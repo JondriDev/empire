@@ -1,13 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '../../components/ui'
+import { emit } from '../../lib/eventBus'
 
 export default function Language() {
   const [input, setInput] = useState('')
   const [translation, setTranslation] = useState('')
 
+  useEffect(() => {
+    emit({ type: 'APP_OPENED', appId: 'language' })
+  }, [])
+
   const handleTranslate = () => {
     // Mock translation
-    setTranslation(`Translated: ${input}`)
+    const result = `Translated: ${input}`
+    setTranslation(result)
+    emit({ type: 'CODE_RUN', language: 'language', code: input, output: result })
   }
 
   return (

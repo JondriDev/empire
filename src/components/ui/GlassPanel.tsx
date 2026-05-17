@@ -10,17 +10,30 @@ export default function GlassPanel({ children, className = '', onClick }: GlassP
   return (
     <div
       onClick={onClick}
-      className={`rounded-2xl shadow-2xl ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      className={`rounded-2xl ${onClick ? 'cursor-pointer' : ''} ${className}`}
       style={{
-        background: 'var(--gl-bg)',
-        backdropFilter: 'var(--gl-blur)',
-        border: '1px solid var(--gl-border-b)',
-        borderTopColor: 'var(--gl-border-t)',
-        boxShadow: 'var(--gl-shadow)',
-        transition: 'background var(--dur-mid), box-shadow var(--dur-mid), border-color var(--dur-mid)',
+        background: 'var(--card-bg)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        border: '1px solid var(--card-border-b)',
+        borderTopColor: 'var(--card-border-t)',
+        boxShadow: 'var(--card-shadow)',
+        transition: 'background var(--dur-base) var(--ease-out), ' +
+                    'box-shadow var(--dur-base) var(--ease-out), ' +
+                    'border-color var(--dur-base) var(--ease-out), ' +
+                    'transform var(--dur-base) var(--ease-spring)',
+        cursor: onClick ? 'pointer' : 'default',
       } as React.CSSProperties}
-      onMouseEnter={(e) => { if (onClick) { e.currentTarget.style.background = 'var(--gl-bg-h)' } }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--gl-bg)' }}
+      onMouseEnter={(e) => {
+        if (!onClick) return
+        e.currentTarget.style.background = 'var(--card-bg-h)'
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)'
+        e.currentTarget.style.transform = 'translateY(-2px)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'var(--card-bg)'
+        e.currentTarget.style.boxShadow = 'var(--card-shadow)'
+        e.currentTarget.style.transform = 'translateY(0)'
+      }}
     >
       {children}
     </div>

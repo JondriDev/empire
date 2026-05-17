@@ -37,7 +37,7 @@ export const apps: AppDefinition[] = [
 const iconMap: Record<string, LucideIcon> = {
   Terminal, Calculator, Calendar, Clock, CloudSun, SpellCheck, Languages,
   Music, Video, Folder, Trash2, Globe, Code2, StickyNote, Image, Database,
-  MapPin, MessageSquare, Wand2, Hash, GraduationCap
+  MapPin, MessageSquare, Wand2, Hash, GraduationCap, Bot, Sparkles
 }
 
 export function getAppIcon(name: string): LucideIcon {

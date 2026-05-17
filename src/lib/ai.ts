@@ -38,7 +38,7 @@ export interface ChatOptions {
   signal?: AbortSignal
 }
 
-function getConfig(): AIConfig {
+export function getConfig(): AIConfig {
   try {
     const raw = localStorage.getItem(AI_CONFIG_KEY)
     if (raw) return { ...DEFAULT_CONFIG, ...JSON.parse(raw) }
@@ -183,7 +183,6 @@ export function buildEmpireContext(): string {
   }
 }
 
-/** Get model display name */
 export function getModelName(): string {
   const config = getConfig()
   return config.model

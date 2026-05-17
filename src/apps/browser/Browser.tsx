@@ -1,8 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '../../components/ui'
+import { emit } from '../../lib/eventBus'
 
 export default function Browser() {
   const [url, setUrl] = useState('https://www.google.com')
+
+  useEffect(() => {
+    emit({ type: 'APP_OPENED', appId: 'browser' })
+  }, [])
+
+  const handleNavigate = () => {
+    emit({ type: 'FILE_OPENED', filePath: url })
+  }
   
   return (
     <Card className="p-6">

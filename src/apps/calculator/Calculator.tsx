@@ -1,4 +1,10 @@
+/**
+ * Calculator — emits results to eventBus, Hermes-aware
+ */
+
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { Bot } from 'lucide-react'
+import { emit } from '../../lib/eventBus'
 
 type Op = '+' | '-' | '×' | '÷' | '^' | null
 
@@ -7,13 +13,10 @@ export default function Calculator() {
   const [expression, setExpression] = useState('')
   const [memory, setMemory] = useState<number | null>(null)
   const [op, setOp] = useState<Op>(null)
-  const [history, setHistory] = useState<string[]>([])
+  const [history, setHistory] = useState<{ expr: string; result: string }[]>([])
   const [newNumber, setNewNumber] = useState(true)
-
-  // Refs for handlers so the keyboard event listener can always call the latest version
   const handlersRef = useRef({} as Record<string, (...args: any[]) => void>)
 
-  // Keyboard support
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const h = handlersRef.current
@@ -33,40 +36,14 @@ export default function Calculator() {
   }, [])
 
   const inputDigit = useCallback((d: string) => {
-    if (newNumber) {
-      setDisplay(d)
-      setNewNumber(false)
-    } else {
-      setDisplay(prev => prev === '0' ? d : prev + d)
-    }
+    if (newNumber) { setDisplay(d); setNewNumber(false) }
+    else setDisplay(prev => prev === '0' ? d : prev + d)
   }, [newNumber])
 
   const inputDecimal = useCallback(() => {
-    if (newNumber) {
-      setDisplay('0.')
-      setNewNumber(false)
-    } else if (!display.includes('.')) {
-      setDisplay(prev => prev + '.')
-    }
+    if (newNumber) { setDisplay('0.'); setNewNumber(false) }
+    else if (!display.includes('.')) setDisplay(prev => prev + '.')
   }, [display, newNumber])
-
-  const handleOp = useCallback((nextOp: Op) => {
-    const num = parseFloat(display)
-    if (memory === null) {
-      setMemory(num)
-    } else if (op) {
-      const result = calculate(memory, num, op)
-      setMemory(result)
-      setDisplay(String(result))
-    }
-    setOp(nextOp)
-    setNewNumber(true)
-    if (op) {
-      setExpression(`${memory} ${op} ${num} ${nextOp || ''}`)
-    } else {
-      setExpression(`${num} ${nextOp || ''}`)
-    }
-  }, [display, memory, op])
 
   const calculate = (a: number, b: number, operation: Op): number => {
     switch (operation) {
@@ -79,13 +56,30 @@ export default function Calculator() {
     }
   }
 
+  const handleOp = useCallback((nextOp: Op) => {
+    const num = parseFloat(display)
+    if (memory === null) setMemory(num)
+    else if (op) {
+      const result = calculate(memory, num, op)
+      setMemory(result)
+      setDisplay(String(result))
+    }
+    setOp(nextOp)
+    setNewNumber(true)
+    if (op) setExpression(`${memory} ${op} ${num} ${nextOp || ''}`)
+    else setExpression(`${num} ${nextOp || ''}`)
+  }, [display, memory, op])
+
   const equals = useCallback(() => {
     const num = parseFloat(display)
     if (memory !== null && op) {
       const result = calculate(memory, num, op)
-      const expr = `${memory} ${op} ${num} = ${result}`
-      setHistory(prev => [expr, ...prev].slice(0, 20))
-      setDisplay(String(result))
+      const expr = `${memory} ${op} ${num} =`
+      const resultStr = String(result)
+      setHistory(prev => [{ expr, result: resultStr }, ...prev].slice(0, 20))
+      // Emit event for other apps
+      emit({ type: 'CALCULATION_RESULT', expression: `${memory} ${op} ${num}`, result: resultStr })
+      setDisplay(resultStr)
       setExpression('')
       setMemory(null)
       setOp(null)
@@ -94,28 +88,16 @@ export default function Calculator() {
   }, [display, memory, op])
 
   const clear = useCallback(() => {
-    setDisplay('0')
-    setExpression('')
-    setMemory(null)
-    setOp(null)
-    setNewNumber(true)
+    setDisplay('0'); setExpression(''); setMemory(null); setOp(null); setNewNumber(true)
   }, [])
 
   const backspace = useCallback(() => {
-    if (display.length > 1) {
-      setDisplay(prev => prev.slice(0, -1))
-    } else {
-      setDisplay('0')
-    }
+    if (display.length > 1) setDisplay(prev => prev.slice(0, -1))
+    else setDisplay('0')
   }, [display])
 
-  const toggleSign = useCallback(() => {
-    setDisplay(prev => String(-parseFloat(prev)))
-  }, [])
-
-  const percent = useCallback(() => {
-    setDisplay(prev => String(parseFloat(prev) / 100))
-  }, [])
+  const toggleSign = useCallback(() => setDisplay(prev => String(-parseFloat(prev))), [])
+  const percent = useCallback(() => setDisplay(prev => String(parseFloat(prev) / 100)), [])
 
   const sciFunc = useCallback((fn: string) => {
     const n = parseFloat(display)
@@ -139,7 +121,6 @@ export default function Calculator() {
   const inputPi = useCallback(() => setDisplay(String(Math.PI)), [])
   const inputE = useCallback(() => setDisplay(String(Math.E)), [])
 
-  // Sync keyboard handlers ref after every render
   useEffect(() => {
     handlersRef.current = {
       digit: (d: string) => inputDigit(d),
@@ -155,16 +136,31 @@ export default function Calculator() {
     }
   })
 
+  const askHermes = () => {
+    sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
+      text: `Calculation: ${expression} ${display}`,
+      title: `Calc: ${display}`,
+      from: 'calculator',
+    }))
+    window.location.href = '/app/ai-chat'
+  }
+
   const btnClass = "px-3 py-3 rounded-xl text-sm font-medium transition-all duration-100 active:scale-95 select-none"
 
   return (
     <div className="p-4 md:p-6 max-w-md mx-auto">
       <div className="flex gap-4">
-        {/* Calculator */}
         <div className="flex-1">
           {/* Display */}
           <div className="bg-black/30 rounded-2xl p-4 mb-4 text-right border border-white/5">
-            <div className="text-gray-400 text-xs h-5 overflow-hidden">{expression}</div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-gray-500 text-xs">{expression}</span>
+              {display !== '0' && (
+                <button onClick={askHermes} className="p-1 rounded-lg hover:bg-purple-500/20 text-purple-400 transition-colors" title="Ask Hermes about this result">
+                  <Bot className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
             <div className="text-3xl font-light tracking-wider overflow-hidden text-ellipsis">{display}</div>
           </div>
 
@@ -196,9 +192,9 @@ export default function Calculator() {
             ))}
             <button onClick={backspace} className={`${btnClass} bg-white/5 hover:bg-white/10 text-gray-300`}>⌫</button>
             {[['0','0'],['.','.']].map(([l, v]) => (
-              <button key={l} onClick={() => v === '.' ? inputDecimal() : inputDigit(v)} className={`${btnClass} bg-white/5 hover:bg-white/10 ${l === '0' ? 'col-span-1' : ''}`}>{l}</button>
+              <button key={l} onClick={() => v === '.' ? inputDecimal() : inputDigit(v)} className={`${btnClass} bg-white/5 hover:bg-white/10`}>{l}</button>
             ))}
-            <button onClick={equals} className={`${btnClass} bg-orange-500/30 text-orange-300 hover:bg-orange-500/40 col-span-1`}>=</button>
+            <button onClick={equals} className={`${btnClass} bg-orange-500/30 text-orange-300 hover:bg-orange-500/40`}>=</button>
           </div>
         </div>
 
@@ -208,7 +204,18 @@ export default function Calculator() {
           <div className="space-y-1 overflow-auto max-h-[400px]">
             {history.length === 0 && <p className="text-gray-600 text-xs">No calculations yet</p>}
             {history.map((h, i) => (
-              <div key={i} className="text-xs text-gray-400 py-1 border-b border-white/5 last:border-0">{h}</div>
+              <button
+                key={i}
+                onClick={() => {
+                  setDisplay(h.result)
+                  setExpression('')
+                  setNewNumber(true)
+                }}
+                className="w-full text-left py-1 border-b border-white/5 last:border-0 hover:bg-white/5 rounded px-1 transition-colors"
+              >
+                <div className="text-xs text-gray-500">{h.expr}</div>
+                <div className="text-xs text-orange-300 font-medium">{h.result}</div>
+              </button>
             ))}
           </div>
           {history.length > 0 && (

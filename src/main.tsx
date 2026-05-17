@@ -4,6 +4,10 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './index.css'
 
+// ── Hermes Empire: AI Connector auto-init ────────────────────────────────────
+// Import order matters: automation must init before any component renders
+import './lib/automation'
+
 // Apply saved theme immediately (before React hydration) to prevent flash
 try {
   const saved = localStorage.getItem('empire-store')

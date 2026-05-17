@@ -1,13 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '../../components/ui'
+import { emit } from '../../lib/eventBus'
 
 export default function Grammar(){
   const [text, setText] = useState('')
   const [correctedText, setCorrectedText] = useState('')
 
+  useEffect(() => {
+    emit({ type: 'APP_OPENED', appId: 'grammar' })
+  }, [])
+
   const handleCorrect = () => {
     // Mock correction
-    setCorrectedText(text.replace(/\s+/g, ' ').trim())
+    const corrected = text.replace(/\s+/g, ' ').trim()
+    setCorrectedText(corrected)
+    emit({ type: 'CODE_RUN', language: 'grammar', code: text, output: corrected })
   }
 
   return (
