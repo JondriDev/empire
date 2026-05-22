@@ -1,93 +1,95 @@
 # Findings & Decisions
 
 ## Requirements
-- Fix bugs across 20 apps in The Empire
+- Fix bugs across 21 apps in The Empire
 - Improve overall quality and consistency
 - Ensure cross-app data flow works correctly
+- Wire APP_OPENED events to all apps for activity feed
 
 ## Research Findings
 
-### Critical Bugs Found
+### ✅ Resolved — Critical Bugs (Phase 2)
 
-**1. Notes app — edit doesn't save**
-- File: `src/apps/notes/Notes.tsx`
-- Issue: `handleSaveEdit(id)` calls `emit({ type: 'NOTE_UPDATED' })` but NEVER calls `updateNote(id, {...})`
-- Impact: All edits are lost on save
-- Fix: Call `updateNote(id, { title, content })` before emit
+**1. Notes app — edit doesn't save** → FIXED
+- `handleSaveEdit(id)` now calls `updateNote(id, { title, content })` before emit
 
-**2. registry.ts — missing Bot/Sparkles in iconMap**
-- File: `src/lib/registry.ts`
-- Issue: Imports `Bot, Sparkles` from lucide-react but `iconMap` object only contains 18 icons
-- Impact: `getAppIcon('Bot')` returns `Terminal` (fallback) — ai-chat app shows wrong icon
-- Fix: Add `Bot, Sparkles` to iconMap
+**2. registry.ts — missing Bot/Sparkles in iconMap** → FIXED
+- `Bot` and `Sparkles` now registered in iconMap
 
-**3. design-system.css — @import ordering**
-- File: `src/design-system.css` line 7
-- Issue: `@import url(...)` comes after CSS variable definitions
-- Impact: Vite build warning: "@import rules must precede all rules aside from @charset and @layer"
-- Fix: Move `@import` to absolute top of file (line 1)
+**3. design-system.css — @import ordering** → FIXED
+- No @import rules — only `@layer base;` at top
 
-**4. LearningTracker — mastered toggle doesn't emit event**
-- File: `src/apps/learning-tracker/LearningTracker.tsx`
-- Issue: `toggleMastered()` calls `updateLearningItem()` but never emits `LEARNING_CHALLENGE` event
-- Impact: HermesAgentBar activity feed misses mastered achievements
-- Fix: Add emit call in toggleMastered
+**4. LearningTracker — mastered toggle** → FIXED
+- `toggleMastered()` now emits `LEARNING_CHALLENGE` event
 
-**5. DataCenter — deleteRow doesn't emit event**
-- File: `src/apps/datacenter/DataCenter.tsx`
-- Issue: `deleteRow()` calls `loadRows()` but never emits `DATA_TABLE_UPDATED`
-- Impact: Activity feed misses deletions
-- Fix: Add emit({ type: 'DATA_TABLE_UPDATED', ... }) before/after deletion
+**5. DataCenter — deleteRow doesn't emit** → FIXED
+- `deleteRow()` now emits `DATA_TABLE_UPDATED` event
 
-### Cross-App Data Flow Issues
+### ✅ Resolved — Cross-App Data Flow (Phase 3)
 
-**6. TokenCounter clipboard format mismatch**
-- appActions sends: `{ text, from }`
-- TokenCounter reads: `sessionStorage.getItem('empire-token-clipboard')` → expects `{ content }`
-- File: Need to check `src/apps/token-counter/TokenCounter.tsx`
-- Status: UNCONFIRMED — need to verify
+**TokenCounter clipboard** → FIXED
+- appActions sends: `{ text, from }` → TokenCounter reads `parsed.text` ✓
 
-**7. Editor clipboard format mismatch**
-- appActions sends: `{ code, language, from }`
-- Editor reads: `sessionStorage.getItem('empire-editor-clipboard')` → expects `{ content }`
-- File: `src/apps/editor/Editor.tsx`
-- Status: UNCONFIRMED — need to verify
+**Editor clipboard** → FIXED
+- appActions sends: `{ code, language, from }` → Editor reads correctly ✓
 
-**8. PromptGenerator clipboard format mismatch**
-- appActions sends: `{ text, from }`
-- PromptGenerator reads: `sessionStorage.getItem('empire-prompt-clipboard')` → expects `{ content }`
-- File: `src/apps/prompt-generator/PromptGenerator.tsx`
-- Status: UNCONFIRMED — need to verify
+**PromptGenerator clipboard** → FIXED
+- appActions sends: `{ text, from }` → PromptGenerator reads `parsed.text` ✓
 
-### Stub Apps (Need Completion)
+### ✅ Completed — Stub Apps (Phase 4)
 
-**9. Browser — not functional**
-- File: `src/apps/browser/Browser.tsx`
-- Status: Shows placeholder text, doesn't actually load URLs
-- Potential: Use server's `/api/proxy` endpoint for web access
-- Potential: Use iframe with sandbox restrictions
+All stub apps now fully functional (see iteration-report-2026-05-21.md):
+- Browser: URL nav, bookmarks, history, quick cities — 213 lines
+- Calendar: Full CRUD, color picker, tags, day grid — 391 lines
+- Maps: Location search, 17-city DB, saved places — 391 lines
+- Grammar: 14 regex patterns, readability scoring — 253 lines
+- Editor: Word count, stats, file browser — 220 lines
+- Language: 12 languages, phrase book — 273 lines
+- Calculator: Memory functions — 248 lines
 
-**10. Calendar — not functional**
-- File: `src/apps/calendar/Calendar.tsx`
-- Status: Only emits hardcoded "New Event", no real CRUD
-- Potential: Use Zustand store (already has events array)
+### ✅ Resolved — APP_OPENED Missing (Phase 5)
 
-**11. Maps — not functional**
-- File: `src/apps/maps/Maps.tsx`
-- Status: Unknown state, needs investigation
+All 6 apps now emit APP_OPENED on mount:
+1. **AIChat.tsx** — added `emit({ type: 'APP_OPENED', appId: 'ai-chat' })` in useEffect
+2. **DataCenter.tsx** — added `emit({ type: 'APP_OPENED', appId: 'datacenter' })` in useEffect
+3. **LearningTracker.tsx** — added `emit({ type: 'APP_OPENED', appId: 'learning-tracker' })` in useEffect
+4. **Notes.tsx** — added `emit({ type: 'APP_OPENED', appId: 'notes' })` in useEffect
+5. **Messages.tsx** — added `emit({ type: 'APP_OPENED', appId: 'messages' })` in useEffect
+6. **Calculator.tsx** — added `emit({ type: 'APP_OPENED', appId: 'calculator' })` in useEffect
 
-**12. Clock — not investigated**
-- File: `src/apps/clock/Clock.tsx`
-- Status: Needs investigation
+### ✅ Resolved — Empty States (Phase 5)
+
+Apps that lacked empty states now have them:
+- **PromptGenerator** — "Select a template or type a custom prompt" with Sparkles icon
+- **TokenCounter** — "Enter text to analyze tokens" with Hash icon
+- CacheCleaner already had an empty state
+
+### ✅ Resolved — Loading States (Phase 5)
+
+- **PromptGenerator** — `enhanceWithAI` fetch now has `enhancing` state: button shows "Enhancing…" with pulsing Sparkles icon, disabled during fetch
+- **DataCenter** — loading spinner upgraded from plain text to animated spinner matching Files app pattern
+- Weather, Files, AIChat already had proper loading states — no changes needed
+- Grammar, Language, Editor, TokenCounter only have async clipboard copy (instant) — no loading state needed
+
+### Build Status (2026-05-22, Phase 6)
+- `npm run build` → 0 errors, 0 warnings — ✓ 8.49s
+- `npx tsc --noEmit` → clean
+- Bundle: 30+ chunks, ~227KB main + 40KB UI vendor + 48KB React vendor
 
 ### Architecture Notes
 - Framework: Vite + React + TypeScript + Tailwind CSS v4
 - State: Zustand with localStorage persistence
-- Router: React Router (hash-based via BrowserRouter not confirmed)
+- Router: React Router (hash-based)
 - Backend: Express.js + WebSocket (ws)
 - Icons: Lucide React
-- Build: Clean (`npx tsc --noEmit` passes with no errors)
+- Build: Clean (`npx tsc --noEmit` — zero errors, `npm run build` — 0 warnings)
 - AI: OpenRouter proxy at `/api/ai/chat` (DeepSeek V4 Flash default)
+- 21 apps total, all functional
+
+### Build Status (2026-05-22)
+- `npm run build` → 0 errors, 0 warnings
+- `npx tsc --noEmit` → clean
+- Bundle: 21 apps, ~227KB main + 40KB UI vendor + 48KB React vendor
 
 ## Technical Decisions
 
@@ -97,23 +99,27 @@
 | iconMap fix is quick win | 2-line change, immediate visual improvement |
 | Use server /api/proxy for Browser | Android security restrictions limit iframe use |
 | Zustand for calendar events | Store already has events[], just needs UI |
+| Add APP_OPENED to all 21 apps | Consistency — 15 already do it, 6 missing |
 
 ## Issues Encountered
 
 | Issue | Resolution |
 |-------|------------|
 | TypeScript types in eventBus.ts on() function use `any` cast | Cast is necessary due to dynamic event type system; acceptable tradeoff |
+| Planning files (task_plan, findings, progress) were stale | Synced with actual state from iteration-report-2026-05-21.md |
+| 6 apps missing APP_OPENED | Identified — will add in Phase 5 |
 
 ## Resources
 - Project root: `/data/data/com.termux/files/home/Desktop/empire`
 - Server: `server.js` (port 3001)
-- Design system: `src/design-system.css`
+- Design system: `src/design-system.css` (838 lines — Jondridev Earth-from-Space theme)
 - Registry: `src/lib/registry.ts`
 - Event bus: `src/lib/eventBus.ts`
 - Store: `src/lib/store.ts`
 - Build command: `cd /data/data/com.termux/files/home/Desktop/empire && npm run build`
+- Iteration report: `iteration-report-2026-05-21.md`
 
 ## Visual/Browser Findings
-- Vite build warning on @import ordering in design-system.css (line 7)
-- Build succeeds but warns about CSS @import position
-- No TypeScript errors (clean compile)
+- All 21 apps render in the dashboard
+- Design system uses dark glassmorphism theme with teal/cyan accents
+- HermesAgentBar shows recent events across apps

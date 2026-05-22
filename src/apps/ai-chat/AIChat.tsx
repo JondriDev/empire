@@ -30,9 +30,14 @@ export default function AIChat() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Load clipboard content from other apps
-  useEffect(() => {
-    const raw = sessionStorage.getItem('empire-ai-clipboard')
+ // Emit APP_OPENED for activity feed tracking
+ useEffect(() => {
+ emit({ type: 'APP_OPENED', appId: 'ai-chat' })
+ }, [])
+
+ // Load clipboard content from other apps
+ useEffect(() => {
+ const raw = sessionStorage.getItem('empire-ai-clipboard')
     if (raw) {
       try {
         const { text, title, from } = JSON.parse(raw)

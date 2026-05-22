@@ -3,7 +3,7 @@
  * Messages are stored in Zustand, broadcast on send.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Bot, Send, Trash2 } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
@@ -12,10 +12,15 @@ const CONTACTS = ['Jondri', 'Work', 'Family', 'Urgent', 'AI Bot']
 
 export default function Messages() {
   const { messages, addMessage } = useStore()
-  const [draft, setDraft] = useState('')
-  const [recipient, setRecipient] = useState(CONTACTS[0])
+ const [draft, setDraft] = useState('')
+ const [recipient, setRecipient] = useState(CONTACTS[0])
 
-  const send = () => {
+ // Emit APP_OPENED for activity feed tracking
+ useEffect(() => {
+ emit({ type: 'APP_OPENED', appId: 'messages' })
+ }, [])
+
+ const send = () => {
     if (!draft.trim()) return
     const msg = {
       id: Date.now().toString(),

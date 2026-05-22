@@ -5,6 +5,7 @@ import { apps, getAppIcon } from '../lib/registry'
 import { useStore } from '../lib/store'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import HermesAgentBar from '../components/HermesAgentBar'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 
 interface AppShellProps {
   appMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>>
@@ -116,7 +117,9 @@ export default function AppShell({ appMap }: AppShellProps) {
       {/* App content */}
       <div className="flex-1 overflow-auto relative">
         <Suspense fallback={<LoadingSpinner />}>
-          <AppComponent />
+          <ErrorBoundary>
+            <AppComponent />
+          </ErrorBoundary>
         </Suspense>
         {/* Floating Hermes Agent Bar */}
         <HermesAgentBar />

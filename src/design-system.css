@@ -481,8 +481,48 @@ img, video, svg { display: block; max-width: 100%; }
 }
 
 /* ═══════════════════════════════════════════════
-   GLASS PANEL SHARED STYLES
-   (Used alongside inline styles in GlassPanel.tsx)
+/* ↓ Glass Panel – hardware‑accelerated pure CSS (no JS) ↓ */
+/* Base glass panel – use class `gp` on the root element */
+.gp {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--card-border-b);
+  border-top: 1px solid var(--card-border-t);
+  box-shadow: var(--card-shadow);
+  transition:
+    background   var(--dur-base) var(--ease-out),
+    box-shadow   var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    transform    var(--dur-base) var(--ease-spring),
+    filter       var(--dur-base) var(--ease-out);
+  will-change: transform, filter;
+}
+
+/* Make interactive panels clickable – add `gp-interactive` */
+.gp-interactive {
+  cursor: pointer;
+}
+.gp-interactive:hover {
+  background: var(--card-bg-h);
+  box-shadow:
+    0 12px 40px rgba(0,0,0,0.55),
+    0 4px 12px rgba(0,0,0,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    0 0 24px rgba(139,92,246,0.12);
+  transform: translateY(-3px) scale(1.015);
+  filter: brightness(1.08);
+}
+.gp-interactive:active {
+  transform: translateY(0) scale(0.985);
+  filter: brightness(0.95);
+  box-shadow: var(--card-shadow);
+}
+.gp:focus-visible {
+  outline: 2px solid rgba(139,92,246,0.5);
+  outline-offset: 2px;
+}
+
    ═══════════════════════════════════════════════ */
 
 /* Extra utility classes for glass surfaces */
@@ -710,6 +750,19 @@ textarea {
               box-shadow var(--dur-fast);
 }
 
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+textarea {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border-b);
+  border-top-color: var(--input-border-t);
+  transition: background var(--dur-fast), border-color var(--dur-fast),
+              box-shadow var(--dur-fast);
+}
+
+/* Focus styles – generic */
 input[type="text"]:focus,
 input[type="search"]:focus,
 input[type="email"]:focus,
@@ -719,6 +772,11 @@ textarea:focus {
   border-color: rgba(139, 92, 246, 0.5);
   box-shadow: var(--input-shadow-focus);
   outline: none;
+}
+
+/* Custom search input focus glow (purple ring) */
+.dash-search:focus {
+  box-shadow: var(--input-shadow-focus), 0 0 0 2px rgba(139, 92, 246, 0.5), 0 0 8px rgba(139, 92, 246, 0.3);
 }
 
 /* ═══════════════════════════════════════════════

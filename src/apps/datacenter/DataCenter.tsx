@@ -18,7 +18,12 @@ export default function DataCenter() {
   const [loading, setLoading] = useState(false)
   const [newRow, setNewRow] = useState<Record<string, string>>({})
 
-  useEffect(() => { loadTables() }, [])
+  // Emit APP_OPENED for activity feed tracking
+ useEffect(() => {
+ emit({ type: 'APP_OPENED', appId: 'datacenter' })
+ }, [])
+
+ useEffect(() => { loadTables() }, [])
 
   const loadTables = async () => {
     try {
@@ -124,8 +129,11 @@ export default function DataCenter() {
         </div>
 
         <div className="flex-1 overflow-auto p-6">
-          {loading ? (
-            <div className="text-center py-12 text-gray-500">Loading...</div>
+ {loading ? (
+ <div className="text-center py-12 text-white/40">
+ <div className="animate-spin w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-2" />
+ Loading...
+ </div>
           ) : rows.length === 0 ? (
             <div className="text-center py-12">
               <Table2 className="w-12 h-12 mx-auto mb-3 text-gray-600" />

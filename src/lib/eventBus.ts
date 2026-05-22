@@ -12,6 +12,7 @@ export type EmpireEvent =
   | { type: 'CALCULATION_RESULT'; expression: string; result: string }
   | { type: 'EVENT_CREATED'; eventId: string; title: string; date: string; time: string }
   | { type: 'EVENT_DELETED'; eventId: string }
+  | { type: 'EVENT_UPDATED'; eventId: string; title: string; date: string; time: string }
   | { type: 'MESSAGE_SENT'; sender: string; content: string }
   | { type: 'CODE_RUN'; language: string; code: string; output: string }
   | { type: 'LEARNING_LOGGED'; topic: string; learned: string }
@@ -24,11 +25,12 @@ export type EmpireEvent =
   | { type: 'APP_OPENED'; appId: string }
   | { type: 'APP_CLOSED'; appId: string }
   | { type: 'DATA_TABLE_UPDATED'; tableName: string; rowCount: number }
+  | { type: 'WEATHER_UPDATED'; temp: number; condition: string; humidity: number; windSpeed: number; location: string; description: string }
 
 type EventHandler<E extends EmpireEvent> = (event: E) => void
 type EventUnsubscribe = () => void
 
-const listeners = new Map<string, Set<EventHandler<any>>>()
+const listeners = new Map<string, Set<EventHandler<EmpireEvent>>>()
 const history: EmpireEvent[] = []
 const MAX_HISTORY = 100
 
@@ -38,8 +40,8 @@ export function on<E extends EmpireEvent['type']>(
   handler: EventHandler<Extract<EmpireEvent, { type: E }>>
 ): EventUnsubscribe {
   if (!listeners.has(type)) listeners.set(type, new Set())
-  listeners.get(type)!.add(handler)
-  return () => listeners.get(type)?.delete(handler)
+  listeners.get(type)!.add(handler as EventHandler<EmpireEvent>)
+  return () => listeners.get(type)?.delete(handler as EventHandler<EmpireEvent>)
 }
 
 /** Subscribe to an event type, but only fire once. */
@@ -47,14 +49,17 @@ export function once<E extends EmpireEvent['type']>(
   type: E,
   handler: EventHandler<Extract<EmpireEvent, { type: E }>>
 ): EventUnsubscribe {
-  const unsub = on(type, ((event: any) => {
-    unsub()
-    handler(event)
-  }) as any)
+  const wrapped: EventHandler<EmpireEvent> = (event) => {
+    if (event.type === type) {
+      unsub()
+      handler(event as Extract<EmpireEvent, { type: E }>)
+    }
+  }
+  if (!listeners.has(type)) listeners.set(type, new Set())
+  listeners.get(type)!.add(wrapped)
+  const unsub = () => listeners.get(type)?.delete(wrapped)
   return unsub
 }
-
-/** Emit an event to all subscribers and store in history. */
 export function emit(event: EmpireEvent): void {
   history.push(event)
   if (history.length > MAX_HISTORY) history.shift()
@@ -67,7 +72,7 @@ export function getRecent<E extends EmpireEvent['type']>(
   type: E,
   count = 10
 ): Extract<EmpireEvent, { type: E }>[] {
-  return history.filter(e => e.type === type).slice(-count) as any
+  return history.filter(e => e.type === type).slice(-count) as Extract<EmpireEvent, { type: E }>[]
 }
 
 /** Get all recent events. */

@@ -5,7 +5,7 @@
  * "Ask Hermes" lets you analyze or summarize any note.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Bot, Plus, Trash2, Edit2, X, Check } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
@@ -17,10 +17,15 @@ export default function Notes() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
+ const [title, setTitle] = useState('')
+ const [content, setContent] = useState('')
 
-  const handleCreate = () => {
+ // Emit APP_OPENED for activity feed tracking
+ useEffect(() => {
+ emit({ type: 'APP_OPENED', appId: 'notes' })
+ }, [])
+
+ const handleCreate = () => {
     if (!title.trim() && !content.trim()) return
     const note: Note = {
       id: Date.now().toString(),

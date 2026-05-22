@@ -19,7 +19,7 @@ export interface AppAction {
 export interface DataPayload {
   text: string
   title?: string
-  json?: any
+  json?: unknown
   source: string // app id
 }
 
@@ -158,8 +158,8 @@ export async function askHermes(question: string, sourceApp: string): Promise<st
     emit({ type: 'AI_QUERY', query: question, context: sourceApp, app: sourceApp })
     emit({ type: 'AI_RESPONSE', query: question, response, app: sourceApp })
     return response
-  } catch (err: any) {
-    return `⚠️ Error: ${err.message}`
+  } catch (err: unknown) {
+    return `⚠️ Error: ${err instanceof Error ? err.message : String(err)}`
   }
 }
 

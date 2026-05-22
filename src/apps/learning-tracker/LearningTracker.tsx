@@ -3,7 +3,7 @@
  * Track topics, log learning, quiz yourself, ask Hermes to explain.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Bot, Plus, Check, X, BookOpen, Brain, Target } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
@@ -12,9 +12,14 @@ export default function LearningTracker() {
   const { learningItems, addLearningItem, updateLearningItem } = useStore()
   const [topic, setTopic] = useState('')
   const [learned, setLearned] = useState('')
-  const [filter, setFilter] = useState<'all' | 'active' | 'mastered'>('all')
+ const [filter, setFilter] = useState<'all' | 'active' | 'mastered'>('all')
 
-  const add = () => {
+ // Emit APP_OPENED for activity feed tracking
+ useEffect(() => {
+ emit({ type: 'APP_OPENED', appId: 'learning-tracker' })
+ }, [])
+
+ const add = () => {
     if (!topic.trim()) return
     addLearningItem({
       id: Date.now().toString(),

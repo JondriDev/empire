@@ -1,23 +1,67 @@
 import { useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { apps, getAppIcon } from '../lib/registry'
 import GlassPanel from '../components/ui/GlassPanel'
-import { Star, Search } from 'lucide-react'
+import { Star, Search, GripVertical } from 'lucide-react'
 
 const FAVORITES_KEY = 'empire-favorites'
 
 export default function Dashboard() {
-  const navigate = useNavigate()
-  const [search, setSearch] = useState('')
-  const [time, setTime] = useState(new Date())
-  const [favorites, setFavorites] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]') } catch { return [] }
-  })
+ const navigate = useNavigate()
+ const [search, setSearch] = useState('')
+ const [time, setTime] = useState(new Date())
+ const [favorites, setFavorites] = useState<string[]>(() => {
+ try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]') } catch { return [] }
+ })
+ const [clockPos, setClockPos] = useState<{ x: number; y: number } | null>(() => {
+ try { return JSON.parse(localStorage.getItem('empire-clock-pos') || 'null') } catch { return null }
+ })
+ const [isDragging, setIsDragging] = useState(false)
+ const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+ const clockRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const i = setInterval(() => setTime(new Date()), 1000)
-    return () => clearInterval(i)
-  }, [])
+ useEffect(() => {
+ const i = setInterval(() => setTime(new Date()), 1000)
+ return () => clearInterval(i)
+ }, [])
+
+ const handleMouseDown = (e: React.MouseEvent) => {
+ if (e.button !== 0) return // Only left click
+ e.preventDefault()
+ setIsDragging(true)
+ const rect = (e.target as HTMLElement).closest('.clock-widget')?.getBoundingClientRect()
+ if (rect && clockPos) {
+ setDragOffset({
+ x: e.clientX - rect.left,
+ y: e.clientY - rect.top
+ })
+ }
+ }
+
+ const handleMouseMove = (e: React.MouseEvent) => {
+ if (!isDragging || !clockRef.current) return
+ e.preventDefault()
+ const newX = e.clientX - dragOffset.x
+ const newY = e.clientY - dragOffset.y
+ setClockPos({ x: newX, y: newY })
+ localStorage.setItem('empire-clock-pos', JSON.stringify({ x: newX, y: newY }))
+ }
+
+ const handleMouseUp = () => {
+ setIsDragging(false)
+ }
+
+ // Add global mouse listeners when dragging
+ useEffect(() => {
+ if (isDragging) {
+ document.addEventListener('mousemove', handleMouseMove as any)
+ document.addEventListener('mouseup', handleMouseUp as any)
+ return () => {
+ document.removeEventListener('mousemove', handleMouseMove as any)
+ document.removeEventListener('mouseup', handleMouseUp as any)
+ }
+ }
+ }, [isDragging, dragOffset])
 
   const toggleFavorite = (id: string) => {
     const next = favorites.includes(id) ? favorites.filter(f => f !== id) : [...favorites, id]
@@ -68,18 +112,28 @@ export default function Dashboard() {
               </p>
             </div>
 
-            {/* Clock widget */}
-            <div
-              className="rounded-2xl px-4 py-2.5 hidden sm:flex flex-col items-center animate-scale-in"
-              style={{
-                background: 'var(--gl-bg)',
-                backdropFilter: 'var(--gl-blur)',
-                border: '1px solid var(--gl-border-b)',
-                borderTopColor: 'var(--gl-border-t)',
-                boxShadow: 'var(--gl-shadow)',
-                animationDelay: '400ms',
-              }}
-            >
+ {/* Clock widget */}
+ <div
+ ref={clockRef}
+ onMouseDown={handleMouseDown}
+ className={`clock-widget rounded-2xl px-4 py-2.5 hidden sm:flex flex-col items-center animate-scale-in transition-shadow ${isDragging ? 'cursor-grabbing shadow-2xl' : 'cursor-grab'}`}
+ style={{
+ background: 'var(--gl-bg)',
+ backdropFilter: 'var(--gl-blur)',
+ border: '1px solid var(--gl-border-b)',
+ borderTopColor: 'var(--gl-border-t)',
+ boxShadow: isDragging ? '0 20px 60px rgba(0,0,0,0.3)' : 'var(--gl-shadow)',
+ animationDelay: '400ms',
+ position: clockPos ? 'absolute' : 'static',
+ left: clockPos?.x ?? 0,
+ top: clockPos?.y ?? 0,
+ zIndex: isDragging ? 1000 : 1,
+ userSelect: isDragging ? 'none' : 'auto',
+ }}
+ >
+ <div className="flex items-center gap-2 mb-1" style={{ color: 'var(--text3)' }}>
+ <GripVertical className="w-3 h-3 opacity-40" />
+ </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-xl font-mono font-medium tracking-widest" style={{ color: 'var(--text)' }}>
                   {hours}:{mins}
@@ -105,7 +159,7 @@ export default function Dashboard() {
               placeholder="Search apps…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="rounded-2xl pl-9 pr-4 py-2.5 w-56 text-sm transition-all duration-200"
+              className="dash-search rounded-2xl pl-9 pr-4 py-2.5 w-56 text-sm transition-all duration-200"
               style={{
                 background: 'var(--gl-bg)',
                 backdropFilter: 'var(--gl-blur)',

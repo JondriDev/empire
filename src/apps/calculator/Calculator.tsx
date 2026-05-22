@@ -13,9 +13,16 @@ export default function Calculator() {
   const [expression, setExpression] = useState('')
   const [memory, setMemory] = useState<number | null>(null)
   const [op, setOp] = useState<Op>(null)
+  const [memStore, setMemStore] = useState<number>(0)
+  const [memLabel, setMemLabel] = useState('')
   const [history, setHistory] = useState<{ expr: string; result: string }[]>([])
-  const [newNumber, setNewNumber] = useState(true)
-  const handlersRef = useRef({} as Record<string, (...args: any[]) => void>)
+ const [newNumber, setNewNumber] = useState(true)
+ const handlersRef = useRef({} as Record<string, (...args: any[]) => void>)
+
+ // Emit APP_OPENED for activity feed tracking
+ useEffect(() => {
+ emit({ type: 'APP_OPENED', appId: 'calculator' })
+ }, [])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -175,6 +182,16 @@ export default function Calculator() {
               <button key={fn} onClick={() => fn === 'pi' ? inputPi() : fn === 'e' ? inputE() : sciFunc(fn)} className={`${btnClass} bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 text-xs`}>{l}</button>
             ))}
           </div>
+
+          {/* Memory row */}
+          <div className="flex items-center gap-1.5 mb-2">
+            <button onClick={() => { setMemStore(parseFloat(display) || 0); setMemLabel('M') }} className={`${btnClass} flex-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[10px] py-2`}>MS</button>
+            <button onClick={() => { setMemStore((prev: number) => prev + (parseFloat(display) || 0)); setMemLabel('M+') }} className={`${btnClass} flex-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[10px] py-2`}>M+</button>
+            <button onClick={() => { setMemStore((prev: number) => prev - (parseFloat(display) || 0)); setMemLabel('M-') }} className={`${btnClass} flex-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[10px] py-2`}>M-</button>
+            <button onClick={() => setDisplay(String(memStore))} className={`${btnClass} flex-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[10px] py-2`}>MR</button>
+            <button onClick={() => { setMemStore(0); setMemLabel('') }} className={`${btnClass} flex-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[10px] py-2`}>MC</button>
+          </div>
+          {memLabel && <div className="text-[10px] text-cyan-400 mb-1">🧠 {memLabel}: {memStore}</div>}
 
           {/* Main buttons */}
           <div className="grid grid-cols-4 gap-1.5">
