@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import {
-  Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
-  Maximize, Upload, Film, Trash2, Clock, ListVideo,
-  Plus, X, Repeat, Volume1, Settings, Subtitles
+ Play, Pause, SkipBack, SkipForward, VolumeX,
+ Maximize, Film, ListVideo,
+ Plus, X, Volume1
 } from 'lucide-react'
 
 interface VideoItem {
@@ -36,7 +36,7 @@ export default function Video() {
   const [duration, setDuration] = useState(0)
   const [playbackRate, setPlaybackRate] = useState(1)
   const [showPlaylist, setShowPlaylist] = useState(true)
-  const [fullscreen, setFullscreen] = useState(false)
+  const [_fullscreen, setFullscreen] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -69,6 +69,7 @@ export default function Video() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,7 +153,7 @@ export default function Video() {
           <h1 className="text-lg font-bold flex items-center gap-2">
             <Film className="w-5 h-5" /> Video Player
           </h1>
-          <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-purple-600 hover:bg-purple-500 ml-auto">
+          <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-cyan-600 hover:bg-cyan-500 ml-auto">
             <Plus className="w-4 h-4 mr-1" /> Add Video
           </Button>
           <input ref={fileInputRef} type="file" accept="video/*" multiple className="hidden" onChange={handleFileSelect} />
@@ -192,7 +193,7 @@ export default function Video() {
                   max={duration || 100}
                   value={currentTime}
                   onChange={seek}
-                  className="w-full h-1 accent-purple-500 cursor-pointer"
+                  className="w-full h-1 accent-cyan-600 cursor-pointer"
                 />
                 <div className="flex items-center gap-3 flex-wrap">
                   <button onClick={togglePlay} className="p-2 bg-white text-black rounded-full hover:bg-white/90">
@@ -213,13 +214,13 @@ export default function Video() {
                       min={0} max={1} step={0.05}
                       value={muted ? 0 : volume}
                       onChange={e => { setVolume(parseFloat(e.target.value)); setMuted(false) }}
-                      className="w-20 h-1 accent-purple-500 cursor-pointer"
+                      className="w-20 h-1 accent-cyan-600 cursor-pointer"
                     />
                   </div>
                   <span className="text-xs text-white/60">{formatTime(currentTime)} / {formatTime(duration)}</span>
                   <div className="flex items-center gap-1">
                     {([0.5, 1, 1.5, 2] as const).map(rate => (
-                      <button key={rate} onClick={() => changeRate(rate)} className={`text-xs px-1.5 py-0.5 rounded ${playbackRate === rate ? 'bg-purple-600 text-white' : 'text-white/40 hover:text-white'}`}>
+                      <button key={rate} onClick={() => changeRate(rate)} className={`text-xs px-1.5 py-0.5 rounded ${playbackRate === rate ? 'bg-cyan-600 text-white' : 'text-white/40 hover:text-white'}`}>
                         {rate}×
                       </button>
                     ))}
@@ -254,11 +255,11 @@ export default function Video() {
                 <div
                   key={video.id}
                   onClick={() => playVideo(video)}
-                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer group transition ${current?.id === video.id ? 'bg-purple-600/30' : 'hover:bg-white/5'}`}
+                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer group transition ${current?.id === video.id ? 'bg-cyan-600/30' : 'hover:bg-white/5'}`}
                 >
                   <span className="text-xs text-white/30 w-5 text-center">{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs truncate ${current?.id === video.id ? 'text-purple-300 font-bold' : ''}`}>{video.title}</p>
+                    <p className={`text-xs truncate ${current?.id === video.id ? 'text-cyan-200 font-bold' : ''}`}>{video.title}</p>
                     {video.duration > 0 && <p className="text-xs text-white/30">{formatTime(video.duration)}</p>}
                   </div>
                   <button onClick={e => { e.stopPropagation(); removeVideo(video.id) }} className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-red-400 p-1">

@@ -5,7 +5,7 @@
  * This is how Notes talk to Prompt Generator, Calculator talks to Notes, etc.
  */
 
-import { emit, type EmpireEvent } from './eventBus'
+import { emit } from './eventBus'
 import { useStore } from './store'
 import { chat } from './ai'
 
@@ -164,7 +164,7 @@ export async function askHermes(question: string, sourceApp: string): Promise<st
 }
 
 /** Gather context from other apps for AI awareness */
-function getCrossAppContext(currentApp: string): string {
+function getCrossAppContext(_currentApp: string): string {
   const state = useStore.getState()
   const parts: string[] = []
 

@@ -25,7 +25,7 @@ const apps = {
   PromptGenerator: lazy(() => import('./apps/prompt-generator/PromptGenerator')),
   TokenCounter: lazy(() => import('./apps/token-counter/TokenCounter')),
   LearningTracker: lazy(() => import('./apps/learning-tracker/LearningTracker')),
-  AIChat: lazy(() => import('./apps/ai-chat/AIChat')),
+  Agent: lazy(() => import('./apps/ai-agent/Agent')),
 }
 
 const appComponentMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
@@ -36,7 +36,7 @@ const appComponentMap: Record<string, React.LazyExoticComponent<React.ComponentT
   datacenter: apps.Datacenter, maps: apps.Maps, messages: apps.Messages,
   'prompt-generator': apps.PromptGenerator, 'token-counter': apps.TokenCounter,
   'learning-tracker': apps.LearningTracker,
-  'ai-chat': apps.AIChat,
+  'ai-agent': apps.Agent,
 }
 
 export default function App() {

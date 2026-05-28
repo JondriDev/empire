@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import {
-  Wand2, Copy, Check, RefreshCw, Sparkles, MessageSquare,
-  Code, BookOpen, PenTool, Zap, ChevronDown, Tag, Send
+  Wand2, Copy, Check, Sparkles, MessageSquare,
+  Code, BookOpen, PenTool, Zap, Tag
 } from 'lucide-react'
 
 type Category = 'general' | 'coding' | 'creative' | 'analysis' | 'learning' | 'communication'
@@ -237,10 +237,10 @@ export default function PromptGenerator() {
 
   const deleteSaved = (id: string) => setSaved(prev => prev.filter(p => p.id !== id))
 
-  const importFromText = (text: string) => {
-    setCustomPrompt(text)
-    setMode('custom')
-    setShowTemplates(false)
+  const _importFromText = (text: string) => {
+  setCustomPrompt(text)
+  setMode('custom')
+  setShowTemplates(false)
   }
 
   const extractVariables = (template: string) => {
@@ -259,10 +259,10 @@ export default function PromptGenerator() {
             <Wand2 className="w-5 h-5" /> Prompt Generator
           </h1>
           <div className="flex gap-1 ml-auto">
-            <button onClick={() => { setMode('template'); setShowTemplates(true) }} className={`text-xs px-3 py-1 rounded ${mode === 'template' ? 'bg-purple-600 text-white' : 'bg-white/10 text-white/60 hover:text-white'}`}>
+            <button onClick={() => { setMode('template'); setShowTemplates(true) }} className={`text-xs px-3 py-1 rounded ${mode === 'template' ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white/60 hover:text-white'}`}>
               Templates
             </button>
-            <button onClick={() => setMode('custom')} className={`text-xs px-3 py-1 rounded ${mode === 'custom' ? 'bg-purple-600 text-white' : 'bg-white/10 text-white/60 hover:text-white'}`}>
+            <button onClick={() => setMode('custom')} className={`text-xs px-3 py-1 rounded ${mode === 'custom' ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white/60 hover:text-white'}`}>
               Custom
             </button>
           </div>
@@ -287,7 +287,7 @@ export default function PromptGenerator() {
               <div
                 key={template.id}
                 onClick={() => applyTemplate(template)}
-                className={`p-3 cursor-pointer transition hover:bg-white/10 rounded-2xl shadow-2xl ${selectedTemplate?.id === template.id ? 'ring-1 ring-purple-500' : ''}`}
+                className={`p-3 cursor-pointer transition hover:bg-white/10 rounded-2xl shadow-2xl ${selectedTemplate?.id === template.id ? 'ring-1 ring-cyan-600' : ''}`}
                 style={{
                   background: 'var(--gl-bg)',
                   backdropFilter: 'var(--gl-blur)',
@@ -355,7 +355,7 @@ export default function PromptGenerator() {
                     />
                   </div>
                 ))}
-                <Button onClick={generate} className="w-full bg-purple-600 hover:bg-purple-500">
+                <Button onClick={generate} className="w-full bg-cyan-600 hover:bg-cyan-500">
                   <Sparkles className="w-4 h-4 mr-2" /> Generate Prompt
                 </Button>
               </div>
@@ -391,7 +391,7 @@ export default function PromptGenerator() {
                   <Sparkles className="w-4 h-4" /> Generated Prompt
                 </h3>
                 <div className="flex gap-2">
- <Button onClick={enhanceWithAI} disabled={enhancing} className="text-xs bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-200 disabled:opacity-50">
+ <Button onClick={enhanceWithAI} className="text-xs bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-200 opacity-50 cursor-not-allowed">
  <Sparkles className={`w-3 h-3 mr-1 ${enhancing ? 'animate-pulse' : ''}`} /> {enhancing ? 'Enhancing…' : 'Enhance'}
                   </Button>
                   <Button onClick={copyToClipboard} className="text-xs bg-white/10 hover:bg-white/20">

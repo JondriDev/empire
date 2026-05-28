@@ -33,9 +33,9 @@ interface ActivityItem {
 
 const APP_COLORS: Record<string, string> = {
   calculator: '#f97316', notes: '#eab308', calendar: '#3b82f6',
-  messages: '#818cf8', learningtracker: '#22c55e', aichat: '#8b5cf6',
+  messages: '#818cf8', learningtracker: '#22c55e', aichat: '#0d9488',
   editor: '#6366f1', datacenter: '#64748b', grammar: '#10b981',
-  language: '#22d3ee', browser: '#14b8a6', default: '#8b5cf6',
+  language: '#22d3ee', browser: '#14b8a6', default: '#0d9488',
 }
 
 const EVENT_TYPE_MAP: Array<{ prefix: string; appId: string }> = [
@@ -120,9 +120,11 @@ export default function HermesAgentBar() {
       setActivity(prev => [item, ...prev].slice(0, 50))
     }
 
+    const unsubs: (() => void)[] = []
     EVENT_TYPES.forEach(type => {
-      unsubRef.current.push(on(type, addActivity as any))
+      unsubs.push(on(type, addActivity as any))
     })
+    unsubRef.current = unsubs
 
     const recent = getAllRecent(10)
     const initial: ActivityItem[] = recent.map(e => {
@@ -139,7 +141,7 @@ export default function HermesAgentBar() {
     }).reverse()
     if (initial.length > 0) setActivity(initial)
 
-    return () => unsubRef.current.forEach(u => u())
+    return () => unsubs.forEach(u => u())
   }, [])
 
   useEffect(() => {
@@ -192,9 +194,10 @@ export default function HermesAgentBar() {
           setChatMessages(prev => [...prev, { role: 'hermes', text: `⚠️ ${err.message}` }])
         }
       )
-    } catch (err: any) {
-      setChatLoading(false)
-      setChatMessages(prev => [...prev, { role: 'hermes', text: `⚠️ ${err.message}` }])
+    } catch (err: unknown) {
+    setChatLoading(false)
+    const msg = err instanceof Error ? err.message : 'Unknown error'
+    setChatMessages(prev => [...prev, { role: 'hermes', text: `⚠️ ${msg}` }])
     }
   }, [chatInput, chatLoading, currentAppId, appDef])
 
@@ -210,12 +213,12 @@ export default function HermesAgentBar() {
           background: 'var(--gl-bg)',
           backdropFilter: 'var(--gl-blur)',
           WebkitBackdropFilter: 'var(--gl-blur)',
-          border: '1px solid rgba(139,92,246,0.3)',
-          boxShadow: 'var(--glow-purple)',
+          border: '1px solid rgba(34,211,238,0.25)',
+          boxShadow: 'var(--glow-teal)',
         }}
       >
-        <Bot className="w-3.5 h-3.5 text-purple-400" />
-        <span className="text-[10px] text-purple-300">Hermes</span>
+        <Bot className="w-3.5 h-3.5 text-cyan-300" />
+        <span className="text-[10px] text-cyan-200">Hermes</span>
         {activity.length > 0 && (
           <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
         )}
@@ -233,16 +236,16 @@ export default function HermesAgentBar() {
           background: 'var(--gl-bg)',
           backdropFilter: 'var(--gl-blur)',
           WebkitBackdropFilter: 'var(--gl-blur)',
-          border: '1px solid rgba(139,92,246,0.3)',
-          boxShadow: 'var(--glow-purple)',
+          border: '1px solid rgba(34,211,238,0.3)',
+          boxShadow: 'var(--glow-teal)',
         }}
       >
-        <Bot className="w-3.5 h-3.5 text-purple-400" />
-        <span className="text-[10px] text-purple-300 hidden sm:inline">Hermes</span>
+        <Bot className="w-3.5 h-3.5 text-cyan-300" />
+        <span className="text-[10px] text-cyan-200 hidden sm:inline">Hermes</span>
         <span
           className="w-1.5 h-1.5 rounded-full"
           style={{
-            background: open ? 'var(--color-purple-4)' : 'var(--color-green-4)',
+            background: open ? 'var(--color-cyan-4)' : 'var(--color-green-4)',
             animation: open ? 'none' : 'pulse 2s ease-in-out infinite',
           }}
         />
@@ -256,8 +259,8 @@ export default function HermesAgentBar() {
             background: 'var(--gl-bg-el)',
             backdropFilter: 'var(--gl-blur-el)',
             WebkitBackdropFilter: 'var(--gl-blur-el)',
-            border: '1px solid rgba(139,92,246,0.25)',
-            boxShadow: '0 24px 64px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.3), var(--glow-purple)',
+            border: '1px solid rgba(34,211,238,0.2)',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.3), var(--glow-teal)',
             maxHeight: '480px',
           }}
         >
@@ -269,7 +272,7 @@ export default function HermesAgentBar() {
             <div className="flex items-center gap-2.5">
               <div
                 className="w-6 h-6 rounded-lg flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, var(--color-purple-5), var(--color-blue-5))' }}
+                style={{ background: 'linear-gradient(135deg, #0d9488, #0e7490)' }}
               >
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
@@ -316,8 +319,8 @@ export default function HermesAgentBar() {
                 onClick={() => setTab(t.id)}
                 className="flex-1 flex items-center justify-center gap-1 py-2 text-[10px] transition-colors"
                 style={{
-                  color: tab === t.id ? 'var(--color-purple-3)' : 'var(--text3)',
-                  borderBottom: tab === t.id ? '1.5px solid var(--color-purple-4)' : '1.5px solid transparent',
+                  color: tab === t.id ? 'var(--color-teal-3)' : 'var(--text3)',
+                  borderBottom: tab === t.id ? '1.5px solid var(--color-cyan-4)' : '1.5px solid transparent',
                 }}
               >
                 <t.icon className="w-3 h-3" />
@@ -337,7 +340,7 @@ export default function HermesAgentBar() {
                   className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs transition-colors hover:bg-white/6"
                   style={{ color: 'var(--text)' }}
                 >
-                  <Bot className="w-3.5 h-3.5 text-purple-400" />
+                  <Bot className="w-3.5 h-3.5 text-cyan-300" />
                   <span>Open AI Chat</span>
                 </button>
 
@@ -353,8 +356,8 @@ export default function HermesAgentBar() {
                   { key: 'SEND_TO_EDITOR'       as const, icon: Wand2,          color: '#6366f1', label: 'Open in Code Editor' },
                   { key: 'SEND_TO_TOKEN_COUNTER' as const, icon: Hash,          color: '#38bdf8', label: 'Count Tokens' },
                   { key: 'SEND_TO_LEARNING'    as const, icon: GraduationCap,   color: '#22c55e', label: 'Track as Learning' },
-                  { key: 'SEND_TO_PROMPT_GEN'  as const, icon: Zap,             color: '#d946ef', label: 'Generate Prompt' },
-                  { key: 'SEND_TO_AI_CHAT'    as const, icon: Sparkles,        color: '#8b5cf6', label: 'Ask Hermes (this context)' },
+                  { key: 'SEND_TO_PROMPT_GEN'  as const, icon: Zap,             color: '#0d9488', label: 'Generate Prompt' },
+                  { key: 'SEND_TO_AI_CHAT'    as const, icon: Sparkles,        color: '#0d9488', label: 'Ask Hermes (this context)' },
                 ]).map(action => (
                   <button
                     key={action.key}
@@ -367,7 +370,7 @@ export default function HermesAgentBar() {
                 ))}
 
                 <div className="text-[9px] px-3 pt-2" style={{ color: 'var(--text3)' }}>
-                  Activity: <span style={{ color: 'var(--color-purple-4)' }}>{activity.length} events</span>
+                  Activity: <span style={{ color: 'var(--color-teal-3)' }}>{activity.length} events</span>
                 </div>
               </div>
             )}
@@ -420,15 +423,15 @@ export default function HermesAgentBar() {
                         className="max-w-[85%] rounded-2xl px-3 py-2 text-[11px] leading-relaxed"
                         style={{
                           background: msg.role === 'user'
-                            ? 'linear-gradient(135deg, rgba(139,92,246,0.35), rgba(109,40,217,0.3))'
+                            ? 'linear-gradient(135deg, rgba(34,211,238,0.25), rgba(13,148,136,0.2))'
                             : 'rgba(255,255,255,0.05)',
-                          color: msg.role === 'user' ? '#e9d5ff' : 'var(--text2)',
+                          color: msg.role === 'user' ? '#e0f7fa' : 'var(--text2)',
                           border: msg.role === 'user'
-                            ? '1px solid rgba(139,92,246,0.25)'
+                            ? '1px solid rgba(34,211,238,0.2)'
                             : '1px solid rgba(255,255,255,0.06)',
                         }}
                       >
-                        {msg.role === 'hermes' && <Bot className="w-2.5 h-2.5 inline mr-1 text-purple-400" />}
+                        {msg.role === 'hermes' && <Bot className="w-2.5 h-2.5 inline mr-1 text-cyan-300" />}
                         {msg.text}
                       </div>
                     </div>
@@ -439,7 +442,7 @@ export default function HermesAgentBar() {
                         className="rounded-2xl px-3 py-2 text-[11px]"
                         style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}
                       >
-                        <span className="animate-pulse" style={{ color: 'var(--color-purple-4)' }}>●</span>
+                        <span className="animate-pulse" style={{ color: 'var(--color-cyan-4)' }}>●</span>
                       </div>
                     </div>
                   )}
@@ -465,8 +468,8 @@ export default function HermesAgentBar() {
                     }}
                     onFocus={e => {
                       e.target.style.background = 'rgba(255,255,255,0.09)'
-                      e.target.style.borderColor = 'rgba(139,92,246,0.4)'
-                      e.target.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.2)'
+                      e.target.style.borderColor = 'rgba(34,211,238,0.4)'
+                      e.target.style.boxShadow = '0 0 0 2px rgba(34,211,238,0.2)'
                     }}
                     onBlur={e => {
                       e.target.style.background = 'rgba(255,255,255,0.06)'
@@ -479,8 +482,8 @@ export default function HermesAgentBar() {
                     disabled={!chatInput.trim() || chatLoading}
                     className="p-2 rounded-xl transition-all duration-150 hover:scale-105 disabled:opacity-30 disabled:hover:scale-100"
                     style={{
-                      background: 'linear-gradient(135deg, var(--color-purple-5), var(--color-purple-7))',
-                      boxShadow: '0 2px 8px rgba(139,92,246,0.4)',
+                      background: 'linear-gradient(135deg, var(--color-cyan-5), var(--color-teal-3))',
+                      boxShadow: '0 2px 8px rgba(34,211,238,0.4)',
                     }}
                   >
                     <Send className="w-3 h-3 text-white" />

@@ -4,9 +4,10 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Bot, Plus, Check, X, BookOpen, Brain, Target } from 'lucide-react'
+import { Bot, Plus, Check, BookOpen, Brain } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
+import type { LearningItem } from '../../lib/store'
 
 export default function LearningTracker() {
   const { learningItems, addLearningItem, updateLearningItem } = useStore()
@@ -40,7 +41,7 @@ export default function LearningTracker() {
     emit({ type: 'LEARNING_CHALLENGE', mode: 'mastery', topic: item?.topic || '', score: mastered ? 1 : 0 })
   }
 
-  const askHermesTopic = (item: any) => {
+  const askHermesTopic = (item: LearningItem) => {
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
       text: `Explain: ${item.topic}\n\nWhat I've learned:\n${item.learned}`,
       title: `Learning: ${item.topic}`,
@@ -82,7 +83,7 @@ export default function LearningTracker() {
         </div>
         <button
           onClick={askHermesAll}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 text-xs hover:bg-purple-500/30 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-200 text-xs hover:bg-cyan-500/30 transition-colors"
         >
           <Bot className="w-3.5 h-3.5" /> Ask Hermes
         </button>
@@ -176,7 +177,7 @@ export default function LearningTracker() {
               </div>
               <button
                 onClick={() => askHermesTopic(item)}
-                className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-purple-500/20 text-purple-400 transition-all"
+                className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-cyan-500/20 text-cyan-300 transition-all"
                 title="Ask Hermes about this topic"
               >
                 <Bot className="w-4 h-4" />

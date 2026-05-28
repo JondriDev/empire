@@ -2,9 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import {
-  Image, Upload, Trash2, ZoomIn, ZoomOut, ChevronLeft,
-  ChevronRight, X, Heart, Calendar, Tag, Filter, Download,
-  FolderOpen, Grid, Maximize2, Share2
+ Image, Upload, Trash2, ChevronLeft,
+ ChevronRight, X, Heart, Download,
+ Maximize2, LayoutGrid, List
 } from 'lucide-react'
 
 interface Photo {
@@ -115,8 +115,12 @@ export default function Photos() {
     document.body.style.overflow = ''
   }
 
-  const lightboxPrev = () => setLightboxIdx(i => (i - 1 + filtered.length) % filtered.length)
-  const lightboxNext = () => setLightboxIdx(i => (i + 1) % filtered.length)
+  const filtered = photos
+    .filter(p => filter === 'favorites' ? p.favorite : true)
+    .filter(p => !searchTag || p.tags.some(t => t.toLowerCase().includes(searchTag.toLowerCase())) || p.name.toLowerCase().includes(searchTag.toLowerCase()))
+
+  const lightboxPrev = useCallback(() => setLightboxIdx(i => (i - 1 + filtered.length) % filtered.length), [filtered.length])
+  const lightboxNext = useCallback(() => setLightboxIdx(i => (i + 1) % filtered.length), [filtered.length])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -127,11 +131,7 @@ export default function Photos() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [lightboxIdx])
-
-  const filtered = photos
-    .filter(p => filter === 'favorites' ? p.favorite : true)
-    .filter(p => !searchTag || p.tags.some(t => t.toLowerCase().includes(searchTag.toLowerCase())) || p.name.toLowerCase().includes(searchTag.toLowerCase()))
+  }, [lightboxIdx, lightboxPrev, lightboxNext])
 
   const allTags = [...new Set(photos.flatMap(p => p.tags))].sort()
 
@@ -145,18 +145,28 @@ export default function Photos() {
           <h1 className="text-lg font-bold flex items-center gap-2 mr-2">
             <Image className="w-5 h-5" /> Photos
           </h1>
-          <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-purple-600 hover:bg-purple-500">
+          <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-cyan-600 hover:bg-cyan-500">
             <Upload className="w-4 h-4 mr-1" /> Import
           </Button>
           <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => addFiles(e.target.files)} />
 
           <div className="h-6 w-px bg-white/10 mx-1" />
           <div className="flex gap-1">
-            {GRID_SIZES.map(size => (
-              <button key={size} onClick={() => setGridSize(size)} className={`px-2 py-1 text-xs rounded ${gridSize === size ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}>
-                {size}
-              </button>
-            ))}
+                  {GRID_SIZES.map(size => (
+                          <button key={size} onClick={() => setGridSize(size)} className={`px-2 py-1 text-xs rounded ${gridSize === size ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}>
+                                  {size}
+                          </button>
+                  ))}
+          </div>
+
+          <div className="h-6 w-px bg-white/10 mx-1" />
+          <div className="flex gap-1">
+                  <button onClick={() => setViewMode('grid')} className={`p-1 rounded ${viewMode === 'grid' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}>
+                          <LayoutGrid className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => setViewMode('list')} className={`p-1 rounded ${viewMode === 'list' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}>
+                          <List className="w-3.5 h-3.5" />
+                  </button>
           </div>
 
           <div className="h-6 w-px bg-white/10 mx-1" />
@@ -180,7 +190,7 @@ export default function Photos() {
             />
             <div className="flex gap-1 flex-wrap">
               {allTags.slice(0, 8).map(tag => (
-                <button key={tag} onClick={() => setSearchTag(tag)} className={`text-xs px-1.5 py-0.5 rounded ${searchTag === tag ? 'bg-purple-600 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}>
+                <button key={tag} onClick={() => setSearchTag(tag)} className={`text-xs px-1.5 py-0.5 rounded ${searchTag === tag ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}>
                   #{tag}
                 </button>
               ))}
@@ -218,7 +228,7 @@ export default function Photos() {
           {filtered.map((photo, idx) => (
             <div
               key={photo.id}
-              className={`relative group aspect-square bg-white/5 rounded-lg overflow-hidden cursor-pointer ${selected === photo.id ? 'ring-2 ring-purple-500' : 'hover:ring-1 hover:ring-white/30'}`}
+              className={`relative group aspect-square bg-white/5 rounded-lg overflow-hidden cursor-pointer ${selected === photo.id ? 'ring-2 ring-cyan-600' : 'hover:ring-1 hover:ring-white/30'}`}
               onClick={() => setSelected(photo.id === selected ? null : photo.id)}
               onDoubleClick={() => openLightbox(idx)}
             >
@@ -242,7 +252,7 @@ export default function Photos() {
               <div
                 key={photo.id}
                 onClick={() => setSelected(photo.id === selected ? null : photo.id)}
-                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group ${selected === photo.id ? 'bg-purple-600/30' : 'hover:bg-white/5'}`}
+                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group ${selected === photo.id ? 'bg-cyan-600/30' : 'hover:bg-white/5'}`}
               >
                 <img src={photo.url} alt={photo.name} className="w-12 h-12 object-cover rounded" />
                 <div className="flex-1 min-w-0">

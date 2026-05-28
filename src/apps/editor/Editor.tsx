@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Code, Copy, Check, Play, Save, FileText, Bot, BarChart2, Trash2 } from 'lucide-react'
-import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 
 interface EditorStats {
@@ -49,7 +48,7 @@ export default function Editor() {
     const words = input.trim() ? input.trim().split(/\s+/).length : 0
     const functions = (input.match(/\bfunction\s+\w+/g) || []).length + (input.match(/\bconst\s+\w+\s*=\s*(?:\([^)]*\)|\w+)\s*=>/g) || []).length
     const imports = (input.match(/^import\s/gm) || []).length + (input.match(/^from\s/gm) || []).length
-    const brackets = (input.match(/[{}()\[\]]/g) || []).length
+    const brackets = (input.match(/[{}()[\]]/g) || []).length
 
     setStats({ lines, chars, words, functions, imports, brackets })
 
@@ -115,7 +114,7 @@ export default function Editor() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Code className="w-6 h-6 text-purple-400" /> Code Editor
+            <Code className="w-6 h-6 text-cyan-300" /> Code Editor
           </h1>
           <p className="text-sm text-gray-400 mt-1">
             {stats.lines} lines · {stats.chars.toLocaleString()} chars
@@ -132,7 +131,7 @@ export default function Editor() {
             ))}
           </select>
           <button onClick={() => setShowStats(!showStats)}
-            className={`p-2 rounded-lg transition-colors ${showStats ? 'bg-purple-600 text-white' : 'hover:bg-white/10 text-gray-400'}`}
+            className={`p-2 rounded-lg transition-colors ${showStats ? 'bg-cyan-600 text-white' : 'hover:bg-white/10 text-gray-400'}`}
             title="Toggle stats">
             <BarChart2 className="w-4 h-4" />
           </button>
@@ -178,7 +177,7 @@ export default function Editor() {
           <span className="text-xs text-gray-500 font-mono">{language}</span>
           <div className="flex gap-1">
             <button onClick={askHermes}
-              className="p-1 rounded hover:bg-purple-500/20 text-purple-400 transition-colors" title="Ask Hermes about this code">
+              className="p-1 rounded hover:bg-cyan-500/20 text-cyan-300 transition-colors" title="Ask Hermes about this code">
               <Bot className="w-3.5 h-3.5" />
             </button>
             <button onClick={copyCode}
@@ -201,7 +200,7 @@ export default function Editor() {
       <div className="flex gap-2">
         <button onClick={handleSave}
           disabled={!code.trim()}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-30 text-white text-sm transition-colors">
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 text-white text-sm transition-colors">
           <Save className="w-4 h-4" /> Save
         </button>
         <button onClick={() => emit({ type: 'CODE_RUN', language, code, output: 'Code saved to event bus' })}

@@ -13,8 +13,8 @@ interface AutomationRule {
   id: string
   name: string
   description: string
-  trigger: { type: string; filter?: (event: any) => boolean }
-  action: (event: any, dispatch: (action: CrossAppAction) => void) => void
+  trigger: { type: string; filter?: (_event: any) => boolean }
+  action: (_event: any, _dispatch: (action: CrossAppAction) => void) => void
   enabled: boolean
   oncePerSession: boolean
 }
@@ -211,7 +211,7 @@ export function initAutomation() {
   rules.forEach((rule) => {
     if (!rule.enabled) return
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     ;(on as any)(rule.trigger.type, (event: any) => {
       if (rule.oncePerSession && firedOncePerSession.has(rule.id)) return
       if (rule.trigger.filter && !rule.trigger.filter(event)) return
@@ -245,7 +245,7 @@ export function toggleRule(ruleId: string, enabled: boolean): void {
 export function addRule(rule: AutomationRule): void {
   rules.push(rule)
   // Immediately wire the new rule
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
     ;(on as any)(rule.trigger.type, (event: any) => {
     if (!rule.enabled) return
     if (rule.trigger.filter && !rule.trigger.filter(event)) return

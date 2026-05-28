@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import {
-  Hash, Copy, Check, Info, TrendingUp, BarChart2,
-  Zap, FileText, Code, Languages, Clock, Upload
+  Hash, Copy, Check, Info, BarChart2, Upload
 } from 'lucide-react'
 
 type Model = 'gpt-3.5' | 'gpt-4' | 'claude' | 'gemini' | 'estimate'
@@ -73,7 +72,7 @@ export default function TokenCounter() {
   const [stats, setStats] = useState<TextStats | null>(null)
   const [compareMode, setCompareMode] = useState(false)
   const [comparisonTexts, setComparisonTexts] = useState<string[]>(['', ''])
-  const [fileNames, setFileNames] = useState<string[]>(['', ''])
+  const [fileNames] = useState<string[]>(['', ''])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -144,7 +143,7 @@ export default function TokenCounter() {
   const avgTokens = estimates.length ? Math.round(totalTokens / estimates.length) : 0
 
   // Compare mode analysis
-  const compareResults = comparisonTexts.map(t => ({
+  const _compareResults = comparisonTexts.map(t => ({
     text: t,
     tokens: estimateTokens(t, 'estimate'),
     stats: countPatterns(t),
@@ -159,10 +158,10 @@ export default function TokenCounter() {
           </h1>
           <div className="flex gap-1 ml-auto">
             <Button onClick={() => { setCompareMode(false); setText(''); setComparisonTexts(['', '']) }}
-              className={`text-xs ${!compareMode ? 'bg-purple-600 text-white' : 'bg-white/10 hover:bg-white/20'}`}>
+              className={`text-xs ${!compareMode ? 'bg-cyan-600 text-white' : 'bg-white/10 hover:bg-white/20'}`}>
               Single
             </Button>
-            <Button onClick={() => setCompareMode(true)} className={`text-xs ${compareMode ? 'bg-purple-600 text-white' : 'bg-white/10 hover:bg-white/20'}`}>
+            <Button onClick={() => setCompareMode(true)} className={`text-xs ${compareMode ? 'bg-cyan-600 text-white' : 'bg-white/10 hover:bg-white/20'}`}>
               <BarChart2 className="w-3 h-3 mr-1" /> Compare
             </Button>
           </div>
@@ -173,7 +172,7 @@ export default function TokenCounter() {
           <span className="text-xs text-white/40 mr-1">Models:</span>
           {(Object.keys(MODEL_LABELS) as Model[]).map(model => (
             <button key={model} onClick={() => toggleModel(model)}
-              className={`text-xs px-2 py-0.5 rounded transition ${selectedModels.includes(model) ? 'bg-purple-600/40 text-purple-200' : 'bg-white/5 text-white/30'}`}>
+              className={`text-xs px-2 py-0.5 rounded transition ${selectedModels.includes(model) ? 'bg-cyan-600/40 text-cyan-100' : 'bg-white/5 text-white/30'}`}>
               {MODEL_LABELS[model]}
             </button>
           ))}
@@ -234,7 +233,7 @@ export default function TokenCounter() {
                 <p className="text-xs text-white/40">Text 2</p>
                 <p className="text-xl font-bold">{estimateTokens(comparisonTexts[1], 'estimate')} tokens</p>
               </div>
-              <div className="col-span-2 p-2 bg-purple-600/20 rounded-lg">
+              <div className="col-span-2 p-2 bg-cyan-600/20 rounded-lg">
                 <p className="text-xs text-white/40">Difference</p>
                 <p className="text-xl font-bold">
                   {Math.abs(estimateTokens(comparisonTexts[0], 'estimate') - estimateTokens(comparisonTexts[1], 'estimate'))} tokens
@@ -359,7 +358,7 @@ export default function TokenCounter() {
               <div key={ctx.model} className="bg-white/5 rounded p-2">
                 <p className="text-white/60">{ctx.model}</p>
                 <div className="mt-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-500 rounded-full" style={{ width: `${ctx.pct}%` }} />
+                  <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${ctx.pct}%` }} />
                 </div>
                 <p className="text-white/40 mt-1">{ctx.limit} limit · {ctx.pct.toFixed(1)}% used</p>
               </div>

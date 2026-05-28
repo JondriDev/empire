@@ -151,9 +151,9 @@ export default function CacheCleaner() {
                 type="checkbox"
                 checked={selected.has(entry.key)}
                 onChange={() => toggleSelect(entry.key)}
-                className="w-4 h-4 accent-purple-500"
+                className="w-4 h-4 accent-cyan-600"
               />
-              <span className={`text-xs px-1.5 py-0.5 rounded ${entry.type === 'localStorage' ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'}`}>
+              <span className={`text-xs px-1.5 py-0.5 rounded ${entry.type === 'localStorage' ? 'bg-blue-500/20 text-blue-300' : 'bg-cyan-500/20 text-cyan-200'}`}>
                 {entry.type === 'localStorage' ? 'LS' : 'SS'}
               </span>
               <span className="flex-1 text-sm truncate group-hover:text-white">{entry.key}</span>

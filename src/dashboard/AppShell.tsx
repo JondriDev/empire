@@ -27,7 +27,7 @@ export default function AppShell({ appMap }: AppShellProps) {
           <button
             onClick={() => navigate('/')}
             className="mt-4 text-sm rounded-xl px-4 py-2 transition-colors"
-            style={{ color: 'var(--color-purple-4)', background: 'var(--btn-secondary-bg)' }}
+            style={{ color: 'var(--color-teal-3)', background: 'var(--btn-secondary-bg)' }}
           >
             Back to Empire
           </button>
@@ -53,21 +53,20 @@ export default function AppShell({ appMap }: AppShellProps) {
           boxShadow: 'var(--nav-shadow)',
         }}
       >
-        {/* Left: traffic lights + app identity */}
+        {/* Left: back chevron + app identity */}
         <div className="flex items-center gap-3">
-          {/* Traffic light buttons */}
-          <div className="flex gap-1.5">
-            <button
-              onClick={() => navigate('/')}
-              className="w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all duration-150 hover:brightness-110 active:scale-90 group"
-              style={{ background: '#ff5f57' }}
-              title="Back to Empire"
-            >
-              <ArrowLeft className="w-2 h-2 text-red-900 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
-            <div className="w-3.5 h-3.5 rounded-full" style={{ background: '#febc2e' }} />
-            <div className="w-3.5 h-3.5 rounded-full" style={{ background: '#28c840' }} />
-          </div>
+          {/* Android back chevron */}
+          <button
+            onClick={() => navigate('/')}
+            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95"
+            style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+            title="Back to Empire"
+          >
+            <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text2)' }} />
+          </button>
 
           {/* App icon + name */}
           <Icon className="w-4 h-4 ml-1" style={{ color: appDef.color }} />

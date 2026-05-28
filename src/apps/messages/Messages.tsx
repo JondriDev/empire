@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Bot, Send, Trash2 } from 'lucide-react'
+import { Bot, Send } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
 
@@ -67,9 +67,9 @@ export default function Messages() {
             className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-white/5 transition-colors border-b"
             style={{ borderColor: 'var(--border)' }}
           >
-            <Bot className="w-4 h-4 text-purple-400" />
+            <Bot className="w-4 h-4 text-cyan-300" />
             <div>
-              <div className="text-sm font-medium text-purple-300">Ask Hermes</div>
+              <div className="text-sm font-medium text-cyan-200">Ask Hermes</div>
               <div className="text-xs text-gray-500">Analyze my messages</div>
             </div>
           </button>
@@ -77,7 +77,7 @@ export default function Messages() {
             <button
               key={contact}
               onClick={() => setRecipient(contact)}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b ${recipient === contact ? 'bg-purple-500/10' : 'hover:bg-white/5'}`}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b ${recipient === contact ? 'bg-cyan-500/10' : 'hover:bg-white/5'}`}
               style={{ borderColor: 'var(--border)' }}
             >
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-medium">
@@ -113,7 +113,11 @@ export default function Messages() {
         <div className="flex-1 overflow-auto px-6 py-4 space-y-3">
           {messages.filter(m => m.sender === recipient || m.sender === 'Me').length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-sm">No messages with {recipient} yet</p>
+              <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-4">
+                <Send className="w-7 h-7 text-cyan-300 opacity-50" />
+              </div>
+              <p className="text-gray-400 text-sm font-medium">No messages with {recipient} yet</p>
+              <p className="text-gray-600 text-xs mt-1">Start the conversation below</p>
             </div>
           )}
           {messages.map(msg => {
@@ -122,12 +126,12 @@ export default function Messages() {
               <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
-                    isMe ? 'bg-purple-600 text-white rounded-tr-sm' : 'border border-white/10 rounded-tl-sm'
+                    isMe ? 'bg-cyan-600 text-white rounded-tr-sm' : 'border border-white/10 rounded-tl-sm'
                   }`}
                   style={!isMe ? { background: 'var(--card-bg)' } : {}}
                 >
                   <p className="text-sm">{msg.content}</p>
-                  <p className={`text-[10px] mt-1 ${isMe ? 'text-purple-200' : 'text-gray-600'}`}>
+                  <p className={`text-[10px] mt-1 ${isMe ? 'text-cyan-100' : 'text-gray-600'}`}>
                     {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
@@ -150,13 +154,13 @@ export default function Messages() {
               }}
               placeholder={`Message ${recipient}...`}
               rows={1}
-              className="flex-1 resize-none rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              className="flex-1 resize-none rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
               style={{ background: 'var(--input-bg)', color: 'var(--text)', minHeight: '48px', maxHeight: '100px' }}
             />
             {draft.trim() && (
               <button
                 onClick={askHermesDraft}
-                className="w-10 h-10 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 flex items-center justify-center text-purple-400 transition-colors flex-shrink-0"
+                className="w-10 h-10 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 flex items-center justify-center text-cyan-300 transition-colors flex-shrink-0"
                 title="Refine with Hermes"
               >
                 <Bot className="w-4 h-4" />
@@ -165,7 +169,7 @@ export default function Messages() {
             <button
               onClick={send}
               disabled={!draft.trim()}
-              className="w-10 h-10 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-30 flex items-center justify-center text-white transition-colors flex-shrink-0"
+              className="w-10 h-10 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 flex items-center justify-center text-white transition-colors flex-shrink-0"
             >
               <Send className="w-4 h-4" />
             </button>

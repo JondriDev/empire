@@ -1,0 +1,370 @@
+/**
+ * Hermes Agent — Main App
+ * Redesigned agentic AI interface for The Empire
+ */
+
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { Bot, Settings, Play, Square, Zap, ChevronDown } from 'lucide-react'
+import { runAgentTurn, getSettings, saveSettings, type AgentSettings } from './lib/agent'
+import type { Message, ToolCall, ThinkingStep } from './lib/types'
+import { getProvider } from './lib/providers'
+import { TOOL_LIST } from './lib/tools'
+import { formatToolResult } from './lib/toolExecutor'
+import ChatPanel from './components/ChatPanel'
+import ThinkingTrace from './components/ThinkingTrace'
+import ModelPicker from './components/ModelPicker'
+import SettingsPanel from './components/SettingsPanel'
+import ConfirmModal from './components/ConfirmModal'
+import { emit } from '../../lib/eventBus'
+
+const WELCOME = `👋 **Hermes Agent is ready.**
+
+I can *act* — not just chat. Here's what I can do:
+
+**📄 File Operations**
+Read, write, and browse files in your Android storage.
+
+**⌨️ Shell Commands**
+Run any Terminal command on your Termux session.
+
+**🔍 Web Search**
+Search the web and fetch page content.
+
+**▶️ Code Execution**
+Run Python or JavaScript code directly.
+
+**Just ask me to do something.** Be specific — "read my notes file", "find all .py files in projects", "search for the latest AI news", "run this Python script" etc.`
+
+export default function Agent() {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 'welcome',
+      role: 'assistant',
+      content: WELCOME,
+      timestamp: Date.now(),
+    },
+  ])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [modelPickerOpen, setModelPickerOpen] = useState(false)
+  const [thinkingSteps, setThinkingSteps] = useState<ThinkingStep[]>([])
+  const [showThinking, setShowThinking] = useState(false)
+  const [pendingConfirmCalls, setPendingConfirmCalls] = useState<ToolCall[]>([])
+  const [settings, setSettings] = useState<AgentSettings>(getSettings)
+  const [_aborted, setAborted] = useState(false)
+
+  const abortRef = useRef<AbortController | null>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  // Emit APP_OPENED
+  useEffect(() => {
+    emit({ type: 'APP_OPENED', appId: 'ai-agent' })
+  }, [])
+
+  // Auto-scroll
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, thinkingSteps])
+
+  // ─── Load clipboard from other apps ─────────────────────────────────────────
+  useEffect(() => {
+    const raw = sessionStorage.getItem('empire-ai-clipboard')
+    if (raw) {
+      try {
+        const { text, title, from } = JSON.parse(raw)
+        const ctx = `From ${from}${title ? ` (${title})` : ''}:\n\n${text}`
+        setInput(ctx)
+        sessionStorage.removeItem('empire-ai-clipboard')
+      } catch { /* ignore */ }
+    }
+  }, [])
+
+  // ─── Run agent turn ───────────────────────────────────────────────────────
+  const runTurn = useCallback((userContent: string, extraMessages: Message[] = []) => {
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: userContent,
+      timestamp: Date.now(),
+    }
+
+    setMessages(prev => [...prev, userMsg])
+    setInput('')
+    setLoading(true)
+    setThinkingSteps([])
+    setAborted(false)
+
+    const historyMessages: Message[] = [
+      ...messages.filter(m => m.id !== 'welcome'),
+      ...extraMessages,
+      userMsg,
+    ]
+
+    const assistantMsgId = (Date.now() + 1).toString()
+    setMessages(prev => [...prev, {
+      id: assistantMsgId,
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now(),
+    }])
+
+    runAgentTurn(historyMessages, settings, {
+      onPhaseChange(phase) {
+        if (phase === 'thinking') {
+          setThinkingSteps([{ step: 1, text: 'Analyzing request...', timestamp: Date.now() }])
+        }
+      },
+      onThinking(step) {
+        setThinkingSteps(prev => [...prev, step])
+      },
+      onToken(token) {
+        setMessages(prev => prev.map(m =>
+          m.id === assistantMsgId ? { ...m, content: m.content + token } : m
+        ))
+      },
+      onToolCall(call, result) {
+        const toolMsg: Message = {
+          id: `tool-${call.id}`,
+          role: 'tool',
+          content: formatToolResult(result),
+          timestamp: Date.now(),
+          toolCallId: call.id,
+          toolName: call.name,
+          error: !result.success,
+        }
+        setMessages(prev => [...prev, toolMsg])
+      },
+      onConfirmNeeded(calls) {
+        setLoading(false)
+        setPendingConfirmCalls(calls)
+      },
+      onDone() {
+        setLoading(false)
+      },
+      onError(err) {
+        setLoading(false)
+        setMessages(prev => prev.map(m =>
+          m.id === assistantMsgId
+            ? { ...m, content: `⚠️ **Error:** ${err.message}` }
+            : m
+        ))
+      },
+    })
+  }, [messages, settings])
+
+  const handleSubmit = useCallback((e?: React.FormEvent) => {
+    e?.preventDefault()
+    if (!input.trim() || loading) return
+    runTurn(input.trim())
+  }, [input, loading, runTurn])
+
+  const handleConfirmDangerous = useCallback(async (calls: ToolCall[]) => {
+    // Execute approved dangerous calls
+    const toolRequests = calls.map(c => ({
+      tool: c.name as any,
+      params: c.arguments,
+      callId: c.id,
+    }))
+
+    setPendingConfirmCalls([])
+    setLoading(true)
+
+    try {
+      const { executeToolsParallel } = await import('./lib/toolExecutor')
+      const results = await executeToolsParallel(toolRequests)
+
+      const toolMessages: Message[] = calls.map(c => ({
+        id: `tool-${c.id}`,
+        role: 'tool' as const,
+        content: formatToolResult(results[c.id]),
+        timestamp: Date.now(),
+        toolCallId: c.id,
+        toolName: c.name,
+        error: !results[c.id].success,
+      }))
+
+      setMessages(prev => [...prev, ...toolMessages])
+      setLoading(false)
+    } catch (_err) {
+      setLoading(false)
+    }
+  }, [])
+
+  const handleCancel = () => {
+    abortRef.current?.abort()
+    setLoading(false)
+  }
+
+  const clearChat = () => setMessages([{
+    id: 'welcome',
+    role: 'assistant',
+    content: WELCOME,
+    timestamp: Date.now(),
+  }])
+
+  const activeProvider = getProvider(settings.activeProvider)
+  const activeModel = settings.providers[settings.activeProvider]?.model || activeProvider.models[0]?.id
+
+  return (
+    <div className="h-full flex flex-col" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center">
+            <Bot className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-base font-semibold">Hermes Agent</h1>
+            <button
+              onClick={() => setModelPickerOpen(true)}
+              className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full cursor-pointer"
+              style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}
+            >
+              <span>{activeProvider.name}</span>
+              <span style={{ color: '#94a3b8' }}>·</span>
+              <span>{activeModel?.split('/').pop()}</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setShowThinking(v => !v)}
+            className="p-2 rounded-lg text-xs"
+            style={{ color: '#94a3b8', background: showThinking ? 'rgba(34,211,238,0.1)' : 'transparent' }}
+            title="Toggle thinking trace"
+          >
+            <Zap className="w-4 h-4" />
+          </button>
+          <button
+            onClick={clearChat}
+            className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors"
+            title="Clear chat"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+              <path d="M10 11v6M14 11v6" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors"
+            title="Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Thinking Trace */}
+      {showThinking && thinkingSteps.length > 0 && (
+        <ThinkingTrace steps={thinkingSteps} />
+      )}
+
+      {/* Chat messages */}
+      <div className="flex-1 overflow-y-auto">
+        <ChatPanel
+          messages={messages}
+          toolList={TOOL_LIST}
+        />
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input area */}
+      <div className="p-4 border-t" style={{ borderColor: 'var(--border)' }}>
+        <form onSubmit={handleSubmit} className="flex items-end gap-2">
+          <div className="flex-1 relative">
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSubmit()
+                }
+              }}
+              placeholder="Ask me to do something..."
+              rows={1}
+              className="w-full rounded-xl px-4 py-3 pr-12 resize-none text-sm"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid var(--border)',
+                color: 'var(--text)',
+                maxHeight: '120px',
+                outline: 'none',
+              }}
+              disabled={loading}
+              ref={el => {
+                if (el) {
+                  el.style.height = 'auto'
+                  el.style.height = Math.min(el.scrollHeight, 120) + 'px'
+                }
+              }}
+            />
+            {loading && (
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="absolute right-3 bottom-3 p-1 rounded"
+                style={{ color: '#ef4444' }}
+              >
+                <Square className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={!input.trim() || loading}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+            style={{
+              background: input.trim() && !loading ? '#6366f1' : 'rgba(99,102,241,0.3)',
+              color: '#fff',
+              cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
+            }}
+          >
+            <Play className="w-4 h-4" />
+          </button>
+        </form>
+        <p className="text-xs text-center mt-2" style={{ color: '#475569' }}>
+          Shift+Enter for newline · Enter to send · I'm an AI that can take actions
+        </p>
+      </div>
+
+      {/* Model Picker */}
+      {modelPickerOpen && (
+        <ModelPicker
+          settings={settings}
+          onChange={newSettings => {
+            setSettings(newSettings)
+            saveSettings(newSettings)
+          }}
+          onClose={() => setModelPickerOpen(false)}
+        />
+      )}
+
+      {/* Settings Panel */}
+      {settingsOpen && (
+        <SettingsPanel
+          settings={settings}
+          onChange={newSettings => {
+            setSettings(newSettings)
+            saveSettings(newSettings)
+          }}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
+
+      {/* Dangerous tool confirmation */}
+      {pendingConfirmCalls.length > 0 && (
+        <ConfirmModal
+          calls={pendingConfirmCalls}
+          onConfirm={() => handleConfirmDangerous(pendingConfirmCalls)}
+          onDeny={() => setPendingConfirmCalls([])}
+        />
+      )}
+    </div>
+  )
+}

@@ -6,10 +6,9 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Bot, Send, Settings, Sparkles, X, Trash2, Copy, ChevronDown } from 'lucide-react'
-import { streamChat, buildEmpireContext, getModelName, saveConfig, getConfig } from '../../lib/ai'
+import { Bot, Send, Settings, Sparkles, X, Trash2, Copy } from 'lucide-react'
+import { streamChat, buildEmpireContext, saveConfig, getConfig } from '../../lib/ai'
 import { emit, getRecent } from '../../lib/eventBus'
-import type { EmpireEvent } from '../../lib/eventBus'
 import { apps } from '../../lib/registry'
 
 interface Message {
@@ -65,7 +64,7 @@ export default function AIChat() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages.length]) // only re-scroll when count changes
 
   const handleSubmit = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault()
@@ -133,14 +132,15 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
           ))
         }
       )
-    } catch (err: any) {
-      setLoading(false)
-      const errorMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `⚠️ Failed to connect: ${err.message}\n\nMake sure the server is running on port 3001.`,
-        timestamp: Date.now(),
-      }
+    } catch (err: unknown) {
+    setLoading(false)
+    const errMsg = err instanceof Error ? err.message : 'Unknown error'
+    const errorMsg: Message = {
+    id: (Date.now() + 1).toString(),
+    role: 'assistant',
+    content: `⚠️ Failed to connect: ${errMsg}\n\nMake sure the server is running on port 3001.`,
+    timestamp: Date.now(),
+    }
       setMessages(prev => [...prev.slice(0, -1), errorMsg])
     }
   }, [input, loading, messages])
@@ -183,10 +183,10 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
 
       {/* Empire Context Banner */}
       {empireContext && (
-        <div className="mx-6 mt-4 p-3 rounded-xl border" style={{ borderColor: 'var(--border)', background: 'rgba(139,92,246,0.05)' }}>
+        <div className="mx-6 mt-4 p-3 rounded-xl border" style={{ borderColor: 'var(--border)', background: 'rgba(34,211,238,0.05)' }}>
           <button
             onClick={() => setContextExpanded(!contextExpanded)}
-            className="w-full flex items-center justify-between text-xs text-purple-400"
+            className="w-full flex items-center justify-between text-xs text-cyan-300"
           >
             <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" /> Empire Context Active</span>
             <span className="text-gray-500">{contextExpanded ? '▲' : '▼'}</span>
@@ -202,7 +202,7 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
         {messages.length === 0 && (
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center mx-auto mb-4">
-              <Bot className="w-8 h-8 text-purple-400" />
+              <Bot className="w-8 h-8 text-cyan-300" />
             </div>
             <h2 className="text-xl font-semibold mb-2">Ask me anything</h2>
             <p className="text-sm text-gray-500 max-w-sm mx-auto">
@@ -218,7 +218,7 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
                 <button
                   key={i}
                   onClick={() => setInput(q)}
-                  className="px-3 py-1.5 rounded-full text-xs border border-purple-500/30 text-purple-300 hover:bg-purple-500/10 transition-colors"
+                  className="px-3 py-1.5 rounded-full text-xs border border-cyan-500/30 text-cyan-200 hover:bg-cyan-500/10 transition-colors"
                 >
                   {q}
                 </button>
@@ -236,7 +236,7 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
             )}
             <div className={`max-w-[75%] rounded-2xl px-4 py-3 ${
               msg.role === 'user'
-                ? 'bg-purple-600 text-white rounded-tr-sm'
+                ? 'bg-cyan-600 text-white rounded-tr-sm'
                 : 'border border-white/10 rounded-tl-sm'
             }`} style={msg.role === 'assistant' ? { background: 'var(--card-bg)' } : {}}>
               <div className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content || (msg.role === 'assistant' && loading && msg.id === messages[messages.length - 1]?.id ? '●' : '')}</div>
@@ -271,14 +271,14 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
               }
             }}
             placeholder="Ask Hermes anything..."
-            className="w-full resize-none rounded-2xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+            className="w-full resize-none rounded-2xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
             style={{ background: 'var(--input-bg)', color: 'var(--text)', minHeight: '52px', maxHeight: '120px' }}
             rows={1}
           />
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
           >
             <Send className="w-3.5 h-3.5 text-white" />
           </button>
@@ -321,7 +321,7 @@ function AISettingsModal({ onClose }: { onClose: () => void }) {
             <input
               value={model}
               onChange={e => setModel(e.target.value)}
-              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-600"
               style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
               placeholder="deepseek/deepseek-v4-flash"
             />
@@ -334,7 +334,7 @@ function AISettingsModal({ onClose }: { onClose: () => void }) {
               type="password"
               value={apiKey}
               onChange={e => setApiKey(e.target.value)}
-              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-600"
               style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
               placeholder="sk-or-v-..."
             />
@@ -346,7 +346,7 @@ function AISettingsModal({ onClose }: { onClose: () => void }) {
               value={systemPrompt}
               onChange={e => setSystemPrompt(e.target.value)}
               rows={4}
-              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none"
+              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-600 resize-none"
               style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
             />
           </div>
@@ -361,7 +361,7 @@ function AISettingsModal({ onClose }: { onClose: () => void }) {
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 px-4 py-2 rounded-xl bg-purple-600 text-white text-sm hover:bg-purple-500 transition-colors"
+            className="flex-1 px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm hover:bg-cyan-500 transition-colors"
           >
             Save
           </button>

@@ -27,7 +27,7 @@ export type EmpireEvent =
   | { type: 'DATA_TABLE_UPDATED'; tableName: string; rowCount: number }
   | { type: 'WEATHER_UPDATED'; temp: number; condition: string; humidity: number; windSpeed: number; location: string; description: string }
 
-type EventHandler<E extends EmpireEvent> = (event: E) => void
+type EventHandler<E extends EmpireEvent> = (_event: E) => void
 type EventUnsubscribe = () => void
 
 const listeners = new Map<string, Set<EventHandler<EmpireEvent>>>()

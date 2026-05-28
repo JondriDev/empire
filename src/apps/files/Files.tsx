@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import {
   Folder, FolderOpen, File, FileText, Image, Film, Music,
-  Code, Archive, ChevronRight, ChevronDown, Upload, Download,
-  Trash2, Home, Info, Search, RefreshCw, Eye, Edit3,
-  Copy, ExternalLink, X
+  Code, Archive, ChevronRight, ChevronDown, Download,
+  Home, RefreshCw, Eye,
+  X
 } from 'lucide-react'
 
 interface FileEntry {
@@ -30,7 +30,7 @@ function getIcon(entry: FileEntry, open?: boolean) {
   const ext = entry.extension.toLowerCase()
   if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) return <Image className="w-4 h-4 text-green-400" />
   if (['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'].includes(ext)) return <Music className="w-4 h-4 text-pink-400" />
-  if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)) return <Film className="w-4 h-4 text-purple-400" />
+  if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)) return <Film className="w-4 h-4 text-cyan-300" />
   if (['zip', 'tar', 'gz', 'rar', '7z'].includes(ext)) return <Archive className="w-4 h-4 text-orange-400" />
   if (['js', 'ts', 'tsx', 'jsx', 'py', 'rs', 'go', 'java', 'c', 'cpp', 'h'].includes(ext)) return <Code className="w-4 h-4 text-blue-400" />
   if (['json', 'xml', 'yaml', 'yml', 'toml', 'ini', 'cfg'].includes(ext)) return <Code className="w-4 h-4 text-cyan-400" />
@@ -56,7 +56,7 @@ export default function Files() {
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set())
   const [previewContent, setPreviewContent] = useState<{ name: string; content: string } | null>(null)
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+  const [viewMode] = useState<'list' | 'grid'>('list')
   const [breadcrumb, setBreadcrumb] = useState<string[]>([])
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export default function Files() {
         {/* Quick paths */}
         <div className="flex gap-1 flex-wrap mb-2">
           {QUICK_PATHS.map(qp => (
-            <button key={qp.path} onClick={() => navigateTo(qp.path)} className={`text-xs px-2 py-1 rounded ${path === qp.path ? 'bg-purple-600/40 text-purple-200' : 'bg-white/5 text-white/50 hover:bg-white/10'}`}>
+            <button key={qp.path} onClick={() => navigateTo(qp.path)} className={`text-xs px-2 py-1 rounded ${path === qp.path ? 'bg-cyan-600/40 text-cyan-100' : 'bg-white/5 text-white/50 hover:bg-white/10'}`}>
               {qp.label}
             </button>
           ))}
@@ -184,7 +184,7 @@ export default function Files() {
           placeholder="Search files..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          className="w-full bg-white/10 border-0 rounded px-3 py-1.5 text-sm"
+          className="w-full bg-white/10 border-0 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
         />
       </Card>
 
@@ -214,7 +214,7 @@ export default function Files() {
             <div
               key={entry.path}
               onClick={() => openFile(entry)}
-              className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer group transition ${selected === entry.name ? 'bg-purple-600/20' : 'hover:bg-white/5'}`}
+              className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer group transition ${selected === entry.name ? 'bg-cyan-600/20' : 'hover:bg-white/5'}`}
             >
               {entry.isDirectory ? (
                 <button onClick={e => { e.stopPropagation(); toggleDir(entry.path) }} className="text-white/30 hover:text-white">
@@ -247,7 +247,7 @@ export default function Files() {
             <div
               key={entry.path}
               onClick={() => openFile(entry)}
-              className={`p-3 rounded-lg cursor-pointer text-center group transition ${selected === entry.name ? 'bg-purple-600/20' : 'hover:bg-white/5'}`}
+              className={`p-3 rounded-lg cursor-pointer text-center group transition ${selected === entry.name ? 'bg-cyan-600/20' : 'hover:bg-white/5'}`}
             >
               <div className="text-3xl mb-1">{entry.isDirectory ? '📁' : '📄'}</div>
               <p className="text-xs truncate">{entry.name}</p>

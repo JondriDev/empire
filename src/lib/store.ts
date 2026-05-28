@@ -37,19 +37,19 @@ interface AppState {
   theme: 'dark' | 'light'
   toggleTheme: () => void
   sidebarOpen: boolean
-  setSidebarOpen: (open: boolean) => void
+  setSidebarOpen: (_open: boolean) => void
   notes: Note[]
-  addNote: (note: Note) => void
-  updateNote: (id: string, note: Partial<Note>) => void
-  deleteNote: (id: string) => void
+  addNote: (_note: Note) => void
+  updateNote: (_id: string, _note: Partial<Note>) => void
+  deleteNote: (_id: string) => void
   messages: Message[]
-  addMessage: (msg: Message) => void
+  addMessage: (_msg: Message) => void
   events: CalendarEvent[]
-  addEvent: (event: CalendarEvent) => void
-  removeEvent: (id: string) => void
+  addEvent: (_event: CalendarEvent) => void
+  removeEvent: (_id: string) => void
   learningItems: LearningItem[]
-  addLearningItem: (item: LearningItem) => void
-  updateLearningItem: (id: string, item: Partial<LearningItem>) => void
+  addLearningItem: (_item: LearningItem) => void
+  updateLearningItem: (_id: string, _item: Partial<LearningItem>) => void
 }
 
 export const useStore = create<AppState>()(
@@ -67,22 +67,22 @@ export const useStore = create<AppState>()(
         document.documentElement.setAttribute('data-theme', next)
         return { theme: next }
       }),
-      setSidebarOpen: (open) => set({ sidebarOpen: open }),
+      setSidebarOpen: (_open) => set({ sidebarOpen: _open }),
 
-      addNote: (note) => set(s => ({ notes: [...s.notes, note] })),
-      updateNote: (id, partial) => set(s => ({
-        notes: s.notes.map(n => n.id === id ? { ...n, ...partial } : n),
+      addNote: (_note) => set(s => ({ notes: [...s.notes, _note] })),
+      updateNote: (_id, _partial) => set(s => ({
+        notes: s.notes.map(n => n.id === _id ? { ...n, ..._partial } : n),
       })),
-      deleteNote: (id) => set(s => ({ notes: s.notes.filter(n => n.id !== id) })),
+      deleteNote: (_id) => set(s => ({ notes: s.notes.filter(n => n.id !== _id) })),
 
-      addMessage: (msg) => set(s => ({ messages: [...s.messages, msg] })),
+      addMessage: (_msg) => set(s => ({ messages: [...s.messages, _msg] })),
 
-      addEvent: (event) => set(s => ({ events: [...s.events, event] })),
-      removeEvent: (id) => set(s => ({ events: s.events.filter(e => e.id !== id) })),
+      addEvent: (_event) => set(s => ({ events: [...s.events, _event] })),
+      removeEvent: (_id) => set(s => ({ events: s.events.filter(e => e.id !== _id) })),
 
-      addLearningItem: (item) => set(s => ({ learningItems: [...s.learningItems, item] })),
-      updateLearningItem: (id, partial) => set(s => ({
-        learningItems: s.learningItems.map(li => li.id === id ? { ...li, ...partial } : li),
+      addLearningItem: (_item) => set(s => ({ learningItems: [...s.learningItems, _item] })),
+      updateLearningItem: (_id, _partial) => set(s => ({
+        learningItems: s.learningItems.map(li => li.id === _id ? { ...li, ..._partial } : li),
       })),
     }),
     { name: 'empire-store' }

@@ -91,7 +91,7 @@ export default function Notes() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-sm transition-colors"
         >
           <Plus className="w-4 h-4" /> New Note
         </button>
@@ -99,12 +99,12 @@ export default function Notes() {
 
       {/* New note form */}
       {showForm && (
-        <div className="mb-6 p-4 rounded-2xl border border-purple-500/20" style={{ background: 'var(--card-bg)' }}>
+        <div className="mb-6 p-4 rounded-2xl border border-cyan-500/20" style={{ background: 'var(--card-bg)' }}>
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="Note title..."
-            className="w-full bg-transparent text-lg font-semibold mb-2 focus:outline-none placeholder:text-gray-600"
+            className="w-full bg-transparent text-lg font-semibold mb-2 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded placeholder:text-gray-600"
             style={{ color: 'var(--text)' }}
           />
           <textarea
@@ -112,11 +112,11 @@ export default function Notes() {
             onChange={e => setContent(e.target.value)}
             placeholder="Write your note..."
             rows={4}
-            className="w-full bg-transparent text-sm resize-none focus:outline-none placeholder:text-gray-600"
+            className="w-full bg-transparent text-sm resize-none focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded placeholder:text-gray-600"
             style={{ color: 'var(--text)' }}
           />
           <div className="flex gap-2 mt-3">
-            <button onClick={handleCreate} className="px-4 py-1.5 rounded-lg bg-purple-600 text-white text-sm hover:bg-purple-500">Save</button>
+            <button onClick={handleCreate} className="px-4 py-1.5 rounded-lg bg-cyan-600 text-white text-sm hover:bg-cyan-500">Save</button>
             <button onClick={() => { setShowForm(false); setTitle(''); setContent('') }} className="px-4 py-1.5 rounded-lg border border-white/10 text-sm hover:bg-white/5">Cancel</button>
           </div>
         </div>
@@ -125,8 +125,8 @@ export default function Notes() {
       {/* Notes list */}
       {notes.length === 0 && (
         <div className="text-center py-16">
-          <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center mx-auto mb-4">
-            <Plus className="w-8 h-8 text-purple-400" />
+          <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-4">
+            <Plus className="w-8 h-8 text-cyan-300" />
           </div>
           <h2 className="text-lg font-medium mb-2">No notes yet</h2>
           <p className="text-sm text-gray-500">Create your first note or ask Hermes to summarize something.</p>
@@ -137,7 +137,7 @@ export default function Notes() {
         {notes.map(note => (
           <div
             key={note.id}
-            className="group relative p-4 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all duration-200"
+            className="group relative p-4 rounded-2xl border border-white/5 hover:border-cyan-500/30 transition-all duration-200"
             style={{ background: 'var(--card-bg)' }}
           >
             {/* View mode */}
@@ -150,7 +150,7 @@ export default function Notes() {
                     {note.tags.length > 0 && (
                       <div className="flex gap-1 mt-2 flex-wrap">
                         {note.tags.map(tag => (
-                          <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300">{tag}</span>
+                          <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200">{tag}</span>
                         ))}
                       </div>
                     )}
@@ -167,7 +167,7 @@ export default function Notes() {
                     </button>
                     <button
                       onClick={() => askHermes(note)}
-                      className="p-1.5 rounded-lg hover:bg-purple-500/20 text-purple-400 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-cyan-500/20 text-cyan-300 transition-colors"
                       title="Ask Hermes about this note"
                     >
                       <Bot className="w-3.5 h-3.5" />
@@ -194,7 +194,7 @@ export default function Notes() {
                   value={editTitle}
                   onChange={e => setEditTitle(e.target.value)}
                   placeholder="Note title..."
-                  className="w-full bg-transparent text-lg font-semibold mb-2 focus:outline-none placeholder:text-gray-600 border-b border-purple-500/30 pb-1"
+                  className="w-full bg-transparent text-lg font-semibold mb-2 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded placeholder:text-gray-600 border-b border-cyan-500/30 pb-1"
                   style={{ color: 'var(--text)' }}
                   autoFocus
                 />
@@ -203,13 +203,13 @@ export default function Notes() {
                   onChange={e => setEditContent(e.target.value)}
                   placeholder="Write your note..."
                   rows={4}
-                  className="w-full bg-transparent text-sm resize-none focus:outline-none placeholder:text-gray-600 mt-2"
+                  className="w-full bg-transparent text-sm resize-none focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded placeholder:text-gray-600 mt-2"
                   style={{ color: 'var(--text)' }}
                 />
                 <div className="flex gap-2 mt-3">
                   <button
                     onClick={() => handleSaveEdit(note.id)}
-                    className="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs hover:bg-purple-500 flex items-center gap-1"
+                    className="px-3 py-1.5 rounded-lg bg-cyan-600 text-white text-xs hover:bg-cyan-500 flex items-center gap-1"
                   >
                     <Check className="w-3 h-3" /> Save
                   </button>

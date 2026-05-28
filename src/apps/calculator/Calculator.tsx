@@ -17,7 +17,7 @@ export default function Calculator() {
   const [memLabel, setMemLabel] = useState('')
   const [history, setHistory] = useState<{ expr: string; result: string }[]>([])
  const [newNumber, setNewNumber] = useState(true)
- const handlersRef = useRef({} as Record<string, (...args: any[]) => void>)
+ const handlersRef = useRef({} as Record<string, (...args: string[]) => void>)
 
  // Emit APP_OPENED for activity feed tracking
  useEffect(() => {
@@ -163,7 +163,7 @@ export default function Calculator() {
             <div className="flex items-center justify-between mb-1">
               <span className="text-gray-500 text-xs">{expression}</span>
               {display !== '0' && (
-                <button onClick={askHermes} className="p-1 rounded-lg hover:bg-purple-500/20 text-purple-400 transition-colors" title="Ask Hermes about this result">
+                <button onClick={askHermes} className="p-1 rounded-lg hover:bg-cyan-500/20 text-cyan-300 transition-colors" title="Ask Hermes about this result">
                   <Bot className="w-3.5 h-3.5" />
                 </button>
               )}

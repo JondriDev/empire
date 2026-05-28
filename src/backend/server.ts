@@ -99,9 +99,10 @@ app.post('/api/ai/chat', async (req, res) => {
 
     res.write('data: [DONE]\n\n')
     res.end()
-  } catch (error: any) {
-    console.error('AI API error:', error)
-    res.status(500).json({ error: error.message || 'AI request failed' })
+  } catch (error: unknown) {
+  console.error('AI API error:', error)
+  const message = error instanceof Error ? error.message : 'AI request failed'
+  res.status(500).json({ error: message })
   }
 })
 

@@ -11,10 +11,10 @@ export interface AppDefinition {
 }
 
 export const apps: AppDefinition[] = [
-  { id: 'ai-chat', name: 'Hermes AI', icon: 'Bot', route: '/app/ai-chat', description: 'Ask Hermes anything', color: '#8b5cf6', hermesEnabled: true },
+  { id: 'ai-agent', name: 'Hermes Agent', icon: 'Sparkles', route: '/app/ai-agent', description: 'AI that actually acts', color: '#6366f1', hermesEnabled: true },
   { id: 'calculator', name: 'Calculator', icon: 'Calculator', route: '/app/calculator', description: 'Scientific calculations', color: '#f97316', hermesEnabled: true },
   { id: 'calendar', name: 'Calendar', icon: 'Calendar', route: '/app/calendar', description: 'Schedule & events', color: '#3b82f6', hermesEnabled: true },
-  { id: 'clock', name: 'Clock', icon: 'Clock', route: '/app/clock', description: 'Time & alarms', color: '#8b5cf6', hermesEnabled: false },
+  { id: 'clock', name: 'Clock', icon: 'Clock', route: '/app/clock', description: 'Time & alarms', color: '#0891b2', hermesEnabled: false },
   { id: 'weather', name: 'Weather', icon: 'CloudSun', route: '/app/weather', description: 'Forecasts & conditions', color: '#06b6d4', hermesEnabled: false },
   { id: 'grammar', name: 'Grammar Fix', icon: 'SpellCheck', route: '/app/grammar', description: 'Fix your writing', color: '#10b981', hermesEnabled: true },
   { id: 'language', name: 'Language Lab', icon: 'Languages', route: '/app/language', description: 'Learn new languages', color: '#22d3ee', hermesEnabled: true },
@@ -25,7 +25,7 @@ export const apps: AppDefinition[] = [
   { id: 'browser', name: 'Browser', icon: 'Globe', route: '/app/browser', description: 'Browse the web', color: '#14b8a6', hermesEnabled: true },
   { id: 'editor', name: 'Code Editor', icon: 'Code2', route: '/app/editor', description: 'Write & edit code', color: '#6366f1', hermesEnabled: true },
   { id: 'notes', name: 'Notes', icon: 'StickyNote', route: '/app/notes', description: 'Write & organize', color: '#eab308', hermesEnabled: true },
-  { id: 'photos', name: 'Photos', icon: 'Image', route: '/app/photos', description: 'Your gallery', color: '#a855f7', hermesEnabled: false },
+  { id: 'photos', name: 'Photos', icon: 'Image', route: '/app/photos', description: 'Your gallery', color: '#0891b2', hermesEnabled: false },
   { id: 'datacenter', name: 'Data Center', icon: 'Database', route: '/app/datacenter', description: 'Manage data', color: '#64748b', hermesEnabled: true },
   { id: 'maps', name: 'Maps', icon: 'MapPin', route: '/app/maps', description: 'Explore locations', color: '#34d399', hermesEnabled: false },
   { id: 'messages', name: 'Messages', icon: 'MessageSquare', route: '/app/messages', description: 'Chat over WiFi', color: '#818cf8', hermesEnabled: true },

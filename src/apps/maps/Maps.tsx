@@ -4,9 +4,8 @@
  */
 
 import { useEffect, useState, useCallback } from 'react'
-import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
-import { Map, Search, Navigation, MapPin, Locate, Plus, Trash2, Star, Globe, Clock, Compass } from 'lucide-react'
+import { Map, Search, Navigation, MapPin, Locate, Trash2, Star, Globe, Compass } from 'lucide-react'
 
 interface Place {
   id: string
@@ -148,7 +147,7 @@ export default function Maps() {
           setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
           setError('')
         },
-        err => {
+        _err => {
           setError('Location access denied. Using default location.')
         }
       )
@@ -189,7 +188,7 @@ export default function Maps() {
       <div className="w-80 border-r flex flex-col" style={{ borderColor: 'var(--border)' }}>
         <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <h1 className="text-lg font-bold flex items-center gap-2">
-            <Map className="w-5 h-5 text-purple-400" /> Maps
+            <Map className="w-5 h-5 text-cyan-300" /> Maps
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
             {currentLocation.lat.toFixed(4)}°, {currentLocation.lng.toFixed(4)}°
@@ -210,7 +209,7 @@ export default function Maps() {
                 style={{ color: 'var(--text)' }}
               />
             </div>
-            <button type="submit" className="px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition-colors">
+            <button type="submit" className="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition-colors">
               <Search className="w-4 h-4" />
             </button>
           </div>
@@ -229,11 +228,11 @@ export default function Maps() {
         {/* Tab buttons */}
         <div className="flex border-b" style={{ borderColor: 'var(--border)' }}>
           <button onClick={() => setActiveTab('search')}
-            className={`flex-1 py-2 text-xs font-medium transition-colors ${activeTab === 'search' ? 'text-purple-400 border-b-2 border-purple-500' : 'text-gray-500 hover:text-gray-300'}`}>
+            className={`flex-1 py-2 text-xs font-medium transition-colors ${activeTab === 'search' ? 'text-cyan-300 border-b-2 border-cyan-500' : 'text-gray-500 hover:text-gray-300'}`}>
             <Search className="w-3 h-3 inline mr-1" /> Search
           </button>
           <button onClick={() => setActiveTab('saved')}
-            className={`flex-1 py-2 text-xs font-medium transition-colors ${activeTab === 'saved' ? 'text-purple-400 border-b-2 border-purple-500' : 'text-gray-500 hover:text-gray-300'}`}>
+            className={`flex-1 py-2 text-xs font-medium transition-colors ${activeTab === 'saved' ? 'text-cyan-300 border-b-2 border-cyan-500' : 'text-gray-500 hover:text-gray-300'}`}>
             <Star className="w-3 h-3 inline mr-1" /> Saved ({savedPlaces.length})
           </button>
         </div>
@@ -266,10 +265,10 @@ export default function Maps() {
               {searchResults.map(place => (
                 <div key={place.id} onClick={() => setSelectedPlace(place)}
                   className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                    selectedPlace?.id === place.id ? 'border-purple-500 bg-purple-500/10' : 'border-white/10 hover:border-white/20'
+                    selectedPlace?.id === place.id ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10 hover:border-white/20'
                   }`} style={{ background: 'var(--card-bg)' }}>
                   <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                    <MapPin className="w-4 h-4 text-cyan-300 mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium">{place.name}</div>
                       <div className="text-xs text-gray-500 truncate">{place.address}</div>
@@ -296,7 +295,7 @@ export default function Maps() {
               )}
               {savedPlaces.map(place => (
                 <div key={place.id} onClick={() => { setSelectedPlace(place); setCurrentLocation({ lat: place.lat, lng: place.lng }) }}
-                  className="p-3 rounded-xl border border-white/10 hover:border-purple-500/30 cursor-pointer transition-all"
+                  className="p-3 rounded-xl border border-white/10 hover:border-cyan-500/30 cursor-pointer transition-all"
                   style={{ background: 'var(--card-bg)' }}>
                   <div className="flex items-start gap-2">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center flex-shrink-0">
@@ -313,7 +312,7 @@ export default function Maps() {
                   </div>
                   <div className="flex gap-2 mt-2">
                     <button onClick={e => { e.stopPropagation(); navigateTo(place) }}
-                      className="text-xs px-2 py-1 rounded bg-purple-600/20 text-purple-300 hover:bg-purple-600/30">
+                      className="text-xs px-2 py-1 rounded bg-cyan-600/20 text-cyan-200 hover:bg-cyan-600/30">
                       <Navigation className="w-3 h-3 inline mr-1" /> Directions
                     </button>
                     <button onClick={e => { e.stopPropagation(); openInMaps(place) }}
@@ -330,7 +329,7 @@ export default function Maps() {
         {/* Location button */}
         <div className="p-3 border-t" style={{ borderColor: 'var(--border)' }}>
           <button onClick={getCurrentLocation}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm transition-colors">
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-sm transition-colors">
             <Locate className="w-4 h-4" /> Use My Location
           </button>
           {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
@@ -351,7 +350,7 @@ export default function Maps() {
           {/* Map content area */}
           <div className="h-full flex items-center justify-center">
             <div className="text-center max-w-md">
-              <Compass className="w-16 h-16 mx-auto mb-4 text-purple-400/50" />
+              <Compass className="w-16 h-16 mx-auto mb-4 text-cyan-300/50" />
               <h2 className="text-lg font-semibold mb-2">Map View</h2>
               <p className="text-sm text-gray-500 mb-4">
                 Search for a place or select from the sidebar to see map details.
@@ -370,7 +369,7 @@ export default function Maps() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => navigateTo(selectedPlace)}
-                      className="flex-1 px-3 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs transition-colors">
+                      className="flex-1 px-3 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs transition-colors">
                       <Navigation className="w-3 h-3 inline mr-1" /> Directions
                     </button>
                     <button onClick={() => openInMaps(selectedPlace)}

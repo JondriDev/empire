@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { apps, getAppIcon } from '../lib/registry'
 import GlassPanel from '../components/ui/GlassPanel'
-import { Star, Search, GripVertical } from 'lucide-react'
+import { Star, Search, GripVertical, Telescope, X } from 'lucide-react'
 
 const FAVORITES_KEY = 'empire-favorites'
 
@@ -53,14 +53,15 @@ export default function Dashboard() {
 
  // Add global mouse listeners when dragging
  useEffect(() => {
- if (isDragging) {
- document.addEventListener('mousemove', handleMouseMove as any)
- document.addEventListener('mouseup', handleMouseUp as any)
- return () => {
- document.removeEventListener('mousemove', handleMouseMove as any)
- document.removeEventListener('mouseup', handleMouseUp as any)
- }
- }
+   if (isDragging) {
+     document.addEventListener('mousemove', handleMouseMove as any)
+     document.addEventListener('mouseup', handleMouseUp as any)
+     return () => {
+       document.removeEventListener('mousemove', handleMouseMove as any)
+       document.removeEventListener('mouseup', handleMouseUp as any)
+     }
+   }
+   // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [isDragging, dragOffset])
 
   const toggleFavorite = (id: string) => {
@@ -211,7 +212,7 @@ export default function Dashboard() {
                       className="w-4 h-4 rounded-full flex items-center justify-center transition-transform hover:scale-110"
                       style={{ background: 'rgba(234,179,8,0.2)' }}
                     >
-                      <span className="text-[7px] font-bold" style={{ color: '#ca8a04' }}>✕</span>
+                      <X size={10} className="font-bold" style={{ color: '#ca8a04' }} />
                     </button>
                   </button>
                 )
@@ -283,7 +284,7 @@ export default function Dashboard() {
         {/* Empty state */}
         {filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-            <div className="text-4xl mb-3">🔭</div>
+            <Telescope size={36} className="text-cyan-400 opacity-60" />
             <p className="text-sm font-medium mb-1" style={{ color: 'var(--text2)' }}>
               No apps found
             </p>

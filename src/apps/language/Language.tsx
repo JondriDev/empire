@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { Languages, Copy, Check, RefreshCw, BookOpen, Bot, ArrowRightLeft, Globe } from 'lucide-react'
-import { Card, Button } from '../../components/ui'
+import { Languages, Copy, Check, BookOpen, ArrowRightLeft, Globe, Bot } from 'lucide-react'
+import { Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 
 interface PhraseBookEntry {
@@ -98,7 +98,7 @@ export default function Language() {
     setDetectedLang(detected)
 
     // If source is auto, set fromLang to detected
-    const source = fromLang === 'auto' ? detected : fromLang
+    if (fromLang === 'auto') setDetectedLang(detectLanguage(input))
 
     // Mock translation with pattern-based transformations
     let result = input
@@ -188,9 +188,9 @@ export default function Language() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Languages className="w-6 h-6 text-purple-400" /> Language Lab
+          <Languages className="w-6 h-6 text-cyan-300" /> Language Lab
         </h1>
-        <Button onClick={() => setShowPhraseBook(!showPhraseBook)} className={`text-xs px-3 py-1 ${showPhraseBook ? 'bg-purple-600' : 'bg-white/10'}`}>
+        <Button onClick={() => setShowPhraseBook(!showPhraseBook)} className={`text-xs px-3 py-1 ${showPhraseBook ? 'bg-cyan-600' : 'bg-white/10'}`}>
           <BookOpen className="w-3 h-3 mr-1" /> Phrases ({phraseBook.length})
         </Button>
       </div>
@@ -205,7 +205,7 @@ export default function Language() {
           ))}
         </select>
         <button onClick={swapLanguages}
-          className="p-2.5 rounded-xl hover:bg-white/10 text-purple-400 transition-colors">
+          className="p-2.5 rounded-xl hover:bg-white/10 text-cyan-300 transition-colors">
           <ArrowRightLeft className="w-5 h-5" />
         </button>
         <select value={toLang} onChange={e => setToLang(e.target.value)}
@@ -300,7 +300,7 @@ export default function Language() {
 
       {/* Hermes */}
       <div className="flex gap-2">
-        <Button onClick={askHermes} className="text-xs bg-purple-600 hover:bg-purple-500">
+        <Button onClick={askHermes} className="text-xs bg-cyan-600 hover:bg-cyan-500">
           <Bot className="w-3 h-3 mr-1" /> Ask Hermes
         </Button>
       </div>

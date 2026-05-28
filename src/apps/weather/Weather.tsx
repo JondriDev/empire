@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CloudSun, Settings, RefreshCw, MapPin, Thermometer, Droplets, Wind, AlertCircle } from 'lucide-react'
+import { CloudSun, Settings, RefreshCw, Thermometer, Droplets, Wind, AlertCircle } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 
 const WEATHER_CONFIG_KEY = 'empire-weather-config'
@@ -47,9 +47,8 @@ export default function Weather() {
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'weather' })
-    if (!weather.isLoading) {
-      fetchWeather()
-    }
+    fetchWeather()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchWeather = async () => {
@@ -89,13 +88,13 @@ export default function Weather() {
       
       setWeather(weatherData)
       emit({ type: 'WEATHER_UPDATED', ...weatherData })
-    } catch (error: any) {
-      console.error('Weather fetch error:', error)
-      setWeather(prev => ({
-        ...DEMO_DATA,
-        error: error.message || 'Failed to fetch weather',
-        isLoading: false
-      }))
+    } catch (error: unknown) {
+    console.error('Weather fetch error:', error)
+    setWeather(_prev => ({
+      ...DEMO_DATA,
+      error: error instanceof Error ? error.message : 'Failed to fetch weather',
+      isLoading: false
+    }))
     }
   }
 
@@ -227,8 +226,8 @@ export default function Weather() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
-          <div className="w-full max-w-md rounded-2xl border border-white/10 p-6" style={{ background: 'var(--card-bg)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setShowSettings(false)}>
+        <div className="w-full max-w-md rounded-2xl border border-white/10 p-6" style={{ background: 'var(--card-bg)' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Settings className="w-4 h-4" /> Weather Settings

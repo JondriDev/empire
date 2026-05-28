@@ -4,10 +4,10 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Bot, Plus, Trash2, RefreshCw, Table2, BarChart3 } from 'lucide-react'
+import { Bot, Plus, Trash2, RefreshCw, Table2 } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 
-interface TableRow { id: number; [key: string]: any }
+interface TableRow { id: number; [key: string]: string | number | boolean | null }
 
 const SERVER = 'http://localhost:3001'
 
@@ -52,7 +52,7 @@ export default function DataCenter() {
 
   const addRow = async () => {
     try {
-      const body: any = {}
+      const body: Record<string, string | number | boolean | null> = {}
       const firstRow = rows[0]
       if (firstRow) {
         Object.keys(firstRow).forEach(k => { if (k !== 'id') body[k] = newRow[k] || '' })
@@ -96,14 +96,14 @@ export default function DataCenter() {
           <p className="text-xs text-gray-400 mt-0.5">{rows.length} rows · {activeTable}</p>
         </div>
         <div className="flex-1 overflow-auto">
-          <button onClick={askHermes} className="w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-purple-500/10 text-purple-400 text-sm border-b" style={{ borderColor: 'var(--border)' }}>
+          <button onClick={askHermes} className="w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-cyan-500/10 text-cyan-300 text-sm border-b" style={{ borderColor: 'var(--border)' }}>
             <Bot className="w-3.5 h-3.5" /> Ask Hermes
           </button>
           {tables.map(t => (
             <button
               key={t}
               onClick={() => setActiveTable(t)}
-              className={`w-full px-4 py-2.5 text-left text-sm capitalize transition-colors border-b ${activeTable === t ? 'bg-purple-500/10 text-purple-300' : 'hover:bg-white/5 text-gray-300'}`}
+              className={`w-full px-4 py-2.5 text-left text-sm capitalize transition-colors border-b ${activeTable === t ? 'bg-cyan-500/10 text-cyan-200' : 'hover:bg-white/5 text-gray-300'}`}
               style={{ borderColor: 'var(--border)' }}
             >
               {t}
@@ -119,11 +119,11 @@ export default function DataCenter() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-6 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-3">
-            <Table2 className="w-4 h-4 text-purple-400" />
+            <Table2 className="w-4 h-4 text-cyan-300" />
             <span className="font-semibold capitalize">{activeTable}</span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400">{rows.length} rows</span>
           </div>
-          <button onClick={askHermes} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/20 text-purple-300 text-xs hover:bg-purple-500/30 transition-colors">
+          <button onClick={askHermes} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-200 text-xs hover:bg-cyan-500/30 transition-colors">
             <Bot className="w-3.5 h-3.5" /> Analyze with Hermes
           </button>
         </div>
@@ -148,7 +148,7 @@ export default function DataCenter() {
                       <th key={col} className="text-left px-3 py-2 text-xs text-gray-400 font-medium uppercase">{col}</th>
                     ))}
                     <th className="text-right px-3 py-2">
-                      <button onClick={addRow} className="text-purple-400 hover:text-purple-300 text-xs flex items-center gap-1 ml-auto">
+                      <button onClick={addRow} className="text-cyan-300 hover:text-cyan-200 text-xs flex items-center gap-1 ml-auto">
                         <Plus className="w-3 h-3" /> Add
                       </button>
                     </th>

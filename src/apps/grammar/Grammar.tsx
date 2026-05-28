@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { SpellCheck, Bot, Copy, Check, RefreshCw, ListChecks, AlertTriangle, Info } from 'lucide-react'
-import { Card, Button } from '../../components/ui'
+import { SpellCheck, Copy, Check, RefreshCw, ListChecks, AlertTriangle, Info } from 'lucide-react'
+import { Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 
 interface GrammarIssue {
@@ -55,7 +55,6 @@ export default function Grammar() {
     }
 
     const found: GrammarIssue[] = []
-    let fixed = input
 
     // Check common patterns
     COMMON_MISTAKES.forEach(([pattern, suggestion, desc]) => {
@@ -157,7 +156,7 @@ export default function Grammar() {
       case 'spelling': return 'bg-red-500/20 text-red-300 border-red-500/20'
       case 'grammar': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/20'
       case 'style': return 'bg-blue-500/20 text-blue-300 border-blue-500/20'
-      case 'punctuation': return 'bg-purple-500/20 text-purple-300 border-purple-500/20'
+      case 'punctuation': return 'bg-cyan-500/20 text-cyan-200 border-cyan-500/20'
       default: return 'bg-gray-500/20 text-gray-300 border-gray-500/20'
     }
   }
@@ -178,7 +177,7 @@ export default function Grammar() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <SpellCheck className="w-6 h-6 text-purple-400" /> Grammar Fix
+            <SpellCheck className="w-6 h-6 text-cyan-300" /> Grammar Fix
           </h1>
           <p className="text-sm text-gray-400 mt-1">
             {stats.words} words · {issues.length} issues found
@@ -186,11 +185,11 @@ export default function Grammar() {
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setMode('check')}
-            className={`text-xs px-3 py-1 ${mode === 'check' ? 'bg-purple-600' : 'bg-white/10'}`}>
+            className={`text-xs px-3 py-1 ${mode === 'check' ? 'bg-cyan-600' : 'bg-white/10'}`}>
             <ListChecks className="w-3 h-3 mr-1" /> Check
           </Button>
           <Button onClick={() => setMode('fix')}
-            className={`text-xs px-3 py-1 ${mode === 'fix' ? 'bg-purple-600' : 'bg-white/10'}`}>
+            className={`text-xs px-3 py-1 ${mode === 'fix' ? 'bg-cyan-600' : 'bg-white/10'}`}>
             <SpellCheck className="w-3 h-3 mr-1" /> Fix
           </Button>
         </div>
@@ -202,7 +201,7 @@ export default function Grammar() {
           value={text}
           onChange={e => setText(e.target.value)}
           placeholder="Paste or type text to check grammar..."
-          className="w-full bg-transparent px-4 py-3 text-sm min-h-[180px] resize-y focus:outline-none"
+          className="w-full bg-transparent px-4 py-3 text-sm min-h-[180px] resize-y focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded-lg"
           style={{ color: 'var(--text)' }}
         />
       </div>
@@ -259,7 +258,7 @@ export default function Grammar() {
             <span className="text-xs text-gray-400 flex items-center gap-1">
               <Info className="w-3 h-3" /> Corrected Text
             </span>
-            <button onClick={copyResult} className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1">
+            <button onClick={copyResult} className="text-xs text-cyan-300 hover:text-cyan-200 flex items-center gap-1">
               {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
             </button>
           </div>
@@ -283,7 +282,7 @@ export default function Grammar() {
           <Button onClick={() => {
             setText(correctedText || text)
             setIssues([])
-          }} className="text-xs bg-purple-600 hover:bg-purple-500">
+          }} className="text-xs bg-cyan-600 hover:bg-cyan-500">
             <RefreshCw className="w-3 h-3 mr-1" /> Apply Fixes
           </Button>
         </div>

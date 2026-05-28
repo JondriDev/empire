@@ -23,13 +23,15 @@ interface ButtonProps {
   children: ReactNode
   className?: string
   onClick?: () => void
+  disabled?: boolean
 }
 
-export function Button({ children, className = '', onClick }: ButtonProps) {
+export function Button({ children, className = '', onClick, disabled }: ButtonProps) {
   return (
     <button 
-      className={`px-4 py-2 rounded-lg transition-colors ${className}`}
+      className={`px-4 py-2 rounded-lg transition-colors ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       onClick={onClick}
+      disabled={disabled}
       style={{
         background: 'var(--gl-bg)',
         border: '1px solid var(--gl-border-b)',

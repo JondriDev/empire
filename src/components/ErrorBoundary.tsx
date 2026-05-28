@@ -39,11 +39,11 @@ export class ErrorBoundary extends Component<Props, State> {
           <button
             onClick={this.reset}
             style={{
-              background: 'rgba(139,92,246,0.3)',
-              border: '1px solid rgba(139,92,246,0.5)',
+              background: 'rgba(34,211,238,0.2)',
+              border: '1px solid rgba(34,211,238,0.4)',
               borderRadius: '0.5rem',
               padding: '0.5rem 1.5rem',
-              color: '#c4b5fd',
+              color: '#a8e3e2',
               cursor: 'pointer',
               fontSize: '0.85rem',
             }}

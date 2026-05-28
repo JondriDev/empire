@@ -3,7 +3,7 @@ export default function LoadingSpinner({ size = 'md' }: { size?: 'sm' | 'md' | '
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
       <div className={`spin-ring ${sizes[size]}`}>
-        <div className="spin-inner" style={{ background: 'var(--color-purple-5)' }} />
+        <div className="spin-inner" style={{ background: 'var(--color-cyan-5)' }} />
       </div>
     </div>
   )

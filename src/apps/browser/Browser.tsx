@@ -4,8 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Globe, Bookmark, History, Bot, ExternalLink, RefreshCw, Trash2, Star, Search } from 'lucide-react'
-import { Card, Button } from '../../components/ui'
+import { Globe, Bookmark, History, Bot, ExternalLink, Trash2, Star, Search } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 
 const DEFAULT_BOOKMARKS = [
@@ -20,7 +19,7 @@ export default function Browser() {
   const [activeTab, setActiveTab] = useState<'browse' | 'bookmarks' | 'history'>('browse')
   const [bookmarks, setBookmarks] = useState(DEFAULT_BOOKMARKS)
   const [history, setHistory] = useState<{ url: string; time: string }[]>([])
-  const [showHermes, setShowHermes] = useState(false)
+  const [_showHermes, _setShowHermes] = useState(false)
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'browser' })
@@ -87,13 +86,13 @@ export default function Browser() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Globe className="w-6 h-6 text-purple-400" /> Browser
+          <Globe className="w-6 h-6 text-cyan-300" /> Browser
         </h1>
         <div className="flex gap-1 bg-white/5 rounded-xl p-1">
           {(['browse', 'bookmarks', 'history'] as const).map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`text-xs px-3 py-1.5 rounded-lg capitalize transition-colors ${
-                activeTab === tab ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+                activeTab === tab ? 'bg-cyan-600 text-white' : 'text-gray-400 hover:text-white'
               }`}>
               {tab === 'browse' && <Globe className="w-3 h-3 inline mr-1" />}
               {tab === 'bookmarks' && <Bookmark className="w-3 h-3 inline mr-1" />}
@@ -127,11 +126,11 @@ export default function Browser() {
         </div>
         <button onClick={() => navigate(url)}
           disabled={!url.trim()}
-          className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-30 text-white text-sm transition-colors flex items-center gap-1">
+          className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 text-white text-sm transition-colors flex items-center gap-1">
           <ExternalLink className="w-4 h-4" /> Go
         </button>
         <button onClick={askHermes}
-          className="p-2 rounded-xl hover:bg-purple-500/20 text-purple-400 transition-colors" title="Ask Hermes about this URL">
+          className="p-2 rounded-xl hover:bg-cyan-500/20 text-cyan-300 transition-colors" title="Ask Hermes about this URL">
           <Bot className="w-5 h-5" />
         </button>
       </div>
@@ -147,7 +146,7 @@ export default function Browser() {
                 <p className="text-xs text-gray-600 mt-1 font-mono">{url}</p>
                 <button
                   onClick={() => window.open(url, '_blank')}
-                  className="mt-3 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm inline-flex items-center gap-1 transition-colors">
+                  className="mt-3 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-sm inline-flex items-center gap-1 transition-colors">
                   <ExternalLink className="w-4 h-4" /> Open in Browser
                 </button>
               </div>
@@ -172,7 +171,7 @@ export default function Browser() {
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {bookmarks.map(b => (
-                <div key={b.url} className="group flex items-center gap-2 p-3 rounded-xl border border-white/10 hover:border-purple-500/30 transition-all cursor-pointer"
+                <div key={b.url} className="group flex items-center gap-2 p-3 rounded-xl border border-white/10 hover:border-cyan-500/30 transition-all cursor-pointer"
                   style={{ background: 'var(--card-bg)' }}
                   onClick={() => { navigate(b.url); setActiveTab('browse') }}>
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-xs font-bold">

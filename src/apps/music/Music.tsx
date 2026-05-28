@@ -3,8 +3,8 @@ import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import {
   Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
-  Upload, Music as MusicIcon, Clock, Trash2, ListMusic,
-  Shuffle, Repeat, ChevronDown, Plus, X
+  Music as MusicIcon, Trash2, ListMusic,
+  Shuffle, Repeat, Plus, X
 } from 'lucide-react'
 
 interface Track {
@@ -45,8 +45,7 @@ export default function Music() {
   const [duration, setDuration] = useState(0)
   const [shuffle, setShuffle] = useState(false)
   const [repeat, setRepeat] = useState<'none' | 'one' | 'all'>('none')
-  const [showQueue, setShowQueue] = useState(false)
-  const [dragged, setDragged] = useState(false)
+  const [_dragged, setDragged] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -228,7 +227,7 @@ export default function Music() {
             Music Player
           </h1>
           <div className="flex gap-2">
-            <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-purple-600 hover:bg-purple-500">
+            <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-cyan-600 hover:bg-cyan-500">
               <Plus className="w-4 h-4 mr-1" /> Add Files
             </Button>
             <input
@@ -263,7 +262,7 @@ export default function Music() {
                 max={duration || 100}
                 value={currentTime}
                 onChange={seek}
-                className="w-full h-1 accent-purple-500 cursor-pointer"
+                className="w-full h-1 accent-cyan-600 cursor-pointer"
               />
               <div className="flex justify-between text-xs text-white/40 mt-1">
                 <span>{formatTime(currentTime)}</span>
@@ -273,7 +272,7 @@ export default function Music() {
 
             {/* Controls */}
             <div className="flex items-center justify-center gap-4 mt-3">
-              <button onClick={() => setShuffle(s => !s)} className={`p-2 rounded-full transition ${shuffle ? 'bg-purple-600 text-white' : 'text-white/40 hover:text-white'}`}>
+              <button onClick={() => setShuffle(s => !s)} className={`p-2 rounded-full transition ${shuffle ? 'bg-cyan-600 text-white' : 'text-white/40 hover:text-white'}`}>
                 <Shuffle className="w-4 h-4" />
               </button>
               <button onClick={prevTrack} className="p-2 text-white/60 hover:text-white transition">
@@ -285,7 +284,7 @@ export default function Music() {
               <button onClick={nextTrack} className="p-2 text-white/60 hover:text-white transition">
                 <SkipForward className="w-5 h-5" />
               </button>
-              <button onClick={() => setRepeat(r => r === 'none' ? 'all' : r === 'all' ? 'one' : 'none')} className={`p-2 rounded-full transition ${repeat !== 'none' ? 'bg-purple-600 text-white' : 'text-white/40 hover:text-white'}`}>
+              <button onClick={() => setRepeat(r => r === 'none' ? 'all' : r === 'all' ? 'one' : 'none')} className={`p-2 rounded-full transition ${repeat !== 'none' ? 'bg-cyan-600 text-white' : 'text-white/40 hover:text-white'}`}>
                 <Repeat className={`w-4 h-4 ${repeat === 'one' ? 'text-xs' : ''}`} />
               </button>
             </div>
@@ -302,7 +301,7 @@ export default function Music() {
                 step={0.01}
                 value={muted ? 0 : volume}
                 onChange={e => { setVolume(parseFloat(e.target.value)); setMuted(false) }}
-                className="flex-1 h-1 accent-purple-500 cursor-pointer"
+                className="flex-1 h-1 accent-cyan-600 cursor-pointer"
               />
             </div>
           </div>
@@ -338,7 +337,7 @@ export default function Music() {
               <div
                 key={track.id}
                 onDoubleClick={() => playTrack(track)}
-                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group transition ${current?.id === track.id ? 'bg-purple-600/30' : 'hover:bg-white/5'}`}
+                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group transition ${current?.id === track.id ? 'bg-cyan-600/30' : 'hover:bg-white/5'}`}
                 draggable
                 onDragStart={() => setDragged(true)}
                 onDragEnd={() => setDragged(false)}
@@ -362,7 +361,7 @@ export default function Music() {
                 <span className="w-6 text-center text-xs text-white/30">{i + 1}</span>
                 <MusicIcon className="w-4 h-4 text-white/30 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm truncate ${current?.id === track.id ? 'text-purple-300 font-bold' : ''}`}>{track.title}</p>
+                  <p className={`text-sm truncate ${current?.id === track.id ? 'text-cyan-200 font-bold' : ''}`}>{track.title}</p>
                   <p className="text-xs text-white/40 truncate">{track.artist}</p>
                 </div>
                 <span className="text-xs text-white/30">{track.duration ? formatTime(track.duration) : '—'}</span>

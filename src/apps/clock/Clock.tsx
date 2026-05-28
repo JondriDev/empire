@@ -129,7 +129,7 @@ export default function Clock() {
         {(['clock', 'stopwatch', 'alarm'] as const).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${activeTab === tab
-              ? 'bg-purple-600 text-white shadow-lg'
+              ? 'bg-cyan-600 text-white shadow-lg'
               : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             {tab === 'clock' && <ClockIcon className="inline w-4 h-4 mr-1" />}
             {tab === 'stopwatch' && <Timer className="inline w-4 h-4 mr-1" />}
@@ -145,7 +145,7 @@ export default function Clock() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-2">
               <h1 className="text-xl font-bold flex items-center">
-                <ClockIcon className="w-5 h-5 mr-2 text-purple-400" />
+                <ClockIcon className="w-5 h-5 mr-2 text-cyan-300" />
                 Clock
               </h1>
               <Button onClick={() => setIs24Hour(h => !h)} className="text-xs px-3 py-1">
@@ -181,7 +181,7 @@ export default function Clock() {
       {activeTab === 'stopwatch' && (
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4 flex items-center">
-            <Timer className="w-5 h-5 mr-2 text-purple-400" />
+            <Timer className="w-5 h-5 mr-2 text-cyan-300" />
             Stopwatch
           </h2>
           <div className="text-center py-6">
@@ -190,7 +190,7 @@ export default function Clock() {
             </div>
             <div className="flex justify-center gap-3 mt-4">
               <Button onClick={() => setStopwatch(s => ({ ...s, running: !s.running }))}
-                className="w-14 h-14 rounded-full bg-purple-600 hover:bg-purple-500 flex items-center justify-center">
+                className="w-14 h-14 rounded-full bg-cyan-600 hover:bg-cyan-500 flex items-center justify-center">
                 {stopwatch.running ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
               </Button>
               <Button onClick={() => {
@@ -226,38 +226,38 @@ export default function Clock() {
         <>
           <Card className="p-4">
             <h2 className="text-base font-semibold mb-3 flex items-center">
-              <Plus className="w-4 h-4 mr-2 text-purple-400" />
+              <Plus className="w-4 h-4 mr-2 text-cyan-300" />
               Add Alarm
             </h2>
             <div className="flex gap-2 items-end">
               <div className="flex-1">
                 <label className="text-xs text-gray-400 block mb-1">Time</label>
                 <input type="time" value={newAlarmTime} onChange={e => setNewAlarmTime(e.target.value)}
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white font-mono focus:border-purple-500 focus:outline-none" />
+                  className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white font-mono focus:border-cyan-500 focus:outline-none" />
               </div>
               <div className="flex-1">
                 <label className="text-xs text-gray-400 block mb-1">Label</label>
                 <input type="text" value={newAlarmLabel} onChange={e => setNewAlarmLabel(e.target.value)}
                   placeholder="Alarm label"
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-purple-500 focus:outline-none" />
+                  className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyan-500 focus:outline-none" />
               </div>
               <Button onClick={addAlarm} className="px-4 py-2">Add</Button>
             </div>
             <div className="mt-3 flex items-center gap-2">
               <input type="checkbox" id="alarm-sound" checked={alarmSound} onChange={e => setAlarmSound(e.target.checked)}
-                className="accent-purple-500" />
+                className="accent-cyan-600" />
               <label htmlFor="alarm-sound" className="text-xs text-gray-400">Play sound (uses browser audio)</label>
             </div>
           </Card>
 
           <Card className="p-4">
             <h2 className="text-base font-semibold mb-3 flex items-center">
-              <AlarmClock className="w-4 h-4 mr-2 text-purple-400" />
+              <AlarmClock className="w-4 h-4 mr-2 text-cyan-300" />
               Alarms ({alarms.filter(a => a.enabled).length} active)
             </h2>
             {alarms.length === 0 && <p className="text-gray-500 text-sm py-4 text-center">No alarms set</p>}
             {alarms.map(alarm => (
-              <div key={alarm.id} className={`p-3 rounded-lg mb-2 border transition-all ${alarm.enabled ? 'border-purple-500/30 bg-purple-500/5' : 'border-white/5 bg-black/20 opacity-50'}`}>
+              <div key={alarm.id} className={`p-3 rounded-lg mb-2 border transition-all ${alarm.enabled ? 'border-cyan-500/30 bg-cyan-500/5' : 'border-white/5 bg-black/20 opacity-50'}`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl font-mono font-bold">{alarm.time}</span>
@@ -265,7 +265,7 @@ export default function Clock() {
                   </div>
                   <div className="flex items-center gap-2">
                     <button onClick={() => toggleAlarm(alarm.id)}
-                      className={`w-10 h-6 rounded-full transition-all ${alarm.enabled ? 'bg-purple-600' : 'bg-gray-600'}`}>
+                      className={`w-10 h-6 rounded-full transition-all ${alarm.enabled ? 'bg-cyan-600' : 'bg-gray-600'}`}>
                       <div className={`w-4 h-4 bg-white rounded-full transition-transform ${alarm.enabled ? 'translate-x-5' : 'translate-x-1'}`} />
                     </button>
                     <button onClick={() => removeAlarm(alarm.id)} className="text-gray-500 hover:text-red-400 transition-colors">
@@ -276,7 +276,7 @@ export default function Clock() {
                 <div className="flex gap-1 flex-wrap">
                   {DAYS.map(day => (
                     <button key={day} onClick={() => toggleDay(alarm.id, day)}
-                      className={`text-xs px-2 py-1 rounded transition-all ${alarm.days.includes(day) ? 'bg-purple-600 text-white' : 'bg-white/5 text-gray-500'}`}>
+                      className={`text-xs px-2 py-1 rounded transition-all ${alarm.days.includes(day) ? 'bg-cyan-600 text-white' : 'bg-white/5 text-gray-500'}`}>
                       {day}
                     </button>
                   ))}

@@ -62,9 +62,9 @@ export function resetConfig(): AIConfig {
 export async function streamChat(
   messages: ChatMessage[],
   options: ChatOptions = {},
-  onToken: (token: string) => void,
+  onToken: (_token: string) => void,
   onDone?: () => void,
-  onError?: (err: Error) => void
+  onError?: (_err: Error) => void
 ): Promise<void> {
   const config = getConfig()
   const controller = new AbortController()
@@ -190,6 +190,5 @@ export function getModelName(): string {
 
 /** Check if AI is configured (has API key or uses server-side default) */
 export function isConfigured(): boolean {
-  const config = getConfig()
   return true // server-side has a fallback
 }

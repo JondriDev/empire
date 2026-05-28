@@ -4,6 +4,7 @@ import fs from 'fs';
 import http from 'http';
 import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'url';
+import { exec, execSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -34,7 +35,7 @@ function safePath(userPath) {
 // ─── Health ─────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
-// ─── File listing ───────────────────────────────────────────────
+// ─── File listing ────────────────────────────────────────────────
 app.get('/api/files', (req, res) => {
   const dir = safePath(req.query.path);
   try {
@@ -227,9 +228,7 @@ wss.on('connection', (ws, req) => {
     try {
       const msg = JSON.parse(data.toString());
 
-      // Handle different message types
       if (msg.type === 'chat') {
-        // Relay chat messages to all other peers
         broadcast({
           type: 'message',
           sender: id,
@@ -237,7 +236,6 @@ wss.on('connection', (ws, req) => {
           timestamp: Date.now(),
         }, ws);
       } else if (msg.type === 'app-event') {
-        // Broadcast app events to all peers (including AI bridge)
         broadcast({
           type: 'app-event',
           app: msg.app,
@@ -249,7 +247,6 @@ wss.on('connection', (ws, req) => {
       } else if (msg.type === 'ping') {
         ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
       } else {
-        // Legacy relay — forward raw message
         broadcast({
           type: 'message',
           sender: id,
@@ -276,6 +273,227 @@ function broadcast(message, excludeWs = null) {
   });
 }
 
+// ─── Tool Registry & Execution ──────────────────────────────────────────────
+
+const TOOL_DEFINITIONS = {
+  file_read: {
+    description: 'Read a file', dangerous: false,
+    schema: { path: 'string', limit: 'number?', offset: 'number?' }
+  },
+  file_write: {
+    description: 'Write content to a file', dangerous: true,
+    schema: { path: 'string', content: 'string', append: 'boolean?' }
+  },
+  file_list: {
+    description: 'List a directory', dangerous: false,
+    schema: { path: 'string' }
+  },
+  shell_exec: {
+    description: 'Execute a shell command', dangerous: true,
+    schema: { command: 'string', timeout: 'number?' }
+  },
+  web_search: {
+    description: 'Search the web', dangerous: false,
+    schema: { query: 'string', limit: 'number?' }
+  },
+  web_fetch: {
+    description: 'Fetch a URL', dangerous: false,
+    schema: { url: 'string', query: 'string?' }
+  },
+  code_exec: {
+    description: 'Execute code', dangerous: false,
+    schema: { code: 'string', language: 'string', args: 'object?' }
+  },
+}
+
+const DANGEROUS_PATTERNS = [
+  /rm\s+-rf\s+\//, /dd\s+if=/, /mkfs/, /fdisk/, />\s*\/dev\//,
+  /format\s+/, /shutdown/, /reboot/, /poweroff/, /init\s+0/,
+  /:\/|\:\)|递龟|汞|潘|涅|沸|活|龜|龠/, // junk filter
+]
+
+const SHELL_TIMEOUT = 30_000
+const CODE_TIMEOUT = 10_000
+
+function validateCommand(cmd) {
+  if (!cmd || typeof cmd !== 'string') return 'No command'
+  for (const p of DANGEROUS_PATTERNS) {
+    if (p.test(cmd)) return `Blocked: ${cmd.slice(0, 40)}`
+  }
+  return null
+}
+
+// ─── Tool API (before static serving) ───────────────────────────
+// ─── GET /api/tools/list ─────────────────────────────────────────────────────
+app.get('/api/tools/list', (req, res) => {
+  res.json({ tools: Object.keys(TOOL_DEFINITIONS) })
+})
+
+// ─── POST /api/tools/execute ─────────────────────────────────────────────────
+app.post('/api/tools/execute', async (req, res) => {
+  const { tool, params } = req.body
+  if (!tool || typeof tool !== 'string') {
+    return res.status(400).json({ success: false, error: 'Missing tool name' })
+  }
+
+  const def = TOOL_DEFINITIONS[tool]
+  if (!def) {
+    return res.status(400).json({ success: false, error: `Unknown tool: ${tool}` })
+  }
+
+  switch (tool) {
+    case 'file_read': {
+      const { path: fp, limit = 500, offset = 1 } = params
+      if (!fp) return res.json({ success: false, error: 'Missing path' })
+      const resolved = safePath(fp)
+      try {
+        const lines = fs.readFileSync(resolved, 'utf8').split('\n')
+        const slice = lines.slice(offset - 1, offset - 1 + limit)
+        res.json({ success: true, output: slice.map((l, i) => `${offset + i}|${l}`).join('\n') })
+      } catch (e) {
+        res.json({ success: false, error: e.message })
+      }
+      break
+    }
+
+    case 'file_write': {
+      if (def.dangerous) {
+        const validation = validateCommand(params.content)
+        if (validation) return res.json({ success: false, error: validation })
+      }
+      const { path: fp, content, append = false } = params
+      if (!fp) return res.json({ success: false, error: 'Missing path' })
+      const resolved = safePath(fp)
+      try {
+        if (append) {
+          fs.appendFileSync(resolved, content, 'utf8')
+        } else {
+          fs.writeFileSync(resolved, content, 'utf8')
+        }
+        res.json({ success: true, output: `Written ${content.length} chars to ${fp}` })
+      } catch (e) {
+        res.json({ success: false, error: e.message })
+      }
+      break
+    }
+
+    case 'file_list': {
+      const { path: fp } = params
+      if (!fp) return res.json({ success: false, error: 'Missing path' })
+      const resolved = safePath(fp)
+      try {
+        const entries = fs.readdirSync(resolved, { withFileTypes: true })
+        const result = entries
+          .filter(e => !e.name.startsWith('.'))
+          .map(e => {
+            const stat = fs.statSync(path.join(resolved, e.name))
+            const type = e.isDirectory() ? 'dir' : 'file'
+            const size = e.isFile() ? stat.size : 0
+            return `${type == 'dir' ? 'd' : '-'} ${e.name}${type === 'file' ? ` (${size}b)` : '/'}`
+          })
+        res.json({ success: true, output: result.join('\n') || '(empty)' })
+      } catch (e) {
+        res.json({ success: false, error: e.message })
+      }
+      break
+    }
+
+    case 'shell_exec': {
+      const { command, timeout = 10 } = params
+      if (!command) return res.json({ success: false, error: 'Missing command' })
+      const blocked = validateCommand(command)
+      if (blocked) return res.json({ success: false, error: `Blocked: ${blocked}` })
+
+      const actualTimeout = Math.min(timeout, SHELL_TIMEOUT / 1000) * 1000
+      exec(command, { timeout: actualTimeout, cwd: ALLOWED_BASE }, (err, stdout, stderr) => {
+        if (err) {
+          res.json({ success: false, error: err.message })
+        } else {
+          res.json({ success: true, output: (stdout + stderr).trim() || '(no output)' })
+        }
+      })
+      break
+    }
+
+    case 'web_search': {
+      const { query, limit = 5 } = params
+      if (!query) return res.json({ success: false, error: 'Missing query' })
+      try {
+        const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`
+        const resp = await fetch(url, {
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          signal: AbortSignal.timeout(10000),
+        })
+        const html = await resp.text()
+        const results = []
+        const itemRe = /<a class="result__a"[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/g
+        let match
+        let count = 0
+        while ((match = itemRe.exec(html)) && count < limit) {
+          const url = match[1]
+          const title = match[2].replace(/<[^>]+>/g, '')
+          results.push({ title, url })
+          count++
+        }
+        res.json({
+          success: true,
+          output: results.map(r => `• ${r.title}\n  ${r.url}`).join('\n\n') || 'No results found'
+        })
+      } catch (e) {
+        res.json({ success: false, error: e.message })
+      }
+      break
+    }
+
+    case 'web_fetch': {
+      const { url } = params
+      if (!url) return res.json({ success: false, error: 'Missing URL' })
+      try {
+        const resp = await fetch(url, {
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          signal: AbortSignal.timeout(15000),
+        })
+        const text = await resp.text()
+        const clean = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+        res.json({ success: true, output: clean.slice(0, 5000) })
+      } catch (e) {
+        res.json({ success: false, error: e.message })
+      }
+      break
+    }
+
+    case 'code_exec': {
+      const { code, language } = params
+      if (!code || !language) return res.json({ success: false, error: 'Missing code or language' })
+      if (!['python', 'javascript'].includes(language)) {
+        return res.json({ success: false, error: `Unsupported language: ${language}` })
+      }
+      try {
+        if (language === 'python') {
+          const result = execSync(`python3 -c ${JSON.stringify(code)}`, {
+            timeout: CODE_TIMEOUT,
+            encoding: 'utf8',
+            cwd: ALLOWED_BASE,
+          })
+          res.json({ success: true, output: result.trim() || '(no output)' })
+        } else {
+          const result = execSync(`node -e ${JSON.stringify(code)}`, {
+            timeout: CODE_TIMEOUT,
+            encoding: 'utf8',
+          })
+          res.json({ success: true, output: result.trim() || '(no output)' })
+        }
+      } catch (e) {
+        res.json({ success: false, error: e.message })
+      }
+      break
+    }
+
+    default:
+      res.status(400).json({ success: false, error: `Unimplemented tool: ${tool}` })
+  }
+})
+
 // ─── Static serving ─────────────────────────────────────────────
 const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
@@ -298,6 +516,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log('  ───────────────────────────────────');
   console.log('  API Server:    http://localhost:' + PORT);
   console.log('  AI Chat Proxy: http://localhost:' + PORT + '/api/ai/chat');
+  console.log('  Tool API:      http://localhost:' + PORT + '/api/tools/list');
   console.log('  WebSocket:     ws://localhost:' + PORT);
   console.log('  Dashboard:     http://localhost:' + PORT);
   console.log('  Default AI:    DeepSeek V4 Flash via OpenRouter\n');
