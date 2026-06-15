@@ -8,7 +8,7 @@
 const AI_CONFIG_KEY = 'empire-ai-config'
 
 export interface AIConfig {
-  provider: 'openrouter' | 'openai' | 'custom'
+  provider: 'nvidia' | 'openrouter' | 'openai' | 'custom'
   model: string
   apiKey: string
   baseUrl: string
@@ -18,10 +18,10 @@ export interface AIConfig {
 }
 
 const DEFAULT_CONFIG: AIConfig = {
-  provider: 'openrouter',
-  model: 'deepseek/deepseek-v4-flash',
+  provider: 'nvidia',
+  model: 'deepseek-ai/deepseek-v4-flash',
   apiKey: '',
-  baseUrl: 'https://openrouter.ai/api/v1',
+  baseUrl: 'https://integrate.api.nvidia.com/v1',
   systemPrompt: `You are Hermes, the AI agent powering The Empire — Jondri's personal application suite. You run on an Android device via Termux with a Mac-themed XFCE desktop. Be concise, helpful, and slightly playful. You have full context of all 20 apps in the Empire and can help with any of them. When asked about data from another app, use the context provided.`,
   temperature: 0.7,
   maxTokens: 2048,
@@ -144,43 +144,65 @@ export async function chat(
   })
 }
 
+interface EmpireNote {
+ title: string
+ content: string
+}
+
+interface EmpireEvent {
+ title: string
+ date: string
+ time: string
+}
+
+interface EmpireLearningItem {
+ mastered: boolean
+}
+
+interface EmpireStoreState {
+ notes?: EmpireNote[]
+ events?: EmpireEvent[]
+ learningItems?: EmpireLearningItem[]
+ messages?: unknown[]
+}
+
 /** Build a context prompt from empire app data for AI awareness. */
 export function buildEmpireContext(): string {
-  try {
-    const storeRaw = localStorage.getItem('empire-store')
-    if (!storeRaw) return ''
+ try {
+ const storeRaw = localStorage.getItem('empire-store')
+ if (!storeRaw) return ''
 
-    const store = JSON.parse(storeRaw)
-    const state = store.state || store
-    const parts: string[] = ['Current Empire state:']
+ const parsed = JSON.parse(storeRaw)
+ const state: EmpireStoreState = (parsed && 'state' in parsed && parsed.state) ? parsed.state : parsed
+ const parts: string[] = ['Current Empire state:']
 
-    if (state.notes?.length) {
-      parts.push(`\n📝 Notes (${state.notes.length}):`)
-      state.notes.slice(0, 5).forEach((n: any) =>
-        parts.push(`  - "${n.title}": ${(n.content || '').substring(0, 80)}`)
-      )
-    }
+ if (state.notes?.length) {
+ parts.push(`\n📝 Notes (${state.notes.length}):`)
+ state.notes.slice(0, 5).forEach((n) =>
+ parts.push(` - "${n.title}": ${(n.content || '').substring(0, 80)}`)
+ )
+ }
 
-    if (state.events?.length) {
-      parts.push(`\n📅 Upcoming events (${state.events.length}):`)
-      state.events.slice(0, 3).forEach((e: any) =>
-        parts.push(`  - ${e.title} on ${e.date} at ${e.time}`)
-      )
-    }
+ if (state.events?.length) {
+ parts.push(`\n📅 Upcoming events (${state.events.length}):`)
+ state.events.slice(0, 3).forEach((e) =>
+ parts.push(` - ${e.title} on ${e.date} at ${e.time}`)
+ )
+ }
 
-    if (state.learningItems?.length) {
-      const mastered = state.learningItems.filter((l: any) => l.mastered).length
-      parts.push(`\n🎓 Learning: ${state.learningItems.length} topics (${mastered} mastered)`)
-    }
+ if (state.learningItems?.length) {
+ const mastered = state.learningItems.filter((l) => l.mastered).length
+ parts.push(`\n🎓 Learning: ${state.learningItems.length} topics (${mastered} mastered)`)
+ }
 
-    if (state.messages?.length) {
-      parts.push(`\n💬 Chat messages: ${state.messages.length}`)
-    }
+ if (state.messages?.length) {
+ parts.push(`\n💬 Chat messages: ${state.messages.length}`)
+ }
 
-    return parts.join('\n')
-  } catch {
-    return ''
-  }
+ return parts.join('\n')
+ } catch {
+ return ''
+ }
 }
 
 export function getModelName(): string {

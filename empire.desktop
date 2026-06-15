@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=The Empire
+Comment=Personal web desktop with 24 apps + Hermes AI
+Exec=/data/data/com.termux/files/home/Desktop/empire/launch-empire.sh
+Icon=/data/data/com.termux/files/home/Desktop/empire/public/icon.svg
+Path=/data/data/com.termux/files/home/Desktop/empire
+Terminal=false
+Type=Application
+Categories=Development;Utility;Network;
+StartupNotify=true
+StartupWMClass=empire
+MimeType=text/html;

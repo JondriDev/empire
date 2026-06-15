@@ -6,17 +6,17 @@
  * like one living system, not 21 disconnected apps.
  */
 
-import { on, emit } from './eventBus'
+import { on, emit, type EmpireEvent } from './eventBus'
 
 // ── Rule definition ──────────────────────────────────────────────────────────
 interface AutomationRule {
-  id: string
-  name: string
-  description: string
-  trigger: { type: string; filter?: (_event: any) => boolean }
-  action: (_event: any, _dispatch: (action: CrossAppAction) => void) => void
-  enabled: boolean
-  oncePerSession: boolean
+ id: string
+ name: string
+ description: string
+ trigger: { type: EmpireEvent['type']; filter?: (_event: EmpireEvent) => boolean }
+ action: (_event: EmpireEvent, _dispatch: (action: CrossAppAction) => void) => void
+ enabled: boolean
+ oncePerSession: boolean
 }
 
 interface CrossAppAction {
@@ -32,7 +32,7 @@ const rules: AutomationRule[] = [
     id: 'ai-chat-open-context',
     name: 'AI Chat pre-loads context',
     description: 'When AI Chat opens, check for queued context from other apps',
-    trigger: { type: 'APP_OPENED', filter: (e) => (e as any).appId === 'ai-chat' },
+    trigger: { type: 'APP_OPENED', filter: (e) => e.type === 'APP_OPENED' && e.appId === 'ai-chat' },
     action: (_, dispatch) => {
       try {
         const stored = sessionStorage.getItem('empire-ai-clipboard')
@@ -58,12 +58,13 @@ const rules: AutomationRule[] = [
     description: 'When a note is created, log it for AI awareness',
     trigger: { type: 'NOTE_CREATED' },
     action: (e) => {
-      emit({
-        type: 'AI_QUERY',
-        query: `Note created: "${(e as any).title}"`,
-        context: buildBriefContext(),
-        app: 'system',
-      })
+    if (e.type !== 'NOTE_CREATED') return
+    emit({
+    type: 'AI_QUERY',
+    query: `Note created: "${e.title}"`,
+    context: buildBriefContext(),
+    app: 'system',
+    })
     },
     enabled: true,
     oncePerSession: false,
@@ -76,12 +77,13 @@ const rules: AutomationRule[] = [
     description: 'Broadcast calculation results for AI to remember',
     trigger: { type: 'CALCULATION_RESULT' },
     action: (e) => {
-      emit({
-        type: 'AI_QUERY',
-        query: `Calculation: ${(e as any).expression} = ${(e as any).result}`,
-        context: buildBriefContext(),
-        app: 'system',
-      })
+    if (e.type !== 'CALCULATION_RESULT') return
+    emit({
+    type: 'AI_QUERY',
+    query: `Calculation: ${e.expression} = ${e.result}`,
+    context: buildBriefContext(),
+    app: 'system',
+    })
     },
     enabled: true,
     oncePerSession: false,
@@ -94,12 +96,11 @@ const rules: AutomationRule[] = [
     description: 'When code runs in the editor, ask Hermes to review it',
     trigger: { type: 'CODE_RUN' },
     action: (e, dispatch) => {
-      const evt = e as any
-      // Queue for AI review in the editor
-      dispatch({
-        type: 'CODE_REVIEW_QUEUED',
-        payload: { code: evt.code, language: evt.language },
-      })
+    if (e.type !== 'CODE_RUN') return
+    dispatch({
+    type: 'CODE_REVIEW_QUEUED',
+    payload: { code: e.code, language: e.language },
+    })
     },
     enabled: true,
     oncePerSession: false,
@@ -128,13 +129,13 @@ const rules: AutomationRule[] = [
     description: 'When a data table is updated, log the change',
     trigger: { type: 'DATA_TABLE_UPDATED' },
     action: (e) => {
-      const evt = e as any
-      emit({
-        type: 'AI_QUERY',
-        query: `Data updated: ${evt.tableName} now has ${evt.rowCount} rows`,
-        context: buildBriefContext(),
-        app: 'system',
-      })
+    if (e.type !== 'DATA_TABLE_UPDATED') return
+    emit({
+    type: 'AI_QUERY',
+    query: `Data updated: ${e.tableName} now has ${e.rowCount} rows`,
+    context: buildBriefContext(),
+    app: 'system',
+    })
     },
     enabled: true,
     oncePerSession: false,
@@ -147,15 +148,15 @@ const rules: AutomationRule[] = [
     description: 'Broadcast token counts for context window management',
     trigger: { type: 'TOKEN_COUNTED' },
     action: (e) => {
-      const evt = e as any
-      if (evt.count > 8000) {
-        emit({
-          type: 'AI_QUERY',
-          query: `Warning: ${evt.count} tokens — consider shortening context`,
-          context: buildBriefContext(),
-          app: 'system',
-        })
-      }
+    if (e.type !== 'TOKEN_COUNTED') return
+    if (e.count > 8000) {
+    emit({
+    type: 'AI_QUERY',
+    query: `Warning: ${e.count} tokens — consider shortening context`,
+    context: buildBriefContext(),
+    app: 'system',
+    })
+    }
     },
     enabled: true,
     oncePerSession: false,
@@ -168,14 +169,15 @@ const rules: AutomationRule[] = [
     description: 'Count app opens for AI to learn user patterns',
     trigger: { type: 'APP_OPENED' },
     action: (e) => {
-      try {
-        const key = 'empire-app-stats'
-        const stats = JSON.parse(localStorage.getItem(key) || '{}')
-        const appId = (e as any).appId
-        stats[appId] = (stats[appId] || 0) + 1
-        stats._lastApp = appId
-        localStorage.setItem(key, JSON.stringify(stats))
-      } catch { /* ignore */ }
+    try {
+    const key = 'empire-app-stats'
+    const stats = JSON.parse(localStorage.getItem(key) || '{}')
+    if (e.type === 'APP_OPENED') {
+    stats[e.appId] = (stats[e.appId] || 0) + 1
+    stats._lastApp = e.appId
+    }
+    localStorage.setItem(key, JSON.stringify(stats))
+    } catch { /* ignore */ }
     },
     enabled: true,
     oncePerSession: false,
@@ -209,20 +211,19 @@ export function initAutomation() {
   initialized = true
 
   rules.forEach((rule) => {
-    if (!rule.enabled) return
+  if (!rule.enabled) return
 
-     
-    ;(on as any)(rule.trigger.type, (event: any) => {
-      if (rule.oncePerSession && firedOncePerSession.has(rule.id)) return
-      if (rule.trigger.filter && !rule.trigger.filter(event)) return
+  on(rule.trigger.type, (event: EmpireEvent) => {
+  if (rule.oncePerSession && firedOncePerSession.has(rule.id)) return
+  if (rule.trigger.filter && !rule.trigger.filter(event)) return
 
-      try {
-        rule.action(event, buildDispatch as any)
-        if (rule.oncePerSession) firedOncePerSession.add(rule.id)
-      } catch (err) {
-        console.warn(`[Automation] Rule "${rule.id}" failed:`, err)
-      }
-    })
+  try {
+  rule.action(event, buildDispatch as unknown as (action: CrossAppAction) => void)
+  if (rule.oncePerSession) firedOncePerSession.add(rule.id)
+  } catch (err) {
+  console.warn(`[Automation] Rule "${rule.id}" failed:`, err)
+  }
+  })
   })
 
   console.log(`[Hermes] Automation initialized with ${rules.filter(r => r.enabled).length} rules`)
@@ -243,18 +244,17 @@ export function toggleRule(ruleId: string, enabled: boolean): void {
 }
 
 export function addRule(rule: AutomationRule): void {
-  rules.push(rule)
-  // Immediately wire the new rule
-   
-    ;(on as any)(rule.trigger.type, (event: any) => {
-    if (!rule.enabled) return
-    if (rule.trigger.filter && !rule.trigger.filter(event)) return
-    try {
-      rule.action(event, buildDispatch as any)
-    } catch (err) {
-      console.warn(`[Automation] Rule "${rule.id}" failed:`, err)
-    }
-  })
+ rules.push(rule)
+ // Immediately wire the new rule
+ on(rule.trigger.type, (event: EmpireEvent) => {
+ if (!rule.enabled) return
+ if (rule.trigger.filter && !rule.trigger.filter(event)) return
+ try {
+ rule.action(event, buildDispatch as unknown as (action: CrossAppAction) => void)
+ } catch (err) {
+ console.warn(`[Automation] Rule "${rule.id}" failed:`, err)
+ }
+ })
 }
 
 // Auto-init when this module loads

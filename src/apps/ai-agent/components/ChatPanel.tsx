@@ -13,7 +13,14 @@ interface Props {
 function formatContent(content: string) {
   const lines = content.split('\n')
   return lines.map((line, i) => {
-    const formatted = line
+    // Escape HTML first — critical for any content sourced from an LLM,
+    // since AI responses cannot be trusted. Markdown regex is then run
+    // against the (safe) escaped text; the regex injects literal tags.
+    const escaped = line
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+    const formatted = escaped
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/`([^`]+)`/g, '<code style="background:rgba(99,102,241,0.15);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:12px">$1</code>')

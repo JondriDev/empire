@@ -131,8 +131,8 @@ export default function DataCenter() {
         <div className="flex-1 overflow-auto p-6">
  {loading ? (
  <div className="text-center py-12 text-white/40">
- <div className="animate-spin w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-2" />
- Loading...
+ <div className="animate-spin w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-3" />
+ <p className="text-sm">Fetching data…</p>
  </div>
           ) : rows.length === 0 ? (
             <div className="text-center py-12">

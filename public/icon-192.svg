@@ -1,10 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#818cf8"/>
-      <stop offset="100%" style="stop-color:#4f46e5"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1b4b"/>
+      <stop offset="100%" style="stop-color:#2e1065"/>
+    </linearGradient>
+    <linearGradient id="crown" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24"/>
+      <stop offset="100%" style="stop-color:#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22d3ee"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
     </linearGradient>
   </defs>
-  <rect width="192" height="192" rx="38" fill="url(#g)"/>
-  <text x="96" y="128" text-anchor="middle" font-family="Georgia, serif" font-size="110" font-weight="bold" fill="white">E</text>
+  <rect width="192" height="192" rx="36" fill="url(#bg)"/>
+  <!-- Crown -->
+  <path d="M40,140 L22,60 L50,85 L60,30 L70,85 L98,60 L80,140 Z" fill="url(#crown)" stroke="#fbbf24" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Orbital ring -->
+  <ellipse cx="96" cy="115" rx="50" ry="14" fill="none" stroke="url(#glow)" stroke-width="2" opacity="0.5"/>
+  <!-- Core dot -->
+  <circle cx="96" cy="115" r="6" fill="white" opacity="0.7"/>
 </svg>

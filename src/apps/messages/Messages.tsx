@@ -73,24 +73,35 @@ export default function Messages() {
               <div className="text-xs text-gray-500">Analyze my messages</div>
             </div>
           </button>
-          {CONTACTS.map(contact => (
-            <button
-              key={contact}
-              onClick={() => setRecipient(contact)}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b ${recipient === contact ? 'bg-cyan-500/10' : 'hover:bg-white/5'}`}
-              style={{ borderColor: 'var(--border)' }}
-            >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-medium">
-                {contact[0]}
-              </div>
-              <div>
-                <div className="text-sm font-medium">{contact}</div>
-                <div className="text-xs text-gray-500">
-                  {messages.filter(m => m.sender === contact || m.sender === 'Me').length} messages
-                </div>
-              </div>
-            </button>
-          ))}
+          {CONTACTS.map(contact => {
+          const contactMessages = messages.filter(m => m.sender === contact || (m.sender === 'Me' && contact === recipient))
+          const lastMsg = contactMessages[contactMessages.length - 1]
+          return (
+          <button
+          key={contact}
+          onClick={() => setRecipient(contact)}
+          className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b ${recipient === contact ? 'bg-cyan-500/10' : 'hover:bg-white/5'}`}
+          style={{ borderColor: 'var(--border)' }}
+          >
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+          {contact[0]}
+          </div>
+          <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+          <span className="text-sm font-medium">{contact}</span>
+          {lastMsg && (
+          <span className="text-[10px] text-gray-600">
+          {new Date(lastMsg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+          )}
+          </div>
+          <div className="text-xs text-gray-500 truncate">
+          {lastMsg ? `${lastMsg.sender === 'Me' ? 'You: ' : ''}${lastMsg.content}` : `${messages.filter(m => m.sender === contact || m.sender === 'Me').length} messages`}
+          </div>
+          </div>
+          </button>
+          )
+          })}
         </div>
       </div>
 
@@ -111,33 +122,36 @@ export default function Messages() {
 
         {/* Messages */}
         <div className="flex-1 overflow-auto px-6 py-4 space-y-3">
-          {messages.filter(m => m.sender === recipient || m.sender === 'Me').length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-4">
-                <Send className="w-7 h-7 text-cyan-300 opacity-50" />
-              </div>
-              <p className="text-gray-400 text-sm font-medium">No messages with {recipient} yet</p>
-              <p className="text-gray-600 text-xs mt-1">Start the conversation below</p>
-            </div>
-          )}
-          {messages.map(msg => {
-            const isMe = msg.sender === 'Me'
-            return (
-              <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
-                    isMe ? 'bg-cyan-600 text-white rounded-tr-sm' : 'border border-white/10 rounded-tl-sm'
-                  }`}
-                  style={!isMe ? { background: 'var(--card-bg)' } : {}}
-                >
-                  <p className="text-sm">{msg.content}</p>
-                  <p className={`text-[10px] mt-1 ${isMe ? 'text-cyan-100' : 'text-gray-600'}`}>
-                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            )
-          })}
+        {(() => {
+        const thread = messages.filter(m => m.sender === recipient || m.sender === 'Me')
+        if (thread.length === 0) return (
+        <div className="text-center py-12">
+        <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-4">
+        <Send className="w-7 h-7 text-cyan-300 opacity-50" />
+        </div>
+        <p className="text-gray-400 text-sm font-medium">No messages with {recipient} yet</p>
+        <p className="text-gray-600 text-xs mt-1">Start the conversation below</p>
+        </div>
+        )
+        return thread.map(msg => {
+        const isMe = msg.sender === 'Me'
+        return (
+        <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+        <div
+        className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
+        isMe ? 'bg-cyan-600 text-white rounded-tr-sm' : 'border border-white/10 rounded-tl-sm'
+        }`}
+        style={!isMe ? { background: 'var(--card-bg)' } : {}}
+        >
+        <p className="text-sm">{msg.content}</p>
+        <p className={`text-[10px] mt-1 ${isMe ? 'text-cyan-100' : 'text-gray-600'}`}>
+        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </p>
+        </div>
+        </div>
+        )
+        })
+        })()}
         </div>
 
         {/* Input */}

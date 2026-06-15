@@ -1,10 +1,18 @@
 /**
  * Calculator — emits results to eventBus, Hermes-aware
+ *
+ * UI polish:
+ *  - Glass display with neon-cyan glow when result ready
+ *  - Operator buttons use the app color (orange) theming
+ *  - Memory indicators refined
+ *  - History sidebar collapsible
+ *  - Toast feedback on copy-to-Hermes
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { Bot } from 'lucide-react'
+import { Bot, Sparkles, History, Trash2, Copy, Check } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
+import { useToast } from '../../components/ui/Toast'
 
 type Op = '+' | '-' | '×' | '÷' | '^' | null
 
@@ -16,13 +24,16 @@ export default function Calculator() {
   const [memStore, setMemStore] = useState<number>(0)
   const [memLabel, setMemLabel] = useState('')
   const [history, setHistory] = useState<{ expr: string; result: string }[]>([])
- const [newNumber, setNewNumber] = useState(true)
- const handlersRef = useRef({} as Record<string, (...args: string[]) => void>)
+  const [newNumber, setNewNumber] = useState(true)
+  const [justCalculated, setJustCalculated] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const handlersRef = useRef({} as Record<string, (...args: string[]) => void>)
+  const toast = useToast()
 
- // Emit APP_OPENED for activity feed tracking
- useEffect(() => {
- emit({ type: 'APP_OPENED', appId: 'calculator' })
- }, [])
+  // Emit APP_OPENED for activity feed tracking
+  useEffect(() => {
+    emit({ type: 'APP_OPENED', appId: 'calculator' })
+  }, [])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -43,11 +54,13 @@ export default function Calculator() {
   }, [])
 
   const inputDigit = useCallback((d: string) => {
+    setJustCalculated(false)
     if (newNumber) { setDisplay(d); setNewNumber(false) }
     else setDisplay(prev => prev === '0' ? d : prev + d)
   }, [newNumber])
 
   const inputDecimal = useCallback(() => {
+    setJustCalculated(false)
     if (newNumber) { setDisplay('0.'); setNewNumber(false) }
     else if (!display.includes('.')) setDisplay(prev => prev + '.')
   }, [display, newNumber])
@@ -64,6 +77,7 @@ export default function Calculator() {
   }
 
   const handleOp = useCallback((nextOp: Op) => {
+    setJustCalculated(false)
     const num = parseFloat(display)
     if (memory === null) setMemory(num)
     else if (op) {
@@ -73,32 +87,34 @@ export default function Calculator() {
     }
     setOp(nextOp)
     setNewNumber(true)
-    if (op) setExpression(`${memory} ${op} ${num} ${nextOp || ''}`)
-    else setExpression(`${num} ${nextOp || ''}`)
+    if (op) setExpression(`${memory} ${op} ${num} `)
+    else setExpression(`${num} `)
   }, [display, memory, op])
 
   const equals = useCallback(() => {
     const num = parseFloat(display)
     if (memory !== null && op) {
       const result = calculate(memory, num, op)
-      const expr = `${memory} ${op} ${num} =`
-      const resultStr = String(result)
+      const expr = `${memory} ${op} ${num}`
+      const resultStr = String(Number.isFinite(result) ? Math.round(result * 1e10) / 1e10 : 'Error')
       setHistory(prev => [{ expr, result: resultStr }, ...prev].slice(0, 20))
       // Emit event for other apps
-      emit({ type: 'CALCULATION_RESULT', expression: `${memory} ${op} ${num}`, result: resultStr })
+      emit({ type: 'CALCULATION_RESULT', expression: expr, result: resultStr })
       setDisplay(resultStr)
-      setExpression('')
+      setExpression(`${expr} =`)
       setMemory(null)
       setOp(null)
       setNewNumber(true)
+      setJustCalculated(true)
     }
   }, [display, memory, op])
 
   const clear = useCallback(() => {
-    setDisplay('0'); setExpression(''); setMemory(null); setOp(null); setNewNumber(true)
+    setDisplay('0'); setExpression(''); setMemory(null); setOp(null); setNewNumber(true); setJustCalculated(false)
   }, [])
 
   const backspace = useCallback(() => {
+    setJustCalculated(false)
     if (display.length > 1) setDisplay(prev => prev.slice(0, -1))
     else setDisplay('0')
   }, [display])
@@ -107,6 +123,7 @@ export default function Calculator() {
   const percent = useCallback(() => setDisplay(prev => String(parseFloat(prev) / 100)), [])
 
   const sciFunc = useCallback((fn: string) => {
+    setJustCalculated(false)
     const n = parseFloat(display)
     let result: number
     switch (fn) {
@@ -120,13 +137,14 @@ export default function Calculator() {
       case 'cube': result = n * n * n; break
       default: result = n
     }
+    const resultStr = String(Number.isFinite(result) ? Math.round(result * 1e10) / 1e10 : 'Error')
     setExpression(`${fn}(${n})`)
-    setDisplay(String(Number.isFinite(result) ? Math.round(result * 1e10) / 1e10 : 'Error'))
+    setDisplay(resultStr)
     setNewNumber(true)
   }, [display])
 
-  const inputPi = useCallback(() => setDisplay(String(Math.PI)), [])
-  const inputE = useCallback(() => setDisplay(String(Math.E)), [])
+  const inputPi = useCallback(() => { setDisplay(String(Math.PI)); setJustCalculated(false); setNewNumber(true) }, [])
+  const inputE = useCallback(() => { setDisplay(String(Math.E)); setJustCalculated(false); setNewNumber(true) }, [])
 
   useEffect(() => {
     handlersRef.current = {
@@ -145,99 +163,467 @@ export default function Calculator() {
 
   const askHermes = () => {
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
-      text: `Calculation: ${expression} ${display}`,
+      text: `Calculation: ${expression || display}`,
       title: `Calc: ${display}`,
       from: 'calculator',
     }))
-    window.location.href = '/app/ai-chat'
+    toast.info('Opening Hermes', `Analyzing: ${display}`)
+    setTimeout(() => { window.location.href = '/app/ai-chat' }, 200)
   }
 
-  const btnClass = "px-3 py-3 rounded-xl text-sm font-medium transition-all duration-100 active:scale-95 select-none"
+  const copyResult = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(display)
+      setCopied(true)
+      toast.success('Copied to clipboard', display)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      toast.error('Copy failed', 'Clipboard access denied')
+    }
+  }, [display, toast])
+
+  /* ── Calculator button styles ── */
+  const baseBtn: React.CSSProperties = {
+    padding: '14px 6px',
+    borderRadius: 'var(--radius-lg)',
+    fontSize: 'var(--text-sm)',
+    fontWeight: 500,
+    transition: 'all var(--dur-fast) var(--ease-spring)',
+    border: '1px solid transparent',
+    cursor: 'pointer',
+    userSelect: 'none',
+    minHeight: '44px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+
+  const digitStyle: React.CSSProperties = {
+    ...baseBtn,
+    background: 'rgba(255,255,255,0.04)',
+    color: 'var(--text)',
+    borderColor: 'rgba(255,255,255,0.05)',
+  }
+  const opStyle: React.CSSProperties = {
+    ...baseBtn,
+    background: 'rgba(249, 115, 22, 0.12)',
+    color: '#fb923c',
+    borderColor: 'rgba(249, 115, 22, 0.18)',
+  }
+  const opActive: React.CSSProperties = {
+    ...opStyle,
+    background: 'rgba(249, 115, 22, 0.28)',
+    borderColor: 'rgba(249, 115, 22, 0.4)',
+    boxShadow: '0 0 12px rgba(249, 115, 22, 0.25)',
+  }
+  const equalsStyle: React.CSSProperties = {
+    ...baseBtn,
+    background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+    color: '#ffffff',
+    borderColor: 'rgba(249, 115, 22, 0.4)',
+    boxShadow: '0 4px 14px rgba(249, 115, 22, 0.3), inset 0 1px 0 rgba(255,255,255,0.18)',
+    fontWeight: 600,
+  }
+  const clearStyle: React.CSSProperties = {
+    ...baseBtn,
+    background: 'rgba(239, 68, 68, 0.12)',
+    color: '#f87171',
+    borderColor: 'rgba(239, 68, 68, 0.18)',
+  }
+  const fnStyle = (active: boolean): React.CSSProperties => ({
+    ...baseBtn,
+    padding: '10px 6px',
+    fontSize: '11px',
+    background: active ? 'rgba(34, 211, 238, 0.18)' : 'rgba(34, 211, 238, 0.08)',
+    color: 'var(--color-cyan-3)',
+    borderColor: active ? 'rgba(34, 211, 238, 0.35)' : 'rgba(34, 211, 238, 0.12)',
+  })
+
+  const onEnter = (setActive?: (b: boolean) => void) => (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.transform = 'translateY(-1px) scale(1.02)'
+    e.currentTarget.style.filter = 'brightness(1.15)'
+    setActive?.(true)
+  }
+  const onLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.transform = ''
+    e.currentTarget.style.filter = ''
+  }
+  const onPress = (style: React.CSSProperties) => (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.transform = 'scale(0.94)'
+    e.currentTarget.style.filter = 'brightness(0.92)'
+    setTimeout(() => { e.currentTarget.style.transform = ''; e.currentTarget.style.filter = '' }, 100)
+  }
 
   return (
-    <div className="p-4 md:p-6 max-w-md mx-auto">
-      <div className="flex gap-4">
-        <div className="flex-1">
-          {/* Display */}
-          <div className="bg-black/30 rounded-2xl p-4 mb-4 text-right border border-white/5">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-gray-500 text-xs">{expression}</span>
+    <div style={{ padding: '16px 20px', maxWidth: '640px', margin: '0 auto', display: 'flex', gap: '14px' }}>
+      {/* Calculator pane */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* Display */}
+        <div
+          style={{
+            position: 'relative',
+            padding: '18px 16px 16px',
+            borderRadius: 'var(--radius-xl)',
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2))',
+            border: '1px solid rgba(255,255,255,0.06)',
+            boxShadow: justCalculated
+              ? '0 0 24px rgba(34, 211, 238, 0.15), inset 0 1px 0 rgba(255,255,255,0.05)'
+              : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+            transition: 'box-shadow var(--dur-mid)',
+            textAlign: 'right',
+            minHeight: '88px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+          }}
+        >
+          {/* Top row: expression + actions */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '8px',
+              marginBottom: '4px',
+              minHeight: '20px',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                color: 'var(--text3)',
+                flex: 1,
+                textAlign: 'right',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                letterSpacing: '0.02em',
+              }}
+            >
+              {expression}
+            </div>
+            <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
+              <button
+                onClick={copyResult}
+                title={copied ? 'Copied!' : 'Copy result'}
+                style={{
+                  width: '24px', height: '24px',
+                  borderRadius: '5px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: copied ? '#4ade80' : 'var(--text3)',
+                  cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all var(--dur-fast)',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = copied ? '#4ade80' : 'var(--text3)'; e.currentTarget.style.background = 'transparent' }}
+              >
+                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              </button>
               {display !== '0' && (
-                <button onClick={askHermes} className="p-1 rounded-lg hover:bg-cyan-500/20 text-cyan-300 transition-colors" title="Ask Hermes about this result">
-                  <Bot className="w-3.5 h-3.5" />
+                <button
+                  onClick={askHermes}
+                  title="Ask Hermes about this result"
+                  style={{
+                    width: '24px', height: '24px',
+                    borderRadius: '5px',
+                    border: 'none',
+                    background: 'transparent',
+                    color: 'var(--color-cyan-3)',
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all var(--dur-fast)',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(34,211,238,0.1)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+                >
+                  <Sparkles className="w-3 h-3" />
                 </button>
               )}
             </div>
-            <div className="text-3xl font-light tracking-wider overflow-hidden text-ellipsis">{display}</div>
           </div>
 
-          {/* Scientific row */}
-          <div className="grid grid-cols-5 gap-1.5 mb-2">
-            {[['sin','sin'], ['cos','cos'], ['tan','tan'], ['log','log'], ['ln','ln']].map(([l, fn]) => (
-              <button key={fn} onClick={() => sciFunc(fn)} className={`${btnClass} bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 text-xs`}>{l}</button>
-            ))}
-          </div>
-          <div className="grid grid-cols-5 gap-1.5 mb-3">
-            {[['x²','sq'], ['x³','cube'], ['√','sqrt'], ['π','pi'], ['e','e']].map(([l, fn]) => (
-              <button key={fn} onClick={() => fn === 'pi' ? inputPi() : fn === 'e' ? inputE() : sciFunc(fn)} className={`${btnClass} bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 text-xs`}>{l}</button>
-            ))}
-          </div>
-
-          {/* Memory row */}
-          <div className="flex items-center gap-1.5 mb-2">
-            <button onClick={() => { setMemStore(parseFloat(display) || 0); setMemLabel('M') }} className={`${btnClass} flex-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[10px] py-2`}>MS</button>
-            <button onClick={() => { setMemStore((prev: number) => prev + (parseFloat(display) || 0)); setMemLabel('M+') }} className={`${btnClass} flex-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[10px] py-2`}>M+</button>
-            <button onClick={() => { setMemStore((prev: number) => prev - (parseFloat(display) || 0)); setMemLabel('M-') }} className={`${btnClass} flex-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[10px] py-2`}>M-</button>
-            <button onClick={() => setDisplay(String(memStore))} className={`${btnClass} flex-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[10px] py-2`}>MR</button>
-            <button onClick={() => { setMemStore(0); setMemLabel('') }} className={`${btnClass} flex-1 bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[10px] py-2`}>MC</button>
-          </div>
-          {memLabel && <div className="text-[10px] text-cyan-400 mb-1">🧠 {memLabel}: {memStore}</div>}
-
-          {/* Main buttons */}
-          <div className="grid grid-cols-4 gap-1.5">
-            {['C','±','%','÷'].map(b => (
-              <button key={b} onClick={() => b === 'C' ? clear() : b === '±' ? toggleSign() : b === '%' ? percent() : handleOp('÷')} className={`${btnClass} ${'÷%'.includes(b) ? 'bg-orange-500/20 text-orange-300 hover:bg-orange-500/30' : b === 'C' ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30' : 'bg-white/5 hover:bg-white/10'}`}>{b}</button>
-            ))}
-            {[['7','7'],['8','8'],['9','9'],['×','×']].map(([l, v]) => (
-              <button key={l} onClick={() => v === '×' ? handleOp('×') : inputDigit(v)} className={`${btnClass} ${v === '×' ? 'bg-orange-500/20 text-orange-300 hover:bg-orange-500/30' : 'bg-white/5 hover:bg-white/10'}`}>{l}</button>
-            ))}
-            {[['4','4'],['5','5'],['6','6'],['-','-']].map(([l, v]) => (
-              <button key={l} onClick={() => v === '-' ? handleOp('-') : inputDigit(v)} className={`${btnClass} ${v === '-' ? 'bg-orange-500/20 text-orange-300 hover:bg-orange-500/30' : 'bg-white/5 hover:bg-white/10'}`}>{l}</button>
-            ))}
-            {[['1','1'],['2','2'],['3','3'],['+','+']].map(([l, v]) => (
-              <button key={l} onClick={() => v === '+' ? handleOp('+') : inputDigit(v)} className={`${btnClass} ${v === '+' ? 'bg-orange-500/20 text-orange-300 hover:bg-orange-500/30' : 'bg-white/5 hover:bg-white/10'}`}>{l}</button>
-            ))}
-            <button onClick={backspace} className={`${btnClass} bg-white/5 hover:bg-white/10 text-gray-300`}>⌫</button>
-            {[['0','0'],['.','.']].map(([l, v]) => (
-              <button key={l} onClick={() => v === '.' ? inputDecimal() : inputDigit(v)} className={`${btnClass} bg-white/5 hover:bg-white/10`}>{l}</button>
-            ))}
-            <button onClick={equals} className={`${btnClass} bg-orange-500/30 text-orange-300 hover:bg-orange-500/40`}>=</button>
+          {/* Main number */}
+          <div
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '32px',
+              fontWeight: 300,
+              letterSpacing: '-0.01em',
+              color: justCalculated ? 'var(--color-cyan-3)' : 'var(--text)',
+              transition: 'color var(--dur-mid)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              lineHeight: 1.1,
+            }}
+          >
+            {display}
           </div>
         </div>
 
-        {/* History sidebar */}
-        <div className="w-36 bg-white/5 rounded-2xl p-3 border border-white/5 hidden sm:block">
-          <h3 className="text-xs text-gray-400 mb-2 font-medium">History</h3>
-          <div className="space-y-1 overflow-auto max-h-[400px]">
-            {history.length === 0 && <p className="text-gray-600 text-xs">No calculations yet</p>}
-            {history.map((h, i) => (
+        {/* Scientific row 1 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
+          {[['sin','sin'], ['cos','cos'], ['tan','tan'], ['log','log'], ['ln','ln']].map(([l, fn]) => (
+            <button
+              key={fn}
+              style={fnStyle(false)}
+              onClick={() => sciFunc(fn)}
+              onMouseEnter={onEnter()}
+              onMouseLeave={onLeave}
+              onMouseDown={onPress(fnStyle(false))}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+
+        {/* Scientific row 2 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
+          {([['x²','sq'], ['x³','cube'], ['√','sqrt'], ['π','pi'], ['e','e']] as const).map(([l, fn]) => (
+            <button
+              key={l}
+              style={fnStyle(false)}
+              onClick={() => {
+                if (fn === 'pi') inputPi()
+                else if (fn === 'e') inputE()
+                else sciFunc(fn as string)
+              }}
+              onMouseEnter={onEnter()}
+              onMouseLeave={onLeave}
+              onMouseDown={onPress(fnStyle(false))}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+
+        {/* Memory row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
+          {[
+            { label: 'MS', fn: () => { setMemStore(parseFloat(display) || 0); setMemLabel('M'); toast.success('Memory saved', display) } },
+            { label: 'M+', fn: () => { setMemStore((prev: number) => prev + (parseFloat(display) || 0)); setMemLabel('M+') } },
+            { label: 'M-', fn: () => { setMemStore((prev: number) => prev - (parseFloat(display) || 0)); setMemLabel('M-') } },
+            { label: 'MR', fn: () => { setDisplay(String(memStore)); setNewNumber(true); setJustCalculated(false) } },
+            { label: 'MC', fn: () => { setMemStore(0); setMemLabel(''); toast.info('Memory cleared') } },
+          ].map(b => (
+            <button
+              key={b.label}
+              style={fnStyle(false)}
+              onClick={b.fn}
+              onMouseEnter={onEnter()}
+              onMouseLeave={onLeave}
+              onMouseDown={onPress(fnStyle(false))}
+            >
+              {b.label}
+            </button>
+          ))}
+        </div>
+
+        {memLabel && (
+          <div style={{ fontSize: '10px', color: 'var(--color-cyan-3)', marginTop: '-4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--color-cyan-4)', boxShadow: '0 0 6px var(--color-cyan-4)', animation: 'pulse-ring 1.5s ease-in-out infinite' }} />
+            Memory {memLabel}: {memStore}
+          </div>
+        )}
+
+        {/* Main buttons */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+          {(['C','±','%','÷'] as const).map(b => (
+            <button
+              key={b}
+              style={b === 'C' ? clearStyle : (b === '÷' ? (op === '÷' ? opActive : opStyle) : digitStyle)}
+              onClick={() => {
+                if (b === 'C') clear()
+                else if (b === '±') toggleSign()
+                else if (b === '%') percent()
+                else handleOp(b as Op)
+              }}
+              onMouseEnter={onEnter()}
+              onMouseLeave={onLeave}
+              onMouseDown={onPress(b === 'C' ? clearStyle : (b === '÷' ? (op === '÷' ? opActive : opStyle) : digitStyle))}
+            >
+              {b}
+            </button>
+          ))}
+
+          {([['7','7'],['8','8'],['9','9'],['×','×']] as const).map(([l, v]) => (
+            <button
+              key={l}
+              style={v === '×' ? (op === '×' ? opActive : opStyle) : digitStyle}
+              onClick={() => v === '×' ? handleOp('×') : inputDigit(v)}
+              onMouseEnter={onEnter()}
+              onMouseLeave={onLeave}
+              onMouseDown={onPress(v === '×' ? (op === '×' ? opActive : opStyle) : digitStyle)}
+            >
+              {l}
+            </button>
+          ))}
+
+          {([['4','4'],['5','5'],['6','6'],['-','-']] as const).map(([l, v]) => (
+            <button
+              key={l}
+              style={v === '-' ? (op === '-' ? opActive : opStyle) : digitStyle}
+              onClick={() => v === '-' ? handleOp('-') : inputDigit(v)}
+              onMouseEnter={onEnter()}
+              onMouseLeave={onLeave}
+              onMouseDown={onPress(v === '-' ? (op === '-' ? opActive : opStyle) : digitStyle)}
+            >
+              {l}
+            </button>
+          ))}
+
+          {([['1','1'],['2','2'],['3','3'],['+','+']] as const).map(([l, v]) => (
+            <button
+              key={l}
+              style={v === '+' ? (op === '+' ? opActive : opStyle) : digitStyle}
+              onClick={() => v === '+' ? handleOp('+') : inputDigit(v)}
+              onMouseEnter={onEnter()}
+              onMouseLeave={onLeave}
+              onMouseDown={onPress(v === '+' ? (op === '+' ? opActive : opStyle) : digitStyle)}
+            >
+              {l}
+            </button>
+          ))}
+
+          <button
+            style={{ ...baseBtn, background: 'rgba(255,255,255,0.04)', color: 'var(--text3)', borderColor: 'rgba(255,255,255,0.05)' }}
+            onClick={backspace}
+            onMouseEnter={onEnter()}
+            onMouseLeave={onLeave}
+            onMouseDown={onPress(baseBtn)}
+            title="Backspace"
+          >
+            ⌫
+          </button>
+
+          {([['0','0'],['.','.']] as const).map(([l, v]) => (
+            <button
+              key={l}
+              style={digitStyle}
+              onClick={() => v === '.' ? inputDecimal() : inputDigit(v)}
+              onMouseEnter={onEnter()}
+              onMouseLeave={onLeave}
+              onMouseDown={onPress(digitStyle)}
+            >
+              {l}
+            </button>
+          ))}
+
+          <button
+            style={equalsStyle}
+            onClick={equals}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px) scale(1.02)'; e.currentTarget.style.filter = 'brightness(1.1)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.filter = '' }}
+            onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.94)'; setTimeout(() => { e.currentTarget.style.transform = '' }, 100) }}
+          >
+            =
+          </button>
+        </div>
+      </div>
+
+      {/* History sidebar */}
+      <div
+        className="gp"
+        style={{
+          width: '160px',
+          padding: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          alignSelf: 'stretch',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '6px',
+          }}
+        >
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '10px',
+              fontWeight: 700,
+              color: 'var(--text3)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+            }}
+          >
+            <History className="w-3 h-3" />
+            History
+          </span>
+          {history.length > 0 && (
+            <button
+              onClick={() => { setHistory([]); toast.info('History cleared') }}
+              title="Clear history"
+              style={{
+                padding: '3px',
+                borderRadius: '4px',
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text3)',
+                cursor: 'pointer',
+                display: 'flex',
+                transition: 'all var(--dur-fast)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; e.currentTarget.style.background = 'transparent' }}
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
+          {history.length === 0 ? (
+            <div style={{ fontSize: '10px', color: 'var(--text3)', textAlign: 'center', padding: '16px 0', lineHeight: 1.5 }}>
+              Calculations you complete will appear here
+            </div>
+          ) : (
+            history.map((h, i) => (
               <button
-                key={i}
+                key={`${h.expr}-${h.result}-${i}`}
                 onClick={() => {
                   setDisplay(h.result)
                   setExpression('')
                   setNewNumber(true)
+                  setJustCalculated(false)
                 }}
-                className="w-full text-left py-1 border-b border-white/5 last:border-0 hover:bg-white/5 rounded px-1 transition-colors"
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '6px 8px',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'background var(--dur-fast)',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
               >
-                <div className="text-xs text-gray-500">{h.expr}</div>
-                <div className="text-xs text-orange-300 font-medium">{h.result}</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {h.expr}
+                </div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fb923c', fontWeight: 500 }}>
+                  = {h.result}
+                </div>
               </button>
-            ))}
-          </div>
-          {history.length > 0 && (
-            <button onClick={() => setHistory([])} className="text-xs text-red-400 mt-2 hover:text-red-300">Clear</button>
+            ))
           )}
+        </div>
+
+        {/* Hint */}
+        <div style={{ fontSize: '9px', color: 'var(--text3)', paddingTop: '6px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span>⌨️ Keyboard</span>
+          <span style={{ opacity: 0.7 }}>0123456789 + - * / ↵</span>
         </div>
       </div>
     </div>

@@ -138,23 +138,26 @@ export default function Weather() {
     <div className="p-6 max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
-            {conditionIcon()}
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">{weather.location}</h1>
-            <p className="text-sm text-gray-400 capitalize">{weather.description}</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={handleRefresh}
-            className="p-2 rounded-xl hover:bg-white/10 transition-colors"
-            title="Refresh"
-          >
-            <RefreshCw className={`w-5 h-5 ${weather.isLoading ? 'animate-spin' : ''}`} />
-          </button>
+      <div className="flex items-center gap-3">
+      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center">
+      {conditionIcon()}
+      </div>
+      <div>
+      <h1 className="text-2xl font-bold">{weather.location}</h1>
+      <p className="text-sm text-gray-400 capitalize">{weather.description}</p>
+      </div>
+      </div>
+      <div className="flex items-center gap-2">
+      <span className="text-xs text-gray-500 hidden sm:block">
+      {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      </span>
+      <button
+      onClick={handleRefresh}
+      className="p-2 rounded-xl hover:bg-white/10 transition-colors"
+      title="Refresh"
+      >
+      <RefreshCw className={`w-5 h-5 ${weather.isLoading ? 'animate-spin' : ''}`} />
+      </button>
           <button
             onClick={() => {
               setTempApiKey(config.apiKey)
@@ -171,49 +174,72 @@ export default function Weather() {
 
       {/* Main Display */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        {/* Temperature Card */}
-        <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <Thermometer className="w-4 h-4 text-red-400" />
-            <span className="text-xs text-gray-400">Temperature</span>
-          </div>
-          <div className="text-4xl font-light">{weather.isLoading ? '...' : `${weather.temp}°F`}</div>
-        </div>
+      {/* Temperature Card */}
+      <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
+      <div className="flex items-center gap-2 mb-2">
+      <Thermometer className="w-4 h-4 text-red-400" />
+      <span className="text-xs text-gray-400">Temperature</span>
+      </div>
+      {weather.isLoading ? (
+      <div className="text-4xl font-light text-gray-600 animate-pulse">--°F</div>
+      ) : (
+      <div className="text-4xl font-light">{weather.temp}°F</div>
+      )}
+      </div>
 
-        {/* Condition Card */}
-        <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <CloudSun className="w-4 h-4 text-yellow-400" />
-            <span className="text-xs text-gray-400">Condition</span>
-          </div>
-          <div className="text-lg font-medium">{weather.isLoading ? '...' : weather.condition}</div>
-        </div>
+      {/* Condition Card */}
+      <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
+      <div className="flex items-center gap-2 mb-2">
+      <CloudSun className="w-4 h-4 text-yellow-400" />
+      <span className="text-xs text-gray-400">Condition</span>
+      </div>
+      {weather.isLoading ? (
+      <div className="text-lg font-medium text-gray-600 animate-pulse">--</div>
+      ) : (
+      <div className="text-lg font-medium">{weather.condition}</div>
+      )}
+      </div>
 
-        {/* Humidity Card */}
-        <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <Droplets className="w-4 h-4 text-blue-400" />
-            <span className="text-xs text-gray-400">Humidity</span>
-          </div>
-          <div className="text-2xl font-light">{weather.isLoading ? '...' : `${weather.humidity}%`}</div>
-        </div>
+      {/* Humidity Card */}
+      <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
+      <div className="flex items-center gap-2 mb-2">
+      <Droplets className="w-4 h-4 text-blue-400" />
+      <span className="text-xs text-gray-400">Humidity</span>
+      </div>
+      {weather.isLoading ? (
+      <div className="text-2xl font-light text-gray-600 animate-pulse">--%</div>
+      ) : (
+      <div className="text-2xl font-light">{weather.humidity}%</div>
+      )}
+      </div>
 
-        {/* Wind Card */}
-        <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <Wind className="w-4 h-4 text-teal-400" />
-            <span className="text-xs text-gray-400">Wind</span>
-          </div>
-          <div className="text-2xl font-light">{weather.isLoading ? '...' : `${weather.windSpeed} mph`}</div>
-        </div>
+      {/* Wind Card */}
+      <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
+      <div className="flex items-center gap-2 mb-2">
+      <Wind className="w-4 h-4 text-teal-400" />
+      <span className="text-xs text-gray-400">Wind</span>
+      </div>
+      {weather.isLoading ? (
+      <div className="text-2xl font-light text-gray-600 animate-pulse">-- mph</div>
+      ) : (
+      <div className="text-2xl font-light">{weather.windSpeed} mph</div>
+      )}
+      </div>
       </div>
 
       {/* Demo Mode Notice */}
-      {config.useDemo && (
-        <div className="p-3 rounded-xl border border-yellow-500/20 bg-yellow-500/10 text-xs text-yellow-300 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>Demo mode active. Add your OpenWeatherMap API key in settings for live data.</span>
-        </div>
+      {config.useDemo && !weather.error && (
+      <div className="p-3 rounded-xl border border-yellow-500/20 bg-yellow-500/10 text-xs text-yellow-300 flex items-center gap-2">
+      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+      <span>Demo mode active. Add your OpenWeatherMap API key in settings for live data.</span>
+      </div>
+      )}
+
+      {/* Last updated */}
+      {!weather.isLoading && !config.useDemo && !weather.error && (
+      <div className="text-center text-[10px] text-gray-600 mt-3">
+      Last updated: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      </div>
       )}
 
       {/* Error Display */}

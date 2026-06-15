@@ -1,12 +1,12 @@
 {
-  "name": "The Empire",
+  "name": "The Empire — Desktop OS",
   "short_name": "Empire",
-  "description": "Your personal application suite — 20 apps in one dashboard",
+  "description": "Your personal web desktop — 24 apps in a full desktop OS experience",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#6366f1",
-  "orientation": "portrait-primary",
+  "background_color": "#1e1b4b",
+  "theme_color": "#22d3ee",
+  "orientation": "any",
   "categories": ["utilities", "productivity"],
   "icons": [
     {
@@ -20,6 +20,26 @@
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Hermes AI Chat",
+      "short_name": "AI Chat",
+      "url": "/?app=ai-chat",
+      "description": "Chat with Hermes AI"
+    },
+    {
+      "name": "Search Apps",
+      "short_name": "Search",
+      "url": "/?search=true",
+      "description": "Open the app launcher search"
     }
   ]
 }

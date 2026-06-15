@@ -18,8 +18,7 @@ export default function Browser() {
   const [url, setUrl] = useState('')
   const [activeTab, setActiveTab] = useState<'browse' | 'bookmarks' | 'history'>('browse')
   const [bookmarks, setBookmarks] = useState(DEFAULT_BOOKMARKS)
-  const [history, setHistory] = useState<{ url: string; time: string }[]>([])
-  const [_showHermes, _setShowHermes] = useState(false)
+  const [history, setHistory] = useState<{ url: string; time: string; id: string }[]>([])
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'browser' })
@@ -34,7 +33,7 @@ export default function Browser() {
   const navigate = (targetUrl: string) => {
     const normalized = targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`
     setUrl(normalized)
-    const entry = { url: normalized, time: new Date().toISOString() }
+    const entry = { url: normalized, time: new Date().toISOString(), id: Date.now().toString() }
     const newHistory = [entry, ...history].slice(0, 50)
     setHistory(newHistory)
     localStorage.setItem('empire-browser-history', JSON.stringify(newHistory))
@@ -208,8 +207,8 @@ export default function Browser() {
             <div className="text-center py-12 text-gray-500 text-sm">No browsing history yet.</div>
           ) : (
             <div className="space-y-1">
-              {history.slice(0, 30).map((h, i) => (
-                <div key={i} className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer"
+              {history.slice(0, 30).map((h) => (
+              <div key={h.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer"
                   onClick={() => { navigate(h.url); setActiveTab('browse') }}>
                   <Globe className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
                   <div className="flex-1 min-w-0">

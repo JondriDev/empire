@@ -193,10 +193,10 @@ export default function Files() {
 
       {/* Content */}
       {loading ? (
-        <Card className="p-8 text-center text-white/40">
-          <div className="animate-spin w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-2" />
-          Loading...
-        </Card>
+      <Card className="p-8 text-center text-white/40">
+      <div className="animate-spin w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-3" />
+      <p className="text-sm">Scanning directory…</p>
+      </Card>
       ) : error ? (
         <Card className="p-6 text-center">
           <p className="text-red-400 mb-2">Failed to load directory</p>

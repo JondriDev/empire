@@ -140,14 +140,7 @@ export default function TokenCounter() {
   }
 
   const totalTokens = estimates.reduce((sum, e) => sum + e.tokens, 0)
-  const avgTokens = estimates.length ? Math.round(totalTokens / estimates.length) : 0
-
-  // Compare mode analysis
-  const _compareResults = comparisonTexts.map(t => ({
-    text: t,
-    tokens: estimateTokens(t, 'estimate'),
-    stats: countPatterns(t),
-  }))
+ const avgTokens = estimates.length ? Math.round(totalTokens / estimates.length) : 0
 
   return (
     <div className="space-y-4">

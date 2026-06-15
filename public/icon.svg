@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1b4b"/>
+      <stop offset="50%" style="stop-color:#312e81"/>
+      <stop offset="100%" style="stop-color:#2e1065"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22d3ee"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+    <linearGradient id="crown" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24"/>
+      <stop offset="100%" style="stop-color:#f59e0b"/>
+    </linearGradient>
+    <filter id="neon">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background rounded rect -->
+  <rect width="1024" height="1024" rx="192" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.04" stroke="white" stroke-width="1">
+    <line x1="0" y1="256" x2="1024" y2="256"/>
+    <line x1="0" y1="512" x2="1024" y2="512"/>
+    <line x1="0" y1="768" x2="1024" y2="768"/>
+    <line x1="256" y1="0" x2="256" y2="1024"/>
+    <line x1="512" y1="0" x2="512" y2="1024"/>
+    <line x1="768" y1="0" x2="768" y2="1024"/>
+  </g>
+
+  <!-- Crown / Empire symbol -->
+  <g transform="translate(512, 260)" filter="url(#neon)">
+    <path d="
+      M -80,120
+      L -130,0
+      L -50,40
+      L 0,-80
+      L 50,40
+      L 130,0
+      L 80,120
+      Z
+    " fill="url(#crown)" stroke="#fbbf24" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Star on top -->
+  <circle cx="512" cy="120" r="16" fill="#fbbf24" opacity="0.6" filter="url(#neon)"/>
+
+  <!-- Orbital ring -->
+  <ellipse cx="512" cy="560" rx="280" ry="80" fill="none" stroke="url(#glow)" stroke-width="6" opacity="0.6"/>
+  <ellipse cx="512" cy="560" rx="280" ry="80" fill="none" stroke="url(#glow)" stroke-width="2" opacity="0.3"/>
+
+  <!-- Orbiting dots -->
+  <circle cx="512" cy="480" r="10" fill="#22d3ee" opacity="0.8" filter="url(#neon)"/>
+  <circle cx="720" cy="535" r="8" fill="#a855f7" opacity="0.6"/>
+  <circle cx="304" cy="585" r="8" fill="#22d3ee" opacity="0.4"/>
+
+  <!-- Core node -->
+  <circle cx="512" cy="560" r="48" fill="url(#glow)" opacity="0.15"/>
+  <circle cx="512" cy="560" r="24" fill="url(#glow)" opacity="0.3"/>
+  <circle cx="512" cy="560" r="12" fill="white" opacity="0.8" filter="url(#neon)"/>
+
+  <!-- Label text -->
+  <text x="512" y="700" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif"
+        font-size="72" font-weight="700" fill="white" letter-spacing="12" opacity="0.9">
+    EMPIRE
+  </text>
+  <text x="512" y="750" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif"
+        font-size="28" font-weight="400" fill="#22d3ee" letter-spacing="8" opacity="0.6">
+    DESKTOP OS
+  </text>
+</svg>

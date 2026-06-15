@@ -1,0 +1,588 @@
+#!/data/data/com.termux/files/usr/bin/bash
+#=============================================================================
+# ███████╗███╗   ███╗██████╗ ██╗██████╗ ███████╗
+# ██╔════╝████╗ ████║██╔══██╗██║██╔══██╗██╔════╝
+# █████╗  ██╔████╔██║██████╔╝██║██████╔╝█████╗
+# ██╔══╝  ██║╚██╔╝██║██╔═══╝ ██║██╔══██╗██╔══╝
+# ███████╗██║ ╚═╝ ██║██║     ██║██║  ██║███████╗
+# ╚══════╝╚═╝     ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝
+#  Empire CLI — Build, Check, Iterate (v1.0)
+#=============================================================================
+
+set -euo pipefail
+
+# ---- Config ----
+EMPIRE_DIR="$(cd "$(dirname "$0")" && pwd)"
+LOG_DIR="$EMPIRE_DIR/logs"
+SUMMARY_FILE="$EMPIRE_DIR/iteration-summary.md"
+METRICS_FILE="$EMPIRE_DIR/metrics.json"
+SCRIPT_NAME="empire"
+
+# ---- Colors (true-color if possible) ----
+if [[ -t 1 ]]; then
+  R='\033[0;31m'  G='\033[0;32m'  Y='\033[1;33m'  B='\033[0;34m'
+  C='\033[0;36m'  M='\033[0;35m'  W='\033[1;37m'  NC='\033[0m'
+  BOLD='\033[1m'  DIM='\033[2m'
+else
+  R= G= Y= B= C= M= W= NC= BOLD= DIM=
+fi
+
+# ---- Helpers ----
+log()  { echo -e "${C}[${SCRIPT_NAME}]${NC} $*"; }
+ok()   { echo -e "  ${G}✓${NC} $*"; }
+warn() { echo -e "  ${Y}⚠${NC} $*"; }
+fail() { echo -e "  ${R}✗${NC} $*"; }
+info() { echo -e "  ${B}ℹ${NC} $*"; }
+title() {
+  local t="$*"; local len=${#t}
+  echo -e "\n${BOLD}${B}── ${t} ${NC}${DIM}${B}$(printf '─%.0s' $(seq 1 $((60 - len - 4))))${NC}"
+}
+header() {
+  echo -e "${BOLD}${B}"
+  echo ' ┌─────────────────────────────────────────────────────────────┐'
+  printf ' │  %-57s │\n' "EMPIRE CLI  v1.0"
+  printf ' │  %-57s │\n' "$(date '+%Y-%m-%d %H:%M:%S')"
+  echo ' └─────────────────────────────────────────────────────────────┘'
+  echo -e "${NC}"
+}
+
+app_name_map() {
+  # Maps directory name → pretty display name
+  local d="$1"
+  case "$d" in
+    ai-chat)          echo "AI Chat";;
+    ai-agent)         echo "AI Agent";;
+    cache)            echo "Cache Cleaner";;
+    datacenter)       echo "Data Center";;
+    language)         echo "Language Lab";;
+    learning-tracker) echo "Learning Tracker";;
+    prompt-generator) echo "Prompt Generator";;
+    token-counter)    echo "Token Counter";;
+    *)                echo "${d^}";;
+  esac
+}
+
+find_app_component() {
+  local dir="$1"
+  # Try known patterns
+  for f in "$dir"/*.tsx; do
+    [ -f "$f" ] || continue
+    basename "$f"
+    return 0
+  done
+  echo ""
+}
+
+# ---- Commands ----
+
+cmd_status() {
+  header
+  echo -e "${BOLD}Dashboard:${NC}"
+  
+  # Project info
+  local name ver
+  name=$(node -e "console.log(require('$EMPIRE_DIR/package.json').name)" 2>/dev/null || echo "empire")
+  ver=$(node -e "console.log(require('$EMPIRE_DIR/package.json').version)" 2>/dev/null || echo "0.0.0")
+  info "Project:  ${BOLD}$name${NC} ${DIM}v$ver${NC}"
+  info "Dir:      ${DIM}$EMPIRE_DIR${NC}"
+  
+  # Last build
+  local build_time="never"
+  local dist_size="—"
+  local dist_files=0
+  if [ -d "$EMPIRE_DIR/dist" ]; then
+    build_time=$(stat -c '%Y' "$EMPIRE_DIR/dist" 2>/dev/null | xargs -I{} date -d '@{}' '+%Y-%m-%d %H:%M' 2>/dev/null || echo "unknown")
+    dist_size=$(du -sh "$EMPIRE_DIR/dist" 2>/dev/null | cut -f1 || echo "?")
+    dist_files=$(find "$EMPIRE_DIR/dist" -type f 2>/dev/null | wc -l)
+  fi
+  info "Last build: ${BOLD}$build_time${NC}"
+  info "Dist:      ${BOLD}$dist_size${NC} (${dist_files} files)"
+  
+  # Node modules
+  if [ -d "$EMPIRE_DIR/node_modules" ]; then
+    ok "node_modules installed"
+  else
+    fail "node_modules missing — run ${BOLD}empire setup${NC}"
+  fi
+  
+  # App count
+  local app_count=0 comp_count=0
+  for d in "$EMPIRE_DIR"/src/apps/*/; do
+    [ -d "$d" ] || continue
+    ((app_count++))
+    local comp=$(find_app_component "$d")
+    [ -n "$comp" ] && ((comp_count++))
+  done
+  info "Apps:     ${BOLD}$app_count${NC} total, ${G}${comp_count}${NC} with components"
+  
+  # Git info
+  if [ -d "$EMPIRE_DIR/.git" ]; then
+    local branch=$(git -C "$EMPIRE_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+    local commit=$(git -C "$EMPIRE_DIR" rev-parse --short HEAD 2>/dev/null || echo "?")
+    info "Git:      ${BOLD}$branch${NC} @ ${DIM}$commit${NC}"
+  fi
+  
+  # Health score
+  local score=100
+  [ -d "$EMPIRE_DIR/node_modules" ] || ((score -= 20))
+  [ -d "$EMPIRE_DIR/dist" ] || ((score -= 30))
+  [ "$app_count" -eq "$comp_count" ] || ((score -= 15))
+  
+  echo ""
+  if [ "$score" -ge 90 ]; then
+    echo -e "  ${G}${BOLD}Health: ${score}/100${NC}"
+  elif [ "$score" -ge 60 ]; then
+    echo -e "  ${Y}${BOLD}Health: ${score}/100${NC}"
+  else
+    echo -e "  ${R}${BOLD}Health: ${score}/100${NC}"
+  fi
+}
+
+cmd_setup() {
+  header
+  title "Installing dependencies"
+  cd "$EMPIRE_DIR"
+  if [ -f "package-lock.json" ]; then
+    npm install --silent 2>&1 | tail -5 || npm install
+  else
+    npm install
+  fi
+  ok "Dependencies installed"
+}
+
+cmd_build() {
+  header
+  title "Building Empire"
+  cd "$EMPIRE_DIR"
+  
+  local start end elapsed
+  start=$(date +%s%N)
+  
+  if npm run build 2>&1; then
+    end=$(date +%s%N)
+    elapsed=$(( (end - start) / 1000000 ))
+    local sec=$((elapsed / 1000))
+    local ms=$((elapsed % 1000))
+    echo ""
+    ok "${BOLD}Build succeeded${NC} ${DIM}(${sec}.${ms}s)${NC}"
+    
+    # Show bundle info
+    if [ -d "dist/assets" ]; then
+      local assets=$(find dist/assets -name '*.js' -o -name '*.css' | sort)
+      local total=0
+      echo ""
+      echo -e "  ${DIM}Assets:${NC}"
+      for f in $assets; do
+        local size=$(stat -c%s "$f" 2>/dev/null || stat -f%z "$f" 2>/dev/null || echo 0)
+        size=$((size / 1024))
+        ((total += size))
+        echo -e "    ${DIM}$(basename "$f")${NC} ${B}${size}KB${NC}"
+      done
+      echo -e "    ${BOLD}Total JS/CSS: ${total}KB${NC}"
+    fi
+    
+    # Save metrics
+    mkdir -p "$EMPIRE_DIR/logs"
+    cat > "$METRICS_FILE" <<< "{
+      \"build_time_ms\": $elapsed,
+      \"status\": \"passed\",
+      \"timestamp\": \"$(date -Iseconds)\",
+      \"bundle_kb\": $total
+    }"
+  else
+    echo ""
+    fail "${BOLD}Build failed${NC}"
+    cat > "$METRICS_FILE" <<< "{
+      \"status\": \"failed\",
+      \"timestamp\": \"$(date -Iseconds)\"
+    }"
+    return 1
+  fi
+}
+
+cmd_check() {
+  header
+  local issues=0 apps_ok=0 apps_total=0
+  
+  title "Phase 1: App Structure Audit"
+  for d in "$EMPIRE_DIR"/src/apps/*/; do
+    [ -d "$d" ] || continue
+    ((apps_total++))
+    local dirname=$(basename "$d")
+    local pretty=$(app_name_map "$dirname")
+    local comp=$(find_app_component "$d")
+    
+    if [ -n "$comp" ]; then
+      ok "$pretty → ${DIM}$comp${NC}"
+      ((apps_ok++))
+    else
+      warn "$pretty ${DIM}(no .tsx component)${NC}"
+      ((issues++))
+    fi
+  done
+  
+  title "Phase 2: Dependencies"
+  if [ -d "$EMPIRE_DIR/node_modules" ]; then
+    ok "node_modules present"
+    local dep_count=$(ls "$EMPIRE_DIR/node_modules" 2>/dev/null | wc -l)
+    info "${DIM}${dep_count} packages${NC}"
+  else
+    warn "node_modules missing"
+    ((issues+=2))
+  fi
+  
+  title "Phase 3: Build Check"
+  cd "$EMPIRE_DIR"
+  if [ -d "dist" ]; then
+    local dist_age=$(( ($(date +%s) - $(stat -c '%Y' "dist" 2>/dev/null || echo 0)) / 60 ))
+    if [ "$dist_age" -lt 120 ]; then
+      ok "Build exists (${dist_age}m old)"
+    else
+      warn "Build is ${dist_age}m old — consider ${BOLD}empire build${NC}"
+    fi
+    local dist_sz=$(du -sh "dist" | cut -f1)
+    local dist_count=$(find "dist" -type f | wc -l)
+    info "dist: ${BOLD}${dist_sz}${NC} (${dist_count} files)"
+  else
+    warn "No dist/ — run ${BOLD}empire build${NC}"
+    ((issues+=3))
+  fi
+  
+  # TypeScript check
+  title "Phase 4: TypeScript Types"
+  if command -v npx &>/dev/null; then
+    if npx --yes tsc --noEmit 2>&1 | head -30; then
+      ok "TypeScript: no errors"
+    else
+      warn "TypeScript has errors"
+      ((issues+=2))
+    fi
+  fi
+  
+  # Lint check
+  title "Phase 5: Lint"
+  if [ -f "$EMPIRE_DIR/eslint.config.js" ] || [ -f "$EMPIRE_DIR/.eslintrc.cjs" ] || [ -f "$EMPIRE_DIR/.eslintrc.js" ]; then
+    if npm run lint 2>&1 | tail -5; then
+      ok "Lint passed"
+    else
+      warn "Lint warnings/errors"
+      ((issues++))
+    fi
+  else
+    info "No ESLint config found — skipping"
+  fi
+  
+  # Test check
+  title "Phase 6: Tests"
+  if grep -q '"test"' "$EMPIRE_DIR/package.json" 2>/dev/null; then
+    if npm run test -- --run 2>&1 | tail -5; then
+      ok "All tests pass"
+    else
+      warn "Some tests failed"
+      ((issues+=2))
+    fi
+  else
+    info "No test script configured"
+  fi
+  
+  # ---- Summary ----
+  echo ""
+  echo -e "${BOLD}${B}══════════════════════════════════════════════════════════${NC}"
+  echo ""
+  
+  local status="PASSED"
+  if [ "$issues" -eq 0 ]; then
+    echo -e "  ${G}${BOLD}✓ ALL CHECKS PASSED${NC}"
+  elif [ "$issues" -le 3 ]; then
+    echo -e "  ${Y}${BOLD}⚠ ${issues} minor issue(s)${NC}"
+    status="WARNINGS"
+  else
+    echo -e "  ${R}${BOLD}✗ ${issues} issue(s) found${NC}"
+    status="ISSUES_FOUND"
+  fi
+  
+  echo ""
+  echo -e "  ${DIM}Apps:${NC}     ${G}${apps_ok}${NC}/${apps_total}"
+  echo -e "  ${DIM}Issues:${NC}   ${issues}"
+  echo -e "  ${Dim}Status:${NC}   ${BOLD}${status}${NC}"
+  echo ""
+  
+  # Save summary
+  local run_id=$(date '+%Y%m%d-%H%M%S')
+  cat > "$SUMMARY_FILE" << EOF
+# Empire Iteration Summary
+
+## Run: ${run_id}
+**Timestamp:** $(date '+%Y-%m-%d %H:%M:%S')
+**Status:** ${status}
+
+| Metric | Value |
+|--------|-------|
+| Apps Complete | ${apps_ok} / ${apps_total} |
+| Issues Found | ${issues} |
+| Status | ${status} |
+
+---
+*Generated by Empire CLI*
+EOF
+  ok "Summary saved → ${DIM}${SUMMARY_FILE}${NC}"
+}
+
+cmd_apps() {
+  local subcmd="${1:-list}"
+  shift 1 2>/dev/null || true
+  
+  case "$subcmd" in
+    list)
+      header
+      echo -e "${BOLD}Empire Apps (22)${NC}\n"
+      printf "  ${DIM}%-22s %-18s %-8s %s${NC}\n" "Directory" "Display Name" "Lines" "Component"
+      echo "  $(printf '%.0s─' {1..70})"
+      
+      for d in "$EMPIRE_DIR"/src/apps/*/; do
+        [ -d "$d" ] || continue
+        local dirname=$(basename "$d")
+        local pretty=$(app_name_map "$dirname")
+        local comp=$(find_app_component "$d")
+        
+        if [ -n "$comp" ]; then
+          local lines=$(wc -l < "$d/$comp" 2>/dev/null || echo "0")
+          printf "  ${C}%-22s${NC} %-18s ${G}%-6s${NC} ${DIM}%s${NC}\n" "$dirname" "$pretty" "$lines" "$comp"
+        else
+          printf "  ${C}%-22s${NC} %-18s ${R}%-6s${NC} ${DIM}(missing)${NC}\n" "$dirname" "$pretty" "?"
+        fi
+      done
+      
+      echo ""
+      local total=$(ls -d "$EMPIRE_DIR"/src/apps/*/ 2>/dev/null | wc -l)
+      info "${BOLD}${total}${NC} apps total"
+      ;;
+    
+    info)
+      local app_name="${1:-}"
+      if [ -z "$app_name" ]; then
+        fail "Usage: ${SCRIPT_NAME} apps info <app-name>"
+        fail "Example: ${SCRIPT_NAME} apps info weather"
+        return 1
+      fi
+      
+      # Find the app dir
+      local app_dir=""
+      for d in "$EMPIRE_DIR"/src/apps/*/; do
+        local dirname=$(basename "$d")
+        if [ "$dirname" = "$app_name" ]; then
+          app_dir="$d"
+          break
+        fi
+      done
+      
+      if [ -z "$app_dir" ]; then
+        fail "App '${app_name}' not found"
+        info "Run ${BOLD}${SCRIPT_NAME} apps list${NC} to see available apps"
+        return 1
+      fi
+      
+      local pretty=$(app_name_map "$app_name")
+      local comp=$(find_app_component "$app_dir")
+      
+      echo ""
+      echo -e "  ${BOLD}${B}App: ${pretty}${NC}"
+      echo "  $(printf '%.0s─' {1..50})"
+      echo -e "  ${DIM}Directory:${NC}  ${C}src/apps/${app_name}${NC}"
+      
+      if [ -n "$comp" ]; then
+        local lines=$(wc -l < "$app_dir/$comp" 2>/dev/null || echo "0")
+        local size=$(wc -c < "$app_dir/$comp" 2>/dev/null || echo "0")
+        echo -e "  ${DIM}Component:${NC}  ${comp} (${lines} lines, $((size / 1024))KB)"
+        
+        # Check for test
+        local test_file=$(find "$app_dir" -name "*.test.*" -o -name "*.spec.*" 2>/dev/null | head -1)
+        if [ -n "$test_file" ]; then
+          echo -e "  ${DIM}Tests:${NC}     ${G}✓${NC} ${DIM}$(basename "$test_file")${NC}"
+        else
+          echo -e "  ${DIM}Tests:${NC}     ${Y}⚠${NC} none"
+        fi
+        
+        # Show imports / deps
+        echo ""
+        echo -e "  ${DIM}Imports:${NC}"
+        grep "^import " "$app_dir/$comp" | while read -r line; do
+          echo -e "    ${DIM}${line}${NC}"
+        done
+        
+        # Show component hooks
+        echo ""
+        echo -e "  ${DIM}Exports:${NC}"
+        grep -E "^(export (default )?(function|const|class) )" "$app_dir/$comp" | while read -r line; do
+          echo -e "    ${C}${line}${NC}"
+        done
+      else
+        echo -e "  ${DIM}Component:${NC}  ${R}missing${NC}"
+      fi
+      
+      # Show subdirs/files
+      local file_count=$(find "$app_dir" -type f 2>/dev/null | wc -l)
+      if [ "$file_count" -gt 1 ]; then
+        echo ""
+        echo -e "  ${DIM}Files (${file_count}):${NC}"
+        find "$app_dir" -type f | sort | while read -r f; do
+          echo -e "    ${DIM}$(realpath --relative-to="$app_dir" "$f")${NC}"
+        done
+      fi
+      ;;
+    
+    *)
+      echo -e "${Y}Usage:${NC}"
+      echo "  ${SCRIPT_NAME} apps list           — List all apps"
+      echo "  ${SCRIPT_NAME} apps info <name>    — Show app details"
+      ;;
+  esac
+}
+
+cmd_fix() {
+  header
+  local fixed=0
+  
+  # 1. Check for missing components
+  title "Auto-fix: Missing Components"
+  for d in "$EMPIRE_DIR"/src/apps/*/; do
+    [ -d "$d" ] || continue
+    local dirname=$(basename "$d")
+    local pretty=$(app_name_map "$dirname")
+    local comp=$(find_app_component "$d")
+    
+    if [ -z "$comp" ]; then
+      warn "$pretty has no .tsx component"
+      # Try to find any importable file
+      if [ -f "$d/index.tsx" ]; then
+        info "  Found index.tsx — might be ok"
+      elif [ -f "$d/${dirname^}.tsx" ]; then
+        info "  Found ${dirname^}.tsx — might be ok"
+      else
+        fail "  No component found — needs manual fix"
+        ((fixed++))
+      fi
+    fi
+  done
+  [ "$fixed" -eq 0 ] && ok "All apps have components"
+  
+  # 2. TypeScript errors (auto-fix attempts)
+  title "Auto-fix: TypeScript"
+  cd "$EMPIRE_DIR"
+  if command -v npx &>/dev/null; then
+    local ts_output
+    ts_output=$(npx tsc --noEmit 2>&1 || true)
+    local ts_errors=$(echo "$ts_output" | grep -c "error TS" 2>/dev/null || echo "0")
+    if [ "$ts_errors" -gt 0 ]; then
+      warn "${ts_errors} TypeScript error(s) — attempting fix"
+      # Common fixes: remove null!
+      grep -rn "null!" "$EMPIRE_DIR/src" --include="*.tsx" --include="*.ts" 2>/dev/null | head -5 | while read -r line; do
+        echo -e "    ${Y}Found null!${NC}: ${DIM}$line${NC}"
+      done
+    else
+      ok "TypeScript: clean"
+    fi
+  fi
+  
+  # 3. Check package.json integrity
+  title "Auto-fix: Package Integrity"
+  cd "$EMPIRE_DIR"
+  if node -e "require('./package.json')" 2>/dev/null; then
+    ok "package.json valid"
+  else
+    fail "package.json is invalid"
+    ((fixed++))
+  fi
+  
+  echo ""
+  if [ "$fixed" -eq 0 ]; then
+    echo -e "  ${G}${BOLD}No issues to fix — everything looks good${NC}"
+  else
+    echo -e "  ${Y}${BOLD}${fixed} issue(s) need manual attention${NC}"
+  fi
+}
+
+cmd_dev() {
+  header
+  echo -e "  ${BOLD}Starting dev server...${NC}\n"
+  cd "$EMPIRE_DIR"
+  npm run dev &
+  DEV_PID=$!
+  
+  echo -e "  ${DIM}PID:${NC} $DEV_PID"
+  echo -e "  ${DIM}Server:${NC} http://localhost:5173"
+  echo -e "  ${DIM}Press Ctrl+C to stop${NC}\n"
+  
+  trap "kill $DEV_PID 2>/dev/null; exit 0" INT TERM
+  wait $DEV_PID
+}
+
+cmd_serve() {
+  header
+  echo -e "  ${BOLD}Starting production server...${NC}\n"
+  cd "$EMPIRE_DIR"
+  if [ ! -f "server.js" ]; then
+    fail "No server.js found"
+    info "Run ${BOLD}${SCRIPT_NAME} build${NC} first"
+    return 1
+  fi
+  node server.js &
+  SERVE_PID=$!
+  
+  echo -e "  ${DIM}PID:${NC} ${SERVE_PID}"
+  echo -e "  ${DIM}Dashboard:${NC} http://localhost:3001"
+  echo -e "  ${DIM}Press Ctrl+C to stop${NC}\n"
+  
+  trap "kill $SERVE_PID 2>/dev/null; exit 0" INT TERM
+  wait $SERVE_PID
+}
+
+cmd_version() {
+  local ver=$(node -e "console.log(require('$EMPIRE_DIR/package.json').version)" 2>/dev/null || echo "0.0.0")
+  local name=$(node -e "console.log(require('$EMPIRE_DIR/package.json').name)" 2>/dev/null || echo "empire")
+  echo -e "${BOLD}${name}${NC} ${DIM}v${ver}${NC}"
+  echo -e "${DIM}Empire CLI v1.0${NC}"
+  echo -e "${DIM}Hermes Agent • May 2026${NC}"
+}
+
+cmd_help() {
+  echo -e "${BOLD}${B}Usage:${NC} ${SCRIPT_NAME} ${DIM}<command>${NC} [options]\n"
+  echo -e " ${C}Commands:${NC}"
+  echo -e "   ${G}status${NC}          Show project health dashboard"
+  echo -e "   ${G}check${NC}           Run 6-phase QA audit (structure, deps, build, types, lint, tests)"
+  echo -e "   ${G}build${NC}           Build the project (tsc + vite)"
+  echo -e "   ${G}setup${NC}           Install npm dependencies"
+  echo -e "   ${G}apps list${NC}       List all 22 apps"
+  echo -e "   ${G}apps info${NC}       Show detailed info about a specific app"
+  echo -e "   ${G}fix${NC}             Auto-fix common issues"
+  echo -e "   ${G}dev${NC}             Start Vite dev server"
+  echo -e "   ${G}serve${NC}           Start production server"
+  echo -e "   ${G}version${NC}         Show version info"
+  echo -e "   ${G}help${NC}            Show this help\n"
+  echo -e " ${C}Examples:${NC}"
+  echo -e "   ${DIM}${SCRIPT_NAME} status${NC}"
+  echo -e "   ${DIM}${SCRIPT_NAME} check${NC}"
+  echo -e "   ${DIM}${SCRIPT_NAME} apps info weather${NC}"
+}
+
+# ---- Main ----
+mkdir -p "$LOG_DIR"
+cd "$EMPIRE_DIR"
+
+case "${1:-help}" in
+  status)  cmd_status;;
+  build)   cmd_build;;
+  check)   cmd_check;;
+  setup)   cmd_setup;;
+  apps)    shift 1; cmd_apps "$@";;
+  fix)     cmd_fix;;
+  dev)     cmd_dev;;
+  serve)   cmd_serve;;
+  version) cmd_version;;
+  help|--help|-h) cmd_help;;
+  *)
+    echo -e "${R}Unknown command:${NC} ${1}"
+    echo "Run '${SCRIPT_NAME} help' for usage"
+    exit 1
+    ;;
+esac

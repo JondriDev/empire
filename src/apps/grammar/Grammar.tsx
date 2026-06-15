@@ -28,9 +28,9 @@ const COMMON_MISTAKES: [RegExp, string, string][] = [
   [/\bi\s+have\b/g, 'I have', 'Capitalize "I"'],
   [/\bi\s+will\b/g, 'I will', 'Capitalize "I"'],
   [/\bi\s+would\b/g, 'I would', 'Capitalize "I"'],
-  [/\b\w+ing\s+to\s+(\w+)\b/g, null!, 'Consider: replace "-ing + to" with infinitive form'],
-  [/\.\s*\.\s*\./g, null!, 'Ellipsis should use "…" (single character)'],
-  [/\s{2,}/g, null!, 'Multiple spaces — use a single space'],
+  [/\b\w+ing\s+to\s+(\w+)\b/g, 'Infinitive form', 'Consider: replace "-ing + to" with infinitive form'],
+  [/\.\s*\.\s*\./g, '…', 'Ellipsis should use "…" (single character)'],
+  [/\s{2,}/g, 'Single space', 'Multiple spaces — use a single space'],
   [/\bi\b(?![\w'])/g, 'I', 'Pronoun "I" should be capitalized'],
 ]
 

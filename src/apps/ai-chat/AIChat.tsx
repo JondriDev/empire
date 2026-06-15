@@ -50,16 +50,17 @@ export default function AIChat() {
 
   // Load recent AI events from bus
   useEffect(() => {
-    const recent = getRecent('AI_QUERY', 5)
-    if (recent.length > 0 && messages.length === 0) {
-      const welcomeMsg: Message = {
-        id: 'system-welcome',
-        role: 'assistant',
-        content: `👋 I'm **Hermes** — the AI connector for The Empire.\n\nI have context from **${CONTEXT_APPS.length}** apps. Ask me anything about your data, or use the panel button on any app to send me context directly.`,
-        timestamp: Date.now(),
-      }
-      setMessages([welcomeMsg])
-    }
+  const recent = getRecent('AI_QUERY', 5)
+  if (recent.length > 0 && messages.length === 0) {
+  const welcomeMsg: Message = {
+  id: 'system-welcome',
+  role: 'assistant',
+  content: `👋 I'm **Hermes** — the AI connector for The Empire.\n\nI have context from **${CONTEXT_APPS.length}** apps. Ask me anything about your data, or use the panel button on any app to send me context directly.`,
+  timestamp: Date.now(),
+  }
+  setMessages([welcomeMsg])
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {

@@ -26,6 +26,11 @@ export type EmpireEvent =
   | { type: 'APP_CLOSED'; appId: string }
   | { type: 'DATA_TABLE_UPDATED'; tableName: string; rowCount: number }
   | { type: 'WEATHER_UPDATED'; temp: number; condition: string; humidity: number; windSpeed: number; location: string; description: string }
+  | { type: 'HERMES_STATUS_REFRESHED'; version: string; model: string; provider: string }
+  | { type: 'HERMES_APP_LAUNCHED'; appId: string; appName: string }
+  | { type: 'HERMES_TOOL_EXECUTED'; toolId: string; toolName: string }
+  | { type: 'HERMES_SKILL_LOADED'; skillName: string }
+  | { type: 'HERMES_MCP_CONNECTED'; mcpName: string; status: string }
 
 type EventHandler<E extends EmpireEvent> = (_event: E) => void
 type EventUnsubscribe = () => void

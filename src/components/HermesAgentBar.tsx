@@ -77,7 +77,7 @@ export default function HermesAgentBar() {
   const [model, setModel] = useState('')
   const [activity, setActivity] = useState<ActivityItem[]>([])
   const [chatInput, setChatInput] = useState('')
-  const [chatMessages, setChatMessages] = useState<{ role: 'hermes' | 'user'; text: string }[]>([])
+  const [chatMessages, setChatMessages] = useState<{ id: string; role: 'hermes' | 'user'; text: string }[]>([])
   const [chatLoading, setChatLoading] = useState(false)
   const [minimized, setMinimized] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -97,18 +97,18 @@ export default function HermesAgentBar() {
     ]
 
     const addActivity = (event: EmpireEvent) => {
-      const match = EVENT_TYPE_MAP.find(m => event.type.startsWith(m.prefix))
-      const appId = match?.appId || (event as any).app || 'unknown'
-      const appDef = apps.find(a => a.id === appId)
-      const appName = appDef?.name || 'Empire'
+    const match = EVENT_TYPE_MAP.find(m => event.type.startsWith(m.prefix))
+    const appId = match?.appId || ('app' in event ? String((event as Record<string, unknown>).app) : '') || 'unknown'
+    const appDef = apps.find(a => a.id === appId)
+    const appName = appDef?.name || 'Empire'
 
-      let description = ACTIVITY_LABELS[event.type] || event.type
-      if (event.type === 'NOTE_CREATED')
-        description = `created note "${String((event as any).title || '').substring(0, 20)}"`
-      else if (event.type === 'CALCULATION_RESULT')
-        description = `calculated: ${(event as any).result}`
-      else if (event.type === 'AI_QUERY')
-        description = `asked: "${String((event as any).query || '').substring(0, 30)}…"`
+    let description = ACTIVITY_LABELS[event.type] || event.type
+    if (event.type === 'NOTE_CREATED')
+    description = `created note "${String(event.title || '').substring(0, 20)}"`
+    else if (event.type === 'CALCULATION_RESULT')
+    description = `calculated: ${event.result}`
+    else if (event.type === 'AI_QUERY')
+    description = `asked: "${String(event.query || '').substring(0, 30)}…"`
 
       const item: ActivityItem = {
         id: Date.now().toString() + Math.random(),
@@ -122,14 +122,15 @@ export default function HermesAgentBar() {
 
     const unsubs: (() => void)[] = []
     EVENT_TYPES.forEach(type => {
-      unsubs.push(on(type, addActivity as any))
+    // Handler accepts any EmpireEvent variant; on() expects specific variant
+    unsubs.push(on(type, ((e: EmpireEvent) => addActivity(e)) as never))
     })
     unsubRef.current = unsubs
 
     const recent = getAllRecent(10)
     const initial: ActivityItem[] = recent.map(e => {
       const match = EVENT_TYPE_MAP.find(m => e.type.startsWith(m.prefix))
-      const appId = match?.appId || (e as any).app || 'unknown'
+      const appId = match?.appId || ('app' in e ? String((e as Record<string, unknown>).app) : '') || 'unknown'
       const appDef = apps.find(a => a.id === appId)
       return {
         id: Math.random().toString(),
@@ -159,7 +160,7 @@ export default function HermesAgentBar() {
       source: currentAppId,
     }
     const result = action.execute(payload)
-    setChatMessages(prev => [...prev, { role: 'hermes', text: `✅ ${result}` }])
+    setChatMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'hermes', text: `✅ ${result}` }])
   }, [currentAppId, appDef])
 
   const openAIChat = useCallback(() => navigate('/app/ai-chat'), [navigate])
@@ -171,9 +172,9 @@ export default function HermesAgentBar() {
     const userText = chatInput.trim()
     setChatInput('')
     setChatLoading(true)
-    setChatMessages(prev => [...prev, { role: 'user', text: userText }])
+     setChatMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'user', text: userText }])
 
-    ;(emit as any)({ type: 'AI_QUERY', query: userText, context: buildEmpireContext(), app: currentAppId })
+    emit({ type: 'AI_QUERY', query: userText, context: buildEmpireContext(), app: currentAppId })
 
     const empireContext = buildEmpireContext()
     const systemPrompt = `You are Hermes, the AI connector for The Empire. Be concise (1-3 sentences). Current app: ${appDef?.name}.${empireContext ? ` Empire state:\n${empireContext}` : ''}`
@@ -186,18 +187,18 @@ export default function HermesAgentBar() {
         (token) => { assistantText += token },
         () => {
           setChatLoading(false)
-          setChatMessages(prev => [...prev, { role: 'hermes', text: assistantText || 'Done.' }])
-          ;(emit as any)({ type: 'AI_RESPONSE', query: userText, response: assistantText, app: currentAppId })
+           setChatMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'hermes', text: assistantText || 'Done.' }])
+          emit({ type: 'AI_RESPONSE', query: userText, response: assistantText, app: currentAppId })
         },
         (err: Error) => {
           setChatLoading(false)
-          setChatMessages(prev => [...prev, { role: 'hermes', text: `⚠️ ${err.message}` }])
+           setChatMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'hermes', text: `⚠️ ${err.message}` }])
         }
       )
     } catch (err: unknown) {
     setChatLoading(false)
     const msg = err instanceof Error ? err.message : 'Unknown error'
-    setChatMessages(prev => [...prev, { role: 'hermes', text: `⚠️ ${msg}` }])
+     setChatMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'hermes', text: `⚠️ ${msg}` }])
     }
   }, [chatInput, chatLoading, currentAppId, appDef])
 
@@ -231,21 +232,24 @@ export default function HermesAgentBar() {
       {/* ── Trigger pill ── */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="hermes-trigger fixed right-3 bottom-20 z-40 flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-200 hover:scale-105"
+        className="hermes-trigger fixed right-3 bottom-20 z-40 flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all duration-200"
         style={{
-          background: 'var(--gl-bg)',
-          backdropFilter: 'var(--gl-blur)',
-          WebkitBackdropFilter: 'var(--gl-blur)',
+          background: 'rgba(13, 18, 36, 0.85)',
+          backdropFilter: 'blur(var(--blur-xl)) saturate(1.6)',
+          WebkitBackdropFilter: 'blur(var(--blur-xl)) saturate(1.6)',
           border: '1px solid rgba(34,211,238,0.3)',
-          boxShadow: 'var(--glow-teal)',
+          boxShadow: '0 4px 18px rgba(0,0,0,0.4), 0 0 24px rgba(34,211,238,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
         }}
+        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)' }}
+        onMouseLeave={(e) => { e.currentTarget.style.transform = '' }}
       >
         <Bot className="w-3.5 h-3.5 text-cyan-300" />
-        <span className="text-[10px] text-cyan-200 hidden sm:inline">Hermes</span>
+        <span className="text-[10px] font-semibold text-cyan-200 hidden sm:inline">Hermes</span>
         <span
           className="w-1.5 h-1.5 rounded-full"
           style={{
             background: open ? 'var(--color-cyan-4)' : 'var(--color-green-4)',
+            boxShadow: open ? '0 0 8px var(--color-cyan-4)' : '0 0 6px var(--color-green-4)',
             animation: open ? 'none' : 'pulse 2s ease-in-out infinite',
           }}
         />

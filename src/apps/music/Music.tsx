@@ -339,7 +339,7 @@ export default function Music() {
                 onDoubleClick={() => playTrack(track)}
                 className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group transition ${current?.id === track.id ? 'bg-cyan-600/30' : 'hover:bg-white/5'}`}
                 draggable
-                onDragStart={() => setDragged(true)}
+                onDragStart={(e) => { setDragged(true); e.dataTransfer.setData('text/plain', track.id) }}
                 onDragEnd={() => setDragged(false)}
                 onDragOver={e => e.preventDefault()}
                 onDrop={e => {
