@@ -68,7 +68,7 @@ export function ToastViewport() {
         position: 'fixed',
         bottom: 80, /* clear of taskbar (56px) + breathing room */
         right: 16,
-        zIndex: 9999,
+        zIndex: 'var(--z-toast)' as unknown as number,
         display: 'flex',
         flexDirection: 'column-reverse',
         gap: '8px',

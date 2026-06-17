@@ -93,24 +93,27 @@ export default function DataCenter() {
       <div className="w-56 border-r flex flex-col" style={{ borderColor: 'var(--border)' }}>
         <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <h1 className="text-base font-bold flex items-center gap-2"><Table2 className="w-4 h-4" /> Data Center</h1>
-          <p className="text-xs text-gray-400 mt-0.5">{rows.length} rows · {activeTable}</p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text3)' }}>{rows.length} rows · {activeTable}</p>
         </div>
         <div className="flex-1 overflow-auto">
           <button onClick={askHermes} className="w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-cyan-500/10 text-cyan-300 text-sm border-b" style={{ borderColor: 'var(--border)' }}>
             <Bot className="w-3.5 h-3.5" /> Ask Hermes
           </button>
-          {tables.map(t => (
-            <button
-              key={t}
-              onClick={() => setActiveTable(t)}
-              className={`w-full px-4 py-2.5 text-left text-sm capitalize transition-colors border-b ${activeTable === t ? 'bg-cyan-500/10 text-cyan-200' : 'hover:bg-white/5 text-gray-300'}`}
-              style={{ borderColor: 'var(--border)' }}
-            >
-              {t}
-            </button>
-          ))}
+          {tables.map(t => {
+            const active = activeTable === t
+            return (
+              <button
+                key={t}
+                onClick={() => setActiveTable(t)}
+                className={`w-full px-4 py-2.5 text-left text-sm capitalize transition-colors border-b ${active ? 'bg-cyan-500/10 text-cyan-200' : 'hover:bg-white/5'}`}
+                style={{ borderColor: 'var(--border)', ...(active ? {} : { color: 'var(--text2)' }) }}
+              >
+                {t}
+              </button>
+            )
+          })}
         </div>
-        <button onClick={loadTables} className="p-3 text-xs text-gray-500 hover:text-gray-300 flex items-center justify-center gap-1 border-t" style={{ borderColor: 'var(--border)' }}>
+        <button onClick={loadTables} className="p-3 text-xs hover:opacity-80 transition-opacity flex items-center justify-center gap-1 border-t" style={{ borderColor: 'var(--border)', color: 'var(--text3)' }}>
           <RefreshCw className="w-3 h-3" /> Refresh
         </button>
       </div>
@@ -121,7 +124,7 @@ export default function DataCenter() {
           <div className="flex items-center gap-3">
             <Table2 className="w-4 h-4 text-cyan-300" />
             <span className="font-semibold capitalize">{activeTable}</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400">{rows.length} rows</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-white/5" style={{ color: 'var(--text3)' }}>{rows.length} rows</span>
           </div>
           <button onClick={askHermes} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-200 text-xs hover:bg-cyan-500/30 transition-colors">
             <Bot className="w-3.5 h-3.5" /> Analyze with Hermes
@@ -130,14 +133,14 @@ export default function DataCenter() {
 
         <div className="flex-1 overflow-auto p-6">
  {loading ? (
- <div className="text-center py-12 text-white/40">
+ <div className="text-center py-12" style={{ color: 'var(--text3)' }}>
  <div className="animate-spin w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-3" />
  <p className="text-sm">Fetching data…</p>
  </div>
           ) : rows.length === 0 ? (
             <div className="text-center py-12">
-              <Table2 className="w-12 h-12 mx-auto mb-3 text-gray-600" />
-              <p className="text-gray-500 text-sm">No data yet. Add a row below.</p>
+              <Table2 className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text3)' }} />
+              <p className="text-sm" style={{ color: 'var(--text2)' }}>No data yet. Add a row below.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -145,7 +148,7 @@ export default function DataCenter() {
                 <thead>
                   <tr className="border-b" style={{ borderColor: 'var(--border)' }}>
                     {columns.map(col => (
-                      <th key={col} className="text-left px-3 py-2 text-xs text-gray-400 font-medium uppercase">{col}</th>
+                      <th key={col} className="text-left px-3 py-2 text-xs font-medium uppercase" style={{ color: 'var(--text3)' }}>{col}</th>
                     ))}
                     <th className="text-right px-3 py-2">
                       <button onClick={addRow} className="text-cyan-300 hover:text-cyan-200 text-xs flex items-center gap-1 ml-auto">
@@ -158,7 +161,7 @@ export default function DataCenter() {
                   {rows.map(row => (
                     <tr key={row.id} className="border-b hover:bg-white/3 transition-colors" style={{ borderColor: 'var(--border)' }}>
                       {columns.map(col => (
-                        <td key={col} className="px-3 py-2.5 text-gray-300">{String(row[col] ?? '—')}</td>
+                        <td key={col} className="px-3 py-2.5" style={{ color: 'var(--text2)' }}>{String(row[col] ?? '—')}</td>
                       ))}
                       <td className="px-3 py-2.5 text-right">
                         <button onClick={() => deleteRow(row.id)} className="text-red-400/50 hover:text-red-400 transition-colors">

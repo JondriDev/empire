@@ -67,6 +67,17 @@ export default function Desktop() {
   const [showStartMenu, setShowStartMenu] = useState(false)
   const [clock, setClock] = useState(new Date())
   const searchInputRef = useRef<HTMLInputElement>(null)
+  // Remembers what was focused before the search palette opened, so focus can
+  // be restored when it closes (WCAG 2.4.3 focus order).
+  const prevFocusRef = useRef<HTMLElement | null>(null)
+
+  // Restore focus to the previously-focused element when the palette closes.
+  useEffect(() => {
+    if (!showSearch && prevFocusRef.current) {
+      prevFocusRef.current.focus?.()
+      prevFocusRef.current = null
+    }
+  }, [showSearch])
 
   // Update clock every second
   useEffect(() => {
@@ -79,7 +90,10 @@ export default function Desktop() {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.code === 'Space') {
         e.preventDefault()
-        setShowSearch(v => !v)
+        setShowSearch(v => {
+          if (!v) prevFocusRef.current = document.activeElement as HTMLElement
+          return !v
+        })
         setSearchQuery('')
         setSearchSelected(0)
       }
@@ -189,9 +203,9 @@ export default function Desktop() {
               style={{
                 ['--app-color' as any]: app.color,
               }}
-              onDoubleClick={() => handleAppOpen(app.id)}
               onClick={() => handleAppOpen(app.id)}
               title={app.description || app.name}
+              aria-label={appLabel(app)}
             >
               <div
                 className="empire-desktop-icon-img"
@@ -377,7 +391,7 @@ export default function Desktop() {
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 8999,
+            zIndex: 'var(--z-startmenu)' as unknown as number,
           }}
           onClick={() => setShowStartMenu(false)}
         >
@@ -548,6 +562,8 @@ export default function Desktop() {
           className="empire-start-btn"
           onClick={() => setShowStartMenu(v => !v)}
           title="Start Menu"
+          aria-label="Start Menu"
+          aria-expanded={showStartMenu}
           style={{ ['--app-color' as any]: 'var(--color-cyan-3)' }}
         >
           <Command className="w-5 h-5" style={{ color: 'var(--color-teal-3)' }} />
@@ -565,6 +581,7 @@ export default function Desktop() {
                 key={win.id}
                 className={`empire-taskbar-app ${isActive ? 'empire-taskbar-app-active' : ''}`}
                 data-tooltip={appLabel(appDef)}
+                aria-label={appLabel(appDef)}
                 onClick={() => {
                   // focusWindow already handles minimize-restore + bring-to-front.
                   // Toggle minimization when clicking the already-active window's taskbar entry.
@@ -601,8 +618,15 @@ export default function Desktop() {
           {/* Search */}
           <button
             className="empire-taskbar-tray-btn"
-            onClick={() => { setShowSearch(v => !v); setSearchSelected(0) }}
+            onClick={() => {
+              setShowSearch(v => {
+                if (!v) prevFocusRef.current = document.activeElement as HTMLElement
+                return !v
+              })
+              setSearchSelected(0)
+            }}
             title="Search (Ctrl+Space)"
+            aria-label="Search apps (Ctrl+Space)"
           >
             <Search className="w-4 h-4" />
           </button>
@@ -612,6 +636,7 @@ export default function Desktop() {
             className="empire-taskbar-tray-btn"
             onClick={toggleTheme}
             title={isLight ? 'Dark mode' : 'Light mode'}
+            aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
           >
             {isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </button>
@@ -621,13 +646,14 @@ export default function Desktop() {
             className="empire-taskbar-tray-btn"
             onClick={toggleLang}
             title={`${t('shell.language', 'Language')}: ${lang === 'en' ? 'English' : 'Bahasa Indonesia'}`}
+            aria-label={`${t('shell.language', 'Language')}: ${lang === 'en' ? 'English' : 'Bahasa Indonesia'}`}
             style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', fontFamily: 'var(--font-mono)' }}
           >
             {lang.toUpperCase()}
           </button>
 
           {/* Volume (decorative) */}
-          <button className="empire-taskbar-tray-btn" title="Volume">
+          <button className="empire-taskbar-tray-btn" title="Volume" aria-label="Volume">
             <Volume2 className="w-4 h-4" />
           </button>
 

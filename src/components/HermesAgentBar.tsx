@@ -209,6 +209,7 @@ export default function HermesAgentBar() {
     return (
       <button
         onClick={() => setMinimized(false)}
+        aria-label="Open Hermes assistant"
         className="hermes-trigger fixed right-3 bottom-20 z-40 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
         style={{
           background: 'var(--gl-bg)',
@@ -232,6 +233,8 @@ export default function HermesAgentBar() {
       {/* ── Trigger pill ── */}
       <button
         onClick={() => setOpen(o => !o)}
+        aria-label={open ? 'Close Hermes panel' : 'Open Hermes panel'}
+        aria-expanded={open}
         className="hermes-trigger fixed right-3 bottom-20 z-40 flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all duration-200"
         style={{
           background: 'rgba(13, 18, 36, 0.85)',
@@ -296,6 +299,7 @@ export default function HermesAgentBar() {
               </span>
               <button
                 onClick={() => setMinimized(true)}
+                aria-label="Minimize Hermes to pill"
                 className="p-1 rounded transition-colors hover:bg-white/5"
                 style={{ color: 'var(--text3)' }}
               >
@@ -303,6 +307,7 @@ export default function HermesAgentBar() {
               </button>
               <button
                 onClick={() => setOpen(false)}
+                aria-label="Close Hermes panel"
                 className="p-1 rounded transition-colors hover:bg-white/5"
                 style={{ color: 'var(--text3)' }}
               >
@@ -463,6 +468,7 @@ export default function HermesAgentBar() {
                     value={chatInput}
                     onChange={e => setChatInput(e.target.value)}
                     placeholder="Ask Hermes…"
+                    aria-label="Ask Hermes"
                     className="flex-1 rounded-xl px-3 py-2 text-[11px] transition-all duration-150"
                     style={{
                       background: 'rgba(255,255,255,0.06)',
@@ -484,6 +490,7 @@ export default function HermesAgentBar() {
                   <button
                     type="submit"
                     disabled={!chatInput.trim() || chatLoading}
+                    aria-label="Send message to Hermes"
                     className="p-2 rounded-xl transition-all duration-150 hover:scale-105 disabled:opacity-30 disabled:hover:scale-100"
                     style={{
                       background: 'linear-gradient(135deg, var(--color-cyan-5), var(--color-teal-3))',

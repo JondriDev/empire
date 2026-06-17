@@ -108,6 +108,14 @@
   --radius-2xl:  1.125rem;   /* 18px */
   --radius-full: 9999px;
 
+  /* ─── Z-index scale ─── canonical layering order for shell overlays.
+     Existing CSS layers (taskbar 9000, window-manager overlays 9500/9999)
+     stay below these; toasts must out-rank menus so they're never buried. */
+  --z-startmenu: 8999;
+  --z-toast:     9998;
+  --z-context:   10000;
+  --z-modal:     10001;
+
   /* ─── Transitions ─── */
   --dur-fast:    100ms;
   --dur-base:    200ms;

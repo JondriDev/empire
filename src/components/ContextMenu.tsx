@@ -113,7 +113,7 @@ export default function ContextMenu() {
         position: 'fixed',
         left: menuX,
         top: menuY,
-        zIndex: 10000,
+        zIndex: 'var(--z-context)' as unknown as number,
       }}
     >
       {/* Quick apps section */}
