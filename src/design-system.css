@@ -1,94 +1,94 @@
-/* Fonts loaded via <link rel="preload"> in index.html for optimal performance */
+/* ═══════════════════════════════════════════════
+   THE EMPIRE — XENO DESIGN SYSTEM INTEGRATION
+   ───────────────────────────────────────────────
+   Empire vendors the JondriDev "XENO" design system 1:1
+   (see ./design-system/colors_and_type.css — the canonical
+   Deep-Field palette · Holographic Glass · Sora type).
+
+   This file:
+     1. imports that canonical foundation (the source of truth),
+     2. bridges Empire's legacy token names onto the XENO tokens
+        so all 26 instruments adopt the new identity with no
+        per-component edits,
+     3. keeps Empire-only utilities (starfield, dock, animations)
+        — now driven by XENO tokens.
+
+   Sora loads locally via the vendored @font-face; JetBrains Mono
+   loads from the CDN (linked in index.html).
+   ═══════════════════════════════════════════════ */
+
+@import "./design-system/colors_and_type.css";
 @layer base;
 
 /* ═══════════════════════════════════════════════
-   JONDRIDEV DESIGN SYSTEM — Earth-from-Space
-   Ported to Empire App Suite
+   BRIDGE — legacy Empire tokens → XENO foundation
+   (theme-independent)
    ═══════════════════════════════════════════════ */
-
-/* ── Design Tokens */
 :root {
-  /* ─── Color Palette ─── */
-  --color-void:        #04050d;
-  --color-deep:        #080b18;
-  --color-surface:     #0d1224;
-  --color-elevated:    #121830;
+  /* ── Type → Sora / JetBrains Mono ── */
+  --font-sans: var(--font);
+  --font-mono: var(--mono);
 
-  /* Teal/Cyan — Earth ocean tones */
-  --color-teal-9:      #042f2e;
-  --color-teal-7:      #0d4847;
-  --color-teal-5:      #146b6a;
-  --color-teal-4:      #1a8887;
-  --color-teal-3:      #22a5a4;
-  --color-teal-2:      #5cc4c3;
-  --color-teal-1:      #a8e3e2;
+  /* ── Surfaces → Deep Field ── */
+  --color-void:     var(--void);
+  --color-deep:     var(--abyss);
+  --color-surface:  #0b1020;
+  --color-elevated: #11182f;
 
-  /* Cyan accent */
-  --color-cyan-5:      #0891b2;
-  --color-cyan-4:      #06b6d4;
-  --color-cyan-3:      #22d3ee;
-  --color-cyan-2:      #7dd3fc;
+  /* ── Teal/Cyan ocean → signal family ── */
+  --color-teal-1:   var(--xenon);
+  --color-teal-2:   #7af2e2;
+  --color-teal-3:   var(--signal);
+  --color-teal-4:   #1fb9a6;
+  --color-teal-5:   #14857a;
+  --color-teal-7:   #0d4847;
+  --color-teal-9:   #042f2e;
+  --color-cyan-2:   #9bf7e6;          /* pale signal */
+  --color-cyan-3:   var(--signal);
+  --color-cyan-4:   var(--signal);
+  --color-cyan-5:   #16b6a0;
 
-  /* Blue — Atmosphere */
-  --color-blue-9:      #0c1a3e;
-  --color-blue-7:      #1e3a8a;
-  --color-blue-5:      #1d4ed8;
-  --color-blue-4:      #2563eb;
-  --color-blue-3:      #60a5fa;
+  /* ── Atmosphere → ion blue ── */
+  --color-blue-3:   var(--ion);
+  --color-blue-4:   #2f7fe6;
+  --color-blue-5:   #1d4ed8;
+  --color-blue-7:   #1e3a8a;
+  --color-blue-9:   #0c1a3e;
 
-  /* Green — Aurora */
-  --color-green-5:     #16a34a;
-  --color-green-4:     #22c55e;
-  --color-green-3:     #4ade80;
+  /* ── Aurora green ── */
+  --color-green-3:  var(--aurora);
+  --color-green-4:  var(--aurora);
+  --color-green-5:  #16a34a;
 
-  /* Orange — Warm accents */
-  --color-orange-4:    #f97316;
-  --color-orange-3:    #fb923c;
+  /* ── Warm → ember ── */
+  --color-orange-3: var(--ember);
+  --color-orange-4: #f97316;
 
-  /* ─── XENO Deep-Field signal accents ───
-     Merged from the-empire's XENO design system. Bioluminescent
-     first-contact signals on the void — used by the Network view,
-     gradients, and per-app accents. */
-  --signal: #34f5d6;   /* primary teal signal */
-  --aurora: #5cf0a8;   /* aurora green */
-  --plasma: #b06bff;   /* plasma violet */
-  --ion:    #4d9bff;   /* ion blue */
-  --ember:  #ff9b6b;   /* ember warm */
-  --xenon:  #d6fbf4;   /* xenon glow / bright text */
+  /* ── Neutrals (Empire-only, kept) ── */
+  --color-white:    #ffffff;
+  --color-gray-50:  #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
 
-  /* Brand gradients */
-  --grad-primary: linear-gradient(135deg, #34f5d6, #4d9bff);
-  --grad-logo:    linear-gradient(110deg, #34f5d6, #4d9bff, #b06bff, #34f5d6);
-  --grad-hero:    linear-gradient(120deg, #34f5d6, #4d9bff, #b06bff);
+  /* ── Type scale (Empire-only px ramp, kept) ── */
+  --text-xs:   0.6875rem;
+  --text-sm:   0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg:   1.0625rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl:  3rem;
 
-  /* Neutrals */
-  --color-white:       #ffffff;
-  --color-gray-50:     #f9fafb;
-  --color-gray-100:    #f3f4f6;
-  --color-gray-200:    #e5e7eb;
-  --color-gray-300:    #d1d5db;
-  --color-gray-400:    #9ca3af;
-  --color-gray-500:    #6b7280;
-  --color-gray-600:    #4b5563;
-  --color-gray-700:    #374151;
-  --color-gray-800:    #1f2937;
-  --color-gray-900:    #111827;
-
-  /* ─── Typography ─── */
-  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
-
-  --text-xs:    0.6875rem;   /* 11px */
-  --text-sm:    0.8125rem;   /* 13px */
-  --text-base: 0.9375rem;   /* 15px */
-  --text-lg:    1.0625rem;   /* 17px */
-  --text-xl:    1.25rem;     /* 20px */
-  --text-2xl:   1.5rem;      /* 24px */
-  --text-3xl:   1.875rem;    /* 30px */
-  --text-4xl:   2.25rem;     /* 36px */
-  --text-5xl:   3rem;        /* 48px */
-
-  /* ─── Spacing ─── */
+  /* ── Spacing (Empire-only ramp, kept) ── */
   --space-1:  0.25rem;
   --space-2:  0.5rem;
   --space-3:  0.75rem;
@@ -100,13 +100,13 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* ─── Radii ─── alien-tech: crisp, engineered corners */
-  --radius-sm:   0.25rem;    /* 4px */
-  --radius-md:   0.4375rem;  /* 7px */
-  --radius-lg:   0.625rem;   /* 10px */
-  --radius-xl:   0.875rem;   /* 14px */
-  --radius-2xl:  1.125rem;   /* 18px */
-  --radius-full: 9999px;
+  /* ── Radii → XENO radius scale ── */
+  --radius-sm:   var(--r-sm);
+  --radius-md:   var(--r-md);
+  --radius-lg:   var(--r-lg);
+  --radius-xl:   var(--r-xl);
+  --radius-2xl:  var(--r-2xl);
+  --radius-full: var(--r-full);
 
   /* ─── Z-index scale ─── canonical layering order for shell overlays.
      Existing CSS layers (taskbar 9000, window-manager overlays 9500/9999)
@@ -116,115 +116,135 @@
   --z-context:   10000;
   --z-modal:     10001;
 
-  /* ─── Transitions ─── */
-  --dur-fast:    100ms;
-  --dur-base:    200ms;
-  --dur-mid:     350ms;
-  --dur-slow:    500ms;
-  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* ── Motion ── (--dur-fast/-mid/-slow + eases come from XENO) ── */
+  --dur-base: 0.2s;
 
-  /* ─── Blur ─── */
-  --blur-sm:   8px;
-  --blur-md:   16px;
-  --blur-lg:   24px;
-  --blur-xl:   40px;
-}
-
-/* ─── Light Theme Overrides ─── */
-[data-theme="light"] {
-  --color-void:        #f0f4f8;
-  --color-deep:        #e2e8f0;
-  --color-surface:     #f8fafc;
-  --color-elevated:     #ffffff;
-  --text:              #0f172a;
-  --text2:             #475569;
-  --text3:             #94a3b8;
-  --grad:              linear-gradient(160deg, #e0f2fe 0%, #f0fdf4 40%, #ede9fe 100%);
+  /* ── Blur (Empire-only, kept) ── */
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-lg: 24px;
+  --blur-xl: 40px;
 }
 
 /* ═══════════════════════════════════════════════
-   DARK THEME (default)
+   BRIDGE — dark "Void" theme (default + root fallback)
+   Glass surfaces map onto the XENO Holographic Glass tokens.
+   (--bg/--text*/--grad/--holo-*/--nav-* are owned by XENO.)
    ═══════════════════════════════════════════════ */
+[data-theme="dark"], :root {
+  --text4: #20324a;
 
-[data-theme="dark"],
-:root {
-  --text:    #e6edf5;
-  --text2:   #8b9bb0;
-  --text3:   #4a5a70;
-  --text4:   #2a3848;
+  --bg-deep:    #02040a;
+  --bg-surface: var(--abyss);
 
-  /* Backgrounds — cold near-black void */
-  --bg:        #03040a;
-  --bg-deep:   #020308;
-  --bg-surface:#080b16;
+  /* hairline border (was previously undefined) */
+  --border: var(--hair);
 
-  /* Gradient — minimal cold void, barely-there depth */
-  --grad: linear-gradient(
-    160deg,
-    #03040a  0%,
-    #05060f  45%,
-    #070a16  72%,
-    #04060e  100%
-  );
+  /* Glass → holographic glass */
+  --gl-bg:       var(--holo-bg);
+  --gl-bg-h:     var(--holo-bg-h);
+  --gl-bg-s:     var(--holo-bg);
+  --gl-blur:     var(--holo-blur);
+  --gl-border-b: var(--holo-bb);
+  --gl-border-t: var(--holo-bt);
+  --gl-shadow:   var(--holo-shadow);
+  --gl-bg-el:    var(--holo-bg-h);
+  --gl-blur-el:  var(--holo-blur);
 
-  /* Glass — flat, engineered panels with hairline strokes */
-  --gl-bg:     rgba(8, 11, 22, 0.66);
-  --gl-bg-h:   rgba(13, 18, 34, 0.80);
-  --gl-bg-s:   rgba(8, 11, 22, 0.40);
-  --gl-blur:   blur(18px) saturate(120%);
-  --gl-border-b:  rgba(255, 255, 255, 0.05);
-  --gl-border-t:  rgba(170, 227, 226, 0.10);
-  --gl-shadow:    0 1px 0 rgba(255, 255, 255, 0.03),
-                  0 12px 34px rgba(0, 0, 0, 0.6);
+  /* Cards → holographic glass */
+  --card-bg:       var(--holo-bg);
+  --card-bg-h:     var(--holo-bg-h);
+  --card-border-b: var(--holo-bb);
+  --card-border-t: var(--holo-bt);
+  --card-shadow:   var(--holo-shadow);
 
-  /* Glass elevated — stronger blur for modals */
-  --gl-bg-el:    rgba(5, 8, 18, 0.92);
-  --gl-blur-el:  blur(26px) saturate(130%);
+  /* Inputs */
+  --input-bg:           var(--holo-bg);
+  --input-bg-focus:     var(--holo-bg-h);
+  --input-border-b:     var(--holo-bb);
+  --input-border-t:     var(--holo-bt);
+  --input-shadow-focus: 0 0 0 1px rgba(52, 245, 214, 0.55);
 
-  /* Navigation bar */
-  --nav-bg:      rgba(4, 6, 14, 0.85);
-  --nav-border: rgba(255, 255, 255, 0.04);
-  --nav-shadow: 0 1px 0 rgba(170,227,226,0.05), 0 6px 20px rgba(0,0,0,0.5);
+  /* Buttons */
+  --btn-primary-bg:     var(--grad-primary);
+  --btn-primary-bg-h:   linear-gradient(135deg, var(--signal) 0%, var(--ion) 100%);
+  --btn-secondary-bg:   var(--holo-bg);
+  --btn-secondary-bg-h: var(--holo-bg-h);
 
-  /* Cards — flat glass panel */
-  --card-bg:    rgba(8, 11, 22, 0.58);
-  --card-bg-h:  rgba(13, 18, 34, 0.78);
-  --card-border-b: rgba(255, 255, 255, 0.05);
-  --card-border-t: rgba(170, 227, 226, 0.09);
-  --card-shadow:   0 1px 0 rgba(255,255,255,0.025), 0 10px 28px rgba(0, 0, 0, 0.5);
+  /* Glows — signal teal */
+  --glow-teal:   0 0 1px rgba(52, 245, 214, 0.60), 0 0 22px rgba(52, 245, 214, 0.20);
+  --glow-accent: 0 0 1px rgba(52, 245, 214, 0.60), 0 0 22px rgba(52, 245, 214, 0.20);
+  --glow-blue:   0 0 1px rgba(77, 155, 255, 0.55), 0 0 22px rgba(77, 155, 255, 0.16);
 
-  /* ─── Input ─── */
-  --input-bg:   rgba(5, 8, 18, 0.7);
-  --input-bg-focus: rgba(10, 14, 28, 0.85);
-  --input-border-b: rgba(255, 255, 255, 0.07);
-  --input-border-t: rgba(170, 227, 226, 0.12);
-  --input-shadow-focus: 0 0 0 1px rgba(34, 211, 238, 0.55);
+  /* Starfield tints */
+  --star-white: rgba(214, 251, 244, 0.90);
+  --star-teal:  rgba( 52, 245, 214, 0.70);
+  --star-teal2: rgba( 52, 245, 214, 0.50);
+  --star-blue:  rgba( 77, 155, 255, 0.70);
 
-  /* ─── Button ─── */
-  --btn-primary-bg:    linear-gradient(135deg, #1a8887 0%, #0d4847 100%);
-  --btn-primary-bg-h:   linear-gradient(135deg, #22a5a4 0%, #146b6a 100%);
-  --btn-secondary-bg:   rgba(255, 255, 255, 0.045);
-  --btn-secondary-bg-h: rgba(170, 227, 226, 0.10);
+  /* Aurora accents */
+  --aurora-green: var(--aurora);
+  --aurora-teal:  var(--signal);
+}
 
-  /* ─── Glows ─── tight, cold, restrained */
-  --glow-teal:   0 0 1px rgba(34, 211, 238, 0.6),  0 0 22px rgba(34, 211, 238, 0.18);
-  --glow-accent: 0 0 1px rgba(34, 211, 238, 0.6),  0 0 22px rgba(34, 211, 238, 0.18);
-  --glow-blue:   0 0 1px rgba(96, 165, 250, 0.5),  0 0 22px rgba(37, 99, 235, 0.12);
+/* ═══════════════════════════════════════════════
+   BRIDGE — light "Daylight Survey" theme
+   ═══════════════════════════════════════════════ */
+[data-theme="light"] {
+  --color-void:     var(--bg);
+  --color-deep:     #d7e2ec;
+  --color-surface:  #f8fafc;
+  --color-elevated: #ffffff;
+  --text4:          #b9c8da;
 
-  /* ─── Star twinkle colors ─── */
-  --star-white:  rgba(255, 255, 255, 0.9);
-  --star-teal:   rgba(34, 211, 238, 0.7);
-  --star-teal2: rgba(34, 211, 238, 0.5);
-  --star-blue:   rgba(96, 165, 250, 0.7);
+  --bg-deep:    #d7e2ec;
+  --bg-surface: #ffffff;
 
-  /* ─── Aurora accents ─── */
-  --aurora-green: #22c55e;
-  --aurora-teal: #22d3ee;
+  --border: var(--hair);
+
+  --gl-bg:       var(--holo-bg);
+  --gl-bg-h:     var(--holo-bg-h);
+  --gl-bg-s:     var(--holo-bg);
+  --gl-blur:     var(--holo-blur);
+  --gl-border-b: var(--holo-bb);
+  --gl-border-t: var(--holo-bt);
+  --gl-shadow:   var(--holo-shadow);
+  --gl-bg-el:    var(--holo-bg-h);
+  --gl-blur-el:  var(--holo-blur);
+
+  --card-bg:       var(--holo-bg);
+  --card-bg-h:     var(--holo-bg-h);
+  --card-border-b: var(--holo-bb);
+  --card-border-t: var(--holo-bt);
+  --card-shadow:   var(--holo-shadow);
+
+  --input-bg:           var(--holo-bg);
+  --input-bg-focus:     var(--holo-bg-h);
+  --input-border-b:     var(--holo-bb);
+  --input-border-t:     var(--holo-bt);
+  --input-shadow-focus: 0 0 0 1px rgba(52, 245, 214, 0.55);
+
+  --btn-primary-bg:     var(--grad-primary);
+  --btn-primary-bg-h:   linear-gradient(135deg, var(--signal) 0%, var(--ion) 100%);
+  --btn-secondary-bg:   var(--holo-bg);
+  --btn-secondary-bg-h: var(--holo-bg-h);
+
+  --glow-teal:   0 0 1px rgba(20, 133, 122, 0.50), 0 0 18px rgba(52, 245, 214, 0.28);
+  --glow-accent: 0 0 1px rgba(20, 133, 122, 0.50), 0 0 18px rgba(52, 245, 214, 0.28);
+  --glow-blue:   0 0 1px rgba(77, 155, 255, 0.45), 0 0 18px rgba(77, 155, 255, 0.20);
+
+  --star-white: rgba(20,  80, 110, 0.45);
+  --star-teal:  rgba(20, 133, 122, 0.45);
+  --star-teal2: rgba(20, 133, 122, 0.30);
+  --star-blue:  rgba(77, 155, 255, 0.45);
+
+  --aurora-green: var(--aurora);
+  --aurora-teal:  var(--signal);
 }
 
 /* ═══════════════════════════════════════════════
    GLOBAL RESETS & BASE
+   (Keyboard focus + the signal ring are owned by XENO.)
    ═══════════════════════════════════════════════ */
 
 *, *::before, *::after {
@@ -242,7 +262,7 @@ html {
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font);
   background: var(--bg);
   color: var(--text);
   min-height: 100dvh;
@@ -251,37 +271,20 @@ body {
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.18);
-}
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.18); }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
 
-/* Text selection */
+/* Text selection — signal tint */
 ::selection {
-  background: rgba(34, 211, 238, 0.3);
-  color: #e0f7fa;
-}
-
-/* Focus ring — crisp alien hairline */
-:focus-visible {
-  outline: 1px solid rgba(34, 211, 238, 0.8);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-
-/* Remove default focus for mouse users */
-:focus:not(:focus-visible) {
-  outline: none;
+  background: rgba(52, 245, 214, 0.30);
+  color: var(--xenon);
 }
 
 /* Cursor helpers */
@@ -293,17 +296,12 @@ img, video, svg { display: block; max-width: 100%; }
 
 /* ═══════════════════════════════════════════════
    TYPOGRAPHY UTILITIES
+   (XENO ships .t-display/.t-h1.../.t-grad/.glow too)
    ═══════════════════════════════════════════════ */
 
-.text-gradient {
-  background: linear-gradient(135deg, var(--color-teal-2) 0%, var(--color-cyan-3) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
+.text-gradient,
 .text-gradient-warm {
-  background: linear-gradient(135deg, var(--color-teal-2) 0%, var(--color-cyan-3) 100%);
+  background: var(--grad-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -367,7 +365,7 @@ img, video, svg { display: block; max-width: 100%; }
   animation: stars-drift  80s linear infinite, stars-twinkle 4s ease-in-out infinite;
 }
 
-/* Layer 2 — colored teal/purple stars, medium twinkle */
+/* Layer 2 — colored signal/ion stars, medium twinkle */
 .stars-layer-2 {
   background-image:
     radial-gradient(1.5px 1.5px at 22% 28%,  var(--star-teal)   0%, transparent 100%),
@@ -391,13 +389,13 @@ img, video, svg { display: block; max-width: 100%; }
 /* Layer 3 — large bright stars, slow twinkle */
 .stars-layer-3 {
   background-image:
-    radial-gradient(2px 2px at 15% 35%,  rgba(255,255,255,0.95) 0%, transparent 100%),
-    radial-gradient(2px 2px at 55% 70%,  rgba(200,230,255,0.9) 0%, transparent 100%),
+    radial-gradient(2px 2px at 15% 35%,  rgba(214,251,244,0.95) 0%, transparent 100%),
+    radial-gradient(2px 2px at 55% 70%,  rgba(200,230,255,0.90) 0%, transparent 100%),
     radial-gradient(2px 2px at 82% 20%,  rgba(255,255,255,0.85) 0%, transparent 100%),
-    radial-gradient(2px 2px at 35% 85%,  rgba(167,239,236,0.8)  0%, transparent 100%),
-    radial-gradient(2px 2px at 68% 48%,  rgba(196,181,253,0.8) 0%, transparent 100%),
+    radial-gradient(2px 2px at 35% 85%,  rgba(167,239,236,0.80) 0%, transparent 100%),
+    radial-gradient(2px 2px at 68% 48%,  rgba(176,107,255,0.80) 0%, transparent 100%),
     radial-gradient(2.5px 2.5px at 90% 65%, rgba(255,255,255,1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 5%  55%,  rgba(144,224,239,0.8) 0%, transparent 100%),
+    radial-gradient(2px 2px at 5%  55%,  rgba(144,224,239,0.80) 0%, transparent 100%),
     radial-gradient(2px 2px at 44% 12%,  rgba(255,255,255,0.85) 0%, transparent 100%);
   background-size: 800px 800px;
   animation: stars-drift  200s linear infinite, stars-twinkle 8s ease-in-out infinite 2s;
@@ -413,19 +411,19 @@ img, video, svg { display: block; max-width: 100%; }
 }
 .nebula-1 {
   width: 600px; height: 400px;
-  background: radial-gradient(ellipse, var(--color-teal-4) 0%, transparent 70%);
+  background: radial-gradient(ellipse, var(--signal) 0%, transparent 70%);
   top: -100px; right: -100px;
   animation: nebula-drift  30s ease-in-out infinite;
 }
 .nebula-2 {
   width: 500px; height: 500px;
-  background: radial-gradient(ellipse, var(--color-teal-5) 0%, transparent 70%);
+  background: radial-gradient(ellipse, var(--ion) 0%, transparent 70%);
   bottom: -150px; left: -100px;
   animation: nebula-drift  40s ease-in-out infinite 5s;
 }
 .nebula-3 {
   width: 400px; height: 300px;
-  background: radial-gradient(ellipse, var(--color-blue-5) 0%, transparent 70%);
+  background: radial-gradient(ellipse, var(--plasma) 0%, transparent 70%);
   top: 40%; left: 30%;
   animation: nebula-drift  25s ease-in-out infinite 10s;
   opacity: 0.06;
@@ -435,24 +433,21 @@ img, video, svg { display: block; max-width: 100%; }
    LAYER UTILITIES
    ═══════════════════════════════════════════════ */
 
-/* Put content above the starfield but below overlays */
 .layer-content {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-card, 1);
 }
 
 /* ═══════════════════════════════════════════════
    APP GRID CARD ANIMATIONS
    ═══════════════════════════════════════════════ */
 
-/* Staggered entrance for app grid cards */
 .app-card {
   opacity: 0;
   transform: translateY(16px) scale(0.97);
   animation: card-entrance var(--dur-slow) var(--ease-spring) forwards;
 }
 
-/* Stagger via nth-child — up to 21 apps (6 cols) */
 .app-card:nth-child(1)  { animation-delay: 50ms; }
 .app-card:nth-child(2)  { animation-delay: 100ms; }
 .app-card:nth-child(3)  { animation-delay: 150ms; }
@@ -481,27 +476,25 @@ img, video, svg { display: block; max-width: 100%; }
   transition: transform var(--dur-mid) var(--ease-spring),
               box-shadow var(--dur-mid) var(--ease-out);
 }
-
 .app-card:hover .app-icon {
   transform: scale(1.12);
-  box-shadow: 0 0 28px var(--card-icon-glow, rgba(34, 211, 238, 0.4));
+  box-shadow: 0 0 28px var(--card-icon-glow, rgba(52, 245, 214, 0.4));
 }
-
-/* Per-card color glow propagation via custom property */
 .app-card[style*="--app-color"] .app-icon {
-  --card-icon-glow: color-mix(in srgb, var(--app-color, #8b5cf6) 45%, transparent);
+  --card-icon-glow: color-mix(in srgb, var(--app-color, var(--plasma)) 45%, transparent);
 }
 
 /* ═══════════════════════════════════════════════
-   GLASS PANEL — hardware-accelerated pure CSS (no JS)
-   Use class `gp` on the root element
+   GLASS PANEL — Empire card recipe, now on XENO glass.
+   (XENO also ships the canonical .holo recipe.)
    ═══════════════════════════════════════════════ */
 .gp {
   background: var(--card-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: var(--gl-blur);
+  -webkit-backdrop-filter: var(--gl-blur);
   border: 1px solid var(--card-border-b);
   border-top: 1px solid var(--card-border-t);
+  border-left: 1px solid var(--card-border-t);
   box-shadow: var(--card-shadow);
   transition:
     background   var(--dur-base) var(--ease-out),
@@ -512,17 +505,14 @@ img, video, svg { display: block; max-width: 100%; }
   will-change: transform, filter;
 }
 
-/* Make interactive panels clickable – add `gp-interactive` */
-.gp-interactive {
-  cursor: pointer;
-}
+.gp-interactive { cursor: pointer; }
 .gp-interactive:hover {
   background: var(--card-bg-h);
-  border-color: rgba(34, 211, 238, 0.35);
+  border-color: rgba(52, 245, 214, 0.35);
   box-shadow:
-    0 10px 28px rgba(0,0,0,0.5),
-    0 0 0 1px rgba(34, 211, 238, 0.12),
-    0 0 18px rgba(34, 211, 238, 0.10);
+    var(--card-shadow),
+    0 0 0 1px rgba(52, 245, 214, 0.12),
+    0 0 18px rgba(52, 245, 214, 0.10);
   transform: translateY(-1px);
 }
 .gp-interactive:active {
@@ -530,40 +520,32 @@ img, video, svg { display: block; max-width: 100%; }
   filter: brightness(0.96);
   box-shadow: var(--card-shadow);
 }
-.gp:focus-visible {
-  outline: 1px solid rgba(34, 211, 238, 0.7);
-  outline-offset: 1px;
-}
 
 /* Extra utility classes for glass surfaces */
 .glass {
   background: var(--gl-bg);
   backdrop-filter: var(--gl-blur);
+  -webkit-backdrop-filter: var(--gl-blur);
   border: 1px solid var(--gl-border-b);
   border-top-color: var(--gl-border-t);
+  border-left-color: var(--gl-border-t);
   box-shadow: var(--gl-shadow);
 }
-
 .glass-elevated {
   background: var(--gl-bg-el);
   backdrop-filter: var(--gl-blur-el);
+  -webkit-backdrop-filter: var(--gl-blur-el);
 }
 
 /* ═══════════════════════════════════════════════
    HERMES AGENT BAR POLISH
    ═══════════════════════════════════════════════ */
 
-.hermes-trigger {
-  animation: hermes-pulse 3s ease-in-out infinite;
-}
+.hermes-trigger { animation: hermes-pulse 3s ease-in-out infinite; }
 
 @keyframes hermes-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(34, 211, 238, 0);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 245, 214, 0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(52, 245, 214, 0); }
 }
 
 /* ═══════════════════════════════════════════════
@@ -574,68 +556,38 @@ img, video, svg { display: block; max-width: 100%; }
   from { transform: translate(0, 0); }
   to   { transform: translate(-400px, -400px); }
 }
-
 @keyframes stars-drift-reverse {
   from { transform: translate(-200px, -200px); }
   to   { transform: translate(0, 0); }
 }
-
 @keyframes stars-twinkle {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.55; }
+  50%      { opacity: 0.55; }
 }
-
 @keyframes nebula-drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(30px, -20px) scale(1.05); }
-  66%       { transform: translate(-20px, 30px) scale(0.97); }
+  33%      { transform: translate(30px, -20px) scale(1.05); }
+  66%      { transform: translate(-20px, 30px) scale(0.97); }
 }
-
 @keyframes card-entrance {
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-
 @keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
 }
-
 @keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position:  200% 0; }
@@ -645,20 +597,16 @@ img, video, svg { display: block; max-width: 100%; }
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0.03) 0%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(255,255,255,0.03) 100%
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
 }
 
-/* Spin animation */
-/* ── Loading Spinner ── Multi-stop gradient ring */
-.spin-ring {
-  position: relative;
-  display: inline-block;
-}
+/* ── Loading Spinner ── Multi-stop signal ring */
+.spin-ring { position: relative; display: inline-block; }
 .spin-ring::before {
   content: '';
   position: absolute;
@@ -666,11 +614,10 @@ img, video, svg { display: block; max-width: 100%; }
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
-    var(--color-teal-5)  0deg,
-    var(--color-teal-4)  90deg,
-    var(--color-cyan-5)  180deg,
-    var(--color-teal-5)  270deg,
-    var(--color-teal-5)  360deg
+    var(--signal) 0deg,
+    var(--ion)    120deg,
+    var(--plasma) 240deg,
+    var(--signal) 360deg
   );
   animation: spin 1.2s linear infinite;
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px));
@@ -684,25 +631,22 @@ img, video, svg { display: block; max-width: 100%; }
 @keyframes spin-counter { to { transform: rotate(-360deg); } }
 
 @keyframes spin-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(34, 211, 238, 0.3), 0 0 20px rgba(34, 211, 238, 0.1); }
-  50%       { box-shadow: 0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.2); }
+  0%, 100% { box-shadow: 0 0 10px rgba(52, 245, 214, 0.3), 0 0 20px rgba(52, 245, 214, 0.1); }
+  50%      { box-shadow: 0 0 20px rgba(52, 245, 214, 0.6), 0 0 40px rgba(52, 245, 214, 0.2); }
 }
 .spin-glow { animation: spin-glow 2s ease-in-out infinite; }
 
-/* Legacy spin */
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 1s linear infinite; }
 
-/* Pulse ring for live indicator */
 @keyframes pulse-ring {
   0%   { transform: scale(1);   opacity: 1; }
   100% { transform: scale(2.2); opacity: 0; }
 }
 
-/* Float animation for decorative elements */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-8px); }
+  50%      { transform: translateY(-8px); }
 }
 .float { animation: float 6s ease-in-out infinite; }
 
@@ -710,19 +654,19 @@ img, video, svg { display: block; max-width: 100%; }
    UTILITY ANIMATION CLASSES
    ═══════════════════════════════════════════════ */
 
-.animate-fade-in    { animation: fade-in    var(--dur-mid)   var(--ease-out) forwards; }
-.animate-fade-in-up { animation: fade-in-up var(--dur-slow)  var(--ease-out) forwards; }
-.animate-scale-in   { animation: scale-in  var(--dur-mid)   var(--ease-spring) forwards; }
-.animate-slide-up   { animation: slide-up   var(--dur-slow)  var(--ease-out) forwards; }
+.animate-fade-in    { animation: fade-in    var(--dur-mid)  var(--ease-out)    forwards; }
+.animate-fade-in-up { animation: fade-in-up var(--dur-slow) var(--ease-out)    forwards; }
+.animate-scale-in   { animation: scale-in   var(--dur-mid)  var(--ease-spring) forwards; }
+.animate-slide-up   { animation: slide-up   var(--dur-slow) var(--ease-out)    forwards; }
 .animate-float      { animation: float      6s ease-in-out  infinite; }
 
 /* Staggered children */
-.stagger-children > *:nth-child(1)  { animation-delay: 0ms; }
-.stagger-children > *:nth-child(2)  { animation-delay: 60ms; }
-.stagger-children > *:nth-child(3)  { animation-delay: 120ms; }
-.stagger-children > *:nth-child(4)  { animation-delay: 180ms; }
-.stagger-children > *:nth-child(5)  { animation-delay: 240ms; }
-.stagger-children > *:nth-child(6)  { animation-delay: 300ms; }
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
 
 /* ═══════════════════════════════════════════════
    DOCK STYLING
@@ -732,17 +676,9 @@ img, video, svg { display: block; max-width: 100%; }
   transition: transform var(--dur-fast) var(--ease-spring),
               background var(--dur-fast) var(--ease-out);
 }
-.dock-item:hover {
-  transform: translateY(-4px) scale(1.08);
-}
-.dock-item:active {
-  transform: translateY(0px) scale(0.95);
-}
-
-/* Active app indicator dot glow */
-.dock-dot {
-  box-shadow: 0 0 6px currentColor;
-}
+.dock-item:hover  { transform: translateY(-4px) scale(1.08); }
+.dock-item:active { transform: translateY(0px) scale(0.95); }
+.dock-dot { box-shadow: 0 0 6px currentColor; }
 
 /* ═══════════════════════════════════════════════
    INPUT POLISH
@@ -753,79 +689,58 @@ input[type="search"],
 input[type="email"],
 input[type="password"],
 textarea {
- background: var(--input-bg);
- border: 1px solid var(--input-border-b);
- border-top-color: var(--input-border-t);
- transition: background var(--dur-fast), border-color var(--dur-fast),
- box-shadow var(--dur-fast);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border-b);
+  border-top-color: var(--input-border-t);
+  transition: background var(--dur-fast), border-color var(--dur-fast),
+              box-shadow var(--dur-fast);
 }
 
-/* Focus styles – generic */
 input[type="text"]:focus,
 input[type="search"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
 textarea:focus {
   background: var(--input-bg-focus);
-  border-color: rgba(34, 211, 238, 0.5);
+  border-color: rgba(52, 245, 214, 0.5);
   box-shadow: var(--input-shadow-focus);
   outline: none;
 }
 
-/* Custom search input focus glow (teal ring) */
 .dash-search:focus {
-  box-shadow: var(--input-shadow-focus), 0 0 0 2px rgba(34, 211, 238, 0.5), 0 0 8px rgba(34, 211, 238, 0.3);
-}
-
-/* ═══════════════════════════════════════════════
-   SCROLLBAR + POLISH
-   ═══════════════════════════════════════════════ */
-
-/* Light mode scrollbar */
-[data-theme="light"] ::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.12);
-}
-[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0,0,0,0.2);
+  box-shadow: var(--input-shadow-focus), 0 0 0 2px rgba(52, 245, 214, 0.5), 0 0 8px rgba(52, 245, 214, 0.3);
 }
 
 /* ═══════════════════════════════════════════════
    FAVORITES BAR POLISH
    ═══════════════════════════════════════════════ */
 
-.fav-btn {
-  transition: all var(--dur-fast) var(--ease-spring);
-}
+.fav-btn { transition: all var(--dur-fast) var(--ease-spring); }
 .fav-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* ═══════════════════════════════════════════════
    RESPONSIVE HELPERS
    ═══════════════════════════════════════════════ */
 
-@media (max-width: 640px) {
-  .hide-sm { display: none !important; }
-}
-
-@media (min-width: 641px) {
-  .show-sm-only { display: none !important; }
-}
+@media (max-width: 640px) { .hide-sm { display: none !important; } }
+@media (min-width: 641px) { .show-sm-only { display: none !important; } }
 
 /* ═══════════════════════════════════════════════
-   BUTTON POLISH — refined hover lift + cyan glow
+   BUTTON POLISH — hover lift + signal glow
    ═══════════════════════════════════════════════ */
 
 .empire-btn {
-  font-family: var(--font-sans);
+  font-family: var(--font);
   letter-spacing: -0.005em;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 .empire-btn:not(:disabled):hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(34, 211, 238, 0.25),
+  box-shadow: 0 4px 16px rgba(52, 245, 214, 0.25),
               inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .empire-btn:not(:disabled):active {
@@ -833,19 +748,15 @@ textarea:focus {
   filter: brightness(0.95);
   transition-duration: var(--dur-fast);
 }
-.empire-btn:focus-visible {
-  outline: 2px solid rgba(34, 211, 238, 0.6);
-  outline-offset: 2px;
-}
 
 /* ═══════════════════════════════════════════════
-   TOOLTIP — refined for desktop icons & subtle hints
+   TOOLTIP
    ═══════════════════════════════════════════════ */
 
 .tooltip {
   position: absolute;
   pointer-events: none;
-  z-index: 9999;
+  z-index: var(--z-toast, 9999);
   padding: 6px 10px;
   background: rgba(8, 12, 28, 0.92);
   backdrop-filter: blur(var(--blur-md));
@@ -856,7 +767,7 @@ textarea:focus {
   font-size: var(--text-xs);
   font-weight: 500;
   white-space: nowrap;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   animation: tooltip-in 180ms var(--ease-out) forwards;
 }
 [data-theme="light"] .tooltip {
@@ -864,7 +775,6 @@ textarea:focus {
   border-color: rgba(0, 0, 0, 0.1);
   color: var(--text);
 }
-
 @keyframes tooltip-in {
   from { opacity: 0; transform: translateY(4px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -875,21 +785,11 @@ textarea:focus {
    ═══════════════════════════════════════════════ */
 
 @keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateX(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
+  from { opacity: 0; transform: translateX(20px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
 }
-
 @keyframes toast-out {
-  to {
-    opacity: 0;
-    transform: translateX(20px) scale(0.95);
-  }
+  to { opacity: 0; transform: translateX(20px) scale(0.95); }
 }
 
 /* ═══════════════════════════════════════════════
@@ -897,13 +797,12 @@ textarea:focus {
    ═══════════════════════════════════════════════ */
 
 .empire-search-result[data-selected="true"] {
-  background: rgba(34, 211, 238, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.25);
+  background: rgba(52, 245, 214, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(52, 245, 214, 0.25);
 }
 .empire-search-result[data-selected="true"] .empire-search-result-name {
-  color: var(--color-cyan-3);
+  color: var(--signal);
 }
-
 .empire-search-result-name {
   font-size: var(--text-sm);
   font-weight: 500;
@@ -915,7 +814,6 @@ textarea:focus {
   color: var(--text3);
   line-height: 1.4;
 }
-
 .empire-search-empty {
   text-align: center;
   padding: 32px 16px;
@@ -930,7 +828,7 @@ textarea:focus {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text3);
 }
 
@@ -958,17 +856,17 @@ textarea:focus {
 }
 
 /* ═══════════════════════════════════════════════
-   APPLE-LIKE SIDEBAR HIGHLIGHT — for selected nav items
+   SIDEBAR HIGHLIGHT — selected nav items
    ═══════════════════════════════════════════════ */
 
 .sidebar-selected {
   background: linear-gradient(
     90deg,
-    rgba(34, 211, 238, 0.18) 0%,
-    rgba(34, 211, 238, 0.08) 60%,
+    rgba(52, 245, 214, 0.18) 0%,
+    rgba(52, 245, 214, 0.08) 60%,
     transparent 100%
   );
-  border-left: 2px solid var(--color-cyan-4);
+  border-left: 2px solid var(--signal);
   color: var(--text);
 }
 .sidebar-selected::before {
@@ -978,29 +876,18 @@ textarea:focus {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: var(--color-cyan-4);
-  box-shadow: 0 0 12px var(--color-cyan-4);
+  background: var(--signal);
+  box-shadow: 0 0 12px var(--signal);
 }
 
 /* ═══════════════════════════════════════════════
    APP ICON COLOR TINT — used by desktop & dock
    ═══════════════════════════════════════════════ */
 
-.app-tint {
-  background: var(--app-color, rgba(34, 211, 238, 0.12), 0.12);
-}
-.app-tint-bold {
-  background: var(--app-color, rgba(34, 211, 238, 0.20), 0.20);
-}
+.app-tint      { background: var(--app-color, rgba(52, 245, 214, 0.12)); }
+.app-tint-bold { background: var(--app-color, rgba(52, 245, 214, 0.20)); }
 
-/* Color-mix fallback for older browsers */
-@supports not (background: color-mix(in srgb, red, blue)) {
-  .app-tint {
-    --alpha: 0.12;
-  }
-}
-
-/* ─── Reduced motion (WCAG 2.3.3) ────────────────────────────────────── */
+/* ─── Reduced motion (WCAG 2.3.3) ─── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
