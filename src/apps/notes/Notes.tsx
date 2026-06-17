@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Edit2, X, Check, StickyNote, Sparkles, FileText, MessageSquare } from 'lucide-react'
+import { Plus, Trash2, Edit2, Check, StickyNote, Sparkles, FileText, MessageSquare } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
 import type { Note } from '../../lib/store'

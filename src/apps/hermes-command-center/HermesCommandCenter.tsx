@@ -10,14 +10,13 @@
  * 6. Quick Actions — one-click operations
  */
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { emit } from '../../lib/eventBus'
 import {
   Activity, Sparkles, Puzzle, BookOpen, Wrench,
   Zap, Server, Cpu, HardDrive, Globe,
   RefreshCw, Search, ChevronDown, ChevronRight,
   CheckCircle2, XCircle, Clock, AlertCircle,
-  Terminal, Code2, FileText, Link2, ExternalLink,
-  Settings, Power, Copy, Check,
+  Terminal, Code2, FileText, Link2,
+  Copy, Check,
   Grid3X3, ArrowRight, Command
 } from 'lucide-react'
 import { apps, getAppIcon } from '../../lib/registry'

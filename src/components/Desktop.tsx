@@ -20,7 +20,7 @@ import { ToastViewport } from './ui/Toast'
 import {
   Search, Sun, Moon, Volume2,
   Command, Sparkles, ArrowUp, ArrowDown,
-  CornerDownLeft, X
+  CornerDownLeft
 } from 'lucide-react'
 
 // Categories used in the start menu grouping

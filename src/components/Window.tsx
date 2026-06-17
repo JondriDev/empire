@@ -49,7 +49,7 @@ export default function Window({ win, isActive }: { win: EmpireWindow; isActive:
     const dx = clientX - dragStart.current.x
     const dy = clientY - dragStart.current.y
     // Ignore micro-movements (helps dblclick detection)
-    if (Math.abs(dx) <  2 && Math.abs(dy) <  2) return
+    if (Math.abs(dx) < 2 && Math.abs(dy) < 2) return
     dragMovedRef.current = true
     moveWindow(win.id, {
       x: Math.max(0, dragStart.current.winX + dx),

@@ -4,7 +4,7 @@
  * Build a form by adding fields, configure them, preview, and export JSON.
  */
 import { useState } from 'react'
-import { Plus, Trash2, GripVertical, Eye, Save, Download, Type, AlignLeft, CheckSquare, Circle, ListChecks, Hash, Mail, Phone, Calendar as CalIcon } from 'lucide-react'
+import { Plus, Trash2, GripVertical, Eye, Download, Type, AlignLeft, CheckSquare, Circle, ListChecks, Hash, Mail, Phone, Calendar as CalIcon } from 'lucide-react'
 
 type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'date' | 'select' | 'checkbox' | 'radio'
 

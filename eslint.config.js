@@ -29,6 +29,9 @@ export default defineConfig([
         caughtErrorsIgnorePattern: '^_',
       }],
       'no-unused-vars': 'off',
+      // Intentional empty `catch {}` is used throughout for best-effort
+      // localStorage/clipboard access that can throw in restricted contexts.
+      'no-empty': ['error', { allowEmptyCatch: true }],
       'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
     },
     languageOptions: {

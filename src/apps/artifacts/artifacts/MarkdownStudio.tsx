@@ -272,6 +272,8 @@ export default function MarkdownStudio() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
+    // handleDownload only closes over `content`, which is already a dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content])
 
   const stats = useMemo(() => {

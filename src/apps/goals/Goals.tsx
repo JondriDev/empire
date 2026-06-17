@@ -4,10 +4,8 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Bot, Plus, Check, Target, Calendar, Flag } from 'lucide-react'
-import { useStore } from '../../lib/store'
+import { Bot, Plus, Check, Target, Flag } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
-import type { Note } from '../../lib/store'
 
 interface Goal {
   id: string
@@ -20,7 +18,6 @@ interface Goal {
 }
 
 export default function Goals() {
-  const { notes, addNote } = useStore()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [deadline, setDeadline] = useState('')

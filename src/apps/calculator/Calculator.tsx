@@ -10,7 +10,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { Bot, Sparkles, History, Trash2, Copy, Check } from 'lucide-react'
+import { Sparkles, History, Trash2, Copy, Check } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { useToast } from '../../components/ui/Toast'
 
@@ -248,7 +248,7 @@ export default function Calculator() {
     e.currentTarget.style.transform = ''
     e.currentTarget.style.filter = ''
   }
-  const onPress = (style: React.CSSProperties) => (e: React.MouseEvent<HTMLButtonElement>) => {
+  const onPress = (_style: React.CSSProperties) => (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.transform = 'scale(0.94)'
     e.currentTarget.style.filter = 'brightness(0.92)'
     setTimeout(() => { e.currentTarget.style.transform = ''; e.currentTarget.style.filter = '' }, 100)

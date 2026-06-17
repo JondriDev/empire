@@ -6,8 +6,8 @@
  * Each card opens its artifact in an immersive fullscreen mode inside the Empire
  * window. Designed to feel like the macOS Launchpad for builders.
  */
-import { useState, useEffect } from 'react'
-import { Wand2, FormInput, BarChart3, Columns, GraduationCap, FileText, Palette, Sparkles, ArrowRight, Star, Zap, Code2 } from 'lucide-react'
+import { useState } from 'react'
+import { FormInput, BarChart3, Columns, GraduationCap, FileText, Palette, Sparkles, ArrowRight, Star, Zap, Code2 } from 'lucide-react'
 
 type IconKey = 'form' | 'chart' | 'kanban' | 'flash' | 'markdown' | 'palette'
 

@@ -179,7 +179,6 @@ function generateHarmony(base: HSL, id: HarmonyId, count: number): HSL[] {
     }
     case 'shades': {
       // Mixed exploration across the swatch
-      const out: HSL[] = []
       const palette: HSL[] = [
         { ...base, l: 95 },
         { ...base, l: 80 },
@@ -263,8 +262,6 @@ export default function ColorPalette() {
     } catch {}
     return new Set()
   })
-  const [seed, setSeed] = useState(0)  // bump to regenerate non-locked swatches
-
   // Sync hex input on external base change
   useEffect(() => {
     setHexInput(base)
@@ -281,7 +278,7 @@ export default function ColorPalette() {
 
   const baseHsl = useMemo(() => rgbToHsl(hexToRgb(base)), [base])
   const def = HARMONIES.find(h => h.id === harmony)!
-  const generated = useMemo(() => generateHarmony(baseHsl, harmony, def.count), [baseHsl, harmony, def.count, seed])
+  const generated = useMemo(() => generateHarmony(baseHsl, harmony, def.count), [baseHsl, harmony, def.count])
 
   const swatches = useMemo(() => generated.map((hsl, i) => {
     const rgb = hslToRgb(hsl)
@@ -320,7 +317,6 @@ export default function ColorPalette() {
   const handleApplySaved = (p: SavedPalette) => {
     setBase(p.base)
     setHarmony(p.harmony)
-    setSeed(s => s + 1)
   }
 
   const handleSaveCurrent = () => {
@@ -349,7 +345,6 @@ export default function ColorPalette() {
     const s = 55 + Math.floor(Math.random() * 35)
     const l = 40 + Math.floor(Math.random() * 25)
     setBase(hslToHex({ h, s, l }))
-    setSeed(s => s + 1)
   }
 
   const handleExport = (kind: 'css' | 'tw') => {
@@ -502,7 +497,7 @@ export default function ColorPalette() {
                   return (
                     <button
                       key={h.id}
-                      onClick={() => { setHarmony(h.id); setSeed(s => s + 1) }}
+                      onClick={() => setHarmony(h.id)}
                       className={`text-left px-3 py-2.5 rounded-xl border transition-all ${
                         active
                           ? 'bg-violet-500/15 border-violet-400/50 shadow-[0_0_0_1px_rgba(167,139,250,0.2)]'

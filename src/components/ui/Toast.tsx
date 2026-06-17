@@ -5,7 +5,6 @@
  * Use via the `useToast()` hook for ergonomic one-shot notifications.
  */
 import { create } from 'zustand'
-import { useEffect } from 'react'
 import { CheckCircle2, AlertCircle, Info, X, AlertTriangle } from 'lucide-react'
 
 export type ToastVariant = 'success' | 'error' | 'info' | 'warning'
@@ -40,6 +39,7 @@ const useToastStore = create<ToastStore>((set) => ({
 }))
 
 /** Hook to call from any component */
+// eslint-disable-next-line react-refresh/only-export-components -- hook intentionally co-located with its Toast components
 export function useToast() {
   const push = useToastStore((s) => s.push)
   return {
@@ -87,9 +87,6 @@ export function ToastViewport() {
 function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
   const palette = variantColors[toast.variant]
   const Icon = palette.icon
-
-  // Auto-trigger entry animation
-  useEffect(() => {}, [])
 
   return (
     <div
