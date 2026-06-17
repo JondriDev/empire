@@ -33,9 +33,14 @@ export interface LearningItem {
   mastered: boolean
 }
 
+export type Lang = 'en' | 'id'
+
 interface AppState {
   theme: 'dark' | 'light'
   toggleTheme: () => void
+  lang: Lang
+  setLang: (_lang: Lang) => void
+  toggleLang: () => void
   sidebarOpen: boolean
   setSidebarOpen: (_open: boolean) => void
   notes: Note[]
@@ -56,6 +61,7 @@ export const useStore = create<AppState>()(
   persist(
     (set) => ({
       theme: 'dark',
+      lang: 'en',
       sidebarOpen: false,
       notes: [],
       messages: [],
@@ -66,6 +72,15 @@ export const useStore = create<AppState>()(
         const next = s.theme === 'dark' ? 'light' : 'dark'
         document.documentElement.setAttribute('data-theme', next)
         return { theme: next }
+      }),
+      setLang: (_lang) => set(() => {
+        document.documentElement.setAttribute('lang', _lang)
+        return { lang: _lang }
+      }),
+      toggleLang: () => set(s => {
+        const next: Lang = s.lang === 'en' ? 'id' : 'en'
+        document.documentElement.setAttribute('lang', next)
+        return { lang: next }
       }),
       setSidebarOpen: (_open) => set({ sidebarOpen: _open }),
 

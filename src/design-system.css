@@ -45,6 +45,22 @@
   --color-orange-4:    #f97316;
   --color-orange-3:    #fb923c;
 
+  /* ─── XENO Deep-Field signal accents ───
+     Merged from the-empire's XENO design system. Bioluminescent
+     first-contact signals on the void — used by the Network view,
+     gradients, and per-app accents. */
+  --signal: #34f5d6;   /* primary teal signal */
+  --aurora: #5cf0a8;   /* aurora green */
+  --plasma: #b06bff;   /* plasma violet */
+  --ion:    #4d9bff;   /* ion blue */
+  --ember:  #ff9b6b;   /* ember warm */
+  --xenon:  #d6fbf4;   /* xenon glow / bright text */
+
+  /* Brand gradients */
+  --grad-primary: linear-gradient(135deg, #34f5d6, #4d9bff);
+  --grad-logo:    linear-gradient(110deg, #34f5d6, #4d9bff, #b06bff, #34f5d6);
+  --grad-hero:    linear-gradient(120deg, #34f5d6, #4d9bff, #b06bff);
+
   /* Neutrals */
   --color-white:       #ffffff;
   --color-gray-50:     #f9fafb;

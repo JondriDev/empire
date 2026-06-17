@@ -1,4 +1,4 @@
-import { Terminal, Calculator, Calendar, Clock, CloudSun, SpellCheck, Languages, Music, Video, Folder, Trash2, Globe, Code2, StickyNote, Image, Database, MapPin, MessageSquare, Wand2, Hash, GraduationCap, Command, Bot, Sparkles, Palette, type LucideIcon } from 'lucide-react'
+import { Terminal, Calculator, Calendar, Clock, CloudSun, SpellCheck, Languages, Music, Video, Folder, Trash2, Globe, Code2, StickyNote, Image, Database, MapPin, MessageSquare, Wand2, Hash, GraduationCap, Command, Bot, Sparkles, Palette, Network, type LucideIcon } from 'lucide-react'
 
 export interface AppDefinition {
   id: string
@@ -35,6 +35,7 @@ export const apps: AppDefinition[] = [
   { id: 'hermes-cc', name: 'Hermes CC', icon: 'Command', route: '/app/hermes-cc', description: 'One-click command center', color: '#22d3ee', hermesEnabled: true },
   { id: 'ai-chat', name: 'AI Chat', icon: 'Sparkles', route: '/app/ai-chat', description: 'Chat with Hermes AI', color: '#a78bfa', hermesEnabled: true },
   { id: 'artifacts', name: 'Artifacts', icon: 'Palette', route: '/app/artifacts', description: 'Self-contained mini-apps & builders', color: '#c084fc', hermesEnabled: true },
+  { id: 'network', name: 'Network', icon: 'Network', route: '/app/network', description: 'The ecosystem as a live node-graph', color: '#34f5d6', hermesEnabled: false },
 ]
 
 const iconMap: Record<string, LucideIcon> = {
@@ -42,6 +43,7 @@ const iconMap: Record<string, LucideIcon> = {
   Music, Video, Folder, Trash2, Globe, Code2, StickyNote, Image, Database,
   MapPin, MessageSquare, Wand2, Hash, GraduationCap, Bot, Sparkles, Command,
   Palette,  // For the Artifacts app — fixed
+  Network,  // For the Network node-graph app (merged from the-empire)
 }
 
 export function getAppIcon(name: string): LucideIcon {

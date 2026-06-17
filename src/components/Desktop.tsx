@@ -13,6 +13,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useWindowStore } from '../lib/windowStore'
 import { apps, getAppIcon } from '../lib/registry'
 import { useStore } from '../lib/store'
+import { useLang } from '../lib/i18n'
 import WindowComponent from './Window'
 import ContextMenu from './ContextMenu'
 import HeroHud from './HeroHud'
@@ -53,6 +54,9 @@ function groupApps() {
 
 export default function Desktop() {
   const { theme, toggleTheme } = useStore()
+  const { t, lang, toggleLang } = useLang()
+  // Localised display name for an app (registry English stays canonical).
+  const appLabel = useCallback((a: typeof apps[number]) => t(`app.${a.id}.name`, a.name), [t])
   const {
   windows, openApp, minimizeWindow,
   focusWindow, activeWindowId
@@ -210,7 +214,7 @@ export default function Desktop() {
                   />
                 )}
               </div>
-              <span className="empire-desktop-icon-label">{app.name}</span>
+              <span className="empire-desktop-icon-label">{appLabel(app)}</span>
             </button>
           )
         })}
@@ -249,7 +253,7 @@ export default function Desktop() {
                 ref={searchInputRef}
                 className="empire-search-input"
                 type="text"
-                placeholder="Search apps, commands…"
+                placeholder={t('shell.search', 'Search apps, commands…')}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 autoFocus
@@ -310,7 +314,7 @@ export default function Desktop() {
                         <Icon className="w-4 h-4" style={{ color: app.color }} />
                       </div>
                       <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
-                        <div className="empire-search-result-name">{app.name}</div>
+                        <div className="empire-search-result-name">{appLabel(app)}</div>
                         {app.description && (
                           <div className="empire-search-result-desc">{app.description}</div>
                         )}
@@ -489,7 +493,7 @@ export default function Desktop() {
                               width: '100%',
                               transition: 'color var(--dur-fast)',
                             }}>
-                              {app.name}
+                              {appLabel(app)}
                             </span>
                           </button>
                         )
@@ -560,7 +564,7 @@ export default function Desktop() {
               <button
                 key={win.id}
                 className={`empire-taskbar-app ${isActive ? 'empire-taskbar-app-active' : ''}`}
-                data-tooltip={appDef.name}
+                data-tooltip={appLabel(appDef)}
                 onClick={() => {
                   // focusWindow already handles minimize-restore + bring-to-front.
                   // Toggle minimization when clicking the already-active window's taskbar entry.
@@ -610,6 +614,16 @@ export default function Desktop() {
             title={isLight ? 'Dark mode' : 'Light mode'}
           >
             {isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </button>
+
+          {/* Language toggle (EN / ID) */}
+          <button
+            className="empire-taskbar-tray-btn"
+            onClick={toggleLang}
+            title={`${t('shell.language', 'Language')}: ${lang === 'en' ? 'English' : 'Bahasa Indonesia'}`}
+            style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', fontFamily: 'var(--font-mono)' }}
+          >
+            {lang.toUpperCase()}
           </button>
 
           {/* Volume (decorative) */}
