@@ -17,8 +17,11 @@ Wiring reference (already done — copy these patterns):
 - [x] Wire **Goals** (`src/apps/goals/`) into the graph as `goal` nodes
       (`mirrorCollection`) and add `<NodeActions type="goal" .../>` to each goal row.
       _(also added `goal` to make-task's `accepts` so the ⚡ menu is non-empty)_
-- [ ] Wire **Artifacts** (`src/apps/artifacts/`) board items as `artifact` nodes
+- [x] Wire **Artifacts** (`src/apps/artifacts/`) board items as `artifact` nodes
       + `<NodeActions type="artifact" .../>` on each card.
+      _(done on the Kanban board as `kanban` nodes — the board's cards are the
+      graph-worthy entity; Artifacts is otherwise a launcher of mini-tools.
+      `kanban` added to make-task accepts.)_
 - [ ] Wire **DataCenter** (`src/apps/datacenter/`) records as `dataset` nodes
       + `<NodeActions type="dataset" .../>`.
 - [ ] Wire **Files** (`src/apps/files/`) entries as `file` nodes
