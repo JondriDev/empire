@@ -8,6 +8,10 @@ import './index.css'
 // Import order matters: automation must init before any component renders
 import './lib/automation'
 
+// ── Core organism: mirror store-backed apps into the graph + register intents ─
+import { startCoreSync } from './lib/core/sync'
+startCoreSync()
+
 // Apply saved theme immediately (before React hydration) to prevent flash
 try {
   const saved = localStorage.getItem('empire-store')
