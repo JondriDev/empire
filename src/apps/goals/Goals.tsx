@@ -6,6 +6,8 @@
 import { useState, useEffect } from 'react'
 import { Bot, Plus, Check, Target, Flag } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
+import { mirrorCollection } from '../../lib/core/sync'
+import { NodeActions } from '../../components/ui/NodeActions'
 
 interface Goal {
   id: string
@@ -42,6 +44,12 @@ export default function Goals() {
   // Save goals to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('empire-goals', JSON.stringify(goals))
+    // Mirror goals into the Core graph so they join the organism.
+    mirrorCollection('goal', 'goals', goals, {
+      id: g => g.id,
+      title: g => g.title,
+      data: g => ({ description: g.description, deadline: g.deadline, progress: g.progress, completed: g.completed }),
+    })
   }, [goals])
 
   const add = () => {
@@ -246,6 +254,7 @@ export default function Goals() {
                 </div>
               </div>
               <div className="flex flex-col gap-1">
+                <NodeActions type="goal" sourceId={goal.id} />
                 <button
                   onClick={() => askHermesGoal(goal)}
                   className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-blue-500/20 text-blue-300 transition-all"

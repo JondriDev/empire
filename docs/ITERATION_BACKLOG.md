@@ -14,8 +14,9 @@ Wiring reference (already done — copy these patterns):
 
 ## P0 — Finish the core "organism" (active thread)
 
-- [ ] Wire **Goals** (`src/apps/goals/`) into the graph as `goal` nodes
+- [x] Wire **Goals** (`src/apps/goals/`) into the graph as `goal` nodes
       (`mirrorCollection`) and add `<NodeActions type="goal" .../>` to each goal row.
+      _(also added `goal` to make-task's `accepts` so the ⚡ menu is non-empty)_
 - [ ] Wire **Artifacts** (`src/apps/artifacts/`) board items as `artifact` nodes
       + `<NodeActions type="artifact" .../>` on each card.
 - [ ] Wire **DataCenter** (`src/apps/datacenter/`) records as `dataset` nodes
