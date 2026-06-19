@@ -5,6 +5,8 @@
  * Defaults to DeepSeek V4 Flash — same model I'm running on.
  */
 
+import { apiUrl } from './apiBase'
+
 const AI_CONFIG_KEY = 'empire-ai-config'
 
 export interface AIConfig {
@@ -71,7 +73,7 @@ export async function streamChat(
   const signal = options.signal || controller.signal
 
   try {
-    const response = await fetch('/api/ai/chat', {
+    const response = await fetch(apiUrl('/api/ai/chat'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

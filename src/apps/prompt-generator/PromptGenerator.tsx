@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
+import { apiUrl } from '../../lib/apiBase'
 import {
   Wand2, Copy, Check, Sparkles, MessageSquare,
   Code, BookOpen, PenTool, Zap, Tag
@@ -190,7 +191,7 @@ export default function PromptGenerator() {
  const input = generated || customPrompt
  setEnhancing(true)
  try {
- const res = await fetch('/api/ai/chat', {
+ const res = await fetch(apiUrl('/api/ai/chat'), {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({ messages: [{ role: 'user', content: `Improve this prompt for better AI responses. Make it more specific, clear, and effective. Return only the improved prompt:\n\n${input}` }] }),

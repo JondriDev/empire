@@ -4,15 +4,14 @@
  */
 
 import type { ToolCallRequest, ToolResult, ToolName } from './types'
-
-const SERVER = '' // Use relative URL (same origin, served by Empire backend)
+import { apiUrl } from '../../../lib/apiBase'
 
 /**
  * Execute a tool call via the server API
  */
 export async function executeTool(call: ToolCallRequest): Promise<ToolResult> {
   try {
-    const response = await fetch(`${SERVER}/api/tools/execute`, {
+    const response = await fetch(apiUrl('/api/tools/execute'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -62,7 +61,7 @@ export async function executeToolsParallel(calls: ToolCallRequest[]): Promise<Re
  */
 export async function listTools(): Promise<ToolName[]> {
   try {
-    const response = await fetch(`${SERVER}/api/tools/list`)
+    const response = await fetch(apiUrl('/api/tools/list'))
     if (!response.ok) return []
     const data = await response.json()
     return data.tools as ToolName[]

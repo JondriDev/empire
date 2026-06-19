@@ -10,6 +10,7 @@
  * 6. Quick Actions — one-click operations
  */
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { apiUrl } from '../../lib/apiBase'
 import {
   Activity, Sparkles, Puzzle, BookOpen, Wrench,
   Zap, Server, Cpu, HardDrive, Globe,
@@ -338,9 +339,9 @@ export default function HermesCommandCenter() {
     setError(null)
     try {
       const [statusRes, skillsRes, mcpsRes] = await Promise.all([
-        fetch('/api/hermes/status').then(r => r.ok ? r.json() : null),
-        fetch('/api/hermes/skills').then(r => r.ok ? r.json() : []),
-        fetch('/api/hermes/mcps').then(r => r.ok ? r.json() : []),
+        fetch(apiUrl('/api/hermes/status')).then(r => r.ok ? r.json() : null),
+        fetch(apiUrl('/api/hermes/skills')).then(r => r.ok ? r.json() : []),
+        fetch(apiUrl('/api/hermes/mcps')).then(r => r.ok ? r.json() : []),
       ])
       if (statusRes) setStatus(statusRes)
       if (skillsRes?.skills) setSkills(skillsRes.skills)
