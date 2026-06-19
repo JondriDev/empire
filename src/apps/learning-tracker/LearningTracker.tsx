@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import { Bot, Plus, Check, BookOpen, Brain } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
+import { NodeActions } from '../../components/ui/NodeActions'
 import type { LearningItem } from '../../lib/store'
 
 export default function LearningTracker() {
@@ -175,6 +176,9 @@ export default function LearningTracker() {
                   <span>→ Next: {item.nextReview}</span>
                 </div>
               </div>
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                <NodeActions type="learning" sourceId={item.id} />
+              </span>
               <button
                 onClick={() => askHermesTopic(item)}
                 className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-cyan-500/20 text-cyan-300 transition-all"

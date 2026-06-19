@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from 'react'
 import { apps } from '../../lib/registry'
 import { useWindowStore } from '../../lib/windowStore'
 import { useLang } from '../../lib/i18n'
+import { useGraph } from '../../lib/core/graph'
+import type { CoreNode } from '../../lib/core/graph'
 
 // Map a hex accent (the registry `color`) to an "r,g,b" string for canvas fills.
 function rgbOf(hex: string): string {
@@ -26,6 +28,7 @@ export default function Network() {
   const openApp = useWindowStore(s => s.openApp)
   const { t } = useLang()
   const [hoverName, setHoverName] = useState<string | null>(null)
+  const [nodeCount, setNodeCount] = useState(0)
 
   useEffect(() => {
     const cv = canvasRef.current
@@ -79,6 +82,48 @@ export default function Network() {
         ctx!.shadowColor = `rgba(${n.c},0.8)`; ctx!.shadowBlur = (i === hover ? 22 : 12) * dpr
         ctx!.fill(); ctx!.shadowBlur = 0
       })
+      // ── Core graph (B-backbone): real CoreNodes orbiting their owning app ──
+      const gnodes = Object.values(useGraph.getState().nodes)
+      if (gnodes.length) {
+        const ownerPos = new Map<string, { x: number; y: number; c: string }>()
+        layout.forEach(n => ownerPos.set(n.app.id, { x: n.x, y: n.y, c: n.c }))
+        const byOwner = new Map<string, CoreNode[]>()
+        for (const gn of gnodes) {
+          const owner = ownerPos.has(gn.meta.app) ? gn.meta.app : '__core'
+          const arr = byOwner.get(owner) ?? []
+          arr.push(gn)
+          byOwner.set(owner, arr)
+        }
+        const pos = new Map<string, { x: number; y: number; c: string }>()
+        byOwner.forEach((list, owner) => {
+          const base = ownerPos.get(owner) ?? { x: core.x, y: core.y, c: '52,245,214' }
+          list.forEach((gn, i) => {
+            const a = (i / Math.max(list.length, 1)) * Math.PI * 2 + tk * 0.3
+            const rr = (24 + (i % 2) * 9) * dpr
+            const p = { x: base.x + Math.cos(a) * rr, y: base.y + Math.sin(a) * rr, c: base.c }
+            pos.set(gn.id, p)
+            // faint tether from the owning app to its node
+            ctx!.beginPath(); ctx!.moveTo(base.x, base.y); ctx!.lineTo(p.x, p.y)
+            ctx!.strokeStyle = `rgba(${base.c},0.18)`; ctx!.lineWidth = dpr; ctx!.stroke()
+          })
+        })
+        // real graph edges (e.g. note -> task) in plasma violet
+        for (const gn of gnodes) {
+          const from = pos.get(gn.id); if (!from) continue
+          for (const l of gn.links) {
+            const to = pos.get(l); if (!to) continue
+            ctx!.beginPath(); ctx!.moveTo(from.x, from.y); ctx!.lineTo(to.x, to.y)
+            ctx!.strokeStyle = 'rgba(176,107,255,0.55)'; ctx!.lineWidth = 1.4 * dpr; ctx!.stroke()
+          }
+        }
+        // node dots
+        pos.forEach(p => {
+          ctx!.beginPath(); ctx!.arc(p.x, p.y, 3 * dpr, 0, 7)
+          ctx!.fillStyle = `rgba(${p.c},0.95)`
+          ctx!.shadowColor = `rgba(${p.c},0.9)`; ctx!.shadowBlur = 8 * dpr
+          ctx!.fill(); ctx!.shadowBlur = 0
+        })
+      }
       // CORE
       const cr = 16 * dpr + Math.sin(tk * 2) * 1.4 * dpr
       const cg = ctx!.createRadialGradient(core.x, core.y, 0, core.x, core.y, cr * 2.4)
@@ -117,11 +162,17 @@ export default function Network() {
     cv.addEventListener('click', onClick)
     addEventListener('resize', onResize)
 
+    // React to the Core graph: keep the live count, and repaint when motion is off.
+    const updateCount = () => setNodeCount(Object.keys(useGraph.getState().nodes).length)
+    updateCount()
+    const unsubGraph = useGraph.subscribe(() => { updateCount(); if (reduceMotion) frame() })
+
     size()
     if (reduceMotion) frame(); else raf = requestAnimationFrame(frame)
 
     return () => {
       cancelAnimationFrame(raf)
+      unsubGraph()
       cv.removeEventListener('mousemove', onMove)
       cv.removeEventListener('mouseleave', onLeave)
       cv.removeEventListener('click', onClick)
@@ -137,7 +188,7 @@ export default function Network() {
           {t('network.title', 'The Network')}
         </div>
         <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text2)', marginTop: 2 }}>
-          {hoverName ?? t('network.hint', `CORE wired to ${apps.length} instruments`)}
+          {hoverName ?? `${t('network.hint', `CORE · ${apps.length} instruments`)} · ${nodeCount} nodes`}
         </div>
       </div>
       <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />

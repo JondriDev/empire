@@ -31,6 +31,14 @@ export type EmpireEvent =
   | { type: 'HERMES_TOOL_EXECUTED'; toolId: string; toolName: string }
   | { type: 'HERMES_SKILL_LOADED'; skillName: string }
   | { type: 'HERMES_MCP_CONNECTED'; mcpName: string; status: string }
+  // Core graph (B-backbone) — every meaningful "thing" in The Empire is a node.
+  | { type: 'NODE_CREATED'; nodeId: string; nodeType: string; title: string; app: string }
+  | { type: 'NODE_UPDATED'; nodeId: string; nodeType: string }
+  | { type: 'NODE_DELETED'; nodeId: string; nodeType: string }
+  | { type: 'NODES_LINKED'; fromId: string; toId: string }
+  | { type: 'NODES_UNLINKED'; fromId: string; toId: string }
+  // Intents (C-layer) — acting on a node and routing it to another app.
+  | { type: 'INTENT_RUN'; intentId: string; nodeId: string }
 
 type EventHandler<E extends EmpireEvent> = (_event: E) => void
 type EventUnsubscribe = () => void
