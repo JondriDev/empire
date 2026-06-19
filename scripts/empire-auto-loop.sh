@@ -12,7 +12,8 @@
 #     SLEEP_SECONDS  default 30   (pause between iterations)
 #
 # Stop gracefully:   touch logs/.stop-auto-loop     (or Ctrl-C)
-# Run detached:      nohup scripts/empire-auto-loop.sh 50 30 >/dev/null 2>&1 &
+# Run detached:      setsid nohup scripts/empire-auto-loop.sh 50 30 >/dev/null 2>&1 &
+# Publish each step: EMPIRE_LOOP_PUSH=1   (pushes auto/iteration so a PR stays current)
 #
 # Permissions: an unattended loop cannot answer permission prompts. The default
 # uses `--permission-mode acceptEdits` (auto-accepts file edits, but may still
@@ -34,6 +35,15 @@ cd "$EMPIRE_DIR" || { echo "Empire dir not found: $EMPIRE_DIR" >&2; exit 1; }
 command -v claude >/dev/null 2>&1 || { echo "claude CLI not on PATH" >&2; exit 1; }
 mkdir -p logs
 rm -f "$STOP_FILE"
+
+# Liveness + single-instance lock. If another loop is already running, refuse.
+PIDFILE="$EMPIRE_DIR/logs/.auto-loop.pid"
+if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE" 2>/dev/null)" 2>/dev/null; then
+  echo "Another auto-loop is already running (PID $(cat "$PIDFILE")). Exiting." >&2
+  exit 1
+fi
+echo "$$" > "$PIDFILE"
+trap 'rm -f "$PIDFILE"' EXIT
 
 # Always operate on the dedicated branch.
 CURRENT="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
@@ -65,6 +75,11 @@ while :; do
 
   if printf '%s' "$OUT" | grep -q "BACKLOG-EMPTY"; then
     echo "Backlog empty — nothing left to do. Halting." | tee -a "$LOG"; break
+  fi
+
+  # Publish to the PR branch when EMPIRE_LOOP_PUSH is set (keeps a PR current).
+  if [ -n "${EMPIRE_LOOP_PUSH:-}" ]; then
+    git push -u origin "$BRANCH" 2>&1 | tee -a "$LOG"
   fi
 
   sleep "$SLEEP_SECONDS"
