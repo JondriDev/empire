@@ -4,10 +4,10 @@
 set -e
 
 EMPIRE_DIR="/data/data/com.termux/files/home/Desktop/empire"
-LOG="$EMPIRE_DIR/iteration-log.md"
-BUILD_LOG="$EMPIRE_DIR/build-check.log"
-COUNTER_FILE="$EMPIRE_DIR/.iter_counter"
-ITER_SCRIPT="$EMPIRE_DIR/iterate.sh"
+LOG="$EMPIRE_DIR/logs/iteration-log.md"
+BUILD_LOG="$EMPIRE_DIR/logs/build-check.log"
+COUNTER_FILE="$EMPIRE_DIR/logs/.iter_counter"
+ITER_SCRIPT="$EMPIRE_DIR/scripts/iterate.sh"
 
 # Init log
 echo "# Empire Iteration Log" > "$LOG"

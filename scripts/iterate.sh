@@ -13,9 +13,9 @@ NC='\033[0m' # No Color
 
 # Paths
 EMPIRE_DIR="$HOME/Desktop/empire"
-LOG_FILE="$EMPIRE_DIR/iteration-log.md"
-FINDINGS_FILE="$EMPIRE_DIR/findings.md"
-PROGRESS_FILE="$EMPIRE_DIR/progress.md"
+LOG_FILE="$EMPIRE_DIR/logs/iteration-log.md"
+FINDINGS_FILE="$EMPIRE_DIR/docs/archive/findings.md"
+PROGRESS_FILE="$EMPIRE_DIR/docs/archive/progress.md"
 
 # Timestamp
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")

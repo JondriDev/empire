@@ -10,8 +10,8 @@
 EMPIRE_DIR="$HOME/Desktop/empire"
 LOG_DIR="$EMPIRE_DIR/logs"
 LOG_FILE="$LOG_DIR/iteration-$(date '+%Y-%m-%d-%H%M').log"
-SUMMARY_FILE="$EMPIRE_DIR/iteration-summary.md"
-METRICS_FILE="$EMPIRE_DIR/metrics.json"
+SUMMARY_FILE="$EMPIRE_DIR/docs/archive/iteration-summary.md"
+METRICS_FILE="$EMPIRE_DIR/docs/archive/metrics.json"
 
 # Thresholds
 BUILD_TIME_THRESHOLD=120
