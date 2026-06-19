@@ -1,0 +1,77 @@
+name: Deploy PWA to GitHub Pages
+
+# Builds the installable PWA (web + Samsung DeX desktop) and publishes it to
+# GitHub Pages. Once enabled (repo Settings -> Pages -> Source: GitHub Actions),
+# the app lives at https://jondridev.github.io/empire/ and can be "Add to Home
+# screen" / "Install app" from any browser, fully offline after first load.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      # Only redeploy when something that affects the build changes.
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'vite.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/pages.yml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment, cancel in-progress on new push.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build PWA (sub-path base for Pages)
+        env:
+          EMPIRE_BASE: /empire/
+        run: npm run build
+
+      - name: SPA fallback (404 -> index.html)
+        run: cp dist/index.html dist/404.html
+
+      - name: Disable Jekyll processing
+        run: touch dist/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
