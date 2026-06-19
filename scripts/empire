@@ -12,10 +12,10 @@
 set -euo pipefail
 
 # ---- Config ----
-EMPIRE_DIR="$(cd "$(dirname "$0")" && pwd)"
+EMPIRE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_DIR="$EMPIRE_DIR/logs"
-SUMMARY_FILE="$EMPIRE_DIR/iteration-summary.md"
-METRICS_FILE="$EMPIRE_DIR/metrics.json"
+SUMMARY_FILE="$EMPIRE_DIR/docs/archive/iteration-summary.md"
+METRICS_FILE="$EMPIRE_DIR/docs/archive/metrics.json"
 SCRIPT_NAME="empire"
 
 # ---- Colors (true-color if possible) ----

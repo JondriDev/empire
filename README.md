@@ -171,16 +171,21 @@ The Empire is a Progressive Web App:
 ```
 empire/
 ├── src/
-│   ├── apps/              # 21 app directories
-│   ├── backend/           # Express server
+│   ├── apps/              # App directories (one folder per app)
 │   ├── components/        # Shared UI components
 │   ├── dashboard/         # Dashboard & AppShell
+│   ├── design-system/     # Vendored XENO palette + Sora fonts
 │   ├── hooks/             # Custom React hooks
-│   ├── lib/               # Utils, registry, store
+│   ├── lib/               # Utils, registry, store, core graph
 │   ├── App.tsx            # Main router
 │   ├── main.tsx           # Entry point
 │   └── design-system.css  # Theme tokens
-├── dist/                  # Production build
+├── docs/                  # Documentation (docs/archive/ = history)
+├── scripts/               # Launchers + dev/iteration tooling
+├── public/                # Icons, manifest, service worker
+├── server.js              # Express backend (port 3001)
+├── dist/                  # Production build (generated)
+├── index.html
 ├── package.json
 ├── vite.config.ts
 └── tsconfig.json
