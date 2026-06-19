@@ -1,9 +1,9 @@
-// Command Center API — talks to Hermes backend endpoints
+// Command Center API — talks to the optional Hermes backend (server.js)
 
-const BASE = '' // same origin
+import { apiUrl } from '../../lib/apiBase'
 
 async function get(endpoint: string) {
-  const res = await fetch(`${BASE}${endpoint}`, {
+  const res = await fetch(apiUrl(endpoint), {
     credentials: 'include',
   })
   if (!res.ok) throw new Error(`API ${endpoint} → ${res.status}`)
@@ -11,7 +11,7 @@ async function get(endpoint: string) {
 }
 
 async function post(endpoint: string, body?: unknown) {
-  const res = await fetch(`${BASE}${endpoint}`, {
+  const res = await fetch(apiUrl(endpoint), {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

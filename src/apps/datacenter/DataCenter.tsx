@@ -6,10 +6,9 @@
 import { useState, useEffect } from 'react'
 import { Bot, Plus, Trash2, RefreshCw, Table2 } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
+import { getApiBase } from '../../lib/apiBase'
 
 interface TableRow { id: number; [key: string]: string | number | boolean | null }
-
-const SERVER = 'http://localhost:3001'
 
 export default function DataCenter() {
   const [tables, setTables] = useState<string[]>([])
@@ -27,7 +26,7 @@ export default function DataCenter() {
 
   const loadTables = async () => {
     try {
-      const res = await fetch(`${SERVER}/api/dc/tables`)
+      const res = await fetch(`${getApiBase()}/api/dc/tables`)
       const data = await res.json()
       if (Array.isArray(data)) setTables(data)
     } catch { /* server may not be running */ }
@@ -40,7 +39,7 @@ export default function DataCenter() {
   const loadRows = async (table: string) => {
     setLoading(true)
     try {
-      const res = await fetch(`${SERVER}/api/dc/table/${table}`)
+      const res = await fetch(`${getApiBase()}/api/dc/table/${table}`)
       const data = await res.json()
       if (Array.isArray(data)) {
         setRows(data)
@@ -57,7 +56,7 @@ export default function DataCenter() {
       if (firstRow) {
         Object.keys(firstRow).forEach(k => { if (k !== 'id') body[k] = newRow[k] || '' })
       }
-      await fetch(`${SERVER}/api/dc/table/${activeTable}`, {
+      await fetch(`${getApiBase()}/api/dc/table/${activeTable}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -69,7 +68,7 @@ export default function DataCenter() {
 
   const deleteRow = async (id: number) => {
     try {
-      await fetch(`${SERVER}/api/dc/table/${activeTable}/${id}`, { method: 'DELETE' })
+      await fetch(`${getApiBase()}/api/dc/table/${activeTable}/${id}`, { method: 'DELETE' })
       emit({ type: 'DATA_TABLE_UPDATED', tableName: activeTable, rowCount: rows.length - 1 })
       loadRows(activeTable)
     } catch { /* ignore */ }
@@ -94,6 +93,11 @@ export default function DataCenter() {
         <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <h1 className="text-base font-bold flex items-center gap-2"><Table2 className="w-4 h-4" /> Data Center</h1>
           <p className="text-xs mt-0.5" style={{ color: 'var(--text3)' }}>{rows.length} rows · {activeTable}</p>
+          {tables.length === 0 && (
+            <p className="text-[11px] mt-1 leading-snug" style={{ color: 'var(--text3)' }}>
+              No backend connected — set a server URL in Agent → Settings to load tables.
+            </p>
+          )}
         </div>
         <div className="flex-1 overflow-auto">
           <button onClick={askHermes} className="w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-cyan-500/10 text-cyan-300 text-sm border-b" style={{ borderColor: 'var(--border)' }}>

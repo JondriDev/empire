@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
+import { apiUrl } from '../../lib/apiBase'
 import {
   Folder, FolderOpen, File, FileText, Image, Film, Music,
   Code, Archive, ChevronRight, ChevronDown, Download,
@@ -73,7 +74,7 @@ export default function Files() {
     setError('')
     setSelected(null)
     try {
-      const res = await fetch(`/api/files?path=${encodeURIComponent(dirPath)}`)
+      const res = await fetch(apiUrl(`/api/files?path=${encodeURIComponent(dirPath)}`))
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       if (!data.files) throw new Error('Invalid response')
@@ -120,7 +121,7 @@ export default function Files() {
     const textExts = ['txt', 'md', 'json', 'xml', 'yaml', 'yml', 'js', 'ts', 'tsx', 'py', 'html', 'css', 'log', 'ini', 'cfg', 'toml', 'env']
     if (textExts.includes(entry.extension.toLowerCase())) {
       try {
-        const res = await fetch(`/api/file/download?path=${encodeURIComponent(entry.path)}`)
+        const res = await fetch(apiUrl(`/api/file/download?path=${encodeURIComponent(entry.path)}`))
         if (res.ok) {
           const text = await res.text()
           setPreviewContent({ name: entry.name, content: text.slice(0, 5000) })
@@ -130,7 +131,7 @@ export default function Files() {
   }
 
   const downloadFile = async (entry: FileEntry) => {
-    window.open(`/api/file/download?path=${encodeURIComponent(entry.path)}`, '_blank')
+    window.open(apiUrl(`/api/file/download?path=${encodeURIComponent(entry.path)}`), '_blank')
   }
 
   const filtered = entries.filter(e =>
