@@ -25,6 +25,7 @@ const DICT: Record<string, Entry> = {
   // ── Network app ──
   'network.title':  { en: 'The Network', id: 'Jaringan Hidup' },
   'network.hint':   { en: 'CORE wired to every instrument — click a node to open it', id: 'INTI terhubung ke tiap instrumen — klik node untuk membuka' },
+  'network.signal': { en: 'signal', id: 'sinyal' },
 
   // ── App names (mapped onto empire's registry ids) ──
   'app.ai-agent.name':         { en: 'Hermes Agent', id: 'Agen Hermes' },

@@ -36,6 +36,7 @@ type EventHandler<E extends EmpireEvent> = (_event: E) => void
 type EventUnsubscribe = () => void
 
 const listeners = new Map<string, Set<EventHandler<EmpireEvent>>>()
+const anyListeners = new Set<EventHandler<EmpireEvent>>()
 const history: EmpireEvent[] = []
 const MAX_HISTORY = 100
 
@@ -65,11 +66,22 @@ export function once<E extends EmpireEvent['type']>(
   const unsub = () => listeners.get(type)?.delete(wrapped)
   return unsub
 }
+/**
+ * Subscribe to EVERY event regardless of type. Returns an unsubscribe function.
+ * Useful for observers that watch the whole organism — e.g. the Network mesh
+ * lighting up the node whose app just emitted activity.
+ */
+export function onAny(handler: EventHandler<EmpireEvent>): EventUnsubscribe {
+  anyListeners.add(handler)
+  return () => anyListeners.delete(handler)
+}
+
 export function emit(event: EmpireEvent): void {
   history.push(event)
   if (history.length > MAX_HISTORY) history.shift()
   const handlers = listeners.get(event.type)
   if (handlers) handlers.forEach(h => h(event))
+  anyListeners.forEach(h => h(event))
 }
 
 /** Get recent events of a specific type. */
