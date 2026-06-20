@@ -47,8 +47,11 @@ Wiring reference (already done — copy these patterns):
       saved-prompts list (localStorage `empire-prompt-generator-saved`).
       `<NodeActions type="prompt"/>` on each saved-prompt row; `prompt` added
       to make-task accepts.)_
-- [ ] Add a per-message ⚡ menu to **Messages** (`src/apps/messages/`) — it is
+- [x] Add a per-message ⚡ menu to **Messages** (`src/apps/messages/`) — it is
       already mirrored centrally but has no `<NodeActions>` on bubbles yet.
+      _(added `<NodeActions type="message" sourceId={msg.id}/>` in each bubble's
+      timestamp row; `message` was already in make-task's `accepts`, so the menu
+      surfaces cross-app intents. Renders nothing if a node has no intents.)_
 - [ ] Enrich `src/lib/core/intents.ts`: add a `make-note-from` intent (any node →
       new `note` node, linked) and `add-to-learning` (note/message → `learning`).
 
