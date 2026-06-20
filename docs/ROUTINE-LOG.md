@@ -5,6 +5,34 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-20 · Integration run — merged #8 (synapse arcs); reviewed #2
+
+**Integrated:** PR #8 (`routine/auto-20260620T200722Z`, code) — squash-merged to
+main after local verification: `npm run build` 🟢 (tsc -b && vite build, PWA precache
+56 entries), `npx vitest run` → 21/21 pass, `npx eslint src/apps/network/Network.tsx`
+clean. Reviewed the diff: additive and reversible, DOM styled via tokens only (canvas
+keeps `rgba()` literals per the file's existing pattern since 2D ctx can't read CSS
+vars), no localStorage/schema changes, no Calendar central syncer, one focused
+increment. `flowForEvent` only lights an edge for a real `from-<id>` tag (unknown
+sources fall back to normal single-app behavior — no false positives).
+
+**Reviewed, not merged:** PR #2 (`packaging/pwa-android-ci`) — non-auto branch, the
+user's own packaging work; left for the human (already reviewed a prior run, no new
+commits). No action taken.
+
+**Main state:** green and releasable at the #8 squash merge. ⚠️ On-device visual
+confirmation still pending (no rendered UI in cloud): the synapse arc / ticker
+`source → target` rendering can't be exercised here. Cleanup note: the GitHub MCP
+merge and the git proxy in this environment couldn't delete the merged head branch
+(`routine/auto-20260620T200722Z` lingers, like a few earlier merged `routine/auto-*`
+branches) — safe to prune manually; no effect on main.
+
+**Next step:** broaden `flowForEvent` to the other real handoffs (`SEND_TO_LEARNING`
+already emits `LEARNING_LOGGED`; emit a lightweight `HANDOFF` from `appActions.ts` for
+the sessionStorage-based transfers) so every synapse lights its edge, not just →Notes.
+
+---
+
 ## 2026-06-20 · `routine/auto-20260620T200722Z` — App→app synapse arcs (nodes light each other)
 
 **Increment:** INTERCONNECT. The mesh only ever lit CORE→app links; now a genuine
