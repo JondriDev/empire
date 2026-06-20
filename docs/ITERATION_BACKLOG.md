@@ -52,8 +52,13 @@ Wiring reference (already done — copy these patterns):
       _(added `<NodeActions type="message" sourceId={msg.id}/>` in each bubble's
       timestamp row; `message` was already in make-task's `accepts`, so the menu
       surfaces cross-app intents. Renders nothing if a node has no intents.)_
-- [ ] Enrich `src/lib/core/intents.ts`: add a `make-note-from` intent (any node →
+- [x] Enrich `src/lib/core/intents.ts`: add a `make-note-from` intent (any node →
       new `note` node, linked) and `add-to-learning` (note/message → `learning`).
+      _(registered in `registerCoreIntents` in `sync.ts` alongside `make-task` —
+      that's where graph-mutating core intents live since they need `useGraph`;
+      `intents.ts` stays the pure registry. `make-note-from` accepts any
+      non-`note` node; `add-to-learning` accepts `note`/`message`. Both create a
+      linked graph node, matching the `make-task` shape.)_
 
 ## P1 — QA hardening (keep it green, grow coverage)
 
@@ -96,6 +101,10 @@ Wiring reference (already done — copy these patterns):
 - [ ] prompt-generator only mirrors **saved** prompts, not every generated one
       (generation is transient until the user taps Save). If a "recent history"
       of un-saved generations is ever wanted, it'd need its own persisted list.
+- [ ] The new `make-note-from` / `add-to-learning` intents create graph-only
+      nodes (like `make-task`) — they don't write back into the Notes/Learning
+      *stores*, so the generated note/learning shows in Network but not in the
+      Notes/LearningTracker app lists until a store round-trip is added.
 - [ ] Photos `photo` nodes carry no thumbnail/url (object URLs are revoked on
       delete and don't survive reload). A `make-note-from`-style intent on a
       photo can't show the image — consider persisting a data-URL thumbnail or
