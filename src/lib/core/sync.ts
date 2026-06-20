@@ -115,6 +115,32 @@ function registerCoreIntents(): void {
       g.link(n.id, task.id)
     },
   })
+
+  registerIntent({
+    id: 'make-note-from',
+    label: 'Make Note from this',
+    icon: '📝',
+    // Any node can spawn a note — except notes themselves (would just clone).
+    accepts: n => n.type !== 'note',
+    run: n => {
+      const g = useGraph.getState()
+      const content = typeof n.data.content === 'string' ? n.data.content : n.title
+      const note = g.addNode({ type: 'note', title: `Note: ${n.title}`, data: { content, tags: [], from: n.id }, app: n.meta.app })
+      g.link(n.id, note.id)
+    },
+  })
+
+  registerIntent({
+    id: 'add-to-learning',
+    label: 'Add to Learning',
+    icon: '🎓',
+    accepts: n => ['note', 'message'].includes(n.type),
+    run: n => {
+      const g = useGraph.getState()
+      const learning = g.addNode({ type: 'learning', title: n.title, data: { learned: false, mastered: false, from: n.id }, app: 'learning-tracker' })
+      g.link(n.id, learning.id)
+    },
+  })
 }
 
 let started = false
