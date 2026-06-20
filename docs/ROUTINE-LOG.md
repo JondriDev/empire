@@ -5,6 +5,55 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-20 · `routine/auto-20260620T200722Z` — App→app synapse arcs (nodes light each other)
+
+**Increment:** INTERCONNECT. The mesh only ever lit CORE→app links; now a genuine
+app→app *handoff* lights a curved link directly between the two instruments — the
+exact "next step" queued by the ticker run (e.g. a calc result saved into Notes
+lights the **Calculator → Notes** link). Also merged the queued ticker PR (#7) onto
+main first so this builds on it.
+
+**Why:** The vision is "one living organism," not a hub-and-spoke. Until now every
+signal radiated from CORE. The Empire already has a real cross-app transfer layer
+(`src/lib/appActions.ts` · `CROSS_APP_ACTIONS.SEND_TO_NOTES`) that tags the new note
+`from-<sourceAppId>` and emits `NOTE_CREATED`. That tag is a real, bus-observable
+directed edge — so the mesh can portray actual nerve traffic between apps **without
+inventing relationships** (ordinary notes carry `tags:[]`, so there are no false
+positives). Honest edges only.
+
+**Changed (`src/apps/network/Network.tsx`):**
+- `flowForEvent(e)` — returns `{ fromId, toId }` for a genuine handoff (today:
+  `NOTE_CREATED` whose tags contain `from-<id>`, with `<id>` a real app ≠ notes),
+  else `null`. One small, extensible seam for future observable app→app events.
+- Canvas `Arc` list (capped at `MAX_ARCS=5`): on a handoff the source node also
+  flares and an arc is pushed. `frame()` draws each arc as a quadratic-bezier link
+  bowed toward CORE (routes *through* the organism), brightness/width ∝ remaining
+  life, with a packet sweeping source→target as it settles (`life 1→0 ⇒ p 0→1`),
+  decaying to rest in ~1.5 s. Arcs self-prune on expiry / stale indices.
+- Ticker + subtitle now render the directed flow as `source → target` (source
+  accent dot, `→` in `--text3`, target name) instead of a single instrument; the
+  header subtitle reads `▸ signal · Calculator → Notes`.
+- Canvas fills stay `rgba()` literals (2D ctx can't read CSS vars — matches the
+  file's existing pattern); all DOM styling through tokens. No new i18n needed
+  (app names already mapped; `→` is a glyph).
+
+**Verified:** `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56 entries).
+`npx eslint src/apps/network/Network.tsx` clean. `npx vitest run` → 21/21 pass.
+No localStorage/schema changes; no Calendar syncer; no new subsystem; additive and
+reversible. Respects `prefers-reduced-motion` (renders one frame per event, no RAF).
+*Not verifiable here (no rendered UI):* on-device — open **The Network**, then in any
+app use the agent bar's **Save to Notes** action (e.g. from Calculator). Watch a
+curved packet race **Calculator → Notes** while both nodes flare, and a row glide
+into the ticker reading `● Calculator → Notes  now`.
+
+**Next step:** Broaden `flowForEvent` to the other real handoffs once they emit on
+the bus — `SEND_TO_LEARNING` (already emits `LEARNING_LOGGED`; thread the source
+through it) and the sessionStorage-based ones (Editor/Token-Counter/Prompt-Gen/AI
+Chat) by emitting a lightweight `HANDOFF` event from `appActions.ts` — so every
+synapse, not just →Notes, lights its edge.
+
+---
+
 ## 2026-06-20 · `routine/auto-20260620T183724Z` — Live signal ticker in The Network
 
 **Increment:** INTERCONNECT + POLISH. Turned the Network mesh into a glanceable
