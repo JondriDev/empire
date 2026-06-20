@@ -1,4 +1,11 @@
-# Cakra Proxy (Cloudflare Worker)
+# Cakra Proxy (Cloudflare Worker) — optional alternative
+
+> **You don't need this.** The live app already ships with a hosted proxy (a
+> Supabase Edge Function, wired as Cakra's default in `src/lib/apiBase.ts`), so
+> Cakra answers on https://jondridev.github.io/empire/ with **zero setup** —
+> just enter your NVIDIA NIM key in **Cakra Agent → Settings**. This Cloudflare
+> Worker is kept only as a self-hosted alternative if you'd rather run your own
+> proxy; paste its URL into the same **Backend server** field to override.
 
 Browsers can't call NVIDIA NIM directly — NIM sends no CORS headers, so the live
 web/desktop PWA gets blocked. This tiny Worker fixes that: it holds your NIM key
