@@ -64,7 +64,7 @@ const ACTIVITY_LABELS: Partial<Record<EmpireEvent['type'], string>> = {
   LEARNING_CHALLENGE:   'completed a challenge',
   TOKEN_COUNTED:        'counted tokens',
   PROMPT_GENERATED:     'generated a prompt',
-  AI_QUERY:             'asked Hermes',
+  AI_QUERY:             'asked Cakra',
   AI_RESPONSE:          'got AI response',
   APP_OPENED:           'opened app',
   DATA_TABLE_UPDATED:   'updated data',
@@ -177,7 +177,7 @@ export default function HermesAgentBar() {
     emit({ type: 'AI_QUERY', query: userText, context: buildEmpireContext(), app: currentAppId })
 
     const empireContext = buildEmpireContext()
-    const systemPrompt = `You are Hermes, the AI connector for The Empire. Be concise (1-3 sentences). Current app: ${appDef?.name}.${empireContext ? ` Empire state:\n${empireContext}` : ''}`
+    const systemPrompt = `You are Cakra, the AI connector for The Empire. Be concise (1-3 sentences). Current app: ${appDef?.name}.${empireContext ? ` Empire state:\n${empireContext}` : ''}`
 
     let assistantText = ''
     try {
@@ -209,7 +209,7 @@ export default function HermesAgentBar() {
     return (
       <button
         onClick={() => setMinimized(false)}
-        aria-label="Open Hermes assistant"
+        aria-label="Open Cakra assistant"
         className="hermes-trigger fixed right-3 bottom-20 z-40 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
         style={{
           background: 'var(--gl-bg)',
@@ -220,7 +220,7 @@ export default function HermesAgentBar() {
         }}
       >
         <Bot className="w-3.5 h-3.5 text-cyan-300" />
-        <span className="text-[10px] text-cyan-200">Hermes</span>
+        <span className="text-[10px] text-cyan-200">Cakra</span>
         {activity.length > 0 && (
           <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
         )}
@@ -233,7 +233,7 @@ export default function HermesAgentBar() {
       {/* ── Trigger pill ── */}
       <button
         onClick={() => setOpen(o => !o)}
-        aria-label={open ? 'Close Hermes panel' : 'Open Hermes panel'}
+        aria-label={open ? 'Close Cakra panel' : 'Open Cakra panel'}
         aria-expanded={open}
         className="hermes-trigger fixed right-3 bottom-20 z-40 flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all duration-200"
         style={{
@@ -247,7 +247,7 @@ export default function HermesAgentBar() {
         onMouseLeave={(e) => { e.currentTarget.style.transform = '' }}
       >
         <Bot className="w-3.5 h-3.5 text-cyan-300" />
-        <span className="text-[10px] font-semibold text-cyan-200 hidden sm:inline">Hermes</span>
+        <span className="text-[10px] font-semibold text-cyan-200 hidden sm:inline">Cakra</span>
         <span
           className="w-1.5 h-1.5 rounded-full"
           style={{
@@ -284,7 +284,7 @@ export default function HermesAgentBar() {
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
               <div>
-                <div className="text-xs font-semibold" style={{ color: 'var(--text)' }}>Hermes</div>
+                <div className="text-xs font-semibold" style={{ color: 'var(--text)' }}>Cakra</div>
                 <div className="text-[9px] font-mono" style={{ color: 'var(--text3)' }}>
                   {model.split('/').pop() || 'connected'}
                 </div>
@@ -299,7 +299,7 @@ export default function HermesAgentBar() {
               </span>
               <button
                 onClick={() => setMinimized(true)}
-                aria-label="Minimize Hermes to pill"
+                aria-label="Minimize Cakra to pill"
                 className="p-1 rounded transition-colors hover:bg-white/5"
                 style={{ color: 'var(--text3)' }}
               >
@@ -307,7 +307,7 @@ export default function HermesAgentBar() {
               </button>
               <button
                 onClick={() => setOpen(false)}
-                aria-label="Close Hermes panel"
+                aria-label="Close Cakra panel"
                 className="p-1 rounded transition-colors hover:bg-white/5"
                 style={{ color: 'var(--text3)' }}
               >
@@ -366,7 +366,7 @@ export default function HermesAgentBar() {
                   { key: 'SEND_TO_TOKEN_COUNTER' as const, icon: Hash,          color: '#38bdf8', label: 'Count Tokens' },
                   { key: 'SEND_TO_LEARNING'    as const, icon: GraduationCap,   color: '#22c55e', label: 'Track as Learning' },
                   { key: 'SEND_TO_PROMPT_GEN'  as const, icon: Zap,             color: '#0d9488', label: 'Generate Prompt' },
-                  { key: 'SEND_TO_AI_CHAT'    as const, icon: Sparkles,        color: '#0d9488', label: 'Ask Hermes (this context)' },
+                  { key: 'SEND_TO_AI_CHAT'    as const, icon: Sparkles,        color: '#0d9488', label: 'Ask Cakra (this context)' },
                 ]).map(action => (
                   <button
                     key={action.key}
@@ -467,8 +467,8 @@ export default function HermesAgentBar() {
                   <input
                     value={chatInput}
                     onChange={e => setChatInput(e.target.value)}
-                    placeholder="Ask Hermes…"
-                    aria-label="Ask Hermes"
+                    placeholder="Ask Cakra…"
+                    aria-label="Ask Cakra"
                     className="flex-1 rounded-xl px-3 py-2 text-[11px] transition-all duration-150"
                     style={{
                       background: 'rgba(255,255,255,0.06)',
@@ -490,7 +490,7 @@ export default function HermesAgentBar() {
                   <button
                     type="submit"
                     disabled={!chatInput.trim() || chatLoading}
-                    aria-label="Send message to Hermes"
+                    aria-label="Send message to Cakra"
                     className="p-2 rounded-xl transition-all duration-150 hover:scale-105 disabled:opacity-30 disabled:hover:scale-100"
                     style={{
                       background: 'linear-gradient(135deg, var(--color-cyan-5), var(--color-teal-3))',

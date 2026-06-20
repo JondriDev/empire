@@ -90,7 +90,7 @@ export default function AppShell({ appMap }: AppShellProps) {
             onClick={() => navigate('/app/ai-chat')}
             className="p-2 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
             style={{ color: 'var(--text2)' }}
-            title="Ask Hermes AI"
+            title="Ask Cakra"
           >
             <Bot className="w-4 h-4" />
           </button>
