@@ -87,6 +87,21 @@ function labelForEvent(e: EmpireEvent): string {
   }
 }
 
+// Detect a genuine app→app handoff that the event bus can observe today: a note
+// saved *from* another app via CROSS_APP_ACTIONS.SEND_TO_NOTES, which tags the
+// new note `from-<sourceAppId>`. Returns the directed pair (source → target), or
+// null for ordinary single-app activity. Honest edges only — no invented links.
+function flowForEvent(e: EmpireEvent): { fromId: string; toId: string } | null {
+  if (e.type === 'NOTE_CREATED') {
+    const tag = e.tags.find(x => x.startsWith('from-'))
+    if (tag) {
+      const fromId = tag.slice('from-'.length)
+      if (fromId && fromId !== 'notes') return { fromId, toId: 'notes' }
+    }
+  }
+  return null
+}
+
 // Compact relative age for the ticker, e.g. "now", "12s", "3m", "1h".
 function ago(ms: number): string {
   const s = Math.floor(ms / 1000)
@@ -97,8 +112,9 @@ function ago(ms: number): string {
   return `${Math.floor(m / 60)}h`
 }
 
-// One row in the live signal ticker.
-type Signal = { key: number; name: string; rgb: string; label: string; at: number }
+// One row in the live signal ticker. `to`/`toRgb` are set only for an app→app
+// handoff, rendered as `source → target`.
+type Signal = { key: number; name: string; rgb: string; to?: string; label: string; at: number }
 const MAX_SIGNALS = 6
 
 export default function Network() {
@@ -136,6 +152,12 @@ export default function Network() {
     // that app emits an event and decaying each frame. idIndex maps app id → i.
     const flares = new Array(apps.length).fill(0)
     const idIndex = new Map(apps.map((a, i) => [a.id, i]))
+    // Transient app→app synapse arcs: a real handoff (e.g. a calc result saved
+    // into Notes) draws a curved link directly between the two instruments,
+    // decaying to rest. Capped so a burst of handoffs can't pile up.
+    type Arc = { from: number; to: number; life: number; rgb: string }
+    const arcs: Arc[] = []
+    const MAX_ARCS = 5
     let activeTimer: ReturnType<typeof setTimeout> | undefined
 
     function size() {
@@ -183,6 +205,30 @@ export default function Network() {
           ctx!.fill(); ctx!.shadowBlur = 0
         }
       })
+      // app→app synapse arcs — a real handoff lights a curved link between the
+      // two instruments, bowed toward CORE so it reads as routing through the
+      // organism. A packet sweeps source→target as the arc settles (life 1→0).
+      for (let k = arcs.length - 1; k >= 0; k--) {
+        const arc = arcs[k]
+        arc.life -= 0.011
+        const a = layout[arc.from], b = layout[arc.to]
+        if (arc.life <= 0 || !a || !b) { arcs.splice(k, 1); continue }
+        const lf = arc.life
+        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2
+        const cx = mx + (core.x - mx) * 0.5, cy = my + (core.y - my) * 0.5
+        ctx!.beginPath(); ctx!.moveTo(a.x, a.y); ctx!.quadraticCurveTo(cx, cy, b.x, b.y)
+        ctx!.strokeStyle = `rgba(${arc.rgb},${0.12 + 0.5 * lf})`
+        ctx!.lineWidth = dpr * (1 + 1.6 * lf)
+        ctx!.shadowColor = `rgba(${arc.rgb},0.8)`; ctx!.shadowBlur = 10 * dpr * lf
+        ctx!.stroke(); ctx!.shadowBlur = 0
+        const p = 1 - lf
+        const px = (1 - p) * (1 - p) * a.x + 2 * (1 - p) * p * cx + p * p * b.x
+        const py = (1 - p) * (1 - p) * a.y + 2 * (1 - p) * p * cy + p * p * b.y
+        ctx!.beginPath(); ctx!.arc(px, py, (2.4 + 2.2 * lf) * dpr, 0, 7)
+        ctx!.fillStyle = `rgba(${arc.rgb},${0.6 + 0.4 * lf})`
+        ctx!.shadowColor = `rgba(${arc.rgb},0.9)`; ctx!.shadowBlur = 12 * dpr * lf
+        ctx!.fill(); ctx!.shadowBlur = 0
+      }
       // app nodes
       layout.forEach((n, i) => {
         const f = flares[i]
@@ -238,13 +284,33 @@ export default function Network() {
       const i = idIndex.get(id)
       if (i === undefined) return
       flares[i] = 1
-      const name = t(`app.${apps[i].id}.name`, apps[i].name)
-      setLastActive(name)
+
+      // A genuine app→app handoff (e.g. a note saved *from* another app) also
+      // lights the source node and fires a synapse arc between the two.
+      const flow = flowForEvent(e)
+      const fromIdx = flow ? idIndex.get(flow.fromId) : undefined
+      const isFlow = fromIdx !== undefined && fromIdx !== i
+      if (isFlow) {
+        flares[fromIdx] = 1
+        arcs.push({ from: fromIdx, to: i, life: 1, rgb: rgbOf(apps[fromIdx].color) })
+        if (arcs.length > MAX_ARCS) arcs.shift()
+      }
+
+      const targetName = t(`app.${apps[i].id}.name`, apps[i].name)
+      const name = isFlow ? t(`app.${apps[fromIdx].id}.name`, apps[fromIdx].name) : targetName
+      setLastActive(isFlow ? `${name} → ${targetName}` : targetName)
       clearTimeout(activeTimer)
       activeTimer = setTimeout(() => setLastActive(null), 2600)
       // Prepend to the live ticker, newest first, capped at MAX_SIGNALS.
       setSignals(prev => [
-        { key: sigKey.current++, name, rgb: rgbOf(apps[i].color), label: labelForEvent(e), at: Date.now() },
+        {
+          key: sigKey.current++,
+          name,
+          rgb: isFlow ? rgbOf(apps[fromIdx].color) : rgbOf(apps[i].color),
+          to: isFlow ? targetName : undefined,
+          label: labelForEvent(e),
+          at: Date.now(),
+        },
         ...prev,
       ].slice(0, MAX_SIGNALS))
       if (reduceMotion) frame()
@@ -323,9 +389,19 @@ export default function Network() {
                   background: `rgb(${s.rgb})`, boxShadow: `0 0 6px rgb(${s.rgb})`,
                 }} />
                 <span style={{ color: 'var(--text)', fontWeight: 600, whiteSpace: 'nowrap' }}>{s.name}</span>
-                <span style={{
-                  color: 'var(--text2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
-                }}>{s.label}</span>
+                {s.to ? (
+                  <>
+                    <span style={{ color: 'var(--text3)', flex: '0 0 auto' }}>→</span>
+                    <span style={{
+                      color: 'var(--text2)', fontWeight: 600, whiteSpace: 'nowrap',
+                      overflow: 'hidden', textOverflow: 'ellipsis', flex: 1,
+                    }}>{s.to}</span>
+                  </>
+                ) : (
+                  <span style={{
+                    color: 'var(--text2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
+                  }}>{s.label}</span>
+                )}
                 <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', flex: '0 0 auto' }}>{ago(Date.now() - s.at)}</span>
               </div>
             ))}
