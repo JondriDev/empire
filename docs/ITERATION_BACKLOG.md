@@ -62,8 +62,12 @@ Wiring reference (already done — copy these patterns):
 
 ## P1 — QA hardening (keep it green, grow coverage)
 
-- [ ] Unit-test `src/lib/core/graph.ts`: addNode/updateNode/deleteNode (cascades
+- [x] Unit-test `src/lib/core/graph.ts`: addNode/updateNode/deleteNode (cascades
       edges), link/unlink, and `nodesOfType`/`neighbors` selectors.
+      _(17 tests in `src/lib/core/graph.test.ts`; reset the singleton store with
+      `useGraph.setState({ nodes: {} })` in `beforeEach`. Covers defaults,
+      distinct ids, no-op guards, inbound-edge cascade on delete, idempotent
+      link, self-link/missing-target guards, and newest-updated-first ordering.)_
 - [ ] Unit-test `src/lib/core/sync.ts` `reconcile`/`mirrorCollection`:
       add → node appears, edit → node updates, delete → node + edges vanish.
 - [ ] Unit-test `src/lib/core/intents.ts`: registerIntent / intentsFor (filters
