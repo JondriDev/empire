@@ -5,7 +5,7 @@
  * Defaults to DeepSeek V4 Flash — same model I'm running on.
  */
 
-import { apiUrl } from './apiBase'
+import { aiApiUrl } from './apiBase'
 import { pickModel, lastUserText, CAKRA_SYSTEM_PROMPT, type RoleModelMap } from './cakra'
 
 const AI_CONFIG_KEY = 'empire-ai-config'
@@ -83,7 +83,7 @@ export async function streamChat(
   }
 
   try {
-    const response = await fetch(apiUrl('/api/ai/chat'), {
+    const response = await fetch(aiApiUrl('/api/ai/chat'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
