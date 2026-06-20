@@ -12,13 +12,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="application-name" content="The Empire" />
     <meta name="description" content="Your personal web desktop — 24 apps, one intelligence" />
-    <!-- Sora (brand display/UI/body) ships locally via @font-face in the
-         vendored XENO design system. JetBrains Mono (telemetry/code) loads
-         from the CDN, per the design system. -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <!-- Sora (brand display/UI/body) and JetBrains Mono (telemetry/code)
+         both ship locally via @font-face in the vendored XENO design
+         system — no external CDN, so the interface renders fully offline. -->
     <title>The Empire</title>
   </head>
   <body>
