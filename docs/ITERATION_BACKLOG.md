@@ -86,7 +86,10 @@ Wiring reference (already done — copy these patterns):
       unregister + same-id replace, `intentsFor` accepts-filtering / empty
       result / registration-order, and `runIntent` happy path (+ INTENT_RUN
       emit), async run() awaiting, unknown-id no-op, and rejected-node no-op.)_
-- [ ] Ensure `npm run lint` is clean; fix any new warnings introduced by wiring.
+- [x] Ensure `npm run lint` is clean; fix any new warnings introduced by wiring.
+      _(verified clean — `npm run lint` (`eslint .`) exits 0 with no warnings.
+      Flat config lints `**/*.{ts,tsx}`, covering all wiring + the new
+      `*.test.ts` files; no code changes were needed.)_
 
 ## P2 — UI/UX polish
 
