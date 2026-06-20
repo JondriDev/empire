@@ -5,6 +5,29 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-20 — Integration run (PR review & merge)
+
+**Integrated.** Reviewed the 3 open PRs in a fresh cloud checkout.
+- **#6 `QA: visual + smoke 2026-06-20`** — docs-only auto PR (screenshots +
+  `REPORT.md` + a QA-table row in this log). Verified diff is docs-only, `mergeable`
+  clean. **Squash-merged.**
+- **#5 `fix(fonts): self-host JetBrains Mono`** — the one code PR this run. Branch was
+  far behind main, so merged current main into it and resolved the `ROUTINE-LOG.md`
+  add/add conflict. Reviewed: one focused increment (remove CDN `<link>`s, add local
+  `@font-face` + 2 vendored woff2), uses the existing `--mono` token, no logic/
+  localStorage changes, reversible. `npm run build` 🟢 + `vitest` 21/21; both hashed
+  woff2 emit into `dist/assets/` and the built CSS references them. **Squash-merged.**
+- **#2 `Package The Empire as installable PWA + Android APK`** — non-`routine/auto-*`
+  branch. The packaging is already on main (commit `912f4dc`); the branch is now stale
+  and would revert later work if merged. **Review-only — commented, left for the human.**
+
+**Main state.** 🟢 GREEN — build + tests pass post-merge. On-device visual confirmation
+of the JetBrains Mono HUD is still pending (no rendered UI in cloud). Note: the env's git
+proxy blocks branch-delete (HTTP 403), so the two merged `routine/auto-*` branches remain
+and can be pruned manually.
+
+---
+
 ## 2026-06-20 · `routine/auto-20260620T131613Z` — Self-host JetBrains Mono (offline-first fix)
 
 **Increment:** FIX + COMPLETE-THE-PWA. Vendored the JetBrains Mono telemetry/code
