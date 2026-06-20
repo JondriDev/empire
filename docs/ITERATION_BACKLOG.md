@@ -40,8 +40,13 @@ Wiring reference (already done — copy these patterns):
       name/size/tags/favorite/date — the object URL is transient so it's not in
       the node data. `<NodeActions type="photo"/>` on grid hover overlay + list
       rows; `photo` added to make-task accepts.)_
-- [ ] Wire **prompt-generator** (`src/apps/prompt-generator/`) history as
+- [x] Wire **prompt-generator** (`src/apps/prompt-generator/`) history as
       `prompt` nodes + `<NodeActions type="prompt" .../>`.
+      _(mirrored each **saved prompt** via `mirrorCollection` keyed by `id`;
+      node carries content/category/createdAt. The generator's history IS the
+      saved-prompts list (localStorage `empire-prompt-generator-saved`).
+      `<NodeActions type="prompt"/>` on each saved-prompt row; `prompt` added
+      to make-task accepts.)_
 - [ ] Add a per-message ⚡ menu to **Messages** (`src/apps/messages/`) — it is
       already mirrored centrally but has no `<NodeActions>` on bubbles yet.
 - [ ] Enrich `src/lib/core/intents.ts`: add a `make-note-from` intent (any node →
@@ -85,6 +90,9 @@ Wiring reference (already done — copy these patterns):
       other dirs' file nodes on navigate). Acceptable for now, but a "pinned" or
       cross-directory file graph would need a persistent registry instead of the
       per-directory reconcile.
+- [ ] prompt-generator only mirrors **saved** prompts, not every generated one
+      (generation is transient until the user taps Save). If a "recent history"
+      of un-saved generations is ever wanted, it'd need its own persisted list.
 - [ ] Photos `photo` nodes carry no thumbnail/url (object URLs are revoked on
       delete and don't survive reload). A `make-note-from`-style intent on a
       photo can't show the image — consider persisting a data-URL thumbnail or
