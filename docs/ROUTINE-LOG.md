@@ -5,6 +5,48 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-20 · `routine/auto-20260620T183724Z` — Live signal ticker in The Network
+
+**Increment:** INTERCONNECT + POLISH. Turned the Network mesh into a glanceable
+activity monitor by adding a live signal ticker — the exact "next step" queued by
+the mesh-wiring run.
+
+**Why:** The Network already pulses CORE→app when any cross-app event fires, but the
+*what/when* was ephemeral (only a fading subtitle). The ticker gives the organism a
+readable nerve-traffic log: the last 6 signals, newest first, each as `● App · verb · age`.
+It makes the "one living organism" legible at a glance without opening every app.
+
+**Changed (`src/apps/network/Network.tsx`):**
+- `labelForEvent()` — maps all 34 `EmpireEvent` variants to a terse instrument verb
+  (`note saved`, `calculated`, `message sent`, `tool run`, …; unknown → `signal`).
+- `ago()` — compact relative age (`now`/`12s`/`3m`/`1h`).
+- `signals` state (capped at `MAX_SIGNALS=6`), prepended in the existing `onAny`
+  handler alongside the flare/lastActive logic — one new entry per real event.
+- A 1s `setInterval` that re-renders **only while signals exist** to age the ticker
+  (the canvas RAF loop is untouched — its effect deps are unchanged, so the mesh
+  animation is undisturbed).
+- Ticker overlay: a `.gp` glass panel, bottom-left, `pointerEvents:none` so node
+  clicks pass through. Header dot lights `--signal` when active. Each row uses the
+  app's registry accent as a glowing dot; rows fade down the stack (opacity ramp);
+  the newest row animates in via the existing `.animate-fade-in-up` (skipped under
+  `prefers-reduced-motion`). Empty state reads `awaiting signal…` in mono.
+- All through tokens (`--space-*`, `--radius-*`, `--text-xs`, `--mono`, `--signal`,
+  `--text/2/3`); zero hardcoded colours except the canvas (2D ctx can't read CSS vars).
+- i18n: added `network.live` + `network.awaiting` (EN + ID).
+
+**Verified:** `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56 entries).
+`npx eslint` clean on both touched files. `npx vitest run` → 21/21 pass. No
+localStorage/schema changes; no Calendar syncer; no new subsystem.
+*Not verifiable here (no rendered UI):* on-device — open **The Network**, act in any
+app (save a note, do a calc), and watch a new row glide into the bottom-left ticker
+(`● Notes · note saved · now`) while the matching node pulses; ages tick up live.
+
+**Next step:** Fold apps into a real shared graph so nodes can also light *each
+other* (app→app intents), not just CORE→app — e.g. a calc result that lands in Notes
+lights the Calculator→Notes link.
+
+---
+
 ## 2026-06-20 — Integration run (PR review & merge)
 
 **Integrated.** Reviewed the 3 open PRs in a fresh cloud checkout.
