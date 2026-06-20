@@ -1,0 +1,7 @@
+name = "cakra-proxy"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# NIM_API_KEY is a *secret*, not set here. After `wrangler deploy`, run:
+#   npx wrangler secret put NIM_API_KEY
+# and paste your NVIDIA NIM key (starts with `nvapi-`).
