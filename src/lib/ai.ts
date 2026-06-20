@@ -5,6 +5,9 @@
  * Defaults to DeepSeek V4 Flash — same model I'm running on.
  */
 
+import { apiUrl } from './apiBase'
+import { pickModel, lastUserText, CAKRA_SYSTEM_PROMPT, type RoleModelMap } from './cakra'
+
 const AI_CONFIG_KEY = 'empire-ai-config'
 
 export interface AIConfig {
@@ -15,6 +18,8 @@ export interface AIConfig {
   systemPrompt: string
   temperature: number
   maxTokens: number
+  /** Cakra multi-model router: auto-pick the best model per task (NVIDIA NIM). */
+  router: { enabled: boolean; roles: Partial<RoleModelMap> }
 }
 
 const DEFAULT_CONFIG: AIConfig = {
@@ -22,9 +27,10 @@ const DEFAULT_CONFIG: AIConfig = {
   model: 'deepseek-ai/deepseek-v4-flash',
   apiKey: '',
   baseUrl: 'https://integrate.api.nvidia.com/v1',
-  systemPrompt: `You are Hermes, the AI agent powering The Empire — Jondri's personal application suite. You run on an Android device via Termux with a Mac-themed XFCE desktop. Be concise, helpful, and slightly playful. You have full context of all 20 apps in the Empire and can help with any of them. When asked about data from another app, use the context provided.`,
+  systemPrompt: CAKRA_SYSTEM_PROMPT,
   temperature: 0.7,
   maxTokens: 2048,
+  router: { enabled: true, roles: {} },
 }
 
 export interface ChatMessage {
@@ -70,13 +76,19 @@ export async function streamChat(
   const controller = new AbortController()
   const signal = options.signal || controller.signal
 
+  // Cakra router: classify this task and pick the best model (NVIDIA NIM).
+  let model = config.model
+  if (config.provider === 'nvidia' && config.router?.enabled !== false) {
+    model = pickModel(lastUserText(messages), config.router?.roles, config.model).model
+  }
+
   try {
-    const response = await fetch('/api/ai/chat', {
+    const response = await fetch(apiUrl('/api/ai/chat'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages,
-        model: config.model,
+        model,
         temperature: options.temperature ?? config.temperature,
         maxTokens: options.maxTokens ?? config.maxTokens,
         systemPrompt: config.systemPrompt,

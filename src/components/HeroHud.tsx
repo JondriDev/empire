@@ -38,7 +38,7 @@ export default function HeroHud({ clock, appCount, runningCount }: HeroHudProps)
   return (
     <div className="empire-hero" aria-hidden="false">
       {/* Reactor core */}
-      <div className="hud-core" role="img" aria-label="Hermes core">
+      <div className="hud-core" role="img" aria-label="Cakra core">
         <div className="hud-core-ticks" />
         <div className="hud-core-sweep" />
         <div className="hud-ring hud-ring-1" />

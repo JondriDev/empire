@@ -153,9 +153,23 @@ The Empire uses a custom glass-morphism theme with the following features:
 
 ---
 
-## 📱 PWA Installation
+## 📱 Run it without Termux (phone / tablet / desktop)
 
-The Empire is a Progressive Web App:
+You can use The Empire on your phone or tablet **without opening Termux &
+Termux-X11**. Everything builds **in the cloud via GitHub Actions** — no PC
+needed. Two ready-to-install versions come out of one offline-first codebase:
+
+- **PWA** (web + Samsung DeX desktop) — auto-deployed to GitHub Pages at
+  `https://jondridev.github.io/empire/`; tap **Install app** / **Add to Home
+  screen**.
+- **Android APK** — built by the **Android APK** workflow; download the APK
+  artifact and install it (a real launcher icon, fully offline).
+
+👉 **Full step-by-step guide: [PACKAGING.md](./PACKAGING.md)**
+
+### PWA Installation (manual / self-hosted)
+
+The Empire is also a standard Progressive Web App:
 
 1. Build for production: `npm run build`
 2. Serve the `dist` folder

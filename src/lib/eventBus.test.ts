@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import {
-  on, once, emit, getRecent, getAllRecent, clearHistory, getStats,
+  on, once, onAny, emit, getRecent, getAllRecent, clearHistory, getStats,
 } from './eventBus'
 
 beforeEach(() => {
@@ -31,6 +31,20 @@ describe('on / emit', () => {
     emit({ type: 'APP_CLOSED', appId: 'notes' })
     expect(fn).not.toHaveBeenCalled()
     off()
+  })
+})
+
+describe('onAny', () => {
+  it('delivers every event regardless of type, then stops after unsubscribe', () => {
+    const fn = vi.fn()
+    const off = onAny(fn)
+    emit({ type: 'APP_OPENED', appId: 'notes' })
+    emit({ type: 'CALCULATION_RESULT', expression: '1+1', result: '2' })
+    expect(fn).toHaveBeenCalledTimes(2)
+    expect(fn).toHaveBeenLastCalledWith({ type: 'CALCULATION_RESULT', expression: '1+1', result: '2' })
+    off()
+    emit({ type: 'APP_CLOSED', appId: 'notes' })
+    expect(fn).toHaveBeenCalledTimes(2)
   })
 })
 

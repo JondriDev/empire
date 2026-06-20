@@ -4,6 +4,7 @@
 
 import { useState } from 'react'
 import { X, Eye, EyeOff } from 'lucide-react'
+import { getApiBase, setApiBase, checkBackend } from '../../../lib/apiBase'
 import { PROVIDER_LIST } from '../lib/providers'
 import type { ProviderId } from '../lib/types'
 import type { AgentSettings } from '../lib/agent'
@@ -16,6 +17,8 @@ interface Props {
 
 export default function SettingsPanel({ settings, onChange, onClose }: Props) {
   const [visibleKeys, setVisibleKeys] = useState<Set<ProviderId>>(new Set())
+  const [backendUrl, setBackendUrl] = useState(getApiBase())
+  const [backendTest, setBackendTest] = useState<'idle' | 'testing' | 'online' | 'offline'>('idle')
 
   const toggleKeyVisibility = (id: ProviderId) => {
     setVisibleKeys(prev => {
@@ -47,6 +50,45 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
+          {/* Backend server (optional) — powers DataCenter, Files, Hermes, AI proxy */}
+          <section>
+            <h3 className="text-sm font-semibold mb-1" style={{ color: '#f1f5f9' }}>
+              Backend server (optional)
+            </h3>
+            <p className="text-xs mb-3" style={{ color: '#94a3b8' }}>
+              Empire runs fully offline. To power DataCenter, Files, Hermes and the AI
+              proxy, point it at a machine running <code>server.js</code> (your PC, or the
+              Termux box on the same Wi-Fi). Leave blank to use the local server when present.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={backendUrl}
+                onChange={e => setBackendUrl(e.target.value)}
+                placeholder="http://192.168.1.10:3001"
+                className="flex-1 rounded-lg px-3 py-2 text-sm font-mono"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid #1e2d4a', color: '#f1f5f9', outline: 'none' }}
+              />
+              <button
+                onClick={async () => {
+                  setApiBase(backendUrl)
+                  setBackendTest('testing')
+                  setBackendTest((await checkBackend()) ? 'online' : 'offline')
+                }}
+                className="px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
+                style={{ background: '#1e2d4a', color: '#f1f5f9' }}
+              >
+                {backendTest === 'testing' ? 'Testing…' : 'Save & test'}
+              </button>
+            </div>
+            {backendTest === 'online' && (
+              <p className="text-xs mt-2" style={{ color: '#34d399' }}>● Connected</p>
+            )}
+            {backendTest === 'offline' && (
+              <p className="text-xs mt-2" style={{ color: '#f87171' }}>● Not reachable — saved anyway</p>
+            )}
+          </section>
+
           {/* Provider API Keys */}
           <section>
             <h3 className="text-sm font-semibold mb-3" style={{ color: '#f1f5f9' }}>

@@ -10,6 +10,7 @@
  * 6. Quick Actions — one-click operations
  */
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { apiUrl } from '../../lib/apiBase'
 import {
   Activity, Sparkles, Puzzle, BookOpen, Wrench,
   Zap, Server, Cpu, HardDrive, Globe,
@@ -338,9 +339,9 @@ export default function HermesCommandCenter() {
     setError(null)
     try {
       const [statusRes, skillsRes, mcpsRes] = await Promise.all([
-        fetch('/api/hermes/status').then(r => r.ok ? r.json() : null),
-        fetch('/api/hermes/skills').then(r => r.ok ? r.json() : []),
-        fetch('/api/hermes/mcps').then(r => r.ok ? r.json() : []),
+        fetch(apiUrl('/api/hermes/status')).then(r => r.ok ? r.json() : null),
+        fetch(apiUrl('/api/hermes/skills')).then(r => r.ok ? r.json() : []),
+        fetch(apiUrl('/api/hermes/mcps')).then(r => r.ok ? r.json() : []),
       ])
       if (statusRes) setStatus(statusRes)
       if (skillsRes?.skills) setSkills(skillsRes.skills)
@@ -456,7 +457,7 @@ export default function HermesCommandCenter() {
           <Command className="w-5 h-5" style={{ color: '#fff' }} />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>Hermes Command Center</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>Cakra Command Center</div>
           <div style={{ fontSize: 12, color: 'var(--text3)' }}>
             {status ? `v${status.version}` : 'loading...'} &middot; One-click control hub
           </div>
@@ -742,7 +743,7 @@ export default function HermesCommandCenter() {
                 <div>OS: {status.system.os} ({status.system.arch})</div>
                 <div>Memory: {status.system.memory}</div>
                 <div>Storage: {status.system.storage}</div>
-                <div>Hermes: v{status.version} &middot; {status.provider} &middot; {status.model}</div>
+                <div>Cakra: v{status.version} &middot; {status.provider} &middot; {status.model}</div>
               </div>
             </div>
           )}
@@ -776,7 +777,7 @@ export default function HermesCommandCenter() {
             color: 'var(--text2)',
             lineHeight: 1.5,
           }}>
-            <strong style={{ color: '#818cf8' }}>Hermes Agent v{status?.version || '?'}</strong>
+            <strong style={{ color: '#818cf8' }}>Cakra Agent v{status?.version || '?'}</strong>
             <br />
             Running on {status?.system.os || 'Android'} &middot; {status?.provider || 'Unknown'} provider
             <br />

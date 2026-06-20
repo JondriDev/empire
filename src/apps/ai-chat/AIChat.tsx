@@ -55,7 +55,7 @@ export default function AIChat() {
   const welcomeMsg: Message = {
   id: 'system-welcome',
   role: 'assistant',
-  content: `👋 I'm **Hermes** — the AI connector for The Empire.\n\nI have context from **${CONTEXT_APPS.length}** apps. Ask me anything about your data, or use the panel button on any app to send me context directly.`,
+  content: `👋 I'm **Cakra** — the AI connector for The Empire.\n\nI have context from **${CONTEXT_APPS.length}** apps. Ask me anything about your data, or use the panel button on any app to send me context directly.`,
   timestamp: Date.now(),
   }
   setMessages([welcomeMsg])
@@ -86,7 +86,7 @@ export default function AIChat() {
 
     // Build messages with Empire context
     const empireContext = buildEmpireContext()
-    const systemPrompt = `You are **Hermes**, the AI agent powering The Empire — Jondri's personal application suite on Android/Termux with a Mac-themed XFCE desktop.
+    const systemPrompt = `You are **Cakra**, the AI agent powering The Empire — Jondri's personal application suite on Android/Termux with a Mac-themed XFCE desktop.
 
 You have full context awareness across these apps: ${CONTEXT_APPS.join(', ')}.
 
@@ -160,7 +160,7 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
             <Bot className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold">Hermes</h1>
+            <h1 className="text-lg font-semibold">Cakra</h1>
             <p className="text-xs text-gray-500">AI Connector — all apps, one intelligence</p>
           </div>
         </div>
@@ -271,7 +271,7 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
                 handleSubmit()
               }
             }}
-            placeholder="Ask Hermes anything..."
+            placeholder="Ask Cakra anything..."
             className="w-full resize-none rounded-2xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
             style={{ background: 'var(--input-bg)', color: 'var(--text)', minHeight: '52px', maxHeight: '120px' }}
             rows={1}
@@ -285,7 +285,7 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
           </button>
         </form>
         <p className="text-center text-[10px] text-gray-600 mt-2">
-          Hermes sees all apps · Press Enter to send, Shift+Enter for newline
+          Cakra sees all apps · Press Enter to send, Shift+Enter for newline
         </p>
       </div>
 
