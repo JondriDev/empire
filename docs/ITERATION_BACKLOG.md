@@ -68,8 +68,15 @@ Wiring reference (already done — copy these patterns):
       `useGraph.setState({ nodes: {} })` in `beforeEach`. Covers defaults,
       distinct ids, no-op guards, inbound-edge cascade on delete, idempotent
       link, self-link/missing-target guards, and newest-updated-first ordering.)_
-- [ ] Unit-test `src/lib/core/sync.ts` `reconcile`/`mirrorCollection`:
+- [x] Unit-test `src/lib/core/sync.ts` `reconcile`/`mirrorCollection`:
       add → node appears, edit → node updates, delete → node + edges vanish.
+      _(9 tests in `src/lib/core/sync.test.ts`; reset the graph singleton with
+      `useGraph.setState({ nodes: {} })` in `beforeEach`. Tests drive the private
+      `reconcile` through the exported `mirrorCollection`: add carries `sourceId`,
+      edit updates title/data in place with a stable id, delete drops node +
+      inbound edges, empty list clears all, plus idempotency and per-type
+      isolation. The store syncers (`note`/`learning`/`message`) reuse the same
+      `reconcile`, so they're covered transitively.)_
 - [ ] Unit-test `src/lib/core/intents.ts`: registerIntent / intentsFor (filters
       by `accepts`) / runIntent.
 - [ ] Ensure `npm run lint` is clean; fix any new warnings introduced by wiring.
