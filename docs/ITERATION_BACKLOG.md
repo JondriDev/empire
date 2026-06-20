@@ -28,8 +28,12 @@ Wiring reference (already done — copy these patterns):
       server rows, are the graph-worthy entity; rows only load for the active
       table and would flood the graph. `<NodeActions type="dataset"/>` on each
       sidebar table row; `dataset` added to make-task accepts.)_
-- [ ] Wire **Files** (`src/apps/files/`) entries as `file` nodes
+- [x] Wire **Files** (`src/apps/files/`) entries as `file` nodes
       + `<NodeActions type="file" .../>`.
+      _(mirrored each non-folder entry of the **current directory** as a `file`
+      node keyed by path; folders are navigation, not graph-worthy. Navigating
+      reconciles the graph to the new directory. `<NodeActions type="file"/>` on
+      each file row; `file` added to make-task accepts.)_
 - [ ] Wire **Photos** (`src/apps/photos/`) items as `photo` nodes
       + `<NodeActions type="photo" .../>`.
 - [ ] Wire **prompt-generator** (`src/apps/prompt-generator/`) history as
@@ -73,3 +77,7 @@ Wiring reference (already done — copy these patterns):
 - [ ] DataCenter `dataset` nodes only carry a `rows` count for the *active*
       table (others are `undefined` until selected). Consider fetching per-table
       row counts on `loadTables` so every dataset node has a stable count.
+- [ ] Files `file` nodes only reflect the *current* directory (reconcile drops
+      other dirs' file nodes on navigate). Acceptable for now, but a "pinned" or
+      cross-directory file graph would need a persistent registry instead of the
+      per-directory reconcile.
