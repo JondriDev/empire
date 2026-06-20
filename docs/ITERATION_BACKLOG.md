@@ -34,8 +34,12 @@ Wiring reference (already done — copy these patterns):
       node keyed by path; folders are navigation, not graph-worthy. Navigating
       reconciles the graph to the new directory. `<NodeActions type="file"/>` on
       each file row; `file` added to make-task accepts.)_
-- [ ] Wire **Photos** (`src/apps/photos/`) items as `photo` nodes
+- [x] Wire **Photos** (`src/apps/photos/`) items as `photo` nodes
       + `<NodeActions type="photo" .../>`.
+      _(mirrored each photo via `mirrorCollection` keyed by `id`; node carries
+      name/size/tags/favorite/date — the object URL is transient so it's not in
+      the node data. `<NodeActions type="photo"/>` on grid hover overlay + list
+      rows; `photo` added to make-task accepts.)_
 - [ ] Wire **prompt-generator** (`src/apps/prompt-generator/`) history as
       `prompt` nodes + `<NodeActions type="prompt" .../>`.
 - [ ] Add a per-message ⚡ menu to **Messages** (`src/apps/messages/`) — it is
@@ -81,3 +85,7 @@ Wiring reference (already done — copy these patterns):
       other dirs' file nodes on navigate). Acceptable for now, but a "pinned" or
       cross-directory file graph would need a persistent registry instead of the
       per-directory reconcile.
+- [ ] Photos `photo` nodes carry no thumbnail/url (object URLs are revoked on
+      delete and don't survive reload). A `make-note-from`-style intent on a
+      photo can't show the image — consider persisting a data-URL thumbnail or
+      a stable file path if photos ever need visual representation in Network.
