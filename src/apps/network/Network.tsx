@@ -6,7 +6,7 @@
  * in the registry, with packets travelling the links. Hovering reveals a
  * label; clicking a node opens that app.
  */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useReducer, useRef, useState } from 'react'
 import { apps } from '../../lib/registry'
 import { useWindowStore } from '../../lib/windowStore'
 import { useLang } from '../../lib/i18n'
@@ -55,12 +55,70 @@ function appIdForEvent(e: EmpireEvent): string | null {
   }
 }
 
+// A terse, instrument-style verb for each signal in the live ticker.
+function labelForEvent(e: EmpireEvent): string {
+  switch (e.type) {
+    case 'NOTE_CREATED': return 'note saved'
+    case 'NOTE_UPDATED': return 'note edited'
+    case 'NOTE_DELETED': return 'note removed'
+    case 'CALCULATION_RESULT': return 'calculated'
+    case 'EVENT_CREATED': return 'event added'
+    case 'EVENT_UPDATED': return 'event edited'
+    case 'EVENT_DELETED': return 'event removed'
+    case 'MESSAGE_SENT': return 'message sent'
+    case 'CODE_RUN': return 'code run'
+    case 'LEARNING_LOGGED': return 'learning logged'
+    case 'LEARNING_CHALLENGE': return 'challenge'
+    case 'TOKEN_COUNTED': return 'tokens counted'
+    case 'PROMPT_GENERATED': return 'prompt built'
+    case 'FILE_OPENED': return 'file opened'
+    case 'AI_QUERY': return 'query'
+    case 'AI_RESPONSE': return 'response'
+    case 'APP_OPENED': return 'opened'
+    case 'APP_CLOSED': return 'closed'
+    case 'DATA_TABLE_UPDATED': return 'table updated'
+    case 'WEATHER_UPDATED': return 'weather synced'
+    case 'HERMES_STATUS_REFRESHED': return 'status refreshed'
+    case 'HERMES_APP_LAUNCHED': return 'app launched'
+    case 'HERMES_TOOL_EXECUTED': return 'tool run'
+    case 'HERMES_SKILL_LOADED': return 'skill loaded'
+    case 'HERMES_MCP_CONNECTED': return 'mcp connected'
+    default: return 'signal'
+  }
+}
+
+// Compact relative age for the ticker, e.g. "now", "12s", "3m", "1h".
+function ago(ms: number): string {
+  const s = Math.floor(ms / 1000)
+  if (s < 2) return 'now'
+  if (s < 60) return `${s}s`
+  const m = Math.floor(s / 60)
+  if (m < 60) return `${m}m`
+  return `${Math.floor(m / 60)}h`
+}
+
+// One row in the live signal ticker.
+type Signal = { key: number; name: string; rgb: string; label: string; at: number }
+const MAX_SIGNALS = 6
+
 export default function Network() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const openApp = useWindowStore(s => s.openApp)
   const { t } = useLang()
   const [hoverName, setHoverName] = useState<string | null>(null)
   const [lastActive, setLastActive] = useState<string | null>(null)
+  const [signals, setSignals] = useState<Signal[]>([])
+  const sigKey = useRef(0)
+  // Re-render once a second (only while signals exist) to age the ticker.
+  const [, tickClock] = useReducer((x: number) => x + 1, 0)
+  const reduceMotion = typeof matchMedia !== 'undefined'
+    && matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  useEffect(() => {
+    if (signals.length === 0) return
+    const id = setInterval(tickClock, 1000)
+    return () => clearInterval(id)
+  }, [signals.length])
 
   useEffect(() => {
     const cv = canvasRef.current
@@ -184,6 +242,11 @@ export default function Network() {
       setLastActive(name)
       clearTimeout(activeTimer)
       activeTimer = setTimeout(() => setLastActive(null), 2600)
+      // Prepend to the live ticker, newest first, capped at MAX_SIGNALS.
+      setSignals(prev => [
+        { key: sigKey.current++, name, rgb: rgbOf(apps[i].color), label: labelForEvent(e), at: Date.now() },
+        ...prev,
+      ].slice(0, MAX_SIGNALS))
       if (reduceMotion) frame()
     })
 
@@ -216,6 +279,59 @@ export default function Network() {
         </div>
       </div>
       <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />
+
+      {/* Live signal ticker — a glanceable readout of recent nerve traffic. */}
+      <div
+        className="gp"
+        style={{
+          position: 'absolute', left: 16, bottom: 16, zIndex: 2, pointerEvents: 'none',
+          width: 'min(248px, calc(100% - 32px))',
+          padding: 'var(--space-3)',
+          borderRadius: 'var(--radius-md)',
+          display: 'flex', flexDirection: 'column', gap: 'var(--space-2)',
+        }}
+      >
+        <div className="t-label" style={{ color: 'var(--text3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+          <span
+            style={{
+              width: 6, height: 6, borderRadius: 'var(--radius-full)',
+              background: signals.length ? 'var(--signal, #34f5d6)' : 'var(--text3)',
+              boxShadow: signals.length ? '0 0 8px var(--signal, #34f5d6)' : 'none',
+              transition: 'background var(--dur-mid), box-shadow var(--dur-mid)',
+            }}
+          />
+          {t('network.live', 'Live Signal')}
+        </div>
+        {signals.length === 0 ? (
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)', fontFamily: 'var(--mono)' }}>
+            {t('network.awaiting', 'awaiting signal…')}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {signals.map((s, idx) => (
+              <div
+                key={s.key}
+                className={!reduceMotion && idx === 0 ? 'animate-fade-in-up' : undefined}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+                  fontSize: 'var(--text-xs)',
+                  opacity: 1 - idx * 0.11,
+                }}
+              >
+                <span style={{
+                  flex: '0 0 auto', width: 7, height: 7, borderRadius: 'var(--radius-full)',
+                  background: `rgb(${s.rgb})`, boxShadow: `0 0 6px rgb(${s.rgb})`,
+                }} />
+                <span style={{ color: 'var(--text)', fontWeight: 600, whiteSpace: 'nowrap' }}>{s.name}</span>
+                <span style={{
+                  color: 'var(--text2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
+                }}>{s.label}</span>
+                <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', flex: '0 0 auto' }}>{ago(Date.now() - s.at)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
