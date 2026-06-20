@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react'
 import { Bot, Plus, Trash2, RefreshCw, Table2 } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { getApiBase } from '../../lib/apiBase'
+import { mirrorCollection } from '../../lib/core/sync'
+import { NodeActions } from '../../components/ui/NodeActions'
 
 interface TableRow { id: number; [key: string]: string | number | boolean | null }
 
@@ -35,6 +37,16 @@ export default function DataCenter() {
   useEffect(() => {
     if (activeTable) loadRows(activeTable)
   }, [activeTable])
+
+  // Mirror each table into the Core graph as a `dataset` node so it joins the
+  // organism. Tables (not individual server rows) are the graph-worthy entity.
+  useEffect(() => {
+    mirrorCollection('dataset', 'datacenter', tables, {
+      id: t => t,
+      title: t => t,
+      data: t => ({ rows: t === activeTable ? rows.length : undefined }),
+    })
+  }, [tables, activeTable, rows.length])
 
   const loadRows = async (table: string) => {
     setLoading(true)
@@ -106,14 +118,22 @@ export default function DataCenter() {
           {tables.map(t => {
             const active = activeTable === t
             return (
-              <button
+              <div
                 key={t}
-                onClick={() => setActiveTable(t)}
-                className={`w-full px-4 py-2.5 text-left text-sm capitalize transition-colors border-b ${active ? 'bg-cyan-500/10 text-cyan-200' : 'hover:bg-white/5'}`}
-                style={{ borderColor: 'var(--border)', ...(active ? {} : { color: 'var(--text2)' }) }}
+                className={`group flex items-center border-b ${active ? 'bg-cyan-500/10' : 'hover:bg-white/5'}`}
+                style={{ borderColor: 'var(--border)' }}
               >
-                {t}
-              </button>
+                <button
+                  onClick={() => setActiveTable(t)}
+                  className={`flex-1 px-4 py-2.5 text-left text-sm capitalize transition-colors ${active ? 'text-cyan-200' : ''}`}
+                  style={active ? {} : { color: 'var(--text2)' }}
+                >
+                  {t}
+                </button>
+                <span className="pr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <NodeActions type="dataset" sourceId={t} />
+                </span>
+              </div>
             )
           })}
         </div>
