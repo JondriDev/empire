@@ -2,7 +2,19 @@
 
 **Your Personal Application Suite — 21 Apps in One Dashboard**
 
-The Empire is a full-featured, offline-first application suite designed for Android/Termux with a beautiful glass-morphism UI. Built with React 19, TypeScript, and Vite, it provides 21 integrated apps with AI-powered assistance through Hermes.
+### ▶️ [Open The Empire](https://jondridev.github.io/empire/)
+
+Runs in any browser — **no Termux, no install required**. On your phone or
+desktop, tap **Install app** / **Add to Home screen** and it opens like a native
+app. Three ways to run it, just like Claude:
+
+| Version | How to get it |
+|---------|---------------|
+| 🌐 **Web app** | [jondridev.github.io/empire](https://jondridev.github.io/empire/) — open instantly |
+| 🖥️ **Desktop app** | Same link → browser menu → **Install** (installable PWA) |
+| 📱 **Android app** | Download the APK from the [Actions tab](https://github.com/JondriDev/empire/actions/workflows/android.yml) → artifact `the-empire-debug-apk` |
+
+The Empire is a full-featured, offline-first application suite with a beautiful glass-morphism UI. Built with React 19, TypeScript, and Vite, it provides 21 integrated apps with AI-powered assistance through **Cakra** — a multi-model agent combining the strengths of Claude Code, Codex, Hermes, OpenClaw, Kimi Code, and AntiGravity.
 
 ![Empire Dashboard](https://via.placeholder.com/1200x600/6366f1/ffffff?text=The+Empire+Dashboard)
 
