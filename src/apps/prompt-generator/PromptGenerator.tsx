@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import { apiUrl } from '../../lib/apiBase'
+import { mirrorCollection } from '../../lib/core/sync'
+import { NodeActions } from '../../components/ui/NodeActions'
 import {
   Wand2, Copy, Check, Sparkles, MessageSquare,
   Code, BookOpen, PenTool, Zap, Tag
@@ -164,6 +166,16 @@ export default function PromptGenerator() {
     try { localStorage.setItem('empire-prompt-generator-saved', JSON.stringify(saved)) } catch { /* ignore */ }
   }, [saved])
 
+  // Mirror saved prompts into the Core graph as `prompt` nodes so the
+  // generator's history joins the organism and gains cross-app intents.
+  useEffect(() => {
+    mirrorCollection('prompt', 'prompt-generator', saved, {
+      id: p => p.id,
+      title: p => p.title,
+      data: p => ({ content: p.content, category: p.category, createdAt: p.createdAt }),
+    })
+  }, [saved])
+
   const applyTemplate = (template: PromptTemplate) => {
     setSelectedTemplate(template)
     setVariables({})
@@ -322,6 +334,7 @@ export default function PromptGenerator() {
  <p className="text-sm">{p.title}</p>
  <p className="text-xs text-white/40 truncate">{p.content}</p>
  </button>
+ <NodeActions type="prompt" sourceId={p.id} />
  <button onClick={() => deleteSaved(p.id)} className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-red-400 text-xs">✕</button>
  </div>
  ))}

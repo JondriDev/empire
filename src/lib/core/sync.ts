@@ -108,7 +108,7 @@ function registerCoreIntents(): void {
     id: 'make-task',
     label: 'Make Task from this',
     icon: '✓',
-    accepts: n => ['note', 'event', 'learning', 'message', 'goal', 'kanban', 'dataset', 'file', 'photo'].includes(n.type),
+    accepts: n => ['note', 'event', 'learning', 'message', 'goal', 'kanban', 'dataset', 'file', 'photo', 'prompt'].includes(n.type),
     run: n => {
       const g = useGraph.getState()
       const task = g.addNode({ type: 'task', title: `Do: ${n.title}`, data: { done: false, from: n.id }, app: n.meta.app })
