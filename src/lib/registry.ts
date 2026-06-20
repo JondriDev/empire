@@ -11,7 +11,7 @@ export interface AppDefinition {
 }
 
 export const apps: AppDefinition[] = [
-  { id: 'ai-agent', name: 'Hermes Agent', icon: 'Sparkles', route: '/app/ai-agent', description: 'AI that actually acts', color: '#22d3ee', hermesEnabled: true },
+  { id: 'ai-agent', name: 'Cakra Agent', icon: 'Sparkles', route: '/app/ai-agent', description: 'AI that actually acts', color: '#22d3ee', hermesEnabled: true },
   { id: 'calculator', name: 'Calculator', icon: 'Calculator', route: '/app/calculator', description: 'Scientific calculations', color: '#2dd4bf', hermesEnabled: true },
   { id: 'calendar', name: 'Calendar', icon: 'Calendar', route: '/app/calendar', description: 'Schedule & events', color: '#60a5fa', hermesEnabled: true },
   { id: 'clock', name: 'Clock', icon: 'Clock', route: '/app/clock', description: 'Time & alarms', color: '#38bdf8', hermesEnabled: false },
@@ -32,8 +32,8 @@ export const apps: AppDefinition[] = [
   { id: 'prompt-generator', name: 'Prompt Gen', icon: 'Wand2', route: '/app/prompt-generator', description: 'Craft AI prompts', color: '#c084fc', hermesEnabled: true },
   { id: 'token-counter', name: 'Token Counter', icon: 'Hash', route: '/app/token-counter', description: 'Count AI tokens', color: '#38bdf8', hermesEnabled: true },
   { id: 'learning-tracker', name: 'Learning Tracker', icon: 'GraduationCap', route: '/app/learning-tracker', description: 'Track & challenge yourself', color: '#34d399', hermesEnabled: true },
-  { id: 'hermes-cc', name: 'Hermes CC', icon: 'Command', route: '/app/hermes-cc', description: 'One-click command center', color: '#22d3ee', hermesEnabled: true },
-  { id: 'ai-chat', name: 'AI Chat', icon: 'Sparkles', route: '/app/ai-chat', description: 'Chat with Hermes AI', color: '#a78bfa', hermesEnabled: true },
+  { id: 'hermes-cc', name: 'Cakra CC', icon: 'Command', route: '/app/hermes-cc', description: 'One-click command center', color: '#22d3ee', hermesEnabled: true },
+  { id: 'ai-chat', name: 'AI Chat', icon: 'Sparkles', route: '/app/ai-chat', description: 'Chat with Cakra', color: '#a78bfa', hermesEnabled: true },
   { id: 'artifacts', name: 'Artifacts', icon: 'Palette', route: '/app/artifacts', description: 'Self-contained mini-apps & builders', color: '#c084fc', hermesEnabled: true },
   { id: 'network', name: 'Network', icon: 'Network', route: '/app/network', description: 'The ecosystem as a live node-graph', color: '#34f5d6', hermesEnabled: false },
 ]
