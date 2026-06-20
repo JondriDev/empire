@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import { apiUrl } from '../../lib/apiBase'
+import { mirrorCollection } from '../../lib/core/sync'
+import { NodeActions } from '../../components/ui/NodeActions'
 import {
   Folder, FolderOpen, File, FileText, Image, Film, Music,
   Code, Archive, ChevronRight, ChevronDown, Download,
@@ -68,6 +70,18 @@ export default function Files() {
   useEffect(() => {
     setBreadcrumb(path.split('/').filter(Boolean))
   }, [path])
+
+  // Mirror the current directory's files into the Core graph as `file` nodes so
+  // they join the organism. Only real files (not folders) are graph-worthy;
+  // navigating to a new directory reconciles the graph to that directory.
+  useEffect(() => {
+    const files = entries.filter(e => !e.isDirectory)
+    mirrorCollection('file', 'files', files, {
+      id: f => f.path,
+      title: f => f.name,
+      data: f => ({ path: f.path, size: f.size, extension: f.extension }),
+    })
+  }, [entries])
 
   const loadDirectory = async (dirPath: string) => {
     setLoading(true)
@@ -230,7 +244,8 @@ export default function Files() {
                 </p>
               </div>
               {!entry.isDirectory && (
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100">
+                <div className="flex gap-1 items-center opacity-0 group-hover:opacity-100" onClick={e => e.stopPropagation()}>
+                  <NodeActions type="file" sourceId={entry.path} />
                   <button onClick={e => { e.stopPropagation(); downloadFile(entry) }} className="p-1.5 text-white/40 hover:text-white">
                     <Download className="w-3.5 h-3.5" />
                   </button>
