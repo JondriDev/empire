@@ -22,8 +22,12 @@ Wiring reference (already done — copy these patterns):
       _(done on the Kanban board as `kanban` nodes — the board's cards are the
       graph-worthy entity; Artifacts is otherwise a launcher of mini-tools.
       `kanban` added to make-task accepts.)_
-- [ ] Wire **DataCenter** (`src/apps/datacenter/`) records as `dataset` nodes
+- [x] Wire **DataCenter** (`src/apps/datacenter/`) records as `dataset` nodes
       + `<NodeActions type="dataset" .../>`.
+      _(mirrored each **table** as a `dataset` node — tables, not individual
+      server rows, are the graph-worthy entity; rows only load for the active
+      table and would flood the graph. `<NodeActions type="dataset"/>` on each
+      sidebar table row; `dataset` added to make-task accepts.)_
 - [ ] Wire **Files** (`src/apps/files/`) entries as `file` nodes
       + `<NodeActions type="file" .../>`.
 - [ ] Wire **Photos** (`src/apps/photos/`) items as `photo` nodes
@@ -65,3 +69,7 @@ Wiring reference (already done — copy these patterns):
 
 ## Discovered follow-ups
 <!-- The loop appends newly found tasks here, then promotes them above. -->
+
+- [ ] DataCenter `dataset` nodes only carry a `rows` count for the *active*
+      table (others are `undefined` until selected). Consider fetching per-table
+      row counts on `loadTables` so every dataset node has a stable count.
