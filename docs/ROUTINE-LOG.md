@@ -5,6 +5,41 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-20 · `routine/auto-20260620T131613Z` — Self-host JetBrains Mono (offline-first fix)
+
+**Increment:** FIX + COMPLETE-THE-PWA. Vendored the JetBrains Mono telemetry/code
+font locally instead of loading it from the Google Fonts CDN.
+
+**Why:** QA flagged a real, reproducible bug — `fonts.googleapis.com` is unreachable
+offline / in the installed PWA, so on the **desktop home `/`** the telemetry HUD text
+overlapped and dock labels ran together (mono metrics fell back to a proportional system
+font), and every route threw a font-fetch console error. The brand font (Sora) was already
+vendored; the mono face was the last external dependency in the type system. Self-hosting
+it makes the interface render identically offline — directly on the path to an installable,
+offline-capable PWA/APK.
+
+**Changed:**
+- Added `src/design-system/fonts/JetBrainsMono-latin.woff2` + `…-latin-ext.woff2`
+  (variable woff2, weights 100–800; latin + latin-ext subsets — covers EN/ID).
+- `src/design-system/colors_and_type.css`: two `@font-face` rules for JetBrains Mono
+  next to the existing Sora faces (same vendored pattern, relative `url('fonts/…')`).
+- `index.html`: removed the 4 Google Fonts `<link>` tags (preconnect ×2, preload,
+  stylesheet); updated the comment. No more `googleapis`/`gstatic` references in the app.
+
+**Verified (integration run, against current main):**
+- `npm run build` → green (`tsc -b && vite build`); Vite emits both hashed `.woff2`
+  files into `dist/assets/` and the built CSS references them. Sora `.ttf` still bundles.
+- `npx vitest run` → all pass. No remaining CDN font references in the app.
+- Merged latest main (packaging + Cakra rebrand) into the branch; resolved the
+  `docs/ROUTINE-LOG.md` add/add conflict (this file).
+- **Not verifiable here (no rendered UI):** on-device, the desktop `/` HUD should now align
+  and read in JetBrains Mono with no console font error, on first load and offline.
+
+**Next step:** Resume the `src/lib/core/*` organism-graph work now that type is fully
+local and packaging has landed on main.
+
+---
+
 ## 2026-06-20 — Integration run (PR review & merge)
 
 **Integrated.** Reviewed the 3 open PRs in a fresh cloud checkout.
