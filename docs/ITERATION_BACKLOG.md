@@ -93,8 +93,13 @@ Wiring reference (already done — copy these patterns):
 
 ## P2 — UI/UX polish
 
-- [ ] `NodeActions` ⚡ menu: use motion tokens (`--dur-fast`, `--ease-spring`),
+- [x] `NodeActions` ⚡ menu: use motion tokens (`--dur-fast`, `--ease-spring`),
       `.gp` glass primitive, full keyboard nav + `aria-*`, and `Esc` to close.
+      _(motion tokens + `.gp` glass were already in place. Added roving-focus
+      keyboard nav: ArrowUp/Down wrap, Home/End jump, Esc + Tab close and return
+      focus to the ⚡ trigger; ArrowDown/Enter/Space opens from the button and
+      focus moves into the first menuitem on open. Menu gets `aria-orientation`,
+      items get `tabIndex={-1}` so the menu owns focus.)_
 - [ ] `Network` app: type-colored nodes from design tokens, legible edge labels,
       and hover highlight of a node's neighbors.
 - [ ] Consistent empty-states for every newly-wired app list (icon + hint).
