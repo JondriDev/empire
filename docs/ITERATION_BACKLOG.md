@@ -77,8 +77,15 @@ Wiring reference (already done — copy these patterns):
       inbound edges, empty list clears all, plus idempotency and per-type
       isolation. The store syncers (`note`/`learning`/`message`) reuse the same
       `reconcile`, so they're covered transitively.)_
-- [ ] Unit-test `src/lib/core/intents.ts`: registerIntent / intentsFor (filters
+- [x] Unit-test `src/lib/core/intents.ts`: registerIntent / intentsFor (filters
       by `accepts`) / runIntent.
+      _(10 tests in `src/lib/core/intents.test.ts`. The registry is a
+      module-level singleton with no public reset, so each test cleans up via
+      the unregister fns `registerIntent` returns (`afterEach`), and
+      `clearHistory()` resets the event bus in `beforeEach`. Covers register +
+      unregister + same-id replace, `intentsFor` accepts-filtering / empty
+      result / registration-order, and `runIntent` happy path (+ INTENT_RUN
+      emit), async run() awaiting, unknown-id no-op, and rejected-node no-op.)_
 - [ ] Ensure `npm run lint` is clean; fix any new warnings introduced by wiring.
 
 ## P2 — UI/UX polish
