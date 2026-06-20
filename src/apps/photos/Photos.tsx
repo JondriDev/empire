@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
+import { mirrorCollection } from '../../lib/core/sync'
+import { NodeActions } from '../../components/ui/NodeActions'
 import {
  Image, Upload, Trash2, ChevronLeft,
  ChevronRight, X, Heart, Download,
@@ -53,6 +55,17 @@ export default function Photos() {
 
   useEffect(() => {
     try { localStorage.setItem('empire-photos', JSON.stringify(photos)) } catch { /* ignore */ }
+  }, [photos])
+
+  // Mirror photos into the Core graph as `photo` nodes so they join the
+  // organism (object URLs are transient, so the node carries name/size/tags,
+  // not the url).
+  useEffect(() => {
+    mirrorCollection('photo', 'photos', photos, {
+      id: p => p.id,
+      title: p => p.name,
+      data: p => ({ size: p.size, tags: p.tags, favorite: p.favorite, date: p.date }),
+    })
   }, [photos])
 
   const addFiles = useCallback((files: FileList | null) => {
@@ -237,9 +250,14 @@ export default function Photos() {
                 <Heart className="absolute top-2 left-2 w-4 h-4 text-pink-500 fill-pink-500" />
               )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-end">
-                <div className="p-2 w-full opacity-0 group-hover:opacity-100 transition">
-                  <p className="text-xs truncate">{photo.name}</p>
-                  <p className="text-xs text-white/60">{formatBytes(photo.size)}</p>
+                <div className="p-2 w-full opacity-0 group-hover:opacity-100 transition flex items-end gap-1">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs truncate">{photo.name}</p>
+                    <p className="text-xs text-white/60">{formatBytes(photo.size)}</p>
+                  </div>
+                  <div onClick={e => e.stopPropagation()}>
+                    <NodeActions type="photo" sourceId={photo.id} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -259,9 +277,12 @@ export default function Photos() {
                   <p className="text-sm truncate">{photo.name}</p>
                   <p className="text-xs text-white/40">{formatBytes(photo.size)} · {formatDate(new Date(photo.date))}</p>
                 </div>
-                <button onClick={e => { e.stopPropagation(); toggleFavorite(photo.id) }} className="opacity-0 group-hover:opacity-100">
-                  <Heart className={`w-4 h-4 ${photo.favorite ? 'text-pink-500 fill-pink-500' : 'text-white/40'}`} />
-                </button>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100" onClick={e => e.stopPropagation()}>
+                  <NodeActions type="photo" sourceId={photo.id} />
+                  <button onClick={e => { e.stopPropagation(); toggleFavorite(photo.id) }}>
+                    <Heart className={`w-4 h-4 ${photo.favorite ? 'text-pink-500 fill-pink-500' : 'text-white/40'}`} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
