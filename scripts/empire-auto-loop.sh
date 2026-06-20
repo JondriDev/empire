@@ -15,11 +15,13 @@
 # Run detached:      setsid nohup scripts/empire-auto-loop.sh 50 30 >/dev/null 2>&1 &
 # Publish each step: EMPIRE_LOOP_PUSH=1   (pushes auto/iteration so a PR stays current)
 #
-# Permissions: an unattended loop cannot answer permission prompts. The default
-# uses `--permission-mode acceptEdits` (auto-accepts file edits, but may still
-# pause on some shell commands). For a truly hands-off overnight run, export:
-#     EMPIRE_LOOP_PERM="--dangerously-skip-permissions"
-# (only do that in this trusted local repo — it skips ALL confirmations).
+# Permissions: an unattended loop cannot answer prompts. This PRoot runs as
+# root, where `--dangerously-skip-permissions` is REFUSED. Instead, the repo's
+# .claude/settings.local.json allow-lists exactly the tools an iteration needs
+# (edits + npm/git read & commit). The loop runs `--permission-mode acceptEdits`;
+# anything not allow-listed (push, rm, curl) is denied in headless mode. The
+# wrapper does the push (EMPIRE_LOOP_PUSH=1), never the model. Override the
+# permission mode via EMPIRE_LOOP_PERM if you really need to.
 set -uo pipefail
 
 EMPIRE_DIR="${EMPIRE_DIR:-/data/data/com.termux/files/home/Desktop/empire}"
