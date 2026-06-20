@@ -17,6 +17,43 @@
 
 const KEY = 'empire-backend-url'
 
+/**
+ * Cakra's default AI proxy (Supabase Edge Function). NVIDIA NIM sends no CORS
+ * headers, so a deployed browser can't call it directly — this proxy adds CORS
+ * and speaks the `/api/ai/chat` contract. Used automatically on the live
+ * web/desktop PWA so Cakra answers with zero setup; on local Termux/dev we stay
+ * same-origin (server.js). An explicit "Backend server" override always wins.
+ */
+const CAKRA_AI_PROXY = 'https://dvvucxqszyupeykdwoev.supabase.co/functions/v1/cakra'
+
+function isLocalHost(h: string): boolean {
+  return (
+    h === 'localhost' ||
+    h === '127.0.0.1' ||
+    h === '' ||
+    /^192\.168\./.test(h) ||
+    /^10\./.test(h) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(h)
+  )
+}
+
+/**
+ * Resolve an `/api/ai/...` URL for Cakra. Prefers an explicit backend override;
+ * otherwise routes to the hosted proxy on the live site, or same-origin locally.
+ */
+export function aiApiUrl(path: string): string {
+  const base = getApiBase()
+  if (base) return base + (path.startsWith('/') ? path : '/' + path)
+  try {
+    if (!isLocalHost(location.hostname)) {
+      return CAKRA_AI_PROXY + (path.startsWith('/') ? path : '/' + path)
+    }
+  } catch {
+    /* no window (SSR/worker) — fall through to same-origin */
+  }
+  return path // same-origin (Termux local server / dev proxy)
+}
+
 export type BackendStatus = 'unknown' | 'online' | 'offline'
 
 let backendStatus: BackendStatus = 'unknown'
