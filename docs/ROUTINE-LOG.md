@@ -5,6 +5,61 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · `routine/auto-20260621T150404Z` — register the orphaned Goals app (27/27 reachable)
+
+**Increment:** FIX + INTERCONNECT + COMPLETE-THE-WEB-APP. Closed the standing
+triage item flagged across the last ~5 QA/integration runs: **`/app/goals` was an
+orphaned route.** A fully-built app — `src/apps/goals/Goals.tsx` (persistent via
+`localStorage['empire-goals']`, eventBus-wired, Ask-Hermes handoff) — has been
+imported in `src/lib/appComponents.tsx` and expected by `Desktop.tsx`'s
+`categorizeApp` (`name === 'Goals' → 'AI & Intelligence'`) since commit `c1d005e`,
+but was **never listed in `src/lib/registry.ts`**. `AppShell` needs both an `appDef`
+(from `registry`) *and* a component (from `appComponents`), so the route rendered
+the "App not found" fallback and the built `Goals-*.js` chunk was unreachable.
+
+**Why register, not retire:** the component is complete, working, and distinct from
+Learning Tracker (deadlines + 0–100 progress sliders, not study logging). It already
+emits real bus traffic (`APP_OPENED` on mount; `NOTE_CREATED/UPDATED/DELETED` tagged
+`['goal']` on edits) and does an Ask-Hermes clipboard handoff to AI Chat — so it was
+built to be a graph citizen. Registering it both makes it reachable **and** lights it
+up in the organism: `apps` is the single source the dock, start menu, and **The
+Network** mesh all iterate, so Goals now appears as a real node and its events finally
+light a node instead of firing into the void (`idIndex.get('goals')` was previously
+`undefined`).
+
+**Changed (`src/lib/registry.ts` only):**
+- New `apps` entry placed right after `learning-tracker` (its sibling
+  self-improvement app): `{ id: 'goals', name: 'Goals', icon: 'Target',
+  route: '/app/goals', description: 'Set goals, track progress', color: '#818cf8',
+  hermesEnabled: true }`. `id: 'goals'` matches the existing `appComponents` key and
+  `Desktop.categorizeApp`'s name check; `#818cf8` (indigo) mirrors the component's
+  own blue→indigo gradient.
+- Imported `Target` from `lucide-react` and added it to `iconMap` so `getAppIcon`
+  resolves the icon (the component already imported `Target` itself).
+
+**Verified:** `npm run build` 🟢 (`tsc -b && vite build`, PWA precache **56**).
+`npx vitest run` → **28/28 pass**. `npx eslint src/lib/registry.ts` clean. The
+`Goals-*.js` chunk now ships as a reachable route. **No data-safety risk checked &
+confirmed:** the only `NOTE_CREATED` listener (`automation.ts` `note-created-broadcast`)
+just emits a transient `AI_QUERY` for activity awareness — no syncer mirrors goal
+events into Notes storage, so registering creates no phantom notes. Additive,
+reversible, no schema change (Goals owns `empire-goals`), no Calendar syncer, one file.
+*Not verifiable here (no rendered UI):* on-device — the desktop dock/start menu now
+shows a **Goals** (target icon) tile under *AI & Intelligence*; opening it renders the
+Goals Tracker (was "App not found"); **The Network** now has a 26th node that flares
+when you add/complete a goal.
+
+**Main state:** 🟢 green; branch based on `origin/main` `12e0180`.
+
+**Next step:** the cheap CI guard is now the best unclaimed item — assert the built
+`dist/assets/*.css` keeps a **top-level** `.empire-desktop` rule (0 occurrences of
+`.hide-sm .empire-desktop`) so a silent comment-balance break can't pass a green build
+again (the #10 regression class). Then a token pass on `Goals.tsx` itself (it mixes
+Tailwind `blue-*/gray-*` literals with `var(--card-bg)`/`var(--text)`) to bring it
+onto the alien-tech palette like its siblings.
+
+---
+
 ## 2026-06-21 · Integration run — merged #16 (code: Track-as-Learning arc) + #15 (QA docs)
 
 **Triaged 4 open PRs into lanes:** 2 `routine/auto-*` (one code, one QA docs) +
