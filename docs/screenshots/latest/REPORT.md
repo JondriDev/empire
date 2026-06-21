@@ -1,9 +1,9 @@
 # The Empire — Visual + Smoke QA Report
 
-- **Run (UTC):** 2026-06-21 08:11
-- **Commit under test:** `65ad660` (current `main`)
+- **Run (UTC):** 2026-06-21 13:04
+- **Commit under test:** `12e0180` (current `main`)
 - **Build:** ✅ GREEN — `tsc -b && vite build` succeeded (PWA precache 56 entries)
-- **Renderer:** Playwright + Chrome-for-Testing 149.0.7827.55 (headless), viewport 1440×900
+- **Renderer:** Playwright 1.56.1 + pre-installed Chromium (build 1194, headless), viewport 1440×900
 - **Result:** **26 / 27 routes render without crash** — all 25 registered apps + the desktop shell pass; the only non-render is the orphaned `/app/goals` route (known, see below). No uncaught JS exceptions anywhere.
 
 > **PASS** = app rendered with no uncaught exception / error boundary / blank screen.
@@ -15,7 +15,7 @@
 | App | Route | Render | Console notes |
 |-----|-------|:------:|---------------|
 | Desktop shell | `/` | ✅ | clean |
-| Hermes Agent | `/app/ai-agent` | ✅ | clean |
+| Cakra Agent | `/app/ai-agent` | ✅ | clean |
 | Calculator | `/app/calculator` | ✅ | clean |
 | Calendar | `/app/calendar` | ✅ | clean |
 | Clock | `/app/clock` | ✅ | clean |
@@ -36,7 +36,7 @@
 | Prompt Gen | `/app/prompt-generator` | ✅ | clean |
 | Token Counter | `/app/token-counter` | ✅ | clean |
 | Learning Tracker | `/app/learning-tracker` | ✅ | clean |
-| Hermes CC | `/app/hermes-cc` | ✅ | clean |
+| Cakra CC | `/app/hermes-cc` | ✅ | clean |
 | AI Chat | `/app/ai-chat` | ✅ | clean |
 | Artifacts | `/app/artifacts` | ✅ | clean |
 | Network | `/app/network` | ✅ | clean — node-graph + live-signal ticker render |
@@ -45,19 +45,12 @@
 ## Notable findings
 
 1. **Orphaned `goals` route (known, unchanged from prior runs).** `Goals` is in
-   `src/lib/appComponents.tsx` (built as a `Goals-*.js` chunk, ~7 kB) but is
-   **not** in `src/lib/registry.ts`. `AppShell` requires *both* a registry
-   `appDef` and a component, so `/app/goals` renders **"App not found"** and the
-   app is unreachable from the desktop/dock — dead weight, not a regression.
-   The fix is a one-liner (add a `goals` entry to the registry) or delete the
-   component; left for the reviewer to decide product intent. **No runtime bug.**
-
-2. **Self-hosted fonts confirmed working.** This run shows **zero** external
-   font fetches/errors — JetBrains Mono is now bundled
-   (`src/design-system/fonts/JetBrainsMono-*.woff2`), so the desktop telemetry
-   strip and all monospace UI render correctly offline. (A prior build against
-   the stale pre-merge tree showed Google Fonts being fetched externally; that
-   is resolved on current `main`.)
+   `src/lib/appComponents.tsx` (built as a `Goals-*.js` chunk) but is **not** in
+   `src/lib/registry.ts`. `AppShell` requires *both* a registry `appDef` and a
+   component, so `/app/goals` renders **"App not found"** and the app is
+   unreachable from the desktop/dock — dead weight, not a regression. The fix is
+   a one-liner (add a `goals` entry to the registry) or delete the component;
+   left for the reviewer to decide product intent. **No runtime bug.**
 
 ## Environmental noise (NOT app bugs — caused by the headless sandbox)
 
@@ -67,7 +60,7 @@
 
 ## Verdict
 
-**main (`65ad660`) is GREEN and runs.** All 25 registered apps and the desktop
+**main (`12e0180`) is GREEN and runs.** All 25 registered apps and the desktop
 shell render cleanly with no uncaught exceptions and no external-resource
 errors. The single ❌ is the long-standing orphan `goals` route (cosmetic dead
 code). Per-app screenshots are in this folder.
