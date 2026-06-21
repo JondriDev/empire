@@ -5,6 +5,43 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · Integration run — merged #16 (code: Track-as-Learning arc) + #15 (QA docs)
+
+**Triaged 4 open PRs into lanes:** 2 `routine/auto-*` (one code, one QA docs) +
+2 human-gated non-auto (`meta/*`, `packaging/*`).
+
+**Merged this run:**
+- **PR #16** (`routine/auto-20260621T120000Z`, **the one CODE PR**) — INTERCONNECT:
+  threads an optional `from?` onto the `LEARNING_LOGGED` bus event so
+  `SEND_TO_LEARNING` lights a directed source→Learning-Tracker arc in The Network
+  (mirrors the existing `NOTE_CREATED` `from-` pattern; guarded so in-app logging
+  draws no false self-edge). Verified on a local merge with current `main`:
+  `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56), `npx vitest run`
+  **28/28**, `eslint` clean on all 4 touched files. Additive & reversible — no
+  localStorage/schema change (`LearningItem` untouched), no Calendar syncer, one
+  focused increment. Squash-merged → `7d08705`.
+- **PR #15** (`routine/auto-qa-20260621T081404Z`, **QA docs-only**) — visual+smoke
+  report + 27 refreshed screenshots; `main` 🟢, 26/27 routes render (only the
+  known orphan `/app/goals` fails). Confirmed docs-only; resolved a `ROUTINE-LOG.md`
+  add/add conflict against #16 on the branch (kept both entries, newest-first),
+  re-verified the net diff is docs-only, squash-merged → `f0f49cb`.
+
+**Left for the human (review-only, not auto-merged):**
+- **PR #14** (`meta/improve-2026-06-21`) — Routine Optimizer proposals; `meta/*`
+  branch explicitly flagged "do not auto-merge." Unchanged since prior run.
+- **PR #2** (`packaging/pwa-android-ci`) — PWA + Android packaging; non-auto,
+  human-gated. Unchanged since prior run.
+
+**Main state:** 🟢 green & releasable. ⚠️ On-device visual confirmation of the
+new Track-as-Learning arc is still pending (not verifiable headless).
+
+**Next step:** build the cheap CI guard flagged across several runs — assert the
+built `dist/assets/*.css` keeps a **top-level** `.empire-desktop` rule so a silent
+comment-balance break can't pass a green build again (the regression #10 caught);
+and triage the orphaned `/app/goals` route (register in `registry.ts` or retire).
+
+---
+
 ## 2026-06-21 · `routine/auto-20260621T120000Z` — Track-as-Learning lights its synapse arc
 
 **Increment:** INTERCONNECT. Closed the standing next-step queued by the last
