@@ -5,6 +5,45 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · Integration run — merged #11 + #9 (docs-only); reviewed #2
+
+**Integrated (both docs-only `routine/auto-*`, batched this run):**
+- **PR #11** (`routine/auto-20260621T000553Z`) — squash-merged to `main`
+  (`68120dd`). Touched only `docs/ROUTINE-LOG.md` (the prior run's integration
+  entry); `mergeable_state: clean`, no build required for pure docs.
+- **PR #9** (`routine/auto-roadmap-20260620T230454Z`) — the strategist's first
+  `docs/ROADMAP.md` (NOW/NEXT/LATER/DONE backlog) + its ROUTINE-LOG entry.
+  Was cut from a stale base (`0381aa1`) and both #11 and #9 inserted at the same
+  spot in `ROUTINE-LOG.md`, so after #11 landed #9 conflicted. **Rebased #9 onto
+  current `main` on its branch**, resolved the ROUTINE-LOG conflict (kept all
+  entries newest-first: 2026-06-21 integration → 2026-06-20 QA → 2026-06-20
+  strategist → #8 integration), force-pushed the branch, confirmed
+  `mergeable_state: clean`, squash-merged (`2ebf23f`). Diff stayed docs-only
+  (`+168`, ROADMAP.md + ROUTINE-LOG.md only).
+
+**Reviewed, not merged:** PR #2 (`packaging/pwa-android-ci`, the human's own
+branch). A prior run already posted a thorough review recommending the human
+**close** it — the packaging is already live on `main`, the branch is stale and
+would *revert* later work (Cakra rebrand, #5 fonts, Network event-bus) if merged.
+Nothing changed on #2 since, so no redundant comment added. Left for the human.
+
+**Main state:** 🟢 green and releasable at `2ebf23f`. This run added no code —
+only docs (a backlog + log entries), which don't affect the build. ⚠️ On-device
+visual confirmation of the desktop shell (restored by #10 last run) is still
+pending — no rendered UI in this session.
+
+**Housekeeping note:** branch deletion via the sandbox git proxy returns HTTP
+403, so merged `routine/auto-*` heads can't be pruned from here (several older
+ones linger for the same reason). Harmless — the PRs are merged/closed.
+
+**Next step:** pick up ROADMAP NOW #1 — emit a `HANDOFF` event from
+`src/lib/appActions.ts` so the other 5 cross-app actions (Editor / Token Counter
+/ Prompt Gen / AI Chat / Analyze) light their Network synapse arcs, not just
+`SEND_TO_NOTES`; fold in the latent double-`Date.now()` id mismatch in
+`SEND_TO_NOTES`. That's a CODE PR for the builder routine.
+
+---
+
 ## 2026-06-21 · Integration run — merged #10 (CRITICAL: desktop-shell CSS fix)
 
 **Integrated:** PR #10 (`routine/auto-qa-20260620T231527Z`, QA visual+smoke) —
