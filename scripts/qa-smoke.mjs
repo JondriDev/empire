@@ -50,7 +50,7 @@ async function visit(name, url, file) {
   const bodyText = await page.evaluate(() => document.body.innerText || '').catch(() => '');
   const rootHtml = await page.evaluate(() => (document.getElementById('root')?.innerHTML || '').length).catch(() => 0);
   if (rootHtml < 30) { crashed = true; uncaught.push('EMPTY: #root has little/no content'); }
-  if (/App not available/i.test(bodyText)) { crashed = true; uncaught.push('App not available (route not wired)'); }
+  if (/App not available|App not found/i.test(bodyText)) { crashed = true; uncaught.push('App not available/found (route not wired)'); }
   if (/Something went wrong|Error boundary/i.test(bodyText)) { crashed = true; uncaught.push('Error boundary triggered'); }
   try {
     await page.screenshot({ path: path.join(OUT, file), fullPage: false });
