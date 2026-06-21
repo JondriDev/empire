@@ -64,3 +64,21 @@ describe('HANDOFF emission', () => {
     expect(handoff && handoff.type === 'HANDOFF' && handoff.fromId).toBe('notes')
   })
 })
+
+describe('SEND_TO_LEARNING', () => {
+  beforeEach(() => useStore.setState({ learningItems: [] }))
+
+  it('tags the LEARNING_LOGGED event with the source app so the mesh can light its arc', () => {
+    const events: EmpireEvent[] = []
+    const off = onAny(e => events.push(e))
+
+    CROSS_APP_ACTIONS.SEND_TO_LEARNING.execute({ text: 'closures', source: 'editor' })
+    off()
+
+    const logged = events.find(e => e.type === 'LEARNING_LOGGED')
+    expect(logged).toBeDefined()
+    // The source threads through so flowForEvent draws editor → learning-tracker.
+    expect(logged && logged.type === 'LEARNING_LOGGED' && logged.from).toBe('editor')
+    expect(useStore.getState().learningItems.at(-1)?.learned).toBe('closures')
+  })
+})
