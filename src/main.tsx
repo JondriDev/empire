@@ -21,7 +21,12 @@ try {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    {/* basename must mirror Vite's `base` so routes resolve under a sub-path.
+        On GitHub Pages the app is served from /empire/, so without this the
+        router matches '/empire/' against '/' and renders nothing (blank page).
+        import.meta.env.BASE_URL is '/empire/' on Pages and '/' for the Termux
+        server, DeX desktop and the Capacitor APK — correct in every target. */}
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <App />
     </BrowserRouter>
   </StrictMode>
