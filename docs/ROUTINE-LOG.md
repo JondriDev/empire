@@ -5,6 +5,59 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · `routine/auto-20260621T120000Z` — Track-as-Learning lights its synapse arc
+
+**Increment:** INTERCONNECT. Closed the standing next-step queued by the last
+several runs: **Track as Learning** (`CROSS_APP_ACTIONS.SEND_TO_LEARNING`) was
+the last cross-app transfer that still radiated only CORE→app in The Network —
+its `LEARNING_LOGGED` event carried no source, so the mesh could light the
+Learning Tracker node but never the directed source→learning arc. Now it does.
+
+**Why:** The vision is "one living organism." Every other cross-app action is
+already an honest, bus-observable directed edge (Notes via the `from-` tag; the
+5 sessionStorage transfers via `HANDOFF`). Learning was the one silent handoff;
+this makes the mesh's portrait of nerve traffic complete — no invented links.
+
+**Approach — single tagged event, not a separate `HANDOFF`:** unlike the 5
+sessionStorage actions (which navigate away via `_self`), SEND_TO_LEARNING stays
+in place and *also* emits `LEARNING_LOGGED`. Emitting a `HANDOFF` **and**
+`LEARNING_LOGGED` would push two rows into the live ticker for one action. So I
+mirrored the cleaner `NOTE_CREATED` `from-` pattern: thread an optional `from`
+onto `LEARNING_LOGGED` instead. One event, one arc, no duplicate row.
+
+**Changed:**
+- `src/lib/eventBus.ts` — `LEARNING_LOGGED` gains an optional `from?: string`
+  (the source app id; undefined when logged inside the Learning Tracker itself).
+- `src/lib/appActions.ts` — `SEND_TO_LEARNING` now emits `from: data.source`.
+- `src/apps/network/Network.tsx` — `flowForEvent` returns
+  `{ fromId: e.from, toId: 'learning-tracker' }` for a `LEARNING_LOGGED` that
+  carries a real `from` (≠ `learning-tracker`); in-app logging leaves `from`
+  undefined, so there's **no false self-edge**. Arc/flare/ticker rendering is
+  unchanged — it already draws any flow `flowForEvent` surfaces.
+- `src/lib/appActions.test.ts` (new test) — asserts `SEND_TO_LEARNING` tags the
+  emitted `LEARNING_LOGGED` with the source app and stores the item.
+
+**Verified:** `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56).
+`npx eslint` clean on all 4 touched files. `npx vitest run` → **28/28 pass**
+(27 prior + 1 new). Additive and reversible; no localStorage/schema changes (the
+stored `LearningItem` shape is untouched — only the transient bus event grew an
+optional field); no Calendar syncer; one focused increment.
+*Not verifiable here (no rendered UI):* on-device — open **The Network** in one
+window, then from another app's agent bar use **Track as Learning**; a curved
+packet should race `source → Learning Tracker` with both nodes flaring and a
+ticker row `● source → Learning Tracker · learning logged · now`.
+
+**Main state:** 🟢 green at `origin/main` `65ad660`; this branch is based on it.
+
+**Next step:** the cheap CI guard flagged across several runs is now the best
+unclaimed item — assert the built `dist/assets/*.css` keeps a **top-level**
+`.empire-desktop` rule (0 `.hide-sm .empire-desktop`) so a silent comment-balance
+break can't pass a green build again (the regression that #10 caught). Also still
+open: triage the orphaned `/app/goals` route (wired in `appComponents.tsx`, absent
+from `registry.ts`) — either register it or retire it from `appComponents.tsx`.
+
+---
+
 ## 2026-06-21 · Integration run — merged #13 (code: HANDOFF) + #12 (QA docs/tooling); left #14 + #2
 
 **Integrated this run (4 open PRs triaged into lanes):**
