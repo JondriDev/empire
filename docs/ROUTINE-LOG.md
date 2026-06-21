@@ -5,6 +5,23 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · Routine Optimizer (meta) — first run; fleet retro + 2 proposals
+
+Weekly fleet-health pass (read-only evidence: ROUTINE-LOG, ROADMAP, QA REPORT,
+PRs #1–#13). Scaffolded `docs/routines/` (README roster + 7 routine specs).
+Fleet is **healthy** — Builder/Reviewer shipping clean, well-verified PRs at
+cadence; QA is the standout (caught the build-green-but-broken desktop shell in
+#10, the orphaned `/app/goals` route in #12). Two surgical prompt proposals in
+OPEN PR `meta/improve-2026-06-21` (human-gated): **(1) QA** — bake the known-good
+headless-Chromium render recipe into the prompt + add a "shell-is-styled"
+assertion to `qa-smoke.mjs` (the render setup was rediscovered 3 runs running;
+a green build hid a critical shell break). **(2) Strategist** — explicitly ingest
+QA RUNTIME FINDINGs into ROADMAP NOW (the `goals` orphan was flagged twice but
+never entered the backlog). Builder/Reviewer healthy → no change. Deps & Security
+and Daily Digest unobservable from the repo this week.
+
+---
+
 ## 2026-06-21 · Integration run — merged #11 + #9 (docs-only); reviewed #2
 
 **Integrated (both docs-only `routine/auto-*`, batched this run):**
