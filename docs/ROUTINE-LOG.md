@@ -5,6 +5,33 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · QA visual + smoke — main 🟢, 27/27 routes render (post-#18 Goals fix)
+
+**Increment:** VISUAL + SMOKE QA on current `main` (`d8e0cb3`). Fresh cloud checkout:
+`npm install` → `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56 entries),
+served `dist/` via `node server.js` on :3001, rendered headless (Playwright chromium
+1194). Drove the desktop shell + all 26 app routes one at a time.
+
+**Result: 27/27 rendered without crash, 0 uncaught JS exceptions.** First run where the
+newly-registered **Goals** app (`/app/goals`, merged in #18) renders live instead of the
+"App not found" fallback — visually confirmed reachable. Screenshots overwritten in
+`docs/screenshots/latest/` (27 PNGs, 1600×1000) + refreshed `REPORT.md` pass/fail table.
+
+**Network noise (expected in cloud sandbox, NOT render failures):** `files` → `/api/files`
+HTTP 500 (Android `/storage/emulated/0` path absent in cloud); `datacenter` → `/api/dc/tables`
+HTTP 401 (needs auth). Neither breaks render.
+
+**Notable visual finding (cosmetic, not a runtime bug):** the Goals app renders with a
+washed-out / low-contrast look vs the cohesive dark shell — confirms the standing
+`Goals.tsx` design-token mismatch (Tailwind `blue-*/gray-*` literals vs `var(--card-bg)`/
+`var(--text)`) flagged in the last integration log. Left for a code routine; out of QA scope.
+
+**Next step:** design-token pass on `src/apps/goals/Goals.tsx` so it inherits the desktop
+theme tokens (it's the only app visibly off-palette). Then the cheap CI guard: assert built
+`dist/assets/*.css` keeps a top-level `.empire-desktop` rule (the #10 regression class).
+
+---
+
 ## 2026-06-21 · Integration run — merged #18 (code: register Goals app) + #17 (QA docs)
 
 **Triaged 4 open PRs into lanes:** 2 `routine/auto-*` (one code, one QA docs) +
