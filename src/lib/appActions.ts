@@ -23,6 +23,15 @@ export interface DataPayload {
   source: string // app id
 }
 
+// Announce a directed app→app handoff on the bus so observers (the Network
+// mesh) can light an honest synapse arc between the two instruments. Emitted
+// synchronously *before* any navigation, so a listening node lights in the
+// moment the transfer happens.
+function handoff(fromId: string, toId: string, label: string): void {
+  if (!fromId || fromId === toId) return
+  emit({ type: 'HANDOFF', fromId, toId, label })
+}
+
 // ─── Actions available to apps ──────────────────────────────────
 
 export const CROSS_APP_ACTIONS = {
@@ -33,14 +42,13 @@ export const CROSS_APP_ACTIONS = {
     description: 'Save as a new note',
     execute: (data: DataPayload) => {
       const { addNote } = useStore.getState()
-      addNote({
-        id: Date.now().toString(),
-        title: data.title || `From ${data.source}`,
-        content: data.text,
-        updatedAt: Date.now(),
-        tags: ['from-' + data.source],
-      })
-      emit({ type: 'NOTE_CREATED', noteId: Date.now().toString(), title: data.title || `From ${data.source}`, content: data.text, tags: ['from-' + data.source] })
+      // Compute the id once so the stored note and the emitted event agree —
+      // two separate Date.now() calls can land on different milliseconds.
+      const id = Date.now().toString()
+      const title = data.title || `From ${data.source}`
+      const tags = ['from-' + data.source]
+      addNote({ id, title, content: data.text, updatedAt: Date.now(), tags })
+      emit({ type: 'NOTE_CREATED', noteId: id, title, content: data.text, tags })
       return `Saved to Notes: "${(data.title || data.text).substring(0, 40)}..."`
     },
   } as const,
@@ -56,6 +64,7 @@ export const CROSS_APP_ACTIONS = {
         language: 'javascript',
         from: data.source,
       }))
+      handoff(data.source, 'editor', 'editing')
       window.open('/app/editor', '_self')
       return 'Opened in Code Editor'
     },
@@ -71,6 +80,7 @@ export const CROSS_APP_ACTIONS = {
         text: data.text,
         from: data.source,
       }))
+      handoff(data.source, 'token-counter', 'counting')
       window.open('/app/token-counter', '_self')
       return 'Opened in Token Counter'
     },
@@ -86,6 +96,7 @@ export const CROSS_APP_ACTIONS = {
         text: data.text,
         from: data.source,
       }))
+      handoff(data.source, 'prompt-generator', 'prompting')
       window.open('/app/prompt-generator', '_self')
       return 'Opened in Prompt Generator'
     },
@@ -102,6 +113,7 @@ export const CROSS_APP_ACTIONS = {
         title: data.title,
         from: data.source,
       }))
+      handoff(data.source, 'ai-chat', 'asking')
       window.open('/app/ai-chat', '_self')
       return 'Opening AI Chat...'
     },
@@ -139,6 +151,7 @@ export const CROSS_APP_ACTIONS = {
         from: data.source,
         action: 'analyze',
       }))
+      handoff(data.source, 'ai-chat', 'analyzing')
       window.open('/app/ai-chat', '_self')
       return 'Opening AI Chat for analysis...'
     },
