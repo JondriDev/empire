@@ -11,6 +11,8 @@ import { apps } from '../../lib/registry'
 import { useWindowStore } from '../../lib/windowStore'
 import { useLang } from '../../lib/i18n'
 import { onAny, type EmpireEvent } from '../../lib/eventBus'
+import { useGraph } from '../../lib/core/graph'
+import type { CoreNode } from '../../lib/core/graph'
 
 // Map a hex accent (the registry `color`) to an "r,g,b" string for canvas fills.
 function rgbOf(hex: string): string {
@@ -126,6 +128,25 @@ function ago(ms: number): string {
 type Signal = { key: number; name: string; rgb: string; to?: string; label: string; at: number }
 const MAX_SIGNALS = 6
 
+// Node colour by *type*, drawn from the Deep-Field design tokens
+// (--signal/--aurora/--plasma/--ion/--ember/pale-signal). Known types get a
+// meaningful accent; anything new gets a stable colour by hashing its name.
+const TYPE_RGB: Record<string, string> = {
+  note: '77,155,255',      // --ion     electric blue
+  task: '92,240,168',      // --aurora  alien green
+  message: '52,245,214',   // --signal  teal
+  learning: '176,107,255', // --plasma  violet
+  goal: '255,155,107',     // --ember   warm signal
+  prompt: '155,247,230',   // pale signal
+}
+const TYPE_CYCLE = ['52,245,214', '92,240,168', '176,107,255', '77,155,255', '255,155,107', '155,247,230']
+function typeRgb(type: string): string {
+  if (TYPE_RGB[type]) return TYPE_RGB[type]
+  let hsh = 0
+  for (let i = 0; i < type.length; i++) hsh = (hsh * 31 + type.charCodeAt(i)) >>> 0
+  return TYPE_CYCLE[hsh % TYPE_CYCLE.length]
+}
+
 export default function Network() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const openApp = useWindowStore(s => s.openApp)
@@ -138,6 +159,7 @@ export default function Network() {
   const [, tickClock] = useReducer((x: number) => x + 1, 0)
   const reduceMotion = typeof matchMedia !== 'undefined'
     && matchMedia('(prefers-reduced-motion: reduce)').matches
+  const [nodeCount, setNodeCount] = useState(0)
 
   useEffect(() => {
     if (signals.length === 0) return
@@ -247,6 +269,49 @@ export default function Network() {
         ctx!.shadowColor = `rgba(${n.c},0.8)`; ctx!.shadowBlur = ((i === hover ? 22 : 12) + f * 22) * dpr
         ctx!.fill(); ctx!.shadowBlur = 0
       })
+      // ── Core graph (B-backbone): real CoreNodes orbiting their owning app ──
+      const gnodes = Object.values(useGraph.getState().nodes)
+      if (gnodes.length) {
+        const ownerPos = new Map<string, { x: number; y: number; c: string }>()
+        layout.forEach(n => ownerPos.set(n.app.id, { x: n.x, y: n.y, c: n.c }))
+        const byOwner = new Map<string, CoreNode[]>()
+        for (const gn of gnodes) {
+          const owner = ownerPos.has(gn.meta.app) ? gn.meta.app : '__core'
+          const arr = byOwner.get(owner) ?? []
+          arr.push(gn)
+          byOwner.set(owner, arr)
+        }
+        const pos = new Map<string, { x: number; y: number; c: string }>()
+        byOwner.forEach((list, owner) => {
+          const base = ownerPos.get(owner) ?? { x: core.x, y: core.y, c: '52,245,214' }
+          list.forEach((gn, i) => {
+            const a = (i / Math.max(list.length, 1)) * Math.PI * 2 + tk * 0.3
+            const rr = (24 + (i % 2) * 9) * dpr
+            // node dot coloured by *type* (Deep-Field token); tether keeps the owner accent
+            const p = { x: base.x + Math.cos(a) * rr, y: base.y + Math.sin(a) * rr, c: typeRgb(gn.type) }
+            pos.set(gn.id, p)
+            // faint tether from the owning app to its node
+            ctx!.beginPath(); ctx!.moveTo(base.x, base.y); ctx!.lineTo(p.x, p.y)
+            ctx!.strokeStyle = `rgba(${base.c},0.18)`; ctx!.lineWidth = dpr; ctx!.stroke()
+          })
+        })
+        // real graph edges (e.g. note -> task) in plasma violet
+        for (const gn of gnodes) {
+          const from = pos.get(gn.id); if (!from) continue
+          for (const l of gn.links) {
+            const to = pos.get(l); if (!to) continue
+            ctx!.beginPath(); ctx!.moveTo(from.x, from.y); ctx!.lineTo(to.x, to.y)
+            ctx!.strokeStyle = 'rgba(176,107,255,0.55)'; ctx!.lineWidth = 1.4 * dpr; ctx!.stroke()
+          }
+        }
+        // node dots
+        pos.forEach(p => {
+          ctx!.beginPath(); ctx!.arc(p.x, p.y, 3 * dpr, 0, 7)
+          ctx!.fillStyle = `rgba(${p.c},0.95)`
+          ctx!.shadowColor = `rgba(${p.c},0.9)`; ctx!.shadowBlur = 8 * dpr
+          ctx!.fill(); ctx!.shadowBlur = 0
+        })
+      }
       // CORE — breathes a little harder when the mesh is busy
       const activity = Math.min(1, flares.reduce((a, b) => a + b, 0))
       const cr = (16 + activity * 3) * dpr + Math.sin(tk * 2) * 1.4 * dpr
@@ -325,6 +390,11 @@ export default function Network() {
       if (reduceMotion) frame()
     })
 
+    // React to the Core graph: keep the live count, and repaint when motion is off.
+    const updateCount = () => setNodeCount(Object.keys(useGraph.getState().nodes).length)
+    updateCount()
+    const unsubGraph = useGraph.subscribe(() => { updateCount(); if (reduceMotion) frame() })
+
     size()
     if (reduceMotion) frame(); else raf = requestAnimationFrame(frame)
 
@@ -332,6 +402,7 @@ export default function Network() {
       cancelAnimationFrame(raf)
       clearTimeout(activeTimer)
       unsubBus()
+      unsubGraph()
       cv.removeEventListener('mousemove', onMove)
       cv.removeEventListener('mouseleave', onLeave)
       cv.removeEventListener('click', onClick)
@@ -350,7 +421,7 @@ export default function Network() {
           {hoverName
             ?? (lastActive
               ? `▸ ${t('network.signal', 'signal')} · ${lastActive}`
-              : t('network.hint', `CORE wired to ${apps.length} instruments`))}
+              : `${t('network.hint', `CORE · ${apps.length} instruments`)} · ${nodeCount} nodes`)}
         </div>
       </div>
       <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />

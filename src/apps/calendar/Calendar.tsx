@@ -6,6 +6,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Trash2, X, Check, Clock } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
+import { mirrorCollection } from '../../lib/core/sync'
+import { NodeActions } from '../../components/ui/NodeActions'
 
 interface CalendarEvent {
   id: string
@@ -56,6 +58,12 @@ export default function Calendar() {
 
   useEffect(() => {
     try { localStorage.setItem('empire-calendar-events', JSON.stringify(events)) } catch { /* ignore */ }
+    // Mirror Calendar's events into the Core graph so they join the organism.
+    mirrorCollection('event', 'calendar', events, {
+      id: e => e.id,
+      title: e => e.title,
+      data: e => ({ date: e.date, time: e.time, description: e.description, tags: e.tags }),
+    })
   }, [events])
 
   const year = currentDate.getFullYear()
@@ -270,6 +278,9 @@ export default function Calendar() {
                     <div className="text-xs text-gray-500 mt-0.5 line-clamp-2">{e.description}</div>
                   )}
                 </div>
+                <span onClick={(ev) => ev.stopPropagation()} className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                  <NodeActions type="event" sourceId={e.id} />
+                </span>
               </div>
             </div>
           ))}

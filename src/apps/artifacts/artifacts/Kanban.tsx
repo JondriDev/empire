@@ -4,6 +4,8 @@
  */
 import { useState, useEffect } from 'react'
 import { Plus, Trash2, X, GripVertical } from 'lucide-react'
+import { mirrorCollection } from '../../../lib/core/sync'
+import { NodeActions } from '../../../components/ui/NodeActions'
 
 type ColumnId = 'todo' | 'doing' | 'done'
 
@@ -53,6 +55,12 @@ export default function Kanban() {
 
   useEffect(() => {
     try { localStorage.setItem(STORAGE, JSON.stringify(tasks)) } catch {}
+    // Mirror Kanban cards into the Core graph so they join the organism.
+    mirrorCollection('kanban', 'artifacts', tasks, {
+      id: t => t.id,
+      title: t => t.title,
+      data: t => ({ column: t.column, tag: t.tag }),
+    })
   }, [tasks])
 
   const moveTo = (id: string, col: ColumnId) => {
@@ -144,6 +152,7 @@ export default function Kanban() {
                       <div className="flex items-start gap-2">
                         <GripVertical size={14} className="text-slate-600 mt-0.5" />
                         <p className="flex-1 text-sm text-slate-100">{t.title}</p>
+                        <NodeActions type="kanban" sourceId={t.id} />
                         <button onClick={() => remove(t.id)} className="text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition"><Trash2 size={12} /></button>
                       </div>
                       {t.tag && (
