@@ -5,6 +5,331 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · Integration run — merged #20 (code: Goals design tokens) + #19 (QA docs)
+
+**Triaged 4 open PRs into lanes:** 2 `routine/auto-*` (one code #20, one QA docs #19)
++ 2 human-gated non-auto (`meta/improve-2026-06-21` #14, `packaging/pwa-android-ci` #2).
+
+**Merged this run:**
+- **PR #19** (`routine/auto-qa-20260621T180613Z`, QA docs-only) — refreshed
+  `docs/screenshots/latest/` (27 PNGs) + `REPORT.md` (27/27 render, 0 crashes) and a
+  ROUTINE-LOG entry. Diff confirmed docs/screenshots-only; squash-merged.
+- **PR #20** (`routine/auto-20260621T201500Z`, **the one CODE PR**) — design-system
+  pass on `src/apps/goals/Goals.tsx` (the last app mixing raw `blue-/gray-/red-`
+  Tailwind literals + hex with tokens). Routes everything through `--ion` accent,
+  `--text/2/3` ramp, `.gp`/`.gp-interactive` glass surfaces, and motion tokens;
+  remaining hex are token fallbacks (`var(--ion,#4d9bff)` etc.). Verified on the PR
+  branch against current `main`: `npm run build` 🟢 (`tsc -b && vite build`, PWA
+  precache 56), `npx vitest run` **28/28**, `eslint` clean, grep confirms zero
+  color literals, `empire-goals` localStorage + eventBus emits untouched. Resolved a
+  `ROUTINE-LOG.md` merge conflict with #19 on the branch (kept both entries,
+  chronological), re-built 🟢, then squash-merged.
+
+**Left for human (review-only, non-auto branches):** #14 `meta/*` (routine-spec
+proposals; explicitly "do not auto-merge") and #2 `packaging/*` (PWA/APK CI).
+
+**Resulting main state:** GREEN — `tsc -b && vite build` passes, 28/28 tests, all
+26 apps + shell render per #19's QA. ⚠️ On-device visual confirmation of the Goals
+token restyle still pending (no rendered UI in cloud; change is color/surface/motion
+only, layout unchanged). Note: merged auto branches could not be auto-deleted (git
+transport returned 403 on delete) — harmless, their PRs are closed.
+
+**Next step:** the cheap CI guard remains the best unclaimed item — assert built
+`dist/assets/*.css` keeps a top-level `.empire-desktop` rule (the #10 regression
+class), then audit the next color-literal offender app.
+
+---
+
+## 2026-06-21 · `routine/auto-20260621T201500Z` — design-token pass on Goals.tsx
+
+**Increment:** ENFORCE DESIGN SYSTEM (priority 4). Closed the standing triage
+item from the last integration run: `Goals.tsx` was the one app still mixing raw
+Tailwind color literals (`blue-400/500/600`, `gray-400/500/600`, `red-300/500`,
+`text-white`, `bg-white/5`) and hex (`#3b82f6`, `#374151`) with design-system
+vars — so editing a token would NOT have restyled it, and it ignored the
+light "Daylight Survey" theme entirely.
+
+**Changed (`src/apps/goals/Goals.tsx` only — presentation layer, zero logic
+change):**
+- **One accent per view:** introduced `const ACCENT = 'var(--ion, #4d9bff)'`
+  (electric-blue, matching its registry tile `#818cf8` identity). Every former
+  blue literal now routes through `--ion`; selected-state fills use
+  `color-mix(in srgb, var(--ion) 18%, transparent)` so they track the token.
+- **Text → Deep-Field ramp:** headings `var(--text)`, secondary `var(--text2)`,
+  muted/meta `var(--text3)` — theme-aware in both dark and light.
+- **Glass surfaces:** add-form and each goal card now use the `.gp` primitive
+  (goal cards add `.gp-interactive` for the holographic lift-on-hover), replacing
+  the manual `border border-blue-500/20` + inline `var(--card-bg)`.
+- **Motion via tokens:** progress-bar fill `var(--dur-slow) var(--ease-out)`,
+  buttons `var(--dur-fast)`.
+- **Slider track** uses `var(--ion)` fill over `var(--input-bg)` instead of
+  `#3b82f6/#374151`. Delete action recolored to `var(--ember)` (warm warning
+  signal). Dropped the per-input `focus:ring-blue-500/50` in favor of the global
+  `:focus-visible` signal ring.
+
+**Verified:** `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56).
+`npx vitest run` → **28/28 pass**. `npx eslint src/apps/goals/Goals.tsx` clean.
+Grep confirms **zero** Tailwind color literals or raw hex remain in the file.
+localStorage schema (`empire-goals`) and all eventBus emits untouched — no data
+risk. **Visual confirmation pending on-device** (no rendered UI in cloud); the
+change is purely color/surface/motion routing, layout (flex/spacing/radii
+Tailwind utilities) is unchanged, so the structure is identical to before.
+
+**Next step:** the cheap CI guard is still the best unclaimed item — assert the
+built `dist/assets/*.css` keeps a **top-level** `.empire-desktop` rule (the #10
+regression class). After that, audit the next color-literal offender app
+(`grep -rlE 'blue-[0-9]|gray-[0-9]' src/apps` to find it).
+
+---
+
+## 2026-06-21 · QA visual + smoke — main 🟢, 27/27 routes render (post-#18 Goals fix)
+
+**Increment:** VISUAL + SMOKE QA on current `main` (`d8e0cb3`). Fresh cloud checkout:
+`npm install` → `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56 entries),
+served `dist/` via `node server.js` on :3001, rendered headless (Playwright chromium
+1194). Drove the desktop shell + all 26 app routes one at a time.
+
+**Result: 27/27 rendered without crash, 0 uncaught JS exceptions.** First run where the
+newly-registered **Goals** app (`/app/goals`, merged in #18) renders live instead of the
+"App not found" fallback — visually confirmed reachable. Screenshots overwritten in
+`docs/screenshots/latest/` (27 PNGs, 1600×1000) + refreshed `REPORT.md` pass/fail table.
+
+**Network noise (expected in cloud sandbox, NOT render failures):** `files` → `/api/files`
+HTTP 500 (Android `/storage/emulated/0` path absent in cloud); `datacenter` → `/api/dc/tables`
+HTTP 401 (needs auth). Neither breaks render.
+
+**Notable visual finding (cosmetic, not a runtime bug):** the Goals app renders with a
+washed-out / low-contrast look vs the cohesive dark shell — confirms the standing
+`Goals.tsx` design-token mismatch (Tailwind `blue-*/gray-*` literals vs `var(--card-bg)`/
+`var(--text)`) flagged in the last integration log. Left for a code routine; out of QA scope.
+
+**Next step:** design-token pass on `src/apps/goals/Goals.tsx` so it inherits the desktop
+theme tokens (it's the only app visibly off-palette). Then the cheap CI guard: assert built
+`dist/assets/*.css` keeps a top-level `.empire-desktop` rule (the #10 regression class).
+
+---
+
+## 2026-06-21 · Integration run — merged #18 (code: register Goals app) + #17 (QA docs)
+
+**Triaged 4 open PRs into lanes:** 2 `routine/auto-*` (one code, one QA docs) +
+2 human-gated non-auto (`meta/*`, `packaging/*`).
+
+**Merged this run:**
+- **PR #18** (`routine/auto-20260621T150404Z`, **the one CODE PR**) — FIX: registers
+  the long-orphaned `goals` app in `src/lib/registry.ts` (adds the `apps` entry +
+  `Target` icon import/map). Closes the standing QA finding (`/app/goals` rendered
+  "App not found" because the component existed in `appComponents.tsx` but had no
+  registry `appDef`). Verified on the PR branch against current `main` (`12e0180`):
+  `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56), `Goals-*.js` chunk
+  now ships as a reachable route, `npx vitest run` **28/28**, `eslint` clean on
+  `registry.ts`. One-file additive/reversible change; the hex `color` is consistent
+  with every other registry entry (metadata, not a CSS token). Squash-merged.
+- **PR #17** (`routine/auto-qa-20260621T130447Z`, QA docs) — refreshed
+  `docs/screenshots/latest/` (27 PNGs), `REPORT.md`, and a `ROUTINE-LOG.md` row.
+  Confirmed docs/screenshots-only; squash-merged without a full build.
+
+**Left for the human (non-auto, review-only — NOT merged):**
+- **PR #14** (`meta/improve-2026-06-21`) — routine-optimizer retro; the PR body
+  itself asks not to auto-merge (proposals are human-applied to live routine configs).
+- **PR #2** (`packaging/pwa-android-ci`) — PWA + Android packaging; user's own work.
+
+**Main state:** 🟢 green at `9fafd29`. Build + 28/28 tests verified pre-merge.
+On-device visual confirmation of the new Goals tile/route is still pending (no
+rendered UI in cloud). Branch deletion for the two merged auto branches was
+rejected by the git proxy — cosmetic only, both PRs are merged.
+
+**Next step:** the cheap CI guard remains the best unclaimed item — assert the built
+`dist/assets/*.css` keeps a **top-level** `.empire-desktop` rule (the #10 regression
+class), then a design-token pass on `Goals.tsx` (it mixes Tailwind `blue-*/gray-*`
+literals with `var(--card-bg)`/`var(--text)`).
+
+---
+
+## 2026-06-21 · `routine/auto-20260621T150404Z` — register the orphaned Goals app (27/27 reachable)
+
+**Increment:** FIX + INTERCONNECT + COMPLETE-THE-WEB-APP. Closed the standing
+triage item flagged across the last ~5 QA/integration runs: **`/app/goals` was an
+orphaned route.** A fully-built app — `src/apps/goals/Goals.tsx` (persistent via
+`localStorage['empire-goals']`, eventBus-wired, Ask-Hermes handoff) — has been
+imported in `src/lib/appComponents.tsx` and expected by `Desktop.tsx`'s
+`categorizeApp` (`name === 'Goals' → 'AI & Intelligence'`) since commit `c1d005e`,
+but was **never listed in `src/lib/registry.ts`**. `AppShell` needs both an `appDef`
+(from `registry`) *and* a component (from `appComponents`), so the route rendered
+the "App not found" fallback and the built `Goals-*.js` chunk was unreachable.
+
+**Why register, not retire:** the component is complete, working, and distinct from
+Learning Tracker (deadlines + 0–100 progress sliders, not study logging). It already
+emits real bus traffic (`APP_OPENED` on mount; `NOTE_CREATED/UPDATED/DELETED` tagged
+`['goal']` on edits) and does an Ask-Hermes clipboard handoff to AI Chat — so it was
+built to be a graph citizen. Registering it both makes it reachable **and** lights it
+up in the organism: `apps` is the single source the dock, start menu, and **The
+Network** mesh all iterate, so Goals now appears as a real node and its events finally
+light a node instead of firing into the void (`idIndex.get('goals')` was previously
+`undefined`).
+
+**Changed (`src/lib/registry.ts` only):**
+- New `apps` entry placed right after `learning-tracker` (its sibling
+  self-improvement app): `{ id: 'goals', name: 'Goals', icon: 'Target',
+  route: '/app/goals', description: 'Set goals, track progress', color: '#818cf8',
+  hermesEnabled: true }`. `id: 'goals'` matches the existing `appComponents` key and
+  `Desktop.categorizeApp`'s name check; `#818cf8` (indigo) mirrors the component's
+  own blue→indigo gradient.
+- Imported `Target` from `lucide-react` and added it to `iconMap` so `getAppIcon`
+  resolves the icon (the component already imported `Target` itself).
+
+**Verified:** `npm run build` 🟢 (`tsc -b && vite build`, PWA precache **56**).
+`npx vitest run` → **28/28 pass**. `npx eslint src/lib/registry.ts` clean. The
+`Goals-*.js` chunk now ships as a reachable route. **No data-safety risk checked &
+confirmed:** the only `NOTE_CREATED` listener (`automation.ts` `note-created-broadcast`)
+just emits a transient `AI_QUERY` for activity awareness — no syncer mirrors goal
+events into Notes storage, so registering creates no phantom notes. Additive,
+reversible, no schema change (Goals owns `empire-goals`), no Calendar syncer, one file.
+*Not verifiable here (no rendered UI):* on-device — the desktop dock/start menu now
+shows a **Goals** (target icon) tile under *AI & Intelligence*; opening it renders the
+Goals Tracker (was "App not found"); **The Network** now has a 26th node that flares
+when you add/complete a goal.
+
+**Main state:** 🟢 green; branch based on `origin/main` `12e0180`.
+
+**Next step:** the cheap CI guard is now the best unclaimed item — assert the built
+`dist/assets/*.css` keeps a **top-level** `.empire-desktop` rule (0 occurrences of
+`.hide-sm .empire-desktop`) so a silent comment-balance break can't pass a green build
+again (the #10 regression class). Then a token pass on `Goals.tsx` itself (it mixes
+Tailwind `blue-*/gray-*` literals with `var(--card-bg)`/`var(--text)`) to bring it
+onto the alien-tech palette like its siblings.
+
+---
+
+## 2026-06-21 · Integration run — merged #16 (code: Track-as-Learning arc) + #15 (QA docs)
+
+**Triaged 4 open PRs into lanes:** 2 `routine/auto-*` (one code, one QA docs) +
+2 human-gated non-auto (`meta/*`, `packaging/*`).
+
+**Merged this run:**
+- **PR #16** (`routine/auto-20260621T120000Z`, **the one CODE PR**) — INTERCONNECT:
+  threads an optional `from?` onto the `LEARNING_LOGGED` bus event so
+  `SEND_TO_LEARNING` lights a directed source→Learning-Tracker arc in The Network
+  (mirrors the existing `NOTE_CREATED` `from-` pattern; guarded so in-app logging
+  draws no false self-edge). Verified on a local merge with current `main`:
+  `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56), `npx vitest run`
+  **28/28**, `eslint` clean on all 4 touched files. Additive & reversible — no
+  localStorage/schema change (`LearningItem` untouched), no Calendar syncer, one
+  focused increment. Squash-merged → `7d08705`.
+- **PR #15** (`routine/auto-qa-20260621T081404Z`, **QA docs-only**) — visual+smoke
+  report + 27 refreshed screenshots; `main` 🟢, 26/27 routes render (only the
+  known orphan `/app/goals` fails). Confirmed docs-only; resolved a `ROUTINE-LOG.md`
+  add/add conflict against #16 on the branch (kept both entries, newest-first),
+  re-verified the net diff is docs-only, squash-merged → `f0f49cb`.
+
+**Left for the human (review-only, not auto-merged):**
+- **PR #14** (`meta/improve-2026-06-21`) — Routine Optimizer proposals; `meta/*`
+  branch explicitly flagged "do not auto-merge." Unchanged since prior run.
+- **PR #2** (`packaging/pwa-android-ci`) — PWA + Android packaging; non-auto,
+  human-gated. Unchanged since prior run.
+
+**Main state:** 🟢 green & releasable. ⚠️ On-device visual confirmation of the
+new Track-as-Learning arc is still pending (not verifiable headless).
+
+**Next step:** build the cheap CI guard flagged across several runs — assert the
+built `dist/assets/*.css` keeps a **top-level** `.empire-desktop` rule so a silent
+comment-balance break can't pass a green build again (the regression #10 caught);
+and triage the orphaned `/app/goals` route (register in `registry.ts` or retire).
+
+---
+
+## 2026-06-21 · `routine/auto-20260621T120000Z` — Track-as-Learning lights its synapse arc
+
+**Increment:** INTERCONNECT. Closed the standing next-step queued by the last
+several runs: **Track as Learning** (`CROSS_APP_ACTIONS.SEND_TO_LEARNING`) was
+the last cross-app transfer that still radiated only CORE→app in The Network —
+its `LEARNING_LOGGED` event carried no source, so the mesh could light the
+Learning Tracker node but never the directed source→learning arc. Now it does.
+
+**Why:** The vision is "one living organism." Every other cross-app action is
+already an honest, bus-observable directed edge (Notes via the `from-` tag; the
+5 sessionStorage transfers via `HANDOFF`). Learning was the one silent handoff;
+this makes the mesh's portrait of nerve traffic complete — no invented links.
+
+**Approach — single tagged event, not a separate `HANDOFF`:** unlike the 5
+sessionStorage actions (which navigate away via `_self`), SEND_TO_LEARNING stays
+in place and *also* emits `LEARNING_LOGGED`. Emitting a `HANDOFF` **and**
+`LEARNING_LOGGED` would push two rows into the live ticker for one action. So I
+mirrored the cleaner `NOTE_CREATED` `from-` pattern: thread an optional `from`
+onto `LEARNING_LOGGED` instead. One event, one arc, no duplicate row.
+
+**Changed:**
+- `src/lib/eventBus.ts` — `LEARNING_LOGGED` gains an optional `from?: string`
+  (the source app id; undefined when logged inside the Learning Tracker itself).
+- `src/lib/appActions.ts` — `SEND_TO_LEARNING` now emits `from: data.source`.
+- `src/apps/network/Network.tsx` — `flowForEvent` returns
+  `{ fromId: e.from, toId: 'learning-tracker' }` for a `LEARNING_LOGGED` that
+  carries a real `from` (≠ `learning-tracker`); in-app logging leaves `from`
+  undefined, so there's **no false self-edge**. Arc/flare/ticker rendering is
+  unchanged — it already draws any flow `flowForEvent` surfaces.
+- `src/lib/appActions.test.ts` (new test) — asserts `SEND_TO_LEARNING` tags the
+  emitted `LEARNING_LOGGED` with the source app and stores the item.
+
+**Verified:** `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56).
+`npx eslint` clean on all 4 touched files. `npx vitest run` → **28/28 pass**
+(27 prior + 1 new). Additive and reversible; no localStorage/schema changes (the
+stored `LearningItem` shape is untouched — only the transient bus event grew an
+optional field); no Calendar syncer; one focused increment.
+*Not verifiable here (no rendered UI):* on-device — open **The Network** in one
+window, then from another app's agent bar use **Track as Learning**; a curved
+packet should race `source → Learning Tracker` with both nodes flaring and a
+ticker row `● source → Learning Tracker · learning logged · now`.
+
+**Main state:** 🟢 green at `origin/main` `65ad660`; this branch is based on it.
+
+**Next step:** the cheap CI guard flagged across several runs is now the best
+unclaimed item — assert the built `dist/assets/*.css` keeps a **top-level**
+`.empire-desktop` rule (0 `.hide-sm .empire-desktop`) so a silent comment-balance
+break can't pass a green build again (the regression that #10 caught). Also still
+open: triage the orphaned `/app/goals` route (wired in `appComponents.tsx`, absent
+from `registry.ts`) — either register it or retire it from `appComponents.tsx`.
+
+---
+
+## 2026-06-21 · QA visual + smoke — main 🟢, 26/27 routes render (Chrome-for-Testing fallback)
+
+**Run:** unattended cloud QA against `main` (`65ad660`). Build 🟢 (`tsc -b &&
+vite build`, PWA precache 56). Served `dist/` via `node server.js` on :3001 and
+drove it headless.
+
+**Result — 26/27 routes render, no uncaught exceptions:** all 25 registered apps
++ the desktop shell PASS. The only non-render is the orphaned `/app/goals`
+(known). Console is clean everywhere except the expected sandbox-only backend
+errors: Files `GET /api/files` → 500 (no device FS) and Data Center → 401 (not
+logged in). **Self-hosted JetBrains Mono confirmed working — zero external font
+fetches this run** (the desktop telemetry strip renders correctly offline).
+Screenshots for every app overwritten in `docs/screenshots/latest/` + full
+pass/fail table in `REPORT.md`.
+
+**Carried-forward finding (still open):** `/app/goals` — wired in
+`appComponents.tsx` but absent from `registry.ts`, so `AppShell` (needs both
+`appDef` + component) shows "App not found"; the `Goals-*.js` chunk is built but
+unreachable. Not a regression; one-liner to register or delete to retire.
+
+**⚠️ Tooling note — stale `origin/main` + blocked Playwright CDN:**
+(1) The fresh clone's `origin/main` ref was **stale at `f6e1e74` (06-19)** while
+the real tip is `65ad660`; `git checkout main` initially landed on the old tree.
+A `git fetch origin main` + `reset --hard origin/main` corrected it — worth a
+`git fetch` at the top of every routine run before trusting `main`.
+(2) `npx playwright install chromium` is **blocked by network egress**
+(`cdn.playwright.dev` / `playwright.azureedge.net` not on the allowlist), and
+the apt `chromium-browser` is only a snap stub. Workaround that worked:
+`storage.googleapis.com` **is** reachable, so pulled Chrome-for-Testing
+149.0.7827.55 directly and pointed Playwright at it via `executablePath`. All
+system libs were present (no `--with-deps` needed). Consider adding the
+Playwright CDN to egress, or caching a browser in the image.
+
+**Main state:** 🟢 green and releasable at `65ad660`.
+
+**Next step:** triage the orphaned `goals` route (register it in `registry.ts`
+or delete the component + map entry) so 27/27 is achievable.
+
+---
+
 ## 2026-06-21 · Integration run — merged #13 (code: HANDOFF) + #12 (QA docs/tooling); left #14 + #2
 
 **Integrated this run (4 open PRs triaged into lanes):**
@@ -497,3 +822,4 @@ Append-only log of unattended cloud QA runs. Newest first.
 | 2026-06-20T13:08Z | 🟢 GREEN | 27/27 | All app routes mount; no uncaught JS / error boundaries. Findings: Google Fonts CDN blocked offline (desktop `/` HUD looks rough w/o webfont — cosmetic); `/api/files` 500 (Android path absent) & `/api/dc/tables` 401 (no auth) — both env-expected, UI stable. |
 | 2026-06-20T18:09Z | 🟢 GREEN | 26/26 | Desktop + 25 registry apps all mount; no uncaught exceptions / React errors / app-origin request failures. Cakra rebrand confirmed live in UI (Calculator "Cakra" badge, dock labels). **Infra note:** the env's egress policy now blocks `cdn.playwright.dev`, so `npx playwright install` fails (403). Worked around by sourcing a headless Chromium binary from the npm registry (`@sparticuz/chromium`, installed `--no-save`) and driving it with `playwright`. Same env-expected non-bugs as prior run (fonts CDN blocked, `/api/files` 500, `/api/dc/tables` 401). |
 | 2026-06-21T04:18Z | 🟢 GREEN | 26/27 | All 26 **registry** apps + desktop shell render cleanly — no uncaught JS / error boundaries. **Finding:** `/app/goals` shows the "App not found" fallback — `goals` is wired in `appComponents.tsx` (and its chunk builds) but is **missing from `registry.ts`**, so the route is orphaned/unreachable from the desktop. Pre-existing, not a new regression. **Tooling fix (this PR):** the smoke script's crash-detection regex only matched Window.tsx's "App not available" and silently passed AppShell.tsx's "App not found" — prior runs false-passed `goals` as ✅. Regex now matches both, so orphaned routes are caught. **Infra note:** `cdn.playwright.dev` still egress-blocked; used the env's pre-installed Chromium at `/opt/pw-browsers` (build 1194) by pinning `playwright@1.56` (`--no-save`). Same env-expected non-bugs: fonts CDN blocked (cosmetic), `/api/files` 500 (Android path absent), `/api/dc/tables` 401 (no auth). |
+| 2026-06-21T13:04Z | 🟢 GREEN | 26/27 | Commit `12e0180`. Desktop shell + all 25 registry apps render cleanly — no uncaught JS exceptions / error boundaries / failed app-origin resources. Screenshots refreshed in `docs/screenshots/latest/` (27 PNGs, 1440×900). **No new regressions.** Same single ❌: orphan `/app/goals` ("App not found") — `goals` is in `appComponents.tsx` but missing from `registry.ts`; cosmetic dead code, left for reviewer. Env-expected non-bugs unchanged: `/api/files` 500 (no device FS), `/api/dc/...` 401 (no auth). **Infra:** `cdn.playwright.dev` still egress-blocked; drove env's pre-installed Chromium at `/opt/pw-browsers/chromium-1194` via `playwright@1.56.1` (`--no-save`). |

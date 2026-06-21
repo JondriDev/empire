@@ -134,7 +134,10 @@ export const CROSS_APP_ACTIONS = {
         nextReview: new Date(Date.now() + 86400000).toISOString().split('T')[0],
         mastered: false,
       })
-      emit({ type: 'LEARNING_LOGGED', topic: data.title || data.text.substring(0, 50), learned: data.text })
+      // Carry the source so the Network mesh can light the source→learning arc
+      // (this transfer stays in place — no navigation — so a single tagged event
+      // is cleaner than a separate HANDOFF that would double the ticker row).
+      emit({ type: 'LEARNING_LOGGED', topic: data.title || data.text.substring(0, 50), learned: data.text, from: data.source })
       return 'Added to Learning Tracker!'
     },
   } as const,
