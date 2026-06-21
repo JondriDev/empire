@@ -58,6 +58,46 @@ from `registry.ts`) — either register it or retire it from `appComponents.tsx`
 
 ---
 
+## 2026-06-21 · QA visual + smoke — main 🟢, 26/27 routes render (Chrome-for-Testing fallback)
+
+**Run:** unattended cloud QA against `main` (`65ad660`). Build 🟢 (`tsc -b &&
+vite build`, PWA precache 56). Served `dist/` via `node server.js` on :3001 and
+drove it headless.
+
+**Result — 26/27 routes render, no uncaught exceptions:** all 25 registered apps
++ the desktop shell PASS. The only non-render is the orphaned `/app/goals`
+(known). Console is clean everywhere except the expected sandbox-only backend
+errors: Files `GET /api/files` → 500 (no device FS) and Data Center → 401 (not
+logged in). **Self-hosted JetBrains Mono confirmed working — zero external font
+fetches this run** (the desktop telemetry strip renders correctly offline).
+Screenshots for every app overwritten in `docs/screenshots/latest/` + full
+pass/fail table in `REPORT.md`.
+
+**Carried-forward finding (still open):** `/app/goals` — wired in
+`appComponents.tsx` but absent from `registry.ts`, so `AppShell` (needs both
+`appDef` + component) shows "App not found"; the `Goals-*.js` chunk is built but
+unreachable. Not a regression; one-liner to register or delete to retire.
+
+**⚠️ Tooling note — stale `origin/main` + blocked Playwright CDN:**
+(1) The fresh clone's `origin/main` ref was **stale at `f6e1e74` (06-19)** while
+the real tip is `65ad660`; `git checkout main` initially landed on the old tree.
+A `git fetch origin main` + `reset --hard origin/main` corrected it — worth a
+`git fetch` at the top of every routine run before trusting `main`.
+(2) `npx playwright install chromium` is **blocked by network egress**
+(`cdn.playwright.dev` / `playwright.azureedge.net` not on the allowlist), and
+the apt `chromium-browser` is only a snap stub. Workaround that worked:
+`storage.googleapis.com` **is** reachable, so pulled Chrome-for-Testing
+149.0.7827.55 directly and pointed Playwright at it via `executablePath`. All
+system libs were present (no `--with-deps` needed). Consider adding the
+Playwright CDN to egress, or caching a browser in the image.
+
+**Main state:** 🟢 green and releasable at `65ad660`.
+
+**Next step:** triage the orphaned `goals` route (register it in `registry.ts`
+or delete the component + map entry) so 27/27 is achievable.
+
+---
+
 ## 2026-06-21 · Integration run — merged #13 (code: HANDOFF) + #12 (QA docs/tooling); left #14 + #2
 
 **Integrated this run (4 open PRs triaged into lanes):**
