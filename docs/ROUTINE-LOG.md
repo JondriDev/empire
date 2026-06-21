@@ -5,6 +5,60 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · `routine/auto-20260621T053000Z` — `HANDOFF` event: every cross-app synapse lights
+
+**Increment:** INTERCONNECT. Closed the standing next-step queued by the last 4
+runs: until now only `SEND_TO_NOTES` lit a directed app→app arc in The Network
+(via the `from-<id>` note tag). The other cross-app transfers — **Open in Code
+Editor / Count Tokens / Use as Prompt / Ask Hermes / Ask Hermes to Analyze** —
+navigated silently, so their synapse never lit.
+
+**Why:** The vision is "one living organism." Those 5 actions are real,
+observable handoffs but emitted nothing on the bus, so the mesh couldn't portray
+them. Now every cross-app transfer is an honest, bus-observable directed edge —
+no invented relationships.
+
+**Changed:**
+- `src/lib/eventBus.ts` — new typed event `HANDOFF { fromId; toId; label? }`: a
+  generic directed cross-app transfer, the bus-level primitive the mesh reads.
+- `src/lib/appActions.ts` — added a small `handoff(fromId, toId, label)` helper
+  (no-ops on empty/self) and emit it from all 5 sessionStorage-based actions
+  *before* navigation: → `editor` (`editing`), `token-counter` (`counting`),
+  `prompt-generator` (`prompting`), `ai-chat` (`asking` / `analyzing`). Also
+  **fixed a latent id mismatch in `SEND_TO_NOTES`**: it called `Date.now()`
+  twice (once for the stored note, once for the emitted `NOTE_CREATED.noteId`),
+  so the two could land on different milliseconds. Now computed once and shared.
+- `src/apps/network/Network.tsx` — `flowForEvent` returns `{fromId,toId}` for a
+  `HANDOFF` (alongside the existing `from-` note tag); `appIdForEvent` lights the
+  `toId` node; `labelForEvent` renders the handoff verb in the live ticker. The
+  arc/flare rendering is unchanged — it already drew any flow `flowForEvent`
+  surfaced.
+- `src/lib/appActions.test.ts` (new) — 6 tests: each navigating action emits a
+  directed `HANDOFF` to the right target; `SEND_TO_NOTES`' stored note id equals
+  its emitted `NOTE_CREATED.noteId`.
+
+**Verified:** `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56
+entries). `npx eslint` clean on all 4 touched files. `npx vitest run` →
+**27/27 pass** (21 prior + 6 new). Additive and reversible; no localStorage/
+schema changes; no Calendar syncer.
+*Not verifiable here (no rendered UI):* on-device — open **The Network** in one
+window, then from another app's agent bar use e.g. **Use as Prompt** or **Count
+Tokens**; a curved packet should race `source → target` (e.g. `Calculator →
+Prompt Generator`) with both nodes flaring and a ticker row `● source → target ·
+prompting · now`. (Note: these actions navigate via `_self`, so the arc lights in
+the moment before the route change.)
+
+**Checkout note:** the env's local `main` branch is stale (`f6e1e74`); the true
+tip is `origin/main` `9eb5e4d`. Based this branch on `origin/main` after fetching.
+
+**Next step:** thread a source through `SEND_TO_LEARNING` (emit a `HANDOFF` or
+add a source field to `LEARNING_LOGGED`) so the Track-as-Learning transfer lights
+its arc too — the last cross-app action still radiating only CORE→app. Also worth
+the cheap CI guard flagged earlier (assert built CSS keeps a top-level
+`.empire-desktop` rule) so a silent comment-balance break can't pass a green build.
+
+---
+
 ## 2026-06-21 · Integration run — merged #11 + #9 (docs-only); reviewed #2
 
 **Integrated (both docs-only `routine/auto-*`, batched this run):**
