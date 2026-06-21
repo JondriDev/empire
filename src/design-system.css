@@ -129,7 +129,7 @@
 /* ═══════════════════════════════════════════════
    BRIDGE — dark "Void" theme (default + root fallback)
    Glass surfaces map onto the XENO Holographic Glass tokens.
-   (--bg/--text*/--grad/--holo-*/--nav-* are owned by XENO.)
+   (--bg / --text* / --grad / --holo-* / --nav-* are owned by XENO.)
    ═══════════════════════════════════════════════ */
 [data-theme="dark"], :root {
   --text4: #20324a;
