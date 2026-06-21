@@ -5,6 +5,45 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-20 · QA visual + smoke — **found & fixed: desktop shell rendered fully unstyled**
+
+**Headline:** First QA run to actually render the UI in-cloud (prior runs noted "visual
+confirmation pending" — Playwright's CDN is blocked here, so I drove the pre-installed
+`/opt/pw-browsers/chromium-1194` binary via `executablePath`). It immediately caught a
+**runtime/visual regression the green build hid**: the entire desktop shell (the
+launcher/home screen) was rendering with **no layout at all** — HUD telemetry stacked in
+the top-left, app names as a flat text run, no grid or dock — while every individual app
+rendered perfectly.
+
+**Root cause:** `src/design-system.css` had a comment typo. The doc line
+`(--bg/--text*/--grad/--holo-*/--nav-* are owned by XENO.)` contains `*/` sequences
+(`--text*/`, `--holo-*/`) that **close the CSS comment early**. The trailing comment text
+spilled out as malformed CSS and left two stray `*/` tokens (confirmed: 60 `/*` vs 62 `*/`),
+which knocked the parser's brace-matching off by a level. In the built bundle every
+`.empire-*` rule ended up rewritten as `@media(max-width:640px){.hide-sm .empire-desktop{…}}`
+— scoped to a `.hide-sm` ancestor inside a mobile media query — so it never applied on the
+real desktop. Apps survived because they're styled with Tailwind utility classes, not the
+`empire-*` custom layer; that's why `tsc -b && vite build` stayed 🟢 and nothing else flagged it.
+
+**Fix (in this PR, tiny + obviously safe):** added spaces around the glob slashes so the
+doc text no longer forms `*/` — comment-only, zero behavioral change. Rebuilt: comment
+balance 60/60, `.hide-sm .empire-desktop` occurrences 0, base `.empire-desktop{` restored as
+a top-level rule. Desktop now renders the intended centered HUD (glowing core, clock,
+status pills, app-icon grid) — see `docs/screenshots/latest/desktop.png`.
+
+**Verified:** `npm run build` 🟢 (PWA precache 56 entries). Headless smoke over the desktop
+shell + 26 app routes: **27/27 rendered, 0 crashes, 0 uncaught JS exceptions.** Screenshots
+overwritten in `docs/screenshots/latest/` + `REPORT.md` regenerated. Non-issues noted in the
+report: `goals` route is a stale id in the smoke list (not in `registry.ts`); `files` 500 /
+`datacenter` 401 are expected backend responses in the offline sandbox.
+
+**Next step:** the human merges this QA PR to restore the desktop on `main`. Optional
+follow-ups: drop the stale `goals` id from `scripts/qa-smoke.mjs`, and consider a cheap CI
+guard (e.g. assert `.empire-desktop` resolves to `position:fixed` in a headless check) so a
+silent CSS-cascade break like this can't pass a green build again.
+
+---
+
 ## 2026-06-20 · Integration run — merged #8 (synapse arcs); reviewed #2
 
 **Integrated:** PR #8 (`routine/auto-20260620T200722Z`, code) — squash-merged to

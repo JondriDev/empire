@@ -1,55 +1,62 @@
-# The Empire — Visual + Smoke QA Report
+# Empire QA — Visual + Smoke Report
 
-- **Run (UTC):** 2026-06-20T18:09:08Z
-- **Build:** 🟢 GREEN (`tsc -b && vite build`)
-- **Routes rendered:** 26/26 (desktop shell + 25 registry apps)
-- **Renderer:** headless Chromium (npm-sourced binary; Playwright CDN blocked by egress policy) @ 1600×900
-- **Result:** ✅ All routes mount; no uncaught exceptions, no React errors, no app-origin request failures.
+**Generated:** 2026-06-20T23:14:04.681Z
 
-## Pass / Fail
+**Result:** 27/27 rendered without crash, 0 failed.
 
-| App | Route | Render | Real runtime errors |
-|---|---|:--:|---|
-| Desktop Shell | `/` | ✅ | — |
-| Cakra Agent | `/app/ai-agent` | ✅ | — |
-| Calculator | `/app/calculator` | ✅ | — |
-| Calendar | `/app/calendar` | ✅ | — |
-| Clock | `/app/clock` | ✅ | — |
-| Weather | `/app/weather` | ✅ | — |
-| Grammar Fix | `/app/grammar` | ✅ | — |
-| Language Lab | `/app/language` | ✅ | — |
-| Music | `/app/music` | ✅ | — |
-| Video | `/app/video` | ✅ | — |
-| Files | `/app/files` | ✅ | — |
-| Cache Cleaner | `/app/cache` | ✅ | — |
-| Browser | `/app/browser` | ✅ | — |
-| Code Editor | `/app/editor` | ✅ | — |
-| Notes | `/app/notes` | ✅ | — |
-| Photos | `/app/photos` | ✅ | — |
-| Data Center | `/app/datacenter` | ✅ | — |
-| Maps | `/app/maps` | ✅ | — |
-| Messages | `/app/messages` | ✅ | — |
-| Prompt Gen | `/app/prompt-generator` | ✅ | — |
-| Token Counter | `/app/token-counter` | ✅ | — |
-| Learning Tracker | `/app/learning-tracker` | ✅ | — |
-| Cakra CC | `/app/hermes-cc` | ✅ | — |
-| AI Chat | `/app/ai-chat` | ✅ | — |
-| Artifacts | `/app/artifacts` | ✅ | — |
-| Network | `/app/network` | ✅ | — |
+> **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
+> Network & console noise (failed external CDN fetches, backend API calls needing auth) is
+> listed separately — expected in the offline cloud sandbox and **not** a render failure.
 
-## Environment-expected notes (not bugs)
-
-These failures are inherent to the headless/offline cloud env and do **not** indicate regressions:
-
-- `EXTERNAL https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap (net::ERR_CERT_AUTHORITY_INVALID)` ×1
-- `EXTERNAL https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap (net::ERR_FAILED)` ×25
-- `APP-API http://localhost:3001/api/files?path=%2Fstorage%2Femulated%2F0 → 500 — Android-only path absent in cloud → 500` ×1
-- `APP-API http://localhost:3001/api/dc/tables → 401 — no auth token in headless → 401` ×1
-
-- **Google Fonts CDN blocked** → JetBrains Mono webfont doesn't load, so the desktop HUD/typography looks rougher than on-device (purely cosmetic; falls back to system mono).
-- **`/api/files` → 500** — endpoint reads an Android storage path that doesn't exist in the cloud checkout. UI stays stable.
-- **`/api/dc/tables` → 401** — Data Center calls the API without an auth token in headless; UI renders its empty/locked state cleanly.
+| App | Render | Uncaught JS / crash | Network / console notes |
+|---|---|---|---|
+| desktop | ✅ | — | — |
+| calculator | ✅ | — | — |
+| calendar | ✅ | — | — |
+| clock | ✅ | — | — |
+| weather | ✅ | — | — |
+| grammar | ✅ | — | — |
+| language | ✅ | — | — |
+| music | ✅ | — | — |
+| video | ✅ | — | — |
+| files | ✅ | — | /api/files?path=%2Fstorage%2Femulated%2F0 → HTTP 500 |
+| cache | ✅ | — | — |
+| browser | ✅ | — | — |
+| editor | ✅ | — | — |
+| notes | ✅ | — | — |
+| photos | ✅ | — | — |
+| datacenter | ✅ | — | /api/dc/tables → HTTP 401 |
+| maps | ✅ | — | — |
+| messages | ✅ | — | — |
+| prompt-generator | ✅ | — | — |
+| token-counter | ✅ | — | — |
+| learning-tracker | ✅ | — | — |
+| ai-agent | ✅ | — | — |
+| ai-chat | ✅ | — | — |
+| goals | ✅ | — | — |
+| hermes-cc | ✅ | — | — |
+| artifacts | ✅ | — | — |
+| network | ✅ | — | — |
 
 ## Screenshots
 
-All PNGs in this folder are overwritten each run (no dated folders). `desktop.png` + `app-<id>.png` per registry app.
+See PNGs in this folder. `desktop.png` is the shell; `app-<id>.png` is each app route.
+
+## Notes (this run)
+
+- **Desktop shell was rendering completely unstyled** (HUD telemetry stacked top-left,
+  app names as a flat text band, no grid/dock) on a clean build of `main`. Root cause:
+  a comment typo in `src/design-system.css` — the doc line `(--bg/--text*/--grad/--holo-*/--nav-* …)`
+  contained `*/` sequences (`--text*/`, `--holo-*/`) that **closed the comment early**,
+  spilling malformed CSS and two stray `*/` tokens that knocked the parser's brace-matching
+  off by a level. Every `.empire-*` rule got absorbed into `@media(max-width:640px){.hide-sm …}`
+  and never applied. **Fixed in this PR** (spaces added around the glob slashes — comment-only,
+  zero behavioral risk). Individual apps were unaffected (they use Tailwind utilities), which
+  is why the build stayed green and only the shell broke. The `desktop.png` here is the
+  post-fix render.
+- `goals` route shows "App not found" — `/app/goals` is **not** in `src/lib/registry.ts`
+  (the closest app is `learning-tracker`). This is a stale id in the smoke harness's route
+  list, not a product regression. `app-goals.png` captures the graceful fallback.
+- `files` → HTTP 500 and `datacenter` → HTTP 401 are **expected** backend responses in the
+  cloud sandbox: `files` reads `/storage/emulated/0` (Android path, absent here) and
+  `datacenter` calls an authed endpoint without a logged-in session. Neither is a render failure.
