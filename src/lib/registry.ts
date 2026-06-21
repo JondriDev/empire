@@ -1,4 +1,4 @@
-import { Terminal, Calculator, Calendar, Clock, CloudSun, SpellCheck, Languages, Music, Video, Folder, Trash2, Globe, Code2, StickyNote, Image, Database, MapPin, MessageSquare, Wand2, Hash, GraduationCap, Command, Bot, Sparkles, Palette, Network, type LucideIcon } from 'lucide-react'
+import { Terminal, Calculator, Calendar, Clock, CloudSun, SpellCheck, Languages, Music, Video, Folder, Trash2, Globe, Code2, StickyNote, Image, Database, MapPin, MessageSquare, Wand2, Hash, GraduationCap, Command, Bot, Sparkles, Palette, Network, Target, type LucideIcon } from 'lucide-react'
 
 export interface AppDefinition {
   id: string
@@ -32,6 +32,7 @@ export const apps: AppDefinition[] = [
   { id: 'prompt-generator', name: 'Prompt Gen', icon: 'Wand2', route: '/app/prompt-generator', description: 'Craft AI prompts', color: '#c084fc', hermesEnabled: true },
   { id: 'token-counter', name: 'Token Counter', icon: 'Hash', route: '/app/token-counter', description: 'Count AI tokens', color: '#38bdf8', hermesEnabled: true },
   { id: 'learning-tracker', name: 'Learning Tracker', icon: 'GraduationCap', route: '/app/learning-tracker', description: 'Track & challenge yourself', color: '#34d399', hermesEnabled: true },
+  { id: 'goals', name: 'Goals', icon: 'Target', route: '/app/goals', description: 'Set goals, track progress', color: '#818cf8', hermesEnabled: true },
   { id: 'hermes-cc', name: 'Cakra CC', icon: 'Command', route: '/app/hermes-cc', description: 'One-click command center', color: '#22d3ee', hermesEnabled: true },
   { id: 'ai-chat', name: 'AI Chat', icon: 'Sparkles', route: '/app/ai-chat', description: 'Chat with Cakra', color: '#a78bfa', hermesEnabled: true },
   { id: 'artifacts', name: 'Artifacts', icon: 'Palette', route: '/app/artifacts', description: 'Self-contained mini-apps & builders', color: '#c084fc', hermesEnabled: true },
@@ -44,6 +45,7 @@ const iconMap: Record<string, LucideIcon> = {
   MapPin, MessageSquare, Wand2, Hash, GraduationCap, Bot, Sparkles, Command,
   Palette,  // For the Artifacts app — fixed
   Network,  // For the Network node-graph app (merged from the-empire)
+  Target,   // For the Goals Tracker app
 }
 
 export function getAppIcon(name: string): LucideIcon {

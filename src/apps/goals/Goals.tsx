@@ -121,63 +121,77 @@ export default function Goals() {
     return true
   })
 
+  // One accent per view — Goals reads as electric-blue "ion" (matches its
+  // registry tile). Everything else routes through the Deep-Field text tokens
+  // so editing a design-system token restyles this app with the rest.
+  const ACCENT = 'var(--ion, #4d9bff)'
+  const inputStyle = { background: 'var(--input-bg)', color: 'var(--text)' } as const
+
   return (
     <div className="p-6 max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Target className="w-6 h-6 text-blue-400" /> Goals Tracker
+          <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--text)' }}>
+            <Target className="w-6 h-6" style={{ color: ACCENT }} /> Goals Tracker
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm mt-1" style={{ color: 'var(--text2)' }}>
             {completedCount}/{goals.length} completed
           </p>
         </div>
         <button
           onClick={askHermesAll}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/20 text-blue-200 text-xs hover:bg-blue-500/30 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-colors"
+          style={{ background: 'color-mix(in srgb, var(--ion) 18%, transparent)', color: ACCENT, transitionDuration: 'var(--dur-fast)' }}
         >
           <Bot className="w-3.5 h-3.5" /> Ask Hermes
         </button>
       </div>
 
       {/* Progress bar */}
-      <div className="mb-6 h-2 rounded-full bg-white/5 overflow-hidden">
+      <div className="mb-6 h-2 rounded-full overflow-hidden" style={{ background: 'var(--input-bg)' }}>
         <div
-          className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-400 transition-all duration-500"
-          style={{ width: `${goals.length ? (completedCount / goals.length) * 100 : 0}%` }}
+          className="h-full rounded-full"
+          style={{
+            width: `${goals.length ? (completedCount / goals.length) * 100 : 0}%`,
+            background: `linear-gradient(to right, var(--ion), var(--signal))`,
+            transition: 'width var(--dur-slow) var(--ease-out)',
+          }}
         />
       </div>
 
       {/* Add form */}
-      <div className="p-4 rounded-2xl border border-blue-500/20 mb-6" style={{ background: 'var(--card-bg)' }}>
-        <h3 className="text-sm font-medium mb-3 flex items-center gap-1"><Plus className="w-3.5 h-3.5 text-blue-400" /> New Goal</h3>
+      <div className="gp p-4 rounded-2xl mb-6">
+        <h3 className="text-sm font-medium mb-3 flex items-center gap-1" style={{ color: 'var(--text)' }}>
+          <Plus className="w-3.5 h-3.5" style={{ color: ACCENT }} /> New Goal
+        </h3>
         <input
           value={title}
           onChange={e => setTitle(e.target.value)}
           placeholder="Goal title (e.g. Learn React)"
-          className="w-full rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
-          style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
+          className="w-full rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none"
+          style={inputStyle}
         />
         <textarea
           value={description}
           onChange={e => setDescription(e.target.value)}
           placeholder="Description"
           rows={2}
-          className="w-full rounded-lg px-3 py-2 text-sm mb-2 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500/50"
-          style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
+          className="w-full rounded-lg px-3 py-2 text-sm mb-2 resize-none focus:outline-none"
+          style={inputStyle}
         />
         <input
           type="date"
           value={deadline}
           onChange={e => setDeadline(e.target.value)}
-          className="w-full rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
-          style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
+          className="w-full rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none"
+          style={inputStyle}
         />
         <button
           onClick={add}
           disabled={!title.trim()}
-          className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-30 text-white text-sm transition-colors"
+          className="px-4 py-1.5 rounded-lg disabled:opacity-30 text-sm transition-colors"
+          style={{ background: ACCENT, color: 'var(--void, #03060e)', transitionDuration: 'var(--dur-fast)' }}
         >
           Add Goal
         </button>
@@ -189,9 +203,12 @@ export default function Goals() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-3 py-1 rounded-full text-xs capitalize transition-colors ${
-              filter === f ? 'bg-blue-500/20 text-blue-300' : 'text-gray-400 hover:text-gray-300'
-            }`}
+            className="px-3 py-1 rounded-full text-xs capitalize transition-colors"
+            style={
+              filter === f
+                ? { background: 'color-mix(in srgb, var(--ion) 18%, transparent)', color: ACCENT }
+                : { color: 'var(--text2)' }
+            }
           >
             {f}
           </button>
@@ -202,53 +219,55 @@ export default function Goals() {
       <div className="space-y-3">
         {filtered.length === 0 && (
           <div className="text-center py-12">
-            <Flag className="w-12 h-12 mx-auto mb-3 text-gray-600" />
-            <p className="text-gray-500 text-sm">No {filter !== 'all' ? filter : ''} goals yet</p>
+            <Flag className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text3)' }} />
+            <p className="text-sm" style={{ color: 'var(--text3)' }}>No {filter !== 'all' ? filter : ''} goals yet</p>
           </div>
         )}
         {filtered.map(goal => (
           <div
             key={goal.id}
-            className="group relative p-4 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all"
-            style={{ background: 'var(--card-bg)' }}
+            className="gp gp-interactive group relative p-4 rounded-2xl"
           >
             <div className="flex items-start gap-3">
               <button
                 onClick={() => toggleCompleted(goal.id, !goal.completed)}
-                className={`w-6 h-6 rounded-lg border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
-                  goal.completed ? 'bg-blue-500 border-blue-500 text-white' : 'border-white/20 hover:border-blue-500/50'
-                }`}
+                className="w-6 h-6 rounded-lg border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors"
+                style={
+                  goal.completed
+                    ? { background: ACCENT, borderColor: ACCENT, color: 'var(--void, #03060e)' }
+                    : { borderColor: 'var(--hair)' }
+                }
               >
                 {goal.completed && <Check className="w-3 h-3" />}
               </button>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className={`font-medium ${goal.completed ? 'line-through text-gray-500' : ''}`}>{goal.title}</h3>
-                  {goal.completed && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300">Completed</span>}
+                  <h3 className="font-medium" style={{ color: goal.completed ? 'var(--text3)' : 'var(--text)', textDecoration: goal.completed ? 'line-through' : 'none' }}>{goal.title}</h3>
+                  {goal.completed && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'color-mix(in srgb, var(--ion) 18%, transparent)', color: ACCENT }}>Completed</span>}
                 </div>
                 {goal.description && (
-                  <p className="text-sm text-gray-400 mt-1">{goal.description}</p>
+                  <p className="text-sm mt-1" style={{ color: 'var(--text2)' }}>{goal.description}</p>
                 )}
-                <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
+                <div className="flex items-center gap-3 mt-2 text-xs" style={{ color: 'var(--text3)' }}>
                   <span>📅 Created: {goal.createdAt}</span>
                   <span>⏰ Deadline: {goal.deadline}</span>
                 </div>
-                
+
                 {/* Progress slider */}
                 <div className="mt-3">
-                  <div className="flex justify-between text-xs mb-1">
+                  <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text2)' }}>
                     <span>Progress</span>
                     <span>{goal.progress}%</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="100" 
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
                     value={goal.progress}
                     onChange={(e) => updateProgress(goal.id, parseInt(e.target.value))}
-                    className="w-full h-1.5 rounded-full appearance-none bg-gray-700"
+                    className="w-full h-1.5 rounded-full appearance-none"
                     style={{
-                      background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${goal.progress}%, #374151 ${goal.progress}%, #374151 100%)`
+                      background: `linear-gradient(to right, var(--ion) 0%, var(--ion) ${goal.progress}%, var(--input-bg) ${goal.progress}%, var(--input-bg) 100%)`
                     }}
                   />
                 </div>
@@ -257,14 +276,16 @@ export default function Goals() {
                 <NodeActions type="goal" sourceId={goal.id} />
                 <button
                   onClick={() => askHermesGoal(goal)}
-                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-blue-500/20 text-blue-300 transition-all"
+                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                  style={{ color: ACCENT }}
                   title="Ask Hermes about this goal"
                 >
                   <Bot className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => deleteGoal(goal.id)}
-                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-red-300 transition-all"
+                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                  style={{ color: 'var(--ember, #ff9b6b)' }}
                   title="Delete goal"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

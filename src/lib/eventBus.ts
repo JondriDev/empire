@@ -15,7 +15,10 @@ export type EmpireEvent =
   | { type: 'EVENT_UPDATED'; eventId: string; title: string; date: string; time: string }
   | { type: 'MESSAGE_SENT'; sender: string; content: string }
   | { type: 'CODE_RUN'; language: string; code: string; output: string }
-  | { type: 'LEARNING_LOGGED'; topic: string; learned: string }
+  // `from` is the source app id when this entry arrived via a cross-app transfer
+  // (CROSS_APP_ACTIONS.SEND_TO_LEARNING); undefined when logged inside the
+  // Learning Tracker itself. The Network mesh reads it as an honest synapse arc.
+  | { type: 'LEARNING_LOGGED'; topic: string; learned: string; from?: string }
   | { type: 'LEARNING_CHALLENGE'; mode: string; topic: string; score: number }
   | { type: 'TOKEN_COUNTED'; text: string; count: number; model: string }
   | { type: 'PROMPT_GENERATED'; prompt: string }

@@ -110,6 +110,11 @@ function flowForEvent(e: EmpireEvent): { fromId: string; toId: string } | null {
       if (fromId && fromId !== 'notes') return { fromId, toId: 'notes' }
     }
   }
+  // An entry tracked *from* another app via SEND_TO_LEARNING carries `from`
+  // (in-app logging leaves it undefined, so no false self-edge).
+  if (e.type === 'LEARNING_LOGGED' && e.from && e.from !== 'learning-tracker') {
+    return { fromId: e.from, toId: 'learning-tracker' }
+  }
   return null
 }
 

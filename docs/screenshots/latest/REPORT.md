@@ -1,8 +1,8 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-06-21T04:18:12.214Z
+**Generated:** 2026-06-21T18:05:40.531Z
 
-**Result:** 26/27 rendered without crash, 1 failed.
+**Result:** 27/27 rendered without crash, 0 failed.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -33,7 +33,7 @@
 | learning-tracker | ✅ | — | — |
 | ai-agent | ✅ | — | — |
 | ai-chat | ✅ | — | — |
-| goals | ❌ FAIL | App not available/found (route not wired) | — |
+| goals | ✅ | — | — |
 | hermes-cc | ✅ | — | — |
 | artifacts | ✅ | — | — |
 | network | ✅ | — | — |
