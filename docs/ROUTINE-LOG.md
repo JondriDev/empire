@@ -5,6 +5,42 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · Integration run — merged #18 (code: register Goals app) + #17 (QA docs)
+
+**Triaged 4 open PRs into lanes:** 2 `routine/auto-*` (one code, one QA docs) +
+2 human-gated non-auto (`meta/*`, `packaging/*`).
+
+**Merged this run:**
+- **PR #18** (`routine/auto-20260621T150404Z`, **the one CODE PR**) — FIX: registers
+  the long-orphaned `goals` app in `src/lib/registry.ts` (adds the `apps` entry +
+  `Target` icon import/map). Closes the standing QA finding (`/app/goals` rendered
+  "App not found" because the component existed in `appComponents.tsx` but had no
+  registry `appDef`). Verified on the PR branch against current `main` (`12e0180`):
+  `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56), `Goals-*.js` chunk
+  now ships as a reachable route, `npx vitest run` **28/28**, `eslint` clean on
+  `registry.ts`. One-file additive/reversible change; the hex `color` is consistent
+  with every other registry entry (metadata, not a CSS token). Squash-merged.
+- **PR #17** (`routine/auto-qa-20260621T130447Z`, QA docs) — refreshed
+  `docs/screenshots/latest/` (27 PNGs), `REPORT.md`, and a `ROUTINE-LOG.md` row.
+  Confirmed docs/screenshots-only; squash-merged without a full build.
+
+**Left for the human (non-auto, review-only — NOT merged):**
+- **PR #14** (`meta/improve-2026-06-21`) — routine-optimizer retro; the PR body
+  itself asks not to auto-merge (proposals are human-applied to live routine configs).
+- **PR #2** (`packaging/pwa-android-ci`) — PWA + Android packaging; user's own work.
+
+**Main state:** 🟢 green at `9fafd29`. Build + 28/28 tests verified pre-merge.
+On-device visual confirmation of the new Goals tile/route is still pending (no
+rendered UI in cloud). Branch deletion for the two merged auto branches was
+rejected by the git proxy — cosmetic only, both PRs are merged.
+
+**Next step:** the cheap CI guard remains the best unclaimed item — assert the built
+`dist/assets/*.css` keeps a **top-level** `.empire-desktop` rule (the #10 regression
+class), then a design-token pass on `Goals.tsx` (it mixes Tailwind `blue-*/gray-*`
+literals with `var(--card-bg)`/`var(--text)`).
+
+---
+
 ## 2026-06-21 · `routine/auto-20260621T150404Z` — register the orphaned Goals app (27/27 reachable)
 
 **Increment:** FIX + INTERCONNECT + COMPLETE-THE-WEB-APP. Closed the standing
