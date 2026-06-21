@@ -23,6 +23,25 @@ function rgbOf(hex: string): string {
   return `${(int >> 16) & 255},${(int >> 8) & 255},${int & 255}`
 }
 
+// Node colour by *type*, drawn from the Deep-Field design tokens
+// (--signal/--aurora/--plasma/--ion/--ember/pale-signal). Known types get a
+// meaningful accent; anything new gets a stable colour by hashing its name.
+const TYPE_RGB: Record<string, string> = {
+  note: '77,155,255',      // --ion     electric blue
+  task: '92,240,168',      // --aurora  alien green
+  message: '52,245,214',   // --signal  teal
+  learning: '176,107,255', // --plasma  violet
+  goal: '255,155,107',     // --ember   warm signal
+  prompt: '155,247,230',   // pale signal
+}
+const TYPE_CYCLE = ['52,245,214', '92,240,168', '176,107,255', '77,155,255', '255,155,107', '155,247,230']
+function typeRgb(type: string): string {
+  if (TYPE_RGB[type]) return TYPE_RGB[type]
+  let hsh = 0
+  for (let i = 0; i < type.length; i++) hsh = (hsh * 31 + type.charCodeAt(i)) >>> 0
+  return TYPE_CYCLE[hsh % TYPE_CYCLE.length]
+}
+
 export default function Network() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const openApp = useWindowStore(s => s.openApp)
