@@ -5,6 +5,56 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · Integration run — merged #13 (code: HANDOFF) + #12 (QA docs/tooling); left #14 + #2
+
+**Integrated this run (4 open PRs triaged into lanes):**
+- **PR #13** (`routine/auto-20260621T053000Z`, **the one CODE PR**) — the
+  INTERCONNECT increment: a new `HANDOFF { fromId; toId; label? }` bus event so
+  the other 5 cross-app transfers (Editor / Token Counter / Prompt Gen / Ask
+  Hermes / Analyze) light their Network synapse arc, not just `SEND_TO_NOTES`;
+  also folds the latent double-`Date.now()` id mismatch in `SEND_TO_NOTES`.
+  **Verified locally on a fresh checkout:** `npm run build` 🟢 (`tsc -b && vite
+  build`, PWA precache 56), `npx vitest run` → **27/27 pass** (21 prior + 6 new),
+  `npx eslint` clean on all 4 touched files. Reviewed the diff: purely additive
+  and reversible, tokens-only (no CSS/colour changes), no localStorage/schema
+  changes, no Calendar central syncer, one focused increment, honest edges only
+  (no-ops on empty/self). `mergeable_state: clean`. **Squash-merged** (`716e070`).
+- **PR #12** (`routine/auto-qa-2026-06-21T04-18Z`, QA visual+smoke) — refreshed
+  screenshots + `REPORT.md` + this log's QA table, plus a one-line crash-regex
+  broadening in `scripts/qa-smoke.mjs` (matches `App not found` as well as `App
+  not available`). Non-app tooling (not in the build graph); low-risk, confirmed
+  the only non-docs file. `mergeable_state: clean`. **Squash-merged** (`c375586`).
+
+**Reviewed, not merged (left for the human):**
+- **PR #14** (`meta/improve-2026-06-21`) — the Routine-Optimizer's weekly retro.
+  **Not** a `routine/auto-*` branch; the PR body explicitly asks to stay open for
+  human review (proposals are human-applied to live routine configs). Untouched.
+- **PR #2** (`packaging/pwa-android-ci`) — the human's own packaging branch;
+  packaging already on `main` and the branch is stale. Prior runs already posted
+  a close recommendation; nothing changed since, so no redundant comment. Left.
+
+**QA finding carried forward:** `/app/goals` is an orphaned route — wired in
+`appComponents.tsx` but missing from `registry.ts`, so it renders the "App not
+found" fallback (now correctly caught by the QA smoke regex). Pre-existing, not a
+regression; flagged for the Strategist/Builder to either register or retire it.
+
+**Main state:** 🟢 green and releasable at `716e070`. Build + 27/27 tests verified
+locally post-checkout of #13. ⚠️ On-device visual confirmation still pending — the
+new synapse arcs / handoff ticker can't be exercised headless in this session.
+
+**Housekeeping:** branch deletion via the sandbox git proxy still returns HTTP 403,
+so the two merged `routine/auto-*` heads (and older ones) linger — harmless; the
+PRs are merged.
+
+**Next step:** ROADMAP NOW — thread a source through `SEND_TO_LEARNING` (emit a
+`HANDOFF` or add a source field to `LEARNING_LOGGED`) so Track-as-Learning lights
+its arc too (the last cross-app action still radiating only CORE→app), and pick up
+the orphaned-`goals` triage. Still worth the cheap CI guard (assert built CSS keeps
+a top-level `.empire-desktop` rule) so a silent comment-balance break can't pass a
+green build again.
+
+---
+
 ## 2026-06-21 · `routine/auto-20260621T053000Z` — `HANDOFF` event: every cross-app synapse lights
 
 **Increment:** INTERCONNECT. Closed the standing next-step queued by the last 4
