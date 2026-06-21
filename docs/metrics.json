@@ -1,0 +1,12 @@
+{
+  "current": {
+    "generatedAt": "2026-06-21T22:45:54.769Z",
+    "apps": 26,
+    "testFiles": 4,
+    "testCases": 24,
+    "tokenViolations": 496,
+    "bundleGzKB": null,
+    "bundleRawKB": null
+  },
+  "history": []
+}
