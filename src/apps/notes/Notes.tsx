@@ -16,6 +16,7 @@ import type { Note } from '../../lib/store'
 import { Button, Input, TextArea, Card, Badge } from '../../components/ui'
 import { EmptyState, SectionHeader } from '../../components/ui/Utility'
 import { useToast } from '../../components/ui/Toast'
+import { NodeActions } from '../../components/ui/NodeActions'
 
 export default function Notes() {
   const { notes, addNote, updateNote, deleteNote } = useStore()
@@ -332,6 +333,7 @@ function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDe
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
+              <NodeActions type="note" sourceId={note.id} />
               <ActionIconBtn title="Edit note" onClick={onStartEdit} icon={<Edit2 className="w-3.5 h-3.5" />} />
               <ActionIconBtn
                 title="Ask Hermes"

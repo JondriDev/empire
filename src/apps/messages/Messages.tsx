@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import { Bot, Send } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
+import { NodeActions } from '../../components/ui/NodeActions'
 
 const CONTACTS = ['Jondri', 'Work', 'Family', 'Urgent', 'AI Bot']
 
@@ -144,9 +145,12 @@ export default function Messages() {
         style={!isMe ? { background: 'var(--card-bg)' } : {}}
         >
         <p className="text-sm">{msg.content}</p>
-        <p className={`text-[10px] mt-1 ${isMe ? 'text-cyan-100' : 'text-gray-600'}`}>
+        <div className="flex items-center justify-between gap-2 mt-1">
+        <p className={`text-[10px] ${isMe ? 'text-cyan-100' : 'text-gray-600'}`}>
         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
+        <NodeActions type="message" sourceId={msg.id} />
+        </div>
         </div>
         </div>
         )

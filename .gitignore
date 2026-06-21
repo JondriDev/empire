@@ -30,3 +30,6 @@ data/
 *.njsproj
 *.sln
 *.sw?
+
+# Local Claude Code permissions for the auto-iteration loop
+.claude/settings.local.json
