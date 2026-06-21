@@ -90,6 +90,24 @@ silent CSS-cascade break like this can't pass a green build again.
 
 ---
 
+## 2026-06-20 · Strategist run — created docs/ROADMAP.md (first prioritized backlog)
+
+Zoomed out over README, docs (ARCHITECTURE/SPEC/ENHANCEMENTS/ROUTINE-LOG), the
+latest QA REPORT, `src/lib/registry.ts`, `eventBus.ts`, `appActions.ts`, and recent
+git log. State: main green, 26/26 routes mount, QA flags **no** open bugs (the
+`/api/files` 500 and `/api/dc/tables` 401 are env-expected). No ROADMAP existed yet —
+created `docs/ROADMAP.md` as the single backlog the build routine pulls from.
+Top of NOW: emit a `HANDOFF` event from `appActions.ts` so *every* cross-app synapse
+lights in the Network mesh (not just →Notes) — the standing next-step from the last
+three build runs — then close the loop on the receiving side, unify the design tokens
+(one palette for DOM + canvas), and bring the README's stale "21 apps / Hermes" copy
+current (25 apps / Cakra). PR on `routine/auto-roadmap-20260620T230454Z`.
+
+(Checkout note: the env's local `main` was stale at `f6e1e74`; fetched + based this
+branch on the true `origin/main` `0381aa1` so the roadmap sits on current state.)
+
+---
+
 ## 2026-06-20 · Integration run — merged #8 (synapse arcs); reviewed #2
 
 **Integrated:** PR #8 (`routine/auto-20260620T200722Z`, code) — squash-merged to
