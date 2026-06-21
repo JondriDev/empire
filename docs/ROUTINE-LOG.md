@@ -5,6 +5,52 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · Integration run — merged #10 (CRITICAL: desktop-shell CSS fix)
+
+**Integrated:** PR #10 (`routine/auto-qa-20260620T231527Z`, QA visual+smoke) —
+squash-merged to main after **independently reproducing and verifying** its bug
+fix. This was the highest-value action available: a genuine, *live* regression on
+`main` that a green build was hiding.
+
+**The bug (confirmed on `main` before merging):** `src/design-system.css` line 132
+documented the XENO-owned tokens as `(--bg/--text*/--grad/--holo-*/--nav-* …)`. The
+substrings `--text*/` and `--holo-*/` each form a `*/`, **closing the CSS comment
+early**. Confirmed the imbalance directly: 60 `/*` vs **62** `*/`. The two stray
+`*/` knocked brace-matching off by a level, so in the *built* bundle every
+`.empire-*` shell rule was absorbed into `@media(max-width:640px){.hide-sm
+.empire-desktop{…}}` — scoped under `.hide-sm` inside a mobile media query — and
+never applied. Confirmed in `dist/assets/*.css`: **15** `.hide-sm .empire-desktop`
+matches and **0** top-level `.empire-desktop{`. The desktop launcher/home shell
+rendered with no layout (HUD stacked top-left, no grid/dock); individual apps
+survived because they use Tailwind utilities, not the `empire-*` layer — which is
+why `tsc -b && vite build` stayed green and nothing flagged it.
+
+**The fix (#10, comment-only):** spaces added around the glob slashes
+(`--bg / --text* / --grad / --holo-* / --nav-*`) so the doc text no longer forms
+`*/`. Zero behavioral change. Independently re-verified post-merge on synced
+`main`: `npm run build` 🟢 (PWA precache), comment balance **60/60**, built CSS
+`.hide-sm .empire-desktop` = **0**, top-level `.empire-desktop{` = **1** (restored).
+PR also refreshed the post-fix QA screenshots + `REPORT.md` (27/27 routes render).
+
+**Main state:** 🟢 green and releasable at the #10 squash merge — desktop shell
+layout restored. ⚠️ On-device visual confirmation still pending (no rendered UI in
+this session beyond the headless smoke #10 already ran).
+
+**Reviewed, not merged:** PR #9 (`routine/auto-roadmap-…`, docs-only ROADMAP) and
+PR #2 (`packaging/pwa-android-ci`, the human's own packaging branch) — both left
+for the human; #9 is low-risk docs but based on stale `main` and would want a
+rebase before merge.
+
+**Next step:** the standing INTERCONNECT item — emit a lightweight `HANDOFF` event
+from `src/lib/appActions.ts` so the other 5 cross-app actions (Editor / Token
+Counter / Prompt Gen / AI Chat / Analyze) light their Network synapse arcs, not
+just `SEND_TO_NOTES`; fold in the latent double-`Date.now()` id mismatch in
+`SEND_TO_NOTES` while there. Also worth a cheap CI guard (assert the built CSS
+keeps a top-level `.empire-desktop` rule) so a silent comment-balance break can't
+pass a green build again.
+
+---
+
 ## 2026-06-20 · QA visual + smoke — **found & fixed: desktop shell rendered fully unstyled**
 
 **Headline:** First QA run to actually render the UI in-cloud (prior runs noted "visual
