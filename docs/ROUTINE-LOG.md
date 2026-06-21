@@ -5,6 +5,41 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · Integration run — merged #20 (code: Goals design tokens) + #19 (QA docs)
+
+**Triaged 4 open PRs into lanes:** 2 `routine/auto-*` (one code #20, one QA docs #19)
++ 2 human-gated non-auto (`meta/improve-2026-06-21` #14, `packaging/pwa-android-ci` #2).
+
+**Merged this run:**
+- **PR #19** (`routine/auto-qa-20260621T180613Z`, QA docs-only) — refreshed
+  `docs/screenshots/latest/` (27 PNGs) + `REPORT.md` (27/27 render, 0 crashes) and a
+  ROUTINE-LOG entry. Diff confirmed docs/screenshots-only; squash-merged.
+- **PR #20** (`routine/auto-20260621T201500Z`, **the one CODE PR**) — design-system
+  pass on `src/apps/goals/Goals.tsx` (the last app mixing raw `blue-/gray-/red-`
+  Tailwind literals + hex with tokens). Routes everything through `--ion` accent,
+  `--text/2/3` ramp, `.gp`/`.gp-interactive` glass surfaces, and motion tokens;
+  remaining hex are token fallbacks (`var(--ion,#4d9bff)` etc.). Verified on the PR
+  branch against current `main`: `npm run build` 🟢 (`tsc -b && vite build`, PWA
+  precache 56), `npx vitest run` **28/28**, `eslint` clean, grep confirms zero
+  color literals, `empire-goals` localStorage + eventBus emits untouched. Resolved a
+  `ROUTINE-LOG.md` merge conflict with #19 on the branch (kept both entries,
+  chronological), re-built 🟢, then squash-merged.
+
+**Left for human (review-only, non-auto branches):** #14 `meta/*` (routine-spec
+proposals; explicitly "do not auto-merge") and #2 `packaging/*` (PWA/APK CI).
+
+**Resulting main state:** GREEN — `tsc -b && vite build` passes, 28/28 tests, all
+26 apps + shell render per #19's QA. ⚠️ On-device visual confirmation of the Goals
+token restyle still pending (no rendered UI in cloud; change is color/surface/motion
+only, layout unchanged). Note: merged auto branches could not be auto-deleted (git
+transport returned 403 on delete) — harmless, their PRs are closed.
+
+**Next step:** the cheap CI guard remains the best unclaimed item — assert built
+`dist/assets/*.css` keeps a top-level `.empire-desktop` rule (the #10 regression
+class), then audit the next color-literal offender app.
+
+---
+
 ## 2026-06-21 · `routine/auto-20260621T201500Z` — design-token pass on Goals.tsx
 
 **Increment:** ENFORCE DESIGN SYSTEM (priority 4). Closed the standing triage
