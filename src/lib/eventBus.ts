@@ -31,6 +31,11 @@ export type EmpireEvent =
   | { type: 'HERMES_TOOL_EXECUTED'; toolId: string; toolName: string }
   | { type: 'HERMES_SKILL_LOADED'; skillName: string }
   | { type: 'HERMES_MCP_CONNECTED'; mcpName: string; status: string }
+  // A directed cross-app handoff: data sent *from* one app *to* another (e.g.
+  // "use as prompt" routes the current selection into Prompt Generator). The
+  // Network mesh reads these as honest app→app synapse arcs. `label` is an
+  // optional terse verb for the live ticker (defaults to "handoff").
+  | { type: 'HANDOFF'; fromId: string; toId: string; label?: string }
 
 type EventHandler<E extends EmpireEvent> = (_event: E) => void
 type EventUnsubscribe = () => void

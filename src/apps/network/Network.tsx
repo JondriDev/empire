@@ -46,6 +46,7 @@ function appIdForEvent(e: EmpireEvent): string | null {
     case 'WEATHER_UPDATED': return 'weather'
     case 'AI_QUERY':
     case 'AI_RESPONSE': return e.app || 'ai-chat'
+    case 'HANDOFF': return e.toId // the receiving instrument lights as the target
     case 'HERMES_STATUS_REFRESHED':
     case 'HERMES_APP_LAUNCHED':
     case 'HERMES_TOOL_EXECUTED':
@@ -83,6 +84,7 @@ function labelForEvent(e: EmpireEvent): string {
     case 'HERMES_TOOL_EXECUTED': return 'tool run'
     case 'HERMES_SKILL_LOADED': return 'skill loaded'
     case 'HERMES_MCP_CONNECTED': return 'mcp connected'
+    case 'HANDOFF': return e.label || 'handoff'
     default: return 'signal'
   }
 }
@@ -92,6 +94,13 @@ function labelForEvent(e: EmpireEvent): string {
 // new note `from-<sourceAppId>`. Returns the directed pair (source → target), or
 // null for ordinary single-app activity. Honest edges only — no invented links.
 function flowForEvent(e: EmpireEvent): { fromId: string; toId: string } | null {
+  // An explicit directed handoff carries both ends (Editor / Token Counter /
+  // Prompt Gen / AI Chat transfers via CROSS_APP_ACTIONS).
+  if (e.type === 'HANDOFF') {
+    if (e.fromId && e.toId && e.fromId !== e.toId) return { fromId: e.fromId, toId: e.toId }
+    return null
+  }
+  // A note saved *from* another app via SEND_TO_NOTES tags it `from-<sourceId>`.
   if (e.type === 'NOTE_CREATED') {
     const tag = e.tags.find(x => x.startsWith('from-'))
     if (tag) {
