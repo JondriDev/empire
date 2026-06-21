@@ -5,6 +5,48 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-21 · `routine/auto-20260621T201500Z` — design-token pass on Goals.tsx
+
+**Increment:** ENFORCE DESIGN SYSTEM (priority 4). Closed the standing triage
+item from the last integration run: `Goals.tsx` was the one app still mixing raw
+Tailwind color literals (`blue-400/500/600`, `gray-400/500/600`, `red-300/500`,
+`text-white`, `bg-white/5`) and hex (`#3b82f6`, `#374151`) with design-system
+vars — so editing a token would NOT have restyled it, and it ignored the
+light "Daylight Survey" theme entirely.
+
+**Changed (`src/apps/goals/Goals.tsx` only — presentation layer, zero logic
+change):**
+- **One accent per view:** introduced `const ACCENT = 'var(--ion, #4d9bff)'`
+  (electric-blue, matching its registry tile `#818cf8` identity). Every former
+  blue literal now routes through `--ion`; selected-state fills use
+  `color-mix(in srgb, var(--ion) 18%, transparent)` so they track the token.
+- **Text → Deep-Field ramp:** headings `var(--text)`, secondary `var(--text2)`,
+  muted/meta `var(--text3)` — theme-aware in both dark and light.
+- **Glass surfaces:** add-form and each goal card now use the `.gp` primitive
+  (goal cards add `.gp-interactive` for the holographic lift-on-hover), replacing
+  the manual `border border-blue-500/20` + inline `var(--card-bg)`.
+- **Motion via tokens:** progress-bar fill `var(--dur-slow) var(--ease-out)`,
+  buttons `var(--dur-fast)`.
+- **Slider track** uses `var(--ion)` fill over `var(--input-bg)` instead of
+  `#3b82f6/#374151`. Delete action recolored to `var(--ember)` (warm warning
+  signal). Dropped the per-input `focus:ring-blue-500/50` in favor of the global
+  `:focus-visible` signal ring.
+
+**Verified:** `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 56).
+`npx vitest run` → **28/28 pass**. `npx eslint src/apps/goals/Goals.tsx` clean.
+Grep confirms **zero** Tailwind color literals or raw hex remain in the file.
+localStorage schema (`empire-goals`) and all eventBus emits untouched — no data
+risk. **Visual confirmation pending on-device** (no rendered UI in cloud); the
+change is purely color/surface/motion routing, layout (flex/spacing/radii
+Tailwind utilities) is unchanged, so the structure is identical to before.
+
+**Next step:** the cheap CI guard is still the best unclaimed item — assert the
+built `dist/assets/*.css` keeps a **top-level** `.empire-desktop` rule (the #10
+regression class). After that, audit the next color-literal offender app
+(`grep -rlE 'blue-[0-9]|gray-[0-9]' src/apps` to find it).
+
+---
+
 ## 2026-06-21 · QA visual + smoke — main 🟢, 27/27 routes render (post-#18 Goals fix)
 
 **Increment:** VISUAL + SMOKE QA on current `main` (`d8e0cb3`). Fresh cloud checkout:
