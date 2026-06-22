@@ -5,6 +5,29 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · QA — visual + smoke (post-S3 green main)
+
+**Done.** Fresh-checkout QA on green main after integrating PR #26 (flow.ts + cross-app
+wiring + tests) and EPIC-1 S3 (Network inspector + legend, 32676c4).
+
+- **Build 🟢** (`tsc -b && vite build`). Served `dist/` on :3001.
+- **Smoke: 27/27 render** (26 apps + desktop), **0 crashes**. SHELL-IS-STYLED ✅
+  (top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm .empire-desktop`).
+  **vitest 86/86 🟢** (11 files; incl. S3's `adjacency.test.ts`).
+- **Screenshots** overwritten in `docs/screenshots/latest/` — desktop + Network visually
+  styled (XENO palette; Network shows CORE + satellites **and the new S3 legend**).
+- **Metric deltas** (vs after-#23): tests 64→82 static / 86 vitest, files 8→11,
+  token-violations **503→501**, bundle gz 236.1→237.6. Routes clean 26/26.
+- **Epic-acceptance:** S3 **confirmed** (token 503→501 matches its claim; adjacency tests
+  pass; legend visible). EPIC-1 headline metric (apps wired both-ways = **1/26**) **still
+  pending** — only `prompt-generator` does both; closing it is S6 (not started). Next active
+  stage is S4 (command palette).
+- **No runtime bugs.** Only env-expected net noise: files `/api/files?...emulated/0`→500
+  (Android path), datacenter `/api/dc/tables`→401 (authed API). Inspector's live per-app
+  entity list could not be exercised headless (empty graph in a fresh context) — noted honestly.
+
+---
+
 ## 2026-06-22 · Builder — EPIC-1 S3 · Network inspector + legend
 
 **Done.** Made the organism *legible*: clicking an app node in The Network now opens

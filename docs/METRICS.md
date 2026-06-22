@@ -14,25 +14,27 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-| Metric | Current (2026-06-22, after #23) | Target | Direction |
+| Metric | Current (2026-06-22, after #26 + S3) | Target | Direction |
 |---|---|---|---|
 | Apps / routes | 26 | ~26 (steady) | coherence over new surface — not a growth metric |
-| Test cases | 64 | 60+ | ↑ higher = safer to leap |
-| Test files | 8 | grow with code | ↑ |
-| Design-token violations | 503 | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
-| Bundle gz (KB) | 236.1 | hold / shrink | ↓ |
+| Test cases | 82 (static) · 86 (vitest run) | 60+ | ↑ higher = safer to leap |
+| Test files | 11 | grow with code | ↑ |
+| Design-token violations | 501 | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
+| Bundle gz (KB) | 237.6 | hold / shrink | ↓ |
 
-> Last integration: **#23** (EPIC-1 S1 · inbound provenance) — Δ vs prior main:
-> test cases +4 (60→64), token violations ±0 (503), bundle gz +1.3 KB (234.8→236.1,
-> one new hook + chip component). The old `24 / 496 / null` column was a stale
-> pre-organism-core snapshot; these are the true current values.
+> Last integration: **PR #26** (flow.ts + cross-app wiring + tests) **+ EPIC-1 S3**
+> (Network inspector + node-type legend, commit 32676c4). Δ vs prior column (after #23):
+> test cases +18 (64→82 static), test files +3 (8→11), token violations **−2 (503→501)**
+> (S3 reused `rgbCss` instead of raw `rgb(` swatches), bundle gz +1.5 KB (236.1→237.6,
+> inspector + legend code). `metrics.mjs` static count (82) undercounts a few nested cases;
+> an actual `vitest run` is **86 passed / 11 files**.
 
 ## Manual / CI metrics (QA + human)
 
-| Metric | Source | Current (QA 2026-06-22) | Target |
+| Metric | Source | Current (QA 2026-06-22, after #26 + S3) | Target |
 |---|---|---|---|
-| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **26 / 26** ✅ (27/27 incl. desktop shell; SHELL-IS-STYLED ✅) — re-confirmed 2026-06-22 (2nd run, green main) | 26 / 26 |
-| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **1 / 26** — only `prompt-generator` does both. Emit-only (10): artifacts, calendar, datacenter, files, goals, learning-tracker, messages, notes, photos, prompt-generator. Receive-only (4): ai-chat, editor, prompt-generator, token-counter. The emit/receive sets barely overlap — this gap is exactly EPIC-1's work (S2 makes every transfer emit; S6 wires the rest both-ways). | 26 / 26 |
+| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **26 / 26** ✅ (27/27 incl. desktop shell; SHELL-IS-STYLED ✅) — re-confirmed 2026-06-22 (post-S3, green main; Network legend visible) | 26 / 26 |
+| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **1 / 26** (unchanged) — only `prompt-generator` does both. Emit-only via `NodeActions` (10): artifacts(kanban), calendar, datacenter, files, goals, learning-tracker, messages, notes, photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor, prompt-generator, token-counter. PR #26 touched flow visualization, not the emit/receive sets — overlap did not grow. Closing this is EPIC-1 **S6** (not yet started). | 26 / 26 |
 | Lighthouse — PWA / Perf / A11y | CI (add to a workflow when feasible) | not measured headless | 90 / 90 / 90 |
 | Open `routine/auto-*` PR age | reviewer log | — | < one review cycle |
 

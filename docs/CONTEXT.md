@@ -141,19 +141,23 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-22, 2nd QA run on green main — no integration since #23)
+## 📊 Last QA confirmation (2026-06-22, post-S3 green main — integrated #26 + S3 since last run)
 
 - **Routes rendering clean: 26/26 ✅** (27/27 incl. desktop). SHELL-IS-STYLED assertion in
   `scripts/qa-smoke.mjs` passed (top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm .empire-desktop`).
-  Desktop + Network screenshots visually confirmed styled (XENO palette, CORE + all satellites).
-- **Apps fully wired BOTH-ways: 1/26** — only `prompt-generator` emits AND receives. Emit-only (10):
-  artifacts, calendar, datacenter, files, goals, learning-tracker, messages, notes, photos, prompt-generator.
-  Receive-only (4): ai-chat, editor, prompt-generator, token-counter. **This near-zero overlap is EPIC-1's gap.**
-- **Epic-acceptance:** S1 (inbound provenance) still holding; S2 (every app emits) not yet shipped → its
-  metric has NOT moved (no contradiction, just **pending**). `appActions.ts` audit unchanged: nav transfers
-  emit `HANDOFF`; the two in-place transfers still emit typed `NOTE_CREATED`/`LEARNING_LOGGED`. S2's
-  uniform-HANDOFF-vs-arc-bearing-event decision is still open for the Builder.
-- **Auto metrics flat vs #23:** apps 26, tests 64/8 files, token-violations 503, bundle gz 236.1 — all ±0.
+  Desktop + Network screenshots visually confirmed styled (XENO palette, CORE + all satellites,
+  **S3 legend panel visible** bottom-right). vitest **86/86 🟢** (11 files).
+- **Apps fully wired BOTH-ways: 1/26 (unchanged)** — only `prompt-generator` emits AND receives. Emit-only
+  via `NodeActions` (10): artifacts(kanban), calendar, datacenter, files, goals, learning-tracker, messages,
+  notes, photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor, prompt-generator,
+  token-counter. PR #26 touched flow viz, not the emit/receive sets. **Closing this overlap is S6 (not started).**
+- **Epic-acceptance:** S3 (inspector + legend) **CONFIRMED** — its metric move (token 503→501) verified in
+  `metrics.json`; `adjacency.test.ts` (5 tests) passes; legend visible in screenshot. *Honest limit:* the
+  inspector's per-app entity/neighbour list could NOT be exercised headless (fresh context = empty
+  `empire-core-graph`, no nodes to click) — seam + tests verify it, not live interaction. **EPIC-1 headline
+  metric (both-ways 1/26) STILL PENDING** — needs S6. Next active stage is **S4 (command palette)**.
+- **Auto metrics moved vs #23:** apps 26 (±0), tests 64→82 static / 86 vitest (+18/+22), files 8→11 (+3),
+  token-violations **503→501 (−2)**, bundle gz 236.1→237.6 (+1.5). All deltas from #26 + S3.
 - **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
   datacenter `/api/dc/tables`→401 (authed API, no headless session).
 - QA harness note: project has **no `playwright` dep**; it's global at `/opt/node22/lib/node_modules`.
