@@ -38,4 +38,5 @@ export const appComponents: AppComponentMap = {
   'hermes-cc':          lazy(() => import('../apps/hermes-command-center/HermesCommandCenter')),
   'artifacts':          lazy(() => import('../apps/artifacts/ArtifactsApp')),
   'network':            lazy(() => import('../apps/network/Network')),
+  'inbox':              lazy(() => import('../apps/inbox/Inbox')),
 }

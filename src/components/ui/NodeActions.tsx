@@ -5,6 +5,9 @@
  * It finds that item's CoreNode in the graph, lists intentsFor(node), and runs
  * the chosen one. This is how every app inherits cross-app routing for free —
  * renders nothing if the node has no applicable intents.
+ *
+ * For graph-only nodes that have no store `sourceId` (e.g. a `task` spawned by
+ * the make-task intent), pass `nodeId` to target the CoreNode by its id directly.
  */
 import { useState, useEffect, useRef, type KeyboardEvent } from 'react'
 import { Zap } from 'lucide-react'
@@ -12,14 +15,17 @@ import { useGraph } from '../../lib/core/graph'
 import { intentsFor, runIntent } from '../../lib/core/intents'
 import { useToast } from './Toast'
 
-export function NodeActions({ type, sourceId }: { type: string; sourceId: string }) {
+export function NodeActions({ type, sourceId, nodeId }:
+  { type?: string; sourceId?: string; nodeId?: string }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
   const toast = useToast()
   const node = useGraph(s =>
-    Object.values(s.nodes).find(n => n.type === type && n.data.sourceId === sourceId)
+    nodeId
+      ? s.nodes[nodeId]
+      : Object.values(s.nodes).find(n => n.type === type && n.data.sourceId === sourceId)
   )
   const intents = node ? intentsFor(node) : []
 

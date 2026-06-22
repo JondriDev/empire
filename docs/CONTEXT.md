@@ -23,27 +23,26 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** EPIC-1 — Organism Completeness (see `docs/EPICS.md`).
-- **Next stage:** **S5 · "Inbox / Today" view.** (S1–S4 all shipped 2026-06-22; S4
-  command palette landed this run.)
-- **Exact shape for S5:** Aggregate every open `task` node from the Core graph into ONE
-  reachable view, so tasks created via ⚡ `make-task` from ANY app surface in one place.
-  Today `task` nodes are graph-only (created by the `make-task` intent in `sync.ts:120`,
-  `data.done=false`, `data.from=<sourceNodeId>`, owner app = the source's app) and have NO
-  home view — they exist in the graph but are invisible. **Recommended shape:** a small
-  surface listing `useNodesOfType('task')` (from `graph.ts:151`), newest first, each row
-  showing the task title + its source app (resolve via `node.meta.app`→`registry`), with a
-  checkbox that flips `data.done` via `useGraph().updateNode(id,{data:{...,done:true}})` and
-  a `<NodeActions type="task" sourceId={...}>` ⚡ bar. **Open question — WHERE does it live?**
-  Cheapest honest slice: a panel *inside The Network* (it already subscribes to `useGraph`),
-  OR a tiny new always-available surface. **Recommend:** add it as a second panel in
-  `Network.tsx` (top-left, mirroring the inspector at bottom-right) so no new route/registry
-  entry is needed — confirm there's room, else make a minimal `Inbox` app + registry entry.
-  *Acceptance:* a task made via ⌘K/⚡ from Notes appears in the Inbox; toggling done updates
-  the graph; one unit test for the task-aggregation/selector logic. Build🟢 vitest🟢 eslint
-  clean; token-violations must NOT regress (reuse `rgbCss`/tokens — see trap below).
-  **Note the `make-task` `data.done` write-path:** `NodeActions`/intents don't yet flip done;
-  S5 introduces the first task *mutation* UI — keep it a graph `updateNode`, the task is a
-  graph-only node (no back-write to any app store).
+- **Next stage:** **S6 · Close the wiring gaps (honest scope) — the FINAL EPIC-1 stage.**
+  (S1–S5 all shipped 2026-06-22; S5 Inbox app landed this run.)
+- **Exact shape for S6:** **Audit first, then wire ONE gap.** The goal is the EPIC-1 headline
+  metric: every *entity-owning* app both emits into the graph AND exposes ⚡ on its rows, and the
+  current both-ways count (1/26 — only `prompt-generator` emits AND receives) climbs. **Step 1 —
+  audit (cheap):** for each entity-owning app, confirm it (a) calls `mirrorCollection(...)` (or is
+  in `sync.ts` syncers) so its items become CoreNodes, and (b) renders `<NodeActions>` on each row.
+  Apps already wired (mirror + NodeActions): Calendar, Notes, Learning Tracker, Messages, Photos,
+  Prompt Gen, DataCenter, Files, Goals, Artifacts/Kanban. **Step 2 — pick the highest-value gap and
+  wire it** (one app per run, build green): the richest remaining win is **receivers** — make a
+  *tool* app also *receive* a handoff (today only ai-chat/editor/prompt-generator/token-counter
+  receive via `useInboundHandoff`; closing the emit/receive overlap is what moves "both-ways").
+  Candidate: give **Calculator** or **Grammar** a `useInboundHandoff` receiver + `<ProvenanceChip>`
+  (rail in `useInboundHandoff.ts` / `ProvenanceChip.tsx`, pattern documented below). **Do NOT invent
+  collections for tool apps** (Calculator/Clock/Weather own no entities — they participate via
+  emit/receive transfers only). *Acceptance:* the chosen app newly participates both ways (visible
+  arc in The Network + provenance chip on receive, or new ⚡ rows if it was an unmirrored
+  entity-owner); one test; build🟢 vitest🟢 eslint clean; token-violations must NOT regress.
+  **When S6 lands and QA confirms the both-ways count moved → EPIC-1 is DONE; promote EPIC-2
+  (token violations → 0) per the QUEUED list.**
 
 ## 🧭 Codebase seams (where the important things live)
 
@@ -67,6 +66,16 @@
     the graph, lists "Open in <app>" + `intentsFor(node)`, runs via `runIntent`+toast (mirrors
     NodeActions). Network's inspector `setFocus`es the selected app's newest node
     (`Network.tsx` effect on `[selected]`), so ⌘K after a click aims at something real.
+  - **Inbox / Today task view (S5, 2026-06-22):** `src/lib/core/tasks.ts` — pure selectors
+    `taskNodes(nodes)` / `partitionTasks(nodes)→{open,done}` / `isTaskDone(n)` (a task is done iff
+    `data.done===true`; sorted newest-first by `meta.created` so a toggle doesn't reorder the list).
+    Unit-tested in `tasks.test.ts` (4 tests). `src/apps/inbox/Inbox.tsx` — the 27th app (registry id
+    `inbox`, `appComponents.tsx`); subscribes `useGraph(s=>s.nodes)`, renders open/done task rows
+    with a checkbox that flips `data.done` via `updateNode(id,{data:{...n.data,done:!done}})`, a
+    source-app chip (icon+name from `registry`), and `<NodeActions nodeId={n.id}/>`. **`NodeActions`
+    now takes an optional `nodeId`** (all three props optional) to target graph-only nodes that have
+    no store `sourceId` — tasks created by `make-task` carry only `data.done`/`data.from`. The only
+    intent that `accepts` a `task` is `make-note-from` (so the ⚡ bar offers "Make Note from this").
   - **HANDOFF receiver rail (S1, 2026-06-22):** `src/lib/useInboundHandoff.ts` —
     `useInboundHandoff<T>(sessionKey)` reads the `empire-*-clipboard` payload once
     on mount, consumes the key, returns `{payload, source, dismiss}`.

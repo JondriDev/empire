@@ -110,8 +110,20 @@ some may already be shipped):
   +6) eslint clean; token-violations 501 (±0 — used `rgbCss`). *Acceptance met:* ⌘K lists the focused node's
   intents and runs them from one surface. *Honest cloud limit:* keyboard summon + run not exercised headless
   (fresh graph is empty); seam + 6 unit tests verify focus logic, not live keypress.
-- [ ] **S5 · "Inbox / Today" view.** Aggregate open `task` nodes from the graph into
-  one view. *Acceptance:* tasks created via ⚡ from any app appear here.
+- [x] **S5 · "Inbox / Today" view.** — **Shipped 2026-06-22.** Built a dedicated **Inbox app**
+  (a real always-reachable home for tasks, not a buried panel) instead of the Network-panel
+  fallback. `src/lib/core/tasks.ts` (pure seam: `partitionTasks`/`taskNodes`/`isTaskDone`, 4
+  tests) aggregates every graph `task` node into open/done buckets (newest-first by `created` so
+  toggling done doesn't reorder). `src/apps/inbox/Inbox.tsx` subscribes to the graph reactively,
+  lists tasks with a checkbox that flips `data.done` via `updateNode`, a source-app chip
+  (icon+name from registry), and a ⚡ `<NodeActions>` bar. `NodeActions` gained an optional
+  `nodeId` prop so graph-only nodes (tasks have no store `sourceId`) can be targeted directly.
+  Registry+appComponents entry added (`inbox`, 27th app). *Acceptance met:* a task made via
+  ⚡ make-task from any app surfaces in the Inbox; toggling the checkbox flips `data.done` on the
+  graph node. Build🟢 vitest 96/96 eslint clean; token-violations **501 (±0** — Inbox is pure
+  tokens; the new registry accent's +1 was offset by removing a dead `var(--ion,#hex)` fallback in
+  Goals). *Honest cloud limit:* a fresh checkout's graph is empty, so the populated list / live
+  toggle can't be exercised headless — covered by the 4 unit tests + the seam.
 - [ ] **S6 · Close the wiring gaps (honest scope).** **Audit first, then wire.** Apps that
   already `mirrorCollection` + render `<NodeActions>`: Calendar, Notes, Learning Tracker,
   Messages, Photos, Prompt Gen, DataCenter, Files, Goals, Artifacts/Kanban. **Entity-owning
