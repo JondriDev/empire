@@ -62,11 +62,15 @@ some may already be shipped):
   "HANDOFF-everywhere vs typed-with-`from`" decision was resolved as **typed-with-`from`**
   (option b). `src/lib/appActions.test.ts` asserts each action emits exactly one
   arc-bearing event with the right source. No Builder work remained; marked shipped here.
-- [ ] **S3 · Network inspector + legend** ← **NEXT (active stage).** Make the organism
+- [x] **S3 · Network inspector + legend** — **Shipped 2026-06-22.** Make the organism
   *legible*: clicking an app node opens an inspector panel showing that app's real graph
   entities and its true cross-app neighbors, plus a persistent legend mapping node-type →
   accent. Today `Network.tsx`'s canvas `onClick` only `openApp(...)`s — there is no
   inspector and no legend, so the colored entity dots and arcs are unreadable.
+  **Done:** new `adjacency.ts` (`appAdjacency`/`entitiesByApp`, 5 tests) + `nodeColors.ts`
+  (extracted `TYPE_RGB`/`typeRgb` + `rgbCss`, one source for canvas+legend); `Network.tsx`
+  click → select, reactive inspector panel (entities by type, ↔/→/← neighbours, ⚡ Open, ✕)
+  + always-visible legend. Build🟢 vitest🟢 86/86 eslint clean; token-violations 503→501.
   **Files & shape:**
   - **New** `src/apps/network/adjacency.ts` — a pure, testable seam. Export
     `appAdjacency(nodes: CoreNode[]): Record<string, { out: string[]; in: string[] }>`
@@ -96,7 +100,7 @@ some may already be shipped):
     + true neighbors, each neighbor row opens that app; the legend's swatches match the
     canvas dot colours; ✕ deselects. Build 🟢, `vitest` 🟢 (incl. the new adjacency test),
     eslint clean on touched files; no new token violations (legend reuses `TYPE_RGB`).
-- [ ] **S4 · Global "⚡ Send to…" in the command palette.** Surface `intentsFor` the
+- [ ] **S4 · Global "⚡ Send to…" in the command palette** ← **NEXT (active stage).** Surface `intentsFor` the
   focused/selected node across all apps from one command surface. *Acceptance:* palette
   lists the focused node's intents and runs them; reachable without hunting per-app bars.
   (Decompose to file/shape when promoted to active — likely `src/components/CommandPalette*`
