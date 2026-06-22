@@ -14,13 +14,18 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-| Metric | Baseline (2026-06-22) | Target | Direction |
+| Metric | Current (2026-06-22, after #23) | Target | Direction |
 |---|---|---|---|
 | Apps / routes | 26 | ~26 (steady) | coherence over new surface — not a growth metric |
-| Test cases | 24 | 60+ | ↑ higher = safer to leap |
-| Test files | 4 | grow with code | ↑ |
-| Design-token violations | 496 | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
-| Bundle gz (KB) | _measure after build_ | hold / shrink | ↓ |
+| Test cases | 64 | 60+ | ↑ higher = safer to leap |
+| Test files | 8 | grow with code | ↑ |
+| Design-token violations | 503 | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
+| Bundle gz (KB) | 236.1 | hold / shrink | ↓ |
+
+> Last integration: **#23** (EPIC-1 S1 · inbound provenance) — Δ vs prior main:
+> test cases +4 (60→64), token violations ±0 (503), bundle gz +1.3 KB (234.8→236.1,
+> one new hook + chip component). The old `24 / 496 / null` column was a stale
+> pre-organism-core snapshot; these are the true current values.
 
 ## Manual / CI metrics (QA + human)
 
