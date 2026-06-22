@@ -4,6 +4,8 @@ import { emit } from '../../lib/eventBus'
 import { apiUrl } from '../../lib/apiBase'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import {
   Wand2, Copy, Check, Sparkles, MessageSquare,
   Code, BookOpen, PenTool, Zap, Tag
@@ -148,19 +150,23 @@ export default function PromptGenerator() {
   const [mode, setMode] = useState<'template' | 'custom'>('template')
   const [generatedTitle, setGeneratedTitle] = useState('')
 
+  const inbound = useInboundHandoff<{ text?: string; from?: string }>('empire-prompt-clipboard')
+
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'prompt-generator' })
     try {
       const savedData = localStorage.getItem('empire-prompt-generator-saved')
       if (savedData) setSaved(JSON.parse(savedData))
-      const sessionData = sessionStorage.getItem('empire-prompt-clipboard')
-      if (sessionData) {
-        const parsed = JSON.parse(sessionData)
-        if (parsed.text) setVariables(prev => ({ ...prev, code: parsed.text, text: parsed.text }))
-        sessionStorage.removeItem('empire-prompt-clipboard')
-      }
     } catch { /* ignore */ }
   }, [])
+
+  // Preload the handed-off text into the template variables once it's read.
+  useEffect(() => {
+    if (inbound.payload?.text) {
+      const t = inbound.payload.text
+      setVariables(prev => ({ ...prev, code: t, text: t }))
+    }
+  }, [inbound.payload])
 
   useEffect(() => {
     try { localStorage.setItem('empire-prompt-generator-saved', JSON.stringify(saved)) } catch { /* ignore */ }
@@ -280,6 +286,12 @@ export default function PromptGenerator() {
             </button>
           </div>
         </div>
+
+        {inbound.source && (
+          <div className="mb-2">
+            <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+          </div>
+        )}
 
         {/* Category filter */}
         <div className="flex gap-1 flex-wrap">

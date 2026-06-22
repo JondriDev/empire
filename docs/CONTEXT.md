@@ -23,12 +23,23 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** EPIC-1 — Organism Completeness (see `docs/EPICS.md`).
-- **Next stage:** the topmost unchecked `[ ]` stage of EPIC-1. **Confirm current
-  state against the code before starting** — some early stages may already be
-  shipped (HANDOFF landed in #13/#20).
-- **Exact shape:** _(builder fills this in each run with the concrete file list,
-  function signatures, and acceptance check for the NEXT stage, so the following
-  run executes immediately.)_
+- **Next stage:** **S2 · Every app emits on transfer.** (S1 shipped 2026-06-22.)
+- **Exact shape for S2:** Audit `src/lib/appActions.ts` `CROSS_APP_ACTIONS`. The
+  navigating transfers already call `handoff(...)` (SEND_TO_EDITOR /
+  _TOKEN_COUNTER / _PROMPT_GEN / _AI_CHAT / ASK_HERMES_TO_ANALYZE). **The two
+  in-place transfers do NOT emit `HANDOFF`:** `SEND_TO_NOTES` (emits
+  `NOTE_CREATED`) and `SEND_TO_LEARNING` (emits `LEARNING_LOGGED`) — by an
+  earlier deliberate choice (the Network's `flowForEvent` lights their arcs from
+  the *typed* events, see `src/apps/network/Network.tsx`). **Decision the next
+  run must make first:** either (a) also emit a `HANDOFF{fromId,toId}` from those
+  two so the rail is uniform (risk: double-counts the Network ticker row — verify
+  `flowForEvent` dedupes, or gate the typed-event arc when a HANDOFF exists), or
+  (b) keep typed events and instead make S2's acceptance "every cross-app action
+  lights exactly one directed arc" — then assert in a test that each action emits
+  *either* a HANDOFF *or* its arc-bearing typed event with `from`. (b) is lower
+  risk and matches the shipped design; recommend (b) unless the Strategist wants
+  literal HANDOFF everywhere. *Acceptance:* one test per action asserts exactly
+  one arc-bearing event with correct `from`/source. Build 🟢 vitest 🟢 eslint clean.
 
 ## 🧭 Codebase seams (where the important things live)
 
@@ -43,6 +54,15 @@
     `src/lib/core/sync.ts` (they need `useGraph`), not here.
   - `src/lib/core/sync.ts` — `startCoreSync()` (called once in `main.tsx`); `mirrorCollection()`.
   - `src/components/ui/NodeActions.tsx` — `<NodeActions type sourceId/>` ⚡ "Send to…" menu.
+  - **HANDOFF receiver rail (S1, 2026-06-22):** `src/lib/useInboundHandoff.ts` —
+    `useInboundHandoff<T>(sessionKey)` reads the `empire-*-clipboard` payload once
+    on mount, consumes the key, returns `{payload, source, dismiss}`.
+    `src/components/ui/ProvenanceChip.tsx` — `<ProvenanceChip from onDismiss/>`
+    glass pill in the source app's registry accent. Used by Editor / TokenCounter /
+    PromptGenerator / AIChat. **To add a new receiver:** `const inbound =
+    useInboundHandoff<{...}>('empire-x-clipboard')`, preload in a `[inbound.payload]`
+    effect, render `{inbound.source && <ProvenanceChip from={inbound.source}
+    onDismiss={inbound.dismiss}/>}`.
 - **Cross-app handoffs:** `src/lib/appActions.ts` — `CROSS_APP_ACTIONS` executors; the
   `handoff(fromId,toId,label)` helper emits `HANDOFF` before navigating. Receivers read
   `sessionStorage` keys (`empire-editor-clipboard`, `-token-clipboard`, `-prompt-clipboard`,
@@ -76,6 +96,14 @@
   **not** write back into the Notes/Learning stores yet.
 - **Sandbox quirks:** branch deletion via the cloud git proxy returns **HTTP 403** (merged heads
   linger — harmless). Headless **Chromium CDN download 403s**; use the recipe below.
+- **Test setup stubs storage:** `src/test/setup.ts` replaces `window.sessionStorage`/
+  `localStorage` with inert `vi.fn()`s (no real store). Any test exercising a storage
+  round-trip must `Object.defineProperty(window,'sessionStorage',{value: <Map-backed shim>})`
+  in `beforeEach` (see `useInboundHandoff.test.ts`). Also: `act` imports from
+  `@testing-library/react`, **not** `vitest`.
+- **StrictMode is ON in prod** (`src/main.tsx`). A "read sessionStorage once + removeItem"
+  mount effect is safe (dev double-invoke keeps the state set on the first pass; the second
+  finds an empty key and no-ops), but never rely on the key surviving a second read.
 
 ## 🖥️ QA headless-render recipe (known-good)
 
