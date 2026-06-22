@@ -1,40 +1,32 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-06-22T18:04:49.236Z
+**Generated:** 2026-06-22T23:04:48.439Z
 
-**Result:** 27/27 rendered without crash, 0 failed.
+**No runtime bug found this run.** Main is GREEN; all 27 apps + the desktop shell render clean.
+
+## TL;DR — metric deltas & epic acceptance (this run)
+
+- **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop shell). SHELL-IS-STYLED ✅ and the
+  **new REGISTRY-COVERAGE guard** ✅ (all 27 registry apps are in the smoke list — added this run so a
+  future app can't silently skip the smoke test). vitest **96/96 🟢** (13 files).
+- **Apps fully wired BOTH-ways: 1/27 (unchanged)** — only `prompt-generator` emits AND receives.
+  S5 (Inbox) added an 11th *emitter* but no receiver, so the headline overlap is flat. **Closing it is S6 (not started).**
+- **EPIC-1 S5 (Inbox / Today view) — acceptance CONFIRMED LIVE.** Seeded 3 `task` nodes into
+  `empire-core-graph` (open from Calculator, done from Notes, open from Goals); the Inbox app surfaced
+  **all three** with their source-app chips and 0 page errors. Captured as `inbox-populated.png`. This is a
+  stronger confirmation than prior runs (which only had the empty-graph state + unit tests). The EPIC-1
+  **headline metric (both-ways 1/27) is still PENDING — needs S6.**
+- **Auto metric deltas vs last QA (post-S4):** apps 26→27 (+1, inbox), test files 12→13 (+1, `tasks.test.ts`),
+  vitest 92→96 (+4), token-violations **501 (±0** — Inbox is pure tokens), bundle gz 238.9→240.5 (+1.6).
+  All deltas from S5 (commit a4f60a7).
+- **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
+  datacenter `/api/dc/tables`→401 (authed API, no headless session).
+
+**Result:** 28/28 rendered without crash, 0 failed.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
 > listed separately — expected in the offline cloud sandbox and **not** a render failure.
-
-## Epic-acceptance — EPIC-1 · S4 (global ⌘K command palette) — **CONFIRMED ✅ (live)**
-
-S4 (global ⌘K command palette over the focused node) landed this run. Verified **live, headless**:
-pressing **Ctrl/⌘-K** on the desktop opens a styled glass dialog (`role="dialog"`) showing the
-focus-aware empty state — *"No node in focus · Nothing in focus yet · Touch a node — create a note,
-select one in The Network — then ⌘K acts on it"* with `navigate / run / ⌘K toggle / 0 actions`
-affordances and ESC to close. See `palette.png`. *Honest limit:* a fresh cloud context has an empty
-`empire-core-graph`, so there is no focused node to **act on** headless — the modal-open, focus
-binding, empty-state copy and key affordances are confirmed; live intent execution from the palette
-is covered by `focus.test.ts` (6) + the seam, not by live interaction.
-
-**EPIC-1 headline metric (apps both-ways 1/26) is UNCHANGED** — S4 is a navigability stage, not a
-wiring stage; closing the emit↔receive overlap is **S6** (not started). Routes stay **26/26 ✅**.
-
-## Metric deltas (vs last QA, post-S3 → now post-S4)
-
-| Metric | post-S3 | now (post-S4) | Δ |
-|---|---|---|---|
-| Routes rendering clean | 26/26 | **26/26** ✅ | ±0 |
-| Apps fully wired both-ways | 1/26 | **1/26** | ±0 |
-| Test cases (static / vitest) | 82 / 86 | **88 / 92** | +6 / +6 |
-| Test files | 11 | **12** | +1 |
-| Token violations | 501 | **501** | ±0 |
-| Bundle gz (KB) | 237.6 | **238.9** | +1.3 |
-
-vitest: **92 passed / 12 files** 🟢. Build 🟢. SHELL-IS-STYLED ✅ (top-level
-`.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`). No runtime bugs found.
 
 | App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|
@@ -65,7 +57,9 @@ vitest: **92 passed / 12 files** 🟢. Build 🟢. SHELL-IS-STYLED ✅ (top-leve
 | hermes-cc | ✅ | — | — |
 | artifacts | ✅ | — | — |
 | network | ✅ | — | — |
+| inbox | ✅ | — | — |
 
 ## Screenshots
 
 See PNGs in this folder. `desktop.png` is the shell; `app-<id>.png` is each app route.
+`inbox-populated.png` is the S5 acceptance shot (Inbox showing 3 seeded tasks across Calculator/Notes/Goals).

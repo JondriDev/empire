@@ -14,27 +14,27 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-| Metric | Current (2026-06-22, after #26 + S3 + S4) | Target | Direction |
+| Metric | Current (2026-06-22, after #26 + S3 + S4 + S5) | Target | Direction |
 |---|---|---|---|
-| Apps / routes | 26 | ~26 (steady) | coherence over new surface — not a growth metric |
-| Test cases | 88 (static) · 92 (vitest run) | 60+ | ↑ higher = safer to leap |
-| Test files | 12 | grow with code | ↑ |
+| Apps / routes | 27 | ~26 (steady) | coherence over new surface — not a growth metric |
+| Test cases | 92 (static) · 96 (vitest run) | 60+ | ↑ higher = safer to leap |
+| Test files | 13 | grow with code | ↑ |
 | Design-token violations | 501 | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
-| Bundle gz (KB) | 238.9 | hold / shrink | ↓ |
+| Bundle gz (KB) | 240.5 | hold / shrink | ↓ |
 
-> Last integration: **EPIC-1 S4** — global ⌘K command palette over the focused node
-> (commit 1de67e5: `focus.ts`/`focus.test.ts`, `CommandPalette.tsx`). Δ vs prior column
-> (after #26 + S3): test cases +6 (82→88 static, 86→92 vitest), test files +1 (11→12,
-> `focus.test.ts`), token violations **±0 (501)** (palette reused tokens — no regression),
-> bundle gz +1.3 KB (237.6→238.9, palette + focus tracking). `metrics.mjs` static count (88)
-> undercounts a few nested cases; an actual `vitest run` is **92 passed / 12 files**.
+> Last integration: **EPIC-1 S5** — Inbox / Today view (the 27th app) aggregating every graph
+> `task` node (commit a4f60a7: `tasks.ts`/`tasks.test.ts`, `apps/inbox/Inbox.tsx`, `NodeActions`
+> optional `nodeId`). Δ vs prior column (after S4): apps +1 (26→27, `inbox`), test cases +4 (88→92
+> static, 92→96 vitest), test files +1 (12→13, `tasks.test.ts`), token violations **±0 (501)** (Inbox
+> is pure tokens — no regression), bundle gz +1.6 KB (238.9→240.5, the Inbox chunk + registry entry).
+> `metrics.mjs` static count (92) undercounts a few nested cases; an actual `vitest run` is **96 passed / 13 files**.
 
 ## Manual / CI metrics (QA + human)
 
-| Metric | Source | Current (QA 2026-06-22, after #26 + S3) | Target |
+| Metric | Source | Current (QA 2026-06-22, after #26 + S3 + S4 + S5) | Target |
 |---|---|---|---|
-| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **26 / 26** ✅ (27/27 incl. desktop shell; SHELL-IS-STYLED ✅) — re-confirmed 2026-06-22 (post-S4, green main; ⌘K palette + Network legend visible) | 26 / 26 |
-| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **1 / 26** (unchanged) — only `prompt-generator` does both. Emit-only via `NodeActions` (10): artifacts(kanban), calendar, datacenter, files, goals, learning-tracker, messages, notes, photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor, prompt-generator, token-counter. S4 (⌘K palette) is a navigability stage — it surfaces existing intents over the focused node but does not add emit/receive wiring, so the overlap is unchanged. Closing this is EPIC-1 **S6** (not yet started). | 26 / 26 |
+| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **27 / 27** ✅ (28/28 incl. desktop shell; SHELL-IS-STYLED ✅ + new REGISTRY-COVERAGE guard ✅) — re-confirmed 2026-06-22 (post-S5, green main; the new Inbox app renders, populated-list confirmed live) | 27 / 27 (every entity route) |
+| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **1 / 27** (unchanged) — only `prompt-generator` does both. Emit-only via `NodeActions` (11): artifacts(kanban), calendar, datacenter, files, goals, inbox, learning-tracker, messages, notes, photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor, prompt-generator, token-counter. S5 (Inbox) added an 11th emitter but no receiver, so the both-ways overlap is unchanged. Closing it is EPIC-1 **S6** (not yet started). | every entity-owning app both ways |
 | Lighthouse — PWA / Perf / A11y | CI (add to a workflow when feasible) | not measured headless | 90 / 90 / 90 |
 | Open `routine/auto-*` PR age | reviewer log | — | < one review cycle |
 
