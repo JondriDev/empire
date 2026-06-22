@@ -79,6 +79,69 @@ SEND_TO_LEARNING currently emit only their typed events, no HANDOFF arc).
 
 ---
 
+## 2026-06-22 · Deps + leverage — safe bumps, transitive vuln fixes, **shell-styled CI guard**
+
+**Weekly dependencies & security routine** on a fresh cloud checkout of `main`
+(`0ade5fd`). Baseline green first: `npm install` → `npm run build` 🟢
+(`tsc -b && vite build`, PWA precache 57) → `npx vitest run` **64/64**.
+
+**Security (`npm audit`): 8 → 5 vulns.** Applied non-breaking `npm audit fix`
+(lockfile-only, no breaking majors): **@babel/core** 7.29.0→7.29.7 (critical —
+arbitrary file read via sourceMappingURL), **form-data** 4.0.5→4.0.6 (high — CRLF
+injection), **js-yaml** 4.1.1→4.2.0 (moderate — merge-key DoS). All three are
+transitive dev-tooling deps.
+- **Deferred (5 remaining, all dev-only):** the entire esbuild→vite→vitest chain
+  (esbuild moderate dev-server; **vite** high path-traversal in optimized-deps
+  `.map`; **vitest** critical arbitrary-file-read *only when `vitest --ui` server
+  is listening*). The fix is `vite@8` + `vitest@4` — a 5→8 and 2→4 multi-major
+  leap (Vite explicitly flagged caution in the brief; would also need
+  `@vitejs/plugin-react@6`, and `@tailwindcss/vite` / `vite-plugin-pwa` re-verify).
+  None ships to production runtime (all are build/test-time servers). **Left for
+  human decision** — Node 22.22 here does satisfy vite@8's engine, so it's
+  feasible in a dedicated PR, just not a "provably safe" auto-bump.
+
+**Safe direct bumps (build stayed 🟢, 64/64):** `@tailwindcss/vite` 4.3.0→4.3.1,
+`tailwindcss` 4.3.0→4.3.1, `react`/`react-dom` 19.2.6→19.2.7, `react-router-dom`
+7.15.1→7.18.0, `lucide-react` 1.16.0→1.21.0, `typescript-eslint`→8.61.1, `uuid`
+14.0.0→14.0.1, `zustand` 5.0.13→5.0.14, `@types/node` 25.9.1→25.9.4, `@types/react`
+19.2.15→19.2.17. **Deferred majors** (report-only): eslint 10, @eslint/js 10,
+@types/node 26, @vitejs/plugin-react 6, eslint-plugin-react-hooks 7,
+eslint-plugin-react-refresh 0.5, globals 17, jsdom 29, **typescript 6**.
+
+**Leverage (one per week) — the `.empire-desktop` shell guard, finally landed.**
+Requested across ~8 prior log entries since the #10 blank-dark regression: a CI
+guard so a green build can never again hide an unstyled desktop shell. Added
+`scripts/check-shell-styled.mjs` (dependency-free) + a PR-blocking
+`.github/workflows/verify.yml` (build → vitest → guard on every PR/push to main).
+The guard asserts the two `docs/CONTEXT.md` invariants against the **built**
+bundle — a top-level `.empire-desktop{…position:fixed…}` rule and **zero**
+`.hide-sm .empire-desktop` — plus a fast source-level `/*`==`*/` comment-balance
+pre-check on the design-system stylesheets (the root cause). **Proven both ways:**
+reran the exact #10 trap (collapsed the spaced glob slashes back to `*/`),
+rebuilt 🟢 (bug hidden), and the guard FAILED with all three signals (60/62
+imbalance; 15 `.hide-sm .empire-desktop`; 0 top-level rule); restored → passes.
+This removes the recurring cost of a full QA render-cycle to catch a whole class
+of silent CSS-cascade regressions. Small, reversible, no app-behavior change.
+
+**Rebased onto current `main` (`e36e9c6`, post-#23 EPIC-1 S1)** at the reviewer's
+request — #23 shifted `docs/metrics.json` history + `docs/METRICS.md`. Resolved
+the `ROUTINE-LOG.md` (kept #23's two entries + this one) and `metrics.json`
+(took main's snapshot, regenerated) conflicts; re-verified on the rebased tree:
+`npm run build` 🟢, `npx vitest run` **68/68** (now incl. #23's 4 tests),
+`node scripts/check-shell-styled.mjs` ✓, `npm audit` unchanged (8→5, the 3
+transitive fixes intact).
+
+**Metrics** (`node scripts/metrics.mjs`, vs #23's true-current snapshot): apps 26
+(±0), testCases 64 (±0), tokenViolations 503 (±0), bundle gz **236.3 KB (+0.2)** —
+the only delta, from the dependency bumps; this PR touches zero app/`src` code.
+
+**Next step:** a dedicated human-reviewed PR to evaluate the vite@8 + vitest@4 +
+@vitejs/plugin-react@6 coordinated major (clears the remaining 5 dev-only vulns);
+and consider extending `verify.yml` with `eslint .` once the eslint 9→10 major is
+triaged.
+
+---
+
 ## 2026-06-21 · Integration run — merged #20 (code: Goals design tokens) + #19 (QA docs)
 
 **Triaged 4 open PRs into lanes:** 2 `routine/auto-*` (one code #20, one QA docs #19)
