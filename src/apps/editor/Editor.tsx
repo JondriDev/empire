@@ -6,6 +6,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Code, Copy, Check, Play, Save, FileText, Bot, BarChart2, Trash2 } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
+import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { useInboundHandoff } from '../../lib/useInboundHandoff'
 
 interface EditorStats {
   lines: number
@@ -34,6 +36,8 @@ export default function Editor() {
   const [copied, setCopied] = useState(false)
   const [savedFiles, setSavedFiles] = useState<{ name: string; lang: string; content: string }[]>([])
 
+  const inbound = useInboundHandoff<{ code?: string; language?: string; from?: string }>('empire-editor-clipboard')
+
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'editor' })
     try {
@@ -41,6 +45,12 @@ export default function Editor() {
       if (s) setSavedFiles(JSON.parse(s))
     } catch { /* ignore */ }
   }, [])
+
+  // Preload handed-off code (e.g. a snippet sent from another app) once read.
+  useEffect(() => {
+    if (inbound.payload?.code) setCode(inbound.payload.code)
+    if (inbound.payload?.language) setLanguage(inbound.payload.language)
+  }, [inbound.payload])
 
   const analyzeCode = useCallback((input: string) => {
     const lines = input.split('\n').length
@@ -119,6 +129,11 @@ export default function Editor() {
           <p className="text-sm text-gray-400 mt-1">
             {stats.lines} lines · {stats.chars.toLocaleString()} chars
           </p>
+          {inbound.source && (
+            <div className="mt-2">
+              <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <select

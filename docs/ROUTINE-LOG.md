@@ -5,6 +5,41 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · EPIC-1 S1 — Inbound provenance (HANDOFF receivers show "From <source>")
+
+**Did.** Built the receiver half of the cross-app HANDOFF rail. New shared
+pieces: `src/lib/useInboundHandoff.ts` (reads the `empire-*-clipboard`
+sessionStorage payload once on mount, consumes the key, exposes
+`{payload, source, dismiss}`) and `src/components/ui/ProvenanceChip.tsx` (a
+glass token pill rendering "From <App>" in the *source app's own accent* +
+icon from the registry, dismissible ✕, `scale-in` entrance). Wired all four
+receivers to use them: **Token Counter, Prompt Gen, AI Chat, Editor**.
+
+**Root-cause fix found en route.** `SEND_TO_EDITOR` writes
+`empire-editor-clipboard`, but `Editor.tsx` **never read it** — "Open in Code
+Editor" silently dropped the payload. Editor now preloads `code`+`language`
+and shows the chip. AI Chat previously injected a `📎 Received from **X**:`
+text *prefix into the input* (polluting the message sent to the model); it now
+preloads clean text and shows the chip above the composer instead.
+
+**Verified.** `npm run build` 🟢 (tsc -b && vite build). `npx vitest run` 🟢
+68 passed (added `useInboundHandoff.test.ts`: round-trip read+consume, empty
+key, dismiss-keeps-payload, malformed-payload-no-throw). `npx eslint` clean on
+all 7 touched files. Metrics: token-violations **503 → 503 (±0)**, test cases
++4, bundle gz +1.3 KB (new component/hook). No localStorage schema changes.
+*Trap learned:* the global test setup (`src/test/setup.ts`) stubs
+`sessionStorage` with inert `vi.fn()`s — storage-round-trip tests must install
+a real in-memory shim; and `act` imports from `@testing-library/react`, not
+`vitest`. *Not verifiable in cloud (no rendered UI):* send from any app's ⚡
+"Send to…" → the target opens pre-filled with a glowing accent-coloured "From
+<App>" chip; ✕ dismisses it. User should confirm on-device.
+
+**Next.** EPIC-1 **S2** — audit `CROSS_APP_ACTIONS` so *every* transfer emits
+exactly one `HANDOFF{fromId,toId}` before navigating (SEND_TO_NOTES /
+SEND_TO_LEARNING currently emit only their typed events, no HANDOFF arc).
+
+---
+
 ## 2026-06-21 · Integration run — merged #20 (code: Goals design tokens) + #19 (QA docs)
 
 **Triaged 4 open PRs into lanes:** 2 `routine/auto-*` (one code #20, one QA docs #19)

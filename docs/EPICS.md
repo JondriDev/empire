@@ -38,11 +38,13 @@ stage is now downhill (low barrier) and visibly moves the headline metric.
 Stages (Builder takes the topmost `[ ]`; **confirm current state vs. code first** —
 some may already be shipped):
 
-- [ ] **S1 · Inbound provenance.** Each `sessionStorage` receiver (Editor, Token
+- [x] **S1 · Inbound provenance.** Each `sessionStorage` receiver (Editor, Token
   Counter, Prompt Gen, AI Chat) shows a dismissible **"From <source>"** chip
   (token-styled, source app's accent) and preloads the payload. *Acceptance:* send
   from Calculator → Token Counter opens pre-filled with a "From Calculator" chip;
   same for the other three. Build 🟢, vitest 🟢, eslint clean; add a unit test.
+  **Shipped 2026-06-22:** `useInboundHandoff` hook + `<ProvenanceChip>`; fixed a
+  latent bug (Editor never read its clipboard). See ROUTINE-LOG 2026-06-22.
 - [ ] **S2 · Every app emits on transfer.** Audit `CROSS_APP_ACTIONS`; any transfer
   that still navigates silently emits `HANDOFF` first (no invented edges).
   *Acceptance:* every cross-app action lights a directed arc in The Network; one
