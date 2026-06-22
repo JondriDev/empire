@@ -1,63 +1,40 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-06-22T13:04:41.266Z
-
-**No runtime bugs found this run.** Build 🟢, all routes render styled, vitest 86/86 🟢.
+**Generated:** 2026-06-22T18:04:49.236Z
 
 **Result:** 27/27 rendered without crash, 0 failed.
-
-## Metric deltas (vs last QA confirmation, "after #23")
-
-The fleet integrated **PR #26 (flow.ts + cross-app wiring + tests)** and **EPIC-1 S3
-(Network inspector + node-type legend, commit 32676c4)** since the last QA run. Auto
-metrics moved accordingly (from `scripts/metrics.mjs` / `docs/metrics.json`):
-
-| Metric | Prev (after #23) | Now | Δ | Direction |
-|---|---|---|---|---|
-| Apps / routes | 26 | 26 | ±0 | steady |
-| Test cases (static count) | 64 | 82 | **+18** | ↑ good |
-| Test files | 8 | 11 | **+3** | ↑ good |
-| Design-token violations | 503 | **501** | **−2** | ↓ good (S3 reused `rgbCss`) |
-| Bundle gz (KB) | 236.1 | 237.6 | +1.5 | ↑ (S3 inspector/legend code) |
-
-> Note: `metrics.mjs` static count = 82; an actual `vitest run` = **86 passed** (its regex
-> undercounts a few nested cases). Both directions agree (test coverage grew with S3 + #26).
-
-## Manual rows
-
-- **Routes rendering clean: 26 / 26 ✅** (27/27 incl. desktop shell). SHELL-IS-STYLED
-  assertion passed (top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm .empire-desktop`).
-  Desktop + Network screenshots visually confirmed styled (XENO palette; Network shows CORE +
-  all satellites **and the new S3 legend panel** bottom-right).
-- **Apps fully wired BOTH-ways: 1 / 26** (unchanged) — only `prompt-generator` both emits
-  (`<NodeActions>`) and receives (`useInboundHandoff`). Emit-only via `NodeActions` (10):
-  artifacts(kanban), calendar, datacenter, files, goals, learning-tracker, messages, notes,
-  photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor,
-  prompt-generator, token-counter. PR #26's wiring touched flow visualization, **not** the
-  emit/receive app sets — so this overlap did not grow.
-
-## Epic-acceptance confirmation (EPIC-1 · Organism Completeness)
-
-- **S3 (Network inspector + legend) — CONFIRMED shipped.** Its stated metric move
-  (token-violations **503 → 501**) is verified in `docs/metrics.json`. `adjacency.test.ts`
-  (5 tests, the new pure seam) passes. Legend panel is visible in `app-network.png`.
-  *Limitation (honest):* the inspector's per-app entity/neighbour listing could **not** be
-  exercised headless — a fresh context has an empty `empire-core-graph` (no seeded nodes),
-  so no app node carries entities to click. Legend + tests verify the seam; live inspector
-  content is verified-by-construction, not by headless interaction.
-- **EPIC-1 target metric (apps fully wired both-ways) — STILL PENDING at 1/26.** S1/S2/S3
-  shipped, but the both-ways closure is **S6** (not yet started), so the headline organism
-  metric has **not** moved. No contradiction — just the remaining gradient. S4 (command
-  palette) is the next active stage.
-
-## Env-expected network noise (NOT bugs)
-
-- `files`: `/api/files?path=/storage/emulated/0` → HTTP 500 (Android-only storage path).
-- `datacenter`: `/api/dc/tables` → HTTP 401 (authed API; no headless session).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
 > listed separately — expected in the offline cloud sandbox and **not** a render failure.
+
+## Epic-acceptance — EPIC-1 · S4 (global ⌘K command palette) — **CONFIRMED ✅ (live)**
+
+S4 (global ⌘K command palette over the focused node) landed this run. Verified **live, headless**:
+pressing **Ctrl/⌘-K** on the desktop opens a styled glass dialog (`role="dialog"`) showing the
+focus-aware empty state — *"No node in focus · Nothing in focus yet · Touch a node — create a note,
+select one in The Network — then ⌘K acts on it"* with `navigate / run / ⌘K toggle / 0 actions`
+affordances and ESC to close. See `palette.png`. *Honest limit:* a fresh cloud context has an empty
+`empire-core-graph`, so there is no focused node to **act on** headless — the modal-open, focus
+binding, empty-state copy and key affordances are confirmed; live intent execution from the palette
+is covered by `focus.test.ts` (6) + the seam, not by live interaction.
+
+**EPIC-1 headline metric (apps both-ways 1/26) is UNCHANGED** — S4 is a navigability stage, not a
+wiring stage; closing the emit↔receive overlap is **S6** (not started). Routes stay **26/26 ✅**.
+
+## Metric deltas (vs last QA, post-S3 → now post-S4)
+
+| Metric | post-S3 | now (post-S4) | Δ |
+|---|---|---|---|
+| Routes rendering clean | 26/26 | **26/26** ✅ | ±0 |
+| Apps fully wired both-ways | 1/26 | **1/26** | ±0 |
+| Test cases (static / vitest) | 82 / 86 | **88 / 92** | +6 / +6 |
+| Test files | 11 | **12** | +1 |
+| Token violations | 501 | **501** | ±0 |
+| Bundle gz (KB) | 237.6 | **238.9** | +1.3 |
+
+vitest: **92 passed / 12 files** 🟢. Build 🟢. SHELL-IS-STYLED ✅ (top-level
+`.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`). No runtime bugs found.
 
 | App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|
