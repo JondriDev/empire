@@ -9,6 +9,51 @@ const BASE = 'http://localhost:3001';
 const OUT = path.resolve('docs/screenshots/latest');
 fs.mkdirSync(OUT, { recursive: true });
 
+// ── SHELL-IS-STYLED assertion (the green-build-but-blank trap) ───────────────
+// A `*/` inside a CSS doc-comment can close it early → every `.empire-*` rule
+// nests under `@media(max-width:640px){.hide-sm…}` → desktop renders unstyled
+// despite a green build. Verify WITHOUT a browser against the built CSS:
+//   • a TOP-LEVEL `.empire-desktop{…position:fixed…}` rule exists, and
+//   • ZERO `.hide-sm .empire-desktop` rules (the nested-under-media signature).
+// This runs before render so a blank build fails fast & loud.
+function assertShellStyled() {
+  const assetsDir = path.resolve('dist/assets');
+  let css = '';
+  try {
+    for (const f of fs.readdirSync(assetsDir)) {
+      if (f.endsWith('.css')) css += fs.readFileSync(path.join(assetsDir, f), 'utf8');
+    }
+  } catch (e) {
+    throw new Error(`SHELL-IS-STYLED: cannot read dist/assets CSS (${e.message}). Build first.`);
+  }
+  // top-level .empire-desktop with position:fixed (props may be reordered by the minifier)
+  const desktopRule = css.match(/\.empire-desktop\{[^}]*\}/g) || [];
+  const hasFixed = desktopRule.some((r) => /position:fixed/.test(r));
+  const nested = (css.match(/\.hide-sm \.empire-desktop/g) || []).length;
+  if (!hasFixed) throw new Error('SHELL-IS-STYLED: no top-level `.empire-desktop{…position:fixed…}` in built CSS — blank-dark trap (comment broke the cascade).');
+  if (nested > 0) throw new Error(`SHELL-IS-STYLED: found ${nested}× \`.hide-sm .empire-desktop\` — rules nested under @media, desktop will render unstyled.`);
+  console.log('SHELL-IS-STYLED ✅  top-level .empire-desktop{position:fixed}, 0 nested under .hide-sm');
+}
+assertShellStyled();
+
+// ── Resolve a usable Chromium (known-good cloud recipe) ──────────────────────
+// cdn.playwright.dev 403s in the sandbox — never download. Prefer the pre-installed
+// /opt/pw-browsers/chromium-*/chrome-linux/chrome (pick the newest if the dir
+// version changed); fall back to Playwright's own resolution.
+function resolveChromiumPath() {
+  const base = '/opt/pw-browsers';
+  try {
+    const dirs = fs.readdirSync(base)
+      .filter((d) => /^chromium-\d+$/.test(d))
+      .sort((a, b) => Number(b.split('-')[1]) - Number(a.split('-')[1]));
+    for (const d of dirs) {
+      const exe = path.join(base, d, 'chrome-linux', 'chrome');
+      if (fs.existsSync(exe)) return exe;
+    }
+  } catch { /* fall through to default */ }
+  return undefined; // let Playwright resolve its bundled browser
+}
+
 // App routes to smoke test (keys mirror src/lib/appComponents.tsx).
 const apps = [
   'calculator','calendar','clock','weather','grammar','language','music','video',
@@ -20,8 +65,14 @@ const apps = [
 const sanitize = (s) => s.replace(/[^a-z0-9-]/gi, '-');
 const results = [];
 
-const browser = await chromium.launch();
+const executablePath = resolveChromiumPath();
+console.log(`Chromium: ${executablePath || '(Playwright default)'}`);
+const browser = await chromium.launch(executablePath ? { executablePath } : {});
 const ctx = await browser.newContext({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
+
+// ── Live DOM styled check: confirm the shell actually paints position:fixed.
+// Complements the static CSS assertion (catches a runtime cascade failure too).
+let domStyledOk = null;
 
 async function visit(name, url, file) {
   const page = await ctx.newPage();
@@ -70,6 +121,22 @@ async function visit(name, url, file) {
 // Desktop shell
 await visit('desktop', BASE + '/', 'desktop.png');
 
+// Live DOM styled check on the rendered shell (computed position must be 'fixed').
+try {
+  const p = await ctx.newPage();
+  await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 20000 });
+  await p.waitForTimeout(1200);
+  domStyledOk = await p.evaluate(() => {
+    const el = document.querySelector('.empire-desktop');
+    return !!el && getComputedStyle(el).position === 'fixed';
+  }).catch(() => false);
+  await p.close();
+  console.log(`DOM shell-styled (computed position:fixed): ${domStyledOk ? '✅' : '❌'}`);
+} catch (e) {
+  domStyledOk = false;
+  console.log('DOM shell-styled check errored:', e.message);
+}
+
 // Each app
 for (const id of apps) {
   await visit(id, `${BASE}/app/${id}`, `app-${sanitize(id)}.png`);
@@ -84,6 +151,7 @@ const fail = results.length - pass;
 let md = `# Empire QA — Visual + Smoke Report\n\n`;
 md += `**Generated:** ${now}\n\n`;
 md += `**Result:** ${pass}/${results.length} rendered without crash, ${fail} failed.\n\n`;
+md += `**Shell-is-styled:** static CSS assertion ✅ (top-level \`.empire-desktop{position:fixed}\`, 0 nested under \`.hide-sm\`); live DOM computed \`position:fixed\` ${domStyledOk ? '✅' : '❌'}.\n\n`;
 md += `> **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.\n`;
 md += `> Network & console noise (failed external CDN fetches, backend API calls needing auth) is\n`;
 md += `> listed separately — expected in the offline cloud sandbox and **not** a render failure.\n\n`;

@@ -5,6 +5,44 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · Visual & Smoke QA run (main @ e36e9c6)
+
+**Build:** 🟢 `npm run build` clean (tsc -b + vite, PWA precache 58 entries). Served `dist/`
+via `node server.js` on :3001 (HTTP 200).
+
+**Smoke:** **27/27 rendered clean** (desktop shell + all 26 app routes, 0 uncaught JS / error
+boundary / blank). **Routes rendering clean = 26/26** ✅. Shell-is-styled verified both ways:
+static CSS assertion (top-level `.empire-desktop{position:fixed}`, 0 nested under `.hide-sm`)
+**and** live DOM computed `position:fixed` ✅. Two env-expected net notes only: `files`
+`/api/files?path=/storage/emulated/0` → 500 (Android-only path) and `datacenter` `/api/dc/tables`
+→ 401 (authed) — not regressions.
+
+**Harness hardening (I own this):** added the **shell-is-styled assertion** to
+`scripts/qa-smoke.mjs` (was missing — the green-but-blank trap had no guard): a pre-render static
+check on built CSS + a live-DOM `position:fixed` check. Also added **executablePath
+auto-resolution** for the pre-installed `/opt/pw-browsers/chromium-*` (picks newest version dir)
+so the known-good recipe is baked into the script, not just docs. Noted in CONTEXT that
+`playwright` must be `npm i --no-save`'d per-run (not in package.json).
+
+**Metrics:** flat (no code change since #23) — apps 26, tests 64/8 files, token-violations 503,
+bundle gz 236.1 KB. `docs/metrics.json` refreshed.
+
+**EPIC-1 acceptance — S1 CONFIRMED end-to-end.** Seeded each receiver's sessionStorage clipboard
+with a `{from:<source>}` payload and asserted the provenance chip rendered headlessly: token-counter
+(From calculator) ✅, prompt-generator (From notes) ✅, ai-chat (From editor) ✅, editor (From
+datacenter) ✅. The receive-half rail is live. **S2 not yet shipped** (next stage: every app emits).
+
+**Organism wiring measured (honest code audit):** both-ways **3/26** (prompt-generator, notes,
+learning-tracker); emit-capable 10/26; receive-capable 6/26. Recorded the manual rows in METRICS.md.
+
+**Retired finding:** `/app/goals` orphan — Goals renders clean and is wired (emit + mirror).
+
+**Next:** execute EPIC-1 **S2** (every cross-app transfer emits exactly one arc-bearing event) to
+move the emit/both-ways rows; merge #22 (deps + CI shell-guard) which complements the new in-script
+assertion.
+
+---
+
 ## 2026-06-22 · Integration run — merged #23 (code: EPIC-1 S1 inbound provenance)
 
 **Triaged 4 open PRs into lanes:** 1 code `routine/auto-*` (#23, on-epic S1), 1

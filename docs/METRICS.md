@@ -29,12 +29,20 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Manual / CI metrics (QA + human)
 
-| Metric | Source | Target |
-|---|---|---|
-| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | 26 / 26 |
-| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | 26 / 26 |
-| Lighthouse — PWA / Perf / A11y | CI (add to a workflow when feasible) | 90 / 90 / 90 |
-| Open `routine/auto-*` PR age | reviewer log | < one review cycle |
+| Metric | Current (2026-06-22 QA) | Source | Target |
+|---|---|---|---|
+| Routes rendering clean | **26 / 26** ✅ | QA `REPORT.md` (headless render, no uncaught JS / blank) | 26 / 26 |
+| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | **3 / 26** (emit-capable 10/26 · receive-capable 6/26) | QA + code audit | 26 / 26 |
+| Lighthouse — PWA / Perf / A11y | not yet measured | CI (add to a workflow when feasible) | 90 / 90 / 90 |
+| Open `routine/auto-*` PR age | see reviewer log | reviewer log | < one review cycle |
+
+> **Organism-wiring breakdown (2026-06-22 QA, honest code audit):** *emit-capable* (renders
+> `<NodeActions>` ⚡ Send-to) = artifacts, calendar, datacenter, files, goals, learning-tracker,
+> messages, notes, photos, prompt-generator (**10**). *Receive-capable* = editor, token-counter,
+> prompt-generator, ai-chat (provenance chip, S1) + notes, learning-tracker (in-place create)
+> (**6**). *Both ways* = prompt-generator, notes, learning-tracker (**3**). EPIC-1 S2–S6 close
+> the gap. EPIC-1 **S1 acceptance confirmed end-to-end** this run (all 4 chip receivers render
+> "From <source>" when seeded — see QA `REPORT.md`).
 
 ## How each routine uses this
 

@@ -107,11 +107,21 @@
 
 ## 🖥️ QA headless-render recipe (known-good)
 
-- Use the pre-installed browser: Playwright `chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' })`
-  (adjust the version dir if it changed). **Fallback:** `@sparticuz/chromium`. Do **not** rely on
-  `cdn.playwright.dev` (403). Serve the built app on `http://localhost:3001` before rendering.
-- `scripts/qa-smoke.mjs` must include the **shell-is-styled assertion** (see blank-dark trap) so a
-  green-but-blank build can't pass.
+- **`playwright` is NOT in package.json** — install it per-run without a browser download:
+  `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers npm install --no-save playwright`,
+  then run with `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node scripts/qa-smoke.mjs`.
+- `scripts/qa-smoke.mjs` now **auto-resolves** the pre-installed browser
+  (`/opt/pw-browsers/chromium-<newest>/chrome-linux/chrome`, picks highest version) and passes it as
+  `executablePath`; falls back to Playwright's default. **Fallback browser:** `@sparticuz/chromium`.
+  Do **not** rely on `cdn.playwright.dev` (403). Serve the built app on `http://localhost:3001` first.
+- `scripts/qa-smoke.mjs` includes the **shell-is-styled assertion** (✅ as of 2026-06-22): a static
+  check on built `dist/assets/*.css` (top-level `.empire-desktop{…position:fixed…}`, zero
+  `.hide-sm .empire-desktop`) that runs *before* render, **plus** a live-DOM computed
+  `position:fixed` check on the rendered shell — a green-but-blank build can't pass.
+- **Last QA (2026-06-22):** 27/27 routes render clean (26/26 apps + shell, 0 uncaught JS). EPIC-1
+  **S1 acceptance confirmed end-to-end** — all 4 provenance-chip receivers (token-counter,
+  prompt-generator, ai-chat, editor) render "From <source>" when their clipboard is seeded.
+  Organism wiring measured: **3/26 both-ways** (emit 10, receive 6).
 
 ## 🧪 Tried & rejected (don't repeat dead ends)
 
@@ -119,8 +129,8 @@
 
 ## 📌 Open follow-ups discovered (promote into EPICS.md stages)
 
-- Verify whether `/app/goals` orphan is resolved — `goals` IS in `registry.ts` now; an earlier QA
-  run flagged it missing. Confirm route renders and retire the finding if fixed.
+- ~~Verify whether `/app/goals` orphan is resolved~~ **RESOLVED (2026-06-22 QA):** `/app/goals`
+  renders clean (PASS) and Goals emits via `<NodeActions>` + mirrors into the graph. Finding retired.
 - DataCenter `dataset` nodes only carry a row count for the *active* table.
 - Files `file` nodes only reflect the *current* directory (reconcile drops others on navigate).
 - Photos `photo` nodes carry no thumbnail (object URLs are revoked on delete).
