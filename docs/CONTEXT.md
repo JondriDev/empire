@@ -23,25 +23,27 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** EPIC-1 — Organism Completeness (see `docs/EPICS.md`).
-- **Next stage:** **S4 · Global "⚡ Send to…" in the command palette.** (S1/S2/S3 all
-  shipped 2026-06-22; S3 inspector+legend landed this run.)
-- **Exact shape for S4:** Surface every node's `intentsFor(node)` from ONE command
-  surface so cross-app routing is reachable without hunting per-app ⚡ bars.
-  **FIRST task — confirm whether a command palette already exists:** grep
-  `CommandPalette|cmdk|command-palette|Cmd+K|metaKey.*k` under `src/components/`
-  and `src/` (none found in a quick scan at seed — verify). **If one exists:** add a
-  context section that, given the focused/selected node, lists `intentsFor(node)`
-  (from `src/lib/core/intents.ts`) and runs the chosen one via `runIntent(id, node)`
-  (mirror `NodeActions.tsx`'s run+toast pattern). **If none exists:** build a minimal
-  one — a `gp` modal opened by ⌘/Ctrl-K (register a global keydown in `Desktop.tsx`),
-  listing the current node's intents; the "focused node" can come from a lightweight
-  selection store or, simplest first slice, the most-recently-active node. **Reuse the
-  rails — do NOT reinvent intents.** *Acceptance:* palette lists the focused node's
-  intents and runs them; one test for the intent-listing/selection logic. Build 🟢
-  vitest 🟢 eslint clean; token-violations must not regress (reuse `rgbCss`/tokens —
-  see trap below). **Open question for the run:** what defines "the focused node"
-  globally? Recommend the simplest honest answer first (last node touched via
-  `NodeActions`/graph mutation) and note the decision in this file.
+- **Next stage:** **S5 · "Inbox / Today" view.** (S1–S4 all shipped 2026-06-22; S4
+  command palette landed this run.)
+- **Exact shape for S5:** Aggregate every open `task` node from the Core graph into ONE
+  reachable view, so tasks created via ⚡ `make-task` from ANY app surface in one place.
+  Today `task` nodes are graph-only (created by the `make-task` intent in `sync.ts:120`,
+  `data.done=false`, `data.from=<sourceNodeId>`, owner app = the source's app) and have NO
+  home view — they exist in the graph but are invisible. **Recommended shape:** a small
+  surface listing `useNodesOfType('task')` (from `graph.ts:151`), newest first, each row
+  showing the task title + its source app (resolve via `node.meta.app`→`registry`), with a
+  checkbox that flips `data.done` via `useGraph().updateNode(id,{data:{...,done:true}})` and
+  a `<NodeActions type="task" sourceId={...}>` ⚡ bar. **Open question — WHERE does it live?**
+  Cheapest honest slice: a panel *inside The Network* (it already subscribes to `useGraph`),
+  OR a tiny new always-available surface. **Recommend:** add it as a second panel in
+  `Network.tsx` (top-left, mirroring the inspector at bottom-right) so no new route/registry
+  entry is needed — confirm there's room, else make a minimal `Inbox` app + registry entry.
+  *Acceptance:* a task made via ⌘K/⚡ from Notes appears in the Inbox; toggling done updates
+  the graph; one unit test for the task-aggregation/selector logic. Build🟢 vitest🟢 eslint
+  clean; token-violations must NOT regress (reuse `rgbCss`/tokens — see trap below).
+  **Note the `make-task` `data.done` write-path:** `NodeActions`/intents don't yet flip done;
+  S5 introduces the first task *mutation* UI — keep it a graph `updateNode`, the task is a
+  graph-only node (no back-write to any app store).
 
 ## 🧭 Codebase seams (where the important things live)
 
@@ -56,6 +58,15 @@
     `src/lib/core/sync.ts` (they need `useGraph`), not here.
   - `src/lib/core/sync.ts` — `startCoreSync()` (called once in `main.tsx`); `mirrorCollection()`.
   - `src/components/ui/NodeActions.tsx` — `<NodeActions type sourceId/>` ⚡ "Send to…" menu.
+  - **Focus + command palette (S4, 2026-06-22):** `src/lib/core/focus.ts` — `useFocus` store
+    (`focusedId`), pure `focusIdForEvent(event)` (NODE_CREATED/UPDATED/INTENT_RUN→nodeId,
+    NODES_LINKED→fromId), and `startFocusTracking()` (called once in `main.tsx`) which subscribes
+    `onAny` to keep `focusedId` = the LAST node touched (clears on that node's NODE_DELETED).
+    `src/components/CommandPalette.tsx` — ⌘/Ctrl-K `gp` modal (self-contained: own open state +
+    global keydown; rendered once in `Desktop.tsx` as Layer 7). Resolves the focused node from
+    the graph, lists "Open in <app>" + `intentsFor(node)`, runs via `runIntent`+toast (mirrors
+    NodeActions). Network's inspector `setFocus`es the selected app's newest node
+    (`Network.tsx` effect on `[selected]`), so ⌘K after a click aims at something real.
   - **HANDOFF receiver rail (S1, 2026-06-22):** `src/lib/useInboundHandoff.ts` —
     `useInboundHandoff<T>(sessionKey)` reads the `empire-*-clipboard` payload once
     on mount, consumes the key, returns `{payload, source, dismiss}`.

@@ -100,11 +100,16 @@ some may already be shipped):
     + true neighbors, each neighbor row opens that app; the legend's swatches match the
     canvas dot colours; ✕ deselects. Build 🟢, `vitest` 🟢 (incl. the new adjacency test),
     eslint clean on touched files; no new token violations (legend reuses `TYPE_RGB`).
-- [ ] **S4 · Global "⚡ Send to…" in the command palette** ← **NEXT (active stage).** Surface `intentsFor` the
-  focused/selected node across all apps from one command surface. *Acceptance:* palette
-  lists the focused node's intents and runs them; reachable without hunting per-app bars.
-  (Decompose to file/shape when promoted to active — likely `src/components/CommandPalette*`
-  + `intentsFor` from `src/lib/core/intents.ts`; confirm whether a palette already exists.)
+- [x] **S4 · Global "⚡ Send to…" in the command palette** — **Shipped 2026-06-22.** No palette
+  existed (only the Ctrl+Space app-search), so built a minimal one: `src/components/CommandPalette.tsx`
+  (⌘/Ctrl-K `gp` modal, reuses the shell's `empire-search-*` glass) targets the FOCUSED node and lists
+  `intentsFor(node)` + an "Open in <app>" action, running the choice via `runIntent` + toast (mirrors
+  `NodeActions`). "Focused node" = the last node touched anywhere, derived from the event bus by the new
+  `src/lib/core/focus.ts` (`useFocus` store + pure `focusIdForEvent` + `startFocusTracking()` in `main.tsx`);
+  Network's inspector also `setFocus`es the selected app's newest node. Build🟢 vitest 92/92 (focus.test.ts
+  +6) eslint clean; token-violations 501 (±0 — used `rgbCss`). *Acceptance met:* ⌘K lists the focused node's
+  intents and runs them from one surface. *Honest cloud limit:* keyboard summon + run not exercised headless
+  (fresh graph is empty); seam + 6 unit tests verify focus logic, not live keypress.
 - [ ] **S5 · "Inbox / Today" view.** Aggregate open `task` nodes from the graph into
   one view. *Acceptance:* tasks created via ⚡ from any app appear here.
 - [ ] **S6 · Close the wiring gaps (honest scope).** **Audit first, then wire.** Apps that

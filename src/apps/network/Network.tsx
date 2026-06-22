@@ -13,6 +13,7 @@ import { useWindowStore } from '../../lib/windowStore'
 import { useLang } from '../../lib/i18n'
 import { onAny, type EmpireEvent } from '../../lib/eventBus'
 import { useGraph } from '../../lib/core/graph'
+import { useFocus } from '../../lib/core/focus'
 import type { CoreNode } from '../../lib/core/graph'
 import { flowForEvent } from '../../lib/core/flow'
 import { appAdjacency, entitiesByApp } from './adjacency'
@@ -397,6 +398,12 @@ export default function Network() {
     return acc
   }, {})
   const selEdges = selected ? adjacency[selected.id] : undefined
+  // Selecting an app points global focus at its newest node, so ⌘K opens the
+  // command palette already aimed at something real in that app.
+  useEffect(() => {
+    if (selEntities[0]) useFocus.getState().setFocus(selEntities[0].id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected])
   const appName = (id: string) => {
     const a = apps.find(x => x.id === id)
     return a ? t(`app.${a.id}.name`, a.name) : id
