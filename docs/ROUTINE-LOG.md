@@ -5,6 +5,45 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · Integration run — merged #23 (code: EPIC-1 S1 inbound provenance)
+
+**Triaged 4 open PRs into lanes:** 1 code `routine/auto-*` (#23, on-epic S1), 1
+deps/infra `routine/auto-*` (#22), 1 docs `routine/auto-*` (#21, strategist), 1
+`meta/*` (#14, review-only).
+
+**Merged the ONE code PR — #23 (EPIC-1 S1 · inbound provenance chips).** Verified
+on a fresh checkout: `npm run build` 🟢, `npx vitest run` 🟢 **68/68**, eslint clean
+on all 7 touched files, `scripts/metrics.mjs` token-violations **503 → 503 (±0)** vs
+true main (main's recorded `496` was a stale pre-organism-core snapshot — confirmed
+by recomputing on `origin/main`). Tests +4, bundle gz +1.3 KB for the new hook +
+chip. Coherence ✓ (active stage S1, exact planned shape), design-system clean (token
+CSS vars only; accents derived from the registry, no hardcoded hex), additive /
+reversible, no localStorage schema changes. Squash-merged to live `main` (`fc33ad6`).
+Builder already updated `CONTEXT.md` (next stage → S2) and checked off EPICS S1; this
+run refreshed `METRICS.md` to the true current values.
+
+**Left OPEN for the human / next cycle (one code PR per run = hard cap):**
+- **#22** (deps + security + CI shell-guard) — a *second* code PR; deferred this
+  cycle. Lands non-breaking `npm audit fix` (critical `@babel/core`, high `form-data`,
+  moderate `js-yaml`) + safe minor bumps + a `.github/workflows/verify.yml` PR gate and
+  `scripts/check-shell-styled.mjs`. Looks safe and valuable; merge next run. The 5
+  remaining vulns (esbuild→vite→vitest, dev-only) need a human-reviewed vite@8/vitest@4
+  major bump.
+- **#21** (strategist docs) — **superseded + textually conflicting** with #23 (both
+  rewrote the EPICS S1 line, the CONTEXT active-epic block, and ROUTINE-LOG). #23 already
+  shipped S1 and advanced the docs to S2, so #21's plan is stale; its only unique content
+  is the `ROADMAP.md` NOW re-rank. Recommend the strategist rebase/close. Not merged.
+- **#14** (`meta/*` Routine Optimizer) — review-only by policy; left for human.
+
+**Main state:** 🟢 green, releasable. EPIC-1 S1 ✅ shipped; active stage now **S2**.
+
+**Next:** merge **#22** (deps/security + shell-guard CI) next cycle, then execute
+**EPIC-1 S2** — audit `CROSS_APP_ACTIONS` so every transfer emits exactly one
+arc-bearing event (decide HANDOFF-everywhere vs. typed-event-with-`from`; CONTEXT
+recommends the latter).
+
+---
+
 ## 2026-06-22 · EPIC-1 S1 — Inbound provenance (HANDOFF receivers show "From <source>")
 
 **Did.** Built the receiver half of the cross-app HANDOFF rail. New shared
