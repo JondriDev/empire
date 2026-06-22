@@ -13,7 +13,20 @@
 import { useStore } from '../store'
 import { useGraph } from './graph'
 import { registerIntent } from './intents'
+import { emit } from '../eventBus'
 import type { CoreNode } from './graph'
+
+/**
+ * Announce a directed app→app handoff on the bus so the Network mesh lights an
+ * honest synapse arc. Guards self-transfers: an intent that derives a node owned
+ * by the SAME app (make-task / make-note-from stay in their source app) is an
+ * in-app derivation, not a synapse — so it emits nothing. Only a genuine
+ * boundary crossing (e.g. a note → Learning Tracker) lights an arc.
+ */
+function announceTransfer(_fromApp: string, _toApp: string, _label: string): void {
+  if (!_fromApp || !_toApp || _fromApp === _toApp) return
+  emit({ type: 'HANDOFF', fromId: _fromApp, toId: _toApp, label: _label })
+}
 
 type Snapshot = ReturnType<typeof useStore.getState>
 
@@ -113,6 +126,7 @@ function registerCoreIntents(): void {
       const g = useGraph.getState()
       const task = g.addNode({ type: 'task', title: `Do: ${n.title}`, data: { done: false, from: n.id }, app: n.meta.app })
       g.link(n.id, task.id)
+      announceTransfer(n.meta.app, task.meta.app, 'make task')
     },
   })
 
@@ -127,6 +141,7 @@ function registerCoreIntents(): void {
       const content = typeof n.data.content === 'string' ? n.data.content : n.title
       const note = g.addNode({ type: 'note', title: `Note: ${n.title}`, data: { content, tags: [], from: n.id }, app: n.meta.app })
       g.link(n.id, note.id)
+      announceTransfer(n.meta.app, note.meta.app, 'make note')
     },
   })
 
@@ -139,6 +154,7 @@ function registerCoreIntents(): void {
       const g = useGraph.getState()
       const learning = g.addNode({ type: 'learning', title: n.title, data: { learned: false, mastered: false, from: n.id }, app: 'learning-tracker' })
       g.link(n.id, learning.id)
+      announceTransfer(n.meta.app, learning.meta.app, 'to learning')
     },
   })
 }

@@ -13,6 +13,7 @@ import { useLang } from '../../lib/i18n'
 import { onAny, type EmpireEvent } from '../../lib/eventBus'
 import { useGraph } from '../../lib/core/graph'
 import type { CoreNode } from '../../lib/core/graph'
+import { flowForEvent } from '../../lib/core/flow'
 
 // Map a hex accent (the registry `color`) to an "r,g,b" string for canvas fills.
 function rgbOf(hex: string): string {
@@ -91,32 +92,8 @@ function labelForEvent(e: EmpireEvent): string {
   }
 }
 
-// Detect a genuine app→app handoff that the event bus can observe today: a note
-// saved *from* another app via CROSS_APP_ACTIONS.SEND_TO_NOTES, which tags the
-// new note `from-<sourceAppId>`. Returns the directed pair (source → target), or
-// null for ordinary single-app activity. Honest edges only — no invented links.
-function flowForEvent(e: EmpireEvent): { fromId: string; toId: string } | null {
-  // An explicit directed handoff carries both ends (Editor / Token Counter /
-  // Prompt Gen / AI Chat transfers via CROSS_APP_ACTIONS).
-  if (e.type === 'HANDOFF') {
-    if (e.fromId && e.toId && e.fromId !== e.toId) return { fromId: e.fromId, toId: e.toId }
-    return null
-  }
-  // A note saved *from* another app via SEND_TO_NOTES tags it `from-<sourceId>`.
-  if (e.type === 'NOTE_CREATED') {
-    const tag = e.tags.find(x => x.startsWith('from-'))
-    if (tag) {
-      const fromId = tag.slice('from-'.length)
-      if (fromId && fromId !== 'notes') return { fromId, toId: 'notes' }
-    }
-  }
-  // An entry tracked *from* another app via SEND_TO_LEARNING carries `from`
-  // (in-app logging leaves it undefined, so no false self-edge).
-  if (e.type === 'LEARNING_LOGGED' && e.from && e.from !== 'learning-tracker') {
-    return { fromId: e.from, toId: 'learning-tracker' }
-  }
-  return null
-}
+// `flowForEvent` (the honest app→app arc predicate) lives in lib/core/flow.ts so
+// the mesh, tests, and future observers share ONE definition.
 
 // Compact relative age for the ticker, e.g. "now", "12s", "3m", "1h".
 function ago(ms: number): string {
