@@ -31,7 +31,7 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 | Metric | Source | Current (QA 2026-06-22) | Target |
 |---|---|---|---|
-| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **26 / 26** ✅ (27/27 incl. desktop shell; SHELL-IS-STYLED ✅) | 26 / 26 |
+| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **26 / 26** ✅ (27/27 incl. desktop shell; SHELL-IS-STYLED ✅) — re-confirmed 2026-06-22 (2nd run, green main) | 26 / 26 |
 | Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **1 / 26** — only `prompt-generator` does both. Emit-only (10): artifacts, calendar, datacenter, files, goals, learning-tracker, messages, notes, photos, prompt-generator. Receive-only (4): ai-chat, editor, prompt-generator, token-counter. The emit/receive sets barely overlap — this gap is exactly EPIC-1's work (S2 makes every transfer emit; S6 wires the rest both-ways). | 26 / 26 |
 | Lighthouse — PWA / Perf / A11y | CI (add to a workflow when feasible) | not measured headless | 90 / 90 / 90 |
 | Open `routine/auto-*` PR age | reviewer log | — | < one review cycle |
