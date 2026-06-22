@@ -1,6 +1,6 @@
 # Routine 7 — Routine Optimizer / meta (Constraint Hunter)
 
-- **Trigger ID:** `bdbe1fca`
+- **Trigger ID:** `trig_01LH2rdoeNTMWkCCxF5fwTXm`
 - **Schedule:** weekly (Sun)
 - **Writes:** `docs/routines/` + `docs/ROUTINE-LOG.md` only; opens an OPEN `meta/*` PR
 - **Cannot:** edit live routine configs, change app code, push to `main`

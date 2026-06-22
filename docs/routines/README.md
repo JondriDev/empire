@@ -61,6 +61,6 @@ Optimizer (weekly, read-only) ──proposes──▶ meta/* PR (stays OPEN) ─
 | 4 | Strategist / Roadmap | `trig_01TvJu2Ri1tsRRedJ4U3Mrdu` | daily | **Epic Architect** — one active epic, deeply decomposed | [strategist-roadmap.md](./strategist-roadmap.md) |
 | 5 | Deps & Security | `trig_0166eKG2PeiJZT1RixcPsJKk` | weekly | **Negentropy/leverage** — safe bumps + 1 automation/week | [deps-security.md](./deps-security.md) |
 | 6 | Daily Digest | `trig_017FcjDcs8ps3wSKyMvHgKwu` | daily | **Gradient report** — metric trend + epic %-complete | [daily-digest.md](./daily-digest.md) |
-| 7 | Routine Optimizer | `bdbe1fca` | weekly | **Constraint hunter** — name THE bottleneck, propose the fix | [routine-optimizer.md](./routine-optimizer.md) |
+| 7 | Routine Optimizer | `trig_01LH2rdoeNTMWkCCxF5fwTXm` | weekly | **Constraint hunter** — name THE bottleneck, propose the fix | [routine-optimizer.md](./routine-optimizer.md) |
 
 _Scaffolded 2026-06-21 (Optimizer first run). Redesigned 2026-06-22 (first-principles "huge iterations" model)._
