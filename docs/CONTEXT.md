@@ -107,7 +107,7 @@
     `TYPE_RGB` (triplets), `typeRgb(type)` (hashed fallback), and **`rgbCss(triplet, alpha?)`**
     which builds a CSS colour from a constant so reusing canonical triplets costs **zero**
     token-metric violations. Canvas, legend and inspector all import from here so they can't drift.
-- **Registry / shell:** `src/lib/registry.ts` (26 apps), `src/lib/appComponents.tsx`
+- **Registry / shell:** `src/lib/registry.ts` (27 apps, incl. S5 `inbox`), `src/lib/appComponents.tsx`
   (route→component map), `src/components/Desktop.tsx` (shell).
 - **Design system:** `src/design-system/colors_and_type.css` (canonical XENO palette),
   `src/design-system.css` (legacy-token *bridge* — edit here to restyle all apps),
@@ -164,26 +164,27 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-22, post-S4 green main — ⌘K command palette landed since last run)
+## 📊 Last QA confirmation (2026-06-22, post-S5 green main — Inbox / Today app landed since last run)
 
-- **Routes rendering clean: 26/26 ✅** (27/27 incl. desktop). SHELL-IS-STYLED assertion in
+- **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED assertion in
   `scripts/qa-smoke.mjs` passed (top-level `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`).
-  Desktop + Network screenshots visually confirmed styled (XENO palette, CORE + all satellites,
-  **S3 legend panel visible** bottom-right). vitest **92/92 🟢** (12 files).
-- **Apps fully wired BOTH-ways: 1/26 (unchanged)** — only `prompt-generator` emits AND receives. Emit-only
-  via `NodeActions` (10): artifacts(kanban), calendar, datacenter, files, goals, learning-tracker, messages,
-  notes, photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor, prompt-generator,
-  token-counter. S4 is navigability (surfaces intents), not wiring. **Closing this overlap is S6 (not started).**
-- **Epic-acceptance:** S4 (⌘K command palette) **CONFIRMED live** — pressing Ctrl/⌘-K on the desktop opens a
-  styled glass `role="dialog"` with the focus-aware empty state ("No node in focus · Touch a node … then ⌘K
-  acts on it", `navigate / run / ⌘K toggle / 0 actions`, ESC). Captured as `docs/screenshots/latest/palette.png`.
-  `focus.test.ts` (6 tests) passes. *Honest limit:* fresh context = empty `empire-core-graph`, so there is no
-  focused node to **act on** headless — modal-open / focus-binding / empty-state confirmed, live intent
-  execution covered by tests + seam. **EPIC-1 headline metric (both-ways 1/26) STILL PENDING** — needs S6.
-  Next active stage is **S5 (Inbox / Today view)**.
-- **Auto metrics moved vs post-S3:** apps 26 (±0), tests 82→88 static / 86→92 vitest (+6/+6), files 11→12 (+1,
-  `focus.test.ts`), token-violations **501 (±0)** (palette reused tokens), bundle gz 237.6→238.9 (+1.3). All
-  deltas from S4 (commit 1de67e5).
+  **NEW this run:** a `REGISTRY-COVERAGE` assertion (cross-checks the smoke `apps` list against
+  `registry.ts`) — it caught that `inbox` was missing from the list; added inbox + the guard so a future
+  app can't silently skip the smoke test. vitest **96/96 🟢** (13 files).
+- **Apps fully wired BOTH-ways: 1/27 (unchanged)** — only `prompt-generator` emits AND receives. Emit-only
+  via `NodeActions` (11): artifacts(kanban), calendar, datacenter, files, goals, **inbox**, learning-tracker,
+  messages, notes, photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor,
+  prompt-generator, token-counter. S5 added an 11th emitter (inbox) but no receiver, so the overlap is
+  unchanged. **Closing this overlap is S6 (not started).**
+- **Epic-acceptance:** S5 (Inbox / Today view) **CONFIRMED LIVE** — seeded 3 `task` nodes into
+  `empire-core-graph` (open from Calculator, done from Notes, open from Goals); the Inbox app surfaced **all
+  three** with source-app chips, 0 page errors. Captured as `docs/screenshots/latest/inbox-populated.png`.
+  This beats prior runs' empty-graph-only confirmation. `tasks.test.ts` (4 tests) passes. **EPIC-1 headline
+  metric (both-ways 1/27) STILL PENDING** — needs S6 (give a tool app a `useInboundHandoff` receiver, or wire
+  the last entity-owner both ways). Next active stage is **S6 (final EPIC-1 stage).**
+- **Auto metrics moved vs post-S4:** apps 26→27 (+1, inbox), tests 88→92 static / 92→96 vitest (+4/+4),
+  files 12→13 (+1, `tasks.test.ts`), token-violations **501 (±0)** (Inbox is pure tokens), bundle gz
+  238.9→240.5 (+1.6). All deltas from S5 (commit a4f60a7).
 - **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
   datacenter `/api/dc/tables`→401 (authed API, no headless session).
 - QA harness note: project has **no `playwright` dep**; it's global at `/opt/node22/lib/node_modules`.

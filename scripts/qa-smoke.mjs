@@ -49,8 +49,22 @@ const apps = [
   'calculator','calendar','clock','weather','grammar','language','music','video',
   'files','cache','browser','editor','notes','photos','datacenter','maps','messages',
   'prompt-generator','token-counter','learning-tracker','ai-agent','ai-chat','goals',
-  'hermes-cc','artifacts','network',
+  'hermes-cc','artifacts','network','inbox',
 ];
+
+// ── REGISTRY-COVERAGE assertion (the silently-skipped-app trap) ─────────────
+// A new app added to the registry but not to `apps` above would never be
+// smoke-tested (a green report that quietly skips it). Cross-check the smoke
+// list against src/lib/registry.ts so every shipped app is rendered here.
+function assertRegistryCoverage() {
+  const reg = fs.readFileSync(path.resolve('src/lib/registry.ts'), 'utf8');
+  const ids = [...reg.matchAll(/id:\s*'([a-z0-9-]+)'/g)].map(m => m[1]);
+  const uniqIds = [...new Set(ids)];
+  const missing = uniqIds.filter(id => !apps.includes(id));
+  if (missing.length) throw new Error(`REGISTRY-COVERAGE: ${missing.length} registry app(s) not in smoke list: ${missing.join(', ')}`);
+  console.log(`REGISTRY-COVERAGE: ✅ all ${uniqIds.length} registry apps are in the smoke list`);
+}
+assertRegistryCoverage();
 
 const sanitize = (s) => s.replace(/[^a-z0-9-]/gi, '-');
 const results = [];
