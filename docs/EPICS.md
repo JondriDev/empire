@@ -29,11 +29,16 @@
 organism where **every** app both *emits* and *receives* honest handoffs, the
 Network mesh portrays the full adjacency, and a human can navigate the whole graph.
 
-**Target metric:** *Apps fully wired into the organism* → **26 / 26** (both emit &
-receive, visible in The Network); *Routes rendering clean* stays **26 / 26**.
-**Why highest gradient:** the product's entire thesis is "one living organism";
-the rails are 80% built (`HANDOFF`, `mirrorCollection`, `NodeActions`), so each
-stage is now downhill (low barrier) and visibly moves the headline metric.
+**Target metric:** *Stateful apps fully wired into the organism* → **all entity-owning
+apps both emit & receive, visible in The Network**; *Routes rendering clean* stays **26 / 26**.
+(See the honest-scope note under S6 — "26/26" was the old literal target; a Calculator
+has no collection to mirror, so the real target is "every app that owns persistent
+entities is in the graph, and every tool app participates via emit/receive transfers.")
+**Why highest gradient:** the product's entire thesis is "one living organism." The
+*rails* are now built — `HANDOFF` fires on every transfer (S2 ✅), receivers acknowledge
+provenance (S1 ✅), `mirrorCollection`/`NodeActions` exist. The remaining gradient is
+**making the organism legible and navigable** (S3), then surfacing its intents globally
+(S4/S5), then closing the wiring gaps (S6). Each is now downhill given the ones before.
 
 Stages (Builder takes the topmost `[ ]`; **confirm current state vs. code first** —
 some may already be shipped):
@@ -45,24 +50,73 @@ some may already be shipped):
   same for the other three. Build 🟢, vitest 🟢, eslint clean; add a unit test.
   **Shipped 2026-06-22:** `useInboundHandoff` hook + `<ProvenanceChip>`; fixed a
   latent bug (Editor never read its clipboard). See ROUTINE-LOG 2026-06-22.
-- [ ] **S2 · Every app emits on transfer.** Audit `CROSS_APP_ACTIONS`; any transfer
-  that still navigates silently emits `HANDOFF` first (no invented edges).
-  *Acceptance:* every cross-app action lights a directed arc in The Network; one
-  test asserts each action emits exactly one `HANDOFF{fromId,toId}`.
-- [ ] **S3 · Network inspector + legend.** Clicking a node shows its real neighbors
-  (from `graph.neighbors`) and a legend maps node-type → accent. *Acceptance:* click
-  a node → side panel lists its true edges; legend matches `design-system` tokens.
+- [x] **S2 · Every app emits on transfer.** Audit `CROSS_APP_ACTIONS`; every transfer
+  emits an arc-bearing event (no invented edges). *Acceptance:* every cross-app action
+  lights a directed arc in The Network; one test asserts each action emits exactly one
+  arc-bearing event with the correct source. **Already shipped (confirmed in code
+  2026-06-22):** all five navigating transfers (`SEND_TO_EDITOR` / `_TOKEN_COUNTER` /
+  `_PROMPT_GEN` / `_AI_CHAT` / `ASK_HERMES_TO_ANALYZE`) call `handoff(from,to,label)` →
+  emit `HANDOFF{fromId,toId}`; the two in-place transfers (`SEND_TO_NOTES`,
+  `SEND_TO_LEARNING`) emit `NOTE_CREATED`/`LEARNING_LOGGED` carrying `from` (a separate
+  HANDOFF would double-count the ticker — see `Network.flowForEvent`). The deferred
+  "HANDOFF-everywhere vs typed-with-`from`" decision was resolved as **typed-with-`from`**
+  (option b). `src/lib/appActions.test.ts` asserts each action emits exactly one
+  arc-bearing event with the right source. No Builder work remained; marked shipped here.
+- [ ] **S3 · Network inspector + legend** ← **NEXT (active stage).** Make the organism
+  *legible*: clicking an app node opens an inspector panel showing that app's real graph
+  entities and its true cross-app neighbors, plus a persistent legend mapping node-type →
+  accent. Today `Network.tsx`'s canvas `onClick` only `openApp(...)`s — there is no
+  inspector and no legend, so the colored entity dots and arcs are unreadable.
+  **Files & shape:**
+  - **New** `src/apps/network/adjacency.ts` — a pure, testable seam. Export
+    `appAdjacency(nodes: CoreNode[]): Record<string, { out: string[]; in: string[] }>`
+    that, for every CoreNode `n`, walks `n.links` and maps `owner(n)=n.meta.app` →
+    `owner(target)` for each linked node, accumulating directed app→app adjacency
+    (skip self-edges and unknown owners). Also export
+    `entitiesByApp(nodes): Record<string, CoreNode[]>` grouping nodes by `meta.app`.
+  - **`src/apps/network/Network.tsx`** — add `const [selected, setSelected] = useState<typeof apps[number] | null>(null)`.
+    In the canvas `onClick`, change behavior: a single click **selects** (`setSelected(layout[i].app)`)
+    instead of opening; the inspector's button opens the app. Render an absolutely-
+    positioned inspector panel (glass token surface, `--mono`, design-system classes —
+    NO raw hex) when `selected` is set, listing: the app name+icon+accent; its entities
+    from `entitiesByApp(useGraph nodes)[id]` grouped/counted by type; its neighbors from
+    `appAdjacency(...)[id]` (each row a button → `openApp(neighbor)`); a "⚡ Open <app>"
+    button and a ✕ to deselect. For the panel, subscribe with `const nodes = useGraph(s => s.nodes)`
+    (the render loop already reads `useGraph.getState().nodes` imperatively — keep that;
+    add the reactive subscription only for the panel so it updates as the graph changes).
+  - **Legend:** a small always-visible panel (corner) listing each entity node-type
+    (note/task/message/learning/goal/prompt + "other") with its accent swatch. Source the
+    colours from the existing `TYPE_RGB` map in `Network.tsx` (export it) so canvas and
+    legend can't drift — do **not** re-hardcode the rgb strings in the DOM.
+  - **Test:** `src/apps/network/adjacency.test.ts` — given a fixture graph (a `note`
+    owned by `calculator` linking a `task` owned by `goals`), assert
+    `appAdjacency(nodes).calculator.out` contains `goals` and `.goals.in` contains
+    `calculator`; assert self-links and unknown owners are dropped.
+  - *Acceptance:* click any app node in The Network → inspector lists its real entities
+    + true neighbors, each neighbor row opens that app; the legend's swatches match the
+    canvas dot colours; ✕ deselects. Build 🟢, `vitest` 🟢 (incl. the new adjacency test),
+    eslint clean on touched files; no new token violations (legend reuses `TYPE_RGB`).
 - [ ] **S4 · Global "⚡ Send to…" in the command palette.** Surface `intentsFor` the
-  focused node across all apps from one command surface. *Acceptance:* palette lists
-  the focused node's intents and runs them; reachable without hunting per-app bars.
+  focused/selected node across all apps from one command surface. *Acceptance:* palette
+  lists the focused node's intents and runs them; reachable without hunting per-app bars.
+  (Decompose to file/shape when promoted to active — likely `src/components/CommandPalette*`
+  + `intentsFor` from `src/lib/core/intents.ts`; confirm whether a palette already exists.)
 - [ ] **S5 · "Inbox / Today" view.** Aggregate open `task` nodes from the graph into
   one view. *Acceptance:* tasks created via ⚡ from any app appear here.
-- [ ] **S6 · Wire the remaining stateful apps both-ways.** Any app still missing
-  `mirrorCollection` + `<NodeActions>` (audit Goals/Artifacts/DataCenter/Files/Photos/
-  prompt-gen against `CONTEXT.md`) gets wired. *Acceptance:* the "apps fully wired"
-  metric reaches 26/26; The Network shows every app's entities.
+- [ ] **S6 · Close the wiring gaps (honest scope).** **Audit first, then wire.** Apps that
+  already `mirrorCollection` + render `<NodeActions>`: Calendar, Notes, Learning Tracker,
+  Messages, Photos, Prompt Gen, DataCenter, Files, Goals, Artifacts/Kanban. **Entity-owning
+  apps still to check/wire:** confirm each persistent-entity app emits into the graph AND
+  exposes ⚡ on its rows; wire any gap (one app per Builder run, build green). **Tool apps**
+  (Calculator, Clock, Weather, Grammar, Language, Music, Video, Cache, Browser, Maps) own
+  no collection — they participate by *emitting/receiving transfers* (already do via
+  `CROSS_APP_ACTIONS`), NOT by mirroring fake entities. *Acceptance:* every entity-owning
+  app's nodes appear in The Network and carry ⚡ actions; do **not** invent collections for
+  tool apps to chase a literal 26/26. (QA should refine the METRICS row to "entity-owning
+  apps wired" + "tool apps emit/receive" rather than a single 26/26 — flagged in ROUTINE-LOG.)
 
-_When all stages ship and QA confirms 26/26 wired → move EPIC-1 to DONE and promote EPIC-2._
+_When S3–S6 ship and QA confirms every entity-owning app is in the graph (and the legend/
+inspector make it legible) → move EPIC-1 to DONE and promote EPIC-2._
 
 ---
 
