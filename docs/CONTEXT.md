@@ -23,23 +23,32 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** EPIC-1 — Organism Completeness (see `docs/EPICS.md`).
-- **Next stage:** **S2 · Every app emits on transfer.** (S1 shipped 2026-06-22.)
-- **Exact shape for S2:** Audit `src/lib/appActions.ts` `CROSS_APP_ACTIONS`. The
-  navigating transfers already call `handoff(...)` (SEND_TO_EDITOR /
-  _TOKEN_COUNTER / _PROMPT_GEN / _AI_CHAT / ASK_HERMES_TO_ANALYZE). **The two
-  in-place transfers do NOT emit `HANDOFF`:** `SEND_TO_NOTES` (emits
-  `NOTE_CREATED`) and `SEND_TO_LEARNING` (emits `LEARNING_LOGGED`) — by an
-  earlier deliberate choice (the Network's `flowForEvent` lights their arcs from
-  the *typed* events, see `src/apps/network/Network.tsx`). **Decision the next
-  run must make first:** either (a) also emit a `HANDOFF{fromId,toId}` from those
-  two so the rail is uniform (risk: double-counts the Network ticker row — verify
-  `flowForEvent` dedupes, or gate the typed-event arc when a HANDOFF exists), or
-  (b) keep typed events and instead make S2's acceptance "every cross-app action
-  lights exactly one directed arc" — then assert in a test that each action emits
-  *either* a HANDOFF *or* its arc-bearing typed event with `from`. (b) is lower
-  risk and matches the shipped design; recommend (b) unless the Strategist wants
-  literal HANDOFF everywhere. *Acceptance:* one test per action asserts exactly
-  one arc-bearing event with correct `from`/source. Build 🟢 vitest 🟢 eslint clean.
+- **Next stage:** **S3 · Network inspector + legend.** (S1 + S2 both shipped — see
+  below. S2 turned out already done in code; the Strategist marked it ✅ on 2026-06-22
+  rather than send the Builder to redo it.)
+- **S2 is DONE (do not redo):** every `CROSS_APP_ACTIONS` transfer already emits one
+  arc-bearing event — five navigating ones emit `HANDOFF{fromId,toId}` via
+  `handoff(...)`; `SEND_TO_NOTES`/`SEND_TO_LEARNING` emit typed events carrying `from`
+  (typed-with-`from` chosen over HANDOFF-everywhere to avoid a doubled ticker row).
+  `src/lib/appActions.test.ts` asserts each action emits exactly one arc-bearing event.
+- **Exact shape for S3 (build without re-planning):**
+  - **New pure module** `src/apps/network/adjacency.ts`:
+    `appAdjacency(nodes: CoreNode[]): Record<string,{out:string[];in:string[]}>` — for
+    each node walk `n.links`, map `n.meta.app` → `target.meta.app`, accumulate directed
+    app→app edges; drop self-edges + unknown owners. Plus `entitiesByApp(nodes):
+    Record<string, CoreNode[]>` (group by `meta.app`). Both pure → unit-tested in
+    `src/apps/network/adjacency.test.ts`.
+  - **`src/apps/network/Network.tsx`:** add `selected` app state; canvas `onClick`
+    now **selects** the picked app (was: `openApp`). Render a glass inspector panel
+    (design-system classes + `--mono`, NO raw hex) when `selected`: app name/icon/accent,
+    its entities (`entitiesByApp(nodes)[id]` grouped/counted by type), its true neighbors
+    (`appAdjacency(nodes)[id]` — each row a button → `openApp`), a "⚡ Open" button + ✕.
+    Subscribe `const nodes = useGraph(s => s.nodes)` for the panel (keep the loop's
+    imperative `useGraph.getState()`). Export `TYPE_RGB` and render a corner **legend**
+    (type → swatch) from it so canvas/DOM colours can't drift.
+  - *Acceptance:* click an app node → inspector lists real entities + neighbors, neighbor
+    rows open that app; legend swatches match canvas dot colours; ✕ deselects. Build 🟢,
+    vitest 🟢 (incl. adjacency test), eslint clean, no new token violations.
 
 ## 🧭 Codebase seams (where the important things live)
 

@@ -5,6 +5,30 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · Strategist — S2 already shipped → advance active stage to S3 (Network inspector)
+
+Read the gradient (METRICS/REPORT/EPICS/ROADMAP/CONTEXT/registry/appActions/Network).
+**Key finding:** EPIC-1 **S2 was already complete in code** — every navigating
+`CROSS_APP_ACTIONS` transfer emits `HANDOFF{fromId,toId}` and the two in-place transfers
+carry `from` on their typed event, with `src/lib/appActions.test.ts` asserting exactly one
+arc-bearing event per action. Sending the Builder to "do S2" would have been a wasted
+slight-iteration, so I marked **S2 ✅** and promoted **S3 · Network inspector + legend** to
+the active stage, deeply decomposed (new pure `adjacency.ts` seam + `adjacency.test.ts`;
+`Network.tsx` selection state → glass inspector panel listing real entities/neighbors;
+exported `TYPE_RGB` corner legend; no raw hex). Mirrored the S3 shape into `CONTEXT.md`.
+**Honest-scope correction:** the "26/26 apps fully wired" target was unreachable as
+literally stated — tool apps (Calculator/Clock/Weather/…) own no collection to mirror, so
+S6 now reads "every *entity-owning* app in the graph; tool apps participate via
+emit/receive" and QA should refine that METRICS row accordingly. Re-ranked ROADMAP (retired
+shipped NOW #1/#2 to DONE; tokens.ts → NOW #1; README-truth → #2; shell launcher → #3,
+feeds S4). QA REPORT 2026-06-21: 27/27 render, only expected offline backend noise (files
+500 / datacenter 401) — nothing broken to jump the queue. **Infra note:** the cloud checkout
+started on detached HEAD `e36e9c6` (the true remote `main` tip); the local `main`/`origin/main`
+refs are stale at `f6e1e74` — branch routine PRs off `HEAD`/`e36e9c6`, not the local `main` ref.
+Docs-only PR on `routine/auto-roadmap-20260622T022943Z`.
+
+---
+
 ## 2026-06-22 · Integration run — merged #23 (code: EPIC-1 S1 inbound provenance)
 
 **Triaged 4 open PRs into lanes:** 1 code `routine/auto-*` (#23, on-epic S1), 1

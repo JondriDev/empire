@@ -10,57 +10,23 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-06-20** · Main: 🟢 green (build + 21/21 vitest) ·
-> QA: 26/26 routes mount, no runtime errors.
+> Last re-ranked: **2026-06-22** (strategist) · Main: 🟢 green (build + 64/64 vitest) ·
+> QA: 26/26 routes mount, no runtime errors. EPIC-1 S1+S2 shipped; active stage **S3**.
+
+> **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
+> (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
+> themes** that feed *future* epics — re-ranked each strategist run. The two former
+> NOW #1 (emit `HANDOFF` from every transfer) and #2 (inbound "From <app>" chips) both
+> **shipped** (EPIC-1 S2 + S1, #23 / 2026-06-22) and have been retired to DONE below.
 
 ---
 
 ## NOW — next 3–5 increments (each one PR-sized)
 
 Pulled top-to-bottom. Each is small, concrete, and has an acceptance check.
+(The active epic's stages take precedence; these are the on-deck themes feeding EPIC-2/3.)
 
-### 1. Every handoff lights its synapse — emit a `HANDOFF` event from `appActions.ts`
-**Priority: INTERCONNECT.** This is the standing "next step" from the last three
-build runs. Today the Network mesh only draws a real app→app arc for
-`SEND_TO_NOTES` (it relies on the `from-<id>` tag on `NOTE_CREATED`). The other
-five cross-app actions in `src/lib/appActions.ts` (`SEND_TO_EDITOR`,
-`SEND_TO_TOKEN_COUNTER`, `SEND_TO_PROMPT_GEN`, `SEND_TO_AI_CHAT`,
-`ASK_HERMES_TO_ANALYZE`) move data via `sessionStorage` + `window.open` and emit
-**nothing** — so the organism can't see them and those synapses stay dark.
-
-- **Why:** the vision is "one living organism," not hub-and-spoke. Real nerve
-  traffic already flows between these apps; the mesh just can't observe it. One
-  honest event closes the gap with no invented relationships.
-- **Do:** add `{ type: 'HANDOFF'; fromId: string; toId: string; kind: string }`
-  to `EmpireEvent`; emit it from every `CROSS_APP_ACTIONS` executor right before
-  it navigates; broaden `Network.flowForEvent` to consume `HANDOFF` directly
-  (keep the existing `NOTE_CREATED`/`from-` path as a fallback). While in
-  `appActions.ts`, fix the latent bug in `SEND_TO_NOTES`: `Date.now().toString()`
-  is computed twice, so the emitted `noteId` differs from the stored note's id —
-  hoist it to one `const id`.
-- **Acceptance:** open **The Network**, then from Calculator use "Count Tokens"
-  → a **Calculator → Token Counter** arc lights and a ticker row reads
-  `● Calculator → Token Counter`. `npm run build` 🟢, `vitest` green, eslint clean
-  on touched files. Add one unit test that `HANDOFF` resolves to a `{fromId,toId}`
-  edge.
-
-### 2. Close the loop on the receiving side — inbound "From <app>" acknowledgment
-**Priority: INTERCONNECT + COMPLETE-APPS.** The four `sessionStorage`-based
-receivers (Editor `empire-editor-clipboard`, Token Counter `empire-token-clipboard`,
-Prompt Gen `empire-prompt-clipboard`, AI Chat `empire-ai-clipboard`) silently
-swallow the payload on mount. The handoff has no visible arrival.
-
-- **Why:** a synapse should fire at *both* ends. Surfacing provenance makes the
-  interconnection legible and trustworthy ("this text came from Calculator"),
-  and it's the natural pair to NOW #1.
-- **Do:** on consuming a `*-clipboard` payload, each receiver shows a small,
-  dismissible "From <source>" chip (token-styled, using the source app's registry
-  accent) and preloads the value. Verify each receiver actually preloads today;
-  fix any that drop the payload.
-- **Acceptance:** send text from Calculator → Token Counter; Token Counter opens
-  pre-filled with a **From Calculator** chip. Same for Editor / Prompt Gen / AI Chat.
-
-### 3. One palette, one source of truth — JS-importable design tokens
+### 1. One palette, one source of truth — JS-importable design tokens
 **Priority: DESIGN-SYSTEM CONSISTENCY.** The Network canvas (and any future
 `<canvas>` visual) hardcodes `rgba()` literals because a 2D context can't read
 CSS custom properties — every routine has flagged this as an accepted divergence.
@@ -75,7 +41,7 @@ The XENO accent palette therefore lives in two places that can drift.
 - **Acceptance:** `Network.tsx` no longer carries orphan hex/rgba beyond values
   derived from the shared module; DOM and canvas accents visibly match. Build green.
 
-### 4. Make the README tell the truth (25 apps, Cakra, current stack)
+### 2. Make the README tell the truth (26 apps, Cakra, current stack)
 **Priority: DESIGN-SYSTEM CONSISTENCY / hygiene.** `README.md` still says
 "21 Apps," centers a **Hermes AI** app, and omits the newer instruments
 (Cakra Agent, Cakra CC, AI Chat, Artifacts, Network). The product was rebranded
@@ -91,10 +57,11 @@ Hermes → **Cakra** and the registry now holds **25** apps + the desktop shell.
 - **Acceptance:** README inventory matches `registry.ts` 1:1; no stale "Hermes AI"
   central-app references; app count is correct.
 
-### 5. Desktop-shell as the organism's hub — global cross-app launcher / command palette audit
-**Priority: INTERCONNECT.** With handoffs now observable (NOW #1/#2), confirm the
-desktop shell exposes them coherently: a single command surface to jump between
-apps and trigger the common handoffs without hunting through each app's agent bar.
+### 3. Desktop-shell as the organism's hub — global cross-app launcher / command palette audit
+**Priority: INTERCONNECT.** *(Feeds EPIC-1 S4 — promote there when S3 lands.)* With
+handoffs now observable and provenance surfaced (S1+S2 shipped), confirm the desktop
+shell exposes them coherently: a single command surface to jump between apps and
+trigger the common handoffs / `intentsFor` a node without hunting through each app's bar.
 
 - **Why:** the shell is where "one organism" is felt first. The graph work is
   wasted if the entry points are scattered.
@@ -137,6 +104,12 @@ apps and trigger the common handoffs without hunting through each app's agent ba
 
 ## DONE — recently shipped (trimmed each run)
 
+- **Inbound provenance chips** (#23, EPIC-1 S1) — every `sessionStorage` receiver
+  (Editor / Token Counter / Prompt Gen / AI Chat) shows a dismissible "From <app>"
+  chip and preloads the payload; fixed Editor silently dropping its clipboard. (2026-06-22)
+- **Every transfer emits an arc** (EPIC-1 S2) — all five navigating `CROSS_APP_ACTIONS`
+  emit `HANDOFF{fromId,toId}`; the two in-place transfers carry `from` on their typed
+  event; `appActions.test.ts` asserts exactly one arc-bearing event per action. (2026-06-22)
 - **App→app synapse arcs** (#8) — handoffs light a curved link directly between
   two instruments, routed through CORE, with a packet sweep. (2026-06-20)
 - **Live signal ticker** (#7) — Network mesh shows the last 6 signals as a
