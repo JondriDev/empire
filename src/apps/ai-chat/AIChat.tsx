@@ -9,7 +9,8 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Bot, Send, Settings, Sparkles, X, Trash2, Copy } from 'lucide-react'
 import { streamChat, buildEmpireContext, saveConfig, getConfig } from '../../lib/ai'
 import { emit, getRecent } from '../../lib/eventBus'
-import { apps } from '../../lib/registry'
+import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { useInboundHandoff } from '../../lib/useInboundHandoff'
 
 interface Message {
   id: string
@@ -34,19 +35,14 @@ export default function AIChat() {
  emit({ type: 'APP_OPENED', appId: 'ai-chat' })
  }, [])
 
- // Load clipboard content from other apps
+ // Load clipboard content from other apps (HANDOFF receiver)
+ const inbound = useInboundHandoff<{ text?: string; title?: string; from?: string }>('empire-ai-clipboard')
  useEffect(() => {
- const raw = sessionStorage.getItem('empire-ai-clipboard')
-    if (raw) {
-      try {
-        const { text, title, from } = JSON.parse(raw)
-        const contextNote = `📎 Received from **${apps.find(a => a.id === from)?.name || from}**${title ? `: ${title}` : ''}:\n\n${text}`
-        setInput(contextNote)
-        sessionStorage.removeItem('empire-ai-clipboard')
-        setTimeout(() => inputRef.current?.focus(), 100)
-      } catch { /* ignore */ }
-    }
-  }, [])
+    if (!inbound.payload?.text) return
+    const { text, title } = inbound.payload
+    setInput(title ? `${title}\n\n${text}` : text)
+    setTimeout(() => inputRef.current?.focus(), 100)
+  }, [inbound.payload])
 
   // Load recent AI events from bus
   useEffect(() => {
@@ -260,6 +256,11 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
 
       {/* Input */}
       <div className="px-6 pb-6 pt-2">
+        {inbound.source && (
+          <div className="mb-2">
+            <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="relative">
           <textarea
             ref={inputRef}

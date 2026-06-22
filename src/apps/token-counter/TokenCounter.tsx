@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Card, Button } from '../../components/ui'
+import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { emit } from '../../lib/eventBus'
 import {
   Hash, Copy, Check, Info, BarChart2, Upload
@@ -76,17 +78,16 @@ export default function TokenCounter() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const inbound = useInboundHandoff<{ text?: string; from?: string }>('empire-token-clipboard')
+
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'token-counter' })
-    try {
-      const sessionData = sessionStorage.getItem('empire-token-clipboard')
-      if (sessionData) {
-        const parsed = JSON.parse(sessionData)
-        if (parsed.text) setText(parsed.text)
-        sessionStorage.removeItem('empire-token-clipboard')
-      }
-    } catch { /* ignore */ }
   }, [])
+
+  // Preload the handed-off text once it's read from the inbound payload.
+  useEffect(() => {
+    if (inbound.payload?.text) setText(inbound.payload.text)
+  }, [inbound.payload])
 
   const recalculate = useCallback((input: string) => {
     if (!input.trim()) {
@@ -170,6 +171,12 @@ export default function TokenCounter() {
             </button>
           ))}
         </div>
+
+        {inbound.source && (
+          <div className="mb-2">
+            <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+          </div>
+        )}
 
         <textarea
           ref={textareaRef}
