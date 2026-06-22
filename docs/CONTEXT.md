@@ -23,23 +23,25 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** EPIC-1 — Organism Completeness (see `docs/EPICS.md`).
-- **Next stage:** **S2 · Every app emits on transfer.** (S1 shipped 2026-06-22.)
-- **Exact shape for S2:** Audit `src/lib/appActions.ts` `CROSS_APP_ACTIONS`. The
-  navigating transfers already call `handoff(...)` (SEND_TO_EDITOR /
-  _TOKEN_COUNTER / _PROMPT_GEN / _AI_CHAT / ASK_HERMES_TO_ANALYZE). **The two
-  in-place transfers do NOT emit `HANDOFF`:** `SEND_TO_NOTES` (emits
-  `NOTE_CREATED`) and `SEND_TO_LEARNING` (emits `LEARNING_LOGGED`) — by an
-  earlier deliberate choice (the Network's `flowForEvent` lights their arcs from
-  the *typed* events, see `src/apps/network/Network.tsx`). **Decision the next
-  run must make first:** either (a) also emit a `HANDOFF{fromId,toId}` from those
-  two so the rail is uniform (risk: double-counts the Network ticker row — verify
-  `flowForEvent` dedupes, or gate the typed-event arc when a HANDOFF exists), or
-  (b) keep typed events and instead make S2's acceptance "every cross-app action
-  lights exactly one directed arc" — then assert in a test that each action emits
-  *either* a HANDOFF *or* its arc-bearing typed event with `from`. (b) is lower
-  risk and matches the shipped design; recommend (b) unless the Strategist wants
-  literal HANDOFF everywhere. *Acceptance:* one test per action asserts exactly
-  one arc-bearing event with correct `from`/source. Build 🟢 vitest 🟢 eslint clean.
+- **Next stage:** **S4 · Global "⚡ Send to…" in the command palette.** (S1/S2/S3 all
+  shipped 2026-06-22; S3 inspector+legend landed this run.)
+- **Exact shape for S4:** Surface every node's `intentsFor(node)` from ONE command
+  surface so cross-app routing is reachable without hunting per-app ⚡ bars.
+  **FIRST task — confirm whether a command palette already exists:** grep
+  `CommandPalette|cmdk|command-palette|Cmd+K|metaKey.*k` under `src/components/`
+  and `src/` (none found in a quick scan at seed — verify). **If one exists:** add a
+  context section that, given the focused/selected node, lists `intentsFor(node)`
+  (from `src/lib/core/intents.ts`) and runs the chosen one via `runIntent(id, node)`
+  (mirror `NodeActions.tsx`'s run+toast pattern). **If none exists:** build a minimal
+  one — a `gp` modal opened by ⌘/Ctrl-K (register a global keydown in `Desktop.tsx`),
+  listing the current node's intents; the "focused node" can come from a lightweight
+  selection store or, simplest first slice, the most-recently-active node. **Reuse the
+  rails — do NOT reinvent intents.** *Acceptance:* palette lists the focused node's
+  intents and runs them; one test for the intent-listing/selection logic. Build 🟢
+  vitest 🟢 eslint clean; token-violations must not regress (reuse `rgbCss`/tokens —
+  see trap below). **Open question for the run:** what defines "the focused node"
+  globally? Recommend the simplest honest answer first (last node touched via
+  `NodeActions`/graph mutation) and note the decision in this file.
 
 ## 🧭 Codebase seams (where the important things live)
 
@@ -68,7 +70,20 @@
   `sessionStorage` keys (`empire-editor-clipboard`, `-token-clipboard`, `-prompt-clipboard`,
   `-ai-clipboard`).
 - **The Network app:** `src/apps/network/Network.tsx` — renders CoreNodes as satellites,
-  consumes `HANDOFF` for directed app→app arcs (`flowForEvent`).
+  consumes `HANDOFF` for directed app→app arcs (`flowForEvent`). **S3 (2026-06-22):** a
+  single canvas click now **selects** a node (`onClick` → `setSelected(layout[i].app)`,
+  empty space clears) and opens an **inspector** panel; the inspector's "⚡ Open" button is
+  what launches the app now. Panels subscribe reactively via `useGraph(s=>s.nodes)` +
+  memoized `appAdjacency`/`entitiesByApp`; the canvas render loop still reads the graph
+  imperatively (animation unaffected — the effect does NOT depend on `selected`).
+  - **`src/apps/network/adjacency.ts`** — pure seam: `appAdjacency(nodes): Record<app,{out,in}>`
+    (owner→owner from node links; drops self-edges, owners not in registry, dangling links)
+    and `entitiesByApp(nodes): Record<app, CoreNode[]>` (grouped, newest first). Unit-tested
+    in `adjacency.test.ts`.
+  - **`src/apps/network/nodeColors.ts`** — the ONE source of node-type colour:
+    `TYPE_RGB` (triplets), `typeRgb(type)` (hashed fallback), and **`rgbCss(triplet, alpha?)`**
+    which builds a CSS colour from a constant so reusing canonical triplets costs **zero**
+    token-metric violations. Canvas, legend and inspector all import from here so they can't drift.
 - **Registry / shell:** `src/lib/registry.ts` (26 apps), `src/lib/appComponents.tsx`
   (route→component map), `src/components/Desktop.tsx` (shell).
 - **Design system:** `src/design-system/colors_and_type.css` (canonical XENO palette),
@@ -115,7 +130,16 @@
 
 ## 🧪 Tried & rejected (don't repeat dead ends)
 
-- _(append: "tried X → didn't work because Y → do Z instead". Empty at seed.)_
+- **`export const TYPE_RGB` from `Network.tsx` → rejected:** eslint
+  `react-refresh/only-export-components` fails (a component file may export only
+  components). **Do Z:** put shared constants/helpers in a sibling module
+  (`nodeColors.ts`) and import them — that's why `TYPE_RGB`/`typeRgb`/`rgbCss` live there.
+- **Token-metric trap (NEW):** `scripts/metrics.mjs` greps raw text for `\brgba?\(`
+  and `#hex` — **including comments**. So a literal `rgb(` *in a code comment* counts
+  as a violation. To reuse a token triplet as a CSS colour without a violation, use
+  `rgbCss(triplet, alpha?)` from `nodeColors.ts` (assembles the string from a constant,
+  no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
+  *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
 ## 📊 Last QA confirmation (2026-06-22, 2nd QA run on green main — no integration since #23)
 

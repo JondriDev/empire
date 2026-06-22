@@ -5,6 +5,46 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · Builder — EPIC-1 S3 · Network inspector + legend
+
+**Done.** Made the organism *legible*: clicking an app node in The Network now opens
+an inspector panel instead of launching the app, and a persistent legend maps each
+node-type → its accent.
+
+- **New `src/apps/network/adjacency.ts`** (pure, unit-tested seam): `appAdjacency(nodes)`
+  walks every node's links and projects `owner(node) → owner(target)` into directed
+  app→app `{ out, in }` adjacency (drops self-edges, unknown owners not in the registry,
+  and dangling links; lists de-duped + sorted). `entitiesByApp(nodes)` groups nodes by
+  owning app, newest first.
+- **New `src/apps/network/nodeColors.ts`**: extracted `TYPE_RGB` / `typeRgb` out of
+  `Network.tsx` (a component file can't export constants — fast-refresh lint) into ONE
+  shared module so canvas + legend + inspector can't drift. Added `rgbCss(triplet, alpha?)`
+  which assembles a CSS colour from a constant (no literal colour-function call), so reusing
+  the canonical triplets does not trip the design-token metric.
+- **`Network.tsx`**: canvas `onClick` now **selects** (`setSelected(layout[i].app)`; empty
+  space clears) rather than `openApp`. Reactive `useGraph(s=>s.nodes)` subscription feeds
+  memoized `appAdjacency`/`entitiesByApp` for the panels (canvas still reads the graph
+  imperatively — animation untouched). Inspector (glass `gp`, tokens only): app icon+name+id,
+  entities grouped/counted by type with accent dots, true cross-app neighbours (↔/→/← each a
+  button → `openApp`), a "⚡ Open <app>" launch button, and a ✕ to deselect. Always-visible
+  legend (bottom-right) lists the six named types + "other". Refactored the existing ticker
+  swatches through `rgbCss` (removed two raw `rgb(` literals → metric improved).
+- **New `src/apps/network/adjacency.test.ts`** (5 cases): app→app projection, self-edge drop,
+  unknown-owner/dangling-link drop, de-dupe+sort, and `entitiesByApp` grouping/order.
+
+**Verified:** `tsc -b && vite build` 🟢 · `npx vitest run` 🟢 **86/86 (11 files)** · eslint clean
+on all four touched/new files. Metrics: apps 26 ±0 · tests 82 ·
+**token-violations 503 → 501 (−2)** · bundle gz 237.6 KB. **No regression.**
+
+**Not verifiable in cloud (visual):** the inspector/legend layout and the click-to-select
+interaction need an on-device check — describe above is exact. Logic (adjacency, grouping)
+is unit-tested; rendering is type/lint-checked only.
+
+**Next:** EPIC-1 **S4 · Global "⚡ Send to…" in the command palette** (see CONTEXT.md for the
+confirmed shape — first task is to locate/confirm whether a command palette already exists).
+
+---
+
 ## 2026-06-22 · QA visual + smoke (2nd run, green main, no integration since #23)
 
 **Build 🟢** (`tsc -b && vite build`, built in 4.4s). Served `dist/` on :3001 via

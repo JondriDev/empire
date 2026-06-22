@@ -6,14 +6,17 @@
  * in the registry, with packets travelling the links. Hovering reveals a
  * label; clicking a node opens that app.
  */
-import { useEffect, useReducer, useRef, useState } from 'react'
-import { apps } from '../../lib/registry'
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { X, Zap } from 'lucide-react'
+import { apps, getAppIcon } from '../../lib/registry'
 import { useWindowStore } from '../../lib/windowStore'
 import { useLang } from '../../lib/i18n'
 import { onAny, type EmpireEvent } from '../../lib/eventBus'
 import { useGraph } from '../../lib/core/graph'
 import type { CoreNode } from '../../lib/core/graph'
 import { flowForEvent } from '../../lib/core/flow'
+import { appAdjacency, entitiesByApp } from './adjacency'
+import { TYPE_RGB, typeRgb, rgbCss } from './nodeColors'
 
 // Map a hex accent (the registry `color`) to an "r,g,b" string for canvas fills.
 function rgbOf(hex: string): string {
@@ -110,24 +113,8 @@ function ago(ms: number): string {
 type Signal = { key: number; name: string; rgb: string; to?: string; label: string; at: number }
 const MAX_SIGNALS = 6
 
-// Node colour by *type*, drawn from the Deep-Field design tokens
-// (--signal/--aurora/--plasma/--ion/--ember/pale-signal). Known types get a
-// meaningful accent; anything new gets a stable colour by hashing its name.
-const TYPE_RGB: Record<string, string> = {
-  note: '77,155,255',      // --ion     electric blue
-  task: '92,240,168',      // --aurora  alien green
-  message: '52,245,214',   // --signal  teal
-  learning: '176,107,255', // --plasma  violet
-  goal: '255,155,107',     // --ember   warm signal
-  prompt: '155,247,230',   // pale signal
-}
-const TYPE_CYCLE = ['52,245,214', '92,240,168', '176,107,255', '77,155,255', '255,155,107', '155,247,230']
-function typeRgb(type: string): string {
-  if (TYPE_RGB[type]) return TYPE_RGB[type]
-  let hsh = 0
-  for (let i = 0; i < type.length; i++) hsh = (hsh * 31 + type.charCodeAt(i)) >>> 0
-  return TYPE_CYCLE[hsh % TYPE_CYCLE.length]
-}
+// Node colour by *type* lives in ./nodeColors so the canvas, legend and
+// inspector share ONE source and can never drift.
 
 export default function Network() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -142,6 +129,14 @@ export default function Network() {
   const reduceMotion = typeof matchMedia !== 'undefined'
     && matchMedia('(prefers-reduced-motion: reduce)').matches
   const [nodeCount, setNodeCount] = useState(0)
+  // The inspector's focused app (set by a single click on a node). The render
+  // loop still reads the graph imperatively for the canvas; this reactive
+  // subscription only feeds the inspector/legend panels so they stay live.
+  const [selected, setSelected] = useState<typeof apps[number] | null>(null)
+  const graphNodes = useGraph(s => s.nodes)
+  const allNodes = useMemo(() => Object.values(graphNodes), [graphNodes])
+  const adjacency = useMemo(() => appAdjacency(allNodes), [allNodes])
+  const entities = useMemo(() => entitiesByApp(allNodes), [allNodes])
 
   useEffect(() => {
     if (signals.length === 0) return
@@ -322,9 +317,12 @@ export default function Network() {
       if (reduceMotion) frame()
     }
     const onLeave = () => { hover = -1; setHoverName(null); if (reduceMotion) frame() }
+    // A single click SELECTS a node (opens the inspector); empty space clears
+    // the selection. The inspector's "⚡ Open" button is what actually launches
+    // an app — so the mesh becomes explorable without windows flying open.
     const onClick = (e: MouseEvent) => {
       const i = pick(e)
-      if (i >= 0) { const a = layout[i].app; openApp(a.id, a.name, a.icon, a.color) }
+      setSelected(i >= 0 ? layout[i].app : null)
     }
     const onResize = () => { size(); if (reduceMotion) frame() }
 
@@ -392,6 +390,24 @@ export default function Network() {
     }
   }, [openApp, t])
 
+  // ── Inspector data for the focused app (cheap; only when a node is selected) ──
+  const selEntities = selected ? entities[selected.id] ?? [] : []
+  const selTypeCounts = selEntities.reduce<Record<string, number>>((acc, n) => {
+    acc[n.type] = (acc[n.type] ?? 0) + 1
+    return acc
+  }, {})
+  const selEdges = selected ? adjacency[selected.id] : undefined
+  const appName = (id: string) => {
+    const a = apps.find(x => x.id === id)
+    return a ? t(`app.${a.id}.name`, a.name) : id
+  }
+  const openById = (id: string) => {
+    const a = apps.find(x => x.id === id)
+    if (a) openApp(a.id, a.name, a.icon, a.color)
+  }
+  // Legend rows: the named entity types (in canvas order) + an "other" bucket.
+  const legendTypes = Object.keys(TYPE_RGB)
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 320, overflow: 'hidden' }}>
       <div style={{ position: 'absolute', top: 14, left: 16, zIndex: 2, pointerEvents: 'none' }}>
@@ -448,7 +464,7 @@ export default function Network() {
               >
                 <span style={{
                   flex: '0 0 auto', width: 7, height: 7, borderRadius: 'var(--radius-full)',
-                  background: `rgb(${s.rgb})`, boxShadow: `0 0 6px rgb(${s.rgb})`,
+                  background: rgbCss(s.rgb), boxShadow: `0 0 6px ${rgbCss(s.rgb)}`,
                 }} />
                 <span style={{ color: 'var(--text)', fontWeight: 600, whiteSpace: 'nowrap' }}>{s.name}</span>
                 {s.to ? (
@@ -470,6 +486,151 @@ export default function Network() {
           </div>
         )}
       </div>
+
+      {/* Legend — node-type → accent, always visible so the coloured dots and
+          arcs are readable. Sourced from TYPE_RGB so it can never drift. */}
+      <div
+        className="gp"
+        style={{
+          position: 'absolute', right: 16, bottom: 16, zIndex: 2, pointerEvents: 'none',
+          padding: 'var(--space-3)', borderRadius: 'var(--radius-md)',
+          display: 'flex', flexDirection: 'column', gap: '6px',
+        }}
+      >
+        <div className="t-label" style={{ color: 'var(--text3)' }}>{t('network.legend', 'Node types')}</div>
+        {legendTypes.map(type => (
+          <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-xs)' }}>
+            <span style={{
+              flex: '0 0 auto', width: 8, height: 8, borderRadius: 'var(--radius-full)',
+              background: rgbCss(TYPE_RGB[type]), boxShadow: `0 0 6px ${rgbCss(TYPE_RGB[type])}`,
+            }} />
+            <span style={{ color: 'var(--text2)', fontFamily: 'var(--mono)' }}>{type}</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-xs)' }}>
+          <span style={{
+            flex: '0 0 auto', width: 8, height: 8, borderRadius: 'var(--radius-full)',
+            background: 'var(--text3)',
+          }} />
+          <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)' }}>other</span>
+        </div>
+      </div>
+
+      {/* Inspector — a single click on a node opens this; lists the app's real
+          graph entities and its true cross-app neighbours. */}
+      {selected && (() => {
+        const Icon = getAppIcon(selected.icon)
+        return (
+          <div
+            className="gp animate-fade-in-up"
+            role="dialog"
+            aria-label={`${selected.name} details`}
+            style={{
+              position: 'absolute', right: 16, top: 14, zIndex: 3,
+              width: 'min(280px, calc(100% - 32px))', maxHeight: 'calc(100% - 28px)',
+              overflowY: 'auto', padding: 'var(--space-4)', borderRadius: 'var(--radius-md)',
+              display: 'flex', flexDirection: 'column', gap: 'var(--space-3)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <span style={{
+                flex: '0 0 auto', width: 30, height: 30, borderRadius: 'var(--radius-md)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: selected.color, background: rgbCss('255,255,255', 0.05),
+              }}>
+                <Icon className="w-4 h-4" />
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {appName(selected.id)}
+                </div>
+                <div className="t-label" style={{ color: 'var(--text3)' }}>{selected.id}</div>
+              </div>
+              <button
+                aria-label="Close inspector"
+                onClick={() => setSelected(null)}
+                style={{
+                  flex: '0 0 auto', padding: 5, borderRadius: 'var(--radius-md)', background: 'transparent',
+                  border: 'none', color: 'var(--text3)', cursor: 'pointer', display: 'flex',
+                }}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Entities owned by this app, grouped + counted by type. */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div className="t-label" style={{ color: 'var(--text3)' }}>
+                {t('network.entities', 'Entities')} · {selEntities.length}
+              </div>
+              {selEntities.length === 0 ? (
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)', fontFamily: 'var(--mono)' }}>
+                  {t('network.noEntities', 'no nodes in the graph yet')}
+                </div>
+              ) : (
+                Object.entries(selTypeCounts).map(([type, count]) => (
+                  <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-xs)' }}>
+                    <span style={{
+                      flex: '0 0 auto', width: 7, height: 7, borderRadius: 'var(--radius-full)',
+                      background: rgbCss(typeRgb(type)), boxShadow: `0 0 6px ${rgbCss(typeRgb(type))}`,
+                    }} />
+                    <span style={{ color: 'var(--text2)', fontFamily: 'var(--mono)', flex: 1 }}>{type}</span>
+                    <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)' }}>{count}</span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* True cross-app neighbours (from real graph edges). */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div className="t-label" style={{ color: 'var(--text3)' }}>{t('network.neighbors', 'Connected apps')}</div>
+              {(!selEdges || (selEdges.out.length === 0 && selEdges.in.length === 0)) ? (
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)', fontFamily: 'var(--mono)' }}>
+                  {t('network.noNeighbors', 'no cross-app links yet')}
+                </div>
+              ) : (
+                [...new Set([...(selEdges?.out ?? []), ...(selEdges?.in ?? [])])].sort().map(id => {
+                  const dir = selEdges!.out.includes(id) && selEdges!.in.includes(id) ? '↔'
+                    : selEdges!.out.includes(id) ? '→' : '←'
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => openById(id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 'var(--space-2)', width: '100%',
+                        padding: '6px 8px', background: 'transparent', border: 'none',
+                        borderRadius: 'var(--radius-md)', color: 'var(--text)', textAlign: 'left',
+                        fontSize: 'var(--text-xs)', cursor: 'pointer',
+                        transition: 'background var(--dur-fast)',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = rgbCss('52,245,214', 0.10) }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+                    >
+                      <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', flex: '0 0 auto', width: 12 }}>{dir}</span>
+                      <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{appName(id)}</span>
+                    </button>
+                  )
+                })
+              )}
+            </div>
+
+            <button
+              onClick={() => openById(selected.id)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-2)',
+                padding: '8px 10px', borderRadius: 'var(--radius-md)', cursor: 'pointer',
+                border: `1px solid ${rgbCss('255,255,255', 0.12)}`, background: 'transparent',
+                color: rgbCss('52,245,214'), fontSize: 'var(--text-sm)', fontWeight: 600,
+                transition: 'background var(--dur-fast)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = rgbCss('52,245,214', 0.10) }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+            >
+              <Zap className="w-3.5 h-3.5" /> {t('network.open', 'Open')} {appName(selected.id)}
+            </button>
+          </div>
+        )
+      })()}
     </div>
   )
 }
