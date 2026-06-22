@@ -124,7 +124,7 @@ export default function Goals() {
   // One accent per view — Goals reads as electric-blue "ion" (matches its
   // registry tile). Everything else routes through the Deep-Field text tokens
   // so editing a design-system token restyles this app with the rest.
-  const ACCENT = 'var(--ion, #4d9bff)'
+  const ACCENT = 'var(--ion)'
   const inputStyle = { background: 'var(--input-bg)', color: 'var(--text)' } as const
 
   return (

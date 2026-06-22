@@ -5,6 +5,45 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · Builder — EPIC-1 S5: Inbox / Today view (one home for every graph `task`)
+
+**Done.** `task` CoreNodes (spawned by ⚡ make-task from any app) were graph-only and invisible —
+no home view. Gave them one, as a **dedicated Inbox app** (a real, always-reachable surface) rather
+than the Network-panel fallback the plan offered, because tasks deserve a home of their own:
+- **`src/lib/core/tasks.ts` (new)** — the pure, testable seam: `taskNodes(nodes)`,
+  `partitionTasks(nodes)→{open,done}`, `isTaskDone(n)` (done iff `data.done===true`). Sorted
+  newest-first by `meta.created` so toggling a task done (which bumps `updated`) doesn't reorder it.
+- **`src/apps/inbox/Inbox.tsx` (new, 27th app)** — subscribes to the graph reactively, partitions
+  into OPEN / DONE sections; each row = a checkbox that flips `data.done` via the graph's
+  `updateNode` (the first task *mutation* UI), the task label (with `Do: ` stripped), a source-app
+  chip (icon+name resolved from the registry), and a ⚡ `<NodeActions>` bar. Empty state points at
+  the ⚡ / ⌘K "Make Task" path. One accent (`--signal`), pure design tokens — **zero** raw colours.
+- **`src/components/ui/NodeActions.tsx`** — added an optional `nodeId` prop (all three props now
+  optional) so graph-only nodes with no store `sourceId` (tasks carry only `data.done`/`data.from`)
+  can be targeted directly. Backward-compatible — every existing `type`+`sourceId` caller unchanged.
+- **`registry.ts` + `appComponents.tsx`** — registered `inbox` (Inbox icon, accent `#5eead4`).
+
+**Verified.** `tsc -b && vite build` 🟢 · `vitest run` **96/96 🟢** (new `tasks.test.ts`, 4 tests:
+`partitionTasks` open/done split + newest-first + non-task exclusion + empty graph) · eslint clean on
+all touched files. **Metrics row:** `apps 27 · tests 92 · files 13 · token-violations 501 · bundle-gz
+240.5`. **Deltas vs pre-run main:** apps 26→27 (+1), static tests 88→92 (+4), files 12→13 (+1),
+**token-violations 501→501 (±0)**, bundle gz 238.9→240.5 (+1.6). *On token-violations:* the new app's
+registry accent is one unavoidable hex (the `color` field is parsed by the Network canvas, so it
+can't be a CSS var) — the Inbox component itself adds zero; I offset the +1 by removing a dead
+`var(--ion, #4d9bff)` hex fallback in `Goals.tsx` (the `--ion` token is always defined), a legit
+design-system-conformance cleanup. Net ±0.
+
+**Not verifiable in cloud:** a fresh checkout's `empire-core-graph` is empty, so the populated list
+and the live done-toggle can't be exercised headless. The 4 unit tests + the pure selector seam cover
+the aggregation/partition logic; on-device, ⚡ "Make Task" from any item (or ⌘K) then open **Inbox** —
+the task appears under OPEN with its source-app chip; clicking its checkbox moves it to DONE.
+
+**Next:** EPIC-1 **S6 · close the wiring gaps** (the FINAL stage) — audit entity-owning apps, then
+wire ONE high-value gap (best: give a tool app a `useInboundHandoff` receiver to move the both-ways
+count off 1/26). Exact shape in `docs/CONTEXT.md`. When S6 lands → EPIC-1 DONE, promote EPIC-2.
+
+---
+
 ## 2026-06-22 · Builder — EPIC-1 S4: global command palette (⌘K → focused node's intents)
 
 **Done.** Built the global "⚡ Send to…" surface. Confirmed no palette existed (only the
