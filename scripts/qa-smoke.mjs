@@ -9,6 +9,41 @@ const BASE = 'http://localhost:3001';
 const OUT = path.resolve('docs/screenshots/latest');
 fs.mkdirSync(OUT, { recursive: true });
 
+// ── SHELL-IS-STYLED assertion (the green-build-but-blank trap) ──────────────
+// A stray `*/` inside a CSS doc-comment can close the comment early, nesting
+// every `.empire-*` rule under `@media(max-width:640px){.hide-sm …}` → the
+// desktop renders unstyled DESPITE a green build. Verify the built CSS without
+// a browser: it must have a TOP-LEVEL `.empire-desktop{…position:fixed…}` and
+// ZERO `.hide-sm .empire-desktop`. Note: the minifier reorders properties, so
+// match the whole rule body, not `.empire-desktop{position:fixed`.
+function assertShellStyled() {
+  const cssFiles = fs.readdirSync(path.resolve('dist/assets')).filter(f => /^index-.*\.css$/.test(f));
+  if (!cssFiles.length) throw new Error('SHELL-IS-STYLED: no dist/assets/index-*.css found (build first)');
+  const css = cssFiles.map(f => fs.readFileSync(path.resolve('dist/assets', f), 'utf8')).join('\n');
+  const topLevel = /\.empire-desktop\{[^}]*position:fixed[^}]*\}/.test(css);
+  const nested = (css.match(/\.hide-sm \.empire-desktop/g) || []).length;
+  if (!topLevel) throw new Error('SHELL-IS-STYLED: missing top-level `.empire-desktop{…position:fixed…}` in built CSS (blank-dark trap)');
+  if (nested !== 0) throw new Error(`SHELL-IS-STYLED: found ${nested}× \`.hide-sm .empire-desktop\` (rules nested under @media → unstyled shell)`);
+  console.log('SHELL-IS-STYLED: ✅ top-level .empire-desktop{position:fixed}, 0 .hide-sm .empire-desktop');
+}
+assertShellStyled();
+
+// Known-good headless recipe (see docs/CONTEXT.md): use the pre-installed
+// Chromium; do NOT rely on cdn.playwright.dev (it 403s in the sandbox).
+async function launchBrowser() {
+  const glob = fs.readdirSync('/opt/pw-browsers').filter(d => /^chromium-\d+$/.test(d)).sort();
+  const candidates = glob.map(d => `/opt/pw-browsers/${d}/chrome-linux/chrome`).filter(p => fs.existsSync(p));
+  for (const executablePath of candidates) {
+    try { return await chromium.launch({ executablePath }); }
+    catch (e) { console.warn(`launch failed for ${executablePath}: ${e.message}`); }
+  }
+  // Fallbacks: bare launch, then @sparticuz/chromium.
+  try { return await chromium.launch(); }
+  catch (e) { console.warn(`bare chromium.launch() failed: ${e.message}`); }
+  const sparticuz = (await import('@sparticuz/chromium')).default;
+  return await chromium.launch({ executablePath: await sparticuz.executablePath(), args: sparticuz.args });
+}
+
 // App routes to smoke test (keys mirror src/lib/appComponents.tsx).
 const apps = [
   'calculator','calendar','clock','weather','grammar','language','music','video',
@@ -20,7 +55,7 @@ const apps = [
 const sanitize = (s) => s.replace(/[^a-z0-9-]/gi, '-');
 const results = [];
 
-const browser = await chromium.launch();
+const browser = await launchBrowser();
 const ctx = await browser.newContext({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
 
 async function visit(name, url, file) {
