@@ -5,6 +5,30 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · QA visual + smoke (2nd run, green main, no integration since #23)
+
+**Build 🟢** (`tsc -b && vite build`, built in 4.4s). Served `dist/` on :3001 via
+`node server.js`. Headless render via pre-installed Chromium (`/opt/pw-browsers/chromium-1194`),
+playwright symlinked from global (env-only).
+
+**Smoke: 27/27 render clean** (26 apps + desktop), **0 failures**, SHELL-IS-STYLED ✅
+(top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm .empire-desktop`). Desktop +
+Network screenshots visually confirmed styled (XENO palette, CORE + all satellites).
+Only env-expected net noise: files `/api/files?path=/storage/emulated/0`→500 (Android-only),
+datacenter `/api/dc/tables`→401 (authed API). **No runtime bugs found.**
+
+**Metrics flat vs #23** — apps 26, tests 64/8, token-violations 503, bundle gz 236.1 KB (all ±0).
+No integration has merged since #23, so nothing moved.
+
+**Epic-acceptance:** EPIC-1 S1 still holding; **S2 (every app emits) NOT shipped → metric
+unmoved (1/26 both-ways), pending not contradicted.** `appActions.ts` audit unchanged.
+
+Screenshots overwritten in `docs/screenshots/latest/`; REPORT.md regenerated with deltas +
+epic confirmation. **Next:** Builder takes S2 — make the two in-place transfers emit (or assert
+exactly one arc-bearing event); decision still open in CONTEXT.md.
+
+---
+
 ## 2026-06-22 · Integration run — merged #23 (code: EPIC-1 S1 inbound provenance)
 
 **Triaged 4 open PRs into lanes:** 1 code `routine/auto-*` (#23, on-epic S1), 1

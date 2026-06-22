@@ -117,15 +117,21 @@
 
 - _(append: "tried X → didn't work because Y → do Z instead". Empty at seed.)_
 
-## 📊 Last QA confirmation (2026-06-22, fresh QA run on green main)
+## 📊 Last QA confirmation (2026-06-22, 2nd QA run on green main — no integration since #23)
 
-- **Routes rendering clean: 26/26 ✅** (27/27 incl. desktop). SHELL-IS-STYLED assertion now lives in
-  `scripts/qa-smoke.mjs` and passed (top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm .empire-desktop`).
+- **Routes rendering clean: 26/26 ✅** (27/27 incl. desktop). SHELL-IS-STYLED assertion in
+  `scripts/qa-smoke.mjs` passed (top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm .empire-desktop`).
+  Desktop + Network screenshots visually confirmed styled (XENO palette, CORE + all satellites).
 - **Apps fully wired BOTH-ways: 1/26** — only `prompt-generator` emits AND receives. Emit-only (10):
   artifacts, calendar, datacenter, files, goals, learning-tracker, messages, notes, photos, prompt-generator.
   Receive-only (4): ai-chat, editor, prompt-generator, token-counter. **This near-zero overlap is EPIC-1's gap.**
-- **Epic-acceptance:** S1 (inbound provenance) confirmed; S2 (every app emits) not yet shipped → its
-  metric has not moved (no contradiction, just pending). Auto metrics flat vs #23 (no integration since).
+- **Epic-acceptance:** S1 (inbound provenance) still holding; S2 (every app emits) not yet shipped → its
+  metric has NOT moved (no contradiction, just **pending**). `appActions.ts` audit unchanged: nav transfers
+  emit `HANDOFF`; the two in-place transfers still emit typed `NOTE_CREATED`/`LEARNING_LOGGED`. S2's
+  uniform-HANDOFF-vs-arc-bearing-event decision is still open for the Builder.
+- **Auto metrics flat vs #23:** apps 26, tests 64/8 files, token-violations 503, bundle gz 236.1 — all ±0.
+- **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
+  datacenter `/api/dc/tables`→401 (authed API, no headless session).
 - QA harness note: project has **no `playwright` dep**; it's global at `/opt/node22/lib/node_modules`.
   The run symlinks it into `node_modules/` (env-only, not committed). Pre-installed Chromium at
   `/opt/pw-browsers/chromium-1194`. `scripts/qa-smoke.mjs` `launchBrowser()` auto-globs the version dir.
