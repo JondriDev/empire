@@ -14,27 +14,27 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-| Metric | Current (2026-06-22, after #26 + S3) | Target | Direction |
+| Metric | Current (2026-06-22, after #26 + S3 + S4) | Target | Direction |
 |---|---|---|---|
 | Apps / routes | 26 | ~26 (steady) | coherence over new surface — not a growth metric |
-| Test cases | 82 (static) · 86 (vitest run) | 60+ | ↑ higher = safer to leap |
-| Test files | 11 | grow with code | ↑ |
+| Test cases | 88 (static) · 92 (vitest run) | 60+ | ↑ higher = safer to leap |
+| Test files | 12 | grow with code | ↑ |
 | Design-token violations | 501 | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
-| Bundle gz (KB) | 237.6 | hold / shrink | ↓ |
+| Bundle gz (KB) | 238.9 | hold / shrink | ↓ |
 
-> Last integration: **PR #26** (flow.ts + cross-app wiring + tests) **+ EPIC-1 S3**
-> (Network inspector + node-type legend, commit 32676c4). Δ vs prior column (after #23):
-> test cases +18 (64→82 static), test files +3 (8→11), token violations **−2 (503→501)**
-> (S3 reused `rgbCss` instead of raw `rgb(` swatches), bundle gz +1.5 KB (236.1→237.6,
-> inspector + legend code). `metrics.mjs` static count (82) undercounts a few nested cases;
-> an actual `vitest run` is **86 passed / 11 files**.
+> Last integration: **EPIC-1 S4** — global ⌘K command palette over the focused node
+> (commit 1de67e5: `focus.ts`/`focus.test.ts`, `CommandPalette.tsx`). Δ vs prior column
+> (after #26 + S3): test cases +6 (82→88 static, 86→92 vitest), test files +1 (11→12,
+> `focus.test.ts`), token violations **±0 (501)** (palette reused tokens — no regression),
+> bundle gz +1.3 KB (237.6→238.9, palette + focus tracking). `metrics.mjs` static count (88)
+> undercounts a few nested cases; an actual `vitest run` is **92 passed / 12 files**.
 
 ## Manual / CI metrics (QA + human)
 
 | Metric | Source | Current (QA 2026-06-22, after #26 + S3) | Target |
 |---|---|---|---|
-| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **26 / 26** ✅ (27/27 incl. desktop shell; SHELL-IS-STYLED ✅) — re-confirmed 2026-06-22 (post-S3, green main; Network legend visible) | 26 / 26 |
-| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **1 / 26** (unchanged) — only `prompt-generator` does both. Emit-only via `NodeActions` (10): artifacts(kanban), calendar, datacenter, files, goals, learning-tracker, messages, notes, photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor, prompt-generator, token-counter. PR #26 touched flow visualization, not the emit/receive sets — overlap did not grow. Closing this is EPIC-1 **S6** (not yet started). | 26 / 26 |
+| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **26 / 26** ✅ (27/27 incl. desktop shell; SHELL-IS-STYLED ✅) — re-confirmed 2026-06-22 (post-S4, green main; ⌘K palette + Network legend visible) | 26 / 26 |
+| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **1 / 26** (unchanged) — only `prompt-generator` does both. Emit-only via `NodeActions` (10): artifacts(kanban), calendar, datacenter, files, goals, learning-tracker, messages, notes, photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor, prompt-generator, token-counter. S4 (⌘K palette) is a navigability stage — it surfaces existing intents over the focused node but does not add emit/receive wiring, so the overlap is unchanged. Closing this is EPIC-1 **S6** (not yet started). | 26 / 26 |
 | Lighthouse — PWA / Perf / A11y | CI (add to a workflow when feasible) | not measured headless | 90 / 90 / 90 |
 | Open `routine/auto-*` PR age | reviewer log | — | < one review cycle |
 
