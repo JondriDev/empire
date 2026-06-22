@@ -10,14 +10,15 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-06-22** (strategist) · Main: 🟢 green (build + 64/64 vitest) ·
-> QA: 26/26 routes mount, no runtime errors. EPIC-1 S1+S2 shipped; active stage **S3**.
+> Last re-ranked: **2026-06-22** (strategist) · Main: 🟢 green (build + 92/92 vitest) ·
+> QA: 26/26 routes mount, no runtime errors. EPIC-1 S1–S5 shipped; active stage **S6a**
+> (close the emit↔receive loop — both-ways metric stuck at 1/26, S6a→3, S6b→6, S6c→9).
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
-> themes** that feed *future* epics — re-ranked each strategist run. The two former
-> NOW #1 (emit `HANDOFF` from every transfer) and #2 (inbound "From <app>" chips) both
-> **shipped** (EPIC-1 S2 + S1, #23 / 2026-06-22) and have been retired to DONE below.
+> themes** that feed *future* epics — re-ranked each strategist run. The former NOW #3
+> (global command-palette audit) **shipped** as EPIC-1 S4 (⌘K palette, commit 1de67e5)
+> and is retired below; the Network legend/inspector (former NEXT) shipped as S3.
 
 ---
 
@@ -57,27 +58,25 @@ Hermes → **Cakra** and the registry now holds **25** apps + the desktop shell.
 - **Acceptance:** README inventory matches `registry.ts` 1:1; no stale "Hermes AI"
   central-app references; app count is correct.
 
-### 3. Desktop-shell as the organism's hub — global cross-app launcher / command palette audit
-**Priority: INTERCONNECT.** *(Feeds EPIC-1 S4 — promote there when S3 lands.)* With
-handoffs now observable and provenance surfaced (S1+S2 shipped), confirm the desktop
-shell exposes them coherently: a single command surface to jump between apps and
-trigger the common handoffs / `intentsFor` a node without hunting through each app's bar.
+### 3. Generate the matching CSS custom properties from the TS token source
+**Priority: DESIGN-SYSTEM CONSISTENCY.** *(Feeds EPIC-2 — promote when EPIC-1 finishes.)*
+Companion to #1: once `src/design-system/tokens.ts` exists, the `colors_and_type.css`
+custom properties should be generated from (or asserted against) the same consts so DOM
+and canvas literally cannot drift, removing the largest class of token violations at the source.
 
-- **Why:** the shell is where "one organism" is felt first. The graph work is
-  wasted if the entry points are scattered.
-- **Do:** inventory how each app currently offers cross-app actions; if a global
-  launcher/command palette already exists, ensure every `CROSS_APP_ACTIONS` entry
-  is reachable from it; if not, scope it as the next NEXT item (don't build blind).
-- **Acceptance:** a written one-paragraph finding in `docs/ROUTINE-LOG.md` + either
-  a small wiring PR or a promoted NEXT theme with concrete shape.
+- **Why:** EPIC-2's target is token-violations 496→0; a single generated source is the
+  highest-leverage move before the per-app sweep.
+- **Do:** scope a build step or a test that asserts every `--accent-*`/signal CSS var equals
+  its `tokens.ts` const; document the generation path. (Build-routine task — outside docs scope.)
+- **Acceptance:** a test or generator ties CSS vars to `tokens.ts`; a drift fails CI. Build green.
 
 ---
 
 ## NEXT — themes (break into NOW items as slots open)
 
-- **Complete the cross-app graph.** Every app both *emits* and *receives* honest
-  handoffs; the Network mesh portrays the full adjacency, not just the handful of
-  wired edges. Add a legend/inspector so a node click shows its real neighbors.
+- **Complete the cross-app graph.** *(In progress — this IS EPIC-1 S6.)* The Network
+  legend + inspector shipped (S3); ⌘K palette (S4) and Inbox (S5) surface intents/tasks.
+  The last gap is the emit↔receive loop (both-ways 1/26 → 9/9) — see EPIC-1 S6a–c.
 - **Design-system consistency sweep.** Audit each of the 25 apps for token usage
   (spacing/radii/type/color) against the XENO system; fix one-off hex, ad-hoc
   spacing, and non-`--mono` code surfaces. Track a per-app conformance checklist.
@@ -104,6 +103,12 @@ trigger the common handoffs / `intentsFor` a node without hunting through each a
 
 ## DONE — recently shipped (trimmed each run)
 
+- **Inbox / Today view** (EPIC-1 S5) — the 27th app aggregates every graph `task` into
+  open/done buckets with a done-toggle, source chip, and ⚡ bar (`tasks.ts` seam). (2026-06-22)
+- **Global ⌘K command palette** (EPIC-1 S4) — focus-aware modal over the last-touched node;
+  lists `intentsFor(node)` + "Open in <app>" and runs via `runIntent` (`focus.ts`). (2026-06-22)
+- **Network inspector + legend** (EPIC-1 S3) — clicking a node opens an inspector of its real
+  entities + true neighbors; persistent node-type legend (`adjacency.ts`/`nodeColors.ts`). (2026-06-22)
 - **Inbound provenance chips** (#23, EPIC-1 S1) — every `sessionStorage` receiver
   (Editor / Token Counter / Prompt Gen / AI Chat) shows a dismissible "From <app>"
   chip and preloads the payload; fixed Editor silently dropping its clipboard. (2026-06-22)
