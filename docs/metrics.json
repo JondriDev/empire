@@ -1,6 +1,6 @@
 {
   "current": {
-    "generatedAt": "2026-06-22T11:22:09.998Z",
+    "generatedAt": "2026-06-22T13:04:45.838Z",
     "apps": 26,
     "testFiles": 11,
     "testCases": 82,
@@ -60,6 +60,15 @@
       "testFiles": 11,
       "testCases": 82,
       "tokenViolations": 503,
+      "bundleGzKB": 237.6,
+      "bundleRawKB": 819.3
+    },
+    {
+      "generatedAt": "2026-06-22T11:22:09.998Z",
+      "apps": 26,
+      "testFiles": 11,
+      "testCases": 82,
+      "tokenViolations": 501,
       "bundleGzKB": 237.6,
       "bundleRawKB": 819.3
     }
