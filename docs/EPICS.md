@@ -45,10 +45,19 @@ some may already be shipped):
   same for the other three. Build 🟢, vitest 🟢, eslint clean; add a unit test.
   **Shipped 2026-06-22:** `useInboundHandoff` hook + `<ProvenanceChip>`; fixed a
   latent bug (Editor never read its clipboard). See ROUTINE-LOG 2026-06-22.
-- [ ] **S2 · Every app emits on transfer.** Audit `CROSS_APP_ACTIONS`; any transfer
+- [x] **S2 · Every app emits on transfer.** Audit `CROSS_APP_ACTIONS`; any transfer
   that still navigates silently emits `HANDOFF` first (no invented edges).
   *Acceptance:* every cross-app action lights a directed arc in The Network; one
   test asserts each action emits exactly one `HANDOFF{fromId,toId}`.
+  **Shipped 2026-06-22:** the 7 `CROSS_APP_ACTIONS` already rode arc-bearing events
+  (HANDOFF / NOTE_CREATED `from-` / LEARNING_LOGGED `from`) — confirmed + already
+  tested. The real silent gap was the **C-layer intents** (the ⚡ NodeActions menu):
+  `add-to-learning` moved a note/message → Learning Tracker with **no** arc. Added a
+  guarded `announceTransfer()` in `sync.ts` so all three core intents emit an honest
+  `HANDOFF` (the `fromId!==toId` guard suppresses in-app `make-task`/`make-note-from`).
+  Extracted the canonical `flowForEvent` arc predicate to `src/lib/core/flow.ts`
+  (shared by Network + tests; S3 inspector will reuse it). +13 tests
+  (`flow.test.ts`, `coreIntents.test.ts`). See ROUTINE-LOG 2026-06-22.
 - [ ] **S3 · Network inspector + legend.** Clicking a node shows its real neighbors
   (from `graph.neighbors`) and a legend maps node-type → accent. *Acceptance:* click
   a node → side panel lists its true edges; legend matches `design-system` tokens.

@@ -5,6 +5,41 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · EPIC-1 S2 — Every app emits on transfer (C-layer intents now light honest arcs)
+
+**Did:** Audited the full cross-app transfer surface. The 7 `CROSS_APP_ACTIONS`
+already ride arc-bearing events (HANDOFF, or NOTE_CREATED `from-`/LEARNING_LOGGED
+`from`) and were already tested — chose the lower-risk "exactly one arc" model over
+HANDOFF-everywhere, per CONTEXT's recommendation. **The real silent gap was the
+C-layer intents** (the ⚡ NodeActions menu, `src/lib/core/sync.ts`): `add-to-learning`
+moved a note/message → Learning Tracker emitting **no** directed arc, so that
+cross-app flow was invisible in The Network. Added a guarded `announceTransfer(fromApp,
+toApp, label)` and called it from all three core intents using the *created node's*
+owner app; the `fromId!==toId` guard makes `make-task`/`make-note-from` (owned by the
+source app — in-app derivations) emit nothing, while `add-to-learning` lights an honest
+`notes/messages → learning-tracker` arc. Extracted the canonical `flowForEvent` arc
+predicate from `Network.tsx` into **`src/lib/core/flow.ts`** so the mesh, tests, and the
+S3 inspector share one honest definition.
+
+**Why:** EPIC-1's leap is "every app both emits and receives honest handoffs." The
+navigating transfers were done; the intent menu — the *primary* cross-app surface —
+was the remaining place where a real transfer happened silently. No invented edges:
+only genuine app-boundary crossings light.
+
+**Verified (fresh checkout):** `npm run build` 🟢 · `npx vitest run` 🟢 **81/81** (+13:
+new `flow.test.ts` 9 + `coreIntents.test.ts` 4) · eslint clean on all 5 touched files ·
+`scripts/metrics.mjs` token-violations **503 → 503 (±0)**, bundle gz **236.1 → 236.1
+(±0)**, test cases **64 → 77**. Additive / reversible; no localStorage or store-schema
+changes. **Not verifiable in cloud (no browser):** that the arc *visibly* draws on the
+canvas when you run "Add to Learning" from a note — logic + event emission are unit-
+tested, but confirm the on-screen synapse on-device.
+
+**Next:** **EPIC-1 S3 · Network inspector + legend** — click a node → side panel of its
+real `graph.neighbors` + a node-type→accent legend. CONTEXT has the exact shape (reuse
+`flow.ts`/`graph.neighbors`, tokens only, keep token metric ±0).
+
+---
+
 ## 2026-06-22 · Integration run — merged #23 (code: EPIC-1 S1 inbound provenance)
 
 **Triaged 4 open PRs into lanes:** 1 code `routine/auto-*` (#23, on-epic S1), 1

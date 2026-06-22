@@ -23,23 +23,26 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** EPIC-1 — Organism Completeness (see `docs/EPICS.md`).
-- **Next stage:** **S2 · Every app emits on transfer.** (S1 shipped 2026-06-22.)
-- **Exact shape for S2:** Audit `src/lib/appActions.ts` `CROSS_APP_ACTIONS`. The
-  navigating transfers already call `handoff(...)` (SEND_TO_EDITOR /
-  _TOKEN_COUNTER / _PROMPT_GEN / _AI_CHAT / ASK_HERMES_TO_ANALYZE). **The two
-  in-place transfers do NOT emit `HANDOFF`:** `SEND_TO_NOTES` (emits
-  `NOTE_CREATED`) and `SEND_TO_LEARNING` (emits `LEARNING_LOGGED`) — by an
-  earlier deliberate choice (the Network's `flowForEvent` lights their arcs from
-  the *typed* events, see `src/apps/network/Network.tsx`). **Decision the next
-  run must make first:** either (a) also emit a `HANDOFF{fromId,toId}` from those
-  two so the rail is uniform (risk: double-counts the Network ticker row — verify
-  `flowForEvent` dedupes, or gate the typed-event arc when a HANDOFF exists), or
-  (b) keep typed events and instead make S2's acceptance "every cross-app action
-  lights exactly one directed arc" — then assert in a test that each action emits
-  *either* a HANDOFF *or* its arc-bearing typed event with `from`. (b) is lower
-  risk and matches the shipped design; recommend (b) unless the Strategist wants
-  literal HANDOFF everywhere. *Acceptance:* one test per action asserts exactly
-  one arc-bearing event with correct `from`/source. Build 🟢 vitest 🟢 eslint clean.
+- **Next stage:** **S3 · Network inspector + legend.** (S1, S2 shipped 2026-06-22.)
+- **Exact shape for S3:** Add a **side panel** to `src/apps/network/Network.tsx`
+  that, on clicking a node, shows that node's **real neighbours** and a **legend**
+  mapping node-type → accent. Today `onClick` just `openApp`s the app (line ~330,
+  `onClick = (e) => { const i = pick(e); if (i>=0) openApp(...) }`). Change it to
+  **select** the app node into React state (e.g. `const [selected, setSelected] =
+  useState<string|null>(null)`) and render a `gp` panel (mirror the live-ticker
+  panel's styling, top-right). Panel contents: **(1)** the app's CoreNodes
+  (`Object.values(useGraph.getState().nodes).filter(n => n.meta.app === id)`) — or
+  better, subscribe via `useGraph(s => …)` so it re-renders — and each node's real
+  edges from `graph.neighbors(nodeId)` (selector already exists in `graph.ts`).
+  **(2)** A legend: iterate the `TYPE_RGB` map (already in Network.tsx, lines ~139)
+  → swatch + type label, so the user can decode the orbiting node dots. Keep
+  "open app" reachable (e.g. a button in the panel, or double-click opens). Tokens
+  only — reuse `var(--text*)`, `--space-*`, `--radius-*`; the swatches read their
+  rgb from `TYPE_RGB`/`typeRgb` (canvas palette, already token-derived). *Acceptance:*
+  click a node → panel lists its true neighbours (assert against `graph.neighbors`);
+  legend rows match `TYPE_RGB`. Add a small test for a `neighbours-of-app` helper if
+  you extract one. Build 🟢 vitest 🟢 eslint clean; **no token violations** (metric
+  must stay ±0 — no raw hex in the new JSX).
 
 ## 🧭 Codebase seams (where the important things live)
 
@@ -66,9 +69,20 @@
 - **Cross-app handoffs:** `src/lib/appActions.ts` — `CROSS_APP_ACTIONS` executors; the
   `handoff(fromId,toId,label)` helper emits `HANDOFF` before navigating. Receivers read
   `sessionStorage` keys (`empire-editor-clipboard`, `-token-clipboard`, `-prompt-clipboard`,
-  `-ai-clipboard`).
+  `-ai-clipboard`). **All 7 actions already light a directed arc** (HANDOFF, or
+  NOTE_CREATED `from-` tag / LEARNING_LOGGED `from`). Tested in `appActions.test.ts`.
+- **C-layer intent arcs (S2, 2026-06-22):** the ⚡ NodeActions menu runs the core intents
+  registered in `src/lib/core/sync.ts` (`make-task`/`make-note-from`/`add-to-learning`).
+  Each now calls `announceTransfer(fromApp, createdNode.meta.app, label)` (guarded
+  `fromId!==toId`) → cross-app `add-to-learning` lights an honest arc; in-app
+  `make-task`/`make-note-from` (created node owned by the *source* app) emit nothing.
+  Tested in `src/lib/core/coreIntents.test.ts`.
+- **Arc predicate (canonical):** `src/lib/core/flow.ts` — `flowForEvent(e): Flow|null`
+  is the ONE definition of "does this event light a directed app→app arc?" (HANDOFF /
+  NOTE_CREATED `from-` / LEARNING_LOGGED `from`; self-edges → null). Network imports it;
+  `flow.test.ts` covers it. **S3 should reuse it / `graph.neighbors` — don't re-derive.**
 - **The Network app:** `src/apps/network/Network.tsx` — renders CoreNodes as satellites,
-  consumes `HANDOFF` for directed app→app arcs (`flowForEvent`).
+  consumes `HANDOFF` for directed app→app arcs via `flowForEvent` (now from `flow.ts`).
 - **Registry / shell:** `src/lib/registry.ts` (26 apps), `src/lib/appComponents.tsx`
   (route→component map), `src/components/Desktop.tsx` (shell).
 - **Design system:** `src/design-system/colors_and_type.css` (canonical XENO palette),
