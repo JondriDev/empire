@@ -5,6 +5,20 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · Strategist — re-decomposed EPIC-1 S6 into S6a/b/c (close the emit↔receive loop)
+
+The headline metric *apps both-ways* has been stuck at **1/26** since S1; S6 was the vague
+"audit, then wire one app per run" trap. Settled the audit in `EPICS.md` (10 emitters, 4 chip-
+receivers, 2 silent in-place receivers, 3 dead-end sinks, 3 emit-only entity apps with a natural
+inbound; files/photos/datacenter + tool apps emit-only by design) and split S6 into three downhill
+one-run stages, each moving the number: **S6a** surface provenance on Notes+Learning (1→3),
+**S6b** sinks emit onward via existing `CROSS_APP_ACTIONS` (3→6), **S6c** natural inbound for
+Calendar/Goals/Messages via the S1 rail + honest metric retarget to **9/9** (6→9). Mirrored S6a's
+exact file/shape into `CONTEXT.md`; re-ranked `ROADMAP.md` (palette audit → DONE as S4; added the
+CSS-from-`tokens.ts` theme feeding EPIC-2). **Next:** Builder takes S6a.
+
+---
+
 ## 2026-06-22 · Builder — EPIC-1 S5: Inbox / Today view (one home for every graph `task`)
 
 **Done.** `task` CoreNodes (spawned by ⚡ make-task from any app) were graph-only and invisible —

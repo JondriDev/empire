@@ -29,11 +29,12 @@
 organism where **every** app both *emits* and *receives* honest handoffs, the
 Network mesh portrays the full adjacency, and a human can navigate the whole graph.
 
-**Target metric:** *Stateful apps fully wired into the organism* → **all entity-owning
-apps both emit & receive, visible in The Network**; *Routes rendering clean* stays **26 / 26**.
-(See the honest-scope note under S6 — "26/26" was the old literal target; a Calculator
-has no collection to mirror, so the real target is "every app that owns persistent
-entities is in the graph, and every tool app participates via emit/receive transfers.")
+**Target metric:** *Apps fully wired both-ways* (emit AND legibly receive) → **1/26 → 9/9
+entity-apps-with-a-natural-inbound**; *Routes rendering clean* stays **26 / 26**.
+(See the settled audit under S6 — "26/26" was the old literal target; a Calculator has no
+collection and no natural inbound, so the honest target is "every entity-owning app that can
+take input is both-ways" (9: notes, learning, prompt-gen, editor, token-counter, ai-chat,
+calendar, goals, messages), while files/photos/datacenter + the tool apps stay emit-only sources.)
 **Why highest gradient:** the product's entire thesis is "one living organism." The
 *rails* are now built — `HANDOFF` fires on every transfer (S2 ✅), receivers acknowledge
 provenance (S1 ✅), `mirrorCollection`/`NodeActions` exist. The remaining gradient is
@@ -124,20 +125,88 @@ some may already be shipped):
   tokens; the new registry accent's +1 was offset by removing a dead `var(--ion,#hex)` fallback in
   Goals). *Honest cloud limit:* a fresh checkout's graph is empty, so the populated list / live
   toggle can't be exercised headless — covered by the 4 unit tests + the seam.
-- [ ] **S6 · Close the wiring gaps (honest scope).** **Audit first, then wire.** Apps that
-  already `mirrorCollection` + render `<NodeActions>`: Calendar, Notes, Learning Tracker,
-  Messages, Photos, Prompt Gen, DataCenter, Files, Goals, Artifacts/Kanban. **Entity-owning
-  apps still to check/wire:** confirm each persistent-entity app emits into the graph AND
-  exposes ⚡ on its rows; wire any gap (one app per Builder run, build green). **Tool apps**
-  (Calculator, Clock, Weather, Grammar, Language, Music, Video, Cache, Browser, Maps) own
-  no collection — they participate by *emitting/receiving transfers* (already do via
-  `CROSS_APP_ACTIONS`), NOT by mirroring fake entities. *Acceptance:* every entity-owning
-  app's nodes appear in The Network and carry ⚡ actions; do **not** invent collections for
-  tool apps to chase a literal 26/26. (QA should refine the METRICS row to "entity-owning
-  apps wired" + "tool apps emit/receive" rather than a single 26/26 — flagged in ROUTINE-LOG.)
+**S6 · Close the emit↔receive loop (the headline metric).** The audit is now DONE (see
+below — no more "audit first" hand-waving). The metric *apps fully wired both-ways* has been
+stuck at **1/26** (only `prompt-generator` emits AND legibly receives) since S1, because three
+honest gaps remain. S6 closes them in three downhill stages, each one Builder run, each moving
+the number. **Audit (settled, code-confirmed 2026-06-22):**
+  - **Emitters (10)** — `<NodeActions>` + mirror into the graph: artifacts/kanban, calendar,
+    datacenter, files, goals, learning-tracker, messages, notes, photos, prompt-generator.
+  - **Chip-receivers (4)** — `useInboundHandoff` + `<ProvenanceChip>`: editor, prompt-generator,
+    token-counter, ai-chat.
+  - **Silent in-place receivers (2)** — `SEND_TO_NOTES`/`SEND_TO_LEARNING` land content but show
+    NO provenance: notes (tags the note `from-<source>` but never renders it), learning-tracker
+    (drops the source entirely — `LearningItem` has no `from` field).
+  - **Dead-end sinks (3)** — editor, token-counter, ai-chat receive but emit nothing onward.
+  - **Emit-only entity apps with a *natural* inbound (3)** — calendar, goals, messages own
+    entities and emit, but no `CROSS_APP_ACTION` targets them, so they can't receive.
+  - **Honest non-receivers** — files, photos, datacenter are *manage/browse* stores (a generic
+    text handoff INTO them is unnatural — they stay emit-only by design); tool apps (calculator,
+    clock, weather, grammar, language, music, video, cache, browser, maps) own no collection and
+    participate as emit-only *sources*. **Do NOT invent inbound for these to chase a literal 26/26.**
 
-_When S3–S6 ship and QA confirms every entity-owning app is in the graph (and the legend/
-inspector make it legible) → move EPIC-1 to DONE and promote EPIC-2._
+- [ ] **S6a · Surface provenance on the two silent in-place receivers (Notes + Learning).**
+  Lowest-risk first: the data already arrives, just make the receive *legible* so both apps
+  count as both-ways. **Files & shape:**
+  - **`src/lib/store.ts`** — add `from?: string` to `interface LearningItem` (optional →
+    backward-compatible; existing persisted items just lack it).
+  - **`src/lib/appActions.ts`** — in `SEND_TO_LEARNING.execute`, set `from: data.source` on the
+    `addLearningItem({...})` object (Notes already carries `tags: ['from-' + data.source]`, no change).
+  - **`src/apps/notes/Notes.tsx`** — for any note whose `tags` contains a `from-<source>` entry,
+    render `<ProvenanceChip from={source} onDismiss={…}/>` on that note's card; dismiss removes
+    only that one tag via `updateNote(id, { tags: tags.filter(...) })` (keep the user's other tags).
+  - **`src/apps/learning-tracker/LearningTracker.tsx`** — for any item with `item.from`, render
+    `<ProvenanceChip from={item.from} onDismiss={…}/>`; dismiss clears `from` via the store updater.
+  - **Test:** extend `src/lib/appActions.test.ts` — assert `SEND_TO_LEARNING.execute` persists a
+    `from` equal to `data.source` on the created learning item.
+  - *Acceptance:* ⚡ Send-to-Notes from Calculator → the new note card shows a "From Calculator"
+    chip (source-accent, dismissible); ⚡ Track-as-Learning from Notes → the new learning item
+    shows a "From Notes" chip. **both-ways 1/26 → 3/26.** Build🟢 vitest🟢 eslint clean; reuse
+    `ProvenanceChip` (no new colours) so token-violations do NOT regress.
+
+- [ ] **S6b · Make the three dead-end sinks emit onward (Editor, Token Counter, AI Chat).**
+  They receive but the signal dies there — give each a ⚡ "Send to…" affordance that re-injects
+  its output, so each becomes both-ways. **Reuse the existing `CROSS_APP_ACTIONS` executors**
+  (they already call `handoff(...)` → light a Network arc); do NOT add new collections. **Shape:**
+  a tiny shared `<SendResultMenu source="<app>" text={…} title?={…}/>` button (new
+  `src/components/ui/SendResultMenu.tsx`) that lists a couple of relevant `CROSS_APP_ACTIONS`
+  (e.g. Notes / Prompt Gen) and runs the chosen one with `{ text, title, source }`. Wire it:
+  - **`src/apps/editor/Editor.tsx`** — "Send code to…" over the current buffer (`source:'editor'`).
+  - **`src/apps/token-counter/TokenCounter.tsx`** — "Send text to…" over the counted text (`source:'token-counter'`).
+  - **`src/apps/ai-chat/AIChat.tsx`** — per assistant reply, "Send reply to…" (`source:'ai-chat'`).
+  - **Test:** `src/components/ui/SendResultMenu.test.tsx` (or extend `appActions.test.ts`) — assert
+    running the menu's action emits a `HANDOFF` whose `fromId` is the sink app's id.
+  - *Acceptance:* from Editor, "Send to Notes" creates a note AND lights an `editor → notes` arc in
+    The Network; same for `token-counter → notes` and `ai-chat → notes`. **both-ways 3/26 → 6/26.**
+    Build🟢 vitest🟢 eslint clean; token-violations not regressed.
+
+- [ ] **S6c · Natural inbound for the last three entity apps (Calendar, Goals, Messages) + retarget
+  the metric honestly.** Each owns entities and already emits but has no inbound `CROSS_APP_ACTION`;
+  give each a *natural* text→entity receive so the organism's loop closes for every entity app that
+  honestly takes input. **Shape (mirror the S1 receiver rail — ~3 lines/app):**
+  - **`src/lib/appActions.ts`** — add `SEND_TO_CALENDAR` (text → draft event), `SEND_TO_GOALS`
+    (text → new goal), `SEND_TO_MESSAGES` (text → composed draft): each `sessionStorage.setItem`
+    an `empire-<x>-clipboard` payload `{ text, title?, from: data.source }`, call
+    `handoff(data.source, '<app>', '<verb>')`, then `window.open('/app/<x>', '_self')`.
+  - **`src/apps/calendar/Calendar.tsx` / `goals/Goals.tsx` / `messages/Messages.tsx`** — each:
+    `const inbound = useInboundHandoff<{text;title?}>('empire-<x>-clipboard')`, a
+    `[inbound.payload]` effect that opens the app's *create* form prefilled from the payload, and
+    `{inbound.source && <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss}/>}`.
+  - **Test:** extend `appActions.test.ts` — each new action emits exactly one arc-bearing `HANDOFF`
+    with the correct `toId`.
+  - **Metric retarget (flag for QA, do not edit METRICS yourself):** EPIC-1's honest success state
+    is **"every entity-owning app with a natural inbound is both-ways"** = notes, learning, prompt-gen,
+    editor, token-counter, ai-chat, calendar, goals, messages (**9**); files/photos/datacenter stay
+    emit-only *by design* (manage/browse stores); tool apps stay emit-only sources. QA should rewrite
+    the "Apps fully wired both-ways" METRICS row to **9 / 9 entity-apps-with-inbound** (+ a note that
+    files/photos/datacenter + tool apps are intentionally emit-only) rather than a dishonest 26/26.
+  - *Acceptance:* ⚡ Send-to-Calendar / -Goals / -Messages from any text opens that app with a
+    "From <source>" chip and a prefilled create form; each lights a Network arc. **both-ways 6/26 →
+    9/26 (= the honest target).** Build🟢 vitest🟢 eslint clean; token-violations not regressed.
+
+_When S6a–c ship and QA confirms the both-ways count climbed to the honest target (9 entity-apps-
+with-inbound, files/photos/datacenter + tool apps emit-only by design) → move EPIC-1 to DONE and
+promote EPIC-2 (design-token violations → 0)._
 
 ---
 

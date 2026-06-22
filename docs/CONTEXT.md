@@ -23,26 +23,29 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** EPIC-1 — Organism Completeness (see `docs/EPICS.md`).
-- **Next stage:** **S6 · Close the wiring gaps (honest scope) — the FINAL EPIC-1 stage.**
-  (S1–S5 all shipped 2026-06-22; S5 Inbox app landed this run.)
-- **Exact shape for S6:** **Audit first, then wire ONE gap.** The goal is the EPIC-1 headline
-  metric: every *entity-owning* app both emits into the graph AND exposes ⚡ on its rows, and the
-  current both-ways count (1/26 — only `prompt-generator` emits AND receives) climbs. **Step 1 —
-  audit (cheap):** for each entity-owning app, confirm it (a) calls `mirrorCollection(...)` (or is
-  in `sync.ts` syncers) so its items become CoreNodes, and (b) renders `<NodeActions>` on each row.
-  Apps already wired (mirror + NodeActions): Calendar, Notes, Learning Tracker, Messages, Photos,
-  Prompt Gen, DataCenter, Files, Goals, Artifacts/Kanban. **Step 2 — pick the highest-value gap and
-  wire it** (one app per run, build green): the richest remaining win is **receivers** — make a
-  *tool* app also *receive* a handoff (today only ai-chat/editor/prompt-generator/token-counter
-  receive via `useInboundHandoff`; closing the emit/receive overlap is what moves "both-ways").
-  Candidate: give **Calculator** or **Grammar** a `useInboundHandoff` receiver + `<ProvenanceChip>`
-  (rail in `useInboundHandoff.ts` / `ProvenanceChip.tsx`, pattern documented below). **Do NOT invent
-  collections for tool apps** (Calculator/Clock/Weather own no entities — they participate via
-  emit/receive transfers only). *Acceptance:* the chosen app newly participates both ways (visible
-  arc in The Network + provenance chip on receive, or new ⚡ rows if it was an unmirrored
-  entity-owner); one test; build🟢 vitest🟢 eslint clean; token-violations must NOT regress.
-  **When S6 lands and QA confirms the both-ways count moved → EPIC-1 is DONE; promote EPIC-2
-  (token violations → 0) per the QUEUED list.**
+- **Next stage:** **S6a · Surface provenance on the two silent in-place receivers (Notes + Learning)** —
+  the first of three S6 stages that close the emit↔receive loop. (S1–S5 all shipped 2026-06-22.)
+  The audit is SETTLED (full breakdown in `docs/EPICS.md` S6) — no re-auditing, just build.
+- **Exact shape for S6a (start here, no re-planning):** the headline metric *apps both-ways* is
+  stuck at **1/26** (only `prompt-generator` emits AND legibly receives). Notes & Learning already
+  emit AND receive content in-place (`SEND_TO_NOTES`/`SEND_TO_LEARNING`) but acknowledge nothing —
+  make the receive *legible* and both flip to both-ways (1→3). Edits:
+  1. `src/lib/store.ts` — add `from?: string` to `interface LearningItem` (optional, backward-compat).
+  2. `src/lib/appActions.ts` — in `SEND_TO_LEARNING.execute`, set `from: data.source` on the
+     `addLearningItem({...})` (Notes already tags `from-<source>` — no change there).
+  3. `src/apps/notes/Notes.tsx` — note cards whose `tags` include a `from-<source>` render
+     `<ProvenanceChip from={source} onDismiss={…}/>`; dismiss strips only that tag via `updateNote`.
+  4. `src/apps/learning-tracker/LearningTracker.tsx` — items with `item.from` render a
+     `<ProvenanceChip>`; dismiss clears `from`.
+  5. Extend `src/lib/appActions.test.ts` — assert `SEND_TO_LEARNING` persists `from === data.source`.
+  *Acceptance:* ⚡ Send-to-Notes from Calculator → new note shows a "From Calculator" chip; ⚡
+  Track-as-Learning from Notes → new item shows a "From Notes" chip. **both-ways 1→3.** Reuse
+  `ProvenanceChip` (no new colours → token-violations flat); build🟢 vitest🟢 eslint clean.
+- **Then S6b** (sinks emit onward: Editor/Token-Counter/AI-Chat get a ⚡ "Send to…" reusing
+  `CROSS_APP_ACTIONS`; 3→6) **then S6c** (natural inbound for Calendar/Goals/Messages via the
+  S1 receiver rail; 6→9 = honest target) — full file lists in `docs/EPICS.md`.
+  **When S6a–c land and QA confirms both-ways climbed to the honest target (9 entity-apps-with-
+  inbound; files/photos/datacenter + tool apps emit-only by design) → EPIC-1 DONE; promote EPIC-2.**
 
 ## 🧭 Codebase seams (where the important things live)
 
