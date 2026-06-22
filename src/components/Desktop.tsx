@@ -17,6 +17,7 @@ import { useLang } from '../lib/i18n'
 import WindowComponent from './Window'
 import ContextMenu from './ContextMenu'
 import HeroHud from './HeroHud'
+import CommandPalette from './CommandPalette'
 import { ToastViewport } from './ui/Toast'
 import {
   Search, Sun, Moon, Volume2,
@@ -684,7 +685,10 @@ export default function Desktop() {
         </div>
       </div>
 
-      {/* Layer 7: Toast Viewport (persistent) */}
+      {/* Layer 7: Command Palette (⌘/Ctrl-K — acts on the focused node) */}
+      <CommandPalette />
+
+      {/* Layer 8: Toast Viewport (persistent) */}
       <ToastViewport />
     </div>
   )

@@ -12,6 +12,10 @@ import './lib/automation'
 import { startCoreSync } from './lib/core/sync'
 startCoreSync()
 
+// ── Focus: keep a global "current node" pointer for the ⌘K command palette ────
+import { startFocusTracking } from './lib/core/focus'
+startFocusTracking()
+
 // Apply saved theme immediately (before React hydration) to prevent flash
 try {
   const saved = localStorage.getItem('empire-store')

@@ -5,6 +5,41 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-22 · Builder — EPIC-1 S4: global command palette (⌘K → focused node's intents)
+
+**Done.** Built the global "⚡ Send to…" surface. Confirmed no palette existed (only the
+Ctrl+Space app-search), so created a minimal one and the focus model behind it:
+- **`src/lib/core/focus.ts` (new)** — `useFocus` store + pure `focusIdForEvent(event)` +
+  `startFocusTracking()` (wired in `main.tsx`). "Focused node" = the LAST node touched
+  anywhere, derived from the event bus (NODE_CREATED/UPDATED, INTENT_RUN→nodeId;
+  NODES_LINKED→fromId); clears when the focused node is deleted. **Decision (the run's open
+  question):** focused node = last-touched-via-bus — the simplest honest global selection,
+  zero per-app wiring.
+- **`src/components/CommandPalette.tsx` (new)** — ⌘/Ctrl-K `gp` modal (reuses the shell's
+  `empire-search-*` glass for native feel), rendered once in `Desktop.tsx` (Layer 7). Shows the
+  focused node (title · type · owner app), lists "Open in <app>" + `intentsFor(node)`, runs the
+  choice via `runIntent`+toast (mirrors `NodeActions`). Keyboard: ⌘K toggle, ↑/↓ navigate, Enter
+  run, Esc close (+ restores prior focus, WCAG 2.4.3). Empty states for no-focus / no-match.
+- **`src/apps/network/Network.tsx`** — selecting an app in the inspector `setFocus`es its newest
+  node, so ⌘K right after a click aims at something real (interconnect, not just a launcher).
+
+**Verified.** `tsc -b && vite build` 🟢 · `vitest run` **92/92 🟢** (new `focus.test.ts`, 6 tests:
+`focusIdForEvent` mapping + `startFocusTracking` last-touched / delete-clears) · eslint clean on all
+touched files. **Metrics:** token-violations **501 (±0** — new rgba literals replaced with `rgbCss`,
+per the comment-grep trap), tests static 82→88 (+6), files 11→12 (+1), bundle gz **237.6→238.9
+(+1.3** for the new component + focus store), routes 26/26. **Metrics row:** `apps 26 · tests 88 ·
+files 12 · token-violations 501 · bundle-gz 238.9`.
+
+**Not verifiable in cloud:** the keyboard summon + live intent-run can't be exercised headless (a
+fresh checkout's `empire-core-graph` is empty, so there's no focused node to act on). The pure focus
+seam + 6 unit tests cover the logic; on-device, press ⌘K (or Ctrl-K) after touching any node — e.g.
+create a note, or click a node in The Network — to confirm the palette lists its intents and runs them.
+
+**Next:** EPIC-1 **S5 · "Inbox / Today" view** — aggregate open graph `task` nodes (from ⚡ make-task)
+into one surface; recommend a second panel inside `Network.tsx`. Exact shape in `docs/CONTEXT.md`.
+
+---
+
 ## 2026-06-22 · QA — visual + smoke (post-S3 green main)
 
 **Done.** Fresh-checkout QA on green main after integrating PR #26 (flow.ts + cross-app
