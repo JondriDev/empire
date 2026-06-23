@@ -167,27 +167,25 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-22, post-S5 green main — Inbox / Today app landed since last run)
+## 📊 Last QA confirmation (2026-06-23, post-S6a green main — Notes/Learning provenance landed since last run)
 
-- **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED assertion in
-  `scripts/qa-smoke.mjs` passed (top-level `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`).
-  **NEW this run:** a `REGISTRY-COVERAGE` assertion (cross-checks the smoke `apps` list against
-  `registry.ts`) — it caught that `inbox` was missing from the list; added inbox + the guard so a future
-  app can't silently skip the smoke test. vitest **96/96 🟢** (13 files).
-- **Apps fully wired BOTH-ways: 1/27 (unchanged)** — only `prompt-generator` emits AND receives. Emit-only
-  via `NodeActions` (11): artifacts(kanban), calendar, datacenter, files, goals, **inbox**, learning-tracker,
-  messages, notes, photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor,
-  prompt-generator, token-counter. S5 added an 11th emitter (inbox) but no receiver, so the overlap is
-  unchanged. **Closing this overlap is S6 (not started).**
-- **Epic-acceptance:** S5 (Inbox / Today view) **CONFIRMED LIVE** — seeded 3 `task` nodes into
-  `empire-core-graph` (open from Calculator, done from Notes, open from Goals); the Inbox app surfaced **all
-  three** with source-app chips, 0 page errors. Captured as `docs/screenshots/latest/inbox-populated.png`.
-  This beats prior runs' empty-graph-only confirmation. `tasks.test.ts` (4 tests) passes. **EPIC-1 headline
-  metric (both-ways 1/27) STILL PENDING** — needs S6 (give a tool app a `useInboundHandoff` receiver, or wire
-  the last entity-owner both ways). Next active stage is **S6 (final EPIC-1 stage).**
-- **Auto metrics moved vs post-S4:** apps 26→27 (+1, inbox), tests 88→92 static / 92→96 vitest (+4/+4),
-  files 12→13 (+1, `tasks.test.ts`), token-violations **501 (±0)** (Inbox is pure tokens), bundle gz
-  238.9→240.5 (+1.6). All deltas from S5 (commit a4f60a7).
+- **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED ✅ (top-level
+  `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (all 27 registry
+  apps in the smoke list). vitest **97/97 🟢** (13 files). **No runtime bugs found.**
+- **Apps fully wired BOTH-ways: 3/27 (↑ from 1 — S6a)** — `prompt-generator`, **notes**, **learning-tracker**
+  now emit AND legibly receive. Still emit-only via `NodeActions`: artifacts(kanban), calendar, datacenter,
+  files, goals, inbox, messages, photos. Receive-only via `useInboundHandoff`: ai-chat, editor, token-counter.
+  **Honest EPIC-1 target = 9/9** entity-apps-with-inbound; next stage **S6b** (Editor/Token-Counter/AI-Chat
+  emit onward → 6).
+- **Epic-acceptance:** S6a (Notes + Learning provenance) **CONFIRMED LIVE** — seeded `empire-store` with a note
+  tagged `from-calculator` + a learning item `from:'notes'`, reloaded: Notes card showed a dismissible
+  **"From Calculator"** chip (user `SNIPPET` tag preserved), Learning item showed **"From Notes"**, 0 page
+  errors. Captured as `notes-provenance.png` / `learning-provenance.png`. This is a true both-ways confirmation
+  (the receive is now legible), beating code-audit-only. `appActions.test.ts` asserts `SEND_TO_LEARNING`
+  persists `from === data.source`.
+- **Auto metrics vs post-S5:** S6a (commit d066e80) moved tests 92→93 static / 96→97 vitest (+1/+1, the new
+  appActions assertion), token-violations **501 (±0)** (reused `ProvenanceChip` — no new colours), bundle gz
+  240.5→240.9 (+0.4). This QA run added no code → auto-metrics ±0 vs the S6a snapshot.
 - **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
   datacenter `/api/dc/tables`→401 (authed API, no headless session).
 - QA harness note: project has **no `playwright` dep**; it's global at `/opt/node22/lib/node_modules`.

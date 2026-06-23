@@ -14,13 +14,13 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-| Metric | Current (2026-06-22, after #26 + S3 + S4 + S5) | Target | Direction |
+| Metric | Current (2026-06-23, after #26 + S3 + S4 + S5 + S6a) | Target | Direction |
 |---|---|---|---|
 | Apps / routes | 27 | ~26 (steady) | coherence over new surface — not a growth metric |
-| Test cases | 92 (static) · 96 (vitest run) | 60+ | ↑ higher = safer to leap |
+| Test cases | 93 (static) · 97 (vitest run) | 60+ | ↑ higher = safer to leap |
 | Test files | 13 | grow with code | ↑ |
 | Design-token violations | 501 | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
-| Bundle gz (KB) | 240.5 | hold / shrink | ↓ |
+| Bundle gz (KB) | 240.9 | hold / shrink | ↓ |
 
 > Last integration: **EPIC-1 S5** — Inbox / Today view (the 27th app) aggregating every graph
 > `task` node (commit a4f60a7: `tasks.ts`/`tasks.test.ts`, `apps/inbox/Inbox.tsx`, `NodeActions`
@@ -33,8 +33,8 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 | Metric | Source | Current (QA 2026-06-22, after #26 + S3 + S4 + S5) | Target |
 |---|---|---|---|
-| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **27 / 27** ✅ (28/28 incl. desktop shell; SHELL-IS-STYLED ✅ + new REGISTRY-COVERAGE guard ✅) — re-confirmed 2026-06-22 (post-S5, green main; the new Inbox app renders, populated-list confirmed live) | 27 / 27 (every entity route) |
-| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **1 / 27** (unchanged) — only `prompt-generator` does both. Emit-only via `NodeActions` (11): artifacts(kanban), calendar, datacenter, files, goals, inbox, learning-tracker, messages, notes, photos, prompt-generator. Receive-only via `useInboundHandoff` (4): ai-chat, editor, prompt-generator, token-counter. S5 (Inbox) added an 11th emitter but no receiver, so the both-ways overlap is unchanged. Closing it is EPIC-1 **S6** (not yet started). | every entity-owning app both ways |
+| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **27 / 27** ✅ (28/28 incl. desktop shell; SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅) — re-confirmed 2026-06-23 (post-S6a, green main; all 28 routes render with 0 uncaught JS) | 27 / 27 (every entity route) |
+| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **3 / 27** (↑ from 1 — S6a) — `prompt-generator`, **`notes`** and **`learning-tracker`** now do both. S6a made the two silent in-place receivers legible: Notes renders a `From <source>` chip off its `from-*` tag, Learning renders one off `item.from`; **confirmed live** this run (seeded note→"From Calculator", learning item→"From Notes", 0 errors — `notes-provenance.png`/`learning-provenance.png`). Still emit-only via `NodeActions`: artifacts(kanban), calendar, datacenter, files, goals, inbox, messages, photos. Receive-only via `useInboundHandoff`: ai-chat, editor, token-counter. **Honest EPIC-1 target = 9 / 9** entity-apps-with-a-natural-inbound (notes, learning, prompt-gen, editor, token-counter, ai-chat, calendar, goals, messages); files/photos/datacenter + tool apps stay emit-only *by design*. Next: **S6b** (Editor/Token-Counter/AI-Chat emit onward → 6). | 9 / 9 entity-apps-with-inbound |
 | Lighthouse — PWA / Perf / A11y | CI (add to a workflow when feasible) | not measured headless | 90 / 90 / 90 |
 | Open `routine/auto-*` PR age | reviewer log | — | < one review cycle |
 
