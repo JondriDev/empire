@@ -5,6 +5,29 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-23 · QA — visual + smoke on green main `6435a81`: **EPIC-1 S6c confirmed LIVE → EPIC-1 DONE, EPIC-2 promoted**
+
+**Verified.** Build 🟢 (`tsc -b && vite build`), vitest **103/103 🟢** (14 files). Headless smoke
+(`scripts/qa-smoke.mjs`, pre-installed Chromium `/opt/pw-browsers/chromium-1194`): **28/28 routes
+render with 0 uncaught JS / 0 crashes / 0 blank** (27 apps + desktop). SHELL-IS-STYLED ✅ (top-level
+`.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (all 27
+registry apps in smoke list). **No runtime bugs found.** Screenshots overwritten in
+`docs/screenshots/latest/`.
+- **Epic-acceptance — S6c CONFIRMED LIVE (the metric actually moved).** Drove the running app with a
+  new env-only harness (`scripts/qa-s6c-confirm.mjs`, not committed): seeded each receiver's
+  `empire-<x>-clipboard` payload + reload, asserted both a "From <source>" `ProvenanceChip` AND a
+  prefilled form field (read off live `input`/`textarea` `.value`). **Calendar** ← editor → chip +
+  New-Event modal prefilled (title/date/desc); **Goals** ← notes → chip + New-Goal title/desc;
+  **Messages** ← ai-chat → chip + composer draft. **3/3 ✅** (`s6c-inbound-{calendar,goals,messages}.png`).
+- **Metric:** *Apps fully wired both-ways* **6/9 → 9/9 entity-apps-with-inbound = honest EPIC-1 target HIT.**
+  *Routes rendering clean* held **27/27**. Auto: vitest 100→103 (+3), token-violations 501 (±0), bundle gz
+  242.8→243.5 (+0.7). Retargeted the METRICS both-ways row to 9/9; flipped EPICS.md (EPIC-1 → ✅ DONE,
+  **EPIC-2 → ▶ ACTIVE**) and the CONTEXT active-epic block.
+- **Env-expected noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android path),
+  datacenter `/api/dc/tables`→401 (authed API). **Next:** Builder starts **EPIC-2 S1** — extract
+  `src/design-system/tokens.ts` + chip the top token-violation files (HermesCommandCenter 64,
+  HermesAgentBar 49, ai-agent SettingsPanel 38, Calculator 38); target violations 501 → 0.
+
 ## 2026-06-23 · Builder — EPIC-1 S6c: natural inbound for the last three entity apps (Calendar, Goals, Messages) — entity loop CLOSED
 
 **Done.** Calendar, Goals and Messages each own entities and already *emitted* (`NodeActions`) but had

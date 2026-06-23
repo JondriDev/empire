@@ -14,28 +14,29 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-| Metric | Current (2026-06-23, after #26 + S3 + S4 + S5 + S6a + S6b) | Target | Direction |
+| Metric | Current (2026-06-23, after #26 + S3 + S4 + S5 + S6a + S6b + **S6c**) | Target | Direction |
 |---|---|---|---|
 | Apps / routes | 27 | ~26 (steady) | coherence over new surface — not a growth metric |
-| Test cases | 96 (static) · 100 (vitest run) | 60+ | ↑ higher = safer to leap |
+| Test cases | 96 (static) · 103 (vitest run) | 60+ | ↑ higher = safer to leap |
 | Test files | 14 | grow with code | ↑ |
 | Design-token violations | 501 | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
-| Bundle gz (KB) | 242.8 | hold / shrink | ↓ |
+| Bundle gz (KB) | 243.5 | hold / shrink | ↓ |
 
-> Last integration: **EPIC-1 S6b** — the three dead-end sinks (Editor, Token-Counter, AI-Chat) now
-> emit onward via the shared `src/components/ui/SendResultMenu.tsx` (commit b6cd0c3:
-> `SendResultMenu.tsx` + `SendResultMenu.test.tsx`, wired into the 3 sinks). Δ vs prior column (after
-> S6a): apps ±0 (27), test cases +3 (93→96 static, 97→100 vitest), test files +1 (13→14,
-> `SendResultMenu.test.tsx`), token violations **±0 (501)** (hover tints use `color-mix`, no new
-> colours), bundle gz +1.9 KB (240.9→242.8, the `SendResultMenu` chunk wired into 3 apps).
-> `metrics.mjs` static count (96) undercounts a few nested cases; an actual `vitest run` is **100 passed / 14 files**.
+> Last integration: **EPIC-1 S6c** (commit `6435a81`) — natural inbound for the last three entity
+> apps: `SEND_TO_CALENDAR` / `SEND_TO_GOALS` / `SEND_TO_MESSAGES` in `appActions.ts`; Calendar / Goals /
+> Messages each wired with `useInboundHandoff` + a `[inbound.payload]` create-form preload +
+> `<ProvenanceChip>`, and added to `SendResultMenu`'s targets. **Entity emit↔receive loop CLOSED →
+> both-ways 6/9 → 9/9.** Δ vs prior column (after S6b): apps ±0 (27), test cases +3 (96 static ±0 —
+> undercounts; 100→103 vitest, the 3 new `appActions` HANDOFF `it.each` cases), test files ±0 (14),
+> token violations **±0 (501)**, bundle gz +0.7 KB (242.8→243.5, the three apps' inbound code).
+> `metrics.mjs` static count (96) undercounts a few nested cases; an actual `vitest run` is **103 passed / 14 files**.
 
 ## Manual / CI metrics (QA + human)
 
-| Metric | Source | Current (QA 2026-06-23, after #26 + S3 + S4 + S5 + S6a + S6b) | Target |
+| Metric | Source | Current (QA 2026-06-23, after #26 + S3 + S4 + S5 + S6a + S6b + **S6c**) | Target |
 |---|---|---|---|
-| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **27 / 27** ✅ (28/28 incl. desktop shell; SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅) — re-confirmed 2026-06-23 (post-S6b, green main `b6cd0c3`; all 28 routes render with 0 uncaught JS) | 27 / 27 (every entity route) |
-| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **6 / 9 entity-apps-with-inbound** (↑ from 3 — S6b) — now both-ways: `prompt-generator`, `notes`, `learning-tracker` (receive provenance) **+ `editor`, `token-counter`, `ai-chat`** (S6b: each gained a `SendResultMenu` "Send to…" affordance that runs a `CROSS_APP_ACTIONS` executor → `handoff(...)` → a real source→target arc). **Confirmed live** this run (`editor-send-menu.png`): the "Send code to…" menu is disabled-when-empty, enabled-with-content, lists 4 targets and excludes Editor itself (no self-handoff); the HANDOFF emission is unit-tested in `SendResultMenu.test.tsx` (3). Remaining gap to the honest target = **calendar, goals, messages** (emit-only entity apps with a natural inbound) — closed by **S6c** (the last EPIC-1 stage). Still emit-only via `NodeActions`: artifacts(kanban), calendar, datacenter, files, goals, inbox, messages, photos. **Honest EPIC-1 target = 9 / 9** entity-apps-with-a-natural-inbound; files/photos/datacenter + tool apps stay emit-only *by design*. | 9 / 9 entity-apps-with-inbound |
+| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **27 / 27** ✅ (28/28 incl. desktop shell; SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅) — re-confirmed 2026-06-23 (post-S6c, green main `6435a81`; all 28 routes render with 0 uncaught JS) | 27 / 27 (every entity route) |
+| Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **9 / 9 entity-apps-with-inbound ✅ TARGET HIT (↑ from 6 — S6c)** — both-ways now: `prompt-generator`, `notes`, `learning-tracker`, `editor`, `token-counter`, `ai-chat` **+ `calendar`, `goals`, `messages`** (S6c: each gained a natural text→entity inbound via `useInboundHandoff` → opens its own create form prefilled + a "From <source>" `ProvenanceChip`; reachable from `SendResultMenu` & `NodeActions`). **Confirmed LIVE this run** (`scripts/qa-s6c-confirm.mjs`, screenshots `s6c-inbound-{calendar,goals,messages}.png`): seeding each `empire-<x>-clipboard` payload + reload shows the chip AND a prefilled field (Calendar New-Event title+date+desc, Goals New-Goal title+desc, Messages composer draft) — 3/3 ✅. The HANDOFF emission is unit-tested (`appActions.test.ts`, vitest 103). **Entity emit↔receive loop CLOSED.** Intentionally emit-only (by design, no natural inbound): files, photos, datacenter (browse/manage stores) + tool apps (calculator, clock, weather, etc.) via `NodeActions`. | 9 / 9 entity-apps-with-inbound ✅ |
 | Lighthouse — PWA / Perf / A11y | CI (add to a workflow when feasible) | not measured headless | 90 / 90 / 90 |
 | Open `routine/auto-*` PR age | reviewer log | — | < one review cycle |
 
