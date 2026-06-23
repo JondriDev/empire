@@ -5,6 +5,37 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-23 · Builder — EPIC-1 S6a: surface provenance on the two silent in-place receivers (Notes + Learning)
+
+**Done.** `SEND_TO_NOTES`/`SEND_TO_LEARNING` already landed content in-place but acknowledged the
+source nowhere, so Notes & Learning were silent receivers stuck out of the both-ways count. Made the
+receive *legible* (reusing the S1 `ProvenanceChip`, no new colours):
+- **`src/lib/store.ts`** — `interface LearningItem` gained `from?: string` (optional → backward-compat
+  with persisted items, which simply lack it).
+- **`src/lib/appActions.ts`** — `SEND_TO_LEARNING.execute` now sets `from: data.source` on the created
+  item (Notes already tagged `from-<source>`, unchanged).
+- **`src/apps/notes/Notes.tsx`** — `NoteCard` splits a `from-<source>` tag out of the tag list and
+  renders `<ProvenanceChip from={source} onDismiss={…}/>`; dismiss strips only `from-*` tags (keeps the
+  user's own tags) via `updateNote`. Other tags still render as badges.
+- **`src/apps/learning-tracker/LearningTracker.tsx`** — items with `item.from` render the chip; dismiss
+  clears `from` via `updateLearningItem(id, { from: undefined })`.
+- **`src/lib/appActions.test.ts`** — new test asserts the stored learning item persists
+  `from === data.source`.
+
+**Verified:** `npm run build` 🟢 (tsc -b && vite build); `npx vitest run` 🟢 **97/97** (was 96, +1);
+`npx eslint` clean on all 5 touched files. Metrics row (`scripts/metrics.mjs`):
+`apps 27 ±0 · tests 92→93 (+1) · files 13 ±0 · token-violations 501 ±0 · bundle gz 240.5→240.9 (+0.4)`.
+No regression — token-violations flat (reused `ProvenanceChip`), tests up.
+
+**both-ways 1/26 → 3/26.** *Not verifiable in cloud:* a fresh checkout's stores are empty, so the live
+chip render (Send-to-Notes from Calculator → "From Calculator" chip; Track-as-Learning from Notes →
+"From Notes" chip) can't be exercised headless — covered by the unit test + the proven S1 chip path.
+
+**Next:** S6b — give Editor/Token-Counter/AI-Chat a ⚡ "Send to…" (new `SendResultMenu.tsx` reusing
+`CROSS_APP_ACTIONS`) so the dead-end sinks emit onward (both-ways 3→6). Exact shape in `CONTEXT.md`.
+
+---
+
 ## 2026-06-22 · Strategist — re-decomposed EPIC-1 S6 into S6a/b/c (close the emit↔receive loop)
 
 The headline metric *apps both-ways* has been stuck at **1/26** since S1; S6 was the vague

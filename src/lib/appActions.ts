@@ -133,6 +133,9 @@ export const CROSS_APP_ACTIONS = {
         date: new Date().toISOString().split('T')[0],
         nextReview: new Date(Date.now() + 86400000).toISOString().split('T')[0],
         mastered: false,
+        // Tag the source so the item can render a ProvenanceChip — makes the
+        // in-place receive legible and flips Learning to a both-ways app (S6a).
+        from: data.source,
       })
       // Carry the source so the Network mesh can light the source→learning arc
       // (this transfer stays in place — no navigation — so a single tagged event

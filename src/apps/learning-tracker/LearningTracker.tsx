@@ -8,6 +8,7 @@ import { Bot, Plus, Check, BookOpen, Brain } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import type { LearningItem } from '../../lib/store'
 
 export default function LearningTracker() {
@@ -170,6 +171,14 @@ export default function LearningTracker() {
                 </div>
                 {item.learned && (
                   <p className="text-sm text-gray-400 mt-1">{item.learned}</p>
+                )}
+                {item.from && (
+                  <div className="mt-2">
+                    <ProvenanceChip
+                      from={item.from}
+                      onDismiss={() => updateLearningItem(item.id, { from: undefined })}
+                    />
+                  </div>
                 )}
                 <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
                   <span>📅 {item.date}</span>

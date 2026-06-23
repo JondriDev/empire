@@ -17,6 +17,10 @@ import { Button, Input, TextArea, Card, Badge } from '../../components/ui'
 import { EmptyState, SectionHeader } from '../../components/ui/Utility'
 import { useToast } from '../../components/ui/Toast'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+
+/** A note received via cross-app handoff carries a `from-<source>` tag (S6a). */
+const FROM_PREFIX = 'from-'
 
 export default function Notes() {
   const { notes, addNote, updateNote, deleteNote } = useStore()
@@ -88,6 +92,12 @@ export default function Notes() {
     setEditingId(null)
     setEditTitle('')
     setEditContent('')
+  }
+
+  // Strip the provenance tag(s) when the source chip is dismissed — leaves any
+  // user-authored tags intact.
+  const handleDismissSource = (note: Note) => {
+    updateNote(note.id, { tags: note.tags.filter(t => !t.startsWith(FROM_PREFIX)) })
   }
 
   const askHermes = (note: Note) => {
@@ -217,6 +227,7 @@ export default function Notes() {
               onCancelEdit={cancelEdit}
               onDelete={() => handleDelete(note.id)}
               onAskHermes={() => askHermes(note)}
+              onDismissSource={() => handleDismissSource(note)}
               editTitle={editTitle}
               editContent={editContent}
               setEditTitle={setEditTitle}
@@ -238,13 +249,18 @@ interface NoteCardProps {
   onCancelEdit: () => void
   onDelete: () => void
   onAskHermes: () => void
+  onDismissSource: () => void
   editTitle: string
   editContent: string
   setEditTitle: (v: string) => void
   setEditContent: (v: string) => void
 }
 
-function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDelete, onAskHermes, editTitle, editContent, setEditTitle, setEditContent }: NoteCardProps) {
+function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDelete, onAskHermes, onDismissSource, editTitle, editContent, setEditTitle, setEditContent }: NoteCardProps) {
+  // Provenance tag → source app; the remaining tags render as normal badges.
+  const fromTag = note.tags.find(t => t.startsWith(FROM_PREFIX))
+  const source = fromTag?.slice(FROM_PREFIX.length)
+  const otherTags = note.tags.filter(t => !t.startsWith(FROM_PREFIX))
   return (
     <div
       className="gp gp-interactive"
@@ -322,9 +338,14 @@ function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDe
                   {note.content}
                 </p>
               )}
-              {note.tags.length > 0 && (
+              {source && (
+                <div style={{ marginTop: '10px' }}>
+                  <ProvenanceChip from={source} onDismiss={onDismissSource} />
+                </div>
+              )}
+              {otherTags.length > 0 && (
                 <div style={{ display: 'flex', gap: '6px', marginTop: '10px', flexWrap: 'wrap' }}>
-                  {note.tags.map(tag => (
+                  {otherTags.map(tag => (
                     <Badge key={tag} variant="info">{tag}</Badge>
                   ))}
                 </div>
