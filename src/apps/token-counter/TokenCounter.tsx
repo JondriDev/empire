@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Card, Button } from '../../components/ui'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { SendResultMenu } from '../../components/ui/SendResultMenu'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { emit } from '../../lib/eventBus'
 import {
@@ -191,7 +192,11 @@ export default function TokenCounter() {
             <Upload className="w-3 h-3 mr-1" /> Load File
           </Button>
           <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.py,.js,.ts,.html,.css,.xml,.yaml,.yml,.log,.env,.gitignore,.npmrc,.prettierrc" />
-          <Button onClick={() => setText('')} className="text-xs bg-white/10 hover:bg-white/20 ml-auto">
+          {/* Pass the counted text onward — lights a token-counter→target arc. */}
+          <div className="ml-auto">
+            <SendResultMenu source="token-counter" text={text} label="Send text to…" />
+          </div>
+          <Button onClick={() => setText('')} className="text-xs bg-white/10 hover:bg-white/20">
             Clear
           </Button>
         </div>

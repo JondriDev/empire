@@ -5,6 +5,46 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-23 · Builder — EPIC-1 S6b: make the three dead-end sinks emit onward (Editor, Token Counter, AI Chat)
+
+**Done.** Editor, Token Counter and AI Chat *received* a HANDOFF (chip via `useInboundHandoff`) but the
+signal died there — none could re-inject its output, so they were stuck out of the both-ways count. Gave
+each a ⚡ "Send to…" affordance that flows its result back into the organism via the EXISTING
+`CROSS_APP_ACTIONS` executors (each already `handoff(...)`s → lights a Network arc). No new collections,
+no new colours.
+- **`src/components/ui/SendResultMenu.tsx`** *(new)* — shared `<SendResultMenu source text title?
+  actions? label?/>`: a glass `gp` dropdown modeled on `NodeActions` (roving-focus keyboard nav, click-
+  outside close). Each item runs `CROSS_APP_ACTIONS[key].execute({text,title,source})`. An `ACTION_TARGET`
+  map filters out any action whose target === source (an app never offers to send to itself); disabled
+  when `!text.trim()`. Hover tints use `color-mix(in srgb, var(--signal) N%, transparent)` (the idiom
+  already at `design-system.css:484`) — deliberately NOT raw `rgba(...)`, which `scripts/metrics.mjs`
+  greps as a token violation even inside a JS string.
+- **`src/apps/editor/Editor.tsx`** — "Send code to…" over the current buffer (`source:'editor'`,
+  `title:'Code — <lang>'`), in the bottom actions row.
+- **`src/apps/token-counter/TokenCounter.tsx`** — "Send text to…" over the counted text
+  (`source:'token-counter'`), in the Load-File/Clear row.
+- **`src/apps/ai-chat/AIChat.tsx`** — per assistant reply, "Send reply to…" (`source:'ai-chat'`), beside
+  the existing Copy button.
+- **`src/components/ui/SendResultMenu.test.tsx`** *(new, 3 tests)* — running an action emits a `HANDOFF`
+  whose `fromId` is the sink app (editor→prompt-generator); the source's own action is never listed;
+  the trigger is disabled (and opens no menu) when text is blank.
+
+**Verified:** `npm run build` 🟢 (tsc -b && vite build); `npx vitest run` 🟢 **100/100** (was 97, +3);
+`npx eslint` clean on all 5 touched files. Metrics row (`scripts/metrics.mjs`):
+`apps 27 ±0 · tests 93→96 (+3) · files 13→14 (+1) · token-violations 501 ±0 · bundle gz 240.9→242.7 (+1.8)`.
+No regression — token-violations flat (color-mix over `var(--signal)`, not raw rgba), tests up.
+
+**both-ways 3/26 → 6/26.** *Not verifiable in cloud:* the source→target arc lighting in the Network is a
+visual change that can't be exercised headless — covered by the HANDOFF unit test + the proven
+`CROSS_APP_ACTIONS`/`flowForEvent` path. The dropdown layout/glass styling needs an on-device glance.
+
+**Next:** S6c — give Calendar/Goals/Messages a *natural* text→entity inbound (new `SEND_TO_CALENDAR`/
+`SEND_TO_GOALS`/`SEND_TO_MESSAGES` + the S1 receiver rail per app), closing the loop to **both-ways 6→9**
+= the honest EPIC-1 target (then EPIC-1 DONE; promote EPIC-2). Calendar trap: wire into its OWN
+`empire-calendar-events` create flow, never a central `event` syncer. Exact shape in `CONTEXT.md`.
+
+---
+
 ## 2026-06-23 · Builder — EPIC-1 S6a: surface provenance on the two silent in-place receivers (Notes + Learning)
 
 **Done.** `SEND_TO_NOTES`/`SEND_TO_LEARNING` already landed content in-place but acknowledged the

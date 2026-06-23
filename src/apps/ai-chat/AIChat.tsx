@@ -10,6 +10,7 @@ import { Bot, Send, Settings, Sparkles, X, Trash2, Copy } from 'lucide-react'
 import { streamChat, buildEmpireContext, saveConfig, getConfig } from '../../lib/ai'
 import { emit, getRecent } from '../../lib/eventBus'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { SendResultMenu } from '../../components/ui/SendResultMenu'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 
 interface Message {
@@ -237,15 +238,19 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
                 : 'border border-white/10 rounded-tl-sm'
             }`} style={msg.role === 'assistant' ? { background: 'var(--card-bg)' } : {}}>
               <div className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content || (msg.role === 'assistant' && loading && msg.id === messages[messages.length - 1]?.id ? '●' : '')}</div>
-              <div className="flex items-center gap-1 mt-1.5">
+              <div className="flex items-center gap-2 mt-1.5">
                 {msg.role === 'assistant' && (
-                  <button
-                    onClick={() => copyMessage(msg.content)}
-                    className="p-0.5 text-gray-600 hover:text-gray-400 transition-colors"
-                    title="Copy"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
+                  <>
+                    <button
+                      onClick={() => copyMessage(msg.content)}
+                      className="p-0.5 text-gray-600 hover:text-gray-400 transition-colors"
+                      title="Copy"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+                    {/* Route this reply onward — lights an ai-chat→target arc. */}
+                    <SendResultMenu source="ai-chat" text={msg.content} label="Send reply to…" />
+                  </>
                 )}
               </div>
             </div>
