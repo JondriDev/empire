@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Code, Copy, Check, Play, Save, FileText, Bot, BarChart2, Trash2 } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { SendResultMenu } from '../../components/ui/SendResultMenu'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 
 interface EditorStats {
@@ -223,6 +224,8 @@ export default function Editor() {
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-green-600/30 hover:bg-green-600/50 disabled:opacity-30 text-green-300 text-sm transition-colors">
           <Play className="w-4 h-4" /> Run
         </button>
+        {/* Re-inject this buffer into the organism — lights an editor→target arc. */}
+        <SendResultMenu source="editor" text={code} title={`Code — ${language}`} label="Send code to…" />
         {code.trim() && (
           <button onClick={() => { setCode(''); setStats({ lines: 0, chars: 0, words: 0, functions: 0, imports: 0, brackets: 0 }) }}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm transition-colors ml-auto">

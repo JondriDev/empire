@@ -172,7 +172,18 @@ the number. **Audit (settled, code-confirmed 2026-06-22):**
     shows a "From Notes" chip. **both-ways 1/26 → 3/26.** Build🟢 vitest🟢 eslint clean; reuse
     `ProvenanceChip` (no new colours) so token-violations do NOT regress.
 
-- [ ] **S6b · Make the three dead-end sinks emit onward (Editor, Token Counter, AI Chat).**
+- [x] **S6b · Make the three dead-end sinks emit onward (Editor, Token Counter, AI Chat).**
+  *(Shipped 2026-06-23.)* New shared `src/components/ui/SendResultMenu.tsx` (glass `gp` dropdown
+  modeled on `NodeActions`, roving-focus keyboard nav, disabled on empty text, drops any action
+  whose target === source so no self-handoff). Wired into Editor ("Send code to…", over the buffer),
+  Token Counter ("Send text to…", over the counted text) and per assistant reply in AI Chat
+  ("Send reply to…"). Each menu item runs an existing `CROSS_APP_ACTIONS` executor with
+  `{ text, title, source }` → the executor `handoff(...)`s → a real source→target arc lights in the
+  Network. **both-ways 3/26 → 6/26.** Tests: `SendResultMenu.test.tsx` (3) — running an action emits
+  a `HANDOFF` whose `fromId` is the sink; self-action excluded; disabled when empty. Token-violations
+  flat at **501** (hover tints use `color-mix(in srgb, var(--signal) …)`, not raw rgba). Build🟢
+  vitest 97→100🟢 eslint clean. *Cloud limit:* the source→target arc is a visual Network change not
+  verifiable headless — flagged for QA.
   They receive but the signal dies there — give each a ⚡ "Send to…" affordance that re-injects
   its output, so each becomes both-ways. **Reuse the existing `CROSS_APP_ACTIONS` executors**
   (they already call `handoff(...)` → light a Network arc); do NOT add new collections. **Shape:**
