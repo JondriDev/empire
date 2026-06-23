@@ -8,6 +8,8 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Trash2, X, C
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { useInboundHandoff } from '../../lib/useInboundHandoff'
+import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 
 interface CalendarEvent {
   id: string
@@ -65,6 +67,25 @@ export default function Calendar() {
       data: e => ({ date: e.date, time: e.time, description: e.description, tags: e.tags }),
     })
   }, [events])
+
+  // Natural inbound: a cross-app HANDOFF (text → draft event) opens the New
+  // Event form prefilled on today. Wired into Calendar's OWN create flow — no
+  // central `event` syncer (that would delete Calendar's self-mirrored nodes).
+  const inbound = useInboundHandoff<{ text?: string; title?: string; from?: string }>('empire-calendar-clipboard')
+  useEffect(() => {
+    if (!inbound.payload?.text) return
+    const t = inbound.payload.text
+    const todayStr = new Date().toISOString().split('T')[0]
+    setNewDate(todayStr)
+    setNewTitle(inbound.payload.title || t.split('\n')[0].slice(0, 80))
+    setNewTime('12:00')
+    setNewDescription(inbound.payload.title ? t : '')
+    setNewTags('')
+    setNewColor('bg-cyan-600')
+    setEditingEvent(null)
+    setSelectedDate(todayStr)
+    setShowForm(true)
+  }, [inbound.payload])
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -181,6 +202,12 @@ export default function Calendar() {
             </button>
           </div>
         </div>
+
+        {inbound.source && (
+          <div className="mb-3">
+            <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+          </div>
+        )}
 
         {/* Day headers */}
         <div className="grid grid-cols-7 mb-1">

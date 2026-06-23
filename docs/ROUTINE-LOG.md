@@ -5,6 +5,47 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-23 · Builder — EPIC-1 S6c: natural inbound for the last three entity apps (Calendar, Goals, Messages) — entity loop CLOSED
+
+**Done.** Calendar, Goals and Messages each own entities and already *emitted* (`NodeActions`) but had
+no inbound `CROSS_APP_ACTION` — the organism's loop didn't close for them. Gave each a *natural*
+text→entity receive via the S1 receiver rail, so any text from any app can flow in and land in that
+app's own create flow with a "From <source>" provenance chip.
+- **`src/lib/appActions.ts`** — three new executors mirroring `SEND_TO_EDITOR`'s shape:
+  `SEND_TO_CALENDAR` (→ `empire-calendar-clipboard`, `handoff(...,'calendar','scheduling')`),
+  `SEND_TO_GOALS` (→ `empire-goals-clipboard`, `'goal-setting'`), `SEND_TO_MESSAGES`
+  (→ `empire-messages-clipboard`, `'messaging'`). Each writes `{text,title?,from:data.source}` and
+  `window.open('/app/<x>','_self')`.
+- **`src/apps/calendar/Calendar.tsx`** — `useInboundHandoff` + a `[inbound.payload]` effect that opens
+  the **New Event** modal prefilled (title = payload title or first line; description = text when a
+  title was supplied; date = today) + `<ProvenanceChip>` above the grid. **Trap respected:** wired into
+  Calendar's OWN create flow — NO central `event` syncer (that would delete its self-mirrored nodes).
+- **`src/apps/goals/Goals.tsx`** — effect prefills the always-visible **New Goal** form (title +
+  description) + chip above the progress bar.
+- **`src/apps/messages/Messages.tsx`** — effect prefills the composer **draft** + chip above the textarea.
+- **`src/components/ui/SendResultMenu.tsx`** — added the three keys to `ACTION_TARGET` + `DEFAULT_ACTIONS`
+  so the loop is reachable from every sink's ⚡ menu (apps self-filter, never send to themselves).
+- **`src/lib/appActions.test.ts`** — extended the `it.each` HANDOFF cases +3 (calendar/goals/messages),
+  each asserting exactly one arc-bearing `HANDOFF` with the correct `toId`.
+
+**Verified:** `npm run build` 🟢 (tsc -b && vite build); `npx vitest run` 🟢 **103/103** (was 100, +3);
+`npx eslint` clean on all 6 touched files. Metrics row (`scripts/metrics.mjs`):
+`apps 27 ±0 · tests 96 ±0 (static; runtime 100→103) · files 14 ±0 · token-violations 501 ±0 · bundle gz 242.8→243.5 (+0.7)`.
+No regression — token-violations flat (reused executors/`color-mix`, no new colours), tests up, build green.
+
+**both-ways 6/9 → 9/9 entity-apps-with-inbound — EPIC-1 entity loop CLOSED.** *Not verifiable in cloud:*
+the inbound prefill + provenance chip and the source→target Network arc are visual/seeded-graph changes
+not exercisable headless — covered by the HANDOFF unit tests + the proven `useInboundHandoff`/`flowForEvent`
+rails. Needs an on-device glance to confirm each app opens prefilled with the chip.
+
+**Next:** QA confirms S6c live, retargets the METRICS "both-ways" row to **9/9 entity-apps-with-inbound**
+(files/photos/datacenter + tool apps emit-only *by design*), moves EPIC-1 → DONE, and promotes EPIC-2
+(design-token violations → 0). If already done, Builder starts **EPIC-2 S1**: chip the 501 token-violations,
+top files `HermesCommandCenter.tsx` (64) / `HermesAgentBar.tsx` (49) / `SettingsPanel.tsx` (38) /
+`Calculator.tsx` (38).
+
+---
+
 ## 2026-06-23 · Builder — EPIC-1 S6b: make the three dead-end sinks emit onward (Editor, Token Counter, AI Chat)
 
 **Done.** Editor, Token Counter and AI Chat *received* a HANDOFF (chip via `useInboundHandoff`) but the

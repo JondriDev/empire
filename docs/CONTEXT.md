@@ -22,44 +22,37 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** EPIC-1 — Organism Completeness (see `docs/EPICS.md`).
-- **Next stage:** **S6c · Natural inbound for the last three entity apps (Calendar, Goals, Messages)
-  + retarget the metric honestly** — the LAST S6 stage; finishing it closes EPIC-1. (S1–S5 shipped
-  2026-06-22; **S6a + S6b shipped 2026-06-23**, both-ways now **6/26**.) Audit SETTLED — just build.
-- **Exact shape for S6c (start here, no re-planning):** Calendar, Goals, Messages each own entities
-  and already emit but have NO inbound `CROSS_APP_ACTION` — give each a *natural* text→entity receive
-  (mirror the S1 receiver rail, ~3 lines/app). Edits:
-  1. `src/lib/appActions.ts` — add `SEND_TO_CALENDAR` (text → draft event), `SEND_TO_GOALS`
-     (text → new goal), `SEND_TO_MESSAGES` (text → composed draft): each `sessionStorage.setItem`
-     an `empire-<x>-clipboard` payload `{ text, title?, from: data.source }`, call
-     `handoff(data.source, '<app>', '<verb>')`, then `window.open('/app/<x>', '_self')`. (Model on the
-     existing `SEND_TO_EDITOR`/`SEND_TO_TOKEN_COUNTER` executors — same shape.)
-  2. `src/apps/calendar/Calendar.tsx` / `goals/Goals.tsx` / `messages/Messages.tsx` — each:
-     `const inbound = useInboundHandoff<{text;title?}>('empire-<x>-clipboard')`, a `[inbound.payload]`
-     effect that opens the app's *create* form prefilled, and `{inbound.source && <ProvenanceChip
-     from={inbound.source} onDismiss={inbound.dismiss}/>}`. **Calendar trap:** it owns its events in
-     `empire-calendar-events` and self-mirrors — wire the receive into its OWN create flow, do not add
-     a central `event` syncer.
-  3. Add the three new actions into the relevant `SendResultMenu` default list / sink toolbars so the
-     loop is reachable from the UI (Calendar/Goals/Messages also become valid `SendResultMenu` targets).
-  4. Test: extend `appActions.test.ts` — each new action emits exactly one arc-bearing `HANDOFF` with
-     the correct `toId`.
-  *Acceptance:* **both-ways 6→9** (the honest EPIC-1 target). Reuse executors/`color-mix` (no new
-  colours → token-violations flat at 501); build🟢 vitest🟢 eslint clean. **When S6c lands and QA
-  confirms both-ways = 9/9 entity-apps-with-inbound → EPIC-1 DONE; promote EPIC-2 (and QA retargets
-  the METRICS "both-ways" row to 9/9 per `docs/EPICS.md` S6c).**
-- **S6b done (this run):** new shared `src/components/ui/SendResultMenu.tsx` — glass `gp` dropdown
-  modeled on `NodeActions` (roving-focus kbd nav; disabled on empty text; `ACTION_TARGET` map drops any
-  action whose target === source so an app never sends to itself). Wired into Editor ("Send code to…",
-  over `code`), TokenCounter ("Send text to…", over `text`, in the Load-File/Clear row), and per
-  assistant reply in AIChat ("Send reply to…", next to Copy). Each item runs an existing
+- **Active epic:** EPIC-1 — Organism Completeness — **entity loop CLOSED (S6c shipped 2026-06-23).**
+  Pending QA live-confirm → then EPIC-1 DONE & promote EPIC-2.
+- **Next stage:** **QA confirms S6c live (both-ways = 9/9 entity-apps-with-inbound), retargets the
+  METRICS "both-ways" row from `x/26` to `9/9 entity-apps-with-inbound` (note: files/photos/datacenter
+  + tool apps are emit-only *by design*), moves EPIC-1 → DONE, and promotes EPIC-2 (design-token
+  violations → 0).** If QA already did this, the Builder's next stage = **EPIC-2 S1** (start chipping
+  the 501 token-violations: top files are `hermes-command-center/HermesCommandCenter.tsx` (64),
+  `components/HermesAgentBar.tsx` (49), `ai-agent/components/SettingsPanel.tsx` (38),
+  `calculator/Calculator.tsx` (38) — replace raw hex/rgb with tokens; see EPIC-2 in `docs/EPICS.md`).
+- **S6c done (this run, 2026-06-23):** all 9 entity-owning apps that honestly take input are now
+  both-ways. Added `SEND_TO_CALENDAR` / `SEND_TO_GOALS` / `SEND_TO_MESSAGES` to
+  `src/lib/appActions.ts` (each writes `empire-<x>-clipboard` `{text,title?,from}`, `handoff(...)`s,
+  `window.open('/app/<x>','_self')`). Receivers wired with the S1 rail:
+  - **Calendar** (`Calendar.tsx`): inbound opens the **New Event** modal prefilled (title = payload
+    title or first line; description = text if a title was given; date = today). **Trap respected** —
+    wired into Calendar's OWN create flow; NO central `event` syncer (that would delete its
+    self-mirrored `empire-calendar-events` nodes).
+  - **Goals** (`Goals.tsx`): inbound prefills the always-visible **New Goal** form (title + description).
+  - **Messages** (`Messages.tsx`): inbound prefills the composer **draft** (chip above the textarea).
+  Each renders `<ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss}/>`. All three added
+  to `SendResultMenu`'s `ACTION_TARGET` + `DEFAULT_ACTIONS` so the loop is UI-reachable (and the apps
+  self-filter so they never offer to send to themselves). `appActions.test.ts` HANDOFF `it.each` cases
+  extended +3. **both-ways 6/9 → 9/9.** build🟢 vitest🟢 (103) eslint clean; token-violations 501 (±0).
+  *Cloud limit:* the source→target Network arc needs a seeded graph + cross-page nav, not screenshottable.
+- **S6b done:** shared `src/components/ui/SendResultMenu.tsx` — glass `gp` dropdown modeled on
+  `NodeActions` (roving-focus kbd nav; disabled on empty text; `ACTION_TARGET` map drops any action
+  whose target === source). Wired into Editor / TokenCounter / AIChat. Each item runs an existing
   `CROSS_APP_ACTIONS[key].execute({text,title,source})` → that executor already `handoff(...)`s. **Token
-  trap avoided:** hover tints use `color-mix(in srgb, var(--signal) N%, transparent)` (already used at
-  `design-system.css:484`) — NOT raw `rgba(...)`, which `scripts/metrics.mjs` greps as a violation even
-  in JS strings. **S6a done:** `ProvenanceChip` also renders for Notes cards + Learning items
-  (`LearningItem.from?:string`; `SEND_TO_LEARNING` sets `from:data.source`).
-  **When S6a–c land and QA confirms both-ways climbed to the honest target (9 entity-apps-with-
-  inbound; files/photos/datacenter + tool apps emit-only by design) → EPIC-1 DONE; promote EPIC-2.**
+  trap avoided:** hover tints use `color-mix(in srgb, var(--signal) N%, transparent)` — NOT raw
+  `rgba(...)`, which `scripts/metrics.mjs` greps as a violation even in JS strings. **S6a done:**
+  `ProvenanceChip` also renders for Notes cards + Learning items (`LearningItem.from?:string`).
 
 ## 🧭 Codebase seams (where the important things live)
 
@@ -107,8 +100,9 @@
     A glass `gp` dropdown (styled like `NodeActions`) whose items run
     `CROSS_APP_ACTIONS[key].execute({text,title,source})` (that executor already `handoff(...)`s → an
     arc lights). `ACTION_TARGET` maps each key→target app id and filters out the source (no
-    self-handoff); `DEFAULT_ACTIONS` = Notes/PromptGen/AIChat/TokenCounter/Editor. Disabled when
-    `!text.trim()`. **Reuse for any future sink** — pass `source` + live text. Hover tints MUST stay
+    self-handoff); `DEFAULT_ACTIONS` = Notes/PromptGen/AIChat/TokenCounter/Editor **+ Calendar/Goals/
+    Messages (S6c)**. Disabled when `!text.trim()`. **Reuse for any future sink** — pass `source` +
+    live text. Hover tints MUST stay
     `color-mix(in srgb, var(--signal) N%, transparent)` (raw `rgba(...)` regresses token-violations
     even inside JS strings — see Tried & rejected). Wired into Editor / TokenCounter / AIChat.
 - **Cross-app handoffs:** `src/lib/appActions.ts` — `CROSS_APP_ACTIONS` executors; the
