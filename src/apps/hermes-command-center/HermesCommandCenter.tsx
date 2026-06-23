@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { apps, getAppIcon } from '../../lib/registry'
 import { useWindowStore } from '../../lib/windowStore'
+import { cssVar, tint } from '../../design-system/tokens'
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -86,7 +87,7 @@ function SectionHeader({
           padding: '10px 14px',
           border: 'none',
           borderRadius: 10,
-          background: 'rgba(255,255,255,0.03)',
+          background: tint('xenon', 3),
           cursor: 'pointer',
           color: 'var(--text)',
           textAlign: 'left',
@@ -94,13 +95,13 @@ function SectionHeader({
           fontWeight: 600,
           transition: 'all 0.15s',
         }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
-        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
+        onMouseEnter={e => { e.currentTarget.style.background = tint('xenon', 6) }}
+        onMouseLeave={e => { e.currentTarget.style.background = tint('xenon', 3) }}
       >
         <div style={{
           width: 32, height: 32, borderRadius: 8,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: `${color}18`, color,
+          background: `color-mix(in srgb, ${color} 9%, transparent)`, color,
         }}>
           <Icon className="w-4 h-4" />
         </div>
@@ -108,7 +109,7 @@ function SectionHeader({
         {count !== undefined && (
           <span style={{
             fontSize: 11, fontWeight: 600, color: 'var(--text3)',
-            background: 'rgba(255,255,255,0.06)', borderRadius: 8,
+            background: tint('xenon', 6), borderRadius: 8,
             padding: '2px 8px',
           }}>
             {count}
@@ -139,8 +140,8 @@ function StatusCard({ label, value, icon: Icon, color, status }: {
     <div style={{
       padding: '12px 14px',
       borderRadius: 10,
-      background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(255,255,255,0.05)',
+      background: tint('xenon', 3),
+      border: `1px solid ${tint('xenon', 5)}`,
       display: 'flex',
       alignItems: 'center',
       gap: 12,
@@ -148,7 +149,7 @@ function StatusCard({ label, value, icon: Icon, color, status }: {
       <div style={{
         width: 36, height: 36, borderRadius: 8,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: `${color}14`,
+        background: `color-mix(in srgb, ${color} 8%, transparent)`,
       }}>
         <Icon className="w-4 h-4" style={{ color }} />
       </div>
@@ -157,9 +158,9 @@ function StatusCard({ label, value, icon: Icon, color, status }: {
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{value}</div>
       </div>
       {status && (
-        status === 'ok' ? <CheckCircle2 className="w-4 h-4" style={{ color: '#22c55e' }} />
-          : status === 'warn' ? <AlertCircle className="w-4 h-4" style={{ color: '#eab308' }} />
-            : <XCircle className="w-4 h-4" style={{ color: '#ef4444' }} />
+        status === 'ok' ? <CheckCircle2 className="w-4 h-4" style={{ color: cssVar('c-success') }} />
+          : status === 'warn' ? <AlertCircle className="w-4 h-4" style={{ color: cssVar('c-warn') }} />
+            : <XCircle className="w-4 h-4" style={{ color: cssVar('c-danger') }} />
       )}
     </div>
   )
@@ -182,12 +183,12 @@ function MetricBar({ label, value, max, color }: {
       </div>
       <div style={{
         height: 6, borderRadius: 3,
-        background: 'rgba(255,255,255,0.06)',
+        background: tint('xenon', 6),
         overflow: 'hidden',
       }}>
         <div style={{
           width: `${pct}%`, height: '100%', borderRadius: 3,
-          background: `linear-gradient(90deg, ${color}, ${color}88)`,
+          background: `linear-gradient(90deg, ${color}, color-mix(in srgb, ${color} 53%, transparent))`,
           transition: 'width 0.3s',
         }} />
       </div>
@@ -214,9 +215,9 @@ function ActionButton({ icon: Icon, label, onClick, color, disabled, subtle }: {
         alignItems: 'center',
         gap: 8,
         padding: '8px 14px',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: `1px solid ${tint('xenon', 6)}`,
         borderRadius: 8,
-        background: subtle ? 'transparent' : 'rgba(255,255,255,0.03)',
+        background: subtle ? 'transparent' : tint('xenon', 3),
         cursor: disabled ? 'not-allowed' : 'pointer',
         color: disabled ? 'var(--text3)' : 'var(--text2)',
         fontSize: 13,
@@ -225,10 +226,10 @@ function ActionButton({ icon: Icon, label, onClick, color, disabled, subtle }: {
         opacity: disabled ? 0.4 : 1,
       }}
       onMouseEnter={e => {
-        if (!disabled) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+        if (!disabled) e.currentTarget.style.background = tint('xenon', 6)
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.background = subtle ? 'transparent' : 'rgba(255,255,255,0.03)'
+        e.currentTarget.style.background = subtle ? 'transparent' : tint('xenon', 3)
       }}
     >
       <Icon className="w-4 h-4" style={{ color: color || 'var(--text3)' }} />
@@ -252,17 +253,17 @@ function AppConnectorCard({ app, onOpen }: {
         alignItems: 'center',
         gap: 10,
         padding: '10px 12px',
-        border: '1px solid rgba(255,255,255,0.05)',
+        border: `1px solid ${tint('xenon', 5)}`,
         borderRadius: 8,
-        background: 'rgba(255,255,255,0.02)',
+        background: tint('xenon', 2),
         cursor: 'pointer',
         width: '100%',
         textAlign: 'left',
         color: 'var(--text)',
         transition: 'all 0.15s',
       }}
-      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = `${app.color}30` }}
-      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)' }}
+      onMouseEnter={e => { e.currentTarget.style.background = tint('xenon', 5); e.currentTarget.style.borderColor = `${app.color}30` }}
+      onMouseLeave={e => { e.currentTarget.style.background = tint('xenon', 2); e.currentTarget.style.borderColor = tint('xenon', 5) }}
     >
       <div style={{
         width: 32, height: 32, borderRadius: 8,
@@ -289,8 +290,8 @@ function SkillCard({ skill }: { skill: SkillItem }) {
     <div style={{
       padding: '10px 12px',
       borderRadius: 8,
-      background: 'rgba(255,255,255,0.02)',
-      border: '1px solid rgba(255,255,255,0.05)',
+      background: tint('xenon', 2),
+      border: `1px solid ${tint('xenon', 5)}`,
     }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>
         {skill.name}
@@ -452,9 +453,9 @@ export default function HermesCommandCenter() {
         <div style={{
           width: 36, height: 36, borderRadius: 10,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+          background: `linear-gradient(135deg, ${cssVar('ion')}, ${cssVar('plasma')})`,
         }}>
-          <Command className="w-5 h-5" style={{ color: '#fff' }} />
+          <Command className="w-5 h-5" style={{ color: cssVar('xenon') }} />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>Cakra Command Center</div>
@@ -466,8 +467,8 @@ export default function HermesCommandCenter() {
           onClick={loadStatus}
           style={{
             padding: 8, borderRadius: 8,
-            border: '1px solid rgba(255,255,255,0.06)',
-            background: 'rgba(255,255,255,0.03)',
+            border: `1px solid ${tint('xenon', 6)}`,
+            background: tint('xenon', 3),
             cursor: 'pointer',
             color: 'var(--text3)',
             display: 'flex',
@@ -499,12 +500,12 @@ export default function HermesCommandCenter() {
         {error && !status && (
           <div style={{
             padding: 16, borderRadius: 10,
-            background: 'rgba(239,68,68,0.08)',
-            border: '1px solid rgba(239,68,68,0.2)',
+            background: tint('c-danger', 8),
+            border: `1px solid ${tint('c-danger', 20)}`,
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            color: '#ef4444',
+            color: cssVar('c-danger'),
             fontSize: 13,
             marginBottom: 16,
           }}>
@@ -517,7 +518,7 @@ export default function HermesCommandCenter() {
         <SectionHeader
           title="Status Dashboard"
           icon={Activity}
-          color="#22c55e"
+          color={cssVar('c-success')}
           expanded={sections.status}
           onToggle={() => toggleSection('status')}
         >
@@ -529,21 +530,21 @@ export default function HermesCommandCenter() {
                 gap: 8,
                 marginBottom: 12,
               }}>
-                <StatusCard label="Version" value={status.version} icon={Sparkles} color="#6366f1" status="ok" />
-                <StatusCard label="Model" value={status.model} icon={Cpu} color="#8b5cf6" status="ok" />
-                <StatusCard label="Provider" value={status.provider} icon={Server} color="#06b6d4" status="ok" />
-                <StatusCard label="Uptime" value={`${Math.floor(status.uptime / 60)}m ${Math.floor(status.uptime % 60)}s`} icon={Clock} color="#22c55e" status="ok" />
-                <StatusCard label="Arch" value={status.system.arch} icon={Cpu} color="#f59e0b" />
-                <StatusCard label="Memory" value={status.system.memory} icon={HardDrive} color="#ec4899" status={status.memoryUsage.percent > 80 ? 'warn' : 'ok'} />
-                <StatusCard label="Storage" value={status.system.storage} icon={HardDrive} color="#14b8a6" status="ok" />
-                <StatusCard label="AI Proxy" value={status.configured ? 'Configured' : 'No API Key'} icon={Globe} color="#6366f1" status={status.configured ? 'ok' : 'warn'} />
+                <StatusCard label="Version" value={status.version} icon={Sparkles} color={cssVar('ion')} status="ok" />
+                <StatusCard label="Model" value={status.model} icon={Cpu} color={cssVar('plasma')} status="ok" />
+                <StatusCard label="Provider" value={status.provider} icon={Server} color={cssVar('c-info')} status="ok" />
+                <StatusCard label="Uptime" value={`${Math.floor(status.uptime / 60)}m ${Math.floor(status.uptime % 60)}s`} icon={Clock} color={cssVar('c-success')} status="ok" />
+                <StatusCard label="Arch" value={status.system.arch} icon={Cpu} color={cssVar('c-warn')} />
+                <StatusCard label="Memory" value={status.system.memory} icon={HardDrive} color={cssVar('plasma')} status={status.memoryUsage.percent > 80 ? 'warn' : 'ok'} />
+                <StatusCard label="Storage" value={status.system.storage} icon={HardDrive} color={cssVar('signal')} status="ok" />
+                <StatusCard label="AI Proxy" value={status.configured ? 'Configured' : 'No API Key'} icon={Globe} color={cssVar('ion')} status={status.configured ? 'ok' : 'warn'} />
               </div>
 
               <MetricBar
                 label="Memory Usage"
                 value={status.memoryUsage.current}
                 max={status.memoryUsage.limit}
-                color="#6366f1"
+                color={cssVar('ion')}
               />
 
               <div style={{
@@ -552,9 +553,9 @@ export default function HermesCommandCenter() {
                 flexWrap: 'wrap',
                 marginTop: 8,
               }}>
-                <StatusCard label="Skills" value={`${status.skillsCount}`} icon={BookOpen} color="#8b5cf6" />
-                <StatusCard label="Plugins" value={`${status.pluginsCount}`} icon={Puzzle} color="#ec4899" />
-                <StatusCard label="MCP Servers" value={`${status.mcpCount}`} icon={Link2} color="#06b6d4" />
+                <StatusCard label="Skills" value={`${status.skillsCount}`} icon={BookOpen} color={cssVar('plasma')} />
+                <StatusCard label="Plugins" value={`${status.pluginsCount}`} icon={Puzzle} color={cssVar('plasma')} />
+                <StatusCard label="MCP Servers" value={`${status.mcpCount}`} icon={Link2} color={cssVar('c-info')} />
               </div>
             </>
           ) : loading ? null : (
@@ -568,7 +569,7 @@ export default function HermesCommandCenter() {
         <SectionHeader
           title="App Connectors"
           icon={Grid3X3}
-          color="#6366f1"
+          color={cssVar('ion')}
           count={apps.length}
           expanded={sections.connectors}
           onToggle={() => toggleSection('connectors')}
@@ -588,7 +589,7 @@ export default function HermesCommandCenter() {
         <SectionHeader
           title="Skills"
           icon={BookOpen}
-          color="#8b5cf6"
+          color={cssVar('plasma')}
           count={skills.length}
           expanded={sections.skills}
           onToggle={() => toggleSection('skills')}
@@ -599,8 +600,8 @@ export default function HermesCommandCenter() {
             gap: 8,
             padding: '8px 12px',
             borderRadius: 8,
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.05)',
+            background: tint('xenon', 3),
+            border: `1px solid ${tint('xenon', 5)}`,
             marginBottom: 10,
           }}>
             <Search className="w-4 h-4" style={{ color: 'var(--text3)' }} />
@@ -647,7 +648,7 @@ export default function HermesCommandCenter() {
         <SectionHeader
           title="MCP Servers"
           icon={Link2}
-          color="#06b6d4"
+          color={cssVar('c-info')}
           count={mcps.length}
           expanded={sections.mcps}
           onToggle={() => toggleSection('mcps')}
@@ -655,8 +656,8 @@ export default function HermesCommandCenter() {
           {mcps.length === 0 ? (
             <div style={{
               padding: 20, borderRadius: 8,
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px dashed rgba(255,255,255,0.08)',
+              background: tint('xenon', 2),
+              border: `1px dashed ${tint('xenon', 8)}`,
               textAlign: 'center',
               color: 'var(--text3)',
               fontSize: 13,
@@ -670,16 +671,16 @@ export default function HermesCommandCenter() {
                 <div key={mcp.name} style={{
                   padding: '10px 12px',
                   borderRadius: 8,
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.05)',
+                  background: tint('xenon', 2),
+                  border: `1px solid ${tint('xenon', 5)}`,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 10,
                 }}>
                   <div style={{
                     width: 8, height: 8, borderRadius: '50%',
-                    background: mcp.status === 'connected' ? '#22c55e'
-                      : mcp.status === 'error' ? '#ef4444' : '#78716c',
+                    background: mcp.status === 'connected' ? cssVar('c-success')
+                      : mcp.status === 'error' ? cssVar('c-danger') : cssVar('text3'),
                     flexShrink: 0,
                   }} />
                   <div style={{ flex: 1 }}>
@@ -702,7 +703,7 @@ export default function HermesCommandCenter() {
                       border: 'none',
                       background: 'transparent',
                       cursor: 'pointer',
-                      color: copiedId === `mcp-${mcp.name}` ? '#22c55e' : 'var(--text3)',
+                      color: copiedId === `mcp-${mcp.name}` ? cssVar('c-success') : 'var(--text3)',
                     }}
                     title="Copy command"
                   >
@@ -718,7 +719,7 @@ export default function HermesCommandCenter() {
         <SectionHeader
           title="System Tools"
           icon={Wrench}
-          color="#f59e0b"
+          color={cssVar('c-warn')}
           expanded={sections.tools}
           onToggle={() => toggleSection('tools')}
         >
@@ -729,13 +730,13 @@ export default function HermesCommandCenter() {
                 icon={tool.id === 'terminal' ? Terminal : tool.id === 'editor' ? Code2 : tool.id === 'files' ? FileText : Globe}
                 label={tool.label}
                 onClick={tool.action}
-                color="#f59e0b"
+                color={cssVar('c-warn')}
               />
             ))}
           </div>
 
           {status && (
-            <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.02)' }}>
+            <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 8, background: tint('xenon', 2) }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text2)', marginBottom: 8 }}>
                 System Info
               </div>
@@ -753,7 +754,7 @@ export default function HermesCommandCenter() {
         <SectionHeader
           title="Quick Actions"
           icon={Zap}
-          color="#eab308"
+          color={cssVar('c-warn')}
           expanded={sections.quick}
           onToggle={() => toggleSection('quick')}
         >
@@ -764,20 +765,20 @@ export default function HermesCommandCenter() {
                 icon={Zap}
                 label={action.label}
                 onClick={action.action}
-                color={action.id === 'refresh-status' ? '#6366f1' : '#22c55e'}
+                color={action.id === 'refresh-status' ? cssVar('ion') : cssVar('c-success')}
               />
             ))}
           </div>
 
           <div style={{
             padding: 10, borderRadius: 8,
-            background: 'rgba(99,102,241,0.06)',
-            border: '1px solid rgba(99,102,241,0.12)',
+            background: tint('ion', 6),
+            border: `1px solid ${tint('ion', 12)}`,
             fontSize: 12,
             color: 'var(--text2)',
             lineHeight: 1.5,
           }}>
-            <strong style={{ color: '#818cf8' }}>Cakra Agent v{status?.version || '?'}</strong>
+            <strong style={{ color: cssVar('ion') }}>Cakra Agent v{status?.version || '?'}</strong>
             <br />
             Running on {status?.system.os || 'Android'} &middot; {status?.provider || 'Unknown'} provider
             <br />

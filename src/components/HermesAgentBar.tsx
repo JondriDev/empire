@@ -16,6 +16,7 @@ import { CROSS_APP_ACTIONS, type DataPayload } from '../lib/appActions'
 import { getModelName, streamChat, buildEmpireContext } from '../lib/ai'
 import { on, emit, getAllRecent } from '../lib/eventBus'
 import type { EmpireEvent } from '../lib/eventBus'
+import { cssVar, tint } from '../design-system/tokens'
 
 // Auto-detect current app from URL
 function useCurrentAppId(): string {
@@ -32,10 +33,10 @@ interface ActivityItem {
 }
 
 const APP_COLORS: Record<string, string> = {
-  calculator: '#f97316', notes: '#eab308', calendar: '#3b82f6',
-  messages: '#818cf8', learningtracker: '#22c55e', aichat: '#0d9488',
-  editor: '#6366f1', datacenter: '#64748b', grammar: '#10b981',
-  language: '#22d3ee', browser: '#14b8a6', default: '#0d9488',
+  calculator: cssVar('ember'), notes: cssVar('c-warn'), calendar: cssVar('ion'),
+  messages: cssVar('ion'), learningtracker: cssVar('c-success'), aichat: cssVar('signal'),
+  editor: cssVar('ion'), datacenter: cssVar('text2'), grammar: cssVar('aurora'),
+  language: cssVar('signal'), browser: cssVar('signal'), default: cssVar('signal'),
 }
 
 const EVENT_TYPE_MAP: Array<{ prefix: string; appId: string }> = [
@@ -215,7 +216,7 @@ export default function HermesAgentBar() {
           background: 'var(--gl-bg)',
           backdropFilter: 'var(--gl-blur)',
           WebkitBackdropFilter: 'var(--gl-blur)',
-          border: '1px solid rgba(34,211,238,0.25)',
+          border: `1px solid ${tint('signal', 25)}`,
           boxShadow: 'var(--glow-teal)',
         }}
       >
@@ -237,11 +238,11 @@ export default function HermesAgentBar() {
         aria-expanded={open}
         className="hermes-trigger fixed right-3 bottom-20 z-40 flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all duration-200"
         style={{
-          background: 'rgba(13, 18, 36, 0.85)',
+          background: tint('abyss', 85),
           backdropFilter: 'blur(var(--blur-xl)) saturate(1.6)',
           WebkitBackdropFilter: 'blur(var(--blur-xl)) saturate(1.6)',
-          border: '1px solid rgba(34,211,238,0.3)',
-          boxShadow: '0 4px 18px rgba(0,0,0,0.4), 0 0 24px rgba(34,211,238,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
+          border: `1px solid ${tint('signal', 30)}`,
+          boxShadow: `0 4px 18px ${tint('void', 40)}, 0 0 24px ${tint('signal', 18)}, inset 0 1px 0 ${tint('xenon', 5)}`,
         }}
         onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)' }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = '' }}
@@ -266,20 +267,20 @@ export default function HermesAgentBar() {
             background: 'var(--gl-bg-el)',
             backdropFilter: 'var(--gl-blur-el)',
             WebkitBackdropFilter: 'var(--gl-blur-el)',
-            border: '1px solid rgba(34,211,238,0.2)',
-            boxShadow: '0 24px 64px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.3), var(--glow-teal)',
+            border: `1px solid ${tint('signal', 20)}`,
+            boxShadow: `0 24px 64px ${tint('void', 60)}, 0 4px 16px ${tint('void', 30)}, var(--glow-teal)`,
             maxHeight: '480px',
           }}
         >
           {/* Header */}
           <div
             className="flex items-center justify-between px-4 py-2.5 flex-shrink-0"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+            style={{ borderBottom: `1px solid ${tint('xenon', 6)}` }}
           >
             <div className="flex items-center gap-2.5">
               <div
                 className="w-6 h-6 rounded-lg flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #0d9488, #0e7490)' }}
+                style={{ background: `linear-gradient(135deg, ${cssVar('signal')}, ${cssVar('ion')})` }}
               >
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
@@ -293,7 +294,7 @@ export default function HermesAgentBar() {
             <div className="flex items-center gap-1.5">
               <span
                 className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                style={{ background: `${currentAppColor}18`, color: currentAppColor }}
+                style={{ background: `color-mix(in srgb, ${currentAppColor} 9%, transparent)`, color: currentAppColor }}
               >
                 {appDef?.name}
               </span>
@@ -317,7 +318,7 @@ export default function HermesAgentBar() {
           </div>
 
           {/* Tab bar */}
-          <div className="flex flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="flex flex-shrink-0" style={{ borderBottom: `1px solid ${tint('xenon', 5)}` }}>
             {([
               { id: 'actions'  as const, label: 'Actions',  icon: Zap },
               { id: 'activity' as const, label: 'Activity', icon: Activity },
@@ -361,12 +362,12 @@ export default function HermesAgentBar() {
                 </div>
 
                 {([
-                  { key: 'SEND_TO_NOTES'       as const, icon: StickyNote,      color: '#eab308', label: 'Save to Notes' },
-                  { key: 'SEND_TO_EDITOR'       as const, icon: Wand2,          color: '#6366f1', label: 'Open in Code Editor' },
-                  { key: 'SEND_TO_TOKEN_COUNTER' as const, icon: Hash,          color: '#38bdf8', label: 'Count Tokens' },
-                  { key: 'SEND_TO_LEARNING'    as const, icon: GraduationCap,   color: '#22c55e', label: 'Track as Learning' },
-                  { key: 'SEND_TO_PROMPT_GEN'  as const, icon: Zap,             color: '#0d9488', label: 'Generate Prompt' },
-                  { key: 'SEND_TO_AI_CHAT'    as const, icon: Sparkles,        color: '#0d9488', label: 'Ask Cakra (this context)' },
+                  { key: 'SEND_TO_NOTES'       as const, icon: StickyNote,      color: cssVar('c-warn'), label: 'Save to Notes' },
+                  { key: 'SEND_TO_EDITOR'       as const, icon: Wand2,          color: cssVar('ion'), label: 'Open in Code Editor' },
+                  { key: 'SEND_TO_TOKEN_COUNTER' as const, icon: Hash,          color: cssVar('signal'), label: 'Count Tokens' },
+                  { key: 'SEND_TO_LEARNING'    as const, icon: GraduationCap,   color: cssVar('c-success'), label: 'Track as Learning' },
+                  { key: 'SEND_TO_PROMPT_GEN'  as const, icon: Zap,             color: cssVar('signal'), label: 'Generate Prompt' },
+                  { key: 'SEND_TO_AI_CHAT'    as const, icon: Sparkles,        color: cssVar('signal'), label: 'Ask Cakra (this context)' },
                 ]).map(action => (
                   <button
                     key={action.key}
@@ -432,12 +433,12 @@ export default function HermesAgentBar() {
                         className="max-w-[85%] rounded-2xl px-3 py-2 text-[11px] leading-relaxed"
                         style={{
                           background: msg.role === 'user'
-                            ? 'linear-gradient(135deg, rgba(34,211,238,0.25), rgba(13,148,136,0.2))'
-                            : 'rgba(255,255,255,0.05)',
-                          color: msg.role === 'user' ? '#e0f7fa' : 'var(--text2)',
+                            ? `linear-gradient(135deg, ${tint('signal', 25)}, ${tint('signal', 20)})`
+                            : tint('xenon', 5),
+                          color: msg.role === 'user' ? cssVar('xenon') : 'var(--text2)',
                           border: msg.role === 'user'
-                            ? '1px solid rgba(34,211,238,0.2)'
-                            : '1px solid rgba(255,255,255,0.06)',
+                            ? `1px solid ${tint('signal', 20)}`
+                            : `1px solid ${tint('xenon', 6)}`,
                         }}
                       >
                         {msg.role === 'hermes' && <Bot className="w-2.5 h-2.5 inline mr-1 text-cyan-300" />}
@@ -449,7 +450,7 @@ export default function HermesAgentBar() {
                     <div className="flex justify-start">
                       <div
                         className="rounded-2xl px-3 py-2 text-[11px]"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}
+                        style={{ background: tint('xenon', 5), border: `1px solid ${tint('xenon', 6)}` }}
                       >
                         <span className="animate-pulse" style={{ color: 'var(--color-cyan-4)' }}>●</span>
                       </div>
@@ -462,7 +463,7 @@ export default function HermesAgentBar() {
                 <form
                   onSubmit={handleChatSubmit}
                   className="p-2 flex gap-2 flex-shrink-0"
-                  style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+                  style={{ borderTop: `1px solid ${tint('xenon', 6)}` }}
                 >
                   <input
                     value={chatInput}
@@ -471,19 +472,19 @@ export default function HermesAgentBar() {
                     aria-label="Ask Cakra"
                     className="flex-1 rounded-xl px-3 py-2 text-[11px] transition-all duration-150"
                     style={{
-                      background: 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: tint('xenon', 6),
+                      border: `1px solid ${tint('xenon', 8)}`,
                       color: 'var(--text)',
                       outline: 'none',
                     }}
                     onFocus={e => {
-                      e.target.style.background = 'rgba(255,255,255,0.09)'
-                      e.target.style.borderColor = 'rgba(34,211,238,0.4)'
-                      e.target.style.boxShadow = '0 0 0 2px rgba(34,211,238,0.2)'
+                      e.target.style.background = tint('xenon', 9)
+                      e.target.style.borderColor = tint('signal', 40)
+                      e.target.style.boxShadow = `0 0 0 2px ${tint('signal', 20)}`
                     }}
                     onBlur={e => {
-                      e.target.style.background = 'rgba(255,255,255,0.06)'
-                      e.target.style.borderColor = 'rgba(255,255,255,0.08)'
+                      e.target.style.background = tint('xenon', 6)
+                      e.target.style.borderColor = tint('xenon', 8)
                       e.target.style.boxShadow = 'none'
                     }}
                   />
@@ -494,7 +495,7 @@ export default function HermesAgentBar() {
                     className="p-2 rounded-xl transition-all duration-150 hover:scale-105 disabled:opacity-30 disabled:hover:scale-100"
                     style={{
                       background: 'linear-gradient(135deg, var(--color-cyan-5), var(--color-teal-3))',
-                      boxShadow: '0 2px 8px rgba(34,211,238,0.4)',
+                      boxShadow: `0 2px 8px ${tint('signal', 40)}`,
                     }}
                   >
                     <Send className="w-3 h-3 text-white" />
@@ -507,7 +508,7 @@ export default function HermesAgentBar() {
           {/* Footer */}
           <div
             className="px-4 py-1.5 text-[9px] flex items-center justify-between flex-shrink-0"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.05)', color: 'var(--text3)' }}
+            style={{ borderTop: `1px solid ${tint('xenon', 5)}`, color: 'var(--text3)' }}
           >
             <span>I am the connector</span>
             <button
