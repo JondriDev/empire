@@ -8,6 +8,8 @@ import { Bot, Send } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { useInboundHandoff } from '../../lib/useInboundHandoff'
+import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 
 const CONTACTS = ['Jondri', 'Work', 'Family', 'Urgent', 'AI Bot']
 
@@ -20,6 +22,13 @@ export default function Messages() {
  useEffect(() => {
  emit({ type: 'APP_OPENED', appId: 'messages' })
  }, [])
+
+  // Natural inbound: a cross-app HANDOFF (text → composed draft) prefills the
+  // message composer so the receive lands in Messages' own send flow.
+  const inbound = useInboundHandoff<{ text?: string; title?: string; from?: string }>('empire-messages-clipboard')
+  useEffect(() => {
+    if (inbound.payload?.text) setDraft(inbound.payload.text)
+  }, [inbound.payload])
 
  const send = () => {
     if (!draft.trim()) return
@@ -160,6 +169,11 @@ export default function Messages() {
 
         {/* Input */}
         <div className="px-6 pb-6 pt-2">
+          {inbound.source && (
+            <div className="mb-2">
+              <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+            </div>
+          )}
           <div className="flex gap-2 items-end">
             <textarea
               value={draft}

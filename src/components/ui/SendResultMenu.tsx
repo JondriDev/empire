@@ -25,6 +25,9 @@ const ACTION_TARGET: Record<AppActionKey, string> = {
   SEND_TO_PROMPT_GEN: 'prompt-generator',
   SEND_TO_AI_CHAT: 'ai-chat',
   SEND_TO_LEARNING: 'learning-tracker',
+  SEND_TO_CALENDAR: 'calendar',
+  SEND_TO_GOALS: 'goals',
+  SEND_TO_MESSAGES: 'messages',
   ASK_HERMES_TO_ANALYZE: 'ai-chat',
 }
 
@@ -34,6 +37,9 @@ const DEFAULT_ACTIONS: AppActionKey[] = [
   'SEND_TO_AI_CHAT',
   'SEND_TO_TOKEN_COUNTER',
   'SEND_TO_EDITOR',
+  'SEND_TO_CALENDAR',
+  'SEND_TO_GOALS',
+  'SEND_TO_MESSAGES',
 ]
 
 export function SendResultMenu({

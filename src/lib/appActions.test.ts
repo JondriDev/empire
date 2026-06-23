@@ -37,6 +37,9 @@ describe('HANDOFF emission', () => {
     ['SEND_TO_TOKEN_COUNTER', 'token-counter'],
     ['SEND_TO_PROMPT_GEN', 'prompt-generator'],
     ['SEND_TO_AI_CHAT', 'ai-chat'],
+    ['SEND_TO_CALENDAR', 'calendar'],
+    ['SEND_TO_GOALS', 'goals'],
+    ['SEND_TO_MESSAGES', 'messages'],
   ] as const
 
   it.each(cases)('%s emits a directed HANDOFF from source to %s', (key, toId) => {

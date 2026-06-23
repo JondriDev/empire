@@ -8,6 +8,8 @@ import { Bot, Plus, Check, Target, Flag } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { useInboundHandoff } from '../../lib/useInboundHandoff'
+import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 
 interface Goal {
   id: string
@@ -51,6 +53,16 @@ export default function Goals() {
       data: g => ({ description: g.description, deadline: g.deadline, progress: g.progress, completed: g.completed }),
     })
   }, [goals])
+
+  // Natural inbound: a cross-app HANDOFF (text → new goal) prefills the New Goal
+  // form so the receive lands in Goals' own create flow.
+  const inbound = useInboundHandoff<{ text?: string; title?: string; from?: string }>('empire-goals-clipboard')
+  useEffect(() => {
+    if (!inbound.payload?.text) return
+    const t = inbound.payload.text
+    setTitle(inbound.payload.title || t.split('\n')[0].slice(0, 80))
+    setDescription(inbound.payload.title ? t : '')
+  }, [inbound.payload])
 
   const add = () => {
     if (!title.trim()) return
@@ -147,6 +159,12 @@ export default function Goals() {
           <Bot className="w-3.5 h-3.5" /> Ask Hermes
         </button>
       </div>
+
+      {inbound.source && (
+        <div className="mb-4">
+          <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+        </div>
+      )}
 
       {/* Progress bar */}
       <div className="mb-6 h-2 rounded-full overflow-hidden" style={{ background: 'var(--input-bg)' }}>

@@ -199,8 +199,17 @@ the number. **Audit (settled, code-confirmed 2026-06-22):**
     The Network; same for `token-counter → notes` and `ai-chat → notes`. **both-ways 3/26 → 6/26.**
     Build🟢 vitest🟢 eslint clean; token-violations not regressed.
 
-- [ ] **S6c · Natural inbound for the last three entity apps (Calendar, Goals, Messages) + retarget
-  the metric honestly.** Each owns entities and already emits but has no inbound `CROSS_APP_ACTION`;
+- [x] **S6c · Natural inbound for the last three entity apps (Calendar, Goals, Messages) + retarget
+  the metric honestly.** ✅ Shipped 2026-06-23. `SEND_TO_CALENDAR` (text → draft event, opens New
+  Event form prefilled on today), `SEND_TO_GOALS` (text → New Goal form prefilled),
+  `SEND_TO_MESSAGES` (text → composed draft) added to `appActions.ts`; each app wired with
+  `useInboundHandoff` + a `[inbound.payload]` create-form preload + `<ProvenanceChip>`. All three
+  added to `SendResultMenu` `ACTION_TARGET` + `DEFAULT_ACTIONS` so the loop is UI-reachable.
+  `appActions.test.ts` HANDOFF cases extended (+3, now 11 in file; vitest 100→103). **both-ways 6/9
+  → 9/9 entity-apps-with-inbound — EPIC-1 entity loop CLOSED.** build🟢 vitest🟢 (103) eslint clean;
+  token-violations 501 (±0). **QA: confirm live, then retarget the METRICS both-ways row to 9/9 and
+  promote EPIC-2.** Original spec below:
+  Each owns entities and already emits but has no inbound `CROSS_APP_ACTION`;
   give each a *natural* text→entity receive so the organism's loop closes for every entity app that
   honestly takes input. **Shape (mirror the S1 receiver rail — ~3 lines/app):**
   - **`src/lib/appActions.ts`** — add `SEND_TO_CALENDAR` (text → draft event), `SEND_TO_GOALS`

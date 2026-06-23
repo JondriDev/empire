@@ -145,6 +145,57 @@ export const CROSS_APP_ACTIONS = {
     },
   } as const,
 
+  SEND_TO_CALENDAR: {
+    id: 'send-to-calendar',
+    label: 'Add to Calendar',
+    icon: 'Calendar',
+    description: 'Draft a calendar event from this',
+    execute: (data: DataPayload) => {
+      sessionStorage.setItem('empire-calendar-clipboard', JSON.stringify({
+        text: data.text,
+        title: data.title,
+        from: data.source,
+      }))
+      handoff(data.source, 'calendar', 'scheduling')
+      window.open('/app/calendar', '_self')
+      return 'Opened in Calendar'
+    },
+  } as const,
+
+  SEND_TO_GOALS: {
+    id: 'send-to-goals',
+    label: 'Make a Goal',
+    icon: 'Target',
+    description: 'Turn this into a new goal',
+    execute: (data: DataPayload) => {
+      sessionStorage.setItem('empire-goals-clipboard', JSON.stringify({
+        text: data.text,
+        title: data.title,
+        from: data.source,
+      }))
+      handoff(data.source, 'goals', 'goal-setting')
+      window.open('/app/goals', '_self')
+      return 'Opened in Goals'
+    },
+  } as const,
+
+  SEND_TO_MESSAGES: {
+    id: 'send-to-messages',
+    label: 'Draft a Message',
+    icon: 'MessageSquare',
+    description: 'Compose a message draft from this',
+    execute: (data: DataPayload) => {
+      sessionStorage.setItem('empire-messages-clipboard', JSON.stringify({
+        text: data.text,
+        title: data.title,
+        from: data.source,
+      }))
+      handoff(data.source, 'messages', 'messaging')
+      window.open('/app/messages', '_self')
+      return 'Opened in Messages'
+    },
+  } as const,
+
   ASK_HERMES_TO_ANALYZE: {
     id: 'ask-hermes-analyze',
     label: 'Ask Hermes to Analyze',
