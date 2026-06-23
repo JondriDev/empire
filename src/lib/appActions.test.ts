@@ -81,4 +81,10 @@ describe('SEND_TO_LEARNING', () => {
     expect(logged && logged.type === 'LEARNING_LOGGED' && logged.from).toBe('editor')
     expect(useStore.getState().learningItems.at(-1)?.learned).toBe('closures')
   })
+
+  it('persists the source on the stored item so it can render a ProvenanceChip (S6a)', () => {
+    CROSS_APP_ACTIONS.SEND_TO_LEARNING.execute({ text: 'monads', source: 'notes' })
+    // `from` makes the in-place receive legible — Learning becomes a both-ways app.
+    expect(useStore.getState().learningItems.at(-1)?.from).toBe('notes')
+  })
 })

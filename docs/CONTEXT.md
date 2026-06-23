@@ -23,27 +23,30 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** EPIC-1 — Organism Completeness (see `docs/EPICS.md`).
-- **Next stage:** **S6a · Surface provenance on the two silent in-place receivers (Notes + Learning)** —
-  the first of three S6 stages that close the emit↔receive loop. (S1–S5 all shipped 2026-06-22.)
+- **Next stage:** **S6b · Make the three dead-end sinks emit onward (Editor, Token Counter, AI Chat)** —
+  the second of three S6 stages. (S1–S5 shipped 2026-06-22; **S6a shipped 2026-06-23**, both-ways now 3/26.)
   The audit is SETTLED (full breakdown in `docs/EPICS.md` S6) — no re-auditing, just build.
-- **Exact shape for S6a (start here, no re-planning):** the headline metric *apps both-ways* is
-  stuck at **1/26** (only `prompt-generator` emits AND legibly receives). Notes & Learning already
-  emit AND receive content in-place (`SEND_TO_NOTES`/`SEND_TO_LEARNING`) but acknowledge nothing —
-  make the receive *legible* and both flip to both-ways (1→3). Edits:
-  1. `src/lib/store.ts` — add `from?: string` to `interface LearningItem` (optional, backward-compat).
-  2. `src/lib/appActions.ts` — in `SEND_TO_LEARNING.execute`, set `from: data.source` on the
-     `addLearningItem({...})` (Notes already tags `from-<source>` — no change there).
-  3. `src/apps/notes/Notes.tsx` — note cards whose `tags` include a `from-<source>` render
-     `<ProvenanceChip from={source} onDismiss={…}/>`; dismiss strips only that tag via `updateNote`.
-  4. `src/apps/learning-tracker/LearningTracker.tsx` — items with `item.from` render a
-     `<ProvenanceChip>`; dismiss clears `from`.
-  5. Extend `src/lib/appActions.test.ts` — assert `SEND_TO_LEARNING` persists `from === data.source`.
-  *Acceptance:* ⚡ Send-to-Notes from Calculator → new note shows a "From Calculator" chip; ⚡
-  Track-as-Learning from Notes → new item shows a "From Notes" chip. **both-ways 1→3.** Reuse
-  `ProvenanceChip` (no new colours → token-violations flat); build🟢 vitest🟢 eslint clean.
-- **Then S6b** (sinks emit onward: Editor/Token-Counter/AI-Chat get a ⚡ "Send to…" reusing
-  `CROSS_APP_ACTIONS`; 3→6) **then S6c** (natural inbound for Calendar/Goals/Messages via the
-  S1 receiver rail; 6→9 = honest target) — full file lists in `docs/EPICS.md`.
+- **Exact shape for S6b (start here, no re-planning):** Editor, Token-Counter and AI-Chat *receive*
+  (chip via `useInboundHandoff`) but the signal dies there. Give each a ⚡ "Send to…" affordance that
+  re-injects its output via the EXISTING `CROSS_APP_ACTIONS` executors (they already `handoff(...)` →
+  light a Network arc). **Do NOT add new collections.** Edits:
+  1. **New** `src/components/ui/SendResultMenu.tsx` — a tiny shared menu button
+     `<SendResultMenu source="<app>" text={…} title?={…}/>` listing a couple relevant
+     `CROSS_APP_ACTIONS` (e.g. SEND_TO_NOTES / SEND_TO_PROMPT_GEN) and running the chosen one with
+     `{ text, title, source }`. Model the dropdown/glass styling on `NodeActions.tsx` (no raw hex —
+     reuse tokens/`gp`). Guard against empty `text` (disable).
+  2. `src/apps/editor/Editor.tsx` — "Send code to…" over the current buffer (`source:'editor'`).
+  3. `src/apps/token-counter/TokenCounter.tsx` — "Send text to…" over the counted text (`source:'token-counter'`).
+  4. `src/apps/ai-chat/AIChat.tsx` — per assistant reply, "Send reply to…" (`source:'ai-chat'`).
+  5. Test: `src/components/ui/SendResultMenu.test.tsx` (or extend `appActions.test.ts`) — running the
+     menu's action emits a `HANDOFF` whose `fromId` is the sink app's id.
+  *Acceptance:* from Editor, "Send to Notes" creates a note AND lights an `editor → notes` arc; same
+  for token-counter & ai-chat. **both-ways 3→6.** Reuse executors (no new colours → token-violations
+  flat); build🟢 vitest🟢 eslint clean.
+- **Then S6c** (natural inbound for Calendar/Goals/Messages via the S1 receiver rail; 6→9 = honest
+  target) — full file lists in `docs/EPICS.md`. **S6a done:** `ProvenanceChip` now also renders for
+  Notes cards (split a `from-<source>` tag out of the badge list) and Learning items (`item.from`);
+  `LearningItem.from?:string` added, `SEND_TO_LEARNING` sets `from:data.source`.
   **When S6a–c land and QA confirms both-ways climbed to the honest target (9 entity-apps-with-
   inbound; files/photos/datacenter + tool apps emit-only by design) → EPIC-1 DONE; promote EPIC-2.**
 

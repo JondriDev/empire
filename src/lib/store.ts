@@ -31,6 +31,8 @@ export interface LearningItem {
   date: string
   nextReview: string
   mastered: boolean
+  /** Source app id when this item arrived via a cross-app handoff (S6a). Optional → backward-compatible with stored items. */
+  from?: string
 }
 
 export type Lang = 'en' | 'id'

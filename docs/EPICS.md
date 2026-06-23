@@ -145,7 +145,15 @@ the number. **Audit (settled, code-confirmed 2026-06-22):**
     clock, weather, grammar, language, music, video, cache, browser, maps) own no collection and
     participate as emit-only *sources*. **Do NOT invent inbound for these to chase a literal 26/26.**
 
-- [ ] **S6a · Surface provenance on the two silent in-place receivers (Notes + Learning).**
+- [x] **S6a · Surface provenance on the two silent in-place receivers (Notes + Learning).**
+  **Shipped 2026-06-23.** `LearningItem` gained `from?: string`; `SEND_TO_LEARNING` now sets
+  `from: data.source`. Notes cards split a `from-<source>` tag out of the badge list and render
+  `<ProvenanceChip>` (dismiss strips only `from-*` tags, keeps user tags); Learning cards render
+  the chip for `item.from` (dismiss clears `from` via `updateLearningItem`). `appActions.test.ts`
+  asserts the stored item persists `from === data.source` (97 vitest tests, +1). Build🟢 eslint
+  clean; token-violations **501 (±0)** (reused `ProvenanceChip`), bundle gz 240.5→240.9 (+0.4).
+  **both-ways 1/26 → 3/26.** *Honest cloud limit:* fresh-checkout graph/stores are empty, so the
+  live chip render isn't exercised headless — covered by the unit test + the existing S1 chip.
   Lowest-risk first: the data already arrives, just make the receive *legible* so both apps
   count as both-ways. **Files & shape:**
   - **`src/lib/store.ts`** — add `from?: string` to `interface LearningItem` (optional →
