@@ -256,12 +256,28 @@ promote EPIC-2 (design-token violations → 0)._
 
 ### EPIC-2 · Design-system conformance → zero token violations
 **Leap:** one palette, rendered identically in DOM and canvas; no app hardcodes color.
-**Target metric:** *Design-token violations* **496 → 0**.
+**Target metric:** *Design-token violations* **501 → 0** (was 496 at epic draft; 501 at S1 start).
 Stage seeds: extract `src/design-system/tokens.ts` (plain TS consts) as the single
-source; generate the matching CSS custom props from it; then sweep app code per the
-`metrics.mjs` "top offenders" list (start: HermesCommandCenter, HermesAgentBar,
-ai-agent SettingsPanel, Calculator) replacing raw hex/rgb with tokens — one cluster
-of apps per stage, build green each time.
+source; then sweep app code per the `metrics.mjs` "top offenders" list replacing raw
+hex/rgb with `cssVar`/`tint` — one cluster of apps per stage, build green each time.
+
+Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `tokens.ts`):
+
+- [x] **S1 · Palette seam + Hermes cluster.** — **Shipped 2026-06-23.** Built
+  `src/design-system/tokens.ts` (`PALETTE` + `cssVar(name)` + `tint(name,pct)` color-mix helper;
+  `tokens.test.ts` 4 cases) and swept `hermes-command-center/HermesCommandCenter.tsx` (64→0) +
+  `components/HermesAgentBar.tsx` (49→0). Found & recorded the **alpha-append trap** (`` `${color}18` ``
+  breaks on a `var()` — convert to `color-mix`). Build🟢 vitest 107/107🟢 (15 files) eslint clean;
+  **token-violations 501 → 388 (−113)**, tests +4, bundle gz +0.1. *Visual recolor (Tailwind→XENO) is
+  intentional but not cloud-verifiable.*
+- [ ] **S2 · Next cluster.** Sweep `ai-agent/components/SettingsPanel.tsx` (38),
+  `apps/calculator/Calculator.tsx` (38), `artifacts/artifacts/MarkdownStudio.tsx` (29) with the same
+  `cssVar`/`tint` rails. *Acceptance:* those three files report 0 hex/rgba in `metrics.mjs`; build🟢
+  vitest🟢 eslint clean; token-violations 388 → ~283 (no regression elsewhere). **Watch the alpha-append
+  trap.**
+- [ ] **S3+ · Continue the sweep.** Remaining offenders incl. `lib/registry.ts` (27 — the per-app
+  `color:'#…'` accents; move them to tokens / a registry-accent map) and `components/ui/index.tsx` (26),
+  then the long tail until **token-violations = 0**. One cluster per stage.
 
 ### EPIC-3 · Depth pass on shallow instruments
 **Leap:** the thin apps (Photos, Maps, Video, Music, Clock) get genuine offline-capable

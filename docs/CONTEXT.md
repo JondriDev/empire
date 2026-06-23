@@ -25,14 +25,17 @@
 - **Active epic:** **EPIC-2 — Design-system conformance → zero token violations** (promoted
   2026-06-23). EPIC-1 (Organism Completeness) is **DONE & QA-confirmed**: both-ways hit **9/9
   entity-apps-with-inbound**, S6c live-confirmed (see Last QA confirmation below).
-- **Next stage (EPIC-2 S1):** start the token sweep. Extract `src/design-system/tokens.ts` (plain TS
-  consts) as the single source of palette truth, then chip the top offenders — replace raw hex/rgb
-  with tokens (or `rgbCss(triplet, alpha?)` from `nodeColors.ts` when a literal `rgb(` would otherwise
-  count as a violation — see Token-metric trap). Top files (from `node scripts/metrics.mjs`):
-  `hermes-command-center/HermesCommandCenter.tsx` (64), `components/HermesAgentBar.tsx` (49),
-  `ai-agent/components/SettingsPanel.tsx` (38), `calculator/Calculator.tsx` (38),
-  `artifacts/artifacts/MarkdownStudio.tsx` (29). **Target metric: design-token violations 501 → 0.**
-  Do ONE cluster of apps per stage, build+vitest green each time, and don't regress bundle/tests.
+- **EPIC-2 S1 DONE (this run, 2026-06-23):** built `src/design-system/tokens.ts` (the TS palette seam:
+  `PALETTE` + `cssVar(name)→'var(--name)'` + `tint(name,pct)→'color-mix(in srgb, var(--name) pct%, transparent)'`,
+  rounds+clamps; `tokens.test.ts` 4 cases) and swept the **Hermes cluster** to zero:
+  `HermesCommandCenter.tsx` 64→0 + `HermesAgentBar.tsx` 49→0. **token-violations 501 → 388 (−113).**
+- **Next stage (EPIC-2 S2):** continue the sweep with the **next cluster**, same `cssVar`/`tint` rails from
+  `src/design-system/tokens.ts`: `ai-agent/components/SettingsPanel.tsx` (38), `apps/calculator/Calculator.tsx`
+  (38), `artifacts/artifacts/MarkdownStudio.tsx` (29). Map raw hex/rgba → tokens (ok→`c-success`, warn→`c-warn`,
+  danger→`c-danger`, indigo→`ion`, violet/pink→`plasma`, cyan/teal→`signal`/`c-info`, white-glass→`tint('xenon',N)`,
+  black-shadow→`tint('void',N)`). **Watch the alpha-append trap** (see Invariants). **Target 388 → ~283.**
+  Later clusters: `lib/registry.ts` (27, the per-app `color:'#…'` accents → move to tokens), `components/ui/index.tsx`
+  (26). **Epic target: design-token violations 501 → 0.** ONE cluster per stage, build+vitest green each time.
 - **S6c done (this run, 2026-06-23):** all 9 entity-owning apps that honestly take input are now
   both-ways. Added `SEND_TO_CALENDAR` / `SEND_TO_GOALS` / `SEND_TO_MESSAGES` to
   `src/lib/appActions.ts` (each writes `empire-<x>-clipboard` `{text,title?,from}`, `handoff(...)`s,
@@ -128,10 +131,17 @@
     token-metric violations. Canvas, legend and inspector all import from here so they can't drift.
 - **Registry / shell:** `src/lib/registry.ts` (27 apps, incl. S5 `inbox`), `src/lib/appComponents.tsx`
   (route→component map), `src/components/Desktop.tsx` (shell).
-- **Design system:** `src/design-system/colors_and_type.css` (canonical XENO palette),
-  `src/design-system.css` (legacy-token *bridge* — edit here to restyle all apps),
-  `src/window-manager.css`, `src/index.css`. A TS token module
-  (`src/design-system/tokens.ts`) is the planned single source for canvas + CSS.
+- **Design system:** `src/design-system/colors_and_type.css` (canonical XENO palette — the `:root`/theme
+  CSS custom props), `src/design-system.css` (legacy-token *bridge* — edit here to restyle all apps),
+  `src/window-manager.css`, `src/index.css`.
+  - **`src/design-system/tokens.ts` (EPIC-2 S1, 2026-06-23):** the TS-side single source of palette truth,
+    mirroring the CSS custom props. **`cssVar('signal')`→`'var(--signal)'`** (themeable, preferred) and
+    **`tint('signal',12)`→`'color-mix(in srgb, var(--signal) 12%, transparent)'`** (translucent tint with NO
+    raw `rgba(` → no metric violation; rounds+clamps pct). `PALETTE` holds the raw hex only for JS consumers
+    that can't resolve a CSS var. **This is the rail for the EPIC-2 sweep** — import these into any app file
+    and replace hex/rgba inline styles. Token names: signal/aurora/plasma/ion/ember/xenon/void/abyss,
+    text/text2/text3, c-success/c-warn/c-danger/c-info. (Distinct from `network/nodeColors.ts`'s `rgbCss`,
+    which builds colours from constant *triplets* for the canvas.)
 - **AI routing:** `src/lib/ai.ts` → `src/lib/apiBase.ts` (`aiApiUrl()`); live site routes
   Cakra to the Supabase proxy, dev stays same-origin.
 
@@ -146,6 +156,11 @@
 - **Calendar owns its own storage:** events live in `empire-calendar-events` (NOT the central
   store) and self-mirror via `mirrorCollection()` in a `[events]` effect. **Never add an
   `event` syncer to the central list** — it would delete Calendar's nodes.
+- **Alpha-append trap (EPIC-2 sweep):** the idiom `` background: `${color}18` `` (append a 2-hex alpha
+  to a colour) **silently breaks** when you swap `color` from a hex to a CSS var — `var(--ion)18` is
+  invalid CSS and renders nothing. When de-hexing a file that uses this pattern, convert those sites to
+  `` `color-mix(in srgb, ${color} N%, transparent)` `` (0x18≈9%, 0x14≈8%, 0x88≈53%). Leave `${app.color}NN`
+  alone while `registry.ts` still supplies a real hex there (valid, and not a violation in *that* file).
 - **An app joins the organism in ~3 lines:** `mirrorCollection(type, app, items, {id,title,data})`
   in a `useEffect` + `<NodeActions type="<type>" sourceId={item.id}/>` in each row.
 - **Graph is a mirror, not the source of truth (yet):** apps keep their own store/localStorage;

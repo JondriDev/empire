@@ -5,6 +5,42 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-23 · Builder — EPIC-2 S1: extract `tokens.ts` + sweep the Hermes cluster (token-violations 501 → 388)
+
+**Done.** Opened EPIC-2 (design-system conformance) by building the TS palette seam and
+de-hexing the two worst offenders.
+- **New `src/design-system/tokens.ts`** — the single source of palette truth for *TypeScript*
+  consumers (mirrors the CSS custom props in `colors_and_type.css`). Exports `PALETTE`
+  (raw hex, for the rare JS-only consumer), `cssVar(name) → 'var(--name)'`, and
+  `tint(name, pct) → 'color-mix(in srgb, var(--name) pct%, transparent)'` (rounds+clamps).
+  Lives under `design-system/` so the metric exempts its literals. **+ `tokens.test.ts`** (4 cases:
+  cssVar/tint shape, tint never reintroduces a `#`/`rgb(` violation, clamp/round, PALETTE coverage).
+- **Swept `hermes-command-center/HermesCommandCenter.tsx` (64→0)** and
+  **`components/HermesAgentBar.tsx` (49→0)** — replaced every raw hex/rgba in inline styles with
+  `cssVar(...)`/`tint(...)`. Semantic map: ok→`c-success`, warn→`c-warn`, danger→`c-danger`,
+  indigo→`ion`, violet/pink→`plasma`, cyan/teal→`signal`/`c-info`, white-glass→`tint('xenon',N)`,
+  black-shadow→`tint('void',N)`. **Visual shift is intentional** (the alien XENO palette replaces the
+  old Tailwind-default indigo/teal set) — this IS the EPIC-2 leap; not cloud-verifiable, confirm on-device.
+- **Trap found & recorded:** the `` `${color}18` `` alpha-append idiom (append a 2-hex alpha to a color)
+  **breaks** when `color` becomes `var(--x)` (`var(--ion)18` is invalid CSS). Converted those sites to
+  `color-mix(in srgb, ${color} N%, transparent)` (0x18≈9%, 0x14≈8%, 0x88≈53%). `${app.color}NN` left as-is
+  (registry still supplies a real hex there — valid, not a violation).
+
+**Verified.** `npm run build` 🟢 (tsc -b && vite build), `npx vitest run` **107/107 🟢** (15 files),
+`npx eslint` clean on the 4 touched files. Metrics row:
+
+| Metric | Apps | Test cases | Test files | Token violations | Bundle gz KB |
+| ------ | ---- | ---------- | ---------- | ---------------- | ------------ |
+| Value  | 27   | 100        | 15         | **388**          | 243.6        |
+| Δ      | ±0   | +4         | +1         | **−113**         | +0.1         |
+
+*Not cloud-verifiable:* the recolor's appearance (can't see rendered UI); logic/structure unchanged so
+build+tests+lint are the gate. **Next:** EPIC-2 S2 — next cluster `ai-agent/components/SettingsPanel.tsx`
+(38) + `apps/calculator/Calculator.tsx` (38) + `artifacts/artifacts/MarkdownStudio.tsx` (29), same
+`cssVar`/`tint` rails; target 388 → ~283.
+
+---
+
 ## 2026-06-23 · QA — visual + smoke on green main `6435a81`: **EPIC-1 S6c confirmed LIVE → EPIC-1 DONE, EPIC-2 promoted**
 
 **Verified.** Build 🟢 (`tsc -b && vite build`), vitest **103/103 🟢** (14 files). Headless smoke
