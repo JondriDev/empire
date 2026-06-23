@@ -187,25 +187,27 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-23, post-S6a green main — Notes/Learning provenance landed since last run)
+## 📊 Last QA confirmation (2026-06-23, post-S6b green main — Editor/Token-Counter/AI-Chat emit-onward landed)
 
 - **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (all 27 registry
-  apps in the smoke list). vitest **97/97 🟢** (13 files). **No runtime bugs found.**
-- **Apps fully wired BOTH-ways: 3/27 (↑ from 1 — S6a)** — `prompt-generator`, **notes**, **learning-tracker**
-  now emit AND legibly receive. Still emit-only via `NodeActions`: artifacts(kanban), calendar, datacenter,
-  files, goals, inbox, messages, photos. Receive-only via `useInboundHandoff`: ai-chat, editor, token-counter.
-  **Honest EPIC-1 target = 9/9** entity-apps-with-inbound; next stage **S6b** (Editor/Token-Counter/AI-Chat
-  emit onward → 6).
-- **Epic-acceptance:** S6a (Notes + Learning provenance) **CONFIRMED LIVE** — seeded `empire-store` with a note
-  tagged `from-calculator` + a learning item `from:'notes'`, reloaded: Notes card showed a dismissible
-  **"From Calculator"** chip (user `SNIPPET` tag preserved), Learning item showed **"From Notes"**, 0 page
-  errors. Captured as `notes-provenance.png` / `learning-provenance.png`. This is a true both-ways confirmation
-  (the receive is now legible), beating code-audit-only. `appActions.test.ts` asserts `SEND_TO_LEARNING`
-  persists `from === data.source`.
-- **Auto metrics vs post-S5:** S6a (commit d066e80) moved tests 92→93 static / 96→97 vitest (+1/+1, the new
-  appActions assertion), token-violations **501 (±0)** (reused `ProvenanceChip` — no new colours), bundle gz
-  240.5→240.9 (+0.4). This QA run added no code → auto-metrics ±0 vs the S6a snapshot.
+  apps in the smoke list). vitest **100/100 🟢** (14 files). **No runtime bugs found.**
+- **Apps fully wired BOTH-ways: 6/9 entity-apps-with-inbound (↑ from 3 — S6b)** — `prompt-generator`, notes,
+  learning-tracker **+ editor, token-counter, ai-chat** now emit AND legibly participate both ways. Remaining
+  gap to the honest target: **calendar, goals, messages** (→ closed by S6c, the last EPIC-1 stage). Still
+  emit-only via `NodeActions`: artifacts(kanban), calendar, datacenter, files, goals, inbox, messages, photos.
+  **Honest EPIC-1 target = 9/9** entity-apps-with-inbound; **next stage = S6c** (Calendar/Goals/Messages get a
+  natural text→entity inbound → 9/9 → EPIC-1 DONE; then QA retargets the METRICS both-ways row to 9/9 & promote EPIC-2).
+- **Epic-acceptance:** S6b (the 3 sinks emit onward) **CONFIRMED LIVE** — drove the running app: Editor's
+  "Send code to…" button is disabled-when-empty / enabled-with-content, and its menu lists 4 targets
+  (Notes / Prompt / Hermes / Count Tokens) **excluding Editor itself** (live `ACTION_TARGET` self-filter, not
+  just the unit test). Captured `editor-send-menu.png`. Token-Counter/AI-Chat share the same `SendResultMenu`;
+  the HANDOFF emission (`fromId` = sink) is asserted by `SendResultMenu.test.tsx` (3). *Cloud limit:* the
+  source→target arc in The Network needs a seeded graph + cross-page nav, so the arc itself isn't screenshotted.
+- **Auto metrics vs post-S6a:** S6b (commit b6cd0c3) moved tests 93→96 static / 97→100 vitest (+3/+3, the new
+  `SendResultMenu.test.tsx`), test files 13→14, token-violations **501 (±0)** (hover tints use `color-mix`, no
+  raw rgba), bundle gz 240.9→242.8 (+1.9, the `SendResultMenu` chunk wired into 3 apps). This QA run added no
+  product code → auto-metrics ±0 vs the S6b builder snapshot.
 - **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
   datacenter `/api/dc/tables`→401 (authed API, no headless session).
 - QA harness note: project has **no `playwright` dep**; it's global at `/opt/node22/lib/node_modules`.
