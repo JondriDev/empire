@@ -124,6 +124,45 @@ for (const id of apps) {
   await visit(id, `${BASE}/app/${id}`, `app-${sanitize(id)}.png`);
 }
 
+// ── INBOUND-LANDS guard (the organism-loop regression trap) ─────────────────
+// A route can render green while its cross-app *receive* silently breaks (the
+// `useInboundHandoff` mount-effect stops preloading, the ProvenanceChip stops
+// rendering). EPIC-1's whole thesis is the emit↔receive loop, so guard it: for
+// each entity receiver, seed its `empire-*-clipboard` payload the way
+// appActions.ts SEND_TO_<X> does, reload, and assert BOTH a "Received from …"
+// chip AND a prefilled control value. Non-fatal (recorded in the report, not
+// thrown) so a flaky reload can't red the whole render run — but a real
+// regression shows as ❌ for the build routine to pick up.
+const inboundCases = [
+  { id: 'calendar', key: 'empire-calendar-clipboard', from: 'editor', needle: 'Quarterly',
+    payload: { text: 'Quarterly planning sync', title: 'Quarterly planning sync', from: 'editor' } },
+  { id: 'goals', key: 'empire-goals-clipboard', from: 'notes', needle: 'organism',
+    payload: { text: 'Ship the organism epic', title: 'Ship the organism epic', from: 'notes' } },
+  { id: 'messages', key: 'empire-messages-clipboard', from: 'ai-chat', needle: 'deploy at 5pm',
+    payload: { text: 'Heads up: deploy at 5pm', from: 'ai-chat' } },
+];
+const inboundResults = [];
+for (const c of inboundCases) {
+  const page = await ctx.newPage();
+  try {
+    await page.goto(`${BASE}/app/${c.id}`, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.evaluate(([k, v]) => sessionStorage.setItem(k, JSON.stringify(v)), [c.key, c.payload]);
+    await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+    await page.waitForTimeout(1500);
+    const chip = (await page.locator('[aria-label^="Received from"]').count()) > 0;
+    const vals = await page.evaluate(() => [...document.querySelectorAll('input,textarea')].map(e => e.value).join(' '));
+    const prefilled = vals.includes(c.needle);
+    inboundResults.push({ id: c.id, from: c.from, chip, prefilled, pass: chip && prefilled });
+    console.log(`INBOUND  ${c.id}  chip=${chip} prefilled=${prefilled} (from ${c.from})`);
+  } catch (e) {
+    inboundResults.push({ id: c.id, from: c.from, chip: false, prefilled: false, pass: false, err: e.message });
+    console.warn(`INBOUND  ${c.id}  ERROR ${e.message}`);
+  }
+  await page.close();
+}
+const inboundPass = inboundResults.filter(r => r.pass).length;
+console.log(`INBOUND-LANDS: ${inboundPass}/${inboundResults.length} ${inboundPass === inboundResults.length ? '✅' : '⚠️'}`);
+
 await browser.close();
 
 // Build report
@@ -141,7 +180,13 @@ const cell = (a) => a.length ? a.map(e => e.replace(/\|/g, '\\|').slice(0, 160))
 for (const r of results) {
   md += `| ${r.name} | ${r.pass ? '✅' : '❌ FAIL'} | ${cell(r.uncaught)} | ${cell([...r.netFails, ...r.consoleErrors.filter(c => !/Failed to load resource/.test(c))])} |\n`;
 }
+md += `\n## Inbound-lands guard (organism emit↔receive loop)\n\n`;
+md += `Each entity receiver was seeded with a cross-app payload + reloaded; PASS = a "Received from <source>" chip rendered AND a control was prefilled.\n\n`;
+md += `| Receiver | From | Chip | Prefilled | Result |\n|---|---|---|---|---|\n`;
+for (const r of inboundResults) {
+  md += `| ${r.id} | ${r.from} | ${r.chip ? '✅' : '❌'} | ${r.prefilled ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
+}
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);

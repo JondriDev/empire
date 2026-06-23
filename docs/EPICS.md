@@ -23,7 +23,15 @@
 
 ---
 
-## ▶ ACTIVE — EPIC-1 · Organism Completeness
+## ✅ DONE — EPIC-1 · Organism Completeness
+
+> **DONE 2026-06-23** (QA-confirmed on green main `6435a81`). All stages S1–S6c shipped;
+> target metric **moved to its honest success state**: *Apps fully wired both-ways* = **9/9
+> entity-apps-with-a-natural-inbound** (was 1/26 at epic start), *Routes rendering clean* held
+> **27/27**. S6c live-confirmed by QA (`scripts/qa-s6c-confirm.mjs` → Calendar/Goals/Messages each
+> show a "From <source>" ProvenanceChip + prefilled create form; 3/3 ✅, screenshots
+> `s6c-inbound-*.png`). **EPIC-2 promoted to ▶ ACTIVE** (design-token violations 501 → 0).
+> Full stage history retained below for reference.
 
 **Leap:** The Empire stops being 26 apps with a few wired synapses and becomes one
 organism where **every** app both *emits* and *receives* honest handoffs, the
@@ -238,7 +246,13 @@ promote EPIC-2 (design-token violations → 0)._
 
 ---
 
-## QUEUED — promote one when the active epic finishes
+## ▶ ACTIVE — EPIC-2 · Design-system conformance → zero token violations
+
+> Promoted 2026-06-23 when EPIC-1 hit its honest target (both-ways 9/9). Builder's next
+> stage = **S1: start the sweep** — extract `src/design-system/tokens.ts` as the single source
+> + chip the top offenders (`hermes-command-center/HermesCommandCenter.tsx` (64),
+> `components/HermesAgentBar.tsx` (49), `ai-agent/components/SettingsPanel.tsx` (38),
+> `calculator/Calculator.tsx` (38)). Target metric *Design-token violations* **501 → 0**.
 
 ### EPIC-2 · Design-system conformance → zero token violations
 **Leap:** one palette, rendered identically in DOM and canvas; no app hardcodes color.

@@ -22,15 +22,17 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** EPIC-1 — Organism Completeness — **entity loop CLOSED (S6c shipped 2026-06-23).**
-  Pending QA live-confirm → then EPIC-1 DONE & promote EPIC-2.
-- **Next stage:** **QA confirms S6c live (both-ways = 9/9 entity-apps-with-inbound), retargets the
-  METRICS "both-ways" row from `x/26` to `9/9 entity-apps-with-inbound` (note: files/photos/datacenter
-  + tool apps are emit-only *by design*), moves EPIC-1 → DONE, and promotes EPIC-2 (design-token
-  violations → 0).** If QA already did this, the Builder's next stage = **EPIC-2 S1** (start chipping
-  the 501 token-violations: top files are `hermes-command-center/HermesCommandCenter.tsx` (64),
-  `components/HermesAgentBar.tsx` (49), `ai-agent/components/SettingsPanel.tsx` (38),
-  `calculator/Calculator.tsx` (38) — replace raw hex/rgb with tokens; see EPIC-2 in `docs/EPICS.md`).
+- **Active epic:** **EPIC-2 — Design-system conformance → zero token violations** (promoted
+  2026-06-23). EPIC-1 (Organism Completeness) is **DONE & QA-confirmed**: both-ways hit **9/9
+  entity-apps-with-inbound**, S6c live-confirmed (see Last QA confirmation below).
+- **Next stage (EPIC-2 S1):** start the token sweep. Extract `src/design-system/tokens.ts` (plain TS
+  consts) as the single source of palette truth, then chip the top offenders — replace raw hex/rgb
+  with tokens (or `rgbCss(triplet, alpha?)` from `nodeColors.ts` when a literal `rgb(` would otherwise
+  count as a violation — see Token-metric trap). Top files (from `node scripts/metrics.mjs`):
+  `hermes-command-center/HermesCommandCenter.tsx` (64), `components/HermesAgentBar.tsx` (49),
+  `ai-agent/components/SettingsPanel.tsx` (38), `calculator/Calculator.tsx` (38),
+  `artifacts/artifacts/MarkdownStudio.tsx` (29). **Target metric: design-token violations 501 → 0.**
+  Do ONE cluster of apps per stage, build+vitest green each time, and don't regress bundle/tests.
 - **S6c done (this run, 2026-06-23):** all 9 entity-owning apps that honestly take input are now
   both-ways. Added `SEND_TO_CALENDAR` / `SEND_TO_GOALS` / `SEND_TO_MESSAGES` to
   `src/lib/appActions.ts` (each writes `empire-<x>-clipboard` `{text,title?,from}`, `handoff(...)`s,
@@ -181,27 +183,28 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-23, post-S6b green main — Editor/Token-Counter/AI-Chat emit-onward landed)
+## 📊 Last QA confirmation (2026-06-23, post-S6c green main `6435a81` — EPIC-1 DONE, entity loop CLOSED)
 
 - **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (all 27 registry
-  apps in the smoke list). vitest **100/100 🟢** (14 files). **No runtime bugs found.**
-- **Apps fully wired BOTH-ways: 6/9 entity-apps-with-inbound (↑ from 3 — S6b)** — `prompt-generator`, notes,
-  learning-tracker **+ editor, token-counter, ai-chat** now emit AND legibly participate both ways. Remaining
-  gap to the honest target: **calendar, goals, messages** (→ closed by S6c, the last EPIC-1 stage). Still
-  emit-only via `NodeActions`: artifacts(kanban), calendar, datacenter, files, goals, inbox, messages, photos.
-  **Honest EPIC-1 target = 9/9** entity-apps-with-inbound; **next stage = S6c** (Calendar/Goals/Messages get a
-  natural text→entity inbound → 9/9 → EPIC-1 DONE; then QA retargets the METRICS both-ways row to 9/9 & promote EPIC-2).
-- **Epic-acceptance:** S6b (the 3 sinks emit onward) **CONFIRMED LIVE** — drove the running app: Editor's
-  "Send code to…" button is disabled-when-empty / enabled-with-content, and its menu lists 4 targets
-  (Notes / Prompt / Hermes / Count Tokens) **excluding Editor itself** (live `ACTION_TARGET` self-filter, not
-  just the unit test). Captured `editor-send-menu.png`. Token-Counter/AI-Chat share the same `SendResultMenu`;
-  the HANDOFF emission (`fromId` = sink) is asserted by `SendResultMenu.test.tsx` (3). *Cloud limit:* the
-  source→target arc in The Network needs a seeded graph + cross-page nav, so the arc itself isn't screenshotted.
-- **Auto metrics vs post-S6a:** S6b (commit b6cd0c3) moved tests 93→96 static / 97→100 vitest (+3/+3, the new
-  `SendResultMenu.test.tsx`), test files 13→14, token-violations **501 (±0)** (hover tints use `color-mix`, no
-  raw rgba), bundle gz 240.9→242.8 (+1.9, the `SendResultMenu` chunk wired into 3 apps). This QA run added no
-  product code → auto-metrics ±0 vs the S6b builder snapshot.
+  apps in the smoke list). vitest **103/103 🟢** (14 files). **No runtime bugs found.**
+- **Apps fully wired BOTH-ways: 9/9 entity-apps-with-inbound — ✅ EPIC-1 TARGET HIT (↑ from 6 — S6c).**
+  Now both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat **+ calendar,
+  goals, messages**. Intentionally emit-only (by design): files, photos, datacenter (browse/manage stores)
+  + tool apps via `NodeActions`. **EPIC-1 entity loop CLOSED → EPIC-1 DONE; EPIC-2 (token violations → 0)
+  promoted to ACTIVE** (METRICS both-ways row retargeted to 9/9; EPICS.md headers flipped).
+- **Epic-acceptance: S6c CONFIRMED LIVE** — drove the running app via `scripts/qa-s6c-confirm.mjs` (env-only
+  harness; seeds each `empire-<x>-clipboard` payload + reload, asserts chip + prefilled field off live
+  `input`/`textarea` `.value`): **Calendar** ← editor → "From Code Editor" chip + New-Event modal prefilled
+  (title "Quarterly planning sync", date=today, desc); **Goals** ← notes → chip + New-Goal title/desc
+  prefilled; **Messages** ← ai-chat → "From AI Chat" chip + composer draft prefilled. **3/3 ✅** — captured
+  `s6c-inbound-{calendar,goals,messages}.png`. The HANDOFF emission is unit-tested (`appActions.test.ts`,
+  vitest 103). *Cloud limit:* the source→target arc in The Network needs a seeded graph + cross-page nav,
+  so the arc itself isn't screenshotted (receiver-side provenance + prefill is the live proof).
+- **Auto metrics vs post-S6b:** S6c (commit `6435a81`) moved vitest 100→103 (+3, the new `appActions`
+  HANDOFF `it.each` cases), test files ±0 (14), static metrics ±0 (96, undercounts), token-violations
+  **501 (±0)**, bundle gz 242.8→243.5 (+0.7, the three apps' inbound code). This QA run added no product
+  code → auto-metrics ±0 vs the S6c builder snapshot.
 - **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
   datacenter `/api/dc/tables`→401 (authed API, no headless session).
 - QA harness note: project has **no `playwright` dep**; it's global at `/opt/node22/lib/node_modules`.
