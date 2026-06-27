@@ -1,46 +1,30 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-06-23T13:16:35.095Z · green main `6435a81`
+**Generated:** 2026-06-27T13:04:43.468Z · green main `386ff36`
 
-**Result:** 28/28 rendered without crash, 0 failed. **No runtime bugs found.**
+**Result:** 28/28 rendered without crash, 0 failed. **No runtime bug found.**
 
-## 🎯 Headline — EPIC-1 (Organism Completeness) DONE: both-ways **9/9** entity-apps-with-inbound
+## Metric deltas (this run)
 
-**EPIC-1 S6c CONFIRMED LIVE.** The new permanent **Inbound-lands guard** (in `scripts/qa-smoke.mjs`,
-table below) seeds each `empire-<x>-clipboard` payload the way `appActions.ts` `SEND_TO_<X>` does,
-reloads, and asserts the receiver shows a **"Received from …" ProvenanceChip** AND **prefilled a real
-control** — **3/3 ✅** (`s6c-inbound-{calendar,goals,messages}.png`):
+| Metric | Value | Δ vs last QA (post-S6c) |
+|---|---|---|
+| Routes rendering clean | 27 / 27 (28/28 incl. desktop) | ±0 |
+| Apps both-ways into the organism | 9 / 9 entity-apps-with-inbound | ±0 (EPIC-1 target held) |
+| Design-token violations | **388** | **−113 (501→388)** |
+| Test cases (vitest) | 107 / 107 (15 files) | +4 |
+| Bundle gz | 243.6 KB | +0.1 |
 
-| Receiver | From | ProvenanceChip | Prefilled field |
-|---|---|---|---|
-| **Calendar** | editor | ✅ | New-Event title "Quarterly planning sync", date=today, desc |
-| **Goals** | notes | ✅ | New-Goal title/desc "Ship the organism epic" |
-| **Messages** | ai-chat | ✅ | composer draft "Heads up: deploy at 5pm" |
+## Epic-acceptance confirmation
 
-With Notes / Learning / Prompt-Gen (S6a) + Editor / Token-Counter / AI-Chat (S6b) already both-ways,
-the entity emit↔receive loop is **CLOSED: both-ways = 9/9 entity-apps-with-a-natural-inbound**
-(files/photos/datacenter + tool apps stay emit-only *by design*). **EPIC-1's target metric hit → EPIC-1
-DONE; EPIC-2 (design-token violations 501 → 0) promoted to ACTIVE.** *Cloud limit:* the source→target
-Network arc needs a seeded graph + cross-page nav, so the arc itself isn't screenshotted (receiver-side
-provenance + prefill is the live proof).
+**ACTIVE epic: EPIC-2 — Design-system conformance → zero token violations** (target *Design-token
+violations* 501 → 0). **EPIC-2 S1 CONFIRMED MOVED:** S1 (palette seam `src/design-system/tokens.ts` +
+Hermes cluster de-hex) claimed 501 → 388 (−113); `node scripts/metrics.mjs` this run reports **388** →
+confirmed, no contradiction. Next stage **S2** (un-swept top offenders: `SettingsPanel.tsx` 38,
+`Calculator.tsx` 38, `MarkdownStudio.tsx` 29). EPIC-1 (both-ways 9/9) re-verified live by the
+INBOUND-LANDS guard (3/3 receivers chip+prefill).
 
-### Metric deltas (vs prior QA `b6cd0c3` → now `6435a81`)
-
-| Metric | Prior (post-S6b) | Now (post-S6c) | Δ |
-|---|---|---|---|
-| Routes rendering clean | 28/28 (incl. desktop) | 28/28 (incl. desktop) | ±0 ✅ |
-| Apps both-ways into organism | 6/9 entity-apps-with-inbound | **9/9 entity-apps-with-inbound** | **+3 → target hit** |
-| Test cases (vitest run) | 100 / 14 files | **103 / 14 files** | +3 (S6c `appActions` HANDOFF cases) |
-| Design-token violations | 501 | 501 | ±0 |
-| Bundle gz (KB) | 242.8 | 243.5 | +0.7 (S6c inbound code) |
-
-SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE ✅ (27 apps) · INBOUND-LANDS ✅ (3/3) · vitest **103/103 🟢**.
-
-### Env-expected net noise (not bugs)
-- `files`: `/api/files?path=/storage/emulated/0` → HTTP 500 (Android-only storage path).
-- `datacenter`: `/api/dc/tables` → HTTP 401 (authed API, no headless session).
-
----
+> Guards green: SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE ✅ (27/27) · INBOUND-LANDS ✅ (3/3).
+> Env-expected noise (NOT bugs): `/api/files` 500 (Android-only path), `/api/dc/tables` 401 (no headless auth).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
