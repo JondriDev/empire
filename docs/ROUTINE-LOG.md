@@ -5,6 +5,42 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-27 · Builder — EPIC-2 S2: sweep the SettingsPanel / Calculator / MarkdownStudio cluster (token-violations 388 → 283)
+
+**Done.** Continued the design-system sweep, de-hexing the three top offenders to zero with the
+`cssVar`/`tint` rails from `src/design-system/tokens.ts`:
+- **`src/apps/ai-agent/components/SettingsPanel.tsx` (38→0)** — modal backdrop `rgba(0,0,0,.7)`→`tint('void',70)`,
+  panel bg `#111827`→`cssVar('abyss')`, borders `#1e2d4a`→`tint('xenon',10)`, "Save & test" fill→`tint('ion',22)`,
+  text greys `#f1f5f9`/`#94a3b8`/`#475569`→`text`/`text2`/`text3`, online/offline `#34d399`/`#f87171`→
+  `c-success`/`c-danger`, white-glass inputs→`tint('xenon',4/5)`.
+- **`src/apps/calculator/Calculator.tsx` (38→0)** — operator/equals/history orange (`#f97316`/`#ea580c`/`#fb923c`)→
+  `ember` (gradient darken via `color-mix(… var(--ember) 70%, var(--void))`), scientific-fn cyan→`signal`, clear
+  red→`c-danger`, copied-tick green→`c-success`, display-glass shadows→`tint('void'/'xenon',N)`. Left the existing
+  `var(--color-cyan-3/4)` CSS-var refs untouched (already tokens, not violations).
+- **`src/apps/artifacts/artifacts/MarkdownStudio.tsx` (29→0)** — amber theme (`#f59e0b`/`#fbbf24`/`#fcd34d`/etc.)→
+  `ember`; the `<style>{`…`}</style>` block is a JS template literal so interpolated `${cssVar('ember')}`/
+  `${tint('ember',N)}` directly; heading hierarchy lightened via `color-mix(… var(--ember) N%, var(--text))`. Its
+  Tailwind utility classes (`bg-amber-500`, `text-emerald-400`) are not hex/rgba → not counted, left as-is.
+
+**No new trap:** the alpha-append idiom didn't appear in this cluster; the only subtlety was the `<style>` template
+literal (interpolation works) and Calculator's pre-existing `var(--color-cyan-*)` refs (kept).
+
+**Verified.** `npm run build` 🟢 (tsc -b && vite build), `npx vitest run` **107/107 🟢** (15 files),
+`npx eslint` clean on the 3 touched files, all three report **0 hex/rgba** in `metrics.mjs`. Metrics row:
+
+| Metric | Apps | Test cases | Test files | Token violations | Bundle gz KB |
+| ------ | ---- | ---------- | ---------- | ---------------- | ------------ |
+| Value  | 27   | 100        | 15         | **283**          | 243.7        |
+| Δ      | ±0   | ±0         | ±0         | **−105**         | +0.1         |
+
+*Not cloud-verifiable:* the recolor's on-screen appearance (can't see rendered UI); logic/structure unchanged so
+build+tests+lint+metric are the gate. **Next:** EPIC-2 S3 — `lib/registry.ts` (27, per-app accent hexes → a
+registry-accent CSS-var map; audit every `${app.color}NN` consumer for the alpha-append trap in the same stage) +
+`components/ui/index.tsx` (26) + `apps/network/Network.tsx` (24, DOM only — keep `rgbCss` for the canvas ctx);
+target 283 → ~210.
+
+---
+
 ## 2026-06-23 · Builder — EPIC-2 S1: extract `tokens.ts` + sweep the Hermes cluster (token-violations 501 → 388)
 
 **Done.** Opened EPIC-2 (design-system conformance) by building the TS palette seam and

@@ -25,17 +25,31 @@
 - **Active epic:** **EPIC-2 — Design-system conformance → zero token violations** (promoted
   2026-06-23). EPIC-1 (Organism Completeness) is **DONE & QA-confirmed**: both-ways hit **9/9
   entity-apps-with-inbound**, S6c live-confirmed (see Last QA confirmation below).
-- **EPIC-2 S1 DONE (this run, 2026-06-23):** built `src/design-system/tokens.ts` (the TS palette seam:
+- **EPIC-2 S1 DONE (2026-06-23):** built `src/design-system/tokens.ts` (the TS palette seam:
   `PALETTE` + `cssVar(name)→'var(--name)'` + `tint(name,pct)→'color-mix(in srgb, var(--name) pct%, transparent)'`,
   rounds+clamps; `tokens.test.ts` 4 cases) and swept the **Hermes cluster** to zero:
   `HermesCommandCenter.tsx` 64→0 + `HermesAgentBar.tsx` 49→0. **token-violations 501 → 388 (−113).**
-- **Next stage (EPIC-2 S2):** continue the sweep with the **next cluster**, same `cssVar`/`tint` rails from
-  `src/design-system/tokens.ts`: `ai-agent/components/SettingsPanel.tsx` (38), `apps/calculator/Calculator.tsx`
-  (38), `artifacts/artifacts/MarkdownStudio.tsx` (29). Map raw hex/rgba → tokens (ok→`c-success`, warn→`c-warn`,
-  danger→`c-danger`, indigo→`ion`, violet/pink→`plasma`, cyan/teal→`signal`/`c-info`, white-glass→`tint('xenon',N)`,
-  black-shadow→`tint('void',N)`). **Watch the alpha-append trap** (see Invariants). **Target 388 → ~283.**
-  Later clusters: `lib/registry.ts` (27, the per-app `color:'#…'` accents → move to tokens), `components/ui/index.tsx`
-  (26). **Epic target: design-token violations 501 → 0.** ONE cluster per stage, build+vitest green each time.
+- **EPIC-2 S2 DONE (this run, 2026-06-27):** swept the next cluster to zero with the `cssVar`/`tint` rails —
+  `ai-agent/components/SettingsPanel.tsx` 38→0, `apps/calculator/Calculator.tsx` 38→0,
+  `artifacts/artifacts/MarkdownStudio.tsx` 29→0. **token-violations 388 → 283 (−105).** Mappings used: amber/orange
+  (`#f59e0b`/`#f97316`/`#fb923c`)→`ember`, slate-dark panel (`#111827`)→`cssVar('abyss')`, slate border
+  (`#1e2d4a`)→`tint('xenon',10)` (button fill→`tint('ion',22)`), green→`c-success`, red→`c-danger`, cyan→`signal`,
+  text greys (`#f1f5f9`/`#94a3b8`/`#475569`)→`text`/`text2`/`text3`, white-glass→`tint('xenon',N)`,
+  black-shadow→`tint('void',N)`. **Gradient/darken idiom:** `color-mix(in srgb, var(--ember) 70%, var(--void))` to
+  darken and `color-mix(in srgb, var(--ember) 80%, var(--text))` to lighten — works inside both inline styles AND
+  the `<style>{`…`}</style>` template literal (interpolate `${cssVar(...)}`/`${tint(...)}`). build🟢 vitest 107🟢
+  eslint clean.
+- **Next stage (EPIC-2 S3):** continue the sweep with the **next cluster**, same `cssVar`/`tint` rails:
+  `lib/registry.ts` (27 — the per-app `color:'#…'` accents; these are the registry accent hexes, see the
+  alpha-append trap note before touching `${app.color}NN` sites elsewhere), `components/ui/index.tsx` (26),
+  `apps/network/Network.tsx` (24 — but **canvas 2D ctx needs raw colour strings**; use `nodeColors.ts`'s `rgbCss`
+  for those, only DOM styles convert to `cssVar`/`tint`), then `artifacts/artifacts/ColorPalette.tsx` (23 — *likely
+  legitimately exempt*: it's a colour-swatch demo whose hex literals ARE the content; consider whether to skip or
+  move its swatch list to a const the metric still counts — decide before sweeping). **Target 283 → ~210.**
+  **Epic target: design-token violations 501 → 0.** ONE cluster per stage, build+vitest green each time.
+  **registry.ts caveat:** `registry.ts` feeds `${app.color}NN` alpha-append sites across the app — if you move the
+  accents to CSS vars, audit every `${app.color}` consumer for the alpha-append trap (see Invariants) in the SAME
+  stage or you'll silently blank those tints.
 - **S6c done (this run, 2026-06-23):** all 9 entity-owning apps that honestly take input are now
   both-ways. Added `SEND_TO_CALENDAR` / `SEND_TO_GOALS` / `SEND_TO_MESSAGES` to
   `src/lib/appActions.ts` (each writes `empire-<x>-clipboard` `{text,title?,from}`, `handoff(...)`s,

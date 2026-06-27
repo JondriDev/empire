@@ -4,6 +4,7 @@
 
 import { useState } from 'react'
 import { X, Eye, EyeOff } from 'lucide-react'
+import { cssVar, tint } from '../../../design-system/tokens'
 import { getApiBase, setApiBase, checkBackend } from '../../../lib/apiBase'
 import { PROVIDER_LIST } from '../lib/providers'
 import type { ProviderId } from '../lib/types'
@@ -32,18 +33,18 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+      style={{ background: tint('void', 70), backdropFilter: 'blur(4px)' }}
       onClick={onClose}
     >
       <div
         className="w-full max-w-lg rounded-2xl overflow-hidden max-h-[85vh] flex flex-col"
-        style={{ background: '#111827', border: '1px solid #1e2d4a' }}
+        style={{ background: cssVar('abyss'), border: `1px solid ${tint('xenon', 10)}` }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: '#1e2d4a' }}>
-          <h2 className="text-base font-semibold" style={{ color: '#f1f5f9' }}>Agent Settings</h2>
-          <button onClick={onClose} className="p-1 rounded" style={{ color: '#94a3b8' }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: tint('xenon', 10) }}>
+          <h2 className="text-base font-semibold" style={{ color: cssVar('text') }}>Agent Settings</h2>
+          <button onClick={onClose} className="p-1 rounded" style={{ color: cssVar('text2') }}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -52,10 +53,10 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
           {/* Backend server (optional) — powers DataCenter, Files, Hermes, AI proxy */}
           <section>
-            <h3 className="text-sm font-semibold mb-1" style={{ color: '#f1f5f9' }}>
+            <h3 className="text-sm font-semibold mb-1" style={{ color: cssVar('text') }}>
               Backend server (optional)
             </h3>
-            <p className="text-xs mb-3" style={{ color: '#94a3b8' }}>
+            <p className="text-xs mb-3" style={{ color: cssVar('text2') }}>
               Empire runs fully offline. To power DataCenter, Files, Hermes and the AI
               proxy, point it at a machine running <code>server.js</code> (your PC, or the
               Termux box on the same Wi-Fi). Leave blank to use the local server when present.
@@ -67,7 +68,7 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
                 onChange={e => setBackendUrl(e.target.value)}
                 placeholder="http://192.168.1.10:3001"
                 className="flex-1 rounded-lg px-3 py-2 text-sm font-mono"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid #1e2d4a', color: '#f1f5f9', outline: 'none' }}
+                style={{ background: tint('xenon', 5), border: `1px solid ${tint('xenon', 10)}`, color: cssVar('text'), outline: 'none' }}
               />
               <button
                 onClick={async () => {
@@ -76,22 +77,22 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
                   setBackendTest((await checkBackend()) ? 'online' : 'offline')
                 }}
                 className="px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
-                style={{ background: '#1e2d4a', color: '#f1f5f9' }}
+                style={{ background: tint('ion', 22), color: cssVar('text') }}
               >
                 {backendTest === 'testing' ? 'Testing…' : 'Save & test'}
               </button>
             </div>
             {backendTest === 'online' && (
-              <p className="text-xs mt-2" style={{ color: '#34d399' }}>● Connected</p>
+              <p className="text-xs mt-2" style={{ color: cssVar('c-success') }}>● Connected</p>
             )}
             {backendTest === 'offline' && (
-              <p className="text-xs mt-2" style={{ color: '#f87171' }}>● Not reachable — saved anyway</p>
+              <p className="text-xs mt-2" style={{ color: cssVar('c-danger') }}>● Not reachable — saved anyway</p>
             )}
           </section>
 
           {/* Provider API Keys */}
           <section>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: '#f1f5f9' }}>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: cssVar('text') }}>
               API Keys — All Free Tier
             </h3>
             <div className="space-y-3">
@@ -102,7 +103,7 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
 
                 return (
                   <div key={provider.id}>
-                    <label className="text-xs mb-1 block" style={{ color: '#94a3b8' }}>
+                    <label className="text-xs mb-1 block" style={{ color: cssVar('text2') }}>
                       {provider.logo} {provider.name}
                     </label>
                     <div className="flex gap-2">
@@ -121,16 +122,16 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
                         placeholder={`Enter ${provider.name} API key`}
                         className="flex-1 rounded-lg px-3 py-2 text-sm"
                         style={{
-                          background: 'rgba(255,255,255,0.05)',
-                          border: '1px solid #1e2d4a',
-                          color: '#f1f5f9',
+                          background: tint('xenon', 5),
+                          border: `1px solid ${tint('xenon', 10)}`,
+                          color: cssVar('text'),
                           outline: 'none',
                         }}
                       />
                       <button
                         onClick={() => toggleKeyVisibility(provider.id)}
                         className="p-2 rounded-lg"
-                        style={{ color: '#94a3b8', background: 'rgba(255,255,255,0.05)' }}
+                        style={{ color: cssVar('text2'), background: tint('xenon', 5) }}
                       >
                         {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -139,14 +140,14 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
                 )
               })}
             </div>
-            <p className="text-xs mt-2" style={{ color: '#475569' }}>
+            <p className="text-xs mt-2" style={{ color: cssVar('text3') }}>
               API keys are stored locally in your browser — never sent to any server except the provider.
             </p>
           </section>
 
           {/* Permissions */}
           <section>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: '#f1f5f9' }}>Permissions</h3>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: cssVar('text') }}>Permissions</h3>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -155,8 +156,8 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
                 className="w-4 h-4 rounded"
               />
               <div>
-                <div className="text-sm" style={{ color: '#f1f5f9' }}>Auto-confirm dangerous tools</div>
-                <div className="text-xs" style={{ color: '#475569' }}>
+                <div className="text-sm" style={{ color: cssVar('text') }}>Auto-confirm dangerous tools</div>
+                <div className="text-xs" style={{ color: cssVar('text3') }}>
                   Automatically run shell commands and file writes without asking
                 </div>
               </div>
@@ -165,7 +166,7 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
 
           {/* Behavior */}
           <section>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: '#f1f5f9' }}>Behavior</h3>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: cssVar('text') }}>Behavior</h3>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -174,18 +175,18 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
                 className="w-4 h-4 rounded"
               />
               <div>
-                <div className="text-sm" style={{ color: '#f1f5f9' }}>Always show thinking trace</div>
-                <div className="text-xs" style={{ color: '#475569' }}>See the AI's reasoning steps</div>
+                <div className="text-sm" style={{ color: cssVar('text') }}>Always show thinking trace</div>
+                <div className="text-xs" style={{ color: cssVar('text3') }}>See the AI's reasoning steps</div>
               </div>
             </label>
           </section>
 
           {/* Model settings */}
           <section>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: '#f1f5f9' }}>Generation</h3>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: cssVar('text') }}>Generation</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#94a3b8' }}>Temperature</label>
+                <label className="text-xs mb-1 block" style={{ color: cssVar('text2') }}>Temperature</label>
                 <input
                   type="range"
                   min={0}
@@ -195,10 +196,10 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
                   onChange={e => onChange({ ...settings, temperature: parseFloat(e.target.value) })}
                   className="w-full"
                 />
-                <div className="text-xs text-center" style={{ color: '#94a3b8' }}>{settings.temperature.toFixed(1)}</div>
+                <div className="text-xs text-center" style={{ color: cssVar('text2') }}>{settings.temperature.toFixed(1)}</div>
               </div>
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#94a3b8' }}>Max Tokens</label>
+                <label className="text-xs mb-1 block" style={{ color: cssVar('text2') }}>Max Tokens</label>
                 <input
                   type="range"
                   min={512}
@@ -208,14 +209,14 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
                   onChange={e => onChange({ ...settings, maxTokens: parseInt(e.target.value) })}
                   className="w-full"
                 />
-                <div className="text-xs text-center" style={{ color: '#94a3b8' }}>{settings.maxTokens}</div>
+                <div className="text-xs text-center" style={{ color: cssVar('text2') }}>{settings.maxTokens}</div>
               </div>
             </div>
           </section>
 
           {/* Tool info */}
           <section>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: '#f1f5f9' }}>Available Tools</h3>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: cssVar('text') }}>Available Tools</h3>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { name: 'file_read', icon: '📄', desc: 'Read files' },
@@ -226,11 +227,11 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
                 { name: 'web_fetch', icon: '🌐', desc: 'Fetch pages' },
                 { name: 'code_exec', icon: '▶️', desc: 'Run code' },
               ].map(tool => (
-                <div key={tool.name} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                <div key={tool.name} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: tint('xenon', 4) }}>
                   <span>{tool.icon}</span>
                   <div>
-                    <div className="text-xs font-mono" style={{ color: '#f1f5f9' }}>{tool.name}</div>
-                    <div className="text-xs" style={{ color: '#475569' }}>{tool.desc}</div>
+                    <div className="text-xs font-mono" style={{ color: cssVar('text') }}>{tool.name}</div>
+                    <div className="text-xs" style={{ color: cssVar('text3') }}>{tool.desc}</div>
                   </div>
                 </div>
               ))}

@@ -12,6 +12,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Sparkles, History, Trash2, Copy, Check } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
+import { cssVar, tint } from '../../design-system/tokens'
 import { useToast } from '../../components/ui/Toast'
 
 type Op = '+' | '-' | '×' | '÷' | '^' | null
@@ -200,43 +201,43 @@ export default function Calculator() {
 
   const digitStyle: React.CSSProperties = {
     ...baseBtn,
-    background: 'rgba(255,255,255,0.04)',
+    background: tint('xenon', 4),
     color: 'var(--text)',
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: tint('xenon', 5),
   }
   const opStyle: React.CSSProperties = {
     ...baseBtn,
-    background: 'rgba(249, 115, 22, 0.12)',
-    color: '#fb923c',
-    borderColor: 'rgba(249, 115, 22, 0.18)',
+    background: tint('ember', 12),
+    color: cssVar('ember'),
+    borderColor: tint('ember', 18),
   }
   const opActive: React.CSSProperties = {
     ...opStyle,
-    background: 'rgba(249, 115, 22, 0.28)',
-    borderColor: 'rgba(249, 115, 22, 0.4)',
-    boxShadow: '0 0 12px rgba(249, 115, 22, 0.25)',
+    background: tint('ember', 28),
+    borderColor: tint('ember', 40),
+    boxShadow: `0 0 12px ${tint('ember', 25)}`,
   }
   const equalsStyle: React.CSSProperties = {
     ...baseBtn,
-    background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-    color: '#ffffff',
-    borderColor: 'rgba(249, 115, 22, 0.4)',
-    boxShadow: '0 4px 14px rgba(249, 115, 22, 0.3), inset 0 1px 0 rgba(255,255,255,0.18)',
+    background: `linear-gradient(135deg, ${cssVar('ember')} 0%, color-mix(in srgb, var(--ember) 70%, var(--void)) 100%)`,
+    color: cssVar('text'),
+    borderColor: tint('ember', 40),
+    boxShadow: `0 4px 14px ${tint('ember', 30)}, inset 0 1px 0 ${tint('xenon', 18)}`,
     fontWeight: 600,
   }
   const clearStyle: React.CSSProperties = {
     ...baseBtn,
-    background: 'rgba(239, 68, 68, 0.12)',
-    color: '#f87171',
-    borderColor: 'rgba(239, 68, 68, 0.18)',
+    background: tint('c-danger', 12),
+    color: cssVar('c-danger'),
+    borderColor: tint('c-danger', 18),
   }
   const fnStyle = (active: boolean): React.CSSProperties => ({
     ...baseBtn,
     padding: '10px 6px',
     fontSize: '11px',
-    background: active ? 'rgba(34, 211, 238, 0.18)' : 'rgba(34, 211, 238, 0.08)',
+    background: active ? tint('signal', 18) : tint('signal', 8),
     color: 'var(--color-cyan-3)',
-    borderColor: active ? 'rgba(34, 211, 238, 0.35)' : 'rgba(34, 211, 238, 0.12)',
+    borderColor: active ? tint('signal', 35) : tint('signal', 12),
   })
 
   const onEnter = (setActive?: (b: boolean) => void) => (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -264,11 +265,11 @@ export default function Calculator() {
             position: 'relative',
             padding: '18px 16px 16px',
             borderRadius: 'var(--radius-xl)',
-            background: 'linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2))',
-            border: '1px solid rgba(255,255,255,0.06)',
+            background: `linear-gradient(180deg, ${tint('void', 40)}, ${tint('void', 20)})`,
+            border: `1px solid ${tint('xenon', 6)}`,
             boxShadow: justCalculated
-              ? '0 0 24px rgba(34, 211, 238, 0.15), inset 0 1px 0 rgba(255,255,255,0.05)'
-              : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+              ? `0 0 24px ${tint('signal', 15)}, inset 0 1px 0 ${tint('xenon', 5)}`
+              : `inset 0 1px 0 ${tint('xenon', 3)}`,
             transition: 'box-shadow var(--dur-mid)',
             textAlign: 'right',
             minHeight: '88px',
@@ -312,13 +313,13 @@ export default function Calculator() {
                   borderRadius: '5px',
                   border: 'none',
                   background: 'transparent',
-                  color: copied ? '#4ade80' : 'var(--text3)',
+                  color: copied ? cssVar('c-success') : 'var(--text3)',
                   cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'all var(--dur-fast)',
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = copied ? '#4ade80' : 'var(--text3)'; e.currentTarget.style.background = 'transparent' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.background = tint('xenon', 5) }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = copied ? cssVar('c-success') : 'var(--text3)'; e.currentTarget.style.background = 'transparent' }}
               >
                 {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
               </button>
@@ -336,7 +337,7 @@ export default function Calculator() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     transition: 'all var(--dur-fast)',
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(34,211,238,0.1)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = tint('signal', 10) }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
                 >
                   <Sparkles className="w-3 h-3" />
@@ -489,7 +490,7 @@ export default function Calculator() {
           ))}
 
           <button
-            style={{ ...baseBtn, background: 'rgba(255,255,255,0.04)', color: 'var(--text3)', borderColor: 'rgba(255,255,255,0.05)' }}
+            style={{ ...baseBtn, background: tint('xenon', 4), color: 'var(--text3)', borderColor: tint('xenon', 5) }}
             onClick={backspace}
             onMouseEnter={onEnter()}
             onMouseLeave={onLeave}
@@ -573,7 +574,7 @@ export default function Calculator() {
                 display: 'flex',
                 transition: 'all var(--dur-fast)',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = cssVar('c-danger'); e.currentTarget.style.background = tint('c-danger', 10) }}
               onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; e.currentTarget.style.background = 'transparent' }}
             >
               <Trash2 className="w-3 h-3" />
@@ -606,13 +607,13 @@ export default function Calculator() {
                   cursor: 'pointer',
                   transition: 'background var(--dur-fast)',
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = tint('xenon', 4) }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
               >
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {h.expr}
                 </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#fb923c', fontWeight: 500 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: cssVar('ember'), fontWeight: 500 }}>
                   = {h.result}
                 </div>
               </button>
@@ -621,7 +622,7 @@ export default function Calculator() {
         </div>
 
         {/* Hint */}
-        <div style={{ fontSize: '9px', color: 'var(--text3)', paddingTop: '6px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ fontSize: '9px', color: 'var(--text3)', paddingTop: '6px', borderTop: `1px solid ${tint('xenon', 4)}`, display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <span>⌨️ Keyboard</span>
           <span style={{ opacity: 0.7 }}>0123456789 + - * / ↵</span>
         </div>
