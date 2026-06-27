@@ -10,6 +10,7 @@
 
 import { create } from 'zustand'
 import type { ToolCall, ToolResult, ToolName } from './types'
+import { cssVar } from '../../../design-system/tokens'
 
 export type ActivityStatus = 'running' | 'done' | 'error'
 
@@ -106,7 +107,7 @@ export function describeActivity(entry: ActivityEntry): ActivityDescriptor {
         icon: isBook ? '📖' : '📄',
         verb: isBook ? 'Reading book' : 'Reading file',
         target: basename(path),
-        accent: '#22d3ee',
+        accent: cssVar('signal'),
       }
     }
     case 'file_list':
@@ -114,20 +115,20 @@ export function describeActivity(entry: ActivityEntry): ActivityDescriptor {
         icon: '📁',
         verb: 'Browsing folder',
         target: basename(String(a.path ?? '')) || String(a.path ?? ''),
-        accent: '#22d3ee',
+        accent: cssVar('signal'),
       }
     case 'file_write':
-      return { icon: '✏️', verb: 'Writing file', target: basename(String(a.path ?? '')), accent: '#f59e0b' }
+      return { icon: '✏️', verb: 'Writing file', target: basename(String(a.path ?? '')), accent: cssVar('ember') }
     case 'web_search':
-      return { icon: '🔍', verb: 'Searching the web', target: `"${String(a.query ?? '')}"`, accent: '#a78bfa' }
+      return { icon: '🔍', verb: 'Searching the web', target: `"${String(a.query ?? '')}"`, accent: cssVar('plasma') }
     case 'web_fetch':
-      return { icon: '🌐', verb: 'Reading web page', target: hostname(String(a.url ?? '')), accent: '#a78bfa' }
+      return { icon: '🌐', verb: 'Reading web page', target: hostname(String(a.url ?? '')), accent: cssVar('plasma') }
     case 'shell_exec':
-      return { icon: '⌨️', verb: 'Running command', target: String(a.command ?? ''), accent: '#f59e0b' }
+      return { icon: '⌨️', verb: 'Running command', target: String(a.command ?? ''), accent: cssVar('ember') }
     case 'code_exec':
-      return { icon: '▶️', verb: 'Running code', target: String(a.language ?? 'code'), accent: '#34d399' }
+      return { icon: '▶️', verb: 'Running code', target: String(a.language ?? 'code'), accent: cssVar('c-success') }
     default:
-      return { icon: '🔧', verb: String(entry.tool), target: '', accent: '#22d3ee' }
+      return { icon: '🔧', verb: String(entry.tool), target: '', accent: cssVar('signal') }
   }
 }
 

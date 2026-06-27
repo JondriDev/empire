@@ -55,15 +55,30 @@
   through `rgbCss(triplet, alpha)`; added accent triplet consts to `nodeColors.ts` (`SIGNAL`/`ION`/`PLASMA`/`VOID`).
   `Network.tsx` reports 0. New `nodeColors.test.ts` (5). **token-violations 268 → 221 (−47).** build🟢 vitest 112🟢
   eslint clean.
-- **Next stage (EPIC-2 S5 — continue the sweep, ~one cluster/run toward 0):** top offenders now
-  (`node scripts/metrics.mjs`): `artifacts/artifacts/ColorPalette.tsx` (23 — **decide exempt-vs-migrate FIRST**: the
-  hex swatches ARE its content/data, so this is the *next* legit-exemption candidate like registry — OR move the
-  swatch list to a named const array; lean exempt only if the hexes are genuinely user-facing palette data, else
-  migrate), then the **ai-agent cluster** — `components/ChatPanel.tsx` (19), `Agent.tsx` (17),
-  `components/ConfirmModal.tsx` (16), `components/WorkspacePanel.tsx` (16). The ai-agent files are render code → sweep
-  with `cssVar`/`tint` rails (NOT exempt). Suggested S5 = the ai-agent ChatPanel+ConfirmModal+WorkspacePanel cluster
-  (≈51) in one stage. **Epic target: design-token violations 501 → 0** (now 221). ONE cluster per stage, build+vitest
-  green each time.
+- **EPIC-2 S5 DONE (this run, 2026-06-27):** swept the **entire ai-agent app's render code** to zero with the
+  `cssVar`/`tint` rails — `Agent.tsx` 17→0, `components/ChatPanel.tsx` 19→0, `components/ConfirmModal.tsx` 16→0,
+  `components/WorkspacePanel.tsx` 16→0, `components/ThinkingTrace.tsx` 6→0, + the semantic activity accents in
+  `lib/activityStore.ts` 8→0 (thinking→`signal`, write/shell→`ember`, search/fetch→`plasma`, code→`c-success`; the
+  `accent` field flows into `<StatusIcon color>` so `cssVar(...)` works). New mappings confirmed: NVIDIA-green
+  `#76b900`→`aurora`, black-scrim `rgba(0,0,0,0.7)`→`tint('void',70)`, slate panel `#111827`→`abyss`. **HTML-string
+  alpha-append trap:** ChatPanel's inline `<code style="background:…">` lives in a `.replace()` arg — convert that
+  arg from a `'…'` string to a `` `…` `` template literal so `${tint('ion',15)}` interpolates (the `$1` backref stays
+  literal in a template literal). **Exempted `ai-agent/lib/providers.ts`** in `metrics.mjs` `DS_INFRA` — per-PROVIDER
+  brand-accent identity manifest (registry precedent; two providers are blue `#4285f4`/`#3b82f6` → would both collapse
+  to `ion`). **token-violations 221 → 134 (−87).** build🟢 vitest 112🟢 eslint clean.
+- **Next stage (EPIC-2 S6 — continue the sweep, ~one cluster/run toward 0):** top offenders now
+  (`node scripts/metrics.mjs`): `artifacts/artifacts/ColorPalette.tsx` (23 — **settle exempt-vs-migrate**: it's a
+  color-theory TOOL, the hexes ARE its content/output — seed palettes (`#6366F1`…), `fgFor` returns true black/white
+  for the WCAG contrast lab, neutral `rgba(255/0,…)` scrims over the user's own swatches. Recoloring to XENO tokens
+  would actively break the contrast lab + lose example data → **lean EXEMPT** like registry/providers, OR move the
+  seed hexes to a named const if you'd rather not exempt the whole file), `components/ui/Toast.tsx` (16 — shared UI
+  primitive, render code → **migrate** with `cssVar`/`tint`), then the artifacts render cluster
+  `ChartBuilder.tsx` (15), `Kanban.tsx` (13), `FormBuilder.tsx` (9). Suggested S6 = Toast + ChartBuilder+Kanban+
+  FormBuilder (≈53) in one stage, settle ColorPalette as an exemption alongside. **Epic target: design-token
+  violations 501 → 0** (now 134). ONE cluster per stage, build+vitest green each time. **Reusable rail for data files:**
+  if a file's colors are genuine external/brand/content identities that must stay distinct (registry, providers,
+  ColorPalette swatches), add its repo-relative path to the `DS_INFRA` set in `scripts/metrics.mjs` with a one-line
+  rationale — don't force-map identity data onto internal tokens.
 - **S6c done (this run, 2026-06-23):** all 9 entity-owning apps that honestly take input are now
   both-ways. Added `SEND_TO_CALENDAR` / `SEND_TO_GOALS` / `SEND_TO_MESSAGES` to
   `src/lib/appActions.ts` (each writes `empire-<x>-clipboard` `{text,title?,from}`, `handoff(...)`s,

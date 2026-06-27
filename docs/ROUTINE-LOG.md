@@ -5,6 +5,42 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-27 · Builder — EPIC-2 S5: ai-agent cluster → zero (token-violations 221 → 134)
+
+**Done.** Swept the **entire ai-agent (Cakra) app's render code** off hardcoded colour onto the `cssVar`/`tint`
+rails from `src/design-system/tokens.ts`, the largest single coherent cluster in the remaining tail:
+- **Render `.tsx`:** `Agent.tsx` (17→0), `components/ChatPanel.tsx` (19→0), `components/ConfirmModal.tsx` (16→0),
+  `components/WorkspacePanel.tsx` (16→0), `components/ThinkingTrace.tsx` (6→0).
+- **Semantic data:** `lib/activityStore.ts` (8→0) — the per-activity `accent` (thinking→`signal`, write/shell→
+  `ember`, search/fetch→`plasma`, code→`c-success`); these flow into `<StatusIcon color>` so `cssVar(...)` renders.
+- **Mappings used:** cyan `#22d3ee`→`signal`, indigo `#6366f1`→`ion`, NVIDIA-green `#76b900`→`aurora`, amber
+  `#f59e0b`→`ember`, green `#34d399`→`c-success`, red `#ef4444`→`c-danger`, text greys `#f1f5f9`/`#94a3b8`/`#475569`/
+  `#64748b`→`text`/`text2`/`text3`, white-glass→`tint('xenon',N)`, black-scrim `rgba(0,0,0,0.7)`→`tint('void',70)`,
+  slate panel `#111827`→`abyss`.
+- **HTML-string alpha-append trap:** ChatPanel injects an inline `<code style="background:…">` via a `.replace()`
+  arg — converted that arg from a `'…'` string to a `` `…` `` template literal so `${tint('ion',15)}` interpolates
+  (the regex `$1` backref stays literal inside a template literal).
+- **Exemption (registry precedent):** added `src/apps/ai-agent/lib/providers.ts` to `DS_INFRA` in
+  `scripts/metrics.mjs`. It's the per-PROVIDER brand-accent identity manifest (consumed as `p.color` in ModelPicker
+  to keep OpenRouter/Google/NVIDIA/etc. visually distinct); mapping external brand colours onto our internal tokens
+  would collapse two blue providers (`#4285f4`/`#3b82f6`) onto `ion` — it's data, not a violation.
+
+**Why.** EPIC-2's target is design-token violations → 0. The ai-agent app was the single densest remaining cluster
+(82 violations across 6 files); sweeping it whole keeps the change coherent and reviewable while taking the biggest
+bite. Provider brand colours are the one part that must NOT be tokenised, so they're exempted, not migrated.
+
+**Verified.** `npm run build` 🟢 (tsc -b + vite build). `npx vitest run` **112/112 🟢** (16 files). `npx eslint`
+clean on all touched files. `node scripts/metrics.mjs`: **token-violations 221 → 134 (−87)**, apps 27 (±0), test
+files 16 (±0), bundle gz 248.3 → 248.1 (−0.2). `grep` confirms 0 hex/rgba left in any ai-agent file except the
+exempt `providers.ts`. *Not cloud-verifiable:* the visual recolour (Cakra chat bubbles, tool-call cards, confirm
+modal, workspace panel, thinking trace now render in XENO accents instead of Tailwind indigo/cyan/amber) — the metric
+drop + green build are the proof; confirm on-device.
+
+**Next best step.** EPIC-2 S6 — Toast.tsx (16, migrate) + the artifacts render cluster (ChartBuilder 15 / Kanban 13
+/ FormBuilder 9, ≈37), and settle `ColorPalette.tsx` (23) as an exemption (it's a colour-theory tool; its hexes are
+content/output, not chrome — recolouring would break its WCAG contrast lab). Target: 134 → ~58. See CONTEXT "Next
+stage".
+
 ## 2026-06-27 · Builder — EPIC-2 S4: registry exemption + Network canvas de-hex (token-violations 268 → 221)
 
 **Done.** Cleared the two deferred S4 offenders from the S3 tail:
