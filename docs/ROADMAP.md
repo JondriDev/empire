@@ -10,39 +10,26 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-06-22** (strategist) · Main: 🟢 green (build + 92/92 vitest) ·
-> QA: 26/26 routes mount, no runtime errors. EPIC-1 S1–S5 shipped; active stage **S6a**
-> (close the emit↔receive loop — both-ways metric stuck at 1/26, S6a→3, S6b→6, S6c→9).
+> Last re-ranked: **2026-06-27** (strategist) · Main: 🟢 green (build + 112 vitest) ·
+> QA: 28/28 routes render, no runtime errors. **EPIC-1 DONE** (both-ways 9/9). **EPIC-2 ACTIVE
+> & ~75% done** — design-token violations **501 → 134**; S1–S5 shipped, remaining 134 decomposed
+> into S6 (artifacts app) → S7 (shared-UI+shell) → S8 (long-tail) → **0**, then EPIC-3 promotes.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
-> themes** that feed *future* epics — re-ranked each strategist run. The former NOW #3
-> (global command-palette audit) **shipped** as EPIC-1 S4 (⌘K palette, commit 1de67e5)
-> and is retired below; the Network legend/inspector (former NEXT) shipped as S3.
+> themes** that feed *future* epics — re-ranked each strategist run. Former NOW #1
+> (JS-importable design tokens) **shipped** as EPIC-2 S1 (`src/design-system/tokens.ts`) and is
+> retired below; the per-app sweep it unblocked is now EPIC-2 S2–S8.
 
 ---
 
 ## NOW — next 3–5 increments (each one PR-sized)
 
 Pulled top-to-bottom. Each is small, concrete, and has an acceptance check.
-(The active epic's stages take precedence; these are the on-deck themes feeding EPIC-2/3.)
+(The **active epic's stages (EPIC-2 S6→S7→S8) take precedence** — these are the on-deck
+themes feeding the *next* epic, EPIC-3 · Depth pass.)
 
-### 1. One palette, one source of truth — JS-importable design tokens
-**Priority: DESIGN-SYSTEM CONSISTENCY.** The Network canvas (and any future
-`<canvas>` visual) hardcodes `rgba()` literals because a 2D context can't read
-CSS custom properties — every routine has flagged this as an accepted divergence.
-The XENO accent palette therefore lives in two places that can drift.
-
-- **Why:** an organism that "feels like alien technology" needs *one* palette
-  rendered identically in DOM and canvas. A shared TS token module removes the
-  drift and unblocks future canvas/WebGL visuals.
-- **Do:** extract the core accent/signal palette into `src/design-system/tokens.ts`
-  (plain TS consts), have the canvas read from it, and — where practical — generate
-  the matching CSS custom properties from the same source so they can't diverge.
-- **Acceptance:** `Network.tsx` no longer carries orphan hex/rgba beyond values
-  derived from the shared module; DOM and canvas accents visibly match. Build green.
-
-### 2. Make the README tell the truth (26 apps, Cakra, current stack)
+### 1. Make the README tell the truth (27 apps, Cakra, current stack)
 **Priority: DESIGN-SYSTEM CONSISTENCY / hygiene.** `README.md` still says
 "21 Apps," centers a **Hermes AI** app, and omits the newer instruments
 (Cakra Agent, Cakra CC, AI Chat, Artifacts, Network). The product was rebranded
@@ -58,28 +45,39 @@ Hermes → **Cakra** and the registry now holds **25** apps + the desktop shell.
 - **Acceptance:** README inventory matches `registry.ts` 1:1; no stale "Hermes AI"
   central-app references; app count is correct.
 
-### 3. Generate the matching CSS custom properties from the TS token source
-**Priority: DESIGN-SYSTEM CONSISTENCY.** *(Feeds EPIC-2 — promote when EPIC-1 finishes.)*
-Companion to #1: once `src/design-system/tokens.ts` exists, the `colors_and_type.css`
-custom properties should be generated from (or asserted against) the same consts so DOM
-and canvas literally cannot drift, removing the largest class of token violations at the source.
+### 2. Lock the palette against future drift (assert CSS vars ≡ `tokens.ts`)
+**Priority: DESIGN-SYSTEM CONSISTENCY.** *(Feeds a post-EPIC-2 follow-up — promote once
+violations hit 0 so the win can't silently rot.)* Now that `src/design-system/tokens.ts` is
+the TS palette source and EPIC-2 is driving app code onto it, add a guard so a new hardcoded
+hex or a drifted CSS var fails fast.
 
-- **Why:** EPIC-2's target is token-violations 496→0; a single generated source is the
-  highest-leverage move before the per-app sweep.
-- **Do:** scope a build step or a test that asserts every `--accent-*`/signal CSS var equals
-  its `tokens.ts` const; document the generation path. (Build-routine task — outside docs scope.)
-- **Acceptance:** a test or generator ties CSS vars to `tokens.ts`; a drift fails CI. Build green.
+- **Why:** EPIC-2 gets violations to 0 by sweeping; without a ratchet, the count creeps back.
+  A test that ties `colors_and_type.css` `--*` vars to their `tokens.ts` consts (and a CI check
+  that `metrics.mjs` token-violations stays 0) makes the conformance permanent.
+- **Do:** a vitest that asserts every `--signal`/`--ion`/… CSS custom prop equals its `PALETTE`
+  const, plus a `metrics.mjs --assert-zero`-style gate. (Build-routine task — outside docs scope.)
+- **Acceptance:** a drift or a new hardcoded hex fails CI. Build green.
+
+### 3. EPIC-3 prep — pick the first shallow instrument to deepen
+**Priority: COMPLETING APPS (next epic on deck).** When EPIC-2 closes, EPIC-3 (depth pass on
+thin apps: Photos, Maps, Video, Music, Clock) promotes. Pre-scope the first stage so the
+handoff is instant: audit which of the five has the highest capability-per-effort offline win
+(leading candidate: **Clock** — world clocks + timers + stopwatch are fully offline and high-use;
+or **Music** — a local-file player). The strategist will decompose the winner into stages then.
+
+- **Acceptance (for the strategist, not the builder):** EPIC-3's S1 names the app, the concrete
+  offline capability, the files, and an acceptance check — ready to promote the moment EPIC-2 is DONE.
 
 ---
 
 ## NEXT — themes (break into NOW items as slots open)
 
-- **Complete the cross-app graph.** *(In progress — this IS EPIC-1 S6.)* The Network
-  legend + inspector shipped (S3); ⌘K palette (S4) and Inbox (S5) surface intents/tasks.
-  The last gap is the emit↔receive loop (both-ways 1/26 → 9/9) — see EPIC-1 S6a–c.
-- **Design-system consistency sweep.** Audit each of the 25 apps for token usage
-  (spacing/radii/type/color) against the XENO system; fix one-off hex, ad-hoc
-  spacing, and non-`--mono` code surfaces. Track a per-app conformance checklist.
+- **Complete the cross-app graph.** ✅ **DONE — this WAS EPIC-1** (emit↔receive loop closed,
+  both-ways 9/9; Network inspector S3, ⌘K palette S4, Inbox S5 all shipped). Retired.
+- **Design-system consistency sweep.** *(In progress — this IS EPIC-2, ~75% done: 501 → 134.)*
+  The colour axis is nearly swept (S1–S5; S6–S8 finish it to 0). A **follow-on theme** once
+  colour hits 0: extend the conformance audit to **spacing/radii/type** (ad-hoc px, non-`--mono`
+  code surfaces) with its own `metrics.mjs` row, so "design-system conformance" isn't colour-only.
 - **Depth pass on shallow apps.** Identify which instruments are still thin
   (Photos, Maps, Video, Music, Clock) and give each one genuine, offline-capable
   function rather than a placeholder — coherence over new apps.

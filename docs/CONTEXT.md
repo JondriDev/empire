@@ -66,19 +66,30 @@
   literal in a template literal). **Exempted `ai-agent/lib/providers.ts`** in `metrics.mjs` `DS_INFRA` — per-PROVIDER
   brand-accent identity manifest (registry precedent; two providers are blue `#4285f4`/`#3b82f6` → would both collapse
   to `ion`). **token-violations 221 → 134 (−87).** build🟢 vitest 112🟢 eslint clean.
-- **Next stage (EPIC-2 S6 — continue the sweep, ~one cluster/run toward 0):** top offenders now
-  (`node scripts/metrics.mjs`): `artifacts/artifacts/ColorPalette.tsx` (23 — **settle exempt-vs-migrate**: it's a
-  color-theory TOOL, the hexes ARE its content/output — seed palettes (`#6366F1`…), `fgFor` returns true black/white
-  for the WCAG contrast lab, neutral `rgba(255/0,…)` scrims over the user's own swatches. Recoloring to XENO tokens
-  would actively break the contrast lab + lose example data → **lean EXEMPT** like registry/providers, OR move the
-  seed hexes to a named const if you'd rather not exempt the whole file), `components/ui/Toast.tsx` (16 — shared UI
-  primitive, render code → **migrate** with `cssVar`/`tint`), then the artifacts render cluster
-  `ChartBuilder.tsx` (15), `Kanban.tsx` (13), `FormBuilder.tsx` (9). Suggested S6 = Toast + ChartBuilder+Kanban+
-  FormBuilder (≈53) in one stage, settle ColorPalette as an exemption alongside. **Epic target: design-token
-  violations 501 → 0** (now 134). ONE cluster per stage, build+vitest green each time. **Reusable rail for data files:**
-  if a file's colors are genuine external/brand/content identities that must stay distinct (registry, providers,
-  ColorPalette swatches), add its repo-relative path to the `DS_INFRA` set in `scripts/metrics.mjs` with a one-line
-  rationale — don't force-map identity data onto internal tokens.
+- **Remaining 134 violations are now fully enumerated & decomposed into exactly 3 stages (EPICS.md S6/S7/S8):**
+  - **S6 · artifacts app → 0 (NEXT, ~75):** the dominant mass. Most of it is **categorical hue arrays** (chart
+    series, kanban columns/tags, form field-types, gallery accents). **The move: add `export const CATEGORICAL:
+    string[]` to `src/design-system/tokens.ts`** = `[cssVar('ion'),cssVar('signal'),cssVar('ember'),cssVar('plasma'),
+    cssVar('c-success'),cssVar('aurora'),cssVar('c-danger'),cssVar('c-info')]` (8 distinct XENO accents, the canonical
+    "N-distinct-series" rail; index `CATEGORICAL[i % len]`). Point `ChartBuilder.COLORS` (15), `Kanban` accents+
+    `TAG_COLORS`+`tagColor` (13), `FormBuilder` field colors (9), `ArtifactGallery` accents (8) at it; de-hex
+    `ArtifactsApp.tsx` (7) chrome with `cssVar`/`tint`. **ChartBuilder SVG** is migratable (`stroke`/`stopColor`/`fill`
+    take `var(--…)`): grid `rgba(255,255,255,0.06)`→`tint('xenon',6)`, cyan `#22d3ee`→`cssVar('signal')`. **EXEMPT
+    `ColorPalette.tsx` (23)** in `metrics.mjs` `DS_INFRA` — colour-theory TOOL, hexes ARE content (seed palettes,
+    WCAG contrast-lab true `#0F172A`/`#FFFFFF`, user swatches); registry/providers precedent. Extend `tokens.test.ts`
+    (CATEGORICAL len/var-shape/unique). → **134 → ~59.** build🟢 vitest🟢.
+  - **S7 · shared-UI + shell → 0 (~45):** `Toast.tsx` (16: green→`c-success`/red→`c-danger`/cyan→`signal`/amber→`c-warn`,
+    panel→`tint('void',85)`, glass→`tint('xenon',N)`), `ErrorBoundary.tsx` (7), `Utility.tsx` (6), `Desktop.tsx` (6),
+    `Dashboard.tsx` (4), `AppShell.tsx` (3), `NodeActions.tsx` (3). All render code → `cssVar`/`tint`; hover tints stay
+    `color-mix`, never raw `rgba`. Keep `${app.color}` registry interpolation in Desktop as-is (identity data). → **~59 → ~14.**
+  - **S8 · long-tail → 0, EPIC-2 CLOSE (~14):** `Notes.tsx` (6), `Goals.tsx` (3), `AIChat.tsx` (2), `Weather.tsx` (1),
+    `Calendar.tsx` (1) → `cssVar`/`tint` (don't touch handoff/provenance logic); `network/nodeColors.ts` (1) → route
+    through its own `rgbCss`/triplet rail (NOT cssVar — it's the canvas source). → **token-violations = 0 → EPIC-2 DONE,
+    promote EPIC-3.**
+  - **Reusable rail for data files:** if a file's colours are genuine external/brand/content identities that must stay
+    distinct (registry, providers, ColorPalette swatches), add its repo-relative path to `DS_INFRA` in
+    `scripts/metrics.mjs` with a one-line rationale — don't force-map identity data onto internal tokens. For
+    *decorative* N-distinct series (charts/tags/fields), use the new `CATEGORICAL` sequence instead of exempting.
 - **S6c done (this run, 2026-06-23):** all 9 entity-owning apps that honestly take input are now
   both-ways. Added `SEND_TO_CALENDAR` / `SEND_TO_GOALS` / `SEND_TO_MESSAGES` to
   `src/lib/appActions.ts` (each writes `empire-<x>-clipboard` `{text,title?,from}`, `handoff(...)`s,

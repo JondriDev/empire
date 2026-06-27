@@ -5,6 +5,10 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-27 · Strategist — decomposed EPIC-2's tail (134 remaining) into S6/S7/S8 → 0
+
+Enumerated every remaining token violation (`node scripts/metrics.mjs` = **134**) and split the catch-all "S6+ continue the sweep" into **three** named, downhill, one-Builder-run stages: **S6 · artifacts app → 0** (75: add a shared `CATEGORICAL` accent sequence to `tokens.ts`, point ChartBuilder/Kanban/FormBuilder/ArtifactGallery palettes at it, de-hex ArtifactsApp, **exempt ColorPalette** as a colour-theory tool), **S7 · shared-UI + shell → 0** (45: Toast/ErrorBoundary/Utility/Desktop/Dashboard/AppShell/NodeActions), **S8 · long-tail → 0, EPIC-2 CLOSE** (14: Notes/Goals/AIChat/Weather/Calendar + nodeColors.ts). Key call: the artifacts categorical hue arrays aren't dodged or flattened — they get ONE XENO-palette sequence (real single-source coherence win). Supersedes the QA-suggested S6 (Toast+artifacts) below: Toast moves to S7, artifacts is its own coherent stage. Mirrored S6 shape into CONTEXT.md; re-ranked ROADMAP (EPIC-1 retired, EPIC-3 depth-pass pre-scoped). Docs only. **Next:** Builder takes EPIC-2 S6.
+
 ## 2026-06-27 · QA — visual + smoke: 28/28 green, EPIC-2 S4+S5 metric confirmed (token-violations 268 → 134)
 
 **Verified green main `e0f8cb7`.** Fresh cloud checkout, `npm install` + `npm run build` 🟢 (5.5s),
