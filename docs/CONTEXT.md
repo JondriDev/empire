@@ -198,28 +198,31 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-23, post-S6c green main `6435a81` — EPIC-1 DONE, entity loop CLOSED)
+## 📊 Last QA confirmation (2026-06-27, post-EPIC-2-S1 green main `386ff36` — token-violations 501→388)
 
 - **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (all 27 registry
-  apps in the smoke list). vitest **103/103 🟢** (14 files). **No runtime bugs found.**
-- **Apps fully wired BOTH-ways: 9/9 entity-apps-with-inbound — ✅ EPIC-1 TARGET HIT (↑ from 6 — S6c).**
-  Now both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat **+ calendar,
-  goals, messages**. Intentionally emit-only (by design): files, photos, datacenter (browse/manage stores)
-  + tool apps via `NodeActions`. **EPIC-1 entity loop CLOSED → EPIC-1 DONE; EPIC-2 (token violations → 0)
-  promoted to ACTIVE** (METRICS both-ways row retargeted to 9/9; EPICS.md headers flipped).
-- **Epic-acceptance: S6c CONFIRMED LIVE** — drove the running app via `scripts/qa-s6c-confirm.mjs` (env-only
-  harness; seeds each `empire-<x>-clipboard` payload + reload, asserts chip + prefilled field off live
-  `input`/`textarea` `.value`): **Calendar** ← editor → "From Code Editor" chip + New-Event modal prefilled
-  (title "Quarterly planning sync", date=today, desc); **Goals** ← notes → chip + New-Goal title/desc
-  prefilled; **Messages** ← ai-chat → "From AI Chat" chip + composer draft prefilled. **3/3 ✅** — captured
-  `s6c-inbound-{calendar,goals,messages}.png`. The HANDOFF emission is unit-tested (`appActions.test.ts`,
-  vitest 103). *Cloud limit:* the source→target arc in The Network needs a seeded graph + cross-page nav,
-  so the arc itself isn't screenshotted (receiver-side provenance + prefill is the live proof).
-- **Auto metrics vs post-S6b:** S6c (commit `6435a81`) moved vitest 100→103 (+3, the new `appActions`
-  HANDOFF `it.each` cases), test files ±0 (14), static metrics ±0 (96, undercounts), token-violations
-  **501 (±0)**, bundle gz 242.8→243.5 (+0.7, the three apps' inbound code). This QA run added no product
-  code → auto-metrics ±0 vs the S6c builder snapshot.
+  apps in the smoke list) + INBOUND-LANDS **3/3 ✅** (calendar←editor, goals←notes, messages←ai-chat each
+  show "Received from …" chip + prefilled control off the live render). vitest **107/107 🟢** (15 files).
+  **No runtime bugs found.**
+- **Apps fully wired BOTH-ways: 9/9 entity-apps-with-inbound — ✅ EPIC-1 TARGET (held, EPIC-1 DONE).**
+  Both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat, calendar, goals,
+  messages. Intentionally emit-only (by design): files, photos, datacenter + tool apps via `NodeActions`.
+  Re-verified live this run by the smoke harness's INBOUND-LANDS guard (3/3 receivers chip+prefill).
+- **Epic-acceptance: EPIC-2 S1 CONFIRMED MOVED** — the ACTIVE epic's target metric is *Design-token
+  violations* (501 → 0). S1 (palette seam `tokens.ts` + Hermes cluster de-hex) claimed **501 → 388 (−113)**;
+  `node scripts/metrics.mjs` this run reports **388** → confirmed, no contradiction. Top remaining offenders
+  (the EPIC-2 **S2** targets, still un-swept): `ai-agent/components/SettingsPanel.tsx` (38),
+  `apps/calculator/Calculator.tsx` (38), `artifacts/artifacts/MarkdownStudio.tsx` (29), then
+  `lib/registry.ts` (27), `components/ui/index.tsx` (26). *Visual recolor (Tailwind→XENO) is intentional
+  but not cloud-verifiable headless — the metric drop is the proof.*
+- **Auto metrics vs post-S6c (last QA snapshot):** EPIC-2 S1 (commit `386ff36`) moved token-violations
+  **501→388 (−113)**, vitest 103→107 (+4, `tokens.test.ts`), test files 14→15 (+1), static count 96→100,
+  bundle gz 243.5→243.6 (+0.1). This QA run added no product code → auto-metrics ±0 vs the S1 builder snapshot.
+- **Stale per-stage screenshots pruned:** removed 8 superseded EPIC-1 confirmation PNGs from
+  `docs/screenshots/latest/` (`s6c-inbound-*`, `*-provenance`, `editor-send-menu`, `inbox-populated`,
+  `palette`) — the INBOUND-LANDS guard now produces fresh emit↔receive proof each run, so `latest/` holds
+  only the current `desktop.png` + `app-<id>.png` set + `REPORT.md`.
 - **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
   datacenter `/api/dc/tables`→401 (authed API, no headless session).
 - QA harness note: project has **no `playwright` dep**; it's global at `/opt/node22/lib/node_modules`.
