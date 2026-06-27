@@ -1,23 +1,28 @@
 /**
- * Hermes Agent — Main App
- * Redesigned agentic AI interface for The Empire
+ * Cakra Agent — Main App
+ * Agentic AI for The Empire, with a Manus-style transparent Workspace panel
+ * so you can watch every action Cakra takes — reading files, searching,
+ * running code — live, as it happens.
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Bot, Settings, Play, Square, Zap, ChevronDown } from 'lucide-react'
+import { Bot, Settings, Play, Square, Zap, ChevronDown, PanelRight } from 'lucide-react'
 import { runAgentTurn, getSettings, saveSettings, type AgentSettings } from './lib/agent'
 import type { Message, ToolCall, ThinkingStep } from './lib/types'
 import { getProvider } from './lib/providers'
 import { TOOL_LIST } from './lib/tools'
-import { formatToolResult } from './lib/toolExecutor'
+import { useActivityStore } from './lib/activityStore'
 import ChatPanel from './components/ChatPanel'
 import ThinkingTrace from './components/ThinkingTrace'
 import ModelPicker from './components/ModelPicker'
 import SettingsPanel from './components/SettingsPanel'
 import ConfirmModal from './components/ConfirmModal'
+import WorkspacePanel from './components/WorkspacePanel'
 import { emit } from '../../lib/eventBus'
 
-const WELCOME = `👋 **Hermes Agent is ready.**
+const AGENT_NAME = 'Cakra'
+
+const WELCOME = `👋 **${AGENT_NAME} is ready.**
 
 I can *act* — not just chat. Here's what I can do:
 
@@ -33,7 +38,9 @@ Search the web and fetch page content.
 **▶️ Code Execution**
 Run Python or JavaScript code directly.
 
-**Just ask me to do something.** Be specific — "read my notes file", "find all .py files in projects", "search for the latest AI news", "run this Python script" etc.`
+**Just ask me to do something.** Be specific — "read my notes file", "find all .py files in projects", "search for the latest AI news", "run this Python script" etc.
+
+*Watch everything I do live in the **Workspace** panel on the right.*`
 
 export default function Agent() {
   const [messages, setMessages] = useState<Message[]>([
@@ -53,9 +60,35 @@ export default function Agent() {
   const [pendingConfirmCalls, setPendingConfirmCalls] = useState<ToolCall[]>([])
   const [settings, setSettings] = useState<AgentSettings>(getSettings)
   const [_aborted, setAborted] = useState(false)
+  const [panelOpen, setPanelOpen] = useState(true)
+  const [containerW, setContainerW] = useState(0)
 
   const abortRef = useRef<AbortController | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  // Live activity log — Cakra's transparent Workspace
+  const startActivity = useActivityStore(s => s.start)
+  const finishActivity = useActivityStore(s => s.finish)
+
+  // Track the window width so the Workspace docks beside the chat on wide
+  // screens and slides over as a full panel on a phone.
+  useEffect(() => {
+    const el = rootRef.current
+    if (!el) return
+    const ro = new ResizeObserver(entries => {
+      for (const e of entries) setContainerW(e.contentRect.width)
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  const isNarrow = containerW > 0 && containerW < 560
+
+  // Match panel visibility to layout when the breakpoint flips: open beside a
+  // wide chat, tucked away on a narrow one (it auto-opens when Cakra acts).
+  useEffect(() => {
+    setPanelOpen(!isNarrow)
+  }, [isNarrow])
 
   // Emit APP_OPENED
   useEffect(() => {
@@ -123,17 +156,13 @@ export default function Agent() {
           m.id === assistantMsgId ? { ...m, content: m.content + token } : m
         ))
       },
+      onToolStart(call) {
+        // The instant Cakra begins an action, surface it in the Workspace.
+        startActivity(call)
+        setPanelOpen(true)
+      },
       onToolCall(call, result) {
-        const toolMsg: Message = {
-          id: `tool-${call.id}`,
-          role: 'tool',
-          content: formatToolResult(result),
-          timestamp: Date.now(),
-          toolCallId: call.id,
-          toolName: call.name,
-          error: !result.success,
-        }
-        setMessages(prev => [...prev, toolMsg])
+        finishActivity(call.id, result)
       },
       onConfirmNeeded(calls) {
         setLoading(false)
@@ -151,7 +180,7 @@ export default function Agent() {
         ))
       },
     })
-  }, [messages, settings])
+  }, [messages, settings, startActivity, finishActivity])
 
   const handleSubmit = useCallback((e?: React.FormEvent) => {
     e?.preventDefault()
@@ -160,7 +189,7 @@ export default function Agent() {
   }, [input, loading, runTurn])
 
   const handleConfirmDangerous = useCallback(async (calls: ToolCall[]) => {
-    // Execute approved dangerous calls
+    // Execute approved dangerous calls — and show each one in the Workspace.
     const toolRequests = calls.map(c => ({
       tool: c.name as any,
       params: c.arguments,
@@ -169,27 +198,18 @@ export default function Agent() {
 
     setPendingConfirmCalls([])
     setLoading(true)
+    setPanelOpen(true)
+    calls.forEach(c => startActivity(c))
 
     try {
       const { executeToolsParallel } = await import('./lib/toolExecutor')
       const results = await executeToolsParallel(toolRequests)
-
-      const toolMessages: Message[] = calls.map(c => ({
-        id: `tool-${c.id}`,
-        role: 'tool' as const,
-        content: formatToolResult(results[c.id]),
-        timestamp: Date.now(),
-        toolCallId: c.id,
-        toolName: c.name,
-        error: !results[c.id].success,
-      }))
-
-      setMessages(prev => [...prev, ...toolMessages])
+      calls.forEach(c => finishActivity(c.id, results[c.id]))
       setLoading(false)
     } catch (_err) {
       setLoading(false)
     }
-  }, [])
+  }, [startActivity, finishActivity])
 
   const handleCancel = () => {
     abortRef.current?.abort()
@@ -207,131 +227,147 @@ export default function Agent() {
   const activeModel = settings.providers[settings.activeProvider]?.model || activeProvider.models[0]?.id
 
   return (
-    <div className="h-full flex flex-col" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center">
-            <Bot className="w-5 h-5 text-white" />
+    <div ref={rootRef} className="h-full flex relative" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+      {/* ─── Chat column ─────────────────────────────────────────────────── */}
+      <div className="h-full flex flex-col flex-1 min-w-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center">
+              <Bot className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-base font-semibold">{AGENT_NAME}</h1>
+              <button
+                onClick={() => setModelPickerOpen(true)}
+                className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full cursor-pointer"
+                style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}
+              >
+                <span>{activeProvider.name}</span>
+                <span style={{ color: '#94a3b8' }}>·</span>
+                <span>{activeModel?.split('/').pop()}</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            </div>
           </div>
-          <div>
-            <h1 className="text-base font-semibold">Hermes Agent</h1>
+
+          <div className="flex items-center gap-1">
             <button
-              onClick={() => setModelPickerOpen(true)}
-              className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full cursor-pointer"
-              style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}
+              onClick={() => setShowThinking(v => !v)}
+              className="p-2 rounded-lg text-xs"
+              style={{ color: '#94a3b8', background: showThinking ? 'rgba(34,211,238,0.1)' : 'transparent' }}
+              title="Toggle thinking trace"
             >
-              <span>{activeProvider.name}</span>
-              <span style={{ color: '#94a3b8' }}>·</span>
-              <span>{activeModel?.split('/').pop()}</span>
-              <ChevronDown className="w-3 h-3" />
+              <Zap className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setPanelOpen(v => !v)}
+              className="p-2 rounded-lg text-xs"
+              style={{ color: panelOpen ? '#22d3ee' : '#94a3b8', background: panelOpen ? 'rgba(34,211,238,0.1)' : 'transparent' }}
+              title="Toggle Workspace — see what Cakra is doing"
+            >
+              <PanelRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={clearChat}
+              className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors"
+              title="Clear chat"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors"
+              title="Settings"
+            >
+              <Settings className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setShowThinking(v => !v)}
-            className="p-2 rounded-lg text-xs"
-            style={{ color: '#94a3b8', background: showThinking ? 'rgba(34,211,238,0.1)' : 'transparent' }}
-            title="Toggle thinking trace"
-          >
-            <Zap className="w-4 h-4" />
-          </button>
-          <button
-            onClick={clearChat}
-            className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors"
-            title="Clear chat"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-              <path d="M10 11v6M14 11v6" />
-            </svg>
-          </button>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors"
-            title="Settings"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
+        {/* Thinking Trace */}
+        {showThinking && thinkingSteps.length > 0 && (
+          <ThinkingTrace steps={thinkingSteps} />
+        )}
+
+        {/* Chat messages */}
+        <div className="flex-1 overflow-y-auto">
+          <ChatPanel
+            messages={messages}
+            toolList={TOOL_LIST}
+          />
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Input area */}
+        <div className="p-4 border-t" style={{ borderColor: 'var(--border)' }}>
+          <form onSubmit={handleSubmit} className="flex items-end gap-2">
+            <div className="flex-1 relative">
+              <textarea
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSubmit()
+                  }
+                }}
+                placeholder="Ask me to do something..."
+                rows={1}
+                className="w-full rounded-xl px-4 py-3 pr-12 resize-none text-sm"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text)',
+                  maxHeight: '120px',
+                  outline: 'none',
+                }}
+                disabled={loading}
+                ref={el => {
+                  if (el) {
+                    el.style.height = 'auto'
+                    el.style.height = Math.min(el.scrollHeight, 120) + 'px'
+                  }
+                }}
+              />
+              {loading && (
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="absolute right-3 bottom-3 p-1 rounded"
+                  style={{ color: '#ef4444' }}
+                >
+                  <Square className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={!input.trim() || loading}
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+              style={{
+                background: input.trim() && !loading ? '#6366f1' : 'rgba(99,102,241,0.3)',
+                color: '#fff',
+                cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
+              }}
+            >
+              <Play className="w-4 h-4" />
+            </button>
+          </form>
+          <p className="text-xs text-center mt-2" style={{ color: '#475569' }}>
+            Shift+Enter for newline · Enter to send · I'm an AI that can take actions
+          </p>
         </div>
       </div>
 
-      {/* Thinking Trace */}
-      {showThinking && thinkingSteps.length > 0 && (
-        <ThinkingTrace steps={thinkingSteps} />
+      {/* ─── Workspace panel (Manus-style transparency) ──────────────────── */}
+      {panelOpen && (
+        <WorkspacePanel overlay={isNarrow} onClose={() => setPanelOpen(false)} />
       )}
-
-      {/* Chat messages */}
-      <div className="flex-1 overflow-y-auto">
-        <ChatPanel
-          messages={messages}
-          toolList={TOOL_LIST}
-        />
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Input area */}
-      <div className="p-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <form onSubmit={handleSubmit} className="flex items-end gap-2">
-          <div className="flex-1 relative">
-            <textarea
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  handleSubmit()
-                }
-              }}
-              placeholder="Ask me to do something..."
-              rows={1}
-              className="w-full rounded-xl px-4 py-3 pr-12 resize-none text-sm"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid var(--border)',
-                color: 'var(--text)',
-                maxHeight: '120px',
-                outline: 'none',
-              }}
-              disabled={loading}
-              ref={el => {
-                if (el) {
-                  el.style.height = 'auto'
-                  el.style.height = Math.min(el.scrollHeight, 120) + 'px'
-                }
-              }}
-            />
-            {loading && (
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="absolute right-3 bottom-3 p-1 rounded"
-                style={{ color: '#ef4444' }}
-              >
-                <Square className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-          <button
-            type="submit"
-            disabled={!input.trim() || loading}
-            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
-            style={{
-              background: input.trim() && !loading ? '#6366f1' : 'rgba(99,102,241,0.3)',
-              color: '#fff',
-              cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
-            }}
-          >
-            <Play className="w-4 h-4" />
-          </button>
-        </form>
-        <p className="text-xs text-center mt-2" style={{ color: '#475569' }}>
-          Shift+Enter for newline · Enter to send · I'm an AI that can take actions
-        </p>
-      </div>
 
       {/* Model Picker */}
       {modelPickerOpen && (
