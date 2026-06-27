@@ -5,6 +5,25 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-27 · QA — visual + smoke: 28/28 green, EPIC-2 S4+S5 metric confirmed (token-violations 268 → 134)
+
+**Verified green main `e0f8cb7`.** Fresh cloud checkout, `npm install` + `npm run build` 🟢 (5.5s),
+`node server.js` on :3001, headless Chromium (`/opt/pw-browsers/chromium-1194`) via `scripts/qa-smoke.mjs`.
+- **Render: 28/28 ✅** (desktop + 27 apps), 0 uncaught JS / blank / error-boundary. SHELL-IS-STYLED ✅,
+  REGISTRY-COVERAGE ✅ (27/27), INBOUND-LANDS **3/3 ✅**. vitest **112/112** (16 files), eslint clean.
+  **No runtime bugs.**
+- **EPIC-2 acceptance CONFIRMED:** two stages landed since last QA (`181c81a`, 268) — **S4** (`b645762`, exempt
+  registry + de-hex Network canvas, 268→221) and **S5** (`e0f8cb7`, de-hex ai-agent cluster + exempt providers,
+  221→134). `metrics.mjs` reports **134** → matches, no contradiction (net **−134**). Visually verified the
+  recolor in `app-ai-agent.png` (signal/ember/abyss tokens) + `app-network.png` (canvas dots match legend).
+- **Deltas vs `181c81a`:** token-violations −134 (268→134), vitest +5 (107→112), test files +1 (15→16),
+  bundle gz −0.2 (248.3→248.1), both-ways 9/9 held, routes 27/27 held.
+- Screenshots overwritten in `docs/screenshots/latest/` (28 PNGs + REPORT.md). METRICS/CONTEXT updated.
+- **Next:** EPIC-2 S6 — `components/ui/Toast.tsx` (16) + artifacts render cluster (ChartBuilder 15, Kanban 13,
+  FormBuilder 9); settle `ColorPalette.tsx` (23) as an exemption (its hexes ARE the tool's content/output).
+
+---
+
 ## 2026-06-27 · Builder — EPIC-2 S5: ai-agent cluster → zero (token-violations 221 → 134)
 
 **Done.** Swept the **entire ai-agent (Cakra) app's render code** off hardcoded colour onto the `cssVar`/`tint`
