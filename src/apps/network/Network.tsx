@@ -17,7 +17,7 @@ import { useFocus } from '../../lib/core/focus'
 import type { CoreNode } from '../../lib/core/graph'
 import { flowForEvent } from '../../lib/core/flow'
 import { appAdjacency, entitiesByApp } from './adjacency'
-import { TYPE_RGB, typeRgb, rgbCss } from './nodeColors'
+import { TYPE_RGB, typeRgb, rgbCss, SIGNAL, ION, PLASMA, VOID } from './nodeColors'
 
 // Map a hex accent (the registry `color`) to an "r,g,b" string for canvas fills.
 function rgbOf(hex: string): string {
@@ -196,21 +196,21 @@ export default function Network() {
         const f = flares[i]
         const pulse = 0.10 + 0.10 * (0.5 + 0.5 * Math.sin(tk + n.ang * 2)) + f * 0.45
         const g = ctx!.createLinearGradient(core.x, core.y, n.x, n.y)
-        g.addColorStop(0, `rgba(52,245,214,${pulse + 0.05 + f * 0.4})`)
-        g.addColorStop(1, `rgba(${n.c},${pulse})`)
+        g.addColorStop(0, rgbCss(SIGNAL, pulse + 0.05 + f * 0.4))
+        g.addColorStop(1, rgbCss(n.c, pulse))
         ctx!.beginPath(); ctx!.moveTo(core.x, core.y); ctx!.lineTo(n.x, n.y)
         ctx!.strokeStyle = g; ctx!.lineWidth = dpr * (1 + f * 1.8); ctx!.stroke()
         // ambient travelling packet
         const tp = (tk * 0.4 + n.ang) % 1
         const px = core.x + (n.x - core.x) * tp, py = core.y + (n.y - core.y) * tp
-        ctx!.beginPath(); ctx!.arc(px, py, 1.6 * dpr, 0, 7); ctx!.fillStyle = `rgba(${n.c},0.9)`; ctx!.fill()
+        ctx!.beginPath(); ctx!.arc(px, py, 1.6 * dpr, 0, 7); ctx!.fillStyle = rgbCss(n.c, 0.9); ctx!.fill()
         // bright surge packet — fires outward from CORE while this link is active
         if (f > 0.01) {
           const sp = (tk * 1.8 + n.ang) % 1
           const sx = core.x + (n.x - core.x) * sp, sy = core.y + (n.y - core.y) * sp
           ctx!.beginPath(); ctx!.arc(sx, sy, (2.2 + 2.4 * f) * dpr, 0, 7)
-          ctx!.fillStyle = `rgba(52,245,214,${0.45 + 0.5 * f})`
-          ctx!.shadowColor = 'rgba(52,245,214,0.9)'; ctx!.shadowBlur = 12 * dpr * f
+          ctx!.fillStyle = rgbCss(SIGNAL, 0.45 + 0.5 * f)
+          ctx!.shadowColor = rgbCss(SIGNAL, 0.9); ctx!.shadowBlur = 12 * dpr * f
           ctx!.fill(); ctx!.shadowBlur = 0
         }
       })
@@ -226,16 +226,16 @@ export default function Network() {
         const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2
         const cx = mx + (core.x - mx) * 0.5, cy = my + (core.y - my) * 0.5
         ctx!.beginPath(); ctx!.moveTo(a.x, a.y); ctx!.quadraticCurveTo(cx, cy, b.x, b.y)
-        ctx!.strokeStyle = `rgba(${arc.rgb},${0.12 + 0.5 * lf})`
+        ctx!.strokeStyle = rgbCss(arc.rgb, 0.12 + 0.5 * lf)
         ctx!.lineWidth = dpr * (1 + 1.6 * lf)
-        ctx!.shadowColor = `rgba(${arc.rgb},0.8)`; ctx!.shadowBlur = 10 * dpr * lf
+        ctx!.shadowColor = rgbCss(arc.rgb, 0.8); ctx!.shadowBlur = 10 * dpr * lf
         ctx!.stroke(); ctx!.shadowBlur = 0
         const p = 1 - lf
         const px = (1 - p) * (1 - p) * a.x + 2 * (1 - p) * p * cx + p * p * b.x
         const py = (1 - p) * (1 - p) * a.y + 2 * (1 - p) * p * cy + p * p * b.y
         ctx!.beginPath(); ctx!.arc(px, py, (2.4 + 2.2 * lf) * dpr, 0, 7)
-        ctx!.fillStyle = `rgba(${arc.rgb},${0.6 + 0.4 * lf})`
-        ctx!.shadowColor = `rgba(${arc.rgb},0.9)`; ctx!.shadowBlur = 12 * dpr * lf
+        ctx!.fillStyle = rgbCss(arc.rgb, 0.6 + 0.4 * lf)
+        ctx!.shadowColor = rgbCss(arc.rgb, 0.9); ctx!.shadowBlur = 12 * dpr * lf
         ctx!.fill(); ctx!.shadowBlur = 0
       }
       // app nodes
@@ -243,8 +243,8 @@ export default function Network() {
         const f = flares[i]
         const r = (i === hover ? 8 : 5.5 + f * 5) * dpr
         ctx!.beginPath(); ctx!.arc(n.x, n.y, r, 0, 7)
-        ctx!.fillStyle = `rgba(${n.c},${Math.min(1, (i === hover ? 1 : 0.85) + f * 0.15)})`
-        ctx!.shadowColor = `rgba(${n.c},0.8)`; ctx!.shadowBlur = ((i === hover ? 22 : 12) + f * 22) * dpr
+        ctx!.fillStyle = rgbCss(n.c, Math.min(1, (i === hover ? 1 : 0.85) + f * 0.15))
+        ctx!.shadowColor = rgbCss(n.c, 0.8); ctx!.shadowBlur = ((i === hover ? 22 : 12) + f * 22) * dpr
         ctx!.fill(); ctx!.shadowBlur = 0
       })
       // ── Core graph (B-backbone): real CoreNodes orbiting their owning app ──
@@ -261,7 +261,7 @@ export default function Network() {
         }
         const pos = new Map<string, { x: number; y: number; c: string }>()
         byOwner.forEach((list, owner) => {
-          const base = ownerPos.get(owner) ?? { x: core.x, y: core.y, c: '52,245,214' }
+          const base = ownerPos.get(owner) ?? { x: core.x, y: core.y, c: SIGNAL }
           list.forEach((gn, i) => {
             const a = (i / Math.max(list.length, 1)) * Math.PI * 2 + tk * 0.3
             const rr = (24 + (i % 2) * 9) * dpr
@@ -270,7 +270,7 @@ export default function Network() {
             pos.set(gn.id, p)
             // faint tether from the owning app to its node
             ctx!.beginPath(); ctx!.moveTo(base.x, base.y); ctx!.lineTo(p.x, p.y)
-            ctx!.strokeStyle = `rgba(${base.c},0.18)`; ctx!.lineWidth = dpr; ctx!.stroke()
+            ctx!.strokeStyle = rgbCss(base.c, 0.18); ctx!.lineWidth = dpr; ctx!.stroke()
           })
         })
         // real graph edges (e.g. note -> task) in plasma violet
@@ -279,14 +279,14 @@ export default function Network() {
           for (const l of gn.links) {
             const to = pos.get(l); if (!to) continue
             ctx!.beginPath(); ctx!.moveTo(from.x, from.y); ctx!.lineTo(to.x, to.y)
-            ctx!.strokeStyle = 'rgba(176,107,255,0.55)'; ctx!.lineWidth = 1.4 * dpr; ctx!.stroke()
+            ctx!.strokeStyle = rgbCss(PLASMA, 0.55); ctx!.lineWidth = 1.4 * dpr; ctx!.stroke()
           }
         }
         // node dots
         pos.forEach(p => {
           ctx!.beginPath(); ctx!.arc(p.x, p.y, 3 * dpr, 0, 7)
-          ctx!.fillStyle = `rgba(${p.c},0.95)`
-          ctx!.shadowColor = `rgba(${p.c},0.9)`; ctx!.shadowBlur = 8 * dpr
+          ctx!.fillStyle = rgbCss(p.c, 0.95)
+          ctx!.shadowColor = rgbCss(p.c, 0.9); ctx!.shadowBlur = 8 * dpr
           ctx!.fill(); ctx!.shadowBlur = 0
         })
       }
@@ -294,11 +294,11 @@ export default function Network() {
       const activity = Math.min(1, flares.reduce((a, b) => a + b, 0))
       const cr = (16 + activity * 3) * dpr + Math.sin(tk * 2) * 1.4 * dpr
       const cg = ctx!.createRadialGradient(core.x, core.y, 0, core.x, core.y, cr * 2.4)
-      cg.addColorStop(0, 'rgba(52,245,214,0.95)'); cg.addColorStop(0.5, 'rgba(77,155,255,0.5)'); cg.addColorStop(1, 'rgba(176,107,255,0)')
+      cg.addColorStop(0, rgbCss(SIGNAL, 0.95)); cg.addColorStop(0.5, rgbCss(ION, 0.5)); cg.addColorStop(1, rgbCss(PLASMA, 0))
       ctx!.beginPath(); ctx!.arc(core.x, core.y, cr * 2.4, 0, 7); ctx!.fillStyle = cg; ctx!.fill()
-      ctx!.beginPath(); ctx!.arc(core.x, core.y, cr, 0, 7); ctx!.fillStyle = 'rgba(3,6,14,0.9)'
-      ctx!.fill(); ctx!.strokeStyle = 'rgba(52,245,214,0.9)'; ctx!.lineWidth = 1.5 * dpr; ctx!.stroke()
-      ctx!.font = `800 ${10 * dpr}px ui-monospace, monospace`; ctx!.fillStyle = '#34f5d6'
+      ctx!.beginPath(); ctx!.arc(core.x, core.y, cr, 0, 7); ctx!.fillStyle = rgbCss(VOID, 0.9)
+      ctx!.fill(); ctx!.strokeStyle = rgbCss(SIGNAL, 0.9); ctx!.lineWidth = 1.5 * dpr; ctx!.stroke()
+      ctx!.font = `800 ${10 * dpr}px ui-monospace, monospace`; ctx!.fillStyle = rgbCss(SIGNAL)
       ctx!.textAlign = 'center'; ctx!.textBaseline = 'middle'; ctx!.fillText('CORE', core.x, core.y)
       if (!reduceMotion) raf = requestAnimationFrame(frame)
     }

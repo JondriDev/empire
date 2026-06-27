@@ -62,10 +62,14 @@ function testStats() {
 // palette lives in src/design-system/**; everything else should consume tokens.
 function tokenViolations() {
   // Design-system infrastructure legitimately defines raw colors: the palette
-  // dir plus the three bridge/shell stylesheets. Everything else (app code)
-  // should consume tokens — those are the actionable violations.
+  // dir plus the three bridge/shell stylesheets. `registry.ts` is also palette
+  // data — the per-app accent IDENTITY manifest (the single source consumed
+  // across the shell as `${app.color}` / `rgbOf(app.color)`), not app render
+  // code bypassing the system. Everything else (app code) should consume
+  // tokens — those are the actionable violations.
   const DS_INFRA = new Set([
     'src/design-system.css', 'src/window-manager.css', 'src/index.css',
+    'src/lib/registry.ts',
   ].map((p) => p.split('/').join(path.sep)));
   const files = walk(path.join(ROOT, 'src')).filter(
     (f) => /\.(ts|tsx|css)$/.test(f) &&

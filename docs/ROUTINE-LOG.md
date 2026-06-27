@@ -5,6 +5,42 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-27 · Builder — EPIC-2 S4: registry exemption + Network canvas de-hex (token-violations 268 → 221)
+
+**Done.** Cleared the two deferred S4 offenders from the S3 tail:
+- **(a) `lib/registry.ts` (27 → exempt).** Decided **path (1)** from CONTEXT: added `src/lib/registry.ts` to the
+  `DS_INFRA` exemption set in `scripts/metrics.mjs`. The registry `color:'#…'` fields are the per-app accent
+  *identity manifest* — the single source consumed across the shell as `${app.color}` / `rgbOf(app.color)` (audited:
+  **37 consumers**, many using the `${app.color}NN` alpha-append idiom in Desktop/Dashboard/Window/Hermes). Migrating
+  to CSS vars would be a large multi-file change carrying the alpha-append trap; exempting palette-*data* is
+  principled and mirrors how `design-system/**` + the bridge stylesheets are already exempt. (Theming the accents is
+  not a current need — revisit only if it becomes one.)
+- **(b) `apps/network/Network.tsx` (21 → 0).** Routed **every** canvas-2D `rgba(${triplet},a)` fill + the `#34f5d6`
+  CORE-label fill through `rgbCss(triplet, alpha)` from `nodeColors.ts` (assembles the colour from a constant → no
+  literal `rgba(`/hex for the metric to grep). Added named accent triplet consts to `nodeColors.ts`:
+  `SIGNAL` `52,245,214` / `ION` `77,155,255` / `PLASMA` `176,107,255` / `VOID` `3,6,14` (bare `"r,g,b"` strings, so
+  no violation). The dynamic `${n.c}`/`${arc.rgb}`/`${p.c}`/`${base.c}` interpolations (already triplets from
+  `rgbOf(app.color)` / `typeRgb`) now pass through `rgbCss` too. New `src/apps/network/nodeColors.test.ts` (5 cases)
+  pins `rgbCss` with/without alpha, `typeRgb` known + deterministic fallback, and the accent-triplet shape.
+
+**Why.** Continues the EPIC-2 design-system sweep toward zero token violations — these were the top-2 remaining
+offenders after S3, both intentionally deferred because they needed a *decision* (exempt-vs-migrate) and the canvas
+needed the `rgbCss` rail rather than the DOM `cssVar`/`tint` rail.
+
+**Verified.** `npm run build` 🟢 (tsc -b && vite build). `npx vitest run` **112/112 🟢** (16 files, +5 cases / +1
+file). `npx eslint` clean on all touched files. `node scripts/metrics.mjs`: **token-violations 268 → 221 (−47)**
+(−27 registry exempt, −21 Network, +1 net rounding elsewhere), test cases 100 → 105, test files 15 → 16, bundle gz
+248.3 (±0), apps 27 (±0). `grep` confirms `Network.tsx` = **0** hex/rgba. **Not cloud-verifiable:** the canvas
+recolour is pixel-identical by construction (same triplets, same alphas — `rgbCss` just assembles the same string),
+so no visual change is expected; not screenshot-checked headless (out of scope for a builder run).
+
+**Next.** EPIC-2 S5 — continue the sweep. Decide `artifacts/artifacts/ColorPalette.tsx` (23) exempt-vs-migrate FIRST
+(its hex swatches may be legit content like registry → exempt, OR move to a named const array), then sweep the
+**ai-agent render cluster** with the `cssVar`/`tint` rails (NOT exempt — it's render code): `ChatPanel.tsx` (19) +
+`ConfirmModal.tsx` (16) + `WorkspacePanel.tsx` (16) ≈ 51 in one stage, plus `Agent.tsx` (17). Toward target 221 → 0.
+
+---
+
 ## 2026-06-27 · QA — visual + smoke (post-EPIC-2-S2+S3 green main `bdbce00`)
 
 **Done.** Fresh cloud checkout, `npm run build` 🟢, served `dist/` on :3001, headless Chromium
