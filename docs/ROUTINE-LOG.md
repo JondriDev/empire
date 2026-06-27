@@ -5,6 +5,44 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-27 · Builder — EPIC-2 S3: sweep the shared UI primitives cluster (token-violations 321 → 268)
+
+**Done.** Continued the design-system sweep, de-hexing the shared primitives + ModelPicker to zero with the
+`cssVar`/`tint` rails from `src/design-system/tokens.ts`:
+- **`src/components/ui/index.tsx` (26→0)** — the highest-leverage file (Button/Input/TextArea/Badge/Divider used
+  app-wide). Button `primary` white text→`cssVar('xenon')`, cyan border/glow→`tint('signal',40/25)`; `danger`
+  red gradient→`tint('c-danger',85)`→`color-mix(… var(--c-danger) 72%, var(--void))`; Input/TextArea focus
+  borders `rgba(34,211,238,.5)`→`tint('signal',50)`; the entire `badgeColors` map (default/success/warning/danger/
+  info) → `xenon`/`c-success`/`c-warn`/`c-danger`/`signal` tints; Divider gradient→`tint('xenon',8)`.
+- **`src/apps/ai-agent/components/ModelPicker.tsx` (24→0)** — overlay `rgba(0,0,0,.7)`→`tint('void',70)`, panel
+  `#111827`→`cssVar('abyss')` / border `#1e2d4a`→`tint('xenon',10)`, **NVIDIA-green `#76b900`→`aurora`** (Cakra-Auto
+  toggle), emerald/amber API-key status→`c-success`/`c-warn`, text greys→`text`/`text2`/`text3`, white-glass→`tint('xenon',N)`.
+- **`src/apps/network/Network.tsx` (24→21)** — only the 3 **DOM** hex fallbacks `var(--signal, #34f5d6)`→
+  `var(--signal)`. The remaining 21 are all canvas-2D ctx strings (lines ~199–301), deferred to S4 (need `rgbCss`).
+
+**Trap fixed (not just avoided):** the **alpha-append trap** appeared in two spots — Badge's custom-`color` prop
+(`${color}18`/`${color}30`) and ModelPicker's provider/model tints (`${p.color}22`, `+'44'`, `${provider.color}15`).
+Converted all to `color-mix(in srgb, ${var} N%, transparent)` (0x18≈9, 0x22≈13, 0x44≈27, 0x15≈8), so a CSS-var-valued
+`color` now renders correctly instead of silently blanking.
+
+**Verified.** `npm run build` 🟢 (tsc -b && vite build), `npx vitest run` **107/107 🟢** (15 files),
+`npx eslint` clean on the 3 touched files, `ui/index.tsx` + `ModelPicker.tsx` each report **0 hex/rgba** in
+`metrics.mjs`. Metrics row:
+
+| Metric | Apps | Test cases | Test files | Token violations | Bundle gz KB |
+| ------ | ---- | ---------- | ---------- | ---------------- | ------------ |
+| Value  | 27   | 100        | 15         | **268**          | 248.3        |
+| Δ      | ±0   | ±0         | ±0         | **−53**          | —            |
+
+*Baseline note:* metrics showed 321 (not the 283 S2 left) at run start — the two post-S2 Cakra commits
+(`6e1fc1e`, `2ab3285`) regressed token-violations +38; net since S2's claim is 283→268. *Not cloud-verifiable:*
+the recolor's on-screen appearance; logic/structure unchanged so build+tests+lint+metric are the gate.
+**Next:** EPIC-2 S4 — the two deferred offenders: `lib/registry.ts` (27, per-app accents — **decide first**: exempt
+in metrics like `design-system/**` vs. CSS-var map + convert every `${app.color}NN` consumer) and `Network.tsx`'s
+21 canvas-ctx strings (route through `rgbCss`); target 268 → ~220.
+
+---
+
 ## 2026-06-27 · Builder — EPIC-2 S2: sweep the SettingsPanel / Calculator / MarkdownStudio cluster (token-violations 388 → 283)
 
 **Done.** Continued the design-system sweep, de-hexing the three top offenders to zero with the

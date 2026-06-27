@@ -1,4 +1,5 @@
 import type { ReactNode, ButtonHTMLAttributes, InputHTMLAttributes, TextareaHTMLAttributes, CSSProperties, HTMLAttributes } from 'react'
+import { cssVar, tint } from '../../design-system/tokens'
 
 /* ═══════════════════════════════════════════════
    EMPIRE UI PRIMITIVES — refined glass + hierarchy
@@ -58,9 +59,9 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'typ
 const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
   primary: {
     background: 'linear-gradient(135deg, var(--color-cyan-5) 0%, var(--color-teal-5) 100%)',
-    color: '#ffffff',
-    border: '1px solid rgba(34, 211, 238, 0.4)',
-    boxShadow: '0 2px 8px rgba(34, 211, 238, 0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
+    color: cssVar('xenon'),
+    border: `1px solid ${tint('signal', 40)}`,
+    boxShadow: `0 2px 8px ${tint('signal', 25)}, inset 0 1px 0 ${tint('xenon', 15)}`,
   },
   secondary: {
     background: 'var(--gl-bg)',
@@ -77,10 +78,10 @@ const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
     border: '1px solid transparent',
   },
   danger: {
-    background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.85) 0%, rgba(220, 38, 38, 0.85) 100%)',
-    color: '#ffffff',
-    border: '1px solid rgba(239, 68, 68, 0.5)',
-    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.25)',
+    background: `linear-gradient(135deg, ${tint('c-danger', 85)} 0%, color-mix(in srgb, var(--c-danger) 72%, var(--void)) 100%)`,
+    color: cssVar('xenon'),
+    border: `1px solid ${tint('c-danger', 50)}`,
+    boxShadow: `0 2px 8px ${tint('c-danger', 25)}`,
   },
 }
 
@@ -177,7 +178,7 @@ export function Input({ value, onChange, placeholder, icon, className = '', mono
         }}
         onFocus={(e) => {
           e.currentTarget.parentElement!.style.background = 'var(--input-bg-focus)'
-          ;(e.currentTarget.parentElement! as HTMLElement).style.borderColor = 'rgba(34, 211, 238, 0.5)'
+          ;(e.currentTarget.parentElement! as HTMLElement).style.borderColor = tint('signal', 50)
           ;(e.currentTarget.parentElement! as HTMLElement).style.boxShadow = 'var(--input-shadow-focus)'
           rest.onFocus?.(e)
         }}
@@ -228,7 +229,7 @@ export function TextArea({ value, onChange, placeholder, className = '', mono, .
       }}
       onFocus={(e) => {
         e.currentTarget.style.background = 'var(--input-bg-focus)'
-        e.currentTarget.style.borderColor = 'rgba(34, 211, 238, 0.5)'
+        e.currentTarget.style.borderColor = tint('signal', 50)
         e.currentTarget.style.boxShadow = 'var(--input-shadow-focus)'
         rest.onFocus?.(e)
       }}
@@ -253,16 +254,20 @@ interface BadgeProps {
 }
 
 const badgeColors: Record<BadgeVariant, { bg: string; fg: string; border: string }> = {
-  default: { bg: 'rgba(255,255,255,0.06)', fg: 'var(--text2)', border: 'rgba(255,255,255,0.08)' },
-  success: { bg: 'rgba(34, 197, 94, 0.12)', fg: '#4ade80', border: 'rgba(34, 197, 94, 0.25)' },
-  warning: { bg: 'rgba(245, 158, 11, 0.12)', fg: '#fbbf24', border: 'rgba(245, 158, 11, 0.25)' },
-  danger:  { bg: 'rgba(239, 68, 68, 0.12)', fg: '#f87171', border: 'rgba(239, 68, 68, 0.25)' },
-  info:    { bg: 'rgba(34, 211, 238, 0.12)', fg: 'var(--color-cyan-3)', border: 'rgba(34, 211, 238, 0.25)' },
+  default: { bg: tint('xenon', 6), fg: 'var(--text2)', border: tint('xenon', 8) },
+  success: { bg: tint('c-success', 12), fg: cssVar('c-success'), border: tint('c-success', 25) },
+  warning: { bg: tint('c-warn', 12), fg: cssVar('c-warn'), border: tint('c-warn', 25) },
+  danger:  { bg: tint('c-danger', 12), fg: cssVar('c-danger'), border: tint('c-danger', 25) },
+  info:    { bg: tint('signal', 12), fg: cssVar('signal'), border: tint('signal', 25) },
 }
 
 export function Badge({ children, variant = 'default', color, className = '' }: BadgeProps) {
   const palette = color
-    ? { bg: `${color}18`, fg: color, border: `${color}30` }
+    ? {
+        bg: `color-mix(in srgb, ${color} 9%, transparent)`,
+        fg: color,
+        border: `color-mix(in srgb, ${color} 19%, transparent)`,
+      }
     : badgeColors[variant]
   return (
     <span
@@ -295,7 +300,7 @@ export function Divider({ className = '' }: { className?: string }) {
       className={className}
       style={{
         height: '1px',
-        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.08) 80%, transparent)',
+        background: `linear-gradient(90deg, transparent, ${tint('xenon', 8)} 20%, ${tint('xenon', 8)} 80%, transparent)`,
         margin: '8px 0',
       }}
     />
