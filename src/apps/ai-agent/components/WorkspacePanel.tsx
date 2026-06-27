@@ -15,13 +15,14 @@ import {
   type ActivityEntry,
 } from '../lib/activityStore'
 import { formatToolResult } from '../lib/toolExecutor'
+import { cssVar, tint } from '../../../design-system/tokens'
 
-const ACCENT = '#22d3ee'
+const ACCENT = cssVar('signal')
 
 function StatusIcon({ status, accent }: { status: ActivityEntry['status']; accent: string }) {
   if (status === 'running') return <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: accent }} />
-  if (status === 'error') return <X className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
-  return <Check className="w-3.5 h-3.5" style={{ color: '#34d399' }} />
+  if (status === 'error') return <X className="w-3.5 h-3.5" style={{ color: cssVar('c-danger') }} />
+  return <Check className="w-3.5 h-3.5" style={{ color: cssVar('c-success') }} />
 }
 
 function Viewer({ entry }: { entry: ActivityEntry }) {
@@ -41,7 +42,7 @@ function Viewer({ entry }: { entry: ActivityEntry }) {
           <Loader2 className="w-3 h-3 animate-spin" style={{ color: ACCENT }} />
         )}
         {elapsed && (
-          <span className="text-[10px] ml-auto" style={{ color: '#475569' }}>
+          <span className="text-[10px] ml-auto" style={{ color: cssVar('text3') }}>
             {elapsed}s
           </span>
         )}
@@ -50,21 +51,21 @@ function Viewer({ entry }: { entry: ActivityEntry }) {
       {arg && (
         <div
           className="text-[11px] font-mono mb-2 px-2 py-1.5 rounded-lg break-all"
-          style={{ background: 'rgba(255,255,255,0.04)', color: '#94a3b8' }}
+          style={{ background: tint('xenon', 4), color: cssVar('text2') }}
         >
           {arg}
         </div>
       )}
 
       {entry.status === 'running' ? (
-        <div className="flex items-center gap-2 text-xs py-6" style={{ color: '#64748b' }}>
+        <div className="flex items-center gap-2 text-xs py-6" style={{ color: cssVar('text3') }}>
           <Loader2 className="w-4 h-4 animate-spin" style={{ color: ACCENT }} />
           {d.verb}…
         </div>
       ) : (
         <pre
           className="whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed"
-          style={{ color: entry.status === 'error' ? '#fca5a5' : '#cbd5e1' }}
+          style={{ color: entry.status === 'error' ? cssVar('c-danger') : cssVar('text') }}
         >
           {entry.result ? formatToolResult(entry.result, 20000) : '(no output)'}
         </pre>
@@ -114,7 +115,7 @@ export default function WorkspacePanel({ onClose, overlay }: Props) {
           {working && (
             <span
               className="text-[10px] px-2 py-0.5 rounded-full inline-flex items-center gap-1 flex-shrink-0"
-              style={{ background: 'rgba(34,211,238,0.12)', color: ACCENT }}
+              style={{ background: tint('signal', 12), color: ACCENT }}
             >
               <Loader2 className="w-2.5 h-2.5 animate-spin" /> working
             </span>
@@ -126,7 +127,7 @@ export default function WorkspacePanel({ onClose, overlay }: Props) {
               onClick={clear}
               title="Clear activity"
               className="p-1.5 rounded-lg transition-colors hover:text-white"
-              style={{ color: '#64748b' }}
+              style={{ color: cssVar('text3') }}
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -135,7 +136,7 @@ export default function WorkspacePanel({ onClose, overlay }: Props) {
             onClick={onClose}
             title="Hide workspace"
             className="p-1.5 rounded-lg transition-colors hover:text-white"
-            style={{ color: '#64748b' }}
+            style={{ color: cssVar('text3') }}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -145,10 +146,10 @@ export default function WorkspacePanel({ onClose, overlay }: Props) {
       {entries.length === 0 ? (
         <div
           className="flex-1 flex flex-col items-center justify-center text-center px-6"
-          style={{ color: '#64748b' }}
+          style={{ color: cssVar('text3') }}
         >
           <Activity className="w-8 h-8 mb-3" style={{ opacity: 0.4 }} />
-          <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>
+          <p className="text-sm font-medium" style={{ color: cssVar('text2') }}>
             Nothing yet
           </p>
           <p className="text-xs mt-1 leading-relaxed">
@@ -169,7 +170,7 @@ export default function WorkspacePanel({ onClose, overlay }: Props) {
                   onClick={() => select(entry.id)}
                   className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors"
                   style={{
-                    background: isSel ? 'rgba(34,211,238,0.08)' : 'transparent',
+                    background: isSel ? tint('signal', 8) : 'transparent',
                     borderLeft: `2px solid ${isSel ? ACCENT : 'transparent'}`,
                   }}
                 >
@@ -179,7 +180,7 @@ export default function WorkspacePanel({ onClose, overlay }: Props) {
                       {d.verb}
                     </div>
                     {d.target && (
-                      <div className="text-[11px] truncate font-mono" style={{ color: '#64748b' }}>
+                      <div className="text-[11px] truncate font-mono" style={{ color: cssVar('text3') }}>
                         {d.target}
                       </div>
                     )}

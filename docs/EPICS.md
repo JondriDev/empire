@@ -299,9 +299,25 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
   77,155,255 / `PLASMA` 176,107,255 / `VOID` 3,6,14). `Network.tsx` now reports **0** hex/rgba. New `nodeColors.test.ts`
   (5 cases) pins `rgbCss`/`typeRgb`/the accent-triplet shape. (−21)
   build🟢 vitest 112🟢 (+5, +1 file) eslint clean; **token-violations 268 → 221 (−47)**, bundle gz 248.3 (±0).
-- [ ] **S5+ · Continue the sweep.** Remaining offenders incl. `artifacts/artifacts/ColorPalette.tsx` (23 — likely
-  legitimately exempt: hex swatches ARE its content; decide skip vs. move-to-const), `ai-agent/components/ChatPanel.tsx`
-  (19), `ai-agent/Agent.tsx` (17) + the long tail until **token-violations = 0**. One cluster per stage.
+- [x] **S5 · ai-agent cluster → zero.** — **Shipped 2026-06-27.** De-hexed the entire ai-agent app's render
+  code with the `cssVar`/`tint` rails: `Agent.tsx` (17→0), `components/ChatPanel.tsx` (19→0),
+  `components/ConfirmModal.tsx` (16→0), `components/WorkspacePanel.tsx` (16→0), `components/ThinkingTrace.tsx`
+  (6→0), and the semantic activity accents in `lib/activityStore.ts` (8→0: thinking→`signal`, write/shell→`ember`,
+  search/fetch→`plasma`, code→`c-success`). Mappings: cyan `#22d3ee`→`signal`, indigo `#6366f1`→`ion`, NVIDIA-green
+  `#76b900`→`aurora`, amber `#f59e0b`→`ember`, green `#34d399`→`c-success`, red `#ef4444`→`c-danger`, text greys
+  →`text`/`text2`/`text3`, white-glass→`tint('xenon',N)`, black-scrim `rgba(0,0,0,.7)`→`tint('void',70)`, slate
+  panel `#111827`→`abyss`. **Alpha-append-in-HTML-string** handled: ChatPanel's `<code style>` injected via a
+  template literal so `${tint('ion',15)}` interpolates. **`ai-agent/lib/providers.ts` exempted** in `metrics.mjs`
+  `DS_INFRA` — it's the per-PROVIDER brand-accent identity manifest (consumed as `p.color` in ModelPicker to keep
+  OpenRouter/Google/NVIDIA/etc. distinct; mapping brand colors onto our tokens would collapse two blue providers
+  onto `ion`), the registry precedent. **token-violations 221 → 134 (−87).** build🟢 vitest 112🟢 eslint clean.
+- [ ] **S6+ · Continue the sweep.** Top offenders now: `artifacts/artifacts/ColorPalette.tsx` (23 — **decide
+  exempt-vs-migrate FIRST**: it's a color-theory tool, the hexes are its content/output (seed palettes, contrast-lab
+  black/white) — lean **exempt** like registry/providers; recoloring would break the WCAG lab), `components/ui/Toast.tsx`
+  (16 — shared UI primitive, render code → **migrate** with `cssVar`/`tint`), then the artifacts cluster
+  `ChartBuilder.tsx` (15), `Kanban.tsx` (13), `FormBuilder.tsx` (9) + the long tail until **token-violations = 0**.
+  Suggested S6 = Toast + the artifacts render cluster (ChartBuilder+Kanban+FormBuilder, ≈37) in one stage; settle
+  ColorPalette as an exemption in the same or next stage. One cluster per stage, build+vitest green each time.
 
 ### EPIC-3 · Depth pass on shallow instruments
 **Leap:** the thin apps (Photos, Maps, Video, Music, Clock) get genuine offline-capable

@@ -11,6 +11,7 @@ import { runAgentTurn, getSettings, saveSettings, type AgentSettings } from './l
 import { runOrchestratedTurn } from './lib/orchestrator'
 import type { Message, ToolCall, ThinkingStep } from './lib/types'
 import { getProvider } from './lib/providers'
+import { cssVar, tint } from '../../design-system/tokens'
 import { TOOL_LIST } from './lib/tools'
 import { useActivityStore } from './lib/activityStore'
 import ChatPanel from './components/ChatPanel'
@@ -247,19 +248,19 @@ export default function Agent() {
                 onClick={() => setModelPickerOpen(true)}
                 className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full cursor-pointer"
                 style={settings.orchestrate
-                  ? { background: 'rgba(118,185,0,0.15)', color: '#76b900' }
-                  : { background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}
+                  ? { background: tint('aurora', 15), color: cssVar('aurora') }
+                  : { background: tint('ion', 15), color: cssVar('ion') }}
               >
                 {settings.orchestrate ? (
                   <>
                     <span>✨ Cakra Auto</span>
-                    <span style={{ color: '#94a3b8' }}>·</span>
+                    <span style={{ color: cssVar('text2') }}>·</span>
                     <span>NIM pool</span>
                   </>
                 ) : (
                   <>
                     <span>{activeProvider.name}</span>
-                    <span style={{ color: '#94a3b8' }}>·</span>
+                    <span style={{ color: cssVar('text2') }}>·</span>
                     <span>{activeModel?.split('/').pop()}</span>
                   </>
                 )}
@@ -272,7 +273,7 @@ export default function Agent() {
             <button
               onClick={() => setShowThinking(v => !v)}
               className="p-2 rounded-lg text-xs"
-              style={{ color: '#94a3b8', background: showThinking ? 'rgba(34,211,238,0.1)' : 'transparent' }}
+              style={{ color: cssVar('text2'), background: showThinking ? tint('signal', 10) : 'transparent' }}
               title="Toggle thinking trace"
             >
               <Zap className="w-4 h-4" />
@@ -280,7 +281,7 @@ export default function Agent() {
             <button
               onClick={() => setPanelOpen(v => !v)}
               className="p-2 rounded-lg text-xs"
-              style={{ color: panelOpen ? '#22d3ee' : '#94a3b8', background: panelOpen ? 'rgba(34,211,238,0.1)' : 'transparent' }}
+              style={{ color: panelOpen ? cssVar('signal') : cssVar('text2'), background: panelOpen ? tint('signal', 10) : 'transparent' }}
               title="Toggle Workspace — see what Cakra is doing"
             >
               <PanelRight className="w-4 h-4" />
@@ -337,7 +338,7 @@ export default function Agent() {
                 rows={1}
                 className="w-full rounded-xl px-4 py-3 pr-12 resize-none text-sm"
                 style={{
-                  background: 'rgba(255,255,255,0.05)',
+                  background: tint('xenon', 5),
                   border: '1px solid var(--border)',
                   color: 'var(--text)',
                   maxHeight: '120px',
@@ -356,7 +357,7 @@ export default function Agent() {
                   type="button"
                   onClick={handleCancel}
                   className="absolute right-3 bottom-3 p-1 rounded"
-                  style={{ color: '#ef4444' }}
+                  style={{ color: cssVar('c-danger') }}
                 >
                   <Square className="w-4 h-4" />
                 </button>
@@ -367,15 +368,15 @@ export default function Agent() {
               disabled={!input.trim() || loading}
               className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
               style={{
-                background: input.trim() && !loading ? '#6366f1' : 'rgba(99,102,241,0.3)',
-                color: '#fff',
+                background: input.trim() && !loading ? cssVar('ion') : tint('ion', 30),
+                color: cssVar('xenon'),
                 cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
               }}
             >
               <Play className="w-4 h-4" />
             </button>
           </form>
-          <p className="text-xs text-center mt-2" style={{ color: '#475569' }}>
+          <p className="text-xs text-center mt-2" style={{ color: cssVar('text3') }}>
             Shift+Enter for newline · Enter to send · I'm an AI that can take actions
           </p>
         </div>
