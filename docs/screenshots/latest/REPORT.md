@@ -1,36 +1,52 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-06-27T18:05:46.248Z
+**Generated:** 2026-06-27T23:05:00.528Z
 
 **Result:** 28/28 rendered without crash, 0 failed.
-
-**No runtime bugs found this run.** Build 🟢, vitest 107/107 🟢, SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (27/27), INBOUND-LANDS 3/3 ✅.
-
-## Metric deltas (vs last QA snapshot `4d4754f`, post-EPIC-2-S1)
-
-| Metric | Last QA (S1) | This run | Δ |
-|---|---|---|---|
-| Apps / routes | 27 | 27 | ±0 |
-| Test cases (vitest) | 107 | 107 | ±0 |
-| Test files | 15 | 15 | ±0 |
-| **Design-token violations** | **388** | **268** | **−120** |
-| Bundle gz (KB) | 243.6 | 248.3 | +4.7 |
-| Routes rendering clean | 27/27 | 27/27 | ±0 |
-| Apps both-ways into organism | 9/9 | 9/9 | ±0 |
-
-Bundle +4.7 KB traces to the two `cakra` feature commits (`2ab3285` adaptive NIM-pool orchestrator, `6e1fc1e` live Workspace panel) — product growth, not a QA-flagged regression.
-
-## Epic-acceptance confirmation — EPIC-2 (ACTIVE)
-
-EPIC-2 target metric = *Design-token violations* (501 → 0). Two builder stages landed since the last QA:
-- **S2** (`e396ce6`): claimed 388 → 283 (SettingsPanel/Calculator/MarkdownStudio cluster).
-- **S3** (`bdbce00`): claimed 321 → 268 (shared UI primitives cluster; baseline 321 not 283 because the two cakra commits regressed +38 in between).
-
-`node scripts/metrics.mjs` this run reports **268** → **CONFIRMED MOVED, no contradiction**. The Tailwind→XENO recolor itself is not headless-verifiable, but the metric drop is the proof; all touched files render clean. Top remaining offenders (next stages): `lib/registry.ts` (27), `artifacts/ColorPalette.tsx` (23), `apps/network/Network.tsx` (21), `ai-agent/ChatPanel.tsx` (19), `ai-agent/Agent.tsx` (17).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
 > listed separately — expected in the offline cloud sandbox and **not** a render failure.
+
+## QA verdict — green main `e0f8cb7` (EPIC-2 S4+S5)
+
+**No runtime bugs found.** Build 🟢 (`tsc -b && vite build`, 5.5s) · vitest **112/112 🟢** (16 files) ·
+eslint clean. Guards: SHELL-IS-STYLED ✅ (top-level `.empire-desktop{…position:fixed…}`, 0 `.hide-sm
+.empire-desktop`) · REGISTRY-COVERAGE ✅ (all 27 registry apps in smoke list) · INBOUND-LANDS **3/3 ✅**
+(calendar←editor, goals←notes, messages←ai-chat each show a "Received from …" chip + a prefilled control
+off the live render).
+
+**Routes rendering clean: 27/27 ✅** (28/28 incl. desktop shell).
+
+### Epic-acceptance — EPIC-2 (Design-token violations 501 → 0) CONFIRMED MOVED
+Two builder stages landed since the last QA (`181c81a`, token-violations 268):
+- **S4** (`b645762`) — exempt `lib/registry.ts` (accent identity manifest) + de-hex Network canvas via
+  `rgbCss`; claimed **268 → 221**.
+- **S5** (`e0f8cb7`) — de-hex the entire ai-agent (Cakra) cluster + exempt `ai-agent/lib/providers.ts`;
+  claimed **221 → 134**.
+
+`node scripts/metrics.mjs` this run reports **134** → both stages **confirmed, no contradiction**
+(net **268 → 134, −134**). Visual recolor is intentional (Tailwind→XENO) and **visually verified** in
+the screenshots: the de-hexed ai-agent app (`app-ai-agent.png`) renders with signal/ember/abyss tokens,
+and the Network canvas (`app-network.png`) renders the CORE mesh with dot colours matching its legend —
+proof the `rgbCss` canvas recolor (S4) and the `cssVar`/`tint` sweep (S5) did not break rendering.
+
+### Metric deltas (vs last QA snapshot `181c81a`)
+| Metric | Last QA | This run | Δ |
+|---|---|---|---|
+| Token violations | 268 | **134** | **−134** ✅ (EPIC-2 target metric) |
+| Routes rendering clean | 27/27 | 27/27 | ±0 |
+| Both-ways organism wiring | 9/9 | 9/9 | ±0 (EPIC-1 held) |
+| vitest tests | 107 | 112 | +5 (S4 `nodeColors.test.ts`) |
+| Test files | 15 | 16 | +1 |
+| Bundle gz (KB) | 248.3 | 248.1 | −0.2 |
+
+Top remaining offenders (next EPIC-2 stage S6): `artifacts/ColorPalette.tsx` (23 — decide exempt-vs-migrate),
+`components/ui/Toast.tsx` (16 — migrate), `artifacts/ChartBuilder.tsx` (15), `Kanban.tsx` (13),
+`FormBuilder.tsx` (9).
+
+**Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0` → HTTP 500 (Android-only
+path), datacenter `/api/dc/tables` → HTTP 401 (authed API, no headless session).
 
 | App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|

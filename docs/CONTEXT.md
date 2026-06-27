@@ -244,33 +244,30 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-27, post-EPIC-2-S2+S3 green main `bdbce00` — token-violations 388→268)
+## 📊 Last QA confirmation (2026-06-27, post-EPIC-2-S4+S5 green main `e0f8cb7` — token-violations 268→134)
 
 - **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (all 27 registry
   apps in the smoke list) + INBOUND-LANDS **3/3 ✅** (calendar←editor, goals←notes, messages←ai-chat each
-  show "Received from …" chip + prefilled control off the live render). vitest **107/107 🟢** (15 files).
-  **No runtime bugs found.**
+  show "Received from …" chip + prefilled control off the live render). build🟢 vitest **112/112 🟢** (16 files)
+  eslint clean. **No runtime bugs found.**
 - **Apps fully wired BOTH-ways: 9/9 entity-apps-with-inbound — ✅ EPIC-1 TARGET (held, EPIC-1 DONE).**
   Both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat, calendar, goals,
   messages. Intentionally emit-only (by design): files, photos, datacenter + tool apps via `NodeActions`.
   Re-verified live this run by the smoke harness's INBOUND-LANDS guard (3/3 receivers chip+prefill).
-- **Epic-acceptance: EPIC-2 S2 + S3 CONFIRMED MOVED** — the ACTIVE epic's target metric is *Design-token
-  violations* (501 → 0). Since the last QA (after S1, 388), four builder commits landed: **S2** (`e396ce6`,
-  claimed 388→283), two `cakra` feature commits (regressed +38), **S3** (`bdbce00`, claimed 321→268).
-  `node scripts/metrics.mjs` this run reports **268** → confirmed, no contradiction (net **388→268, −120**).
-  Top remaining offenders (next stages): `lib/registry.ts` (27 — S4a, decide exempt-vs-migrate),
-  `artifacts/artifacts/ColorPalette.tsx` (23 — likely exempt, swatches ARE content),
-  `apps/network/Network.tsx` (21 — S4b, route canvas `rgba(` through `rgbCss`),
-  `ai-agent/components/ChatPanel.tsx` (19), `ai-agent/Agent.tsx` (17). *Visual recolor (Tailwind→XENO) is
-  intentional but not cloud-verifiable headless — the metric drop is the proof.*
-- **Auto metrics vs post-S1 (last QA snapshot `4d4754f`):** token-violations **388→268 (−120)**, vitest
-  107 (±0), test files 15 (±0), static count 100 (±0), bundle gz **243.6→248.3 (+4.7** — the two cakra
-  feature commits, product growth not a QA regression). No new tests added by the de-hex stages (pure recolor).
-- **Stale per-stage screenshots pruned:** removed 8 superseded EPIC-1 confirmation PNGs from
-  `docs/screenshots/latest/` (`s6c-inbound-*`, `*-provenance`, `editor-send-menu`, `inbox-populated`,
-  `palette`) — the INBOUND-LANDS guard now produces fresh emit↔receive proof each run, so `latest/` holds
-  only the current `desktop.png` + `app-<id>.png` set + `REPORT.md`.
+- **Epic-acceptance: EPIC-2 S4 + S5 CONFIRMED MOVED** — the ACTIVE epic's target metric is *Design-token
+  violations* (501 → 0). Since the last QA (after S2+S3, 268), two builder commits landed: **S4** (`b645762`,
+  exempt `lib/registry.ts` + de-hex Network canvas, claimed 268→221), **S5** (`e0f8cb7`, de-hex ai-agent/Cakra
+  cluster + exempt `ai-agent/lib/providers.ts`, claimed 221→134). `node scripts/metrics.mjs` this run reports
+  **134** → confirmed, no contradiction (net **268→134, −134**). Visually verified in screenshots: ai-agent
+  renders signal/ember/abyss tokens, Network canvas dot colours match its legend (the `rgbCss` recolor holds).
+  Top remaining offenders (next stage S6): `artifacts/artifacts/ColorPalette.tsx` (23 — decide exempt-vs-migrate,
+  lean exempt: swatches ARE content), `components/ui/Toast.tsx` (16 — migrate), `artifacts/artifacts/ChartBuilder.tsx`
+  (15), `Kanban.tsx` (13), `FormBuilder.tsx` (9). *Visual recolor (Tailwind→XENO) is intentional; the metric drop
+  is the proof.*
+- **Auto metrics vs last QA snapshot `181c81a`:** token-violations **268→134 (−134)**, vitest **107→112 (+5**,
+  S4 `nodeColors.test.ts`), test files **15→16 (+1)**, static count 100→105, bundle gz **248.3→248.1 (−0.2)**.
+- **`latest/` holds only:** current `desktop.png` + 27 `app-<id>.png` + `REPORT.md` (no dated/per-stage PNGs).
 - **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
   datacenter `/api/dc/tables`→401 (authed API, no headless session).
 - QA harness note: project has **no `playwright` dep**; it's global at `/opt/node22/lib/node_modules`.
