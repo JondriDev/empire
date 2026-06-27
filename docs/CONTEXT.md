@@ -48,19 +48,22 @@
   `+'44'`) → `color-mix(in srgb, ${var} N%, transparent)` (0x18≈9, 0x22≈13, 0x44≈27). **token-violations 321 → 268
   (−53).** build🟢 vitest 107🟢 eslint clean. *(Baseline was 321 not 283: the two post-S2 Cakra commits regressed
   +38.)*
-- **Next stage (EPIC-2 S4 — TWO deferred offenders, DECIDE FIRST):**
-  - **(a) `lib/registry.ts` (27, the per-app `color:'#…'` accents).** ⚠️ **Do NOT naively swap to a CSS var** — the
-    `${app.color}NN` alpha-append consumers across the app will silently blank (alpha-append trap, see Invariants).
-    Two valid paths: **(1)** keep the registry hex as the legitimate single source and exempt `registry.ts` in
-    `scripts/metrics.mjs` the way `design-system/**` is exempt (it IS palette data); **(2)** move accents to a
-    CSS-var map AND convert every `${app.color}NN` site to `color-mix` in the SAME stage. Pick (1) unless the
-    accents need theming.
-  - **(b) `apps/network/Network.tsx` (21, all canvas-2D ctx, lines ~199–301).** Route every `rgba(${triplet},a)`
-    through `rgbCss(triplet, alpha)` from `nodeColors.ts` (no literal `rgba(`); add named consts for the literal
-    triplets: `52,245,214`=signal, `176,107,255`=plasma, `77,155,255`=ion, `3,6,14`=void, and the bare `#34f5d6`.
-  - **Target 268 → ~220.** **Epic target: design-token violations 501 → 0.** ONE cluster per stage, build+vitest
-    green each time. After S4: `ColorPalette.tsx` (23, likely exempt — swatches ARE content), `ChatPanel.tsx` (19),
-    `Agent.tsx` (17), long tail.
+- **EPIC-2 S4 DONE (this run, 2026-06-27):** (a) **exempted `lib/registry.ts`** in `scripts/metrics.mjs` (`DS_INFRA`
+  set) — it's the per-app accent *identity manifest*, the single source consumed across the shell as `${app.color}`/
+  `rgbOf` (37 consumers, many `${app.color}NN` alpha-append → migration too risky/large; exempting palette-data is
+  principled). (b) **de-hexed the Network canvas** — every `rgba(${triplet},a)` + the `#34f5d6` label fill now go
+  through `rgbCss(triplet, alpha)`; added accent triplet consts to `nodeColors.ts` (`SIGNAL`/`ION`/`PLASMA`/`VOID`).
+  `Network.tsx` reports 0. New `nodeColors.test.ts` (5). **token-violations 268 → 221 (−47).** build🟢 vitest 112🟢
+  eslint clean.
+- **Next stage (EPIC-2 S5 — continue the sweep, ~one cluster/run toward 0):** top offenders now
+  (`node scripts/metrics.mjs`): `artifacts/artifacts/ColorPalette.tsx` (23 — **decide exempt-vs-migrate FIRST**: the
+  hex swatches ARE its content/data, so this is the *next* legit-exemption candidate like registry — OR move the
+  swatch list to a named const array; lean exempt only if the hexes are genuinely user-facing palette data, else
+  migrate), then the **ai-agent cluster** — `components/ChatPanel.tsx` (19), `Agent.tsx` (17),
+  `components/ConfirmModal.tsx` (16), `components/WorkspacePanel.tsx` (16). The ai-agent files are render code → sweep
+  with `cssVar`/`tint` rails (NOT exempt). Suggested S5 = the ai-agent ChatPanel+ConfirmModal+WorkspacePanel cluster
+  (≈51) in one stage. **Epic target: design-token violations 501 → 0** (now 221). ONE cluster per stage, build+vitest
+  green each time.
 - **S6c done (this run, 2026-06-23):** all 9 entity-owning apps that honestly take input are now
   both-ways. Added `SEND_TO_CALENDAR` / `SEND_TO_GOALS` / `SEND_TO_MESSAGES` to
   `src/lib/appActions.ts` (each writes `empire-<x>-clipboard` `{text,title?,from}`, `handoff(...)`s,
@@ -154,6 +157,9 @@
     `TYPE_RGB` (triplets), `typeRgb(type)` (hashed fallback), and **`rgbCss(triplet, alpha?)`**
     which builds a CSS colour from a constant so reusing canonical triplets costs **zero**
     token-metric violations. Canvas, legend and inspector all import from here so they can't drift.
+    **EPIC-2 S4:** also exports the canvas accent triplets `SIGNAL`/`ION`/`PLASMA`/`VOID` (bare `"r,g,b"`);
+    `Network.tsx` now assembles **every** canvas fill via `rgbCss(...)` (0 literal `rgba(`/hex). `nodeColors.test.ts`
+    pins these.
 - **Registry / shell:** `src/lib/registry.ts` (27 apps, incl. S5 `inbox`), `src/lib/appComponents.tsx`
   (route→component map), `src/components/Desktop.tsx` (shell).
 - **Design system:** `src/design-system/colors_and_type.css` (canonical XENO palette — the `:root`/theme
