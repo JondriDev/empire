@@ -8,6 +8,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Bot, Settings, Play, Square, Zap, ChevronDown, PanelRight } from 'lucide-react'
 import { runAgentTurn, getSettings, saveSettings, type AgentSettings } from './lib/agent'
+import { runOrchestratedTurn } from './lib/orchestrator'
 import type { Message, ToolCall, ThinkingStep } from './lib/types'
 import { getProvider } from './lib/providers'
 import { TOOL_LIST } from './lib/tools'
@@ -142,7 +143,11 @@ export default function Agent() {
       timestamp: Date.now(),
     }])
 
-    runAgentTurn(historyMessages, settings, {
+    // Cakra Auto orchestrates across the whole NIM pool; otherwise run the
+    // single-model agentic loop. Both share the same callbacks below.
+    const runTurnFn = settings.orchestrate ? runOrchestratedTurn : runAgentTurn
+
+    runTurnFn(historyMessages, settings, {
       onPhaseChange(phase) {
         if (phase === 'thinking') {
           setThinkingSteps([{ step: 1, text: 'Analyzing request...', timestamp: Date.now() }])
@@ -241,11 +246,23 @@ export default function Agent() {
               <button
                 onClick={() => setModelPickerOpen(true)}
                 className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full cursor-pointer"
-                style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}
+                style={settings.orchestrate
+                  ? { background: 'rgba(118,185,0,0.15)', color: '#76b900' }
+                  : { background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}
               >
-                <span>{activeProvider.name}</span>
-                <span style={{ color: '#94a3b8' }}>·</span>
-                <span>{activeModel?.split('/').pop()}</span>
+                {settings.orchestrate ? (
+                  <>
+                    <span>✨ Cakra Auto</span>
+                    <span style={{ color: '#94a3b8' }}>·</span>
+                    <span>NIM pool</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{activeProvider.name}</span>
+                    <span style={{ color: '#94a3b8' }}>·</span>
+                    <span>{activeModel?.split('/').pop()}</span>
+                  </>
+                )}
                 <ChevronDown className="w-3 h-3" />
               </button>
             </div>

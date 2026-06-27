@@ -167,55 +167,82 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
     apiKeyLabel: 'Nvidia API Key',
     free: true,
     color: '#76b900',
+    // The Cakra orchestrator routes across this NIM pool. Each model is tagged
+    // with the role(s) it's best at. Model IDs reflect the June 2026 NIM
+    // catalog — edit here as NVIDIA updates the catalog; the orchestrator falls
+    // back to deepseek-v4-flash if any id 404s.
     models: [
       {
-        id: 'nvidia/llama-3.1-nemotron-70b-instruct',
-        name: 'Nemotron 70B',
+        id: 'nvidia/llama-3.1-nemotron-nano-8b-v1',
+        name: 'Nemotron Nano 8B',
         contextWindow: 128_000,
         provider: 'nvidia',
-        notes: 'Nvidia optimized, high quality',
+        notes: 'Tiny + fast — the router/classifier',
+        roles: ['router'],
+        tier: 'fast',
       },
       {
-        id: 'meta/llama-3-70b-instruct',
-        name: 'Llama 3 70B',
-        contextWindow: 8_000,
-        provider: 'nvidia',
-        notes: 'Strong general purpose',
-      },
-      {
-        id: 'mistralai/mixtral-8x22b-instruct',
-        name: 'Mixtral 8x22B',
-        contextWindow: 64_000,
-        provider: 'nvidia',
-        notes: 'Excellent reasoning',
-      },
-      {
-        id: 'qwen/qwen2.5-coder-32b-instruct',
-        name: 'Qwen2.5 Coder 32B',
-        contextWindow: 32_000,
-        provider: 'nvidia',
-        notes: 'Best for code — Cakra Coder role',
-      },
-      {
-        id: 'deepseek-ai/deepseek-r1',
-        name: 'DeepSeek R1',
-        contextWindow: 64_000,
-        provider: 'nvidia',
-        notes: 'Deep reasoning — Cakra Planner role',
-      },
-      {
-        id: 'meta/llama-3.2-90b-vision-instruct',
-        name: 'Llama 3.2 90B Vision',
+        id: 'meta/llama-3.3-70b-instruct',
+        name: 'Llama 3.3 70B',
         contextWindow: 128_000,
         provider: 'nvidia',
-        notes: 'Multimodal / images — Cakra Vision role',
+        notes: 'Solid general-purpose chat',
+        roles: ['chat'],
+        tier: 'balanced',
+      },
+      {
+        id: 'nvidia/llama-3.3-nemotron-super-49b-v1.5',
+        name: 'Nemotron Super 49B v1.5',
+        contextWindow: 128_000,
+        provider: 'nvidia',
+        notes: 'Balanced agentic workhorse, strong tool use',
+        roles: ['agentic', 'verifier'],
+        tier: 'balanced',
       },
       {
         id: 'deepseek-ai/deepseek-v4-flash',
         name: 'DeepSeek V4 Flash',
-        contextWindow: 64_000,
+        contextWindow: 1_000_000,
         provider: 'nvidia',
-        notes: 'Fast default chat — Cakra Fast role',
+        notes: '284B MoE · 1M ctx · fast coding & agents',
+        roles: ['code', 'agentic', 'chat'],
+        tier: 'balanced',
+      },
+      {
+        id: 'qwen/qwen2.5-coder-32b-instruct',
+        name: 'Qwen2.5 Coder 32B',
+        contextWindow: 128_000,
+        provider: 'nvidia',
+        notes: 'Coding specialist',
+        roles: ['code'],
+        tier: 'balanced',
+      },
+      {
+        id: 'minimaxai/minimax-m3',
+        name: 'MiniMax M3',
+        contextWindow: 1_000_000,
+        provider: 'nvidia',
+        notes: '428B MoE (22B active) · multimodal · long-horizon coding & agents',
+        roles: ['reasoning', 'code', 'agentic', 'vision'],
+        tier: 'frontier',
+      },
+      {
+        id: 'deepseek-ai/deepseek-r1',
+        name: 'DeepSeek R1',
+        contextWindow: 128_000,
+        provider: 'nvidia',
+        notes: 'Deep reasoning — verifier / Thinker',
+        roles: ['reasoning', 'verifier'],
+        tier: 'frontier',
+      },
+      {
+        id: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
+        name: 'Nemotron Ultra 253B',
+        contextWindow: 128_000,
+        provider: 'nvidia',
+        notes: 'Top-tier reasoning accuracy',
+        roles: ['reasoning'],
+        tier: 'frontier',
       },
     ],
   },
@@ -250,6 +277,16 @@ export function getProviderForModel(modelId: string): Provider | undefined {
     }
   }
   return undefined
+}
+
+/** The NIM model pool the Cakra orchestrator routes across */
+export function getNimPool(): ModelInfo[] {
+  return PROVIDERS.nvidia.models
+}
+
+/** Pick the first NIM model that has a given role, optionally excluding ids */
+export function pickNimByRole(role: import('./types').ModelRole, exclude: string[] = []): ModelInfo | undefined {
+  return getNimPool().find(m => m.roles?.includes(role) && !exclude.includes(m.id))
 }
 
 /** Get provider from an API key prefix hint (rough heuristic) */

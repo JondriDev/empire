@@ -32,6 +32,8 @@ export interface AgentSettings {
   showThinking: boolean
   maxTokens: number
   temperature: number
+  // Cakra Auto — orchestrate across the whole NIM pool instead of one model
+  orchestrate?: boolean
 }
 
 export function getSettings(): AgentSettings {
@@ -48,6 +50,7 @@ export function getSettings(): AgentSettings {
     showThinking: false,
     maxTokens: 4096,
     temperature: 0.7,
+    orchestrate: false,
   }
   try {
     const raw = localStorage.getItem(SETTINGS_KEY)

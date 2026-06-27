@@ -4,7 +4,7 @@
 
 import { useState } from 'react'
 import { X, Check } from 'lucide-react'
-import { PROVIDER_LIST } from '../lib/providers'
+import { PROVIDER_LIST, getNimPool } from '../lib/providers'
 import type { ProviderId } from '../lib/types'
 import type { AgentSettings } from '../lib/agent'
 
@@ -38,8 +38,46 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
           </button>
         </div>
 
+        {/* Cakra Auto — orchestrate across the whole NIM pool */}
+        <div className="px-5 pt-4">
+          <button
+            onClick={() => onChange({ ...settings, orchestrate: !settings.orchestrate })}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors"
+            style={{
+              background: settings.orchestrate ? 'rgba(118,185,0,0.12)' : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${settings.orchestrate ? '#76b90055' : 'transparent'}`,
+            }}
+          >
+            <div>
+              <div className="text-sm font-medium" style={{ color: '#f1f5f9' }}>
+                ✨ Cakra Auto
+              </div>
+              <div className="text-xs mt-0.5" style={{ color: '#475569' }}>
+                Orchestrate across {getNimPool().length} NIM models — auto-routes & escalates hard tasks
+              </div>
+            </div>
+            <div
+              className="w-10 h-6 rounded-full flex items-center px-0.5 transition-all"
+              style={{
+                background: settings.orchestrate ? '#76b900' : 'rgba(255,255,255,0.15)',
+                justifyContent: settings.orchestrate ? 'flex-end' : 'flex-start',
+              }}
+            >
+              <div className="w-5 h-5 rounded-full bg-white" />
+            </div>
+          </button>
+          {settings.orchestrate && (
+            <p className="text-xs mt-2 px-1" style={{ color: '#76b900' }}>
+              Cakra picks the model per task. Manual selection below turns Auto off.
+            </p>
+          )}
+        </div>
+
         {/* Provider tabs */}
-        <div className="flex overflow-x-auto px-5 pt-4 gap-2">
+        <div
+          className="flex overflow-x-auto px-5 pt-4 gap-2"
+          style={{ opacity: settings.orchestrate ? 0.45 : 1 }}
+        >
           {PROVIDER_LIST.map(p => (
             <button
               key={p.id}
@@ -71,6 +109,7 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
               onClick={() => {
                 onChange({
                   ...settings,
+                  orchestrate: false,
                   activeProvider: selected,
                   providers: {
                     ...settings.providers,
