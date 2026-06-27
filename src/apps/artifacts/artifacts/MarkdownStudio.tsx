@@ -5,6 +5,7 @@
  */
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { Eye, Edit3, Download, Copy, Check, RotateCcw, FileText, Sparkles } from 'lucide-react'
+import { cssVar, tint } from '../../../design-system/tokens'
 
 const SAMPLE = `# Hello, Markdown ✨
 
@@ -290,7 +291,7 @@ export default function MarkdownStudio() {
       <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/30 backdrop-blur">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-lg"
-               style={{ background: 'linear-gradient(135deg, #f59e0b, #f59e0b80)', boxShadow: '0 8px 24px #f59e0b30' }}>
+               style={{ background: `linear-gradient(135deg, ${cssVar('ember')}, ${tint('ember', 50)})`, boxShadow: `0 8px 24px ${tint('ember', 19)}` }}>
             <FileText size={16} />
           </div>
           <div>
@@ -342,7 +343,7 @@ export default function MarkdownStudio() {
             onClick={handleDownload}
             title="Download .md"
             className="px-2.5 py-1.5 rounded-md text-xs flex items-center gap-1.5 text-white shadow"
-            style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', boxShadow: '0 4px 12px #f59e0b30' }}
+            style={{ background: `linear-gradient(135deg, ${cssVar('ember')}, color-mix(in srgb, var(--ember) 70%, var(--void)))`, boxShadow: `0 4px 12px ${tint('ember', 19)}` }}
           >
             <Download size={12} />
             Download .md
@@ -412,25 +413,25 @@ export default function MarkdownStudio() {
       </div>
 
       <style>{`
-        .md-preview h1.md-h { font-size: 2rem; font-weight: 800; margin: 1.5rem 0 0.75rem; line-height: 1.2; background: linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .md-preview h2.md-h { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: #fcd34d; }
-        .md-preview h3.md-h { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; color: #fde68a; }
-        .md-preview h4.md-h, .md-preview h5.md-h, .md-preview h6.md-h { font-weight: 600; margin: 1rem 0 0.5rem; color: #fef3c7; }
-        .md-preview p.md-p { margin: 0.5rem 0; line-height: 1.7; color: #cbd5e1; }
-        .md-preview .md-code-inline { background: rgba(245, 158, 11, 0.15); color: #fcd34d; padding: 1px 5px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.85em; border: 1px solid rgba(245, 158, 11, 0.2); }
-        .md-preview pre.md-pre { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
-        .md-preview pre.md-pre code { color: #e0e7ff; font-family: ui-monospace, monospace; font-size: 0.85rem; line-height: 1.6; }
-        .md-preview blockquote.md-quote { border-left: 3px solid #f59e0b; padding-left: 1rem; margin: 1rem 0; color: #94a3b8; font-style: italic; background: rgba(245, 158, 11, 0.05); padding: 0.5rem 1rem; border-radius: 0 8px 8px 0; }
-        .md-preview ul.md-ul, .md-preview ol.md-ol, .md-preview ul.md-task-list { padding-left: 1.5rem; margin: 0.5rem 0; color: #cbd5e1; }
+        .md-preview h1.md-h { font-size: 2rem; font-weight: 800; margin: 1.5rem 0 0.75rem; line-height: 1.2; background: linear-gradient(135deg, color-mix(in srgb, var(--ember) 80%, var(--text)), ${cssVar('ember')}); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .md-preview h2.md-h { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: ${cssVar('ember')}; }
+        .md-preview h3.md-h { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; color: color-mix(in srgb, var(--ember) 70%, var(--text)); }
+        .md-preview h4.md-h, .md-preview h5.md-h, .md-preview h6.md-h { font-weight: 600; margin: 1rem 0 0.5rem; color: color-mix(in srgb, var(--ember) 45%, var(--text)); }
+        .md-preview p.md-p { margin: 0.5rem 0; line-height: 1.7; color: ${cssVar('text')}; }
+        .md-preview .md-code-inline { background: ${tint('ember', 15)}; color: ${cssVar('ember')}; padding: 1px 5px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.85em; border: 1px solid ${tint('ember', 20)}; }
+        .md-preview pre.md-pre { background: ${tint('void', 40)}; border: 1px solid ${tint('xenon', 10)}; border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
+        .md-preview pre.md-pre code { color: ${cssVar('text')}; font-family: ui-monospace, monospace; font-size: 0.85rem; line-height: 1.6; }
+        .md-preview blockquote.md-quote { border-left: 3px solid ${cssVar('ember')}; padding-left: 1rem; margin: 1rem 0; color: ${cssVar('text2')}; font-style: italic; background: ${tint('ember', 5)}; padding: 0.5rem 1rem; border-radius: 0 8px 8px 0; }
+        .md-preview ul.md-ul, .md-preview ol.md-ol, .md-preview ul.md-task-list { padding-left: 1.5rem; margin: 0.5rem 0; color: ${cssVar('text')}; }
         .md-preview ul.md-ul li, .md-preview ol.md-ol li { margin: 0.25rem 0; line-height: 1.6; }
         .md-preview .md-task-list { list-style: none; padding-left: 0.5rem; }
         .md-preview .md-task { list-style: none; }
         .md-preview .md-task label { display: inline-flex; align-items: center; gap: 0.5rem; cursor: default; }
-        .md-preview .md-task input[type="checkbox"] { accent-color: #f59e0b; }
-        .md-preview hr.md-hr { border: none; border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 1.5rem 0; }
-        .md-preview a { color: #fbbf24; text-decoration: underline; text-decoration-color: rgba(251, 191, 36, 0.4); }
-        .md-preview a:hover { color: #fcd34d; text-decoration-color: #fcd34d; }
-        .md-preview del { color: #94a3b8; }
+        .md-preview .md-task input[type="checkbox"] { accent-color: ${cssVar('ember')}; }
+        .md-preview hr.md-hr { border: none; border-top: 1px solid ${tint('xenon', 10)}; margin: 1.5rem 0; }
+        .md-preview a { color: ${cssVar('ember')}; text-decoration: underline; text-decoration-color: ${tint('ember', 40)}; }
+        .md-preview a:hover { color: color-mix(in srgb, var(--ember) 80%, var(--text)); text-decoration-color: color-mix(in srgb, var(--ember) 80%, var(--text)); }
+        .md-preview del { color: ${cssVar('text2')}; }
       `}</style>
     </div>
   )

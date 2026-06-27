@@ -270,14 +270,22 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
   breaks on a `var()` — convert to `color-mix`). Build🟢 vitest 107/107🟢 (15 files) eslint clean;
   **token-violations 501 → 388 (−113)**, tests +4, bundle gz +0.1. *Visual recolor (Tailwind→XENO) is
   intentional but not cloud-verifiable.*
-- [ ] **S2 · Next cluster.** Sweep `ai-agent/components/SettingsPanel.tsx` (38),
-  `apps/calculator/Calculator.tsx` (38), `artifacts/artifacts/MarkdownStudio.tsx` (29) with the same
-  `cssVar`/`tint` rails. *Acceptance:* those three files report 0 hex/rgba in `metrics.mjs`; build🟢
-  vitest🟢 eslint clean; token-violations 388 → ~283 (no regression elsewhere). **Watch the alpha-append
-  trap.**
-- [ ] **S3+ · Continue the sweep.** Remaining offenders incl. `lib/registry.ts` (27 — the per-app
-  `color:'#…'` accents; move them to tokens / a registry-accent map) and `components/ui/index.tsx` (26),
-  then the long tail until **token-violations = 0**. One cluster per stage.
+- [x] **S2 · Next cluster.** — **Shipped 2026-06-27.** Swept `ai-agent/components/SettingsPanel.tsx` (38→0),
+  `apps/calculator/Calculator.tsx` (38→0), `artifacts/artifacts/MarkdownStudio.tsx` (29→0) with the
+  `cssVar`/`tint` rails. amber/orange→`ember`, slate→`abyss`/`xenon`/`ion`, greens→`c-success`, reds→`c-danger`,
+  cyan→`signal`, text greys→`text`/`text2`/`text3`. Gradients/darken-lighten via `color-mix(… var(--ember) N%,
+  var(--void)/var(--text))` (works in inline styles AND the `<style>{`…`}</style>` template literal). All three
+  files report **0 hex/rgba** in `metrics.mjs`; build🟢 vitest 107🟢 eslint clean; **token-violations 388 → 283
+  (−105)**, no regression elsewhere.
+- [ ] **S3 · Next cluster.** Sweep `lib/registry.ts` (27 — the per-app `color:'#…'` accents; move them to a
+  registry-accent CSS-var map) and `components/ui/index.tsx` (26), then `apps/network/Network.tsx` (24 — DOM
+  styles → `cssVar`/`tint`, but the **canvas 2D ctx keeps `rgbCss` from `nodeColors.ts`**, not a violation).
+  *Acceptance:* those files report 0 hex/rgba (registry/ui fully, Network minus its canvas-ctx strings); build🟢
+  vitest🟢 eslint clean; token-violations 283 → ~210. **registry.ts caveat:** audit every `${app.color}NN`
+  alpha-append consumer in the same stage (alpha-append trap) before moving accents off hex.
+- [ ] **S4+ · Continue the sweep.** Remaining offenders incl. `artifacts/artifacts/ColorPalette.tsx` (23 — likely
+  legitimately exempt: hex swatches ARE its content; decide skip vs. move-to-const) + the long tail until
+  **token-violations = 0**. One cluster per stage.
 
 ### EPIC-3 · Depth pass on shallow instruments
 **Leap:** the thin apps (Photos, Maps, Video, Music, Clock) get genuine offline-capable
