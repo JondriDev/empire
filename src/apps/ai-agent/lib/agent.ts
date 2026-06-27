@@ -19,7 +19,7 @@ import type {
 } from './types'
 import { getProvider } from './providers'
 import { TOOL_LIST, isDangerousTool } from './tools'
-import { executeToolsParallel, formatToolResult } from './toolExecutor'
+import { executeTool, executeToolsParallel, formatToolResult } from './toolExecutor'
 
 // ─── Settings ────────────────────────────────────────────────────────────────
 
@@ -141,6 +141,7 @@ export interface AgentCallbacks {
   onPhaseChange: (_phase: AgentPhase) => void
   onThinking: (_step: ThinkingStep) => void
   onToken: (_token: string) => void
+  onToolStart?: (_call: ToolCall) => void
   onToolCall: (_call: ToolCall, _result: ToolResult) => void
   onConfirmNeeded: (_calls: ToolCall[]) => void
   onDone: () => void
@@ -294,13 +295,15 @@ export async function runAgentTurn(
     if (confirmedCalls.length > 0) {
       callbacks.onPhaseChange('tool_results')
 
-      const toolRequests: ToolCallRequest[] = confirmedCalls.map(c => ({
-        tool: c.name as ToolName,
-        params: c.arguments,
-        callId: c.id,
+      // Announce + execute each tool individually so the Workspace panel can
+      // show every action live (started → result), instead of running silently.
+      const results: Record<string, ToolResult> = {}
+      await Promise.all(confirmedCalls.map(async (c) => {
+        callbacks.onToolStart?.(c)
+        const result = await executeTool({ tool: c.name as ToolName, params: c.arguments, callId: c.id })
+        results[c.id] = result
+        callbacks.onToolCall(c, result)
       }))
-
-      const results = await executeToolsParallel(toolRequests)
 
       // Feed tool results back to the model for final response
       const toolResultMessages: ChatMessage[] = confirmedCalls.map(c => ({
@@ -398,6 +401,7 @@ export async function executePendingToolCalls(
     callId: c.id,
   }))
 
+  pendingCalls.forEach(c => callbacks.onToolStart?.(c))
   const results = await executeToolsParallel(toolRequests)
 
   // Notify of each result
