@@ -1,30 +1,32 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-06-27T13:04:43.468Z · green main `386ff36`
+**Generated:** 2026-06-27T18:05:46.248Z
 
-**Result:** 28/28 rendered without crash, 0 failed. **No runtime bug found.**
+**Result:** 28/28 rendered without crash, 0 failed.
 
-## Metric deltas (this run)
+**No runtime bugs found this run.** Build 🟢, vitest 107/107 🟢, SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (27/27), INBOUND-LANDS 3/3 ✅.
 
-| Metric | Value | Δ vs last QA (post-S6c) |
-|---|---|---|
-| Routes rendering clean | 27 / 27 (28/28 incl. desktop) | ±0 |
-| Apps both-ways into the organism | 9 / 9 entity-apps-with-inbound | ±0 (EPIC-1 target held) |
-| Design-token violations | **388** | **−113 (501→388)** |
-| Test cases (vitest) | 107 / 107 (15 files) | +4 |
-| Bundle gz | 243.6 KB | +0.1 |
+## Metric deltas (vs last QA snapshot `4d4754f`, post-EPIC-2-S1)
 
-## Epic-acceptance confirmation
+| Metric | Last QA (S1) | This run | Δ |
+|---|---|---|---|
+| Apps / routes | 27 | 27 | ±0 |
+| Test cases (vitest) | 107 | 107 | ±0 |
+| Test files | 15 | 15 | ±0 |
+| **Design-token violations** | **388** | **268** | **−120** |
+| Bundle gz (KB) | 243.6 | 248.3 | +4.7 |
+| Routes rendering clean | 27/27 | 27/27 | ±0 |
+| Apps both-ways into organism | 9/9 | 9/9 | ±0 |
 
-**ACTIVE epic: EPIC-2 — Design-system conformance → zero token violations** (target *Design-token
-violations* 501 → 0). **EPIC-2 S1 CONFIRMED MOVED:** S1 (palette seam `src/design-system/tokens.ts` +
-Hermes cluster de-hex) claimed 501 → 388 (−113); `node scripts/metrics.mjs` this run reports **388** →
-confirmed, no contradiction. Next stage **S2** (un-swept top offenders: `SettingsPanel.tsx` 38,
-`Calculator.tsx` 38, `MarkdownStudio.tsx` 29). EPIC-1 (both-ways 9/9) re-verified live by the
-INBOUND-LANDS guard (3/3 receivers chip+prefill).
+Bundle +4.7 KB traces to the two `cakra` feature commits (`2ab3285` adaptive NIM-pool orchestrator, `6e1fc1e` live Workspace panel) — product growth, not a QA-flagged regression.
 
-> Guards green: SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE ✅ (27/27) · INBOUND-LANDS ✅ (3/3).
-> Env-expected noise (NOT bugs): `/api/files` 500 (Android-only path), `/api/dc/tables` 401 (no headless auth).
+## Epic-acceptance confirmation — EPIC-2 (ACTIVE)
+
+EPIC-2 target metric = *Design-token violations* (501 → 0). Two builder stages landed since the last QA:
+- **S2** (`e396ce6`): claimed 388 → 283 (SettingsPanel/Calculator/MarkdownStudio cluster).
+- **S3** (`bdbce00`): claimed 321 → 268 (shared UI primitives cluster; baseline 321 not 283 because the two cakra commits regressed +38 in between).
+
+`node scripts/metrics.mjs` this run reports **268** → **CONFIRMED MOVED, no contradiction**. The Tailwind→XENO recolor itself is not headless-verifiable, but the metric drop is the proof; all touched files render clean. Top remaining offenders (next stages): `lib/registry.ts` (27), `artifacts/ColorPalette.tsx` (23), `apps/network/Network.tsx` (21), `ai-agent/ChatPanel.tsx` (19), `ai-agent/Agent.tsx` (17).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is

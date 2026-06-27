@@ -223,7 +223,7 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-27, post-EPIC-2-S1 green main `386ff36` — token-violations 501→388)
+## 📊 Last QA confirmation (2026-06-27, post-EPIC-2-S2+S3 green main `bdbce00` — token-violations 388→268)
 
 - **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (all 27 registry
@@ -234,16 +234,18 @@
   Both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat, calendar, goals,
   messages. Intentionally emit-only (by design): files, photos, datacenter + tool apps via `NodeActions`.
   Re-verified live this run by the smoke harness's INBOUND-LANDS guard (3/3 receivers chip+prefill).
-- **Epic-acceptance: EPIC-2 S1 CONFIRMED MOVED** — the ACTIVE epic's target metric is *Design-token
-  violations* (501 → 0). S1 (palette seam `tokens.ts` + Hermes cluster de-hex) claimed **501 → 388 (−113)**;
-  `node scripts/metrics.mjs` this run reports **388** → confirmed, no contradiction. Top remaining offenders
-  (the EPIC-2 **S2** targets, still un-swept): `ai-agent/components/SettingsPanel.tsx` (38),
-  `apps/calculator/Calculator.tsx` (38), `artifacts/artifacts/MarkdownStudio.tsx` (29), then
-  `lib/registry.ts` (27), `components/ui/index.tsx` (26). *Visual recolor (Tailwind→XENO) is intentional
-  but not cloud-verifiable headless — the metric drop is the proof.*
-- **Auto metrics vs post-S6c (last QA snapshot):** EPIC-2 S1 (commit `386ff36`) moved token-violations
-  **501→388 (−113)**, vitest 103→107 (+4, `tokens.test.ts`), test files 14→15 (+1), static count 96→100,
-  bundle gz 243.5→243.6 (+0.1). This QA run added no product code → auto-metrics ±0 vs the S1 builder snapshot.
+- **Epic-acceptance: EPIC-2 S2 + S3 CONFIRMED MOVED** — the ACTIVE epic's target metric is *Design-token
+  violations* (501 → 0). Since the last QA (after S1, 388), four builder commits landed: **S2** (`e396ce6`,
+  claimed 388→283), two `cakra` feature commits (regressed +38), **S3** (`bdbce00`, claimed 321→268).
+  `node scripts/metrics.mjs` this run reports **268** → confirmed, no contradiction (net **388→268, −120**).
+  Top remaining offenders (next stages): `lib/registry.ts` (27 — S4a, decide exempt-vs-migrate),
+  `artifacts/artifacts/ColorPalette.tsx` (23 — likely exempt, swatches ARE content),
+  `apps/network/Network.tsx` (21 — S4b, route canvas `rgba(` through `rgbCss`),
+  `ai-agent/components/ChatPanel.tsx` (19), `ai-agent/Agent.tsx` (17). *Visual recolor (Tailwind→XENO) is
+  intentional but not cloud-verifiable headless — the metric drop is the proof.*
+- **Auto metrics vs post-S1 (last QA snapshot `4d4754f`):** token-violations **388→268 (−120)**, vitest
+  107 (±0), test files 15 (±0), static count 100 (±0), bundle gz **243.6→248.3 (+4.7** — the two cakra
+  feature commits, product growth not a QA regression). No new tests added by the de-hex stages (pure recolor).
 - **Stale per-stage screenshots pruned:** removed 8 superseded EPIC-1 confirmation PNGs from
   `docs/screenshots/latest/` (`s6c-inbound-*`, `*-provenance`, `editor-send-menu`, `inbox-populated`,
   `palette`) — the INBOUND-LANDS guard now produces fresh emit↔receive proof each run, so `latest/` holds

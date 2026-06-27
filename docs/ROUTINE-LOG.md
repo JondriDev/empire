@@ -5,6 +5,21 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-27 · QA — visual + smoke (post-EPIC-2-S2+S3 green main `bdbce00`)
+
+**Done.** Fresh cloud checkout, `npm run build` 🟢, served `dist/` on :3001, headless Chromium
+(`/opt/pw-browsers/chromium-1194`) via `scripts/qa-smoke.mjs`. **28/28 routes rendered clean, 0 failures, 0
+uncaught JS.** Guards: SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (27/27), INBOUND-LANDS **3/3 ✅**
+(calendar←editor, goals←notes, messages←ai-chat — chip + prefill live). vitest **107/107 🟢** (15 files).
+**No runtime bugs found.** Screenshots overwritten in `docs/screenshots/latest/` (28 PNGs + REPORT.md).
+
+**Epic-acceptance (EPIC-2, ACTIVE — target *Design-token violations* 501→0):** since the last QA (after S1,
+388) four builder commits landed — S2 (`e396ce6`, 388→283), two `cakra` feature commits (regressed +38), S3
+(`bdbce00`, 321→268). `node scripts/metrics.mjs` reports **268** → **CONFIRMED MOVED** (net 388→268, −120), no
+contradiction. Bundle gz 243.6→248.3 (+4.7, the cakra features — product growth, not a regression). Manual
+rows held: routes 27/27, both-ways 9/9. METRICS.md + CONTEXT.md refreshed. **Next:** EPIC-2 S4 — decide
+`lib/registry.ts` (27) exempt-vs-migrate, then route `Network.tsx` canvas `rgba(` through `rgbCss` (21).
+
 ## 2026-06-27 · Builder — EPIC-2 S3: sweep the shared UI primitives cluster (token-violations 321 → 268)
 
 **Done.** Continued the design-system sweep, de-hexing the shared primitives + ModelPicker to zero with the
