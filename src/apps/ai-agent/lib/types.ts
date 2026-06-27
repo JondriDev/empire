@@ -52,12 +52,29 @@ export interface Provider {
   color: string          // Brand color for UI
 }
 
+/**
+ * What a model is *good at* — used by the Cakra orchestrator to route each
+ * task to the right NIM model instead of making the user pick one by hand.
+ */
+export type ModelRole =
+  | 'router'     // cheap + fast — classifies the task
+  | 'chat'       // quick general answers
+  | 'reasoning'  // deep multi-step thinking (the "Thinker")
+  | 'code'       // coding / agentic work (the "Worker")
+  | 'agentic'    // balanced tool-using workhorse
+  | 'verifier'   // double-checks another model's answer
+  | 'vision'     // image / multimodal input
+
+export type ModelTier = 'fast' | 'balanced' | 'frontier'
+
 export interface ModelInfo {
   id: string             // Full model ID (e.g. "meta-llama/llama-3.1-8b-instruct")
   name: string           // Display name
   contextWindow: number  // In tokens
   provider: ProviderId
   notes?: string
+  roles?: ModelRole[]    // Capabilities the orchestrator routes on
+  tier?: ModelTier       // Rough speed/quality tier
 }
 
 export interface ProviderConfig {
