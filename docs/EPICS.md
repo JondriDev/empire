@@ -248,11 +248,13 @@ promote EPIC-2 (design-token violations → 0)._
 
 ## ▶ ACTIVE — EPIC-2 · Design-system conformance → zero token violations
 
-> Promoted 2026-06-23 when EPIC-1 hit its honest target (both-ways 9/9). Builder's next
-> stage = **S1: start the sweep** — extract `src/design-system/tokens.ts` as the single source
-> + chip the top offenders (`hermes-command-center/HermesCommandCenter.tsx` (64),
-> `components/HermesAgentBar.tsx` (49), `ai-agent/components/SettingsPanel.tsx` (38),
-> `calculator/Calculator.tsx` (38)). Target metric *Design-token violations* **501 → 0**.
+> Promoted 2026-06-23 when EPIC-1 hit its honest target (both-ways 9/9). **S1–S5 SHIPPED**;
+> **token-violations 501 → 134** (`node scripts/metrics.mjs` 2026-06-27). The remaining 134 are
+> now fully enumerated and decomposed into **exactly three** downhill stages — S6 (artifacts app),
+> S7 (shared-UI + shell), S8 (long-tail) → **0**. Builder's next stage = **S6: the artifacts app
+> → zero** (add a shared `CATEGORICAL` accent sequence to `tokens.ts`, point every chart/kanban/
+> form/gallery palette at it, exempt the ColorPalette tool). Target metric *Design-token
+> violations* **501 → 0** (now **134**).
 
 ### EPIC-2 · Design-system conformance → zero token violations
 **Leap:** one palette, rendered identically in DOM and canvas; no app hardcodes color.
@@ -311,13 +313,70 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
   `DS_INFRA` — it's the per-PROVIDER brand-accent identity manifest (consumed as `p.color` in ModelPicker to keep
   OpenRouter/Google/NVIDIA/etc. distinct; mapping brand colors onto our tokens would collapse two blue providers
   onto `ion`), the registry precedent. **token-violations 221 → 134 (−87).** build🟢 vitest 112🟢 eslint clean.
-- [ ] **S6+ · Continue the sweep.** Top offenders now: `artifacts/artifacts/ColorPalette.tsx` (23 — **decide
-  exempt-vs-migrate FIRST**: it's a color-theory tool, the hexes are its content/output (seed palettes, contrast-lab
-  black/white) — lean **exempt** like registry/providers; recoloring would break the WCAG lab), `components/ui/Toast.tsx`
-  (16 — shared UI primitive, render code → **migrate** with `cssVar`/`tint`), then the artifacts cluster
-  `ChartBuilder.tsx` (15), `Kanban.tsx` (13), `FormBuilder.tsx` (9) + the long tail until **token-violations = 0**.
-  Suggested S6 = Toast + the artifacts render cluster (ChartBuilder+Kanban+FormBuilder, ≈37) in one stage; settle
-  ColorPalette as an exemption in the same or next stage. One cluster per stage, build+vitest green each time.
+> **Remaining 134 violations — full enumeration (`node scripts/metrics.mjs`, 2026-06-27), partitioned into S6/S7/S8:**
+> **Artifacts app (75):** ColorPalette 23 (→exempt), ChartBuilder 15, Kanban 13, FormBuilder 9, ArtifactGallery 8,
+> ArtifactsApp 7. **Shared-UI + shell (45):** Toast 16, ErrorBoundary 7, Utility 6, Desktop 6, Dashboard 4, AppShell 3,
+> NodeActions 3. **Long-tail entity apps (14):** Notes 6, Goals 3, AIChat 2, Weather 1, Calendar 1, nodeColors.ts 1.
+> Sum = 134. After S6/S7/S8 land, the metric hits **0** and EPIC-2 is DONE.
+
+- [ ] **S6 · The artifacts app → zero, via ONE shared `CATEGORICAL` accent sequence.** The artifacts app is
+  the dominant remaining mass (75 of 134) and most of it is **categorical hue arrays** — `ChartBuilder.COLORS`,
+  `Kanban` column accents + `TAG_COLORS` + per-task `tagColor` seeds, `FormBuilder` field-type colors,
+  `ArtifactGallery` per-artifact accents — i.e. "give me N visually-distinct series colours." Don't dodge these
+  and don't flatten them onto one token: serve the epic's actual thesis by giving the whole app **one categorical
+  sequence drawn from the XENO palette** (8 distinct accents is plenty for any chart/tag/field set). This is a real
+  single-source-of-truth coherence win, not metric-chasing. **Files & shape:**
+  - **`src/design-system/tokens.ts`** — add `export const CATEGORICAL: string[] = [cssVar('ion'), cssVar('signal'),
+    cssVar('ember'), cssVar('plasma'), cssVar('c-success'), cssVar('aurora'), cssVar('c-danger'), cssVar('c-info')]`
+    (8 distinct XENO accents; the canonical "N-distinct-series" rail). Consumers index it `CATEGORICAL[i % CATEGORICAL.length]`.
+    Extend `tokens.test.ts`: assert `CATEGORICAL.length === 8`, every entry is a `var(--…)` string, and entries are unique.
+  - **`src/apps/artifacts/artifacts/ChartBuilder.tsx`** (15→0) — `const COLORS = [...8 hexes]` → `import { CATEGORICAL }`
+    and use it (or `COLORS = CATEGORICAL`). SVG chrome is migratable (SVG `stroke`/`stopColor`/`fill` accept `var(--…)`):
+    grid `stroke="rgba(255,255,255,0.06)"` → `stroke={tint('xenon',6)}`; the cyan line/area `#22d3ee` (stroke + both
+    `<stop stopColor>`) → `cssVar('signal')`. Keep `stopOpacity` numbers as-is.
+  - **`src/apps/artifacts/artifacts/Kanban.tsx`** (13→0) — column `accent` (3) and `TAG_COLORS` (6) → indices into
+    `CATEGORICAL`; per-task seed `tagColor: '#…'` → `CATEGORICAL[n]`. Any chrome hex/rgba → `cssVar`/`tint`.
+  - **`src/apps/artifacts/artifacts/FormBuilder.tsx`** (9→0) — the field-type `color: '#…'` palette → `CATEGORICAL`
+    by index (one accent per field type).
+  - **`src/apps/artifacts/ArtifactGallery.tsx`** (8→0) — per-artifact `accent: '#…'` → `CATEGORICAL` by index.
+  - **`src/apps/artifacts/ArtifactsApp.tsx`** (7→0) — chrome hex/rgba (panel/border/glass) → `cssVar`/`tint` per the
+    established mappings (slate panel→`abyss`, white-glass→`tint('xenon',N)`, void-scrim→`tint('void',N)`).
+  - **`src/apps/artifacts/artifacts/ColorPalette.tsx`** (23) — **EXEMPT** (don't migrate): it's a colour-theory TOOL
+    where the hexes ARE its content/output — seed palettes (`#6366F1`…), the CSS-export string, `fgFor` returning true
+    `#0F172A`/`#FFFFFF` for the **WCAG contrast lab**, the placeholder, and the user's own swatch backgrounds.
+    Recolouring to XENO tokens would break the contrast lab and lose the seed data (registry/providers precedent).
+    Add `'src/apps/artifacts/artifacts/ColorPalette.tsx'` to the `DS_INFRA` set in `scripts/metrics.mjs` with a
+    one-line rationale comment.
+  - *Acceptance:* `node scripts/metrics.mjs` reports **0** for every non-exempt file under `src/apps/artifacts/**`
+    (ColorPalette exempted); charts/kanban/forms/gallery render in XENO accents; **token-violations 134 → ~59**
+    (−75: −23 exempt, −52 swept). Build🟢 `vitest`🟢 (incl. the extended `tokens.test.ts`) eslint clean on touched files.
+
+- [ ] **S7 · Shared UI primitives + shell chrome → zero.** The reusable surfaces every app inherits — migrate them
+  with the `cssVar`/`tint` rails (all render code, no identity data; ~45 violations). **Files & shape:**
+  - **`src/components/ui/Toast.tsx`** (16) — the per-type config map: success-green→`c-success`, error-red→`c-danger`,
+    info-cyan `#22d3ee`→`signal`, warning-amber `#f59e0b`→`c-warn` (stripe = solid `cssVar`, fg = lighter via
+    `color-mix(… var(--accent) 70%, var(--text))`, bg = `tint(accent,12)`); panel `rgba(13,18,36,0.85)`→`tint('void',85)`
+    or `abyss`; white borders/inset → `tint('xenon',N)`; shadow `rgba(0,0,0,…)`→`tint('void',N)`; hover `rgba(255,255,255,0.06)`
+    →`tint('xenon',6)`. (`fg: 'var(--color-cyan-3)'` on info is already a var — leave it or normalise to `cssVar('signal')`.)
+  - **`src/components/ErrorBoundary.tsx`** (7) — fallback-panel chrome (danger accent + glass) → `cssVar('c-danger')`/`tint`.
+  - **`src/components/ui/Utility.tsx`** (6) — shared utility chrome → `cssVar`/`tint`.
+  - **`src/components/Desktop.tsx`** (6) — shell chrome hex/rgba → `cssVar`/`tint` (keep any `${app.color}` registry-accent
+    interpolation as-is; that's identity data, not a violation in this file — only fix literal hex/rgba).
+  - **`src/dashboard/Dashboard.tsx`** (4) + **`src/dashboard/AppShell.tsx`** (3) → `cssVar`/`tint`.
+  - **`src/components/ui/NodeActions.tsx`** (3) → `cssVar`/`tint` (hover tints stay `color-mix`, never raw `rgba` — see trap).
+  - *Acceptance:* all seven files report **0**; the desktop shell, toasts, error fallback and ⚡ menu render identically in
+    XENO. **token-violations ~59 → ~14.** Build🟢 vitest🟢 eslint clean.
+
+- [ ] **S8 · Long-tail entity apps → ZERO (EPIC-2 close).** The final scattered hexes in entity-app render code +
+  one canvas helper. **Files & shape:**
+  - **`src/apps/notes/Notes.tsx`** (6), **`src/apps/goals/Goals.tsx`** (3), **`src/apps/ai-chat/AIChat.tsx`** (2),
+    **`src/apps/weather/Weather.tsx`** (1), **`src/apps/calendar/Calendar.tsx`** (1) → `cssVar`/`tint` per the
+    established mappings; preserve any inbound-handoff / provenance-chip behaviour (don't touch logic, only colours).
+  - **`src/apps/network/nodeColors.ts`** (1) — the single remaining literal: route it through `rgbCss(triplet, alpha)`
+    or a named triplet const (this file is the canvas-colour source — keep using its own `rgbCss` rail, NOT `cssVar`).
+  - *Acceptance:* `node scripts/metrics.mjs` reports **token-violations = 0** (the EPIC-2 target). Build🟢 vitest🟢
+    eslint clean. **EPIC-2 DONE** — flag QA to confirm 0 on green main, then retire EPIC-2 to DONE and promote
+    **EPIC-3 · Depth pass on shallow instruments** to ▶ ACTIVE.
 
 ### EPIC-3 · Depth pass on shallow instruments
 **Leap:** the thin apps (Photos, Maps, Video, Music, Clock) get genuine offline-capable
