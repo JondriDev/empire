@@ -422,7 +422,7 @@ export default function Network() {
         <div style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--text)' }}>
           {t('network.title', 'The Network')}
         </div>
-        <div style={{ fontSize: 'var(--text-xs)', color: hoverName ? 'var(--text2)' : (lastActive ? 'var(--signal, #34f5d6)' : 'var(--text2)'), marginTop: 2 }}>
+        <div style={{ fontSize: 'var(--text-xs)', color: hoverName ? 'var(--text2)' : (lastActive ? 'var(--signal)' : 'var(--text2)'), marginTop: 2 }}>
           {hoverName
             ?? (lastActive
               ? `▸ ${t('network.signal', 'signal')} · ${lastActive}`
@@ -446,8 +446,8 @@ export default function Network() {
           <span
             style={{
               width: 6, height: 6, borderRadius: 'var(--radius-full)',
-              background: signals.length ? 'var(--signal, #34f5d6)' : 'var(--text3)',
-              boxShadow: signals.length ? '0 0 8px var(--signal, #34f5d6)' : 'none',
+              background: signals.length ? 'var(--signal)' : 'var(--text3)',
+              boxShadow: signals.length ? '0 0 8px var(--signal)' : 'none',
               transition: 'background var(--dur-mid), box-shadow var(--dur-mid)',
             }}
           />

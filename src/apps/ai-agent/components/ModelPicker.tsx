@@ -7,6 +7,7 @@ import { X, Check } from 'lucide-react'
 import { PROVIDER_LIST, getNimPool } from '../lib/providers'
 import type { ProviderId } from '../lib/types'
 import type { AgentSettings } from '../lib/agent'
+import { cssVar, tint } from '../../../design-system/tokens'
 
 interface Props {
   settings: AgentSettings
@@ -22,18 +23,18 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+      style={{ background: tint('void', 70), backdropFilter: 'blur(4px)' }}
       onClick={onClose}
     >
       <div
         className="w-full max-w-md rounded-2xl overflow-hidden"
-        style={{ background: '#111827', border: '1px solid #1e2d4a' }}
+        style={{ background: cssVar('abyss'), border: `1px solid ${tint('xenon', 10)}` }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: '#1e2d4a' }}>
-          <h2 className="text-base font-semibold" style={{ color: '#f1f5f9' }}>Choose Model</h2>
-          <button onClick={onClose} className="p-1 rounded" style={{ color: '#94a3b8' }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: tint('xenon', 10) }}>
+          <h2 className="text-base font-semibold" style={{ color: cssVar('text') }}>Choose Model</h2>
+          <button onClick={onClose} className="p-1 rounded" style={{ color: cssVar('text2') }}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -44,22 +45,22 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
             onClick={() => onChange({ ...settings, orchestrate: !settings.orchestrate })}
             className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors"
             style={{
-              background: settings.orchestrate ? 'rgba(118,185,0,0.12)' : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${settings.orchestrate ? '#76b90055' : 'transparent'}`,
+              background: settings.orchestrate ? tint('aurora', 12) : tint('xenon', 4),
+              border: `1px solid ${settings.orchestrate ? tint('aurora', 33) : 'transparent'}`,
             }}
           >
             <div>
-              <div className="text-sm font-medium" style={{ color: '#f1f5f9' }}>
+              <div className="text-sm font-medium" style={{ color: cssVar('text') }}>
                 ✨ Cakra Auto
               </div>
-              <div className="text-xs mt-0.5" style={{ color: '#475569' }}>
+              <div className="text-xs mt-0.5" style={{ color: cssVar('text3') }}>
                 Orchestrate across {getNimPool().length} NIM models — auto-routes & escalates hard tasks
               </div>
             </div>
             <div
               className="w-10 h-6 rounded-full flex items-center px-0.5 transition-all"
               style={{
-                background: settings.orchestrate ? '#76b900' : 'rgba(255,255,255,0.15)',
+                background: settings.orchestrate ? cssVar('aurora') : tint('xenon', 15),
                 justifyContent: settings.orchestrate ? 'flex-end' : 'flex-start',
               }}
             >
@@ -67,7 +68,7 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
             </div>
           </button>
           {settings.orchestrate && (
-            <p className="text-xs mt-2 px-1" style={{ color: '#76b900' }}>
+            <p className="text-xs mt-2 px-1" style={{ color: cssVar('aurora') }}>
               Cakra picks the model per task. Manual selection below turns Auto off.
             </p>
           )}
@@ -84,9 +85,9 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
               onClick={() => setSelected(p.id)}
               className="px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-colors"
               style={{
-                background: selected === p.id ? `${p.color}22` : 'rgba(255,255,255,0.05)',
-                color: selected === p.id ? p.color : '#94a3b8',
-                border: `1px solid ${selected === p.id ? p.color + '44' : 'transparent'}`,
+                background: selected === p.id ? `color-mix(in srgb, ${p.color} 13%, transparent)` : tint('xenon', 5),
+                color: selected === p.id ? p.color : cssVar('text2'),
+                border: `1px solid ${selected === p.id ? `color-mix(in srgb, ${p.color} 27%, transparent)` : 'transparent'}`,
               }}
             >
               <span>{p.logo}</span> {p.name}
@@ -96,7 +97,7 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
 
         {/* Provider info */}
         <div className="px-5 pt-2 pb-3">
-          <p className="text-xs" style={{ color: '#475569' }}>
+          <p className="text-xs" style={{ color: cssVar('text3') }}>
             {provider.free && '✓ Free tier available'} · {provider.models.length} models
           </p>
         </div>
@@ -124,14 +125,14 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
               className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left text-sm transition-colors"
               style={{
                 background: settings.providers[selected]?.model === m.id
-                  ? `${provider.color}15`
-                  : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${settings.providers[selected]?.model === m.id ? provider.color + '44' : 'transparent'}`,
+                  ? `color-mix(in srgb, ${provider.color} 8%, transparent)`
+                  : tint('xenon', 4),
+                border: `1px solid ${settings.providers[selected]?.model === m.id ? `color-mix(in srgb, ${provider.color} 27%, transparent)` : 'transparent'}`,
               }}
             >
               <div>
-                <div style={{ color: '#f1f5f9' }}>{m.name}</div>
-                <div className="text-xs mt-0.5" style={{ color: '#475569' }}>
+                <div style={{ color: cssVar('text') }}>{m.name}</div>
+                <div className="text-xs mt-0.5" style={{ color: cssVar('text3') }}>
                   {m.contextWindow.toLocaleString()} ctx · {m.notes}
                 </div>
               </div>
@@ -148,9 +149,9 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
             style={{
               background: settings.providers[selected]?.apiKey
-                ? 'rgba(16,185,129,0.1)'
-                : 'rgba(245,158,11,0.1)',
-              color: settings.providers[selected]?.apiKey ? '#10b981' : '#f59e0b',
+                ? tint('c-success', 10)
+                : tint('c-warn', 10),
+              color: settings.providers[selected]?.apiKey ? cssVar('c-success') : cssVar('c-warn'),
             }}
           >
             <span>{settings.providers[selected]?.apiKey ? '✓' : '⚠'}</span>

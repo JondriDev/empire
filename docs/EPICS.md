@@ -277,15 +277,29 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
   var(--void)/var(--text))` (works in inline styles AND the `<style>{`…`}</style>` template literal). All three
   files report **0 hex/rgba** in `metrics.mjs`; build🟢 vitest 107🟢 eslint clean; **token-violations 388 → 283
   (−105)**, no regression elsewhere.
-- [ ] **S3 · Next cluster.** Sweep `lib/registry.ts` (27 — the per-app `color:'#…'` accents; move them to a
-  registry-accent CSS-var map) and `components/ui/index.tsx` (26), then `apps/network/Network.tsx` (24 — DOM
-  styles → `cssVar`/`tint`, but the **canvas 2D ctx keeps `rgbCss` from `nodeColors.ts`**, not a violation).
-  *Acceptance:* those files report 0 hex/rgba (registry/ui fully, Network minus its canvas-ctx strings); build🟢
-  vitest🟢 eslint clean; token-violations 283 → ~210. **registry.ts caveat:** audit every `${app.color}NN`
-  alpha-append consumer in the same stage (alpha-append trap) before moving accents off hex.
-- [ ] **S4+ · Continue the sweep.** Remaining offenders incl. `artifacts/artifacts/ColorPalette.tsx` (23 — likely
-  legitimately exempt: hex swatches ARE its content; decide skip vs. move-to-const) + the long tail until
-  **token-violations = 0**. One cluster per stage.
+- [x] **S3 · Shared UI primitives cluster.** — **Shipped 2026-06-27.** Swept the shared primitives
+  `components/ui/index.tsx` (26→0: Button primary/danger, Input/TextArea focus borders, the whole `badgeColors`
+  map, Badge custom-`color` prop, Divider) and `ai-agent/components/ModelPicker.tsx` (24→0: overlay/panel chrome,
+  Cakra-Auto toggle, provider tabs, model list, API-key status) with the `cssVar`/`tint` rails, plus the 3 safe
+  **DOM** hex fallbacks in `apps/network/Network.tsx` (`var(--signal, #34f5d6)` → `var(--signal)`, 24→21).
+  Mappings: cyan→`signal`, NVIDIA-green `#76b900`→`aurora`, white→`xenon`, slate panel `#111827`→`abyss`/border
+  `#1e2d4a`→`tint('xenon',10)`, emerald→`c-success`, amber→`c-warn`, red→`c-danger`, text greys→`text`/`text2`/
+  `text3`. **Alpha-append trap fixed** in two spots (Badge `${color}18` and ModelPicker `${p.color}22`/`+'44'`)
+  by switching to `color-mix(in srgb, ${var} N%, transparent)` so a CSS-var-valued `color` no longer renders
+  nothing. build🟢 vitest 107🟢 eslint clean; **token-violations 321 → 268 (−53)**. (Note: pre-S3 baseline was
+  321, not 283 — the two post-S2 Cakra commits regressed it +38; net since S2-claim is 283→268.)
+- [ ] **S4 · registry accents + Network canvas.** Two related-but-deferred offenders from S3:
+  (a) `lib/registry.ts` (27 — the per-app `color:'#…'` accents). **Do NOT just swap to a CSS var:** `${app.color}NN`
+  alpha-append consumers across the app will silently blank (alpha-append trap). Either keep the registry hex as the
+  legit single source (and move the metric to exempt it like `design-system/**`), OR move accents to a CSS-var map
+  AND convert every `${app.color}NN` site to `color-mix` in the same stage. **Decide first.**
+  (b) `apps/network/Network.tsx` (21 — all canvas-2D ctx strings, lines ~199–301). Route every `rgba(${triplet},a)`
+  through `rgbCss(triplet, alpha)` from `nodeColors.ts` (assembles from a constant → no literal `rgba(`); add named
+  triplet consts for the literal `rgba(52,245,214,…)`=signal / `(176,107,255,…)`=plasma / `(77,155,255,…)`=ion /
+  `(3,6,14,…)`=void / `#34f5d6`. *Acceptance:* both report 0; build🟢 vitest🟢 eslint clean; token-violations 268 → ~220.
+- [ ] **S5+ · Continue the sweep.** Remaining offenders incl. `artifacts/artifacts/ColorPalette.tsx` (23 — likely
+  legitimately exempt: hex swatches ARE its content; decide skip vs. move-to-const), `ai-agent/components/ChatPanel.tsx`
+  (19), `ai-agent/Agent.tsx` (17) + the long tail until **token-violations = 0**. One cluster per stage.
 
 ### EPIC-3 · Depth pass on shallow instruments
 **Leap:** the thin apps (Photos, Maps, Video, Music, Clock) get genuine offline-capable

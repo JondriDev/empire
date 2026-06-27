@@ -39,17 +39,28 @@
   darken and `color-mix(in srgb, var(--ember) 80%, var(--text))` to lighten — works inside both inline styles AND
   the `<style>{`…`}</style>` template literal (interpolate `${cssVar(...)}`/`${tint(...)}`). build🟢 vitest 107🟢
   eslint clean.
-- **Next stage (EPIC-2 S3):** continue the sweep with the **next cluster**, same `cssVar`/`tint` rails:
-  `lib/registry.ts` (27 — the per-app `color:'#…'` accents; these are the registry accent hexes, see the
-  alpha-append trap note before touching `${app.color}NN` sites elsewhere), `components/ui/index.tsx` (26),
-  `apps/network/Network.tsx` (24 — but **canvas 2D ctx needs raw colour strings**; use `nodeColors.ts`'s `rgbCss`
-  for those, only DOM styles convert to `cssVar`/`tint`), then `artifacts/artifacts/ColorPalette.tsx` (23 — *likely
-  legitimately exempt*: it's a colour-swatch demo whose hex literals ARE the content; consider whether to skip or
-  move its swatch list to a const the metric still counts — decide before sweeping). **Target 283 → ~210.**
-  **Epic target: design-token violations 501 → 0.** ONE cluster per stage, build+vitest green each time.
-  **registry.ts caveat:** `registry.ts` feeds `${app.color}NN` alpha-append sites across the app — if you move the
-  accents to CSS vars, audit every `${app.color}` consumer for the alpha-append trap (see Invariants) in the SAME
-  stage or you'll silently blank those tints.
+- **EPIC-2 S3 DONE (this run, 2026-06-27):** swept the **shared UI primitives cluster** with the `cssVar`/`tint`
+  rails — `components/ui/index.tsx` 26→0 (Button primary/danger, Input/TextArea focus borders, full `badgeColors`
+  map, Badge custom-`color` prop, Divider), `ai-agent/components/ModelPicker.tsx` 24→0 (overlay/panel chrome,
+  Cakra-Auto toggle, provider tabs, model list, API-key status), + the 3 safe DOM hex fallbacks in
+  `apps/network/Network.tsx` (`var(--signal, #34f5d6)`→`var(--signal)`, 24→21). New mapping learned: **NVIDIA-green
+  `#76b900`→`aurora`**, white→`xenon`. **Alpha-append trap fixed in two spots** (`${color}18` / `${p.color}22`,
+  `+'44'`) → `color-mix(in srgb, ${var} N%, transparent)` (0x18≈9, 0x22≈13, 0x44≈27). **token-violations 321 → 268
+  (−53).** build🟢 vitest 107🟢 eslint clean. *(Baseline was 321 not 283: the two post-S2 Cakra commits regressed
+  +38.)*
+- **Next stage (EPIC-2 S4 — TWO deferred offenders, DECIDE FIRST):**
+  - **(a) `lib/registry.ts` (27, the per-app `color:'#…'` accents).** ⚠️ **Do NOT naively swap to a CSS var** — the
+    `${app.color}NN` alpha-append consumers across the app will silently blank (alpha-append trap, see Invariants).
+    Two valid paths: **(1)** keep the registry hex as the legitimate single source and exempt `registry.ts` in
+    `scripts/metrics.mjs` the way `design-system/**` is exempt (it IS palette data); **(2)** move accents to a
+    CSS-var map AND convert every `${app.color}NN` site to `color-mix` in the SAME stage. Pick (1) unless the
+    accents need theming.
+  - **(b) `apps/network/Network.tsx` (21, all canvas-2D ctx, lines ~199–301).** Route every `rgba(${triplet},a)`
+    through `rgbCss(triplet, alpha)` from `nodeColors.ts` (no literal `rgba(`); add named consts for the literal
+    triplets: `52,245,214`=signal, `176,107,255`=plasma, `77,155,255`=ion, `3,6,14`=void, and the bare `#34f5d6`.
+  - **Target 268 → ~220.** **Epic target: design-token violations 501 → 0.** ONE cluster per stage, build+vitest
+    green each time. After S4: `ColorPalette.tsx` (23, likely exempt — swatches ARE content), `ChatPanel.tsx` (19),
+    `Agent.tsx` (17), long tail.
 - **S6c done (this run, 2026-06-23):** all 9 entity-owning apps that honestly take input are now
   both-ways. Added `SEND_TO_CALENDAR` / `SEND_TO_GOALS` / `SEND_TO_MESSAGES` to
   `src/lib/appActions.ts` (each writes `empire-<x>-clipboard` `{text,title?,from}`, `handoff(...)`s,
