@@ -14,6 +14,7 @@ import { Zap } from 'lucide-react'
 import { useGraph } from '../../lib/core/graph'
 import { intentsFor, runIntent } from '../../lib/core/intents'
 import { useToast } from './Toast'
+import { cssVar, tint } from '../../design-system/tokens'
 
 export function NodeActions({ type, sourceId, nodeId }:
   { type?: string; sourceId?: string; nodeId?: string }) {
@@ -102,7 +103,7 @@ export function NodeActions({ type, sourceId, nodeId }:
           alignItems: 'center', justifyContent: 'center',
           transition: 'all var(--dur-fast) var(--ease-spring)',
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = '#34f5d6'; e.currentTarget.style.background = 'rgba(52,245,214,0.12)' }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = cssVar('signal'); e.currentTarget.style.background = tint('signal', 12) }}
         onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; e.currentTarget.style.background = 'transparent' }}
       >
         <Zap className="w-3.5 h-3.5" />
@@ -136,7 +137,7 @@ export function NodeActions({ type, sourceId, nodeId }:
                 fontSize: 'var(--text-sm)', cursor: 'pointer', textAlign: 'left',
                 transition: 'background var(--dur-fast)',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(52,245,214,0.10)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = tint('signal', 10) }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
               <span aria-hidden style={{ width: 16, textAlign: 'center' }}>{i.icon ?? '↗'}</span>

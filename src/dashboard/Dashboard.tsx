@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { apps, getAppIcon } from '../lib/registry'
 import GlassPanel from '../components/ui/GlassPanel'
 import { Star, Search, GripVertical, Telescope, X } from 'lucide-react'
+import { cssVar, tint } from '../design-system/tokens'
 
 const FAVORITES_KEY = 'empire-favorites'
 
@@ -123,7 +124,7 @@ export default function Dashboard() {
  backdropFilter: 'var(--gl-blur)',
  border: '1px solid var(--gl-border-b)',
  borderTopColor: 'var(--gl-border-t)',
- boxShadow: isDragging ? '0 20px 60px rgba(0,0,0,0.3)' : 'var(--gl-shadow)',
+ boxShadow: isDragging ? `0 20px 60px ${tint('void', 30)}` : 'var(--gl-shadow)',
  animationDelay: '400ms',
  position: clockPos ? 'absolute' : 'static',
  left: clockPos?.x ?? 0,
@@ -181,7 +182,7 @@ export default function Dashboard() {
               <span className="text-xs font-medium" style={{ color: 'var(--text2)' }}>
                 Favorites
               </span>
-              <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(234,179,8,0.15)', color: 'var(--color-orange-4)' }}>
+              <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: tint('c-warn', 15), color: 'var(--color-orange-4)' }}>
                 {favCount}
               </span>
             </div>
@@ -210,9 +211,9 @@ export default function Dashboard() {
                     <button
                       onClick={e => { e.stopPropagation(); toggleFavorite(app.id) }}
                       className="w-4 h-4 rounded-full flex items-center justify-center transition-transform hover:scale-110"
-                      style={{ background: 'rgba(234,179,8,0.2)' }}
+                      style={{ background: tint('c-warn', 20) }}
                     >
-                      <X size={10} className="font-bold" style={{ color: '#ca8a04' }} />
+                      <X size={10} className="font-bold" style={{ color: cssVar('c-warn') }} />
                     </button>
                   </button>
                 )

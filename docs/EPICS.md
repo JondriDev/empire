@@ -362,7 +362,7 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
     (ColorPalette exempted); charts/kanban/forms/gallery render in XENO accents; **token-violations 134 → ~59**
     (−75: −23 exempt, −52 swept). Build🟢 `vitest`🟢 (incl. the extended `tokens.test.ts`) eslint clean on touched files.
 
-- [ ] **S7 · Shared UI primitives + shell chrome → zero.** The reusable surfaces every app inherits — migrate them
+- [x] **S7 · Shared UI primitives + shell chrome → zero.** *(DONE 2026-06-28 — token-violations 59 → 14, −45.)* The reusable surfaces every app inherits — migrate them
   with the `cssVar`/`tint` rails (all render code, no identity data; ~45 violations). **Files & shape:**
   - **`src/components/ui/Toast.tsx`** (16) — the per-type config map: success-green→`c-success`, error-red→`c-danger`,
     info-cyan `#22d3ee`→`signal`, warning-amber `#f59e0b`→`c-warn` (stripe = solid `cssVar`, fg = lighter via

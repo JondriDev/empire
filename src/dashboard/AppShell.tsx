@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { ArrowLeft, Grid3X3, Sun, Moon, Bot } from 'lucide-react'
 import { apps, getAppIcon } from '../lib/registry'
 import { useStore } from '../lib/store'
+import { tint } from '../design-system/tokens'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import HermesAgentBar from '../components/HermesAgentBar'
 import { ErrorBoundary } from '../components/ErrorBoundary'
@@ -60,8 +61,8 @@ export default function AppShell({ appMap }: AppShellProps) {
             onClick={() => navigate('/')}
             className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95"
             style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: tint('xenon', 6),
+              border: `1px solid ${tint('xenon', 8)}`,
             }}
             title="Back to Empire"
           >
@@ -182,7 +183,7 @@ function Dock({ currentApp }: { currentApp: string }) {
                   background: 'var(--gl-bg-el)',
                   backdropFilter: 'var(--gl-blur-el)',
                   color: 'var(--text)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                  boxShadow: `0 4px 12px ${tint('void', 40)}`,
                 }}
               >
                 {app.name}

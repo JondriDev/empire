@@ -24,6 +24,7 @@ import {
   Command, Sparkles, ArrowUp, ArrowDown,
   CornerDownLeft
 } from 'lucide-react'
+import { tint } from '../design-system/tokens'
 
 // Categories used in the start menu grouping
 const CATEGORY_ORDER = ['AI & Intelligence', 'Productivity & Data', 'Media & Files', 'Utilities'] as const
@@ -224,7 +225,7 @@ export default function Desktop() {
                       height: 7,
                       borderRadius: '50%',
                       background: app.color,
-                      boxShadow: `0 0 8px ${app.color}, 0 0 0 1.5px rgba(0,0,0,0.6)`,
+                      boxShadow: `0 0 8px ${app.color}, 0 0 0 1.5px ${tint('void', 60)}`,
                     }}
                   />
                 )}
@@ -359,8 +360,8 @@ export default function Desktop() {
                 alignItems: 'center',
                 gap: '14px',
                 padding: '8px 14px',
-                borderTop: '1px solid rgba(255,255,255,0.05)',
-                background: 'rgba(0,0,0,0.15)',
+                borderTop: `1px solid ${tint('xenon', 5)}`,
+                background: tint('void', 15),
                 fontSize: '10px',
                 color: 'var(--text3)',
               }}
@@ -489,7 +490,7 @@ export default function Desktop() {
                                     height: 12,
                                     borderRadius: '50%',
                                     background: 'var(--color-cyan-5)',
-                                    border: '1.5px solid rgba(13, 18, 36, 1)',
+                                    border: '1.5px solid var(--abyss)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -530,14 +531,14 @@ export default function Desktop() {
                   padding: '4px 8px',
                   borderRadius: 'var(--radius-md)',
                   background: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  border: `1px solid ${tint('xenon', 6)}`,
                   color: 'var(--text2)',
                   cursor: 'pointer',
                   fontSize: '11px',
                   transition: 'all var(--dur-fast)',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+                  e.currentTarget.style.background = tint('xenon', 5)
                   e.currentTarget.style.color = 'var(--text)'
                 }}
                 onMouseLeave={(e) => {
