@@ -4,6 +4,7 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 const BASE = 'http://localhost:3001';
 const OUT = path.resolve('docs/screenshots/latest');
@@ -169,6 +170,67 @@ for (const c of inboundCases) {
 const inboundPass = inboundResults.filter(r => r.pass).length;
 console.log(`INBOUND-LANDS: ${inboundPass}/${inboundResults.length} ${inboundPass === inboundResults.length ? '✅' : '⚠️'}`);
 
+// ── MEDIA-PERSISTS guard (EPIC-3 S2 acceptance: the IDB blob roundtrip) ──────
+// S2 made Music + Video libraries survive a reload by storing real Blobs in
+// IndexedDB and persisting metadata only. jsdom has NO IndexedDB, so the unit
+// tests (`mediaStore.test.ts`) can only pin the pure transforms (strip /
+// rehydrate / ghost-drop) — the actual add→reload→still-there roundtrip that is
+// the stage's whole acceptance was never exercised by any automated check. Do
+// it for real here: drive the genuine file <input> (real user flow →
+// handleFileSelect → putMedia → setPlaylist), reload, and assert the item
+// survived (rehydrated from IDB, not dropped as a ghost). Non-fatal (recorded,
+// not thrown) like INBOUND-LANDS so a flaky browser can't red the whole render
+// run — but a real regression in the persistence rail shows as ❌ for the build
+// routine to pick up.
+function makeWavBytes() {
+  const sampleRate = 8000, numSamples = 800; // ~0.1s of silence; a valid RIFF/WAVE
+  const dataSize = numSamples * 2;
+  const buf = Buffer.alloc(44 + dataSize);
+  buf.write('RIFF', 0); buf.writeUInt32LE(36 + dataSize, 4); buf.write('WAVE', 8);
+  buf.write('fmt ', 12); buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20);
+  buf.writeUInt16LE(1, 22); buf.writeUInt32LE(sampleRate, 24);
+  buf.writeUInt32LE(sampleRate * 2, 28); buf.writeUInt16LE(2, 32); buf.writeUInt16LE(16, 34);
+  buf.write('data', 36); buf.writeUInt32LE(dataSize, 40);
+  return buf;
+}
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'empire-qa-media-'));
+const wavPath = path.join(tmpDir, 'QAProbe MusicSurvive.wav');
+const webmPath = path.join(tmpDir, 'QAProbe VideoSurvive.webm');
+fs.writeFileSync(wavPath, makeWavBytes());
+// The blob bytes are irrelevant to the persistence roundtrip — only the .webm
+// extension (passes Video's file filter) and that real bytes round-trip matter.
+fs.writeFileSync(webmPath, Buffer.from('QAProbe-video-bytes-for-idb-roundtrip'));
+const mediaCases = [
+  { id: 'music', file: wavPath, title: 'QAProbe MusicSurvive' },
+  { id: 'video', file: webmPath, title: 'QAProbe VideoSurvive' },
+];
+const mediaResults = [];
+for (const c of mediaCases) {
+  const page = await ctx.newPage();
+  try {
+    await page.goto(`${BASE}/app/${c.id}`, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.waitForTimeout(800);
+    await page.setInputFiles('input[type="file"]', c.file);
+    await page.waitForTimeout(1200);
+    const bodyAfterAdd = await page.evaluate(() => document.body.innerText || '');
+    const added = bodyAfterAdd.includes(c.title);
+    // Reload — the library must be rebuilt from localStorage meta + IDB blobs.
+    await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+    await page.waitForTimeout(2200); // async rehydrate (loadMediaUrls → rehydrateMedia)
+    const bodyAfterReload = await page.evaluate(() => document.body.innerText || '');
+    const survived = bodyAfterReload.includes(c.title);
+    mediaResults.push({ id: c.id, added, survived, pass: added && survived });
+    console.log(`MEDIA  ${c.id}  added=${added} survived-reload=${survived}`);
+  } catch (e) {
+    mediaResults.push({ id: c.id, added: false, survived: false, pass: false, err: e.message });
+    console.warn(`MEDIA  ${c.id}  ERROR ${e.message}`);
+  }
+  await page.close();
+}
+try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { /* ignore */ }
+const mediaPass = mediaResults.filter(r => r.pass).length;
+console.log(`MEDIA-PERSISTS: ${mediaPass}/${mediaResults.length} ${mediaPass === mediaResults.length ? '✅' : '⚠️'}`);
+
 await browser.close();
 
 // Build report
@@ -192,7 +254,13 @@ md += `| Receiver | From | Chip | Prefilled | Result |\n|---|---|---|---|---|\n`
 for (const r of inboundResults) {
   md += `| ${r.id} | ${r.from} | ${r.chip ? '✅' : '❌'} | ${r.prefilled ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
 }
+md += `\n## Media-persists guard (EPIC-3 S2 — IndexedDB blob roundtrip)\n\n`;
+md += `Each media app's real file \`<input>\` was driven with a small blob, then the page was reloaded; PASS = the item appeared after add AND survived the reload (rehydrated from IndexedDB, not dropped as a ghost). This exercises the S2 acceptance that jsdom cannot (no IndexedDB).\n\n`;
+md += `| App | Added | Survived reload | Result |\n|---|---|---|---|\n`;
+for (const r of mediaResults) {
+  md += `| ${r.id} | ${r.added ? '✅' : '❌'} | ${r.survived ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
+}
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);

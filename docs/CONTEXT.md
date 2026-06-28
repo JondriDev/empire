@@ -354,33 +354,37 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-28, post-EPIC-3-S1 green main `2cb7801` — Clock made offline + tested)
+## 📊 Last QA confirmation (2026-06-28, post-EPIC-3-S2 green main `88b70a7` — Music + Video survive a reload)
 
 - **Routes rendering clean: 25/25 ✅** (26/26 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (bidirectional, all 25
   registry apps ↔ smoke list) + INBOUND-LANDS **3/3 ✅** (calendar←editor, goals←notes, messages←ai-chat each
-  show "Received from …" chip + prefilled control off the live render). build🟢 vitest **132/132 🟢** (17 files)
-  eslint clean. **No runtime bugs found.** Visually verified: Earth-from-Space palette + alien icons + Cakra;
-  **Clock now shows the new Timer tab + editable World Clocks ("Add city…" picker) + 12H toggle**; Maps renders the
+  show "Received from …" chip + prefilled control off the live render) + **MEDIA-PERSISTS 2/2 ✅ (NEW guard, see
+  below)**. build🟢 vitest **143/143 🟢** (18 files) eslint clean. **No runtime bugs found.** Visually verified:
+  Earth-from-Space palette + alien icons + Cakra; Music/Video render their styled empty states; Maps renders the
   real Leaflet container (only OSM/CARTO tiles grey — egress-blocked, env-expected).
 - **Apps fully wired BOTH-ways: 9/9 entity-apps-with-inbound — ✅ EPIC-1 TARGET (held, EPIC-1 DONE).**
   Both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat, calendar, goals,
   messages. Intentionally emit-only (by design): files, photos, datacenter + tool apps via `NodeActions`.
   Re-verified live this run by the smoke harness's INBOUND-LANDS guard (3/3 receivers chip+prefill).
-- **Epic-acceptance: EPIC-3 S1 (Clock) CONFIRMED MOVED** — the ACTIVE epic's target metric is *Shallow
-  instruments with genuine persistent/offline function + a unit test* (→ 8/8). Since the last QA (`23df6ce`), one
-  code commit landed: **`2cb7801` EPIC-3 S1** (persistent offline Clock + countdown Timer). Confirmed, no
-  contradiction: Clock now persists `{alarms,worldClocks,is24Hour}` to `localStorage:empire-clock-state`
-  (`Clock.tsx:52,92`, serialize/deserialize with tolerant migration) — fully offline; **`clockLogic.test.ts` adds
-  17 unit cases** (all green). New Timer tab fires `EVENT_CREATED` → Network pulse; WebAudio `beep()` (no asset).
-  **Metric 4/8 → 5/8** — Clock is the first instrument with BOTH function AND a dedicated test (the 4 redesign
-  instruments have function but still lack a test → S4 backfills). metrics.json shows the discrete step
-  (cases 108→125 static / vitest 115→132, files 16→17, gz 288.6→290.7).
+- **Epic-acceptance: EPIC-3 S2 (Music + Video) CONFIRMED MOVED — LIVE, in a real browser.** The ACTIVE epic's
+  target metric is *Shallow instruments with genuine persistent/offline function + a unit test* (→ 8/8). Since
+  the last QA (`2cb7801`, S1 Clock), one code commit landed: **`88b70a7` EPIC-3 S2** (Music + Video libraries
+  survive a reload via the shared IDB blob store `src/lib/mediaStore.ts`). Previously S2's acceptance was only
+  unit-pinned at the pure-transform layer (`mediaStore.test.ts`, 11 cases) **because jsdom has no IndexedDB**.
+  This run **added a MEDIA-PERSISTS guard** to `scripts/qa-smoke.mjs` that drives the genuine file `<input>`
+  (`handleFileSelect → putMedia → setPlaylist`), reloads, and asserts the item survived (rehydrated from IDB,
+  not dropped as a ghost): **music ✅ added+survived, video ✅ added+survived — the live IDB roundtrip works.**
+  **Metric 5/8 → 7/8** (Music + Video now have BOTH function AND a shared unit test). metrics.json shows the
+  discrete step (cases 125→136 static / vitest 132→143, files 17→18, gz 290.7→291.9).
 - **▶ NEXT STAGE = EPIC-3 S3** (Photos → durable thumbnails that survive a reload; **reuse** the S2
   `src/lib/mediaStore.ts` blob store, persist metadata only, rehydrate on mount + a unit test). Then S4
-  (backfill a test for Weather/DataCenter → metric honest at 8/8). *(S2 shipped 2026-06-28: Music + Video.)*
-- **Auto metrics vs last QA snapshot `23df6ce`:** test cases **115→132 (+17)**, test files **16→17 (+1)**, bundle
-  gz **288.6→290.7 (+2.1, Timer tab, by design)**, apps **25 (±0)**, token-violations **0 (±0)**.
+  (backfill a test for Weather/DataCenter → metric honest at 8/8). **QA harness note for S3:** the MEDIA-PERSISTS
+  guard is media-app-specific (drives `input[type=file]`); when Photos S3 lands, **add `photos` to its
+  `mediaCases`** (filename `.png`, assert the thumbnail/title survives the reload) to confirm S3 live too.
+- **Auto metrics vs last QA snapshot `2cb7801`:** test cases **132→143 (+11)** (`mediaStore.test.ts`), test files
+  **17→18 (+1)**, bundle gz **290.7→291.9 (+1.2, shared store, by design)**, apps **25 (±0)**, token-violations
+  **0 (±0)**.
 - **`latest/` holds only:** current `desktop.png` + 25 `app-<id>.png` + `REPORT.md` (no dated/per-stage PNGs).
 - **Env-expected net noise (not bugs):** weather→Open-Meteo geocoding + Geolocation blocked, maps→CARTO/OSM
   dark-tile PNGs blocked (Leaflet container + attribution still render), files `/api/files?path=/storage/emulated/0`

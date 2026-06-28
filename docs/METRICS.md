@@ -14,19 +14,20 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-| Metric | Current (QA 2026-06-28, after **EPIC-3 S1 (Clock)** — green main `2cb7801`) | Target | Direction |
+| Metric | Current (QA 2026-06-28, after **EPIC-3 S2 (Music + Video persist)** — green main `88b70a7`) | Target | Direction |
 |---|---|---|---|
 | Apps / routes | 25 | ~26 (steady) | coherence over new surface — not a growth metric |
-| Test cases | 125 (static) · 132 (vitest run) | 60+ | ↑ higher = safer to leap |
-| Test files | 17 | grow with code | ↑ |
+| Test cases | 136 (static) · 143 (vitest run) | 60+ | ↑ higher = safer to leap |
+| Test files | 18 | grow with code | ↑ |
 | Design-token violations | **0** | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
-| Bundle gz (KB) | 290.7 | hold / shrink | ↓ |
+| Bundle gz (KB) | 291.9 | hold / shrink | ↓ |
 
-> Last integration since prior QA snapshot (`23df6ce`, JondriDev redesign, apps 25 / gz 288.6 / vitest 115 / files
-> 16): one code commit landed — **`2cb7801` EPIC-3 S1 (persistent offline Clock + countdown Timer)**. Δ: test cases
-> **115 → 132 (+17)** (`clockLogic.test.ts`), test files **16 → 17 (+1)**, bundle gz **288.6 → 290.7 (+2.1, the
-> Timer tab, by design)**, apps ±0 (25), token violations ±0 (**0**). `metrics.mjs` static count (125) undercounts
-> nested cases; an actual `vitest run` is **132 passed / 17 files**. CONFIRMED on green main `2cb7801`, no contradiction.
+> Last integration since prior QA snapshot (`2cb7801`, EPIC-3 S1 Clock, apps 25 / gz 290.7 / vitest 132 / files
+> 17): one code commit landed — **`88b70a7` EPIC-3 S2 (Music + Video libraries survive a reload via the shared
+> IndexedDB blob store `src/lib/mediaStore.ts`)**. Δ: test cases **132 → 143 (+11)** (`mediaStore.test.ts`), test
+> files **17 → 18 (+1)**, bundle gz **290.7 → 291.9 (+1.2, the shared store, by design)**, apps ±0 (25), token
+> violations ±0 (**0**). `metrics.mjs` static count (136) undercounts nested cases; an actual `vitest run` is
+> **143 passed / 18 files**. CONFIRMED on green main `88b70a7`, no contradiction.
 
 > Prior context (still load-bearing): the **JondriDev redesign** (`bf76cf5`…`23df6ce`) intentionally set apps
 > **27 → 25** (deleted `ai-agent` + `hermes-cc`; AI unified into **Cakra** at `/app/ai-chat`) and bundle gz
@@ -36,10 +37,10 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Manual / CI metrics (QA + human)
 
-| Metric | Source | Current (QA 2026-06-28, after **EPIC-3 S1 (Clock)** green main `2cb7801`) | Target |
+| Metric | Source | Current (QA 2026-06-28, after **EPIC-3 S2 (Music + Video persist)** green main `88b70a7`) | Target |
 |---|---|---|---|
-| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **25 / 25** ✅ (26/26 incl. desktop shell; SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅ bidirectional + INBOUND-LANDS 3/3 ✅) — re-confirmed 2026-06-28 on `2cb7801` (all 26 routes render with 0 uncaught JS, vitest 132/132; Earth-from-Space palette + alien icons + Cakra verified visually; Clock shows the new Timer tab + editable World Clocks; Maps renders the real Leaflet container — only OSM/CARTO tiles grey, env-blocked). | 25 / 25 (every entity route) |
-| Shallow instruments with offline function + a unit test (EPIC-3 target) | QA + code audit | **5 / 8** — Clock (S1: `empire-clock-state` persistence + `clockLogic.test.ts` 17 cases ✅, **first with BOTH function AND test**) + the 4 redesign instruments Weather/Maps/Language/DataCenter (function ✅, dedicated test pending → S4 backfills). Remaining shallow: Music, Video, Photos (S2/S3). **Moved 4/8 → 5/8 this run (S1 confirmed).** | 8 / 8 |
+| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **25 / 25** ✅ (26/26 incl. desktop shell; SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅ bidirectional + INBOUND-LANDS 3/3 ✅ + **MEDIA-PERSISTS 2/2 ✅ new guard**) — re-confirmed 2026-06-28 on `88b70a7` (all 26 routes render with 0 uncaught JS, vitest 143/143; Earth-from-Space palette + alien icons + Cakra verified visually; Music/Video render their styled empty states; Maps renders the real Leaflet container — only OSM/CARTO tiles grey, env-blocked). | 25 / 25 (every entity route) |
+| Shallow instruments with offline function + a unit test (EPIC-3 target) | QA + code audit | **7 / 8** — Clock (S1: `empire-clock-state` persistence + `clockLogic.test.ts` 17 cases ✅) + **Music + Video (S2: real `Blob`s in IndexedDB via `mediaStore.ts`, metadata-only localStorage, ghost-drop on rehydrate + `mediaStore.test.ts` 11 cases ✅ — live IDB roundtrip CONFIRMED this run by the new MEDIA-PERSISTS guard: add file → reload → survives, both apps)** + the 4 redesign instruments Weather/Maps/Language/DataCenter (function ✅, dedicated test pending → S4 backfills). Remaining shallow: Photos (S3). **Moved 5/8 → 7/8 this run (S2 confirmed live).** | 8 / 8 |
 | Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **9 / 9 entity-apps-with-inbound ✅ TARGET HIT (↑ from 6 — S6c)** — both-ways now: `prompt-generator`, `notes`, `learning-tracker`, `editor`, `token-counter`, `ai-chat` **+ `calendar`, `goals`, `messages`** (S6c: each gained a natural text→entity inbound via `useInboundHandoff` → opens its own create form prefilled + a "From <source>" `ProvenanceChip`; reachable from `SendResultMenu` & `NodeActions`). **Confirmed LIVE this run** (`scripts/qa-s6c-confirm.mjs`, screenshots `s6c-inbound-{calendar,goals,messages}.png`): seeding each `empire-<x>-clipboard` payload + reload shows the chip AND a prefilled field (Calendar New-Event title+date+desc, Goals New-Goal title+desc, Messages composer draft) — 3/3 ✅. The HANDOFF emission is unit-tested (`appActions.test.ts`, vitest 103). **Entity emit↔receive loop CLOSED.** Intentionally emit-only (by design, no natural inbound): files, photos, datacenter (browse/manage stores) + tool apps (calculator, clock, weather, etc.) via `NodeActions`. | 9 / 9 entity-apps-with-inbound ✅ |
 | Lighthouse — PWA / Perf / A11y | CI (add to a workflow when feasible) | not measured headless | 90 / 90 / 90 |
 | Open `routine/auto-*` PR age | reviewer log | — | < one review cycle |
