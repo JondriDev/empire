@@ -30,6 +30,21 @@
   instrument per stage: Photos/Maps/Video/Music/Clock → genuine offline-capable function + a unit test).
   EPIC-1 (Organism Completeness) **DONE & QA-confirmed** (both-ways 9/9). EPIC-2 (Design-system
   conformance) **DONE 2026-06-28** — token-violations **501 → 0** across S1–S8 (see below).
+- **🎨 REDESIGN LANDED (2026-06-28) — user-directed "JondriDev pass"; do NOT revert.** A first-principles
+  overhaul of The Empire. **Intentional metric deltas — read before "fixing" them:**
+  - **apps 27 → 25 is BY DESIGN:** deleted `ai-agent` (Hermes Agent) + `hermes-cc` (Hermes CC) and folded
+    the agent's tool-calling into the single **Cakra** app (`src/apps/cakra/`; route still `/app/ai-chat`,
+    id `ai-chat`, name **Cakra**). **Do NOT re-add the deleted apps** to lift "apps/routes".
+  - **bundle gz +~40 KB is BY DESIGN:** **Maps** renders a real interactive **Leaflet + OSM** map (`leaflet`
+    dep, lazy-loaded inside the Maps chunk). **Do NOT strip `leaflet`** to shrink the bundle.
+  - **token-violations stay 0** — every changed/new app consumes DS tokens (`var(--c-*)` / `tint`).
+  - **Palette swapped XENO → JondriDev Earth-from-Space** in `colors_and_type.css` (bridge *re-valued*, names
+    kept). **App icons** are now a bespoke **alien SVG set** in `src/design-system/icons/` (via `getAppIcon`),
+    NOT Lucide (Lucide stays only for in-app control affordances).
+  - **Cut decorative chrome:** `HeroHud.tsx` + `HermesAgentBar.tsx` deleted; zero Hermes branding
+    (`grep -ri hermes src` = 0).
+  - **Made real (this directly ADVANCES EPIC-3):** Weather=Open-Meteo (no key), Maps=Leaflet+Nominatim,
+    Language=Cakra `chat()` translation, DataCenter=local-first localStorage (works offline, no server).
 - **EPIC-2 S1 DONE (2026-06-23):** built `src/design-system/tokens.ts` (the TS palette seam:
   `PALETTE` + `cssVar(name)→'var(--name)'` + `tint(name,pct)→'color-mix(in srgb, var(--name) pct%, transparent)'`,
   rounds+clamps; `tokens.test.ts` 4 cases) and swept the **Hermes cluster** to zero:
@@ -209,10 +224,12 @@
     **EPIC-2 S4:** also exports the canvas accent triplets `SIGNAL`/`ION`/`PLASMA`/`VOID` (bare `"r,g,b"`);
     `Network.tsx` now assembles **every** canvas fill via `rgbCss(...)` (0 literal `rgba(`/hex). `nodeColors.test.ts`
     pins these.
-- **Registry / shell:** `src/lib/registry.ts` (27 apps, incl. S5 `inbox`), `src/lib/appComponents.tsx`
-  (route→component map), `src/components/Desktop.tsx` (shell).
-- **Design system:** `src/design-system/colors_and_type.css` (canonical XENO palette — the `:root`/theme
-  CSS custom props), `src/design-system.css` (legacy-token *bridge* — edit here to restyle all apps),
+- **Registry / shell:** `src/lib/registry.ts` (**25 apps** post-redesign — `ai-agent`+`hermes-cc` deleted,
+  `ai-chat`→**Cakra**), `src/lib/appComponents.tsx` (route→component map), `src/components/Desktop.tsx` (shell).
+  **App identity icons** now resolve from the bespoke alien SVG set `src/design-system/icons/` via `getAppIcon()`.
+- **Design system:** `src/design-system/colors_and_type.css` (canonical **JondriDev Earth-from-Space**
+  palette — re-skinned 2026-06-28, was XENO; the `:root`/theme CSS custom props), `src/design-system.css`
+  (legacy-token *bridge*, re-valued onto the DS tokens — edit here to restyle all apps),
   `src/window-manager.css`, `src/index.css`.
   - **`src/design-system/tokens.ts` (EPIC-2 S1, 2026-06-23):** the TS-side single source of palette truth,
     mirroring the CSS custom props. **`cssVar('signal')`→`'var(--signal)'`** (themeable, preferred) and
