@@ -1,32 +1,41 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-06-28T04:06:50.051Z
+**Generated:** 2026-06-28T09:10:49.869Z
 
 **Result:** 28/28 rendered without crash, 0 failed.
 
-**No runtime bugs found.** Build 🟢 (`tsc -b && vite build`), vitest **115/115 🟢** (16 files), eslint clean. SHELL-IS-STYLED ✅ (top-level `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`), REGISTRY-COVERAGE ✅ (all 27 registry apps smoke-tested), INBOUND-LANDS **3/3 ✅**.
+## ✅ No runtime bugs found this run. EPIC-2 S7 acceptance CONFIRMED.
 
-## Fitness metrics (this run vs. last QA snapshot)
+**Headline:** green main `d66dd27`. Build 🟢, `tsc -b && vite build` clean. vitest **115/115** (16 files).
+ESLint clean. SHELL-IS-STYLED ✅ (top-level `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`),
+REGISTRY-COVERAGE ✅ (all 27 registry apps smoke-tested), INBOUND-LANDS **3/3 ✅**.
 
-| Metric | Value | Δ vs last QA | Notes |
+**Epic-acceptance (EPIC-2 · Design-token violations → 0):** the ACTIVE epic's target metric is
+*Design-token violations*. Two commits landed since the last QA snapshot (which reported **59** after S6):
+**S7** (`37e26db` — swept the 7 shared-UI + shell surfaces: Toast/ErrorBoundary/Utility/Desktop/Dashboard/
+AppShell/NodeActions, claimed 59→14) and a routines-retro doc commit. `node scripts/metrics.mjs` this run
+reports **14** → **CONFIRMED, no contradiction** (`metrics.json` history shows the discrete **59 → 14** step).
+Visually verified: the desktop shell, app grid, telemetry rail and toasts render fully in XENO accents
+(Desktop/AppShell/Dashboard chrome intact — see `desktop.png`); artifacts categorical rail unbroken
+(`app-artifacts.png`). **EPIC-2 is one stage from DONE** — S8 (long-tail entity apps → 0) is the close.
+
+**Metric deltas vs last QA snapshot (`4826447`, token-violations 59):**
+
+| Metric | Prev (QA post-S6) | This run (QA post-S7) | Δ |
 |---|---|---|---|
-| Apps / routes | 27 | ±0 | steady-state |
-| Test cases | 108* | ±0 | *`(it\|test)(` source count; vitest runtime = 115 (it.each expands) |
-| Test files | 16 | ±0 | |
-| Token violations | **59** | **−75** (134→59) | LOWER is better — EPIC-2 target |
-| Bundle gz (KB) | 248.1 | −0.0 | |
+| Design-token violations | 59 | **14** | **−45** ✅ (S7 acceptance) |
+| Routes rendering clean | 27/27 (28/28 incl. shell) | **27/27 (28/28)** | ±0 ✅ |
+| Apps both-ways (entity-apps-with-inbound) | 9/9 | **9/9** | ±0 ✅ (EPIC-1 held) |
+| Test cases (vitest) | 115 | **115** | ±0 |
+| Test files | 16 | **16** | ±0 |
+| Bundle gz (KB) | 248.1 | **248** | ±0 |
 
-- **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop).
-- **Apps fully wired both-ways: 9/9 entity-apps-with-inbound** (EPIC-1 target, held). INBOUND-LANDS re-verified live: calendar←editor, goals←notes, messages←ai-chat each show a "Received from …" chip + prefilled control off the live render.
+**Remaining 14 token violations (= S8 scope, EPIC-2 close):** `apps/notes/Notes.tsx` (6),
+`apps/goals/Goals.tsx` (3), `apps/ai-chat/AIChat.tsx` (2), `apps/weather/Weather.tsx` (1),
+`apps/calendar/Calendar.tsx` (1), `apps/network/nodeColors.ts` (1).
 
-## Epic-acceptance confirmation — EPIC-2 (active)
-
-**Target metric:** *Design-token violations* 501 → 0. **CONFIRMED MOVED.** Since the last QA (green main `e0f8cb7`, 134), builder commit **S6** (`5bd2cd0` — entire artifacts app → 0 via the shared `CATEGORICAL` accent rail + exempt `ColorPalette.tsx`) claimed 134→59. `node scripts/metrics.mjs` this run reports **59** → confirmed, no contradiction (metrics.json history shows the 134→59 step at 2026-06-28T00:07). Net since last QA: **−75**. Visually verified: the artifacts app (ChartBuilder/Kanban/FormBuilder/gallery) renders the categorical token series, no broken/blank swatches.
-
-**Remaining 59 → 2 stages (EPICS.md S7/S8, not yet built):** S7 shared-UI + shell (~45, top offenders `Toast.tsx` 16, `ErrorBoundary.tsx` 7, `Desktop.tsx`/`Utility.tsx` 6 each, `Notes.tsx` 6), S8 long-tail → 0 / EPIC-2 close.
-
-**Env-expected net noise (not bugs):** `files` `/api/files?path=/storage/emulated/0`→HTTP 500 (Android-only path), `datacenter` `/api/dc/tables`→HTTP 401 (authed API, no headless session).
-
+**Env-expected net noise (NOT bugs):** `files` `/api/files?path=/storage/emulated/0` → HTTP 500 (Android-only
+path), `datacenter` `/api/dc/tables` → HTTP 401 (authed API, no headless session). All other routes: 0 net failures.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
