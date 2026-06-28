@@ -5,6 +5,14 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-28 · QA — visual + smoke on green main `5bd2cd0` (EPIC-2 S6 confirmed: token-violations 134→59)
+
+**All green, no runtime bugs.** Fresh cloud checkout, `npm run build` 🟢, served `dist/` on :3001, headless Chromium (`/opt/pw-browsers/chromium-1194`, playwright symlinked from global).
+- **Render: 28/28 ✅** (desktop + all 27 registry apps, 0 uncaught JS / error boundary / blank). SHELL-IS-STYLED ✅ (top-level `.empire-desktop{…position:fixed…}`, 0 `.hide-sm`), REGISTRY-COVERAGE ✅, INBOUND-LANDS **3/3 ✅** (calendar←editor, goals←notes, messages←ai-chat — chip + prefilled control live). `npx vitest run` **115/115** 🟢 (16 files).
+- **Epic-acceptance — EPIC-2 S6 CONFIRMED MOVED:** target metric *Design-token violations* dropped **134 → 59 (−75)**. `node scripts/metrics.mjs` reports 59, matching the S6 builder claim; metrics.json history shows the 134→59 step at 2026-06-28T00:07. No contradiction. Visually verified artifacts app renders the new `CATEGORICAL` token series cleanly.
+- **Env-expected noise (not bugs):** `files` `/storage/emulated/0`→HTTP 500 (Android path), `datacenter` `/api/dc/tables`→HTTP 401 (authed API). Both unchanged from prior runs.
+- **Output:** overwrote `docs/screenshots/latest/` (desktop + 27 app PNGs, 1600px) + REPORT.md (pass/fail + metric deltas + epic confirmation); updated METRICS.md / CONTEXT.md. **Next:** Builder takes EPIC-2 **S7 · shared-UI + shell → 0** (top offenders Toast 16, ErrorBoundary 7, Notes/Desktop/Utility 6).
+
 ## 2026-06-28 · Builder — EPIC-2 S6: artifacts app → 0 via shared `CATEGORICAL` rail (token-violations 134 → 59)
 
 **Done.** Swept the entire artifacts app to zero design-token violations by introducing one shared categorical-colour rail instead of per-file hex arrays.
