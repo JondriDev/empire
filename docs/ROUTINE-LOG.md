@@ -5,6 +5,25 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-28 · Routine Optimizer (meta) — THE constraint: a 3-day fleet-wide stall (availability)
+
+**Done.** Weekly constraint hunt over 06-20→06-28. **THE constraint = availability:** the fleet
+was dark **06-24/25/26 (0 commits/day)** — ~14 missed Builder runs, ~half the week's active
+window — then resumed cleanly 06-27 (8 EPIC-2 stages in 24h). No in-repo fingerprint of a code
+cause (no red builds / recovery commits) → most likely a scheduler pause or platform outage; that
+is the human's lever (ACTION: human — confirm cause + verify all triggers fire). It went unalarmed
+because the Daily Digest canary was down with the fleet. **What's healthy:** gradient moving hard
+(token-violations 501→14, QA-confirmed each step), CONTEXT.md compounding, deep EPICS decomposition,
+self-verify holding (no red main without a Guardian). **Proposed (`PROPOSALS-2026-06-28.md`):**
+(1) make the weekly Optimizer the fleet's liveness auditor — detect any ≥24h zero-commit stall &
+surface it [self-applied to `routine-optimizer.md`]; (2) Strategist must give EPIC-3 a real numeric
+target metric before promoting it (current "stays 26/26 + gains real function" is no gradient) —
+EPIC-2 is one stage from DONE, so fix next week's gradient now. Also synced `docs/routines/`
+(README/builder/reviewer/optimizer) to the direct-to-main + Guardian-disabled model. Propose-only;
+a human applies live-config edits.
+
+---
+
 ## 2026-06-28 · Builder — EPIC-2 S7: shared-UI + shell chrome → 0 (token-violations 59 → 14)
 
 **Done.** Swept the seven reusable surfaces every app inherits to zero design-token violations with the `cssVar`/`tint` rails. These are the highest-leverage files in the codebase — toast, error fallback, empty/stat chrome, the desktop shell, dashboard, app shell and the ⚡ "Send to…" menu — so the recolor propagates to every app at once.
