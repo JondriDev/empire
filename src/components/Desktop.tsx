@@ -2,7 +2,7 @@
  * Empire Desktop — Full Web OS Shell
  *
  * Layers (bottom to top):
- * 1. Desktop background (starfield + wallpaper)
+ * 1. Desktop background (Earth-from-Space gradient)
  * 2. Desktop icons (app grid on the desktop)
  * 3. Windows (draggable, resizable)
  * 4. Context menu
@@ -16,12 +16,11 @@ import { useStore } from '../lib/store'
 import { useLang } from '../lib/i18n'
 import WindowComponent from './Window'
 import ContextMenu from './ContextMenu'
-import HeroHud from './HeroHud'
 import CommandPalette from './CommandPalette'
 import { ToastViewport } from './ui/Toast'
 import {
   Search, Sun, Moon, Volume2,
-  Command, Sparkles, ArrowUp, ArrowDown,
+  Command, ArrowUp, ArrowDown,
   CornerDownLeft
 } from 'lucide-react'
 import { tint } from '../design-system/tokens'
@@ -30,11 +29,9 @@ import { tint } from '../design-system/tokens'
 const CATEGORY_ORDER = ['AI & Intelligence', 'Productivity & Data', 'Media & Files', 'Utilities'] as const
 
 function categorizeApp(name: string): typeof CATEGORY_ORDER[number] {
-  const lower = name.toLowerCase()
   if (
-    name.includes('Hermes') || name === 'AI Chat' || name === 'Prompt Gen' ||
-    name === 'Token Counter' || name === 'Goals' || name === 'Grammar Fix' ||
-    lower.includes('agent')
+    name === 'Cakra' || name === 'Prompt Gen' ||
+    name === 'Token Counter' || name === 'Goals' || name === 'Grammar Fix'
   ) return 'AI & Intelligence'
   if (
     name === 'Notes' || name === 'Calendar' || name === 'Calculator' ||
@@ -146,54 +143,11 @@ export default function Desktop() {
 
   return (
     <div className="empire-desktop" style={{ color: 'var(--text)' }}>
-      {/* Layer 0: Starfield Background */}
-      <div className="empire-desktop-bg starfield">
-        <div className="stars-layer-1" />
-        <div className="stars-layer-2" />
-        <div className="stars-layer-3" />
-        <div className="nebula-layer" />
-        {/* Command-center HUD ambience */}
-        <div className="empire-hud-glow" />
-        <div className="empire-hud-grid" />
-        <div className="empire-hud-horizon" />
-        <div className="empire-hud-frame">
-          <span className="hud-corner hud-corner-tl" />
-          <span className="hud-corner hud-corner-tr" />
-          <span className="hud-corner hud-corner-bl" />
-          <span className="hud-corner hud-corner-br" />
-        </div>
-        {/* Telemetry rails fill the wide void with command-center density */}
-        <div className="empire-rail empire-rail-left">
-          <span className="rail-label">SYS·TELEMETRY</span>
-          <div className="rail-bars">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <span key={i} className="rail-bar" style={{ ['--i' as string]: String(i) }} />
-            ))}
-          </div>
-          <span className="rail-readout">PWR ▰▰▰▰▱</span>
-          <span className="rail-readout">NET ▰▰▰▱▱</span>
-          <span className="rail-readout">MEM ▰▰▰▰▰</span>
-        </div>
-        <div className="empire-rail empire-rail-right">
-          <span className="rail-label">HERMES·LINK</span>
-          <div className="rail-ticks">
-            {Array.from({ length: 14 }).map((_, i) => (
-              <span key={i} className="rail-tick" style={{ ['--i' as string]: String(i) }} />
-            ))}
-          </div>
-          <span className="rail-readout">UPLINK·OK</span>
-          <span className="rail-readout">LAT 14ms</span>
-          <span className="rail-readout">v2.0.1</span>
-        </div>
-      </div>
+      {/* Layer 0: Earth-from-Space gradient background */}
+      <div className="empire-desktop-bg starfield" aria-hidden="true" />
 
-      {/* Layer 1: Launcher (HUD centerpiece + balanced app grid) */}
+      {/* Layer 1: App launcher */}
       <div className="empire-launcher">
-        <HeroHud
-          clock={clock}
-          appCount={apps.length}
-          runningCount={windows.length}
-        />
         <div className="empire-app-grid">
         {apps.map(app => {
           const Icon = getAppIcon(app.icon)
@@ -336,11 +290,6 @@ export default function Desktop() {
                         )}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                        {app.hermesEnabled && (
-                          <span title="Hermes-powered" style={{ display: 'flex' }}>
-                            <Sparkles className="w-3.5 h-3.5" style={{ color: app.color }} />
-                          </span>
-                        )}
                         {isSelected && (
                           <span className="empire-search-kbd">
                             <CornerDownLeft className="w-2.5 h-2.5" />
@@ -480,25 +429,6 @@ export default function Desktop() {
                               style={{ background: `${app.color}1A` }}
                             >
                               <Icon className="w-5 h-5" style={{ color: app.color }} />
-                              {app.hermesEnabled && (
-                                <span
-                                  style={{
-                                    position: 'absolute',
-                                    top: -3,
-                                    right: -3,
-                                    width: 12,
-                                    height: 12,
-                                    borderRadius: '50%',
-                                    background: 'var(--color-cyan-5)',
-                                    border: '1.5px solid var(--abyss)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                  }}
-                                >
-                                  <Sparkles className="w-2 h-2 text-white" strokeWidth={3} />
-                                </span>
-                              )}
                             </div>
                             <span className="line-clamp-2" style={{
                               fontSize: '10px',
