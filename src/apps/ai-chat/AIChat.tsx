@@ -12,6 +12,7 @@ import { emit, getRecent } from '../../lib/eventBus'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { SendResultMenu } from '../../components/ui/SendResultMenu'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
+import { tint } from '../../design-system/tokens'
 
 interface Message {
   id: string
@@ -181,7 +182,7 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
 
       {/* Empire Context Banner */}
       {empireContext && (
-        <div className="mx-6 mt-4 p-3 rounded-xl border" style={{ borderColor: 'var(--border)', background: 'rgba(34,211,238,0.05)' }}>
+        <div className="mx-6 mt-4 p-3 rounded-xl border" style={{ borderColor: 'var(--border)', background: tint('signal', 5) }}>
           <button
             onClick={() => setContextExpanded(!contextExpanded)}
             className="w-full flex items-center justify-between text-xs text-cyan-300"
@@ -313,7 +314,7 @@ function AISettingsModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: tint('void', 60) }}>
       <div className="w-full max-w-md rounded-2xl border border-white/10 p-6" style={{ background: 'var(--card-bg)' }}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">

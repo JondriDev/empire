@@ -17,6 +17,7 @@ import { Button, Input, TextArea, Card, Badge } from '../../components/ui'
 import { EmptyState, SectionHeader } from '../../components/ui/Utility'
 import { useToast } from '../../components/ui/Toast'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { cssVar, tint } from '../../design-system/tokens'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 
 /** A note received via cross-app handoff carries a `from-<source>` tag (S6a). */
@@ -279,7 +280,7 @@ function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDe
           width: 3,
           height: 24,
           borderRadius: '0 3px 3px 0',
-          background: '#eab308',
+          background: cssVar('c-warn'),
           opacity: 0.7,
         }}
       />
@@ -360,13 +361,13 @@ function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDe
                 title="Ask Hermes"
                 onClick={onAskHermes}
                 icon={<Sparkles className="w-3.5 h-3.5" />}
-                accent="#a855f7"
+                accent={cssVar('plasma')}
               />
               <ActionIconBtn
                 title="Delete"
                 onClick={onDelete}
                 icon={<Trash2 className="w-3.5 h-3.5" />}
-                accent="#ef4444"
+                accent={cssVar('c-danger')}
               />
             </div>
           </div>
@@ -379,7 +380,7 @@ function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDe
               justifyContent: 'space-between',
               marginTop: '12px',
               paddingTop: '10px',
-              borderTop: '1px solid rgba(255,255,255,0.04)',
+              borderTop: `1px solid ${tint('xenon', 4)}`,
               fontSize: '10px',
               color: 'var(--text3)',
               fontVariantNumeric: 'tabular-nums',
@@ -406,7 +407,7 @@ function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDe
                 borderRadius: '4px',
                 transition: 'background var(--dur-fast)',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(34,211,238,0.08)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = tint('signal', 8) }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
               <MessageSquare className="w-2.5 h-2.5" />
@@ -438,7 +439,7 @@ function ActionIconBtn({ icon, title, onClick, accent }: { icon: React.ReactNode
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.color = accent || 'var(--text)'
-        e.currentTarget.style.background = accent ? `${accent}1F` : 'rgba(255,255,255,0.06)'
+        e.currentTarget.style.background = accent ? `color-mix(in srgb, ${accent} 12%, transparent)` : tint('xenon', 6)
         e.currentTarget.style.transform = 'scale(1.1)'
       }}
       onMouseLeave={(e) => {

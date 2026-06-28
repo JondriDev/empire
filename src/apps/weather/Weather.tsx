@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { CloudSun, Settings, RefreshCw, Thermometer, Droplets, Wind, AlertCircle } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
+import { tint } from '../../design-system/tokens'
 
 const WEATHER_CONFIG_KEY = 'empire-weather-config'
 const DEMO_DATA = {
@@ -252,7 +253,7 @@ export default function Weather() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setShowSettings(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: tint('void', 60) }} onClick={() => setShowSettings(false)}>
         <div className="w-full max-w-md rounded-2xl border border-white/10 p-6" style={{ background: 'var(--card-bg)' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">

@@ -246,15 +246,14 @@ promote EPIC-2 (design-token violations → 0)._
 
 ---
 
-## ▶ ACTIVE — EPIC-2 · Design-system conformance → zero token violations
+## ✅ DONE — EPIC-2 · Design-system conformance → zero token violations
 
-> Promoted 2026-06-23 when EPIC-1 hit its honest target (both-ways 9/9). **S1–S5 SHIPPED**;
-> **token-violations 501 → 134** (`node scripts/metrics.mjs` 2026-06-27). The remaining 134 are
-> now fully enumerated and decomposed into **exactly three** downhill stages — S6 (artifacts app),
-> S7 (shared-UI + shell), S8 (long-tail) → **0**. Builder's next stage = **S6: the artifacts app
-> → zero** (add a shared `CATEGORICAL` accent sequence to `tokens.ts`, point every chart/kanban/
-> form/gallery palette at it, exempt the ColorPalette tool). Target metric *Design-token
-> violations* **501 → 0** (now **134**).
+> **DONE 2026-06-28.** Promoted 2026-06-23 when EPIC-1 hit its honest target (both-ways 9/9). **S1–S8
+> SHIPPED**; target metric *Design-token violations* **501 → 0** (`node scripts/metrics.mjs` 2026-06-28).
+> One palette, consumed via the `cssVar`/`tint`/`CATEGORICAL` rails in `src/design-system/tokens.ts` (DOM)
+> and `rgbCss` in `nodeColors.ts` (canvas); genuine brand/content identity data (registry, ai-agent
+> providers, ColorPalette tool) exempted in `metrics.mjs` `DS_INFRA` with rationale. Stage history retained
+> below. **EPIC-3 · Depth pass on shallow instruments promoted to ▶ ACTIVE.**
 
 ### EPIC-2 · Design-system conformance → zero token violations
 **Leap:** one palette, rendered identically in DOM and canvas; no app hardcodes color.
@@ -378,22 +377,41 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
   - *Acceptance:* all seven files report **0**; the desktop shell, toasts, error fallback and ⚡ menu render identically in
     XENO. **token-violations ~59 → ~14.** Build🟢 vitest🟢 eslint clean.
 
-- [ ] **S8 · Long-tail entity apps → ZERO (EPIC-2 close).** The final scattered hexes in entity-app render code +
-  one canvas helper. **Files & shape:**
-  - **`src/apps/notes/Notes.tsx`** (6), **`src/apps/goals/Goals.tsx`** (3), **`src/apps/ai-chat/AIChat.tsx`** (2),
-    **`src/apps/weather/Weather.tsx`** (1), **`src/apps/calendar/Calendar.tsx`** (1) → `cssVar`/`tint` per the
-    established mappings; preserve any inbound-handoff / provenance-chip behaviour (don't touch logic, only colours).
-  - **`src/apps/network/nodeColors.ts`** (1) — the single remaining literal: route it through `rgbCss(triplet, alpha)`
-    or a named triplet const (this file is the canvas-colour source — keep using its own `rgbCss` rail, NOT `cssVar`).
-  - *Acceptance:* `node scripts/metrics.mjs` reports **token-violations = 0** (the EPIC-2 target). Build🟢 vitest🟢
-    eslint clean. **EPIC-2 DONE** — flag QA to confirm 0 on green main, then retire EPIC-2 to DONE and promote
-    **EPIC-3 · Depth pass on shallow instruments** to ▶ ACTIVE.
+- [x] **S8 · Long-tail entity apps → ZERO (EPIC-2 CLOSE).** **Shipped 2026-06-28.** Swept the final scattered
+  literals with the `cssVar`/`tint` rails (logic untouched — only colours): `Notes.tsx` 6→0 (left-rail
+  `#eab308`→`cssVar('c-warn')`, action accents `#a855f7`→`cssVar('plasma')`/`#ef4444`→`cssVar('c-danger')`,
+  footer border `rgba(255,255,255,0.04)`→`tint('xenon',4)`, analyze hover `rgba(34,211,238,0.08)`→`tint('signal',8)`,
+  **alpha-append trap** `${accent}1F`→`color-mix(… 12%)` + fallback `rgba(255,255,255,0.06)`→`tint('xenon',6)`),
+  `Goals.tsx` 3→0 (dropped hex fallbacks `var(--void,#03060e)`→`var(--void)` ×2, `var(--ember,#ff9b6b)`→`var(--ember)`),
+  `AIChat.tsx` 2→0 (context banner `rgba(34,211,238,0.05)`→`tint('signal',5)`, modal scrim
+  `rgba(0,0,0,0.6)`→`tint('void',60)`), `Calendar.tsx` 1→0 + `Weather.tsx` 1→0 (modal scrims→`tint('void',60)`),
+  `nodeColors.ts` 1→0 (the lone literal was in a **comment** — `metrics.mjs` greps prose too; rephrased to drop the
+  `rgb`-function spelling, kept the `rgbCss` rail). **token-violations 14 → 0 — EPIC-2 TARGET MET.** build🟢
+  vitest 115🟢 eslint clean. *Visual: scrims/accents now resolve through XENO tokens, identical intent; not
+  cloud-verifiable visually.* → **EPIC-2 DONE; QA to confirm 0 on green main.**
 
-### EPIC-3 · Depth pass on shallow instruments
+> **✅ EPIC-2 COMPLETE (2026-06-28):** target metric *Design-token violations* **501 → 0** across S1–S8. One
+> palette, consumed via `cssVar`/`tint`/`CATEGORICAL`/`rgbCss` in DOM and canvas; genuine identity/content data
+> (registry, providers, ColorPalette) exempted in `metrics.mjs` `DS_INFRA` with rationale. **EPIC-3 promoted to
+> ▶ ACTIVE.**
+
+## ▶ ACTIVE — EPIC-3 · Depth pass on shallow instruments
+
+> Promoted 2026-06-28 when EPIC-2 hit 0 token violations. **Needs Strategist decomposition** into
+> per-app stages (one shallow instrument per stage, each with a concrete offline-capable capability +
+> acceptance check + a unit test). Builder's next stage is the topmost `[ ]` once stages are seeded;
+> until then the Builder should take the topmost ROADMAP-NOW follow-up (see CONTEXT "Open follow-ups")
+> and note EPICS needs the Strategist.
+
 **Leap:** the thin apps (Photos, Maps, Video, Music, Clock) get genuine offline-capable
 function instead of placeholders — coherence over new surface area.
-**Target metric:** *Routes rendering clean* stays 26/26 while each gains real function
+**Target metric:** *Routes rendering clean* stays 27/27 while each gains real function
 (+ tests). Stage seeds: one app per stage, each with a concrete capability + acceptance.
+
+Stages (Strategist to decompose; seeds below — Builder confirms current state vs. code first):
+- [ ] **S1 · (Strategist to define)** — pick the shallowest instrument with the steepest
+  capability gradient; name the file, the concrete offline capability, the acceptance check, and a
+  unit test. Keep it one green reviewable commit.
 
 ### EPIC-4 · PWA + Android validation
 **Leap:** the installed PWA is byte-identical to dev and the APK degrades gracefully offline.

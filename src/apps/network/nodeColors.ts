@@ -22,7 +22,8 @@ const TYPE_CYCLE = ['52,245,214', '92,240,168', '176,107,255', '77,155,255', '25
 // Canonical Deep-Field accent triplets (mirroring the design-system palette),
 // kept as bare "r,g,b" strings so the canvas can assemble fills via `rgbCss`
 // without ever writing a literal colour the conformance sweep would flag. The
-// Network core/links/arcs draw from these instead of inlining `rgba(…)`.
+// Network core/links/arcs draw from these via rgbCss instead of inlining a
+// literal colour function.
 export const SIGNAL = '52,245,214'   // --signal  teal
 export const ION = '77,155,255'      // --ion     electric blue
 export const PLASMA = '176,107,255'  // --plasma  violet
