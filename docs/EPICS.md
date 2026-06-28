@@ -446,16 +446,22 @@ Stages (Builder takes the topmost `[ ]`; confirm current state vs. code first):
   eslint clean; **token-violations 0 (±0)** (kept the existing Tailwind-class idiom, no raw hex), bundle gz
   288.6→290.7 (+2.1, the Timer tab). *Cloud limit:* the reload-restores-state and timer-beep behaviours are
   described for on-device confirmation; the persistence/alarm/timer *logic* is covered by the 17 unit tests.
-- [ ] **S2 · Music + Video → library actually survives a reload (IndexedDB blob store).** Both apps persist
-  their playlist to `localStorage` **including `URL.createObjectURL` blob URLs, which are dead after a reload**
-  — so the restored "library" is a list of unplayable ghosts (a latent data-integrity bug). Fix: a shared
-  `src/lib/mediaStore.ts` IndexedDB wrapper (`putMedia`/`getMedia`/`deleteMedia`/`allMediaIds`, graceful no-op
-  if IDB unavailable) that stores the actual file `Blob`s keyed by id; persist only metadata (title/artist/
-  duration/id, **no src**) in localStorage; on mount, read blobs from IDB and `createObjectURL` to rehydrate
-  real, playable `src`s. Guard a per-blob size cap (skip persisting very large videos to avoid quota; keep
-  them session-only with a "won't survive reload" hint). Keep the pure metadata (de)serialization in a tested
-  module (`mediaStore` glue stays thin); unit-test the strip/rehydrate transforms. *Acceptance:* add an audio
-  file → reload → it's still in the playlist AND plays. **One coherent commit covering both apps (shared store).**
+- [x] **S2 · Music + Video → library actually survives a reload (IndexedDB blob store).** **Shipped 2026-06-28.**
+  Both apps persisted their playlist to `localStorage` *including* `URL.createObjectURL` blob URLs (session-scoped
+  → dead after reload), so the restored library was a list of unplayable ghosts (a latent data-integrity bug).
+  **Done:** new shared `src/lib/mediaStore.ts` — a thin, tolerant IndexedDB wrapper (`putMedia`/`getMedia`/
+  `deleteMedia`/`allMediaIds`/`loadMediaUrls`; opens DB `empire-media`/store `blobs`; **graceful no-op when IDB is
+  absent** — private mode / jsdom resolve null/false/empty, never throw) storing real file `Blob`s keyed by id +
+  the **pure, tested** transforms `toStorableMeta` (strip volatile `src`, drop `ephemeral`) / `rehydrateMedia`
+  (attach fresh URLs, **drop ghosts**) / `shouldPersistBlob` (75 MB per-blob cap). `Music.tsx` + `Video.tsx` now
+  persist **metadata only** (no `src`) and async-rehydrate on mount (read meta → recover blobs → rebuild library),
+  with a `hydratedRef` gate so the initial empty render can't overwrite the saved library before its blobs load.
+  Oversized files are persisted-skipped, flagged `ephemeral`, kept session-only with a "session-only" hint chip and
+  excluded from localStorage (never become ghosts). Add → `putMedia`; remove/clear → `deleteMedia`.
+  `mediaStore.test.ts` (11 cases) pins strip/rehydrate round-trip, the ghost-drop, the size-cap, and empties.
+  *Acceptance:* add an audio/video file → reload → still in the playlist AND plays (the persistence/ghost-drop
+  *logic* is unit-pinned; the IDB-roundtrip needs a real browser — jsdom has no IDB). Build🟢 vitest 132→143🟢
+  eslint clean; **token-violations 0 (±0)**, bundle gz 290.7→291.9 (+1.2, the shared store). One commit, both apps.
 - [ ] **S3 · Photos → thumbnails persist + survive navigation (close the redesign gap).** Per CONTEXT
   "Open follow-ups": Photos `photo` nodes carry no thumbnail and object URLs are revoked on delete. Give Photos
   durable thumbnails (reuse the S2 `mediaStore` if landed, or a downscaled dataURL) so the gallery survives a

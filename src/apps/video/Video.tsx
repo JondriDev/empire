@@ -2,12 +2,17 @@ import { useState, useEffect, useRef } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import {
+  putMedia, deleteMedia, loadMediaUrls,
+  toStorableMeta, rehydrateMedia, shouldPersistBlob,
+  type MediaRecord, type StoredMeta,
+} from '../../lib/mediaStore'
+import {
  Play, Pause, SkipBack, SkipForward, VolumeX,
  Maximize, Film, ListVideo,
  Plus, X, Volume1
 } from 'lucide-react'
 
-interface VideoItem {
+interface VideoItem extends MediaRecord {
   id: string
   title: string
   src: string
@@ -15,7 +20,11 @@ interface VideoItem {
   size: number
   type: string
   date: string
+  /** too large to persist — playable this session, won't survive a reload. */
+  ephemeral?: boolean
 }
+
+const PLAYLIST_KEY = 'empire-video-playlist'
 
 function formatTime(seconds: number): string {
   if (!seconds || isNaN(seconds)) return '0:00'
@@ -40,17 +49,33 @@ export default function Video() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // Gate persistence until the async rehydrate finishes (see Music.tsx).
+  const hydratedRef = useRef(false)
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'video' })
-    try {
-      const saved = localStorage.getItem('empire-video-playlist')
-      if (saved) setVideos(JSON.parse(saved))
-    } catch { /* ignore */ }
+    let cancelled = false
+    // Restore metadata, then recover real blobs from IndexedDB and mint fresh
+    // object URLs — videos whose blob is gone are dropped (no unplayable ghosts).
+    ;(async () => {
+      let meta: Array<StoredMeta<VideoItem>> = []
+      try {
+        const saved = localStorage.getItem(PLAYLIST_KEY)
+        if (saved) meta = JSON.parse(saved)
+      } catch { /* ignore */ }
+      const urls = await loadMediaUrls(Array.isArray(meta) ? meta.map(m => m.id) : [])
+      const restored = rehydrateMedia<VideoItem>(Array.isArray(meta) ? meta : [], id => urls.get(id) ?? null)
+      if (!cancelled) {
+        setVideos(restored)
+        hydratedRef.current = true
+      }
+    })()
+    return () => { cancelled = true }
   }, [])
 
   useEffect(() => {
-    try { localStorage.setItem('empire-video-playlist', JSON.stringify(videos)) } catch { /* ignore */ }
+    if (!hydratedRef.current) return
+    try { localStorage.setItem(PLAYLIST_KEY, JSON.stringify(toStorableMeta(videos))) } catch { /* ignore */ }
   }, [videos])
 
   useEffect(() => {
@@ -77,15 +102,23 @@ export default function Video() {
     const vidFiles = files.filter(f => f.type.startsWith('video/') || /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(f.name))
     if (!vidFiles.length) return
 
-    const newVideos: VideoItem[] = vidFiles.map(file => ({
-      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      title: file.name.replace(/\.[^.]+$/, ''),
-      src: URL.createObjectURL(file),
-      duration: 0,
-      size: file.size,
-      type: file.type || 'video/mp4',
-      date: new Date().toISOString(),
-    }))
+    const newVideos: VideoItem[] = vidFiles.map(file => {
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+      // Persist bytes to IndexedDB so the video survives a reload; skip oversized
+      // files (quota) and keep them session-only (ephemeral).
+      const ephemeral = !shouldPersistBlob(file.size)
+      if (!ephemeral) void putMedia(id, file)
+      return {
+        id,
+        title: file.name.replace(/\.[^.]+$/, ''),
+        src: URL.createObjectURL(file),
+        duration: 0,
+        size: file.size,
+        type: file.type || 'video/mp4',
+        date: new Date().toISOString(),
+        ephemeral,
+      }
+    })
 
     setVideos(prev => [...prev, ...newVideos])
     if (!current && newVideos.length > 0) playVideo(newVideos[0])
@@ -131,6 +164,7 @@ export default function Video() {
   const removeVideo = (id: string) => {
     const vid = videos.find(v => v.id === id)
     if (vid) URL.revokeObjectURL(vid.src)
+    void deleteMedia(id)
     setVideos(prev => {
       const next = prev.filter(v => v.id !== id)
       if (current?.id === id) {
@@ -261,6 +295,7 @@ export default function Video() {
                   <div className="flex-1 min-w-0">
                     <p className={`text-xs truncate ${current?.id === video.id ? 'text-cyan-200 font-bold' : ''}`}>{video.title}</p>
                     {video.duration > 0 && <p className="text-xs text-white/30">{formatTime(video.duration)}</p>}
+                    {video.ephemeral && <p className="text-[10px] text-amber-300/70" title="Too large to save — won't survive a reload">session-only</p>}
                   </div>
                   <button onClick={e => { e.stopPropagation(); removeVideo(video.id) }} className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-red-400 p-1">
                     <X className="w-3 h-3" />
