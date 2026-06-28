@@ -1,5 +1,5 @@
 /**
- * Hermes AI Chat — the primary AI interface for The Empire
+ * Cakra — the primary AI interface for The Empire
  *
  * I am the central AI hub. Every app can feed context here.
  * I have full awareness of Empire state and can talk to any app.

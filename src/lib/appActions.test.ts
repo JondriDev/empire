@@ -55,11 +55,11 @@ describe('HANDOFF emission', () => {
     expect(handoff && handoff.type === 'HANDOFF' && handoff.toId).toBe(toId)
   })
 
-  it('ASK_HERMES_TO_ANALYZE emits a HANDOFF into ai-chat', async () => {
+  it('ASK_CAKRA_TO_ANALYZE emits a HANDOFF into ai-chat', async () => {
     const events: EmpireEvent[] = []
     const off = onAny(e => events.push(e))
 
-    await CROSS_APP_ACTIONS.ASK_HERMES_TO_ANALYZE.execute({ text: 'x', source: 'notes' })
+    await CROSS_APP_ACTIONS.ASK_CAKRA_TO_ANALYZE.execute({ text: 'x', source: 'notes' })
     off()
 
     const handoff = events.find(e => e.type === 'HANDOFF')

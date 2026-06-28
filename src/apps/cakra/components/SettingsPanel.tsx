@@ -51,13 +51,13 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
-          {/* Backend server (optional) — powers DataCenter, Files, Hermes, AI proxy */}
+          {/* Backend server (optional) — powers DataCenter, Files, Cakra, AI proxy */}
           <section>
             <h3 className="text-sm font-semibold mb-1" style={{ color: cssVar('text') }}>
               Backend server (optional)
             </h3>
             <p className="text-xs mb-3" style={{ color: cssVar('text2') }}>
-              Empire runs fully offline. To power DataCenter, Files, Hermes and the AI
+              Empire runs fully offline. To power DataCenter, Files, Cakra and the AI
               proxy, point it at a machine running <code>server.js</code> (your PC, or the
               Termux box on the same Wi-Fi). Leave blank to use the local server when present.
             </p>

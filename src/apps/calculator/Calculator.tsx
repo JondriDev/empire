@@ -1,12 +1,12 @@
 /**
- * Calculator — emits results to eventBus, Hermes-aware
+ * Calculator — emits results to eventBus, Cakra-aware
  *
  * UI polish:
  *  - Glass display with neon-cyan glow when result ready
  *  - Operator buttons use the app color (orange) theming
  *  - Memory indicators refined
  *  - History sidebar collapsible
- *  - Toast feedback on copy-to-Hermes
+ *  - Toast feedback on copy-to-Cakra
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react'
@@ -162,13 +162,13 @@ export default function Calculator() {
     }
   })
 
-  const askHermes = () => {
+  const askCakra = () => {
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
       text: `Calculation: ${expression || display}`,
       title: `Calc: ${display}`,
       from: 'calculator',
     }))
-    toast.info('Opening Hermes', `Analyzing: ${display}`)
+    toast.info('Opening Cakra', `Analyzing: ${display}`)
     setTimeout(() => { window.location.href = '/app/ai-chat' }, 200)
   }
 
@@ -325,8 +325,8 @@ export default function Calculator() {
               </button>
               {display !== '0' && (
                 <button
-                  onClick={askHermes}
-                  title="Ask Hermes about this result"
+                  onClick={askCakra}
+                  title="Ask Cakra about this result"
                   style={{
                     width: '24px', height: '24px',
                     borderRadius: '5px',

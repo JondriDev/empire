@@ -1,6 +1,6 @@
 /**
  * Calendar — connected to the Empire eventBus
- * Full event CRUD, month/year grid, dark theme, Hermes integration.
+ * Full event CRUD, month/year grid, dark theme, Cakra integration.
  */
 
 import { useState, useEffect, useCallback } from 'react'

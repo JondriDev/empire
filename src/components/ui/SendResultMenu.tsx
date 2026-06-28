@@ -1,7 +1,7 @@
 /**
  * SendResultMenu — the ⚡ "Send to…" affordance for *sink* apps (Organism S6b).
  *
- * The receiver apps (Editor, Token Counter, AI Chat) take a HANDOFF in but the
+ * The receiver apps (Editor, Token Counter, Cakra) take a HANDOFF in but the
  * signal used to die there. Drop <SendResultMenu source="editor" text={code} />
  * into a sink's toolbar and its output can flow onward: each menu item runs an
  * existing `CROSS_APP_ACTIONS` executor with `{ text, title, source }`, which
@@ -28,7 +28,7 @@ const ACTION_TARGET: Record<AppActionKey, string> = {
   SEND_TO_CALENDAR: 'calendar',
   SEND_TO_GOALS: 'goals',
   SEND_TO_MESSAGES: 'messages',
-  ASK_HERMES_TO_ANALYZE: 'ai-chat',
+  ASK_CAKRA_TO_ANALYZE: 'ai-chat',
 }
 
 const DEFAULT_ACTIONS: AppActionKey[] = [

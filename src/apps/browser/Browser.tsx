@@ -1,6 +1,6 @@
 /**
  * Web Browser — connected to the Empire eventBus
- * URL navigation, bookmarks, history, and Hermes integration.
+ * URL navigation, bookmarks, history, and Cakra integration.
  */
 
 import { useState, useEffect } from 'react'
@@ -60,10 +60,10 @@ export default function Browser() {
     localStorage.removeItem('empire-browser-history')
   }
 
-  const askHermes = () => {
+  const askCakra = () => {
     if (!url.trim()) return
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
-      text: `URL: ${url}\n\nI want to know about this page or have Hermes analyze this website.`,
+      text: `URL: ${url}\n\nI want to know about this page or have Cakra analyze this website.`,
       title: `Browser: ${url}`,
       from: 'browser',
     }))
@@ -128,8 +128,8 @@ export default function Browser() {
           className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 text-white text-sm transition-colors flex items-center gap-1">
           <ExternalLink className="w-4 h-4" /> Go
         </button>
-        <button onClick={askHermes}
-          className="p-2 rounded-xl hover:bg-cyan-500/20 text-cyan-300 transition-colors" title="Ask Hermes about this URL">
+        <button onClick={askCakra}
+          className="p-2 rounded-xl hover:bg-cyan-500/20 text-cyan-300 transition-colors" title="Ask Cakra about this URL">
           <Bot className="w-5 h-5" />
         </button>
       </div>

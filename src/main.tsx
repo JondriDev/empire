@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './index.css'
 
-// ── Hermes Empire: AI Connector auto-init ────────────────────────────────────
+// ── Cakra Empire: AI Connector auto-init ────────────────────────────────────
 // Import order matters: automation must init before any component renders
 import './lib/automation'
 

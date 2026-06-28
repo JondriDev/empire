@@ -1,6 +1,6 @@
 /**
  * Code Editor — connected to the Empire eventBus
- * Code editing with stats, syntax analysis, and Hermes integration.
+ * Code editing with stats, syntax analysis, and Cakra integration.
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -109,7 +109,7 @@ export default function Editor() {
     localStorage.setItem('empire-editor-files', JSON.stringify(updated))
   }
 
-  const askHermes = () => {
+  const askCakra = () => {
     if (!code.trim()) return
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
       text: `Code (${language}):\n\n\`\`\`${language}\n${code}\n\`\`\``,
@@ -192,8 +192,8 @@ export default function Editor() {
         <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 bg-white/3">
           <span className="text-xs text-gray-500 font-mono">{language}</span>
           <div className="flex gap-1">
-            <button onClick={askHermes}
-              className="p-1 rounded hover:bg-cyan-500/20 text-cyan-300 transition-colors" title="Ask Hermes about this code">
+            <button onClick={askCakra}
+              className="p-1 rounded hover:bg-cyan-500/20 text-cyan-300 transition-colors" title="Ask Cakra about this code">
               <Bot className="w-3.5 h-3.5" />
             </button>
             <button onClick={copyCode}

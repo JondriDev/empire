@@ -1,6 +1,6 @@
 /**
- * Learning Tracker — connected to eventBus + Hermes
- * Track topics, log learning, quiz yourself, ask Hermes to explain.
+ * Learning Tracker — connected to eventBus + Cakra
+ * Track topics, log learning, quiz yourself, ask Cakra to explain.
  */
 
 import { useState, useEffect } from 'react'
@@ -43,7 +43,7 @@ export default function LearningTracker() {
     emit({ type: 'LEARNING_CHALLENGE', mode: 'mastery', topic: item?.topic || '', score: mastered ? 1 : 0 })
   }
 
-  const askHermesTopic = (item: LearningItem) => {
+  const askCakraTopic = (item: LearningItem) => {
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
       text: `Explain: ${item.topic}\n\nWhat I've learned:\n${item.learned}`,
       title: `Learning: ${item.topic}`,
@@ -52,7 +52,7 @@ export default function LearningTracker() {
     window.location.href = '/app/ai-chat'
   }
 
-  const askHermesAll = () => {
+  const askCakraAll = () => {
     const summary = learningItems.map(l =>
       `• **${l.topic}**${l.mastered ? ' ✅' : ' 🔄'}\n  ${l.learned}`
     ).join('\n')
@@ -84,10 +84,10 @@ export default function LearningTracker() {
           </p>
         </div>
         <button
-          onClick={askHermesAll}
+          onClick={askCakraAll}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-200 text-xs hover:bg-cyan-500/30 transition-colors"
         >
-          <Bot className="w-3.5 h-3.5" /> Ask Hermes
+          <Bot className="w-3.5 h-3.5" /> Ask Cakra
         </button>
       </div>
 
@@ -189,9 +189,9 @@ export default function LearningTracker() {
                 <NodeActions type="learning" sourceId={item.id} />
               </span>
               <button
-                onClick={() => askHermesTopic(item)}
+                onClick={() => askCakraTopic(item)}
                 className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-cyan-500/20 text-cyan-300 transition-all"
-                title="Ask Hermes about this topic"
+                title="Ask Cakra about this topic"
               >
                 <Bot className="w-4 h-4" />
               </button>

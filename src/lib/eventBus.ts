@@ -29,11 +29,11 @@ export type EmpireEvent =
   | { type: 'APP_CLOSED'; appId: string }
   | { type: 'DATA_TABLE_UPDATED'; tableName: string; rowCount: number }
   | { type: 'WEATHER_UPDATED'; temp: number; condition: string; humidity: number; windSpeed: number; location: string; description: string }
-  | { type: 'HERMES_STATUS_REFRESHED'; version: string; model: string; provider: string }
-  | { type: 'HERMES_APP_LAUNCHED'; appId: string; appName: string }
-  | { type: 'HERMES_TOOL_EXECUTED'; toolId: string; toolName: string }
-  | { type: 'HERMES_SKILL_LOADED'; skillName: string }
-  | { type: 'HERMES_MCP_CONNECTED'; mcpName: string; status: string }
+  | { type: 'CAKRA_STATUS_REFRESHED'; version: string; model: string; provider: string }
+  | { type: 'CAKRA_APP_LAUNCHED'; appId: string; appName: string }
+  | { type: 'CAKRA_TOOL_EXECUTED'; toolId: string; toolName: string }
+  | { type: 'CAKRA_SKILL_LOADED'; skillName: string }
+  | { type: 'CAKRA_MCP_CONNECTED'; mcpName: string; status: string }
   // A directed cross-app handoff: data sent *from* one app *to* another (e.g.
   // "use as prompt" routes the current selection into Prompt Generator). The
   // Network mesh reads these as honest app→app synapse arcs. `label` is an
