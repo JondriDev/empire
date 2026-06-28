@@ -410,24 +410,26 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
 
 ## ▶ ACTIVE — EPIC-3 · Depth pass on shallow instruments
 
-> Promoted 2026-06-28 when EPIC-2 hit 0 token violations. **Needs Strategist decomposition** into
-> per-app stages (one shallow instrument per stage, each with a concrete offline-capable capability +
-> acceptance check + a unit test). Builder's next stage is the topmost `[ ]` once stages are seeded;
-> until then the Builder should take the topmost ROADMAP-NOW follow-up (see CONTEXT "Open follow-ups")
-> and note EPICS needs the Strategist.
+> Promoted 2026-06-28 when EPIC-2 hit 0 token violations. **✅ Decomposed & Strategist-refined 2026-06-28**
+> (S1 Clock + S2 Music/Video shipped; S3 Photos + S4 test-backfill remain, both razor-sharp below). Builder
+> takes the topmost `[ ]` (= **S3 · Photos**) and executes without re-planning.
 
 **Leap:** the thin apps (Photos, Maps, Video, Music, Clock) get genuine offline-capable
 function instead of placeholders — coherence over new surface area.
-**Target metric:** *Shallow instruments with genuine persistent/offline function + a unit test* →
-target **8/8** (Weather, Maps, Language, DataCenter, Clock, Music, Video, Photos). The 2026-06-28
-redesign pre-delivered the first four (Weather=Open-Meteo, Maps=Leaflet+Nominatim, Language=Cakra
-translation, DataCenter=local-first localStorage — though those four shipped without a dedicated unit
-test, so a follow-up may backfill one). **Now 5/8** after S1 (Clock). *Routes rendering clean* stays
-25/25 throughout. Stage seeds: one instrument per stage, each a concrete capability + acceptance + test.
+**Target metric (PRIMARY):** *Shallow instruments with genuine persistent/offline function* → **8/8**
+(Weather, Maps, Language, DataCenter, Clock, Music, Video, Photos). **Now 7/8** — the 2026-06-28 redesign
+pre-delivered the first four (Weather=Open-Meteo, Maps=Leaflet+Nominatim, Language=Cakra translation,
+DataCenter=local-first localStorage); **S1** added Clock; **S2** added Music + Video. **Only Photos remains
+(S3).** *Routes rendering clean* stays 25/25 throughout.
+**Acceptance discipline (the "+ a unit test"):** every NEW deepening stage ships with a dedicated unit test
+of its pure logic (Clock ✅ `clockLogic.test.ts`, Music/Video ✅ `mediaStore.test.ts`, Photos → S3). The four
+redesign instruments pre-shipped without tests; **S4 backfills the two that have real pure logic
+(DataCenter CRUD + Weather mapping)** — Maps/Language are thin Leaflet/Cakra wrappers whose honest coverage
+is QA's render-smoke. EPIC-3 is **DONE** when the function metric hits 8/8 (S3) and S4's tests land.
 
-> **Decomposition note:** EPIC-3 was Builder-seeded (2026-06-28) when no Strategist run had decomposed it
-> and a green Clock stage was ready to ship. The Strategist may refine the ordering/target; the shape below
-> is concrete enough to execute without re-planning.
+> **Decomposition note:** EPIC-3 was Builder-seeded (2026-06-28) for the green Clock stage; the Strategist
+> refined the target (function-8/8 primary, "+test" as discipline not a separate 8-test metric) and deeply
+> re-specified S3 (exact `mediaStore` port from Music) + S4 (named logic modules + test fixtures) on 2026-06-28.
 
 Stages (Builder takes the topmost `[ ]`; confirm current state vs. code first):
 - [x] **S1 · Clock → persistent, offline instrument + countdown Timer.** **Shipped 2026-06-28.**
@@ -462,21 +464,101 @@ Stages (Builder takes the topmost `[ ]`; confirm current state vs. code first):
   *Acceptance:* add an audio/video file → reload → still in the playlist AND plays (the persistence/ghost-drop
   *logic* is unit-pinned; the IDB-roundtrip needs a real browser — jsdom has no IDB). Build🟢 vitest 132→143🟢
   eslint clean; **token-violations 0 (±0)**, bundle gz 290.7→291.9 (+1.2, the shared store). One commit, both apps.
-- [ ] **S3 · Photos → thumbnails persist + survive navigation (close the redesign gap).** Per CONTEXT
-  "Open follow-ups": Photos `photo` nodes carry no thumbnail and object URLs are revoked on delete. Give Photos
-  durable thumbnails (reuse the S2 `mediaStore` if landed, or a downscaled dataURL) so the gallery survives a
-  reload; add a unit test for the thumbnail/serialization logic. *Acceptance:* add a photo → reload → thumbnail
-  still renders.
-- [ ] **S4 · Backfill a unit test for one redesign-delivered instrument (Weather or DataCenter).** The four
-  redesign instruments work but shipped without a dedicated test; add one (e.g. Weather's Open-Meteo
-  response→view-model mapping, or DataCenter's localStorage table CRUD) to make EPIC-3's "+ a unit test"
-  acceptance honest for the target count.
+- [ ] **S3 · Photos → library survives a reload (reuse the S2 `mediaStore` blob rail) + a unit test.**
+  **This is the SAME latent data-integrity bug S2 just fixed in Music/Video — confirmed in code.**
+  `Photos.tsx:51-58` persists each photo's `url` (a `URL.createObjectURL(file)` blob URL) to
+  `localStorage('empire-photos')`; blob URLs are **session-scoped → dead after a reload**, so the restored
+  gallery is a grid of broken images (a real bug, not a placeholder). Fix it by reusing the **exact rail**
+  S2 built — store the real image `Blob` in IndexedDB, persist metadata only, re-mint URLs on mount, drop
+  ghosts. Mirror `Music.tsx` 1:1; **this is a near-mechanical port, fully downhill.** Files & shape:
+  - **`src/apps/photos/Photos.tsx`** — apply the Music pattern verbatim:
+    - `import { putMedia, deleteMedia, loadMediaUrls, toStorableMeta, rehydrateMedia, shouldPersistBlob,
+      type MediaRecord, type StoredMeta } from '../../lib/mediaStore'`.
+    - Make `interface Photo extends MediaRecord` and **rename the field `url` → `src`** throughout (the
+      transforms key on `src`; ~8 read sites: the two `<img src>`, the lightbox `<img>`/`<a download href>`,
+      `URL.revokeObjectURL`, `addFiles`). Add `ephemeral?: boolean`.
+    - **Mount effect** (replace the current `localStorage.getItem` load, lines 48-54): async-rehydrate —
+      read `empire-photos` metadata, `const urls = await loadMediaUrls(meta.map(m=>m.id))`,
+      `setPhotos(rehydrateMedia<Photo>(meta, id => urls.get(id) ?? null))`, then set a `hydratedRef`.
+      Use the **`hydratedRef` gate** (a `useRef(false)`) exactly like Music so the initial empty render
+      can't clobber the saved library before blobs load (the race S2 documents).
+    - **Persist effect** (replace lines 56-58): `if (!hydratedRef.current) return;
+      localStorage.setItem('empire-photos', JSON.stringify(toStorableMeta(photos)))`.
+    - **`addFiles`** (lines 71-101): for each image set `const ephemeral = !shouldPersistBlob(file.size);
+      if (!ephemeral) void putMedia(id, file)`; keep the `src = URL.createObjectURL(file)` for this session,
+      set `ephemeral` on the record. Surface a "session" hint chip on `ephemeral` photos (mirror Music's
+      `amber-*` chip) so an oversized photo isn't a silent ghost.
+    - **`deletePhoto`** (lines 107-113): add `void deleteMedia(id)` alongside the existing `revokeObjectURL`.
+    - The graph-mirror effect (lines 63-69) is unaffected (it already omits the url).
+  - **Test (new file → +1 test-file metric):** `src/apps/photos/photosStore.test.ts` — with a Photo-shaped
+    fixture, assert `toStorableMeta` strips `src` + drops `ephemeral` but **keeps `favorite`/`tags`/`width`/
+    `height`/`date`**; assert `rehydrateMedia` re-attaches a URL and **drops a photo whose blob is missing**
+    (the ghost case). (The shared transforms are already tested generically in `mediaStore.test.ts`; this
+    pins the Photo contract so a future field-strip regression fails loudly.)
+  - *Acceptance:* add a photo → reload → it still renders (its blob came back from IDB); delete a photo →
+    its IDB blob is removed; an oversized (>75 MB) photo shows the "session" chip and is excluded from
+    localStorage. **Function metric 7/8 → 8/8 (all shallow instruments offline-capable).** Build🟢 vitest🟢
+    (+ the new file) eslint clean; **token-violations stay 0** (keep the Tailwind-class idiom — the hint chip
+    uses `amber-*` utility classes like Music, NOT inline hex). *Cloud limit:* the add→reload→still-renders
+    path needs a real browser with IDB (jsdom has none) — the pure transforms carry the coverage, as in S2.
 
-### EPIC-4 · PWA + Android validation
-**Leap:** the installed PWA is byte-identical to dev and the APK degrades gracefully offline.
-**Target metric:** *Lighthouse PWA ≥ 90*; offline precache verified on a real install.
-Stage seeds: validate SW precache + base-path on a real install; close asset gaps; run the
-Android workflow and verify the backend-optional layer with no LAN server.
+- [ ] **S4 · Backfill unit tests for the two logic-heavy redesign instruments (DataCenter + Weather) — EPIC-3 CLOSE.**
+  The four redesign instruments (Weather/Maps/Language/DataCenter) shipped working but **without a dedicated
+  test**, so the "+ a unit test" discipline is uneven. Maps & Language are thin wrappers (Leaflet / Cakra
+  `chat()`) with little pure logic worth unit-pinning — QA's render-smoke is their honest coverage. **DataCenter
+  and Weather DO have real pure logic**; extract and test it so the suite's persistence/parsing is regression-
+  guarded. Files & shape:
+  - **DataCenter** — extract the table CRUD + (de)serialization out of `DataCenter.tsx` into a pure
+    `src/apps/datacenter/datacenterLogic.ts` (mirror `clockLogic.ts`): move `loadStore`/serialize plus pure
+    helpers `addRow(store, table, row)` / `deleteRow(store, table, id)` / `addTable(store, name, cols)` (return
+    a new `DCStore`, no React). Rewire the component to call them. **Test `datacenterLogic.test.ts`:** add a
+    table, add/delete rows, and a `load(serialize(store)) === store` round-trip incl. a corrupt/partial-JSON
+    fallback (the tolerant-parse contract).
+  - **Weather** — extract the **pure WMO-code → `{label,description,cat}` mapping** (`Weather.tsx:43 wmo()`)
+    and the **Open-Meteo forecast JSON → `WeatherData`/`DayForecast[]` mapping** into a pure
+    `src/apps/weather/weatherLogic.ts`. Rewire the component's fetch handler to call the mapper.
+    **Test `weatherLogic.test.ts`:** feed a canned Open-Meteo response object → assert the mapped current
+    temp + N-day forecast (`hi`/`lo`/`cat`) and a couple of `wmo()` codes (clear/rain/snow). No network — the
+    mapper is pure over a fixture.
+  - *Acceptance:* both new logic modules are imported by their components (no behavior change) and covered by
+    `datacenterLogic.test.ts` + `weatherLogic.test.ts`; **test-files +2, all green.** Build🟢 vitest🟢 eslint
+    clean; token-violations 0. **This closes EPIC-3** (function 8/8 after S3; the two logic-heavy redesign
+    instruments now carry tests, Maps/Language render-smoke-covered) → QA confirms 8/8 and promotes **EPIC-4**.
+
+_When S3 ships (function 8/8) and S4 lands (DataCenter+Weather tests) and QA confirms the function metric hit
+8/8 → move EPIC-3 to DONE and promote **EPIC-4 · PWA + Android validation** (stages seeded below)._
+
+## ⏳ QUEUED — EPIC-4 · PWA completion → installable, offline-true
+> Promote when EPIC-3 is DONE (function 8/8 + S4 tests). Highest gradient after EPIC-3 because the
+> vision's end-state is "a complete offline-first PWA, then Android" and every app is now offline-capable
+> — the shell itself is the last thing that isn't guaranteed to load with no network.
+
+**Leap:** the installed PWA boots and runs **fully offline** (shell + all 25 app chunks precached), is
+installable, and is byte-identical to dev — turning "26 offline apps" into "one offline product."
+**Target metric:** *Lighthouse PWA ≥ 90* **and** a new **`offline-boots` smoke guard** = the built app
+loads + renders the desktop with the network fully blocked (today's QA only blocks *external* hosts; it
+never asserts a cold offline boot of the app's own chunks).
+Stages (Strategist to finalize on promotion; first-pass seeds — each one Builder run, build-green):
+- [ ] **S1 · Offline-boot guard + SW precache audit.** Add `scripts/qa-offline.mjs` (or extend
+  `qa-smoke.mjs`): serve `dist/`, load with `page.route('**', …)` aborting **all** requests after first
+  load, assert the desktop shell + one lazy app route still render from the SW/precache. Inventory what the
+  service worker actually precaches vs the 25 lazy app chunks (find the SW config — likely `vite-plugin-pwa`
+  in `vite.config.ts` or a manual `sw.js`). *Acceptance:* the guard runs in QA and reports cold-offline
+  pass/fail; the precache gap (chunks not cached) is enumerated.
+- [ ] **S2 · Close the precache gap.** Configure the SW (Workbox `globPatterns` / runtime caching) so the
+  shell + every app chunk + fonts + the alien SVG icon set are precached; verify `dist` includes a manifest
+  + icons at the right sizes. *Acceptance:* the S1 offline-boot guard goes green for the shell **and** a
+  cold-navigated app route; manifest + maskable icons present.
+- [ ] **S3 · Base-path + install-flow correctness.** Confirm `base` is correct for the deploy target so the
+  installed PWA's asset URLs resolve (the blank-on-install class of bug); add a lightweight check that the
+  manifest `start_url`/`scope` match `base`. *Acceptance:* built app loads under the deploy base with no 404
+  asset; install prompt criteria met.
+
+## ⏳ QUEUED — EPIC-5 · Android APK validation
+> Promote after EPIC-4. **Leap:** the APK degrades gracefully with no LAN server (backend-optional layer).
+> **Target metric:** APK installs + all offline-capable apps function on-device with `server.js` absent.
+> Stage seeds: run the `Android APK` workflow; verify the backend-optional fallbacks (Files' `/api/files`
+> 500 → on-device storage path, etc.); on-device smoke of the 8 offline instruments.
 
 ---
 

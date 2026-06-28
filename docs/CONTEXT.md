@@ -22,20 +22,25 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **EPIC-3 — Depth pass on shallow instruments** (promoted 2026-06-28 when EPIC-2 hit
-  **0** token violations). **✅ NOW DECOMPOSED (Builder-seeded 2026-06-28) — S1 SHIPPED.** Target metric:
-  *shallow instruments with genuine persistent/offline function + a unit test* → **8/8** (Weather, Maps,
-  Language, DataCenter, Clock, Music, Video, Photos); **now 7/8** (redesign delivered the first four; S1
-  delivered Clock; **S2 delivered Music + Video**). Only **Photos** remains.
-  - **▶ NEXT STAGE = EPIC-3 S3 (Photos → durable thumbnails that survive a reload + a unit test).** Exact
-    shape in EPICS.md S3. **The gap (CONTEXT "Open follow-ups"):** Photos `photo` nodes carry no thumbnail
-    and object URLs are revoked on delete, so the gallery doesn't survive a reload. **Build:** give Photos
-    durable thumbnails — **reuse the S2 `src/lib/mediaStore.ts`** (store the real image `Blob` in IDB, persist
-    metadata only, rehydrate `src` on mount with the same `toStorableMeta`/`rehydrateMedia` rails — this is the
-    *whole point* of the shared store) **or** a downscaled dataURL if a tiny inline thumbnail is preferable.
-    Add a unit test for the thumbnail/serialization logic. *Acceptance:* add a photo → reload → thumbnail still
-    renders. Then **S4** (backfill a test for Weather or DataCenter → makes the metric honest at 8/8). First
-    read `src/apps/photos/` to find its current store key + shape before editing.
+- **Active epic:** **EPIC-3 — Depth pass on shallow instruments** (promoted 2026-06-28; **Strategist-refined
+  2026-06-28**). **S1 (Clock) + S2 (Music/Video) SHIPPED.** **Target metric (PRIMARY):** *shallow instruments
+  with genuine persistent/offline function* → **8/8** (Weather, Maps, Language, DataCenter, Clock, Music, Video,
+  Photos); **now 7/8** — only **Photos** remains. The "+ a unit test" is the **acceptance discipline** for each
+  new deepening stage (not a separate 8-test metric); S4 backfills the two logic-heavy redesign instruments.
+  - **▶ NEXT STAGE = EPIC-3 S3 (Photos → library survives a reload, reuse the S2 `mediaStore` blob rail + a
+    unit test).** Full razor-sharp shape in EPICS.md S3 — **read it; it's a near-mechanical port of `Music.tsx`.**
+    **The bug (confirmed in code):** `Photos.tsx:51-58` persists each photo's `url` (a `URL.createObjectURL`
+    blob URL) to `localStorage('empire-photos')` → blob URLs are session-scoped → **dead after reload** = a grid
+    of broken images. This is the **identical bug S2 fixed** in Music/Video. **Build:** mirror Music 1:1 —
+    `interface Photo extends MediaRecord`, **rename field `url`→`src`** (~8 sites), async-rehydrate on mount via
+    `loadMediaUrls`+`rehydrateMedia` behind a `hydratedRef` gate, persist `toStorableMeta(photos)` only,
+    `putMedia(id,file)` on add (skip >75 MB → `ephemeral` + "session" chip), `deleteMedia(id)` on delete. New
+    test `src/apps/photos/photosStore.test.ts` (Photo fixture: strip-src/keep-favorite/tags/dims + ghost-drop).
+    *Acceptance:* add a photo → reload → still renders. **Function 7/8 → 8/8.**
+  - **THEN S4 (EPIC-3 CLOSE):** extract+test `datacenterLogic.ts` (table CRUD round-trip) + `weatherLogic.ts`
+    (Open-Meteo JSON → view-model + `wmo()` mapping). Maps/Language stay render-smoke-covered. Then EPIC-3 DONE →
+    promote **EPIC-4 · PWA completion** (already decomposed in EPICS.md QUEUED: offline-boot guard → precache gap
+    → base-path).
   - **✅ S2 SHIPPED (2026-06-28):** Music + Video libraries now survive a reload. Real `Blob`s live in IDB via
     the new shared `src/lib/mediaStore.ts`; only metadata persists; ghosts (missing blobs) are dropped on
     rehydrate; oversized files stay session-only (`ephemeral`, "session-only" hint). See seam + trap below.

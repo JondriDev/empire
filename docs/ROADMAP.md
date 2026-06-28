@@ -10,24 +10,23 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-06-27** (strategist) · Main: 🟢 green (build + 112 vitest) ·
-> QA: 28/28 routes render, no runtime errors. **EPIC-1 DONE** (both-ways 9/9). **EPIC-2 ACTIVE
-> & ~75% done** — design-token violations **501 → 134**; S1–S5 shipped, remaining 134 decomposed
-> into S6 (artifacts app) → S7 (shared-UI+shell) → S8 (long-tail) → **0**, then EPIC-3 promotes.
+> Last re-ranked: **2026-06-28** (strategist) · Main: 🟢 green (build + vitest 136 / 18 files, token-violations 0) ·
+> QA: 26/26 routes render, no runtime errors. **EPIC-1 DONE** (both-ways 9/9). **EPIC-2 DONE** (token-violations
+> 501 → 0, S1–S8). **EPIC-3 · Depth pass ACTIVE** — shallow instruments offline-capable, **now 7/8** (S1 Clock +
+> S2 Music/Video shipped); **only Photos remains (S3)**, then S4 backfills DataCenter+Weather tests → EPIC-3 DONE
+> → **EPIC-4 · PWA completion** promotes (already decomposed in EPICS.md QUEUED).
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
-> themes** that feed *future* epics — re-ranked each strategist run. Former NOW #1
-> (JS-importable design tokens) **shipped** as EPIC-2 S1 (`src/design-system/tokens.ts`) and is
-> retired below; the per-app sweep it unblocked is now EPIC-2 S2–S8.
+> themes** that feed *future* epics — re-ranked each strategist run.
 
 ---
 
 ## NOW — next 3–5 increments (each one PR-sized)
 
 Pulled top-to-bottom. Each is small, concrete, and has an acceptance check.
-(The **active epic's stages (EPIC-2 S6→S7→S8) take precedence** — these are the on-deck
-themes feeding the *next* epic, EPIC-3 · Depth pass.)
+(The **active epic's stages (EPIC-3 S3 → S4) take precedence** — these are the on-deck
+themes feeding *future* epics.)
 
 ### 1. Make the README tell the truth (27 apps, Cakra, current stack)
 **Priority: DESIGN-SYSTEM CONSISTENCY / hygiene.** `README.md` still says
@@ -58,15 +57,21 @@ hex or a drifted CSS var fails fast.
   const, plus a `metrics.mjs --assert-zero`-style gate. (Build-routine task — outside docs scope.)
 - **Acceptance:** a drift or a new hardcoded hex fails CI. Build green.
 
-### 3. EPIC-3 prep — pick the first shallow instrument to deepen
-**Priority: COMPLETING APPS (next epic on deck).** When EPIC-2 closes, EPIC-3 (depth pass on
-thin apps: Photos, Maps, Video, Music, Clock) promotes. Pre-scope the first stage so the
-handoff is instant: audit which of the five has the highest capability-per-effort offline win
-(leading candidate: **Clock** — world clocks + timers + stopwatch are fully offline and high-use;
-or **Music** — a local-file player). The strategist will decompose the winner into stages then.
+### 3. Deeper graph mirrors — DataCenter & Files reflect their WHOLE state (off-theme depth, feeds a future epic)
+**Priority: INTERCONNECTION (the living graph).** Two QA-surfaced gaps where an app's graph
+presence is partial, so the organism's picture of it is incomplete:
+- **DataCenter** `dataset` nodes only carry a row count for the *active* table — switching tables
+  doesn't surface the others into the graph.
+- **Files** `file` nodes only reflect the *current* directory; navigating away reconciles the
+  others out, so the graph forgets folders you've left.
 
-- **Acceptance (for the strategist, not the builder):** EPIC-3's S1 names the app, the concrete
-  offline capability, the files, and an acceptance check — ready to promote the moment EPIC-2 is DONE.
+- **Why:** the thesis is "one organism where every app's real entities are legible in The Network."
+  A store that only mirrors its active slice under-represents itself in the mesh.
+- **Do (future epic, not now):** mirror **all** tables/visited directories (or a stable summary node
+  per table/dir) so the graph reflects the full collection. Off the EPIC-3 depth theme — park here
+  until EPIC-3/EPIC-4 close, then fold into an "organism completeness II" epic if still relevant.
+- **Acceptance:** switching DataCenter tables / navigating Files leaves prior tables/dirs represented
+  in The Network instead of being reconciled away.
 
 ---
 
@@ -74,19 +79,18 @@ or **Music** — a local-file player). The strategist will decompose the winner 
 
 - **Complete the cross-app graph.** ✅ **DONE — this WAS EPIC-1** (emit↔receive loop closed,
   both-ways 9/9; Network inspector S3, ⌘K palette S4, Inbox S5 all shipped). Retired.
-- **Design-system consistency sweep.** *(In progress — this IS EPIC-2, ~75% done: 501 → 134.)*
-  The colour axis is nearly swept (S1–S5; S6–S8 finish it to 0). A **follow-on theme** once
-  colour hits 0: extend the conformance audit to **spacing/radii/type** (ad-hoc px, non-`--mono`
-  code surfaces) with its own `metrics.mjs` row, so "design-system conformance" isn't colour-only.
-- **Depth pass on shallow apps.** Identify which instruments are still thin
-  (Photos, Maps, Video, Music, Clock) and give each one genuine, offline-capable
-  function rather than a placeholder — coherence over new apps.
-- **PWA completion.** After packaging PR #2 merges (human-owned), validate the
-  offline precache, install flow, and base-path on a real install; close any
-  service-worker/asset gaps so the installed PWA is identical to dev.
-- **Android APK validation.** Once PWA is solid, run the `Android APK` workflow,
-  install on-device, and verify the offline backend-optional layer degrades
-  gracefully with no LAN server.
+- **Design-system consistency sweep.** ✅ **DONE — this WAS EPIC-2** (token-violations 501 → 0, S1–S8).
+  **Follow-on theme (not yet an epic):** extend the conformance audit to **spacing/radii/type** (ad-hoc px,
+  non-`--mono` code surfaces) with its own `metrics.mjs` row, so "design-system conformance" isn't colour-only.
+  Also: **lock the palette against drift** (NOW #2) so the 0 can't silently rot — promote alongside this.
+- **Depth pass on shallow apps.** *(In progress — this IS EPIC-3, 7/8.)* Photos (S3) is the last thin
+  instrument; S4 backfills DataCenter+Weather tests. Closes when function hits 8/8.
+- **PWA completion.** *(Decomposed as the QUEUED EPIC-4 in EPICS.md.)* Validate a **cold offline boot** of
+  the app's own chunks (not just external-host blocking), close the SW precache gap so the shell + all 25 app
+  chunks + fonts + alien icons precache, and verify base-path/install-flow so the installed PWA is identical
+  to dev. **Promotes the moment EPIC-3 is DONE.**
+- **Android APK validation.** *(QUEUED EPIC-5.)* Once PWA is solid, run the `Android APK` workflow, install
+  on-device, and verify the offline backend-optional layer degrades gracefully with no LAN server.
 
 ## LATER — parking lot (revisit; don't build yet)
 
