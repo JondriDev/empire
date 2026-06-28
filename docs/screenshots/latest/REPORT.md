@@ -1,41 +1,54 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-06-28T09:10:49.869Z
+**Generated:** 2026-06-28T13:11:23.814Z
 
-**Result:** 28/28 rendered without crash, 0 failed.
+**Result:** 26/26 rendered without crash, 0 failed.
 
-## ✅ No runtime bugs found this run. EPIC-2 S7 acceptance CONFIRMED.
+> ⚠️ **First QA after the JondriDev redesign landed on main** (`23df6ce`; commits `bf76cf5`…`23df6ce`).
+> Remote main was force-rebased mid-run — this report tests the **current redesigned tree**, not the
+> pre-redesign `b12b835` it superseded. Intentional, builder-documented deltas (do **not** "fix"): apps
+> **27 → 25** (deleted `ai-agent` + `hermes-cc`, AI unified into **Cakra** at `/app/ai-chat`); bundle gz
+> **248 → 288** (+40, real Leaflet+OSM Maps); palette swapped XENO → JondriDev Earth-from-Space; bespoke
+> alien SVG icon set replaces Lucide app icons; decorative HUD (`HeroHud`/`HermesAgentBar`) removed.
 
-**Headline:** green main `d66dd27`. Build 🟢, `tsc -b && vite build` clean. vitest **115/115** (16 files).
-ESLint clean. SHELL-IS-STYLED ✅ (top-level `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`),
-REGISTRY-COVERAGE ✅ (all 27 registry apps smoke-tested), INBOUND-LANDS **3/3 ✅**.
+## Runtime bugs found this run
 
-**Epic-acceptance (EPIC-2 · Design-token violations → 0):** the ACTIVE epic's target metric is
-*Design-token violations*. Two commits landed since the last QA snapshot (which reported **59** after S6):
-**S7** (`37e26db` — swept the 7 shared-UI + shell surfaces: Toast/ErrorBoundary/Utility/Desktop/Dashboard/
-AppShell/NodeActions, claimed 59→14) and a routines-retro doc commit. `node scripts/metrics.mjs` this run
-reports **14** → **CONFIRMED, no contradiction** (`metrics.json` history shows the discrete **59 → 14** step).
-Visually verified: the desktop shell, app grid, telemetry rail and toasts render fully in XENO accents
-(Desktop/AppShell/Dashboard chrome intact — see `desktop.png`); artifacts categorical rail unbroken
-(`app-artifacts.png`). **EPIC-2 is one stage from DONE** — S8 (long-tail entity apps → 0) is the close.
+**None.** No uncaught JS exceptions, no error boundaries, no blank routes across the redesigned tree.
+All 26 routes (desktop shell + 25 apps) render clean; INBOUND-LANDS organism loop **3/3**; SHELL-IS-STYLED ✅;
+REGISTRY-COVERAGE ✅ (smoke list ↔ registry match exactly, 25 apps). Verified visually: desktop shell
+(new palette + alien icons, Cakra replaces Hermes), and **Maps renders the real Leaflet container** (zoom
+controls + OSM/CARTO attribution + search panel) — only the map *tiles* are grey because OSM/CARTO tile
+servers are egress-blocked in the sandbox (the `maps` net:8 / `weather` net:1 noise), which is env-expected,
+not a render failure.
 
-**Metric deltas vs last QA snapshot (`4826447`, token-violations 59):**
+## Harness change this run
 
-| Metric | Prev (QA post-S6) | This run (QA post-S7) | Δ |
-|---|---|---|---|
-| Design-token violations | 59 | **14** | **−45** ✅ (S7 acceptance) |
-| Routes rendering clean | 27/27 (28/28 incl. shell) | **27/27 (28/28)** | ±0 ✅ |
-| Apps both-ways (entity-apps-with-inbound) | 9/9 | **9/9** | ±0 ✅ (EPIC-1 held) |
-| Test cases (vitest) | 115 | **115** | ±0 |
-| Test files | 16 | **16** | ±0 |
-| Bundle gz (KB) | 248.1 | **248** | ±0 |
+Added a **reverse REGISTRY-COVERAGE guard** to `scripts/qa-smoke.mjs` (smoke-list ⊆ registry): an app
+deleted/renamed in the registry but left in the smoke list would otherwise be visited at a dead `/app/<id>`
+route and red the run as "App not found". The redesign deleted `ai-agent`+`hermes-cc`; the builder already
+pruned them from the list, but the guard now makes that class of drift fail loudly at assertion time.
 
-**Remaining 14 token violations (= S8 scope, EPIC-2 close):** `apps/notes/Notes.tsx` (6),
-`apps/goals/Goals.tsx` (3), `apps/ai-chat/AIChat.tsx` (2), `apps/weather/Weather.tsx` (1),
-`apps/calendar/Calendar.tsx` (1), `apps/network/nodeColors.ts` (1).
+## Metric deltas (this run, redesigned main `23df6ce`)
 
-**Env-expected net noise (NOT bugs):** `files` `/api/files?path=/storage/emulated/0` → HTTP 500 (Android-only
-path), `datacenter` `/api/dc/tables` → HTTP 401 (authed API, no headless session). All other routes: 0 net failures.
+| Metric | Pre-redesign (QA `b12b835`) | This run (`23df6ce`) | Δ | Note |
+|---|---|---|---|---|
+| Routes rendering clean | 28/28 | **26/26** | −2 routes | by design (2 apps deleted) |
+| Apps both-ways into organism | 9/9 | **9/9** | ±0 ✅ | INBOUND-LANDS 3/3 live |
+| Test cases (vitest) | 115 | **115** | ±0 | |
+| Test files | 16 | **16** | ±0 | |
+| Design-token violations | 0 | **0** | ±0 ✅ | held through the full redesign |
+| Bundle gz (KB) | 248 | **288.6** | +40.6 | by design (real Leaflet Maps) |
+
+## Epic-acceptance confirmation
+
+- **EPIC-2 (Design-system conformance) — DONE & still CONFIRMED.** `node scripts/metrics.mjs` = **0** token
+  violations even after a ground-up redesign (every new/changed surface consumes DS tokens). No regression.
+- **EPIC-3 (Depth pass on shallow instruments) — ACTIVE, still UN-DECOMPOSED, but the redesign ADVANCED it.**
+  Commit `b155992` made **Weather (Open-Meteo), Maps (Leaflet+Nominatim), Language (Cakra translation),
+  DataCenter (local-first localStorage)** genuinely work — exactly the "shallow → real instrument" thesis of
+  EPIC-3. **But EPIC-3 still has no formal stages and no declared target metric**, so there is no acceptance
+  number to confirm-move yet. **The Strategist must seed EPIC-3 stages + a target metric** (e.g. "N/5 shallow
+  instruments offline-capable with a unit test") so future runs can measure it. Recorded in CONTEXT + log.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -47,7 +60,7 @@ path), `datacenter` `/api/dc/tables` → HTTP 401 (authed API, no headless sessi
 | calculator | ✅ | — | — |
 | calendar | ✅ | — | — |
 | clock | ✅ | — | — |
-| weather | ✅ | — | — |
+| weather | ✅ | — | https://geocoding-api.open-meteo.com/v1/search?name=Jakarta&count=1&language=en&format=json (net::ERR_TUNNEL_CONNECTION_FAILED)<br>Permissions policy violation: Geolocation access has been blocked because of a permissions policy applied to the current document. See https://crbug.com/4143482 |
 | grammar | ✅ | — | — |
 | language | ✅ | — | — |
 | music | ✅ | — | — |
@@ -58,16 +71,14 @@ path), `datacenter` `/api/dc/tables` → HTTP 401 (authed API, no headless sessi
 | editor | ✅ | — | — |
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
-| datacenter | ✅ | — | /api/dc/tables → HTTP 401 |
-| maps | ✅ | — | — |
+| datacenter | ✅ | — | — |
+| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
 | learning-tracker | ✅ | — | — |
-| ai-agent | ✅ | — | — |
 | ai-chat | ✅ | — | — |
 | goals | ✅ | — | — |
-| hermes-cc | ✅ | — | — |
 | artifacts | ✅ | — | — |
 | network | ✅ | — | — |
 | inbox | ✅ | — | — |

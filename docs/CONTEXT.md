@@ -45,6 +45,20 @@
     (`grep -ri hermes src` = 0).
   - **Made real (this directly ADVANCES EPIC-3):** Weather=Open-Meteo (no key), Maps=Leaflet+Nominatim,
     Language=Cakra `chat()` translation, DataCenter=local-first localStorage (works offline, no server).
+  - **✅ QA-CONFIRMED 2026-06-28 on green main `23df6ce`** (first QA after the redesign; remote was
+    force-rebased mid-run so QA re-ran against the redesigned tree, not pre-redesign `b12b835`): build 🟢,
+    **smoke 26/26 render clean** (desktop + 25 apps, 0 uncaught JS), vitest **115/115**, **token-violations 0**
+    (held through the whole redesign), SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅, INBOUND-LANDS **3/3**. Verified
+    visually: new Earth-from-Space palette + alien icons + Cakra; **Maps shows the real Leaflet container**
+    (zoom + OSM attribution) — only tiles grey (OSM/CARTO egress-blocked = `maps` net:8 / `weather` net:1,
+    env-expected). **No runtime regressions.** Metrics: apps 27→25, gz 248→288.6 (both by design), tokens 0.
+  - **QA harness:** added a **reverse REGISTRY-COVERAGE guard** to `scripts/qa-smoke.mjs` (smoke-list ⊆
+    registry) so a deleted/renamed app left in the smoke list fails loudly instead of red-ing the run as a
+    phantom `/app/<id>` route — the exact drift this redesign (deleting ai-agent+hermes-cc) could have caused.
+  - **⚠️ EPIC-3 still has NO formal stages and NO declared target metric.** The redesign advanced the *intent*
+    (4 instruments made real) but there is no acceptance number to confirm-move. **Strategist must seed EPIC-3
+    stages + a target metric** (e.g. "N/5 shallow instruments offline-capable + a unit test") before the next
+    builder run, or EPIC-3 progress stays unmeasurable.
 - **EPIC-2 S1 DONE (2026-06-23):** built `src/design-system/tokens.ts` (the TS palette seam:
   `PALETTE` + `cssVar(name)→'var(--name)'` + `tint(name,pct)→'color-mix(in srgb, var(--name) pct%, transparent)'`,
   rounds+clamps; `tokens.test.ts` 4 cases) and swept the **Hermes cluster** to zero:

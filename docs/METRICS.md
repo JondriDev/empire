@@ -14,30 +14,30 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-| Metric | Current (QA 2026-06-28, after **EPIC-2 S7** — shared-UI + shell chrome de-hex sweep) | Target | Direction |
+| Metric | Current (QA 2026-06-28, after the **JondriDev redesign** — green main `23df6ce`) | Target | Direction |
 |---|---|---|---|
-| Apps / routes | 27 | ~26 (steady) | coherence over new surface — not a growth metric |
+| Apps / routes | 25 | ~26 (steady) | coherence over new surface — not a growth metric |
 | Test cases | 108 (static) · 115 (vitest run) | 60+ | ↑ higher = safer to leap |
 | Test files | 16 | grow with code | ↑ |
-| Design-token violations | **14** | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
-| Bundle gz (KB) | 248 | hold / shrink | ↓ |
+| Design-token violations | **0** | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
+| Bundle gz (KB) | 288.6 | hold / shrink | ↓ |
 
-> Last integration since prior QA snapshot (`4826447`, after S6, token-violations 59): one builder
-> commit — **EPIC-2 S7** (`37e26db`, swept the **7 shared-UI + shell surfaces** → 0 with the `cssVar`/`tint`
-> rails: Toast 16→0, ErrorBoundary 7→0, Utility 6→0, Desktop 6→0, Dashboard 4→0, AppShell 3→0, NodeActions 3→0;
-> claimed 59→14) + a routines-retro doc commit (`d66dd27`, no code). **Design-token violations 59 → 14 (−45)**
-> — EPIC-2 target metric CONFIRMED moved this QA run (`node scripts/metrics.mjs` reports 14, matching the S7
-> claim, no contradiction; metrics.json history shows the discrete 59→14 step). Δ vs prior column: apps ±0 (27),
-> test cases ±0 (115 vitest), test files ±0 (16), token violations **−45 (59→14)**, bundle gz ±0 (248).
-> `metrics.mjs` static count (108) undercounts nested `it.each` cases; an actual `vitest run` is
-> **115 passed / 16 files**. Remaining 14 = the **S8 long-tail** (EPIC-2 close): `Notes.tsx` (6), `Goals.tsx` (3),
-> `AIChat.tsx` (2), `Weather.tsx` (1), `Calendar.tsx` (1), `nodeColors.ts` (1).
+> Last integration since prior QA snapshot (`b12b835`, EPIC-2 S8, apps 27 / gz 248 / token-violations 0): the
+> **JondriDev redesign** force-rebased main (`bf76cf5`…`23df6ce`). **Intentional, builder-documented deltas — do
+> NOT regress-gate these:** apps **27 → 25** (deleted `ai-agent` + `hermes-cc`; AI unified into the single **Cakra**
+> app at `/app/ai-chat`), bundle gz **248 → 288.6 (+40.6)** (real **Leaflet + OSM** Maps), palette swapped XENO →
+> JondriDev Earth-from-Space, bespoke alien SVG app-icon set replaces Lucide, decorative HUD removed. **Design-token
+> violations held at 0 through the entire redesign** (`node scripts/metrics.mjs` reports 0 — every new/changed
+> surface consumes DS tokens; CONFIRMED, no contradiction). Δ vs prior column: apps **−2 (27→25, by design)**, test
+> cases ±0 (115 vitest), test files ±0 (16), token violations ±0 (**0**), bundle gz **+40.6 (by design, Leaflet)**.
+> `metrics.mjs` static count (108) undercounts nested `it.each` cases; an actual `vitest run` is **115 passed / 16
+> files**. The redesign also made **Weather/Maps/Language/DataCenter genuinely work** (`b155992`) — advances EPIC-3.
 
 ## Manual / CI metrics (QA + human)
 
-| Metric | Source | Current (QA 2026-06-28, after **EPIC-2 S7** green main `d66dd27`) | Target |
+| Metric | Source | Current (QA 2026-06-28, after the **JondriDev redesign** green main `23df6ce`) | Target |
 |---|---|---|---|
-| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **27 / 27** ✅ (28/28 incl. desktop shell; SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅; INBOUND-LANDS 3/3 ✅) — re-confirmed 2026-06-28 (post-EPIC-2-S7, green main `d66dd27`; all 28 routes render with 0 uncaught JS, vitest 115/115; shell/toast/error-boundary chrome re-verified XENO after the S7 sweep) | 27 / 27 (every entity route) |
+| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **25 / 25** ✅ (26/26 incl. desktop shell; SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅ now bidirectional + INBOUND-LANDS 3/3 ✅) — re-confirmed 2026-06-28 on the **redesigned** tree (`23df6ce`; all 26 routes render with 0 uncaught JS, vitest 115/115; new Earth-from-Space palette + alien icons + Cakra-unified AI verified visually; Maps renders the real Leaflet container — only OSM tiles grey, env-blocked). Was 27/27 pre-redesign; **−2 routes by design** (ai-agent + hermes-cc deleted). | 25 / 25 (every entity route) |
 | Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **9 / 9 entity-apps-with-inbound ✅ TARGET HIT (↑ from 6 — S6c)** — both-ways now: `prompt-generator`, `notes`, `learning-tracker`, `editor`, `token-counter`, `ai-chat` **+ `calendar`, `goals`, `messages`** (S6c: each gained a natural text→entity inbound via `useInboundHandoff` → opens its own create form prefilled + a "From <source>" `ProvenanceChip`; reachable from `SendResultMenu` & `NodeActions`). **Confirmed LIVE this run** (`scripts/qa-s6c-confirm.mjs`, screenshots `s6c-inbound-{calendar,goals,messages}.png`): seeding each `empire-<x>-clipboard` payload + reload shows the chip AND a prefilled field (Calendar New-Event title+date+desc, Goals New-Goal title+desc, Messages composer draft) — 3/3 ✅. The HANDOFF emission is unit-tested (`appActions.test.ts`, vitest 103). **Entity emit↔receive loop CLOSED.** Intentionally emit-only (by design, no natural inbound): files, photos, datacenter (browse/manage stores) + tool apps (calculator, clock, weather, etc.) via `NodeActions`. | 9 / 9 entity-apps-with-inbound ✅ |
 | Lighthouse — PWA / Perf / A11y | CI (add to a workflow when feasible) | not measured headless | 90 / 90 / 90 |
 | Open `routine/auto-*` PR age | reviewer log | — | < one review cycle |
