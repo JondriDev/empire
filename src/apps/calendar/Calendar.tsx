@@ -10,6 +10,7 @@ import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { tint } from '../../design-system/tokens'
 
 interface CalendarEvent {
   id: string
@@ -332,7 +333,7 @@ export default function Calendar() {
 
       {/* Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: tint('void', 60) }}>
           <div className="w-full max-w-md rounded-2xl border border-white/10 p-6" style={{ background: 'var(--card-bg)' }}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">

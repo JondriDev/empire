@@ -209,7 +209,7 @@ export default function Goals() {
           onClick={add}
           disabled={!title.trim()}
           className="px-4 py-1.5 rounded-lg disabled:opacity-30 text-sm transition-colors"
-          style={{ background: ACCENT, color: 'var(--void, #03060e)', transitionDuration: 'var(--dur-fast)' }}
+          style={{ background: ACCENT, color: 'var(--void)', transitionDuration: 'var(--dur-fast)' }}
         >
           Add Goal
         </button>
@@ -252,7 +252,7 @@ export default function Goals() {
                 className="w-6 h-6 rounded-lg border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors"
                 style={
                   goal.completed
-                    ? { background: ACCENT, borderColor: ACCENT, color: 'var(--void, #03060e)' }
+                    ? { background: ACCENT, borderColor: ACCENT, color: 'var(--void)' }
                     : { borderColor: 'var(--hair)' }
                 }
               >
@@ -303,7 +303,7 @@ export default function Goals() {
                 <button
                   onClick={() => deleteGoal(goal.id)}
                   className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                  style={{ color: 'var(--ember, #ff9b6b)' }}
+                  style={{ color: 'var(--ember)' }}
                   title="Delete goal"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

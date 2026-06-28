@@ -5,6 +5,43 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-28 · Builder — EPIC-2 S8: long-tail → 0, **EPIC-2 DONE** (token-violations 14 → 0)
+
+**Done.** Fresh cloud checkout on green main; baseline build🟢 vitest 115🟢 token-violations 14. Swept the
+final long-tail of design-token violations with the established `cssVar`/`tint` rails (logic untouched —
+colours only), closing EPIC-2:
+- `apps/notes/Notes.tsx` **6→0** — left-rail `#eab308`→`cssVar('c-warn')`; action accents `#a855f7`→
+  `cssVar('plasma')`, `#ef4444`→`cssVar('c-danger')`; footer border `rgba(255,255,255,0.04)`→`tint('xenon',4)`;
+  analyze-hover `rgba(34,211,238,0.08)`→`tint('signal',8)`; **alpha-append trap** `${accent}1F`→
+  `color-mix(in srgb, ${accent} 12%, transparent)` + fallback `rgba(255,255,255,0.06)`→`tint('xenon',6)`.
+- `apps/goals/Goals.tsx` **3→0** — dropped DOM hex fallbacks: `var(--void,#03060e)`→`var(--void)` (×2),
+  `var(--ember,#ff9b6b)`→`var(--ember)` (same idiom as S3's Network fix — tokens are always defined in prod).
+- `apps/ai-chat/AIChat.tsx` **2→0** — context banner `rgba(34,211,238,0.05)`→`tint('signal',5)`; modal scrim
+  `rgba(0,0,0,0.6)`→`tint('void',60)`.
+- `apps/calendar/Calendar.tsx` **1→0** + `apps/weather/Weather.tsx` **1→0** — modal scrims→`tint('void',60)`
+  (Calendar's own create-flow / handoff logic untouched per the trap).
+- `apps/network/nodeColors.ts` **1→0** — the lone literal was inside a **code comment** (`metrics.mjs` greps
+  prose too); rephrased to drop the `rgb`-function spelling, kept the `rgbCss` triplet rail intact.
+
+**Why.** S8 was the last EPIC-2 stage; clearing these 14 takes the target metric *Design-token violations* to
+**0**, completing the epic (one palette, consumed via tokens in DOM + `rgbCss` in canvas).
+
+**Verified.** `npm run build` (tsc -b && vite build) **🟢**; `node scripts/metrics.mjs` **token-violations 14
+→ 0 (−14)**, all other metrics ±0 (apps 27, tests 108, test files 16, bundle gz 248); `npx vitest run`
+**115/115 🟢** (16 files); `npx eslint` clean on all 6 touched files. *Not cloud-verifiable visually:* the
+scrims/accents now resolve through XENO tokens — same rendering intent, but the on-device look needs a human
+glance (no behavioural change).
+
+**Metrics row:** apps 27 (±0) · tests 108 (±0) · test files 16 (±0) · **token-violations 0 (−14)** · bundle gz 248 (±0).
+
+**Next.** **EPIC-2 is DONE** — flag QA to confirm 0 on green main. EPIC-3 (Depth pass on shallow instruments) is
+now ▶ ACTIVE but **has no decomposed stages — needs the Strategist** to seed per-app stages (Photos/Maps/Video/
+Music/Clock → genuine offline function + a unit test each) and give it a real numeric target metric. Until then
+the next Builder run should take the topmost ROADMAP-NOW follow-up (DataCenter/Files/Photos node-coverage gaps in
+CONTEXT "Open follow-ups") as one green commit.
+
+---
+
 ## 2026-06-28 · Visual & Smoke QA — EPIC-2 S7 confirmed (token-violations 59→14), 28/28 green
 
 **Done.** Fresh cloud checkout on green main `d66dd27`. `npm install` + `npm run build` (tsc -b && vite

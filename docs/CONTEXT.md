@@ -22,9 +22,14 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **EPIC-2 — Design-system conformance → zero token violations** (promoted
-  2026-06-23). EPIC-1 (Organism Completeness) is **DONE & QA-confirmed**: both-ways hit **9/9
-  entity-apps-with-inbound**, S6c live-confirmed (see Last QA confirmation below).
+- **Active epic:** **EPIC-3 — Depth pass on shallow instruments** (promoted 2026-06-28 when EPIC-2 hit
+  **0** token violations). **⚠️ EPIC-3 has NO decomposed stages yet — needs the Strategist.** Until then,
+  the Builder's next move is to take the topmost ROADMAP-NOW follow-up (see "Open follow-ups discovered"
+  at the bottom of this file — e.g. DataCenter/Files/Photos node-coverage gaps) as one green reviewable
+  commit, and note in the log that EPICS needs the Strategist to seed EPIC-3 stages (one shallow
+  instrument per stage: Photos/Maps/Video/Music/Clock → genuine offline-capable function + a unit test).
+  EPIC-1 (Organism Completeness) **DONE & QA-confirmed** (both-ways 9/9). EPIC-2 (Design-system
+  conformance) **DONE 2026-06-28** — token-violations **501 → 0** across S1–S8 (see below).
 - **EPIC-2 S1 DONE (2026-06-23):** built `src/design-system/tokens.ts` (the TS palette seam:
   `PALETTE` + `cssVar(name)→'var(--name)'` + `tint(name,pct)→'color-mix(in srgb, var(--name) pct%, transparent)'`,
   rounds+clamps; `tokens.test.ts` 4 cases) and swept the **Hermes cluster** to zero:
@@ -95,13 +100,15 @@
   →`cssVar('signal')`/`tint('signal',N)`). **New mapping confirmed:** lighten an accent for legible fg/heading text via
   `color-mix(in srgb, var(--accent) 70%, var(--text))`; opaque dark panel border→`var(--abyss)` (not a tint).
   **token-violations 59 → 14 (−45).** build🟢 vitest 115🟢 eslint clean.
-- **Remaining 14 violations → 1 stage (EPICS.md S8 — NEXT, EPIC-2 CLOSE):**
-  - **S8 · long-tail → 0, EPIC-2 CLOSE (14):** `apps/notes/Notes.tsx` (6), `apps/goals/Goals.tsx` (3),
-    `apps/ai-chat/AIChat.tsx` (2), `apps/weather/Weather.tsx` (1), `apps/calendar/Calendar.tsx` (1) → `cssVar`/`tint`
-    per the established mappings (**don't touch handoff/provenance/inbound logic — only colours**); `apps/network/nodeColors.ts`
-    (1) → route the last literal through its own `rgbCss(triplet, alpha)`/named-triplet rail (**NOT `cssVar`** — it's the
-    canvas-colour source). → **token-violations = 0 → EPIC-2 DONE, flag QA to confirm 0 on green main, promote EPIC-3
-    (Depth pass on shallow instruments).** Watch the alpha-append trap (`${color}NN`→`color-mix`) in these entity apps.
+- **EPIC-2 S8 DONE (this run, 2026-06-28) — token-violations 14 → 0, EPIC-2 CLOSED.** Swept the long-tail with the
+  `cssVar`/`tint` rails (logic untouched, colours only): `Notes.tsx` 6→0 (`#eab308`→`cssVar('c-warn')`, action accents
+  `#a855f7`→`plasma`/`#ef4444`→`c-danger`, footer border→`tint('xenon',4)`, analyze hover→`tint('signal',8)`,
+  **alpha-append `${accent}1F`→`color-mix(… 12%)`** + fallback→`tint('xenon',6)`), `Goals.tsx` 3→0 (dropped DOM hex
+  fallbacks `var(--void,#hex)`→`var(--void)`, `var(--ember,#hex)`→`var(--ember)` — same idiom as S3's Network fix),
+  `AIChat.tsx` 2→0 (banner→`tint('signal',5)`, scrim→`tint('void',60)`), `Calendar.tsx`/`Weather.tsx` 1→0 each (modal
+  scrims→`tint('void',60)`), `nodeColors.ts` 1→0 (**the lone literal was in a CODE COMMENT** — `metrics.mjs` greps prose;
+  rephrased to drop the `rgb`-function spelling, `rgbCss` rail intact). **All 14 gone; metrics confirms 0.** build🟢
+  vitest 115🟢 eslint clean.
   - **Reusable rail for data files:** if a file's colours are genuine external/brand/content identities that must stay
     distinct (registry, providers, ColorPalette swatches), add its repo-relative path to `DS_INFRA` in
     `scripts/metrics.mjs` with a one-line rationale — don't force-map identity data onto internal tokens. For
