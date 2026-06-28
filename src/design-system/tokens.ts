@@ -25,26 +25,26 @@ export type TokenName =
   | 'c-success' | 'c-warn' | 'c-danger' | 'c-info';
 
 /**
- * XENO palette — raw hex values, a mirror of `:root` in colors_and_type.css.
- * Prefer `cssVar`/`tint` in app code; these literals are only for the rare JS
- * consumer that cannot resolve a CSS var.
+ * Earth-from-Space palette — raw hex values, a mirror of `:root` in
+ * colors_and_type.css. Prefer `cssVar`/`tint` in app code; these literals are
+ * only for the rare JS consumer that cannot resolve a CSS var.
  */
 export const PALETTE: Record<TokenName, string> = {
-  signal: '#34f5d6',
-  aurora: '#5cf0a8',
-  plasma: '#b06bff',
-  ion:    '#4d9bff',
-  ember:  '#ff9b6b',
-  xenon:  '#d6fbf4',
-  void:   '#03060e',
-  abyss:  '#070d1c',
-  text:   '#dce8f2',
-  text2:  '#7a98b4',
-  text3:  '#32465e',
-  'c-success': '#5cf0a8',
-  'c-warn':    '#ffcf6b',
-  'c-danger':  '#ff6b8a',
-  'c-info':    '#34f5d6',
+  signal: '#1a8caa',
+  aurora: '#66d9a0',
+  plasma: '#3c7a4a',
+  ion:    '#5b8fb9',
+  ember:  '#c4a265',
+  xenon:  '#e8edf2',
+  void:   '#050a14',
+  abyss:  '#0b1a2e',
+  text:   '#e4eaf4',
+  text2:  '#7a8faa',
+  text3:  '#2e3d54',
+  'c-success': '#66d9a0',
+  'c-warn':    '#f0c94e',
+  'c-danger':  '#f87171',
+  'c-info':    '#1a8caa',
 };
 
 /** Reference a design-system CSS custom property by token name.

@@ -1,8 +1,13 @@
 /* ═══════════════════════════════════════════════
-   XENO — JONDRIDEV DESIGN SYSTEM · TOKENS + TYPE
-   Deep-Field palette · Holographic Glass
-   A first-contact interface. Bioluminescent signals
-   on void. Copy this file into every app.
+   JONDRIDEV DESIGN SYSTEM · TOKENS + TYPE
+   Earth-from-Space palette · Liquid Glass UI
+   Oceanic primary, warm planetary accents, on a
+   deep-space void. Copy this file into every app.
+
+   Token NAMES are kept stable (--signal/--ion/… and
+   the TS mirror in tokens.ts + every cssVar()/tint()
+   consumer); only their VALUES are the JondriDev brand
+   palette — so the whole shell re-skins with no churn.
 
    Brand fonts are local (Sora, weights 100–800 via
    font-weight). JetBrains Mono is also vendored locally
@@ -39,37 +44,37 @@
   --font: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
 
-  /* ── Deep-Field signal palette ──
-     Bioluminescent accents over a void backdrop. Saturated
-     on purpose — this is the identity, not a literal photo. */
-  --signal: #34f5d6;  /* primary bioluminescent teal */
-  --aurora: #5cf0a8;  /* alien green            */
-  --plasma: #b06bff;  /* plasma violet (rare)   */
-  --ion:    #4d9bff;  /* electric blue          */
-  --ember:  #ff9b6b;  /* warm signal / warning  */
-  --xenon:  #d6fbf4;  /* pale luminescence      */
-  --void:   #03060e;  /* deep-field backdrop    */
-  --abyss:  #070d1c;  /* raised surface         */
+  /* ── Earth-from-Space palette ──
+     JondriDev brand values mapped onto the stable token names.
+     Dominant feel is oceanic; everything else is a warm accent. */
+  --signal: #1a8caa;  /* shallow cyan — PRIMARY brand          */
+  --aurora: #66d9a0;  /* aurora green — success / life          */
+  --plasma: #3c7a4a;  /* land green — rare decorative accent    */
+  --ion:    #5b8fb9;  /* atmosphere blue — secondary            */
+  --ember:  #c4a265;  /* desert sand — warm signal              */
+  --xenon:  #e8edf2;  /* cloud white — pale luminescence        */
+  --void:   #050a14;  /* deep-space backdrop                    */
+  --abyss:  #0b1a2e;  /* earth-ocean navy — raised surface      */
 
   /* ── App accents (one per first-party node) ── */
-  --c-keuangan: #5cf0a8;  /* aurora  · finance    */
-  --c-kamus:    #34f5d6;  /* signal  · dictionary */
-  --c-kosakata: #ff9b6b;  /* ember   · vocab      */
-  --c-pembaca:  #4d9bff;  /* ion     · reader     */
-  --c-mesin:    #9bf7e6;  /* pale signal · terminal */
-  --c-cakra:    #b06bff;  /* plasma  · AI agent   */
+  --c-keuangan: #66d9a0;  /* aurora   · finance    */
+  --c-kamus:    #1a8caa;  /* shallow  · dictionary */
+  --c-kosakata: #c4a265;  /* desert   · vocab      */
+  --c-pembaca:  #f0c94e;  /* city     · reader     */
+  --c-mesin:    #8fb4d8;  /* atmos pale · terminal */
+  --c-cakra:    #5b8fb9;  /* atmosphere · AI agent */
 
   /* ── Semantic ── */
-  --c-success: #5cf0a8;
-  --c-warn:    #ffcf6b;
-  --c-danger:  #ff6b8a;
-  --c-info:    #34f5d6;
+  --c-success: #66d9a0;
+  --c-warn:    #f0c94e;
+  --c-danger:  #f87171;
+  --c-info:    #1a8caa;
 
-  /* ── Radius ── */
-  --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
-  --r-xl: 28px; --r-2xl: 38px; --r-full: 9999px;
+  /* ── Radius (large-radius system, JondriDev) ── */
+  --r-sm: 10px; --r-md: 16px; --r-lg: 22px;
+  --r-xl: 30px; --r-2xl: 40px; --r-full: 9999px;
 
-  /* ── Spacing · 5-stop (coarse on purpose, keeps layouts on-grid) ── */
+  /* ── Spacing · 5-stop (12 & 32 omitted on purpose — keeps layouts on-grid) ── */
   --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px;
   --sp-lg: 24px; --sp-xl: 40px;
 
@@ -77,14 +82,14 @@
   --bw: 1px;
 
   /* ── Opacity scale (glass + state alphas, tokenized) ── */
-  --op-fill:      0.20;  /* holo glass fill, dark        */
-  --op-fill-h:    0.30;  /* holo glass fill, dark hover  */
-  --op-fill-lt:   0.42;  /* holo glass fill, light       */
-  --op-fill-lt-h: 0.58;  /* holo glass fill, light hover */
-  --op-edge:      0.45;  /* bright signal edge           */
-  --op-edge-dim:  0.07;  /* dim void edge                */
-  --op-tint:      0.10;  /* badge/chip tinted fill       */
-  --op-tint-h:    0.18;  /* tinted fill, hover           */
+  --op-fill:      0.08;  /* glass fill, dark        */
+  --op-fill-h:    0.13;  /* glass fill, dark hover  */
+  --op-fill-lt:   0.22;  /* glass fill, light       */
+  --op-fill-lt-h: 0.32;  /* glass fill, light hover */
+  --op-edge:      0.24;  /* bright directional edge */
+  --op-edge-dim:  0.08;  /* dim directional edge    */
+  --op-tint:      0.10;  /* badge/chip tinted fill  */
+  --op-tint-h:    0.18;  /* tinted fill, hover      */
 
   /* ── Z-index scale (no magic numbers) ── */
   --z-base:    0;
@@ -98,10 +103,10 @@
   /* ── Motion ── */
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --dur-fast: 0.16s;
+  --dur-fast: 0.15s;
   --dur-mid:  0.28s;
-  --dur-slow: 0.6s;
-  --stagger:  46ms;   /* per-sibling delay for fade-up reveals */
+  --dur-slow: 0.5s;
+  --stagger:  42ms;   /* per-sibling delay for fade-up reveals */
 
   /* ── Layout ── */
   --nav-h:  56px;
@@ -111,82 +116,106 @@
   --bp-desktop: 1024px;
 
   /* ── Brand gradients ── */
-  --grad-primary: linear-gradient(135deg, #34f5d6, #4d9bff);
-  --grad-logo:    linear-gradient(110deg, #34f5d6, #4d9bff, #b06bff, #34f5d6);
-  --grad-hero:    linear-gradient(120deg, #34f5d6, #4d9bff, #b06bff);
+  --grad-primary: linear-gradient(135deg, #1a8caa, #5b8fb9);
+  --grad-logo:    linear-gradient(135deg, #1a8caa, #5b8fb9, #66d9a0, #1a8caa);
+  --grad-hero:    linear-gradient(135deg, #1a8caa, #5b8fb9, #66d9a0);
+
+  /* ── Liquid Glass · prismatic edge ring (theme-agnostic) ── */
+  --gl-prism: conic-gradient(from 210deg,
+    rgba(255,255,255,0)    0deg,
+    rgba(255,210,180,0.45) 40deg,
+    rgba(180,220,255,0.45) 160deg,
+    rgba(255,255,255,0)    220deg,
+    rgba(200,180,255,0.45) 300deg,
+    rgba(255,255,255,0)    360deg);
 }
 
-/* ── Dark "Void" theme (default) ── */
+/* ── Dark "Deep Field" theme (default) ── */
 [data-theme="dark"] {
-  --bg: #03060e;
-  --text:  #dce8f2;
-  --text2: #7a98b4;
-  --text3: #32465e;
+  --bg: #050a14;
+  --text:  #e4eaf4;
+  --text2: #7a8faa;
+  --text3: #2e3d54;
 
+  /* Earth-from-Space: five overlapping radial washes on near-black space. */
   --grad:
-    radial-gradient(ellipse 120% 55% at 50% -8%,  rgba( 52,245,214, 0.10) 0%, transparent 60%),
-    radial-gradient(ellipse  80% 60% at 88%  4%,  rgba( 77,155,255, 0.12) 0%, transparent 55%),
-    radial-gradient(ellipse  70% 70% at 10% 22%,  rgba(176,107,255, 0.10) 0%, transparent 55%),
-    radial-gradient(ellipse  90% 60% at 60% 108%, rgba( 92,240,168, 0.07) 0%, transparent 55%),
-    #03060e;
+    radial-gradient(ellipse 120% 60% at 20%  8%, rgba( 10, 61,107, 0.55) 0%, transparent 55%),
+    radial-gradient(ellipse  80% 70% at 85% 12%, rgba( 26,140,170, 0.30) 0%, transparent 50%),
+    radial-gradient(ellipse  60% 80% at 65% 88%, rgba( 60,122, 74, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse  50% 50% at  8% 78%, rgba( 91,143,185, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse  40% 40% at 50% 45%, rgba(240,201, 78, 0.08) 0%, transparent 55%),
+    #050a14;
 
-  --holo-bg:   rgba(28, 58, 74, 0.20);
-  --holo-bg-h: rgba(40, 78, 98, 0.30);
-  --holo-bt:   rgba(120,240,224, 0.45);  /* bright signal edge, top-left */
-  --holo-bb:   rgba(120,200,255, 0.07);  /* dim void edge, bottom-right  */
-  --holo-fill: linear-gradient(150deg, rgba(40,80,96,0.22) 0%, rgba(16,34,54,0.12) 100%);
+  /* Liquid Glass — near-zero fill, white directional edges, top specular +
+     bottom dark rim baked into the shadow. (Kept under --holo-* names so the
+     bridge + .holo/.gp/.glass consumers re-skin with no rename.) */
+  --holo-bg:   rgba(255,255,255,0.08);
+  --holo-bg-h: rgba(255,255,255,0.13);
+  --holo-bt:   rgba(255,255,255,0.24);  /* bright top-left edge   */
+  --holo-bb:   rgba(255,255,255,0.08);  /* dim bottom-right edge  */
+  --holo-fill: linear-gradient(180deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.05) 42%, rgba(255,255,255,0.035) 100%);
   --holo-shadow:
-    inset 0 0.5px 0 rgba(180,255,244,0.22),
-    inset 0 -0.5px 0 rgba(120,160,255,0.04),
-    0 2px 10px rgba(0,8,16,0.50),
-    0 14px 40px rgba(0,12,24,0.40);
-  --holo-blur: blur(20px) saturate(165%) brightness(1.05);
-  --scan: rgba(120,240,224, 0.05);
-  --hair: rgba(120,200,224, 0.12);
+    inset 0 1.25px 0 rgba(255,255,255,0.45),
+    inset 0 0.5px  0 rgba(255,255,255,0.75),
+    inset 0 -1px   0 rgba(255,255,255,0.06),
+    inset 0 -7px 16px -10px rgba(0,0,0,0.40),
+    0 1px 3px  rgba(0,0,0,0.35),
+    0 8px 24px rgba(0,0,0,0.25);
+  --holo-blur: blur(24px) saturate(180%) brightness(1.1);
+  --scan: rgba(120,240,224, 0.05);   /* legacy (no longer used by .holo) */
+  --hair: rgba(255,255,255, 0.12);
 
-  --nav-bg:     rgba(5, 10, 20, 0.50);
-  --nav-border: rgba(120,240,224, 0.16);
-  --nav-shadow: inset 0 0.5px 0 rgba(180,255,244,0.14), 0 6px 26px rgba(0,6,14,0.60);
+  --nav-bg:     rgba(5, 10, 20, 0.45);
+  --nav-border: rgba(255,255,255,0.16);
+  --nav-shadow: inset 0 0.5px 0 rgba(255,255,255,0.16), 0 1px 8px rgba(0,0,0,0.40);
 }
 
 /* ── Light "Daylight Survey" theme ── */
 [data-theme="light"] {
-  --bg: #e6eef5;
-  --text:  #06131f;
-  --text2: #3a5670;
-  --text3: #90accb;
+  --bg: #dae6f2;
+  --text:  #0a1628;
+  --text2: #3d5a80;
+  --text3: #8fafc8;
 
   --grad:
-    radial-gradient(ellipse 110% 55% at 50% -6%, rgba( 26,170,170, 0.18) 0%, transparent 60%),
-    radial-gradient(ellipse  80% 55% at 88%  6%, rgba( 77,155,255, 0.16) 0%, transparent 55%),
-    radial-gradient(ellipse  70% 70% at  8% 20%, rgba(150, 90,230, 0.10) 0%, transparent 55%),
-    #e6eef5;
+    radial-gradient(ellipse 110% 55% at 15%  5%, rgba( 26,140,170, 0.30) 0%, transparent 55%),
+    radial-gradient(ellipse  80% 60% at 88% 10%, rgba( 91,143,185, 0.25) 0%, transparent 55%),
+    radial-gradient(ellipse  60% 70% at 60% 90%, rgba( 60,122, 74, 0.15) 0%, transparent 55%),
+    radial-gradient(ellipse  50% 50% at  5% 80%, rgba(196,162,101, 0.10) 0%, transparent 50%),
+    radial-gradient(ellipse  45% 55% at 78% 68%, rgba(244,114,182, 0.08) 0%, transparent 50%),
+    #dae6f2;
 
-  --holo-bg:   rgba(255,255,255, 0.42);
-  --holo-bg-h: rgba(255,255,255, 0.58);
-  --holo-bt:   rgba(255,255,255, 0.95);
-  --holo-bb:   rgba(20, 80,110, 0.14);
-  --holo-fill: linear-gradient(150deg, rgba(255,255,255,0.36) 0%, rgba(255,255,255,0.16) 100%);
+  --holo-bg:   rgba(255,255,255,0.22);
+  --holo-bg-h: rgba(255,255,255,0.32);
+  --holo-bt:   rgba(255,255,255,0.75);
+  --holo-bb:   rgba(20, 80,110, 0.20);
+  --holo-fill: linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.16) 45%, rgba(255,255,255,0.12) 100%);
   --holo-shadow:
-    inset 0 0.5px 0 rgba(255,255,255,0.95),
-    0 2px 10px rgba(20,70,110,0.08),
-    0 12px 30px rgba(20,70,110,0.06);
-  --holo-blur: blur(14px) saturate(150%);
+    inset 0 1.25px 0 rgba(255,255,255,0.90),
+    inset 0 0.5px  0 rgba(255,255,255,1),
+    inset 0 -1px   0 rgba(255,255,255,0.30),
+    inset 0 -7px 16px -12px rgba(60,100,160,0.18),
+    0 1px 3px  rgba(60,100,160,0.06),
+    0 8px 22px -8px rgba(60,100,160,0.14);
+  --holo-blur: blur(12px) saturate(140%);
   --scan: rgba(20,110,130, 0.035);
   --hair: rgba(20, 90,120, 0.14);
 
-  --nav-bg:     rgba(230,238,245, 0.60);
-  --nav-border: rgba(20,110,130, 0.16);
-  --nav-shadow: inset 0 0.5px 0 rgba(255,255,255,0.90), 0 4px 18px rgba(20,70,110,0.08);
+  --nav-bg:     rgba(218,230,242, 0.50);
+  --nav-border: rgba(255,255,255,0.60);
+  --nav-shadow: inset 0 0.5px 0 rgba(255,255,255,0.85), 0 1px 8px rgba(60,100,160,0.06);
 }
 
 /* ═══════════════════════════════════════════════
-   Holographic glass — the one surface recipe.
-   Near-invisible fill, a single signal rim, a faint
-   scanline beneath. Never nest .holo inside .holo.
+   Liquid Glass — the one surface recipe.
+   Near-zero fill, heavy backdrop blur, directional
+   edges (bright top-left, dim bottom-right), top
+   specular + bottom dark rim (in --holo-shadow), and
+   a faint prismatic edge ring. Never nest .holo in .holo.
    ═══════════════════════════════════════════════ */
 .holo {
   position: relative;
+  isolation: isolate;
   background: var(--holo-fill, var(--holo-bg));
   backdrop-filter: var(--holo-blur);
   -webkit-backdrop-filter: var(--holo-blur);
@@ -197,15 +226,20 @@
   transform: translateZ(0);
   transition: background var(--dur-mid), box-shadow var(--dur-mid), border-color var(--dur-mid);
 }
+/* Prismatic edge ring — chromatic fringe on the 1px border (sells refraction). */
 .holo::after {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: repeating-linear-gradient(0deg, var(--scan) 0, var(--scan) 1px, transparent 1px, transparent 4px);
-  opacity: 0.6;
-  mix-blend-mode: overlay;
+  padding: 1px;
+  background: var(--gl-prism);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0.7;
 }
 
 /* ═══════════════════════════════════════════════
@@ -277,7 +311,7 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-.glow { text-shadow: 0 0 22px rgba(52, 245, 214, 0.45); }
+.glow { text-shadow: 0 0 22px rgba(26, 140, 170, 0.45); }
 
 /* ═══════════════════════════════════════════════
    Keyboard focus — one bright signal ring on every
