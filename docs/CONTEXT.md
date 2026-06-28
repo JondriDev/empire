@@ -275,7 +275,7 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-28, post-EPIC-2-S6 green main `5bd2cd0` — token-violations 134→59)
+## 📊 Last QA confirmation (2026-06-28, post-EPIC-2-S7 green main `d66dd27` — token-violations 59→14)
 
 - **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (all 27 registry
@@ -286,17 +286,21 @@
   Both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat, calendar, goals,
   messages. Intentionally emit-only (by design): files, photos, datacenter + tool apps via `NodeActions`.
   Re-verified live this run by the smoke harness's INBOUND-LANDS guard (3/3 receivers chip+prefill).
-- **Epic-acceptance: EPIC-2 S6 CONFIRMED MOVED** — the ACTIVE epic's target metric is *Design-token
-  violations* (501 → 0). Since the last QA (after S4+S5, 134), one builder commit landed: **S6** (`5bd2cd0`,
-  swept the entire artifacts app → 0 via the new shared `CATEGORICAL` 8-distinct-hex accent rail in `tokens.ts`
-  + exempted `ColorPalette.tsx` as content, claimed 134→59). `node scripts/metrics.mjs` this run reports
-  **59** → confirmed, no contradiction (net **134→59, −75**; metrics.json history shows the 134→59 step).
-  Visually verified: artifacts app (ChartBuilder/Kanban/FormBuilder/gallery) renders the categorical token
-  series, no broken/blank swatches. Top remaining offenders (next stage S7): `components/ui/Toast.tsx` (16),
-  `components/ErrorBoundary.tsx` (7), `apps/notes/Notes.tsx`/`components/Desktop.tsx`/`components/ui/Utility.tsx`
-  (6 each). *Visual recolor (Tailwind→XENO) is intentional; the metric drop is the proof.*
-- **Auto metrics vs last QA snapshot `e0f8cb7`:** token-violations **134→59 (−75)**, vitest **112→115 (+3**,
-  S6 `tokens.test.ts`), test files **16 (±0)**, static count 105→108, bundle gz **248.1 (±0)**.
+- **Epic-acceptance: EPIC-2 S7 CONFIRMED MOVED** — the ACTIVE epic's target metric is *Design-token
+  violations* (501 → 0). Since the last QA (after S6, 59), one builder code commit landed: **S7** (`37e26db`,
+  swept the 7 shared-UI + shell surfaces → 0 with the `cssVar`/`tint` rails — Toast 16→0, ErrorBoundary 7→0,
+  Utility 6→0, Desktop 6→0, Dashboard 4→0, AppShell 3→0, NodeActions 3→0; claimed 59→14) plus a routines-retro
+  doc commit (`d66dd27`, no code). `node scripts/metrics.mjs` this run reports **14** → confirmed, no
+  contradiction (net **59→14, −45**; metrics.json history shows the discrete 59→14 step). Visually verified:
+  the desktop shell, app grid, telemetry rail render fully in XENO (Desktop/AppShell/Dashboard chrome intact),
+  artifacts categorical rail unbroken. **EPIC-2 is one stage from DONE** — only S8 (long-tail entity apps) left.
+  *Visual recolor (Tailwind→XENO) is intentional; the metric drop is the proof.*
+- **Remaining 14 → S8 (EPIC-2 close):** `apps/notes/Notes.tsx` (6), `apps/goals/Goals.tsx` (3),
+  `apps/ai-chat/AIChat.tsx` (2), `apps/weather/Weather.tsx` (1), `apps/calendar/Calendar.tsx` (1),
+  `apps/network/nodeColors.ts` (1, route through `rgbCss` not `cssVar`). After S8 → token-violations = 0,
+  flag QA to confirm 0 on green main, promote EPIC-3 (Depth pass on shallow instruments).
+- **Auto metrics vs last QA snapshot `4826447`:** token-violations **59→14 (−45)**, vitest **115 (±0)**,
+  test files **16 (±0)**, static count **108 (±0)**, bundle gz **248 (±0)**.
 - **`latest/` holds only:** current `desktop.png` + 27 `app-<id>.png` + `REPORT.md` (no dated/per-stage PNGs).
 - **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
   datacenter `/api/dc/tables`→401 (authed API, no headless session).

@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-28 · Visual & Smoke QA — EPIC-2 S7 confirmed (token-violations 59→14), 28/28 green
+
+**Done.** Fresh cloud checkout on green main `d66dd27`. `npm install` + `npm run build` (tsc -b && vite
+build) **🟢**; served `dist/` on :3001. Headless smoke (pre-installed Chromium 1194) rendered all **28
+routes (desktop + 27 apps) with 0 uncaught JS / 0 error-boundaries / 0 blanks → 28/28 PASS.** Harness
+guards all green: SHELL-IS-STYLED ✅ (top-level `.empire-desktop{…position:fixed…}`, 0 `.hide-sm
+.empire-desktop`), REGISTRY-COVERAGE ✅ (27/27), INBOUND-LANDS **3/3 ✅** (calendar←editor / goals←notes /
+messages←ai-chat each show "Received from …" chip + prefilled control). vitest **115/115** (16 files),
+eslint clean. **Epic-acceptance: EPIC-2 S7 CONFIRMED MOVED** — `node scripts/metrics.mjs` reports
+**token-violations = 14**, matching the S7 claim (59→14, −45); metrics.json history shows the discrete
+step, no contradiction. Visually re-verified the S7-touched shell/chrome (Desktop/AppShell/Dashboard) renders
+fully in XENO + artifacts categorical rail intact. **No runtime bugs found.** Env-expected net noise only
+(files Android-path 500, datacenter authed 401). Overwrote `docs/screenshots/latest/` (desktop + 27 app PNGs
++ REPORT.md), updated METRICS.md / CONTEXT.md. **Next: EPIC-2 S8** (long-tail entity apps → 0: Notes 6,
+Goals 3, AIChat 2, Weather 1, Calendar 1, nodeColors 1) closes EPIC-2 → then promote EPIC-3.
+
+---
+
 ## 2026-06-28 · Routine Optimizer (meta) — THE constraint: a 3-day fleet-wide stall (availability)
 
 **Done.** Weekly constraint hunt over 06-20→06-28. **THE constraint = availability:** the fleet
