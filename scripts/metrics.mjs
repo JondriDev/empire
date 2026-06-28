@@ -101,6 +101,48 @@ function tokenViolations() {
   return { count, top: offenders.slice(0, 5) };
 }
 
+// ---- metric: design-system utility conformance (lower is better) -----------
+// Tailwind named-palette utilities in app code bypass the JondriDev tokens
+// (text-gray-400, bg-cyan-600, text-white/40, bg-white/10, text-red-400, …).
+// tokenViolations() above only catches raw #hex / rgba() LITERALS; EPIC-2
+// swept those to 0 but never touched these ergonomic-but-off-system Tailwind
+// colour classes — which is why the apps were only partly on-system. App code
+// should use the token-backed utilities instead (text-fg/-muted/-faint,
+// bg-glass, border-hair, text-signal/-danger/…, the .gp/.glass primitives, or
+// cssVar()/tint()). Same infra allowlist as tokenViolations().
+function offSystemUtilities() {
+  const DS_INFRA = new Set([
+    'src/design-system.css', 'src/window-manager.css', 'src/index.css',
+    'src/lib/registry.ts',
+    'src/apps/cakra/lib/providers.ts',
+    'src/apps/artifacts/artifacts/ColorPalette.tsx',
+  ].map((p) => p.split('/').join(path.sep)));
+  const files = walk(path.join(ROOT, 'src')).filter(
+    (f) => /\.(ts|tsx|css)$/.test(f) &&
+      !f.includes(`${path.sep}design-system${path.sep}`) &&
+      !DS_INFRA.has(path.relative(ROOT, f)) &&
+      !/\.test\.tsx?$/.test(f)
+  );
+  // Tailwind utility prefixes that take a colour value.
+  const PFX = 'bg|text|border|ring|ring-offset|from|to|via|fill|stroke|divide|outline|accent|caret|decoration|placeholder|shadow';
+  // Default Tailwind palette scales (the off-system colours).
+  const SCALE = 'slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose';
+  const named = new RegExp(`\\b(?:${PFX})-(?:${SCALE})-[0-9]{2,3}(?:/[0-9]{1,3})?\\b`, 'g');
+  const blackWhite = new RegExp(`\\b(?:${PFX})-(?:white|black)(?:/[0-9]{1,3})?\\b`, 'g');
+  const arbColor = new RegExp(`\\b(?:${PFX})-\\[(?:#|rgb|hsl|oklch|oklab)[^\\]]*\\]`, 'gi');
+  let count = 0;
+  const offenders = [];
+  for (const f of files) {
+    const txt = read(f);
+    const n = (txt.match(named) || []).length
+            + (txt.match(blackWhite) || []).length
+            + (txt.match(arbColor) || []).length;
+    if (n) { count += n; offenders.push([path.relative(ROOT, f), n]); }
+  }
+  offenders.sort((a, b) => b[1] - a[1]);
+  return { count, top: offenders.slice(0, 8) };
+}
+
 // ---- metric: shipped bundle size (gzipped) ---------------------------------
 function bundleSize() {
   const dir = path.join(ROOT, 'dist/assets');
@@ -118,6 +160,7 @@ function bundleSize() {
 // ---- assemble ---------------------------------------------------------------
 const t = testStats();
 const tv = tokenViolations();
+const osu = offSystemUtilities();
 const bundle = bundleSize();
 const snapshot = {
   generatedAt: new Date().toISOString(),
@@ -125,12 +168,13 @@ const snapshot = {
   testFiles: t.testFiles,
   testCases: t.testCases,
   tokenViolations: tv.count,
+  offSystemUtilities: osu.count,
   bundleGzKB: bundle ? bundle.gzKB : null,
   bundleRawKB: bundle ? bundle.rawKB : null,
 };
 
 if (JSON_ONLY) {
-  console.log(JSON.stringify({ ...snapshot, tokenViolationTop: tv.top }, null, 2));
+  console.log(JSON.stringify({ ...snapshot, tokenViolationTop: tv.top, offSystemUtilitiesTop: osu.top }, null, 2));
   process.exit(0);
 }
 
@@ -158,7 +202,8 @@ const rows = [
   ['Apps / routes', snapshot.apps, delta('apps'), 'higher = more surface (steady-state ~26)'],
   ['Test cases', snapshot.testCases, delta('testCases'), 'higher = safer to leap'],
   ['Test files', snapshot.testFiles, delta('testFiles'), ''],
-  ['Token violations', snapshot.tokenViolations, delta('tokenViolations'), 'LOWER is better (design-system conformance)'],
+  ['Token violations', snapshot.tokenViolations, delta('tokenViolations'), 'LOWER is better (raw hex/rgb literals)'],
+  ['Off-system utils', snapshot.offSystemUtilities, delta('offSystemUtilities'), 'LOWER is better (Tailwind palette classes bypassing tokens)'],
   ['Bundle gz (KB)', snapshot.bundleGzKB ?? 'n/a (no dist)', delta('bundleGzKB'), 'LOWER is better; build first to measure'],
 ];
 const w = (s, n) => String(s).padEnd(n);
@@ -170,4 +215,20 @@ if (tv.top.length) {
   console.log(`\nTop token-violation files:`);
   for (const [f, n] of tv.top) console.log(`  ${n}\t${f}`);
 }
+if (osu.top.length) {
+  console.log(`\nTop off-system-utility files:`);
+  for (const [f, n] of osu.top) console.log(`  ${n}\t${f}`);
+}
 console.log('');
+
+// ---- optional CI gate: fail if design-system conformance regressed ---------
+if (args.has('--assert-zero')) {
+  const fail = [];
+  if (snapshot.tokenViolations > 0) fail.push(`tokenViolations=${snapshot.tokenViolations}`);
+  if (snapshot.offSystemUtilities > 0) fail.push(`offSystemUtilities=${snapshot.offSystemUtilities}`);
+  if (fail.length) {
+    console.error(`✗ design-system conformance assertion FAILED: ${fail.join(', ')}`);
+    process.exit(1);
+  }
+  console.log('✓ design-system conformance: tokenViolations=0, offSystemUtilities=0');
+}

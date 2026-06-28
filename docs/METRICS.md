@@ -20,7 +20,17 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 | Test cases | 136 (static) · 143 (vitest run) | 60+ | ↑ higher = safer to leap |
 | Test files | 18 | grow with code | ↑ |
 | Design-token violations | **0** | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
+| Off-system utilities | **1160** | 0 | ↓ Tailwind palette classes (`text-gray-400`, `bg-cyan-600`, `bg-white/10`, `text-white`, `text-red-400`…) that bypass the JondriDev tokens — EPIC-2's blind spot, now being swept |
 | Bundle gz (KB) | 291.9 | hold / shrink | ↓ |
+
+> **Off-system utilities (added 2026-06-29).** `tokenViolations` only ever counted raw `#hex`/`rgba()`
+> *literals*, so it hit 0 while ~1,160 ergonomic-but-off-system Tailwind palette classes still bypassed
+> the design system (and broke theme-switching, since `text-white`/`bg-gray-*` don't follow `[data-theme]`).
+> Migrate them to the token-backed utilities added in `src/design-system/theme.css`
+> (`text-fg`/`text-muted`/`text-faint`, `bg-glass`, `border-hair`, `text-signal`/`bg-signal`,
+> `text-success`/`text-warn`/`text-danger`/`text-info`), the `.gp`/`.glass` primitives + `src/components/ui`
+> components, or `cssVar()`/`tint()`/`CATEGORICAL` for JS-computed colours. The lock stage flips
+> `node scripts/metrics.mjs --assert-zero` into a hard gate so it can't regress.
 
 > Last integration since prior QA snapshot (`2cb7801`, EPIC-3 S1 Clock, apps 25 / gz 290.7 / vitest 132 / files
 > 17): one code commit landed — **`88b70a7` EPIC-3 S2 (Music + Video libraries survive a reload via the shared

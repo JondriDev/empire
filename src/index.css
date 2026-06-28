@@ -1,3 +1,4 @@
 @import "tailwindcss";
+@import "./design-system/theme.css";
 @import "./design-system.css";
 @import "./window-manager.css";
