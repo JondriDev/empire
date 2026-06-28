@@ -44,7 +44,7 @@ Run Python or JavaScript code directly.
 
 *Watch everything I do live in the **Workspace** panel on the right.*`
 
-export default function Agent() {
+export default function AgentSurface() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -94,7 +94,7 @@ export default function Agent() {
 
   // Emit APP_OPENED
   useEffect(() => {
-    emit({ type: 'APP_OPENED', appId: 'ai-agent' })
+    emit({ type: 'APP_OPENED', appId: 'ai-chat' })
   }, [])
 
   // Auto-scroll

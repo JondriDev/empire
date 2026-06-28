@@ -48,8 +48,8 @@ async function launchBrowser() {
 const apps = [
   'calculator','calendar','clock','weather','grammar','language','music','video',
   'files','cache','browser','editor','notes','photos','datacenter','maps','messages',
-  'prompt-generator','token-counter','learning-tracker','ai-agent','ai-chat','goals',
-  'hermes-cc','artifacts','network','inbox',
+  'prompt-generator','token-counter','learning-tracker','ai-chat','goals',
+  'artifacts','network','inbox',
 ];
 
 // ── REGISTRY-COVERAGE assertion (the silently-skipped-app trap) ─────────────

@@ -30,7 +30,6 @@ const DICT: Record<string, Entry> = {
   'network.awaiting': { en: 'awaiting signal…', id: 'menunggu sinyal…' },
 
   // ── App names (mapped onto empire's registry ids) ──
-  'app.ai-agent.name':         { en: 'Hermes Agent', id: 'Agen Hermes' },
   'app.calculator.name':       { en: 'Calculator', id: 'Kalkulator' },
   'app.calendar.name':         { en: 'Calendar', id: 'Kalender' },
   'app.clock.name':            { en: 'Clock', id: 'Jam' },
@@ -51,8 +50,7 @@ const DICT: Record<string, Entry> = {
   'app.prompt-generator.name': { en: 'Prompt Gen', id: 'Pembuat Prompt' },
   'app.token-counter.name':    { en: 'Token Counter', id: 'Penghitung Token' },
   'app.learning-tracker.name': { en: 'Learning Tracker', id: 'Pelacak Belajar' },
-  'app.hermes-cc.name':        { en: 'Hermes CC', id: 'Pusat Komando' },
-  'app.ai-chat.name':          { en: 'AI Chat', id: 'Obrolan AI' },
+  'app.ai-chat.name':          { en: 'Cakra', id: 'Cakra' },
   'app.artifacts.name':        { en: 'Artifacts', id: 'Artefak' },
   'app.network.name':          { en: 'Network', id: 'Jaringan' },
 }

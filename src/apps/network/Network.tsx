@@ -58,7 +58,7 @@ function appIdForEvent(e: EmpireEvent): string | null {
     case 'HERMES_APP_LAUNCHED':
     case 'HERMES_TOOL_EXECUTED':
     case 'HERMES_SKILL_LOADED':
-    case 'HERMES_MCP_CONNECTED': return 'hermes-cc'
+    case 'HERMES_MCP_CONNECTED': return 'ai-chat'
     default: return null
   }
 }
