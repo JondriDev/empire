@@ -1,9 +1,14 @@
 # Routine 1 — Builder (Epic Executor)
 
+> **⚠ Model update (~2026-06-24).** Builder now **commits the stage directly to `main`**
+> (its own green build/tests/metrics are the only gate — no PR, no `routine/auto-*` branch,
+> no Reviewer). The verbatim prompt below still says "Open a PR … never push to main" and
+> needs the human to paste back the current live prompt — see `PROPOSALS-2026-06-28.md`.
+
 - **Trigger ID:** `trig_01NhehaEqini9ix3THyYLQcK`
 - **Schedule:** every 5h
-- **Branch prefix:** `routine/auto-*`
-- **Writes:** app code + tests (one code PR/run) · updates `docs/CONTEXT.md`, `docs/EPICS.md`
+- **Pushes:** directly to `main` (self-verified green; no PR)
+- **Writes:** app code + tests (one stage/run) · updates `docs/CONTEXT.md`, `docs/EPICS.md`
 
 ## Current prompt  (paste verbatim into the live config)
 

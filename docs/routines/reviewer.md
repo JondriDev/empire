@@ -1,8 +1,14 @@
-# Routine 2 — Reviewer (Integrator)
+# Routine 2 — Reviewer / Main-Health Guardian (DISABLED)
+
+> **⚠ DISABLED (~2026-06-24).** The fleet switched to direct-to-main; there are no PRs to
+> merge, so the Integrator role was retired. If re-enabled, its job is **Main-Health
+> Guardian**: verify `main` is green/releasable and fix a red `main` *directly on `main`*
+> (it does NOT merge PRs/branches). The verbatim prompt below is the OLD PR-merge Integrator
+> text and must be rewritten before any re-enable — see `PROPOSALS-2026-06-28.md`.
 
 - **Trigger ID:** `trig_01MBY9DbEJ6rM5pmL127wAnH`
-- **Schedule:** every 5h (offset from Builder)
-- **Writes:** merges `routine/auto-*` PRs to `main`; integration entries in `docs/ROUTINE-LOG.md`; updates `docs/METRICS.md`
+- **Schedule:** DISABLED (was: every 5h, offset from Builder)
+- **Writes (when active):** Main-Health fixes committed directly to `main`; `docs/ROUTINE-LOG.md`; `docs/METRICS.md`
 
 ## Current prompt  (paste verbatim into the live config)
 
