@@ -257,8 +257,8 @@ export default function Dashboard() {
                   {app.description}
                 </p>
 
-                {/* Hermes badge */}
-                {app.hermesEnabled && (
+                {/* Cakra badge */}
+                {app.cakraEnabled && (
                   <div
                     className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full"
                     style={{ background: `${app.color}15`, color: `${app.color}bb` }}

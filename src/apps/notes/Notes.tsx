@@ -2,7 +2,7 @@
  * Notes — connected to the Empire eventBus
  *
  * Every note creation, update, and deletion is broadcast to all apps.
- * "Ask Hermes" lets you analyze or summarize any note.
+ * "Ask Cakra" lets you analyze or summarize any note.
  *
  * UI polish: uses EmpireButton, EmpireInput/TextArea, EmptyState primitives
  * + toast notifications for feedback (no console.log).
@@ -101,13 +101,13 @@ export default function Notes() {
     updateNote(note.id, { tags: note.tags.filter(t => !t.startsWith(FROM_PREFIX)) })
   }
 
-  const askHermes = (note: Note) => {
+  const askCakra = (note: Note) => {
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
       text: `${note.title}\n\n${note.content}`,
       title: note.title,
       from: 'notes',
     }))
-    toast.info('Opening Hermes', `Analyzing "${note.title}"...`)
+    toast.info('Opening Cakra', `Analyzing "${note.title}"...`)
     setTimeout(() => { window.location.href = '/app/ai-chat' }, 200)
   }
 
@@ -157,7 +157,7 @@ export default function Notes() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
             <Badge variant="info">New</Badge>
             <span style={{ fontSize: '11px', color: 'var(--text3)' }}>
-              Save to your library — Hermes can analyze it later
+              Save to your library — Cakra can analyze it later
             </span>
           </div>
           <Input
@@ -202,7 +202,7 @@ export default function Notes() {
           <EmptyState
             icon={<StickyNote className="w-6 h-6" />}
             title="No notes yet"
-            description="Capture a thought, paste a quote, or jot a meeting summary. Hermes can summarize or analyze any note."
+            description="Capture a thought, paste a quote, or jot a meeting summary. Cakra can summarize or analyze any note."
             action={
               <Button
                 variant="primary"
@@ -227,7 +227,7 @@ export default function Notes() {
               onSaveEdit={() => handleSaveEdit(note.id)}
               onCancelEdit={cancelEdit}
               onDelete={() => handleDelete(note.id)}
-              onAskHermes={() => askHermes(note)}
+              onAskCakra={() => askCakra(note)}
               onDismissSource={() => handleDismissSource(note)}
               editTitle={editTitle}
               editContent={editContent}
@@ -249,7 +249,7 @@ interface NoteCardProps {
   onSaveEdit: () => void
   onCancelEdit: () => void
   onDelete: () => void
-  onAskHermes: () => void
+  onAskCakra: () => void
   onDismissSource: () => void
   editTitle: string
   editContent: string
@@ -257,7 +257,7 @@ interface NoteCardProps {
   setEditContent: (v: string) => void
 }
 
-function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDelete, onAskHermes, onDismissSource, editTitle, editContent, setEditTitle, setEditContent }: NoteCardProps) {
+function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDelete, onAskCakra, onDismissSource, editTitle, editContent, setEditTitle, setEditContent }: NoteCardProps) {
   // Provenance tag → source app; the remaining tags render as normal badges.
   const fromTag = note.tags.find(t => t.startsWith(FROM_PREFIX))
   const source = fromTag?.slice(FROM_PREFIX.length)
@@ -358,8 +358,8 @@ function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDe
               <NodeActions type="note" sourceId={note.id} />
               <ActionIconBtn title="Edit note" onClick={onStartEdit} icon={<Edit2 className="w-3.5 h-3.5" />} />
               <ActionIconBtn
-                title="Ask Hermes"
-                onClick={onAskHermes}
+                title="Ask Cakra"
+                onClick={onAskCakra}
                 icon={<Sparkles className="w-3.5 h-3.5" />}
                 accent={cssVar('plasma')}
               />
@@ -392,7 +392,7 @@ function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDe
               {(note.content.trim() ? note.content.trim().split(/\s+/).length : 0)} words
             </span>
             <button
-              onClick={onAskHermes}
+              onClick={onAskCakra}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',

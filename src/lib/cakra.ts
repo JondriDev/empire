@@ -3,7 +3,8 @@
  *
  * Cakra unifies the strengths of several coding agents (Claude Code's planning
  * + tool use, Codex's code execution, Kimi's long-context coding, Gemini /
- * AntiGravity's multimodal routing, Hermes' app-awareness). Instead of one
+ * AntiGravity's multimodal routing) plus its own deep awareness of every
+ * Empire app. Instead of one
  * fixed model, it classifies each task and routes it to the strongest model
  * for the job — all on the active provider (default NVIDIA NIM).
  *
@@ -84,7 +85,7 @@ export function lastUserText(messages: { role: string; content: string }[]): str
 export const CAKRA_SYSTEM_PROMPT =
   `You are Cakra — the unified intelligence of The Empire, Jondri's personal application suite. ` +
   `You combine the strengths of the best coding agents into one assistant: Claude Code's planning and tool use, ` +
-  `Codex's code execution, Kimi's long-context coding, Gemini/AntiGravity's multimodal routing, and Hermes' ` +
+  `Codex's code execution, Kimi's long-context coding, Gemini/AntiGravity's multimodal routing, and its own ` +
   `deep awareness of every app in the Empire. You automatically use the best model for each task. ` +
   `Be concise, sharp, and a little visionary. You have full context of all the Empire's apps and can act across ` +
   `them; when given data from another app, use it.`

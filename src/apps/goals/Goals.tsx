@@ -1,6 +1,6 @@
 /** 
- * Goals Tracker — connected to eventBus + Hermes
- * Track personal goals, set deadlines, track progress, ask Hermes for advice.
+ * Goals Tracker — connected to eventBus + Cakra
+ * Track personal goals, set deadlines, track progress, ask Cakra for advice.
  */
 
 import { useState, useEffect } from 'react'
@@ -105,7 +105,7 @@ export default function Goals() {
     emit({ type: 'NOTE_DELETED', noteId: id })
   }
 
-  const askHermesGoal = (goal: Goal) => {
+  const askCakraGoal = (goal: Goal) => {
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
       text: `Goal: ${goal.title}\n\nDescription: ${goal.description}\nDeadline: ${goal.deadline}\nProgress: ${goal.progress}%`,
       title: `Goal: ${goal.title}`,
@@ -114,7 +114,7 @@ export default function Goals() {
     window.location.href = '/app/ai-chat'
   }
 
-  const askHermesAll = () => {
+  const askCakraAll = () => {
     const summary = goals.map(g =>
       `• **${g.title}**${g.completed ? ' ✅' : ' 🔄'}\n  ${g.description}\n  Progress: ${g.progress}% | Deadline: ${g.deadline}`
     ).join('\n')
@@ -152,11 +152,11 @@ export default function Goals() {
           </p>
         </div>
         <button
-          onClick={askHermesAll}
+          onClick={askCakraAll}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-colors"
           style={{ background: 'color-mix(in srgb, var(--ion) 18%, transparent)', color: ACCENT, transitionDuration: 'var(--dur-fast)' }}
         >
-          <Bot className="w-3.5 h-3.5" /> Ask Hermes
+          <Bot className="w-3.5 h-3.5" /> Ask Cakra
         </button>
       </div>
 
@@ -293,10 +293,10 @@ export default function Goals() {
               <div className="flex flex-col gap-1">
                 <NodeActions type="goal" sourceId={goal.id} />
                 <button
-                  onClick={() => askHermesGoal(goal)}
+                  onClick={() => askCakraGoal(goal)}
                   className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                   style={{ color: ACCENT }}
-                  title="Ask Hermes about this goal"
+                  title="Ask Cakra about this goal"
                 >
                   <Bot className="w-4 h-4" />
                 </button>

@@ -104,9 +104,9 @@ export const CROSS_APP_ACTIONS = {
 
   SEND_TO_AI_CHAT: {
     id: 'send-to-ai',
-    label: 'Ask Hermes',
+    label: 'Ask Cakra',
     icon: 'Sparkles',
-    description: 'Send to AI Chat for analysis',
+    description: 'Send to Cakra for analysis',
     execute: (data: DataPayload) => {
       sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
         text: data.text,
@@ -115,7 +115,7 @@ export const CROSS_APP_ACTIONS = {
       }))
       handoff(data.source, 'ai-chat', 'asking')
       window.open('/app/ai-chat', '_self')
-      return 'Opening AI Chat...'
+      return 'Opening Cakra…'
     },
   } as const,
 
@@ -196,9 +196,9 @@ export const CROSS_APP_ACTIONS = {
     },
   } as const,
 
-  ASK_HERMES_TO_ANALYZE: {
-    id: 'ask-hermes-analyze',
-    label: 'Ask Hermes to Analyze',
+  ASK_CAKRA_TO_ANALYZE: {
+    id: 'ask-cakra-analyze',
+    label: 'Ask Cakra to Analyze',
     icon: 'Brain',
     description: 'Get AI-powered analysis via chat',
     execute: async (data: DataPayload) => {
@@ -210,7 +210,7 @@ export const CROSS_APP_ACTIONS = {
       }))
       handoff(data.source, 'ai-chat', 'analyzing')
       window.open('/app/ai-chat', '_self')
-      return 'Opening AI Chat for analysis...'
+      return 'Opening Cakra for analysis…'
     },
   } as const,
 }
@@ -220,7 +220,7 @@ export type AppActionKey = keyof typeof CROSS_APP_ACTIONS
 // ─── Smart context injection ────────────────────────────────────
 
 /** Build a prompt for the AI that includes current empire context */
-export async function askHermes(question: string, sourceApp: string): Promise<string> {
+export async function askCakra(question: string, sourceApp: string): Promise<string> {
   try {
     const response = await chat([
       { role: 'user', content: `[From ${sourceApp}] ${question}\n\nContext:\n${getCrossAppContext(sourceApp)}` },

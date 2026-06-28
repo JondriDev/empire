@@ -1,6 +1,6 @@
 /**
  * Data Center — real tables via server API + eventBus
- * Ask Hermes to analyze data, generate reports, or explain patterns.
+ * Ask Cakra to analyze data, generate reports, or explain patterns.
  */
 
 import { useState, useEffect } from 'react'
@@ -86,7 +86,7 @@ export default function DataCenter() {
     } catch { /* ignore */ }
   }
 
-  const askHermes = () => {
+  const askCakra = () => {
     const tableData = rows.slice(0, 10).map(r => JSON.stringify(r)).join('\n')
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
       text: `Data from **${activeTable}** table:\n\n${tableData}${rows.length > 10 ? `\n... and ${rows.length - 10} more rows` : ''}`,
@@ -112,8 +112,8 @@ export default function DataCenter() {
           )}
         </div>
         <div className="flex-1 overflow-auto">
-          <button onClick={askHermes} className="w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-cyan-500/10 text-cyan-300 text-sm border-b" style={{ borderColor: 'var(--border)' }}>
-            <Bot className="w-3.5 h-3.5" /> Ask Hermes
+          <button onClick={askCakra} className="w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-cyan-500/10 text-cyan-300 text-sm border-b" style={{ borderColor: 'var(--border)' }}>
+            <Bot className="w-3.5 h-3.5" /> Ask Cakra
           </button>
           {tables.map(t => {
             const active = activeTable === t
@@ -150,8 +150,8 @@ export default function DataCenter() {
             <span className="font-semibold capitalize">{activeTable}</span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-white/5" style={{ color: 'var(--text3)' }}>{rows.length} rows</span>
           </div>
-          <button onClick={askHermes} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-200 text-xs hover:bg-cyan-500/30 transition-colors">
-            <Bot className="w-3.5 h-3.5" /> Analyze with Hermes
+          <button onClick={askCakra} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-200 text-xs hover:bg-cyan-500/30 transition-colors">
+            <Bot className="w-3.5 h-3.5" /> Analyze with Cakra
           </button>
         </div>
 

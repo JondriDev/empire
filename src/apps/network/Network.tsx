@@ -54,11 +54,11 @@ function appIdForEvent(e: EmpireEvent): string | null {
     case 'AI_QUERY':
     case 'AI_RESPONSE': return e.app || 'ai-chat'
     case 'HANDOFF': return e.toId // the receiving instrument lights as the target
-    case 'HERMES_STATUS_REFRESHED':
-    case 'HERMES_APP_LAUNCHED':
-    case 'HERMES_TOOL_EXECUTED':
-    case 'HERMES_SKILL_LOADED':
-    case 'HERMES_MCP_CONNECTED': return 'ai-chat'
+    case 'CAKRA_STATUS_REFRESHED':
+    case 'CAKRA_APP_LAUNCHED':
+    case 'CAKRA_TOOL_EXECUTED':
+    case 'CAKRA_SKILL_LOADED':
+    case 'CAKRA_MCP_CONNECTED': return 'ai-chat'
     default: return null
   }
 }
@@ -86,11 +86,11 @@ function labelForEvent(e: EmpireEvent): string {
     case 'APP_CLOSED': return 'closed'
     case 'DATA_TABLE_UPDATED': return 'table updated'
     case 'WEATHER_UPDATED': return 'weather synced'
-    case 'HERMES_STATUS_REFRESHED': return 'status refreshed'
-    case 'HERMES_APP_LAUNCHED': return 'app launched'
-    case 'HERMES_TOOL_EXECUTED': return 'tool run'
-    case 'HERMES_SKILL_LOADED': return 'skill loaded'
-    case 'HERMES_MCP_CONNECTED': return 'mcp connected'
+    case 'CAKRA_STATUS_REFRESHED': return 'status refreshed'
+    case 'CAKRA_APP_LAUNCHED': return 'app launched'
+    case 'CAKRA_TOOL_EXECUTED': return 'tool run'
+    case 'CAKRA_SKILL_LOADED': return 'skill loaded'
+    case 'CAKRA_MCP_CONNECTED': return 'mcp connected'
     case 'HANDOFF': return e.label || 'handoff'
     default: return 'signal'
   }

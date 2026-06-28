@@ -2,7 +2,7 @@
  * apiBase — single source of truth for the *optional* Empire backend.
  *
  * Most Empire apps run fully client-side (localStorage / Zustand persist).
- * A handful (DataCenter, the AI proxy, agent tools, Files, Hermes) talk to
+ * A handful (DataCenter, the AI proxy, agent tools, Files, Cakra) talk to
  * the Express backend in `server.js`. When the app is packaged as a PWA or
  * Android APK with no local server, those calls must degrade gracefully —
  * and may optionally be pointed at a remote server the user runs (e.g. a PC

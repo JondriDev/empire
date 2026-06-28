@@ -73,7 +73,7 @@ export default function AppShell({ appMap }: AppShellProps) {
           <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>
             {appDef.name}
           </span>
-          {appDef.hermesEnabled && (
+          {appDef.cakraEnabled && (
             <span
               className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full"
               style={{ background: `${appDef.color}18`, color: appDef.color }}

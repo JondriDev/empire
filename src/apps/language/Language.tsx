@@ -1,6 +1,6 @@
 /**
  * Language Lab — connected to the Empire eventBus
- * Multi-language translation, phrase book, and Hermes integration.
+ * Multi-language translation, phrase book, and Cakra integration.
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -167,7 +167,7 @@ export default function Language() {
     localStorage.setItem('empire-phrase-book', JSON.stringify(updated))
   }
 
-  const askHermes = () => {
+  const askCakra = () => {
     if (!translation && !input) return
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
       text: `Translation request:\n\nOriginal (${LANGUAGES.find(l => l.code === (fromLang === 'auto' ? detectedLang : fromLang))?.name}): ${input}\n\nTranslation (${LANGUAGES.find(l => l.code === toLang)?.name}): ${translation}`,
@@ -298,10 +298,10 @@ export default function Language() {
         </div>
       )}
 
-      {/* Hermes */}
+      {/* Cakra */}
       <div className="flex gap-2">
-        <Button onClick={askHermes} className="text-xs bg-cyan-600 hover:bg-cyan-500">
-          <Bot className="w-3 h-3 mr-1" /> Ask Hermes
+        <Button onClick={askCakra} className="text-xs bg-cyan-600 hover:bg-cyan-500">
+          <Bot className="w-3 h-3 mr-1" /> Ask Cakra
         </Button>
       </div>
     </div>

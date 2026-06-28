@@ -43,7 +43,7 @@ export default function Messages() {
     setDraft('')
   }
 
-  const askHermesDraft = () => {
+  const askCakraDraft = () => {
     if (!draft.trim()) return
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
       text: `Draft message to ${recipient}:\n\n${draft}`,
@@ -53,7 +53,7 @@ export default function Messages() {
     window.location.href = '/app/ai-chat'
   }
 
-  const askHermesThread = () => {
+  const askCakraThread = () => {
     const recent = messages.slice(-5).map(m => `[${m.sender}]: ${m.content}`).join('\n')
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({
       text: recent || 'No messages yet',
@@ -73,13 +73,13 @@ export default function Messages() {
         </div>
         <div className="flex-1 overflow-auto">
           <button
-            onClick={askHermesThread}
+            onClick={askCakraThread}
             className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-white/5 transition-colors border-b"
             style={{ borderColor: 'var(--border)' }}
           >
             <Bot className="w-4 h-4 text-cyan-300" />
             <div>
-              <div className="text-sm font-medium text-cyan-200">Ask Hermes</div>
+              <div className="text-sm font-medium text-cyan-200">Ask Cakra</div>
               <div className="text-xs text-gray-500">Analyze my messages</div>
             </div>
           </button>
@@ -191,9 +191,9 @@ export default function Messages() {
             />
             {draft.trim() && (
               <button
-                onClick={askHermesDraft}
+                onClick={askCakraDraft}
                 className="w-10 h-10 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 flex items-center justify-center text-cyan-300 transition-colors flex-shrink-0"
-                title="Refine with Hermes"
+                title="Refine with Cakra"
               >
                 <Bot className="w-4 h-4" />
               </button>

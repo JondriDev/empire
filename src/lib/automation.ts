@@ -1,5 +1,5 @@
 /**
- * Cross-App Automation Rules — Hermes as the conductor
+ * Cross-App Automation Rules — Cakra as the conductor
  *
  * I watch all eventBus events and automatically trigger actions
  * across apps. I am the connective tissue that makes the Empire feel
@@ -27,11 +27,11 @@ interface CrossAppAction {
 // ── Built-in rules ───────────────────────────────────────────────────────────
 
 const rules: AutomationRule[] = [
-  // ── AI Chat → Context awareness ──────────────────────────────────────────────
+  // ── Cakra → Context awareness ──────────────────────────────────────────────
   {
     id: 'ai-chat-open-context',
-    name: 'AI Chat pre-loads context',
-    description: 'When AI Chat opens, check for queued context from other apps',
+    name: 'Cakra pre-loads context',
+    description: 'When Cakra opens, check for queued context from other apps',
     trigger: { type: 'APP_OPENED', filter: (e) => e.type === 'APP_OPENED' && e.appId === 'ai-chat' },
     action: (_, dispatch) => {
       try {
@@ -39,7 +39,7 @@ const rules: AutomationRule[] = [
         if (stored) {
           const ctx = JSON.parse(stored)
           dispatch({
-            type: 'HERMES_CTX_QUEUED',
+            type: 'CAKRA_CTX_QUEUED',
             payload: { text: ctx.text, title: ctx.title, from: ctx.from },
           })
           // Clear it so it doesn't persist
@@ -93,7 +93,7 @@ const rules: AutomationRule[] = [
   {
     id: 'code-run-log',
     name: 'Log code runs',
-    description: 'When code runs in the editor, ask Hermes to review it',
+    description: 'When code runs in the editor, ask Cakra to review it',
     trigger: { type: 'CODE_RUN' },
     action: (e, dispatch) => {
     if (e.type !== 'CODE_RUN') return
@@ -226,7 +226,7 @@ export function initAutomation() {
   })
   })
 
-  console.log(`[Hermes] Automation initialized with ${rules.filter(r => r.enabled).length} rules`)
+  console.log(`[Cakra] Automation initialized with ${rules.filter(r => r.enabled).length} rules`)
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -239,7 +239,7 @@ export function toggleRule(ruleId: string, enabled: boolean): void {
   const rule = rules.find(r => r.id === ruleId)
   if (rule) {
     rule.enabled = enabled
-    console.log(`[Hermes] Rule "${rule.id}" ${enabled ? 'enabled' : 'disabled'}`)
+    console.log(`[Cakra] Rule "${rule.id}" ${enabled ? 'enabled' : 'disabled'}`)
   }
 }
 
