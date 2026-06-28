@@ -5,7 +5,6 @@ import { apps, getAppIcon } from '../lib/registry'
 import { useStore } from '../lib/store'
 import { tint } from '../design-system/tokens'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
-import HermesAgentBar from '../components/HermesAgentBar'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 
 interface AppShellProps {
@@ -121,8 +120,6 @@ export default function AppShell({ appMap }: AppShellProps) {
             <AppComponent />
           </ErrorBoundary>
         </Suspense>
-        {/* Floating Hermes Agent Bar */}
-        <HermesAgentBar />
       </div>
 
       {/* Dock */}

@@ -87,16 +87,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen layer-content" style={{ background: 'var(--grad)', backgroundAttachment: 'fixed' }}>
 
-      {/* ── Animated Starfield ── */}
-      <div className="starfield" aria-hidden="true">
-        <div className="nebula nebula-1" />
-        <div className="nebula nebula-2" />
-        <div className="nebula nebula-3" />
-        <div className="stars-layer-1" />
-        <div className="stars-layer-2" />
-        <div className="stars-layer-3" />
-      </div>
-
       {/* ── Content ── */}
       <div className="relative z-10 p-6">
 

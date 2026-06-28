@@ -545,17 +545,6 @@ img, video, svg { display: block; max-width: 100%; }
 }
 
 /* ═══════════════════════════════════════════════
-   HERMES AGENT BAR POLISH
-   ═══════════════════════════════════════════════ */
-
-.hermes-trigger { animation: hermes-pulse 3s ease-in-out infinite; }
-
-@keyframes hermes-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(26, 140, 170, 0.4); }
-  50%      { box-shadow: 0 0 0 8px rgba(26, 140, 170, 0); }
-}
-
-/* ═══════════════════════════════════════════════
    KEYFRAME ANIMATIONS
    ═══════════════════════════════════════════════ */
 
