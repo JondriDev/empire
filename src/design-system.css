@@ -163,7 +163,7 @@
   --input-bg-focus:     var(--holo-bg-h);
   --input-border-b:     var(--holo-bb);
   --input-border-t:     var(--holo-bt);
-  --input-shadow-focus: 0 0 0 1px rgba(52, 245, 214, 0.55);
+  --input-shadow-focus: 0 0 0 1px rgba(26, 140, 170, 0.55);
 
   /* Buttons */
   --btn-primary-bg:     var(--grad-primary);
@@ -172,15 +172,15 @@
   --btn-secondary-bg-h: var(--holo-bg-h);
 
   /* Glows — signal teal */
-  --glow-teal:   0 0 1px rgba(52, 245, 214, 0.60), 0 0 22px rgba(52, 245, 214, 0.20);
-  --glow-accent: 0 0 1px rgba(52, 245, 214, 0.60), 0 0 22px rgba(52, 245, 214, 0.20);
-  --glow-blue:   0 0 1px rgba(77, 155, 255, 0.55), 0 0 22px rgba(77, 155, 255, 0.16);
+  --glow-teal:   0 0 1px rgba(26, 140, 170, 0.60), 0 0 22px rgba(26, 140, 170, 0.20);
+  --glow-accent: 0 0 1px rgba(26, 140, 170, 0.60), 0 0 22px rgba(26, 140, 170, 0.20);
+  --glow-blue:   0 0 1px rgba(91, 143, 185, 0.55), 0 0 22px rgba(91, 143, 185, 0.16);
 
   /* Starfield tints */
   --star-white: rgba(214, 251, 244, 0.90);
-  --star-teal:  rgba( 52, 245, 214, 0.70);
-  --star-teal2: rgba( 52, 245, 214, 0.50);
-  --star-blue:  rgba( 77, 155, 255, 0.70);
+  --star-teal:  rgba( 26, 140, 170, 0.70);
+  --star-teal2: rgba( 26, 140, 170, 0.50);
+  --star-blue:  rgba( 91, 143, 185, 0.70);
 
   /* Aurora accents */
   --aurora-green: var(--aurora);
@@ -222,21 +222,21 @@
   --input-bg-focus:     var(--holo-bg-h);
   --input-border-b:     var(--holo-bb);
   --input-border-t:     var(--holo-bt);
-  --input-shadow-focus: 0 0 0 1px rgba(52, 245, 214, 0.55);
+  --input-shadow-focus: 0 0 0 1px rgba(26, 140, 170, 0.55);
 
   --btn-primary-bg:     var(--grad-primary);
   --btn-primary-bg-h:   linear-gradient(135deg, var(--signal) 0%, var(--ion) 100%);
   --btn-secondary-bg:   var(--holo-bg);
   --btn-secondary-bg-h: var(--holo-bg-h);
 
-  --glow-teal:   0 0 1px rgba(20, 133, 122, 0.50), 0 0 18px rgba(52, 245, 214, 0.28);
-  --glow-accent: 0 0 1px rgba(20, 133, 122, 0.50), 0 0 18px rgba(52, 245, 214, 0.28);
-  --glow-blue:   0 0 1px rgba(77, 155, 255, 0.45), 0 0 18px rgba(77, 155, 255, 0.20);
+  --glow-teal:   0 0 1px rgba(20, 133, 122, 0.50), 0 0 18px rgba(26, 140, 170, 0.28);
+  --glow-accent: 0 0 1px rgba(20, 133, 122, 0.50), 0 0 18px rgba(26, 140, 170, 0.28);
+  --glow-blue:   0 0 1px rgba(91, 143, 185, 0.45), 0 0 18px rgba(91, 143, 185, 0.20);
 
   --star-white: rgba(20,  80, 110, 0.45);
   --star-teal:  rgba(20, 133, 122, 0.45);
   --star-teal2: rgba(20, 133, 122, 0.30);
-  --star-blue:  rgba(77, 155, 255, 0.45);
+  --star-blue:  rgba(91, 143, 185, 0.45);
 
   --aurora-green: var(--aurora);
   --aurora-teal:  var(--signal);
@@ -263,7 +263,8 @@ html {
 
 body {
   font-family: var(--font);
-  background: var(--bg);
+  background: var(--grad);
+  background-attachment: fixed;
   color: var(--text);
   min-height: 100dvh;
   overflow-x: hidden;
@@ -283,7 +284,7 @@ body {
 
 /* Text selection — signal tint */
 ::selection {
-  background: rgba(52, 245, 214, 0.30);
+  background: rgba(26, 140, 170, 0.30);
   color: var(--xenon);
 }
 
@@ -311,14 +312,20 @@ img, video, svg { display: block; max-width: 100%; }
    ANIMATED STARFIELD BACKGROUND
    ═══════════════════════════════════════════════ */
 
+/* Earth-from-Space wash. The Deep-Field starfield/nebula layers are retired
+   (off-brand for JondriDev); this layer now paints the planetary --grad. The
+   stray star/nebula child divs are inert (hidden below) and removed in shell cleanup. */
 .starfield {
   position: fixed;
   inset: 0;
   z-index: 0;
-  overflow: hidden;
   pointer-events: none;
-  opacity: 0.5;
+  background: var(--grad);
+  background-attachment: fixed;
 }
+.stars-layer-1, .stars-layer-2, .stars-layer-3,
+.nebula, .nebula-layer,
+.starfield::before, .starfield::after { display: none !important; }
 
 .starfield::before,
 .starfield::after {
@@ -478,7 +485,7 @@ img, video, svg { display: block; max-width: 100%; }
 }
 .app-card:hover .app-icon {
   transform: scale(1.12);
-  box-shadow: 0 0 28px var(--card-icon-glow, rgba(52, 245, 214, 0.4));
+  box-shadow: 0 0 28px var(--card-icon-glow, rgba(26, 140, 170, 0.4));
 }
 .app-card[style*="--app-color"] .app-icon {
   --card-icon-glow: color-mix(in srgb, var(--app-color, var(--plasma)) 45%, transparent);
@@ -508,11 +515,11 @@ img, video, svg { display: block; max-width: 100%; }
 .gp-interactive { cursor: pointer; }
 .gp-interactive:hover {
   background: var(--card-bg-h);
-  border-color: rgba(52, 245, 214, 0.35);
+  border-color: rgba(26, 140, 170, 0.35);
   box-shadow:
     var(--card-shadow),
-    0 0 0 1px rgba(52, 245, 214, 0.12),
-    0 0 18px rgba(52, 245, 214, 0.10);
+    0 0 0 1px rgba(26, 140, 170, 0.12),
+    0 0 18px rgba(26, 140, 170, 0.10);
   transform: translateY(-1px);
 }
 .gp-interactive:active {
@@ -544,8 +551,8 @@ img, video, svg { display: block; max-width: 100%; }
 .hermes-trigger { animation: hermes-pulse 3s ease-in-out infinite; }
 
 @keyframes hermes-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 245, 214, 0.4); }
-  50%      { box-shadow: 0 0 0 8px rgba(52, 245, 214, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(26, 140, 170, 0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(26, 140, 170, 0); }
 }
 
 /* ═══════════════════════════════════════════════
@@ -631,8 +638,8 @@ img, video, svg { display: block; max-width: 100%; }
 @keyframes spin-counter { to { transform: rotate(-360deg); } }
 
 @keyframes spin-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(52, 245, 214, 0.3), 0 0 20px rgba(52, 245, 214, 0.1); }
-  50%      { box-shadow: 0 0 20px rgba(52, 245, 214, 0.6), 0 0 40px rgba(52, 245, 214, 0.2); }
+  0%, 100% { box-shadow: 0 0 10px rgba(26, 140, 170, 0.3), 0 0 20px rgba(26, 140, 170, 0.1); }
+  50%      { box-shadow: 0 0 20px rgba(26, 140, 170, 0.6), 0 0 40px rgba(26, 140, 170, 0.2); }
 }
 .spin-glow { animation: spin-glow 2s ease-in-out infinite; }
 
@@ -702,13 +709,13 @@ input[type="email"]:focus,
 input[type="password"]:focus,
 textarea:focus {
   background: var(--input-bg-focus);
-  border-color: rgba(52, 245, 214, 0.5);
+  border-color: rgba(26, 140, 170, 0.5);
   box-shadow: var(--input-shadow-focus);
   outline: none;
 }
 
 .dash-search:focus {
-  box-shadow: var(--input-shadow-focus), 0 0 0 2px rgba(52, 245, 214, 0.5), 0 0 8px rgba(52, 245, 214, 0.3);
+  box-shadow: var(--input-shadow-focus), 0 0 0 2px rgba(26, 140, 170, 0.5), 0 0 8px rgba(26, 140, 170, 0.3);
 }
 
 /* ═══════════════════════════════════════════════
@@ -740,7 +747,7 @@ textarea:focus {
 }
 .empire-btn:not(:disabled):hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(52, 245, 214, 0.25),
+  box-shadow: 0 4px 16px rgba(26, 140, 170, 0.25),
               inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .empire-btn:not(:disabled):active {
@@ -797,8 +804,8 @@ textarea:focus {
    ═══════════════════════════════════════════════ */
 
 .empire-search-result[data-selected="true"] {
-  background: rgba(52, 245, 214, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(52, 245, 214, 0.25);
+  background: rgba(26, 140, 170, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(26, 140, 170, 0.25);
 }
 .empire-search-result[data-selected="true"] .empire-search-result-name {
   color: var(--signal);
@@ -862,8 +869,8 @@ textarea:focus {
 .sidebar-selected {
   background: linear-gradient(
     90deg,
-    rgba(52, 245, 214, 0.18) 0%,
-    rgba(52, 245, 214, 0.08) 60%,
+    rgba(26, 140, 170, 0.18) 0%,
+    rgba(26, 140, 170, 0.08) 60%,
     transparent 100%
   );
   border-left: 2px solid var(--signal);
@@ -884,8 +891,8 @@ textarea:focus {
    APP ICON COLOR TINT — used by desktop & dock
    ═══════════════════════════════════════════════ */
 
-.app-tint      { background: var(--app-color, rgba(52, 245, 214, 0.12)); }
-.app-tint-bold { background: var(--app-color, rgba(52, 245, 214, 0.20)); }
+.app-tint      { background: var(--app-color, rgba(26, 140, 170, 0.12)); }
+.app-tint-bold { background: var(--app-color, rgba(26, 140, 170, 0.20)); }
 
 /* ─── Reduced motion (WCAG 2.3.3) ─── */
 @media (prefers-reduced-motion: reduce) {
