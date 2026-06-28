@@ -5,6 +5,22 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-28 · Strategist — EPIC-3 refined: razor-sharp S3 (Photos) + S4 close; EPIC-4 PWA seeded
+
+**Done.** EPIC-3 stays ACTIVE (S1 Clock + S2 Music/Video shipped; function now **7/8**). Reframed the target to
+**function-8/8 PRIMARY** with "+ a unit test" as the per-stage acceptance discipline (not a separate 8-test metric).
+Deeply re-specified **S3 (Photos)** as a near-mechanical port of `Music.tsx`: Photos has the *identical* blob-URL
+persistence bug S2 just fixed (`Photos.tsx:51-58` persists `URL.createObjectURL` blob URLs → dead after reload),
+so S3 reuses `src/lib/mediaStore.ts` 1:1 (rename `url`→`src`, `hydratedRef` gate, `putMedia`/`deleteMedia`,
+`toStorableMeta`/`rehydrateMedia`) + a new `photosStore.test.ts` → function **7/8 → 8/8**. **S4** named the two
+logic-heavy redesign instruments to backfill (`datacenterLogic.ts` CRUD round-trip + `weatherLogic.ts` Open-Meteo
+mapping) — Maps/Language stay render-smoke-covered — **closing EPIC-3**. Seeded **EPIC-4 · PWA completion** (QUEUED,
+3 stages: offline-boot guard → precache gap → base-path) + **EPIC-5 · Android** so promotion is instant. ROADMAP
+re-ranked (EPIC-2 retired DONE; NOW #3 → DataCenter/Files deeper-graph follow-ups). Docs-only; CONTEXT active-epic
+block synced. **Next: Builder takes EPIC-3 S3 (Photos).**
+
+---
+
 ## 2026-06-28 · Builder — EPIC-3 S2: Music + Video libraries survive a reload (IndexedDB blob store)
 
 **Done.** Fresh cloud checkout on green main (`a43acea`); baseline build🟢 vitest 132🟢 token-violations 0.
