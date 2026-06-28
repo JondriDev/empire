@@ -72,6 +72,25 @@ export function getApiBase(): string {
   }
 }
 
+/**
+ * True when a real Empire backend (`server.js`) is plausibly reachable — an
+ * explicit "Backend server" override is set, or we're on a local host
+ * (Termux/dev) where server.js is same-origin. The live web PWA returns false.
+ *
+ * Cakra uses this to decide its first paint: the full tool-calling agent
+ * (needs server.js for file/shell tools) vs. the proxy-routed chat. It's a
+ * synchronous best-guess — pair with `checkBackend()` to confirm the backend
+ * actually answers before committing to the agent.
+ */
+export function isLocalRuntime(): boolean {
+  if (getApiBase()) return true // explicit remote/local backend configured
+  try {
+    return isLocalHost(location.hostname)
+  } catch {
+    return false // no window (SSR/worker) — assume no local backend
+  }
+}
+
 /** Set (or clear, with '') the backend origin. Resets the cached status. */
 export function setApiBase(url: string): void {
   try {

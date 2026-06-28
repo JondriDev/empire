@@ -20,6 +20,7 @@ import type {
 import { getProvider } from './providers'
 import { TOOL_LIST, isDangerousTool } from './tools'
 import { executeTool, executeToolsParallel, formatToolResult } from './toolExecutor'
+import { buildEmpireContext } from '../../../lib/ai'
 
 // ─── Settings ────────────────────────────────────────────────────────────────
 
@@ -76,9 +77,9 @@ function buildSystemPrompt(_settings: AgentSettings): string {
     `- **${t.name}** (${t.category}${t.dangerous ? ', DANGEROUS' : ''}): ${t.description}`
   ).join('\n')
 
-  return `You are **Hermes Agent** — an AI that can *act* in the real world, not just chat.
+  return `You are **Cakra** — Jondri's AI that can *act* in the real world, not just chat.
 
-You run on an Android/Termux device as part of The Empire app suite.
+You run on an Android/Termux device as part of The Empire app suite — a web-desktop OS with ~25 apps.
 
 ## Your Abilities
 
@@ -110,7 +111,13 @@ After I show you the tool result, you can decide the next step — call more too
 - If the user asks to do something you can't do with available tools, say so honestly
 - Never make up tool results — if you don't know, say so
 - When searching the web, use the query terms the user provided
-- For code execution, prefer the language the user specified, or Python if unspecified`
+- For code execution, prefer the language the user specified, or Python if unspecified
+
+## Live Empire Context
+
+This is the current state across the user's apps — use it to ground answers about their data and to decide actions:
+
+${buildEmpireContext() || '(no app context captured yet)'}`
 }
 
 // ─── Tool Call Extraction ─────────────────────────────────────────────────────
@@ -206,7 +213,7 @@ export async function runAgentTurn(
         'Authorization': `Bearer ${providerSettings?.apiKey ?? ''}`,
         ...(settings.activeProvider === 'openrouter' ? {
           'HTTP-Referer': 'http://localhost:3001',
-          'X-Title': 'Hermes Agent',
+          'X-Title': 'Cakra',
         } : {}),
       },
       body: JSON.stringify({
