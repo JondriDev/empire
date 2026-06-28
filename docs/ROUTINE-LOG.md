@@ -5,6 +5,43 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-28 · Builder — EPIC-3 S2: Music + Video libraries survive a reload (IndexedDB blob store)
+
+**Done.** Fresh cloud checkout on green main (`a43acea`); baseline build🟢 vitest 132🟢 token-violations 0.
+Shipped **EPIC-3 S2** — fixed a latent data-integrity bug in both **Music** and **Video** with one shared store.
+
+- **Bug fixed (priority #1):** both apps persisted their playlist to `localStorage` *including* the
+  `URL.createObjectURL(file)` blob `src`. Blob URLs are **session-scoped** → dead after a reload, so the
+  "restored" library was a list of unplayable ghosts. Now: real file `Blob`s live in **IndexedDB**, only
+  *metadata* (no `src`) is persisted, and a fresh object URL is minted on mount — tracks whose blob is gone
+  are **dropped**, never shown as dead rows.
+- **New shared rail `src/lib/mediaStore.ts`:** thin, tolerant IndexedDB wrapper
+  (`putMedia`/`getMedia`/`deleteMedia`/`allMediaIds`/`loadMediaUrls`; opens DB `empire-media` store `blobs`;
+  **graceful no-op when IDB is absent** — private mode / jsdom resolve to null/false/empty, never throw) +
+  the **pure, tested** transforms `toStorableMeta` (strip volatile `src`, drop `ephemeral` items) and
+  `rehydrateMedia` (attach fresh URLs, drop ghosts), plus `shouldPersistBlob` (75 MB per-blob cap).
+- **Quota guard:** files over the cap are persisted-skipped and flagged `ephemeral` — still playable this
+  session, marked with a `session` / `session-only` hint chip in the playlist, and **excluded from
+  localStorage** so they never become ghosts.
+- **Wiring (`Music.tsx`, `Video.tsx`):** mount effect now async-rehydrates (read metadata → recover blobs →
+  rebuild library); a `hydratedRef` gate stops the initial empty render from overwriting the saved library
+  before its blobs load (race avoided). Add → `putMedia`; remove/clear → `deleteMedia`.
+- **Verified:** build🟢 (tsc -b && vite build), vitest **132→143** (`mediaStore.test.ts` +11: strip/rehydrate
+  round-trip, **ghost-drop**, size-cap, empties), eslint clean on all 4 touched files.
+- **Metrics (no regression):** token-violations **0 (±0)**, test cases 125→136 (+11), test files 17→18 (+1),
+  apps 25 (±0), bundle gz 290.7→291.9 (+1.2, the IDB store + wiring — inherent to added function). Kept the
+  existing Tailwind-class idiom; no raw hex (the `session` hint uses `amber-*` utility classes, not inline hex).
+- **Cloud limit (not verifiable headless):** the add-file → reload → still-plays-from-IDB behaviour needs a
+  real browser with IndexedDB + an actual media file; jsdom has no IDB (per `src/test/setup.ts`), so the IDB
+  glue stays thin/untested and the **pure transforms** carry the test coverage (the ghost-drop is the bug fix,
+  and it's unit-pinned). On-device confirmation: add an audio/video file → reload → it's still in the playlist
+  AND plays.
+- **Next:** **EPIC-3 S3** — Photos: durable thumbnails that survive a reload (reuse this `mediaStore`, or a
+  downscaled dataURL) + a unit test. Then S4 (backfill a test for Weather/DataCenter). Metric **5/8 → 7/8**
+  after S2 (Music + Video both now have function AND a shared test).
+
+---
+
 ## 2026-06-28 · Visual & Smoke QA — EPIC-3 S1 (Clock) CONFIRMED on green main `2cb7801`
 
 **Done.** Fresh cloud checkout, green main `2cb7801`. `npm run build` 🟢; served `dist/` on :3001 and ran the

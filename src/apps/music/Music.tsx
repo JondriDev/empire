@@ -2,12 +2,17 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import {
+  putMedia, deleteMedia, loadMediaUrls,
+  toStorableMeta, rehydrateMedia, shouldPersistBlob,
+  type MediaRecord, type StoredMeta,
+} from '../../lib/mediaStore'
+import {
   Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
   Music as MusicIcon, Trash2, ListMusic,
   Shuffle, Repeat, Plus, X
 } from 'lucide-react'
 
-interface Track {
+interface Track extends MediaRecord {
   id: string
   title: string
   artist: string
@@ -15,7 +20,11 @@ interface Track {
   duration: number
   src: string
   cover?: string
+  /** too large to persist — playable this session, won't survive a reload. */
+  ephemeral?: boolean
 }
+
+const PLAYLIST_KEY = 'empire-music-playlist'
 
 function formatTime(seconds: number): string {
   if (!seconds || isNaN(seconds)) return '0:00'
@@ -48,20 +57,38 @@ export default function Music() {
   const [_dragged, setDragged] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // Gate persistence until the async rehydrate finishes, so the initial empty
+  // render never overwrites the saved library before its blobs are recovered.
+  const hydratedRef = useRef(false)
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'music' })
-    // Restore playlist from localStorage
+    let cancelled = false
     try {
-      const saved = localStorage.getItem('empire-music-playlist')
-      if (saved) setPlaylist(JSON.parse(saved))
       const savedVol = localStorage.getItem('empire-music-volume')
       if (savedVol) setVolume(parseFloat(savedVol))
     } catch { /* ignore */ }
+    // Restore metadata from localStorage, then recover real blobs from IndexedDB
+    // and mint fresh object URLs — tracks whose blob is gone are dropped (no ghosts).
+    ;(async () => {
+      let meta: Array<StoredMeta<Track>> = []
+      try {
+        const saved = localStorage.getItem(PLAYLIST_KEY)
+        if (saved) meta = JSON.parse(saved)
+      } catch { /* ignore */ }
+      const urls = await loadMediaUrls(Array.isArray(meta) ? meta.map(m => m.id) : [])
+      const restored = rehydrateMedia<Track>(Array.isArray(meta) ? meta : [], id => urls.get(id) ?? null)
+      if (!cancelled) {
+        setPlaylist(restored)
+        hydratedRef.current = true
+      }
+    })()
+    return () => { cancelled = true }
   }, [])
 
   useEffect(() => {
-    try { localStorage.setItem('empire-music-playlist', JSON.stringify(playlist)) } catch { /* ignore */ }
+    if (!hydratedRef.current) return
+    try { localStorage.setItem(PLAYLIST_KEY, JSON.stringify(toStorableMeta(playlist))) } catch { /* ignore */ }
   }, [playlist])
 
   useEffect(() => {
@@ -124,13 +151,19 @@ export default function Music() {
     const newTracks: Track[] = audioFiles.map(file => {
       const meta = guessMeta(file)
       const src = URL.createObjectURL(file)
+      const id = `${Date.now()}-${slugify(file.name)}`
+      // Persist the real bytes to IndexedDB so the track survives a reload; skip
+      // oversized files (quota) and keep them session-only (ephemeral).
+      const ephemeral = !shouldPersistBlob(file.size)
+      if (!ephemeral) void putMedia(id, file)
       return {
-        id: `${Date.now()}-${slugify(file.name)}`,
+        id,
         title: meta.title || file.name,
         artist: meta.artist || 'Unknown Artist',
         album: meta.album || '',
         duration: 0,
         src,
+        ephemeral,
       }
     })
 
@@ -158,6 +191,7 @@ export default function Music() {
   const removeTrack = (id: string) => {
     const track = playlist.find(t => t.id === id)
     if (track) URL.revokeObjectURL(track.src)
+    void deleteMedia(id)
     setPlaylist(prev => {
       const next = prev.filter(t => t.id !== id)
       if (current?.id === id) {
@@ -169,7 +203,7 @@ export default function Music() {
   }
 
   const clearPlaylist = () => {
-    playlist.forEach(t => URL.revokeObjectURL(t.src))
+    playlist.forEach(t => { URL.revokeObjectURL(t.src); void deleteMedia(t.id) })
     setPlaylist([])
     setCurrent(null)
     setPlaying(false)
@@ -364,6 +398,9 @@ export default function Music() {
                   <p className={`text-sm truncate ${current?.id === track.id ? 'text-cyan-200 font-bold' : ''}`}>{track.title}</p>
                   <p className="text-xs text-white/40 truncate">{track.artist}</p>
                 </div>
+                {track.ephemeral && (
+                  <span className="text-[10px] text-amber-300/70 px-1.5 py-0.5 rounded bg-amber-500/10" title="Too large to save — won't survive a reload">session</span>
+                )}
                 <span className="text-xs text-white/30">{track.duration ? formatTime(track.duration) : '—'}</span>
                 <button
                   onClick={e => { e.stopPropagation(); removeTrack(track.id) }}

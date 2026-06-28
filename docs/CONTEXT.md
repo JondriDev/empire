@@ -25,18 +25,20 @@
 - **Active epic:** **EPIC-3 — Depth pass on shallow instruments** (promoted 2026-06-28 when EPIC-2 hit
   **0** token violations). **✅ NOW DECOMPOSED (Builder-seeded 2026-06-28) — S1 SHIPPED.** Target metric:
   *shallow instruments with genuine persistent/offline function + a unit test* → **8/8** (Weather, Maps,
-  Language, DataCenter, Clock, Music, Video, Photos); **now 5/8** (redesign delivered the first four; S1
-  delivered Clock).
-  - **▶ NEXT STAGE = EPIC-3 S2 (Music + Video → library survives a reload via IndexedDB).** Exact shape in
-    EPICS.md S2. **The bug to fix:** `Music.tsx`/`Video.tsx` persist their playlist to localStorage
-    *including* `URL.createObjectURL(...)` blob URLs (`empire-music-playlist` / `empire-video-playlist`),
-    but blob URLs are **session-scoped → dead after reload**, so the restored library is a list of
-    unplayable ghosts. **Build:** a shared `src/lib/mediaStore.ts` (IndexedDB; `putMedia`/`getMedia`/
-    `deleteMedia`/`allMediaIds`, graceful no-op when IDB absent) storing real `Blob`s by id; persist only
-    *metadata* (no `src`) in localStorage; rehydrate `src` via `createObjectURL` on mount. Size-cap large
-    blobs (quota). Unit-test the pure strip/rehydrate transforms (jsdom has **no** IndexedDB — keep the IDB
-    glue thin and untested, or add a tiny in-memory fake; do **not** add `fake-indexeddb` unless needed).
-    One commit covering both apps (shared store).
+  Language, DataCenter, Clock, Music, Video, Photos); **now 7/8** (redesign delivered the first four; S1
+  delivered Clock; **S2 delivered Music + Video**). Only **Photos** remains.
+  - **▶ NEXT STAGE = EPIC-3 S3 (Photos → durable thumbnails that survive a reload + a unit test).** Exact
+    shape in EPICS.md S3. **The gap (CONTEXT "Open follow-ups"):** Photos `photo` nodes carry no thumbnail
+    and object URLs are revoked on delete, so the gallery doesn't survive a reload. **Build:** give Photos
+    durable thumbnails — **reuse the S2 `src/lib/mediaStore.ts`** (store the real image `Blob` in IDB, persist
+    metadata only, rehydrate `src` on mount with the same `toStorableMeta`/`rehydrateMedia` rails — this is the
+    *whole point* of the shared store) **or** a downscaled dataURL if a tiny inline thumbnail is preferable.
+    Add a unit test for the thumbnail/serialization logic. *Acceptance:* add a photo → reload → thumbnail still
+    renders. Then **S4** (backfill a test for Weather or DataCenter → makes the metric honest at 8/8). First
+    read `src/apps/photos/` to find its current store key + shape before editing.
+  - **✅ S2 SHIPPED (2026-06-28):** Music + Video libraries now survive a reload. Real `Blob`s live in IDB via
+    the new shared `src/lib/mediaStore.ts`; only metadata persists; ghosts (missing blobs) are dropped on
+    rehydrate; oversized files stay session-only (`ephemeral`, "session-only" hint). See seam + trap below.
   - EPIC-1 (Organism Completeness) **DONE & QA-confirmed** (both-ways 9/9). EPIC-2 (Design-system
     conformance) **DONE 2026-06-28** — token-violations **501 → 0** across S1–S8 (see below).
 - **🎨 REDESIGN LANDED (2026-06-28) — user-directed "JondriDev pass"; do NOT revert.** A first-principles
@@ -268,6 +270,15 @@
       array; reserve `DS_INFRA` exemptions for genuine brand/content identity data. Tested in `tokens.test.ts`.
 - **AI routing:** `src/lib/ai.ts` → `src/lib/apiBase.ts` (`aiApiUrl()`); live site routes
   Cakra to the Supabase proxy, dev stays same-origin.
+- **Durable media store (EPIC-3 S2, 2026-06-28):** `src/lib/mediaStore.ts` — the rail for any app that
+  holds user-uploaded `Blob`s that must survive a reload. **IDB glue:** `putMedia(id,blob)→bool`,
+  `getMedia(id)→Blob|null`, `deleteMedia(id)`, `allMediaIds()`, `loadMediaUrls(ids)→Map<id,url>` (DB
+  `empire-media`, store `blobs`; every op is a tolerant no-op when IndexedDB is absent — jsdom/private mode).
+  **Pure transforms (the tested part — `mediaStore.test.ts`, 11 cases):** `toStorableMeta(items)` strips the
+  volatile `src` + drops `ephemeral` (what you write to localStorage), `rehydrateMedia(meta, urlForId)` mints
+  fresh URLs and **drops ghosts** (the bug fix), `shouldPersistBlob(size)` enforces the 75 MB cap. Consumed by
+  `Music.tsx` + `Video.tsx`; **Photos S3 should reuse it.** jsdom has no IDB → keep the glue thin/untested,
+  test only the transforms.
 
 ## ⚠️ Invariants & traps (do NOT relearn these the hard way)
 
@@ -277,11 +288,15 @@
   green build**. Always **space out the slashes** in comments. Verify without a browser:
   `grep -o '/\*'` count == `grep -o '\*/'` count, and built `dist/assets/index-*.css` has a
   **top-level `.empire-desktop{position:fixed}`** with **zero `.hide-sm .empire-desktop`**.
-- **Blob-URL persistence trap (Music/Video — EPIC-3 S2 target):** `URL.createObjectURL(file)` returns a
-  *session-scoped* URL that is **invalid after a reload**. `Music.tsx`/`Video.tsx` persist their playlist
-  (with these `src` URLs) to localStorage, so the restored library can't actually play. Persist the real
-  `Blob` bytes (IndexedDB) + metadata, and rebuild `src` on mount — never round-trip a blob URL through
-  localStorage and expect it to work.
+- **Blob-URL persistence trap (Music/Video — FIXED EPIC-3 S2, reuse the rail for Photos S3):**
+  `URL.createObjectURL(file)` returns a *session-scoped* URL that is **invalid after a reload** — never
+  round-trip a blob URL through localStorage and expect it to play. **The rail (`src/lib/mediaStore.ts`):**
+  store the real `Blob` in IndexedDB (`putMedia(id,blob)`), persist **metadata only** via `toStorableMeta(items)`
+  (strips `src` + drops `ephemeral`), and on mount `loadMediaUrls(ids)` → `rehydrateMedia(meta, urlForId)` to
+  mint fresh object URLs and **drop any item whose blob is gone** (no ghost rows). **Gate the persist effect
+  behind a `hydratedRef`** so the initial empty render doesn't clobber the saved library before the async
+  rehydrate finishes (race — both Music & Video do this). Oversized blobs (`!shouldPersistBlob(size)`) stay
+  session-only (`ephemeral`, excluded from localStorage). Photos S3 should reuse this exact rail.
 - **Clock persists via a pure logic module (EPIC-3 S1):** `src/apps/clock/clockLogic.ts` owns the maths +
   (de)serialization (`deserializeClockState` is tolerant — bad JSON / null / partial / corrupt all fall
   back field-by-field, so adding a field never wipes saved alarms). The component lazy-loads from
@@ -356,9 +371,9 @@
   **Metric 4/8 → 5/8** — Clock is the first instrument with BOTH function AND a dedicated test (the 4 redesign
   instruments have function but still lack a test → S4 backfills). metrics.json shows the discrete step
   (cases 108→125 static / vitest 115→132, files 16→17, gz 288.6→290.7).
-- **▶ NEXT STAGE = EPIC-3 S2** (Music + Video → library survives reload via shared `src/lib/mediaStore.ts`
-  IndexedDB blob store; persist metadata only, rehydrate blob `src` on mount). Then S3 (Photos thumbnails),
-  S4 (backfill a test for Weather/DataCenter).
+- **▶ NEXT STAGE = EPIC-3 S3** (Photos → durable thumbnails that survive a reload; **reuse** the S2
+  `src/lib/mediaStore.ts` blob store, persist metadata only, rehydrate on mount + a unit test). Then S4
+  (backfill a test for Weather/DataCenter → metric honest at 8/8). *(S2 shipped 2026-06-28: Music + Video.)*
 - **Auto metrics vs last QA snapshot `23df6ce`:** test cases **115→132 (+17)**, test files **16→17 (+1)**, bundle
   gz **288.6→290.7 (+2.1, Timer tab, by design)**, apps **25 (±0)**, token-violations **0 (±0)**.
 - **`latest/` holds only:** current `desktop.png` + 25 `app-<id>.png` + `REPORT.md` (no dated/per-stage PNGs).
@@ -373,4 +388,5 @@
 
 - DataCenter `dataset` nodes only carry a row count for the *active* table.
 - Files `file` nodes only reflect the *current* directory (reconcile drops others on navigate).
-- Photos `photo` nodes carry no thumbnail (object URLs are revoked on delete).
+- Photos `photo` nodes carry no thumbnail (object URLs are revoked on delete). **→ now promoted to EPIC-3 S3
+  (the active NEXT stage); fix by reusing the S2 `mediaStore.ts` blob rail.**
