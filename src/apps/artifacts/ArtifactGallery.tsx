@@ -8,6 +8,7 @@
  */
 import { useState } from 'react'
 import { FormInput, BarChart3, Columns, GraduationCap, FileText, Palette, Sparkles, ArrowRight, Star, Zap, Code2 } from 'lucide-react'
+import { cssVar } from '../../design-system/tokens'
 
 type IconKey = 'form' | 'chart' | 'kanban' | 'flash' | 'markdown' | 'palette'
 
@@ -39,7 +40,7 @@ const ARTIFACTS: ArtifactMeta[] = [
     title: 'Form Builder',
     tagline: 'Drag, drop, deploy.',
     description: 'Design a custom form with a growing palette of field types. Live preview, JSON export, fully responsive output.',
-    accent: '#6366f1',
+    accent: cssVar('ion'),
     badges: ['Drag & Drop', 'Live Preview', 'Export JSON'],
     preview: '▢  Full Name      ▢▢▢▢▢▢\n▢  Email          ▢▢▢▢▢▢\n▢  Date           ▢▢/▢▢/▢▢\n    [+ Add Field]',
     highlight: true,
@@ -50,7 +51,7 @@ const ARTIFACTS: ArtifactMeta[] = [
     title: 'Chart Builder',
     tagline: 'Data talks, charts listen.',
     description: 'Sandbox for live charts. Bar, line, pie — switch modes in a click, edit data inline, export to SVG.',
-    accent: '#22d3ee',
+    accent: cssVar('signal'),
     badges: ['Bar', 'Line', 'Pie', 'SVG Export'],
     preview: '  ▆ ▇ ▅ █ ▊ ▌\n  Jan Feb Mar Apr\n  ▁▂▃▄▅▆▇  •••',
   },
@@ -60,7 +61,7 @@ const ARTIFACTS: ArtifactMeta[] = [
     title: 'Kanban Board',
     tagline: 'Tasks, in motion.',
     description: 'Three-column board with drag-to-reorder, auto-save to localStorage, colored tags, and instant add.',
-    accent: '#ec4899',
+    accent: cssVar('c-danger'),
     badges: ['Drag & Drop', 'Auto-save', 'Tags'],
     preview: '┌─To Do──┬─Doing─┬─Done──┐\n│ Task A │ Task C │Task E │\n│ Task B │ Task D │      │\n└────────┴───────┴───────┘',
   },
@@ -70,7 +71,7 @@ const ARTIFACTS: ArtifactMeta[] = [
     title: 'Flashcards',
     tagline: 'Learn. Flip. Repeat.',
     description: 'Spaced-repetition decks. Build your own or pick from the sample library. Track what you know.',
-    accent: '#10b981',
+    accent: cssVar('aurora'),
     badges: ['Spaced Rep', 'Custom Decks', 'Mastery Tracking'],
     preview: '┌─────────────────┐\n│ What is a      │\n│   closure?     │\n│      FLIP  →   │\n└─────────────────┘',
   },
@@ -80,7 +81,7 @@ const ARTIFACTS: ArtifactMeta[] = [
     title: 'Markdown Studio',
     tagline: 'Write beautifully.',
     description: 'Split-pane markdown editor with live preview, syntax hints, copy-to-clipboard, and .md download.',
-    accent: '#f59e0b',
+    accent: cssVar('c-warn'),
     badges: ['Live Preview', 'Split Pane', 'Download .md'],
     preview: '# Hello\n **bold** *italic*\n - one\n - two\n ```code```',
     highlight: true,
@@ -91,9 +92,9 @@ const ARTIFACTS: ArtifactMeta[] = [
     title: 'Color Palette',
     tagline: 'Harmony, swatched.',
     description: 'Generate beautiful palettes from base colors across complementary, triadic, analogous, and more.',
-    accent: '#a855f7',
+    accent: cssVar('plasma'),
     badges: ['7 Harmonies', 'Copy HEX', 'Export CSS'],
-    preview: '■ ■ ■ ■ ■\n■ ■ ■ ■ ■\n■ ■ ■ ■ ■\n#6366f1 #ec4899',
+    preview: '■ ■ ■ ■ ■\n■ ■ ■ ■ ■\n■ ■ ■ ■ ■\n▦ 7 harmonies',
     highlight: true,
   },
 ]
@@ -165,8 +166,8 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
                     style={{
-                      background: `linear-gradient(135deg, ${a.accent}, ${a.accent}80)`,
-                      boxShadow: `0 8px 24px ${a.accent}30`,
+                      background: `linear-gradient(135deg, ${a.accent}, color-mix(in srgb, ${a.accent} 50%, transparent))`,
+                      boxShadow: `0 8px 24px color-mix(in srgb, ${a.accent} 19%, transparent)`,
                     }}
                   >
                     <Icon size={22} className="text-white" />
@@ -191,7 +192,7 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
                 <div
                   className="relative rounded-lg p-3 mb-3 font-mono text-xs whitespace-pre text-slate-300 border border-white/5"
                   style={{
-                    background: `linear-gradient(135deg, ${a.accent}10, transparent)`,
+                    background: `linear-gradient(135deg, color-mix(in srgb, ${a.accent} 6%, transparent), transparent)`,
                   }}
                 >
                   {a.preview}
@@ -203,7 +204,7 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
                     <span
                       key={b}
                       className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] uppercase tracking-wider"
-                      style={isHovered ? { color: a.accent, borderColor: `${a.accent}40` } : {}}
+                      style={isHovered ? { color: a.accent, borderColor: `color-mix(in srgb, ${a.accent} 25%, transparent)` } : {}}
                     >
                       {b}
                     </span>

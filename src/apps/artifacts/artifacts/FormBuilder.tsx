@@ -5,6 +5,7 @@
  */
 import { useState } from 'react'
 import { Plus, Trash2, GripVertical, Eye, Download, Type, AlignLeft, CheckSquare, Circle, ListChecks, Hash, Mail, Phone, Calendar as CalIcon } from 'lucide-react'
+import { CATEGORICAL } from '../../../design-system/tokens'
 
 type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'date' | 'select' | 'checkbox' | 'radio'
 
@@ -17,16 +18,18 @@ interface Field {
   options?: string[]
 }
 
+// Each field type gets a distinct categorical accent from the design-system rail
+// (CATEGORICAL is 8 distinct XENO accents; the 9th type wraps cyclically).
 const PALETTE: { type: FieldType; label: string; icon: any; color: string }[] = [
-  { type: 'text', label: 'Short Text', icon: Type, color: '#6366f1' },
-  { type: 'textarea', label: 'Long Text', icon: AlignLeft, color: '#22d3ee' },
-  { type: 'number', label: 'Number', icon: Hash, color: '#f59e0b' },
-  { type: 'email', label: 'Email', icon: Mail, color: '#10b981' },
-  { type: 'phone', label: 'Phone', icon: Phone, color: '#ec4899' },
-  { type: 'date', label: 'Date', icon: CalIcon, color: '#a855f7' },
-  { type: 'select', label: 'Dropdown', icon: ListChecks, color: '#3b82f6' },
-  { type: 'checkbox', label: 'Checkbox', icon: CheckSquare, color: '#14b8a6' },
-  { type: 'radio', label: 'Radio', icon: Circle, color: '#ef4444' },
+  { type: 'text', label: 'Short Text', icon: Type, color: CATEGORICAL[0] },
+  { type: 'textarea', label: 'Long Text', icon: AlignLeft, color: CATEGORICAL[1] },
+  { type: 'number', label: 'Number', icon: Hash, color: CATEGORICAL[2] },
+  { type: 'email', label: 'Email', icon: Mail, color: CATEGORICAL[3] },
+  { type: 'phone', label: 'Phone', icon: Phone, color: CATEGORICAL[4] },
+  { type: 'date', label: 'Date', icon: CalIcon, color: CATEGORICAL[5] },
+  { type: 'select', label: 'Dropdown', icon: ListChecks, color: CATEGORICAL[6] },
+  { type: 'checkbox', label: 'Checkbox', icon: CheckSquare, color: CATEGORICAL[7] },
+  { type: 'radio', label: 'Radio', icon: Circle, color: CATEGORICAL[8 % CATEGORICAL.length] },
 ]
 
 const uid = () => Math.random().toString(36).slice(2, 10)

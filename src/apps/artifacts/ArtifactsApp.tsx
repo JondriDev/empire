@@ -14,16 +14,18 @@ import Kanban from './artifacts/Kanban'
 import Flashcards from './artifacts/Flashcards'
 import MarkdownStudio from './artifacts/MarkdownStudio'
 import ColorPalette from './artifacts/ColorPalette'
+import { cssVar } from '../../design-system/tokens'
 
 // Lazy-ish: import all statically for instant switching inside this window.
 // They're small and self-contained; preloading costs ~5KB total.
+// Each artifact carries a distinct design-system accent (matches ArtifactGallery).
 const ARTIFACT_RENDERERS: Record<string, { component: any; title: string; accent: string }> = {
-  'form-builder':     { component: FormBuilder,     title: 'Form Builder',     accent: '#6366f1' },
-  'chart-builder':    { component: ChartBuilder,    title: 'Chart Builder',    accent: '#22d3ee' },
-  'kanban':           { component: Kanban,          title: 'Kanban Board',     accent: '#ec4899' },
-  'flashcards':       { component: Flashcards,      title: 'Flashcards',       accent: '#10b981' },
-  'markdown-editor':  { component: MarkdownStudio,  title: 'Markdown Studio',  accent: '#f59e0b' },
-  'color-palette':    { component: ColorPalette,    title: 'Color Palette',    accent: '#a855f7' },
+  'form-builder':     { component: FormBuilder,     title: 'Form Builder',     accent: cssVar('ion') },
+  'chart-builder':    { component: ChartBuilder,    title: 'Chart Builder',    accent: cssVar('signal') },
+  'kanban':           { component: Kanban,          title: 'Kanban Board',     accent: cssVar('c-danger') },
+  'flashcards':       { component: Flashcards,      title: 'Flashcards',       accent: cssVar('aurora') },
+  'markdown-editor':  { component: MarkdownStudio,  title: 'Markdown Studio',  accent: cssVar('c-warn') },
+  'color-palette':    { component: ColorPalette,    title: 'Color Palette',    accent: cssVar('plasma') },
 }
 
 export default function ArtifactsApp() {
@@ -53,8 +55,8 @@ export default function ArtifactsApp() {
         <div
           className="flex items-center gap-3 px-4 py-2.5 border-b backdrop-blur-sm shrink-0"
           style={{
-            background: `linear-gradient(90deg, ${accent}15, transparent 60%), rgba(0,0,0,0.5)`,
-            borderBottomColor: `${accent}30`,
+            background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 8%, transparent), transparent 60%), color-mix(in srgb, var(--void) 50%, transparent)`,
+            borderBottomColor: `color-mix(in srgb, ${accent} 19%, transparent)`,
           }}
         >
           <button
@@ -67,7 +69,7 @@ export default function ArtifactsApp() {
           <div className="flex-1" />
           <span
             className="px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold"
-            style={{ background: `${accent}25`, color: accent, border: `1px solid ${accent}40` }}
+            style={{ background: `color-mix(in srgb, ${accent} 15%, transparent)`, color: accent, border: `1px solid color-mix(in srgb, ${accent} 25%, transparent)` }}
           >
             {title}
           </span>

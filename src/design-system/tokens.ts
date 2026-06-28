@@ -61,3 +61,23 @@ export const tint = (name: TokenName, pct: number): string => {
   const p = Math.max(0, Math.min(100, Math.round(pct)));
   return `color-mix(in srgb, var(--${name}) ${p}%, transparent)`;
 };
+
+/**
+ * The canonical "N-distinct-series" rail: an ordered list of 8 visually
+ * distinct XENO accents (each a themeable `var(--…)`) for decorative,
+ * categorical colour — chart series, kanban tags, form field-types, etc.
+ * Index it cyclically: `CATEGORICAL[i % CATEGORICAL.length]`. Every entry has
+ * a *distinct hex* (no two tokens collapse to the same colour), so adjacent
+ * series stay legible. Use this instead of a hardcoded hex array; reserve
+ * `DS_INFRA` exemptions for genuine brand/content identity data.
+ */
+export const CATEGORICAL: string[] = [
+  cssVar('ion'),
+  cssVar('signal'),
+  cssVar('ember'),
+  cssVar('plasma'),
+  cssVar('aurora'),
+  cssVar('c-warn'),
+  cssVar('c-danger'),
+  cssVar('xenon'),
+];
