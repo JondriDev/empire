@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PALETTE, cssVar, tint, type TokenName } from './tokens';
+import { PALETTE, CATEGORICAL, cssVar, tint, type TokenName } from './tokens';
 
 describe('design tokens', () => {
   it('cssVar wraps a token name in a CSS var() reference', () => {
@@ -25,6 +25,26 @@ describe('design tokens', () => {
     for (const [name, value] of Object.entries(PALETTE)) {
       expect(cssVar(name as TokenName)).toBe(`var(--${name})`);
       expect(value).toMatch(/^#[0-9a-f]{6}$/);
+    }
+  });
+
+  it('CATEGORICAL is 8 themeable var() accents with no raw colour literals', () => {
+    expect(CATEGORICAL).toHaveLength(8);
+    for (const c of CATEGORICAL) {
+      expect(c).toMatch(/^var\(--[a-z-]+\)$/);
+      expect(c).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+      expect(c).not.toMatch(/\brgba?\(/);
+    }
+  });
+
+  it('CATEGORICAL entries are all distinct (no two series collapse)', () => {
+    expect(new Set(CATEGORICAL).size).toBe(CATEGORICAL.length);
+  });
+
+  it('CATEGORICAL references only real palette tokens', () => {
+    for (const c of CATEGORICAL) {
+      const name = c.slice('var(--'.length, -')'.length) as TokenName;
+      expect(PALETTE[name]).toMatch(/^#[0-9a-f]{6}$/);
     }
   });
 });

@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2, X, GripVertical } from 'lucide-react'
 import { mirrorCollection } from '../../../lib/core/sync'
 import { NodeActions } from '../../../components/ui/NodeActions'
+import { CATEGORICAL, cssVar } from '../../../design-system/tokens'
 
 type ColumnId = 'todo' | 'doing' | 'done'
 
@@ -21,22 +22,23 @@ interface Task {
 interface Column { id: ColumnId; title: string; accent: string }
 
 const COLUMNS: Column[] = [
-  { id: 'todo', title: 'To Do', accent: '#6366f1' },
-  { id: 'doing', title: 'In Progress', accent: '#22d3ee' },
-  { id: 'done', title: 'Done', accent: '#10b981' },
+  { id: 'todo', title: 'To Do', accent: cssVar('ion') },
+  { id: 'doing', title: 'In Progress', accent: cssVar('signal') },
+  { id: 'done', title: 'Done', accent: cssVar('c-success') },
 ]
 
-const TAG_COLORS = ['#6366f1', '#22d3ee', '#10b981', '#f59e0b', '#ec4899', '#a855f7']
+// Distinct categorical accents for tags (design-system rail).
+const TAG_COLORS = CATEGORICAL
 
 const STORAGE = 'empire-artifact-kanban'
 
 const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36)
 
 const seed = (): Task[] => [
-  { id: uid(), title: 'Design dashboard layout', column: 'todo', tag: 'design', tagColor: '#ec4899', created: Date.now() },
-  { id: uid(), title: 'Set up auth flow', column: 'doing', tag: 'backend', tagColor: '#22d3ee', created: Date.now() },
-  { id: uid(), title: 'Write unit tests', column: 'doing', tag: 'testing', tagColor: '#f59e0b', created: Date.now() },
-  { id: uid(), title: 'Ship v1 release', column: 'done', tag: 'release', tagColor: '#10b981', created: Date.now() },
+  { id: uid(), title: 'Design dashboard layout', column: 'todo', tag: 'design', tagColor: CATEGORICAL[6], created: Date.now() },
+  { id: uid(), title: 'Set up auth flow', column: 'doing', tag: 'backend', tagColor: CATEGORICAL[1], created: Date.now() },
+  { id: uid(), title: 'Write unit tests', column: 'doing', tag: 'testing', tagColor: CATEGORICAL[2], created: Date.now() },
+  { id: uid(), title: 'Ship v1 release', column: 'done', tag: 'release', tagColor: CATEGORICAL[4], created: Date.now() },
 ]
 
 export default function Kanban() {
@@ -157,7 +159,7 @@ export default function Kanban() {
                       </div>
                       {t.tag && (
                         <div className="mt-2 flex items-center gap-1.5">
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: t.tagColor + '33', color: t.tagColor }}>{t.tag}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: `color-mix(in srgb, ${t.tagColor} 20%, transparent)`, color: t.tagColor }}>{t.tag}</span>
                         </div>
                       )}
                     </div>

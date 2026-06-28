@@ -319,8 +319,19 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
 > NodeActions 3. **Long-tail entity apps (14):** Notes 6, Goals 3, AIChat 2, Weather 1, Calendar 1, nodeColors.ts 1.
 > Sum = 134. After S6/S7/S8 land, the metric hits **0** and EPIC-2 is DONE.
 
-- [ ] **S6 · The artifacts app → zero, via ONE shared `CATEGORICAL` accent sequence.** The artifacts app is
-  the dominant remaining mass (75 of 134) and most of it is **categorical hue arrays** — `ChartBuilder.COLORS`,
+- [x] **S6 · The artifacts app → zero, via ONE shared `CATEGORICAL` accent sequence.** **Shipped 2026-06-28.**
+  Added `export const CATEGORICAL: string[]` to `tokens.ts` (8 distinct-hex XENO accents: ion/signal/ember/plasma/
+  aurora/c-warn/c-danger/xenon — chose distinct *hexes* over the spec's c-success/c-info which collapse onto
+  aurora/signal). Swept all 5 render files to 0: `ChartBuilder` (`COLORS = CATEGORICAL`; SVG grid→`tint('xenon',6)`,
+  cyan line/stops→`cssVar('signal')`, pie scrim→`tint('void',40)`), `Kanban` (columns→`cssVar` ion/signal/c-success,
+  `TAG_COLORS = CATEGORICAL`, seed tagColors→`CATEGORICAL[n]`, tag-pill alpha-append `+'33'`→`color-mix(… 20%)`),
+  `FormBuilder` (field colors→`CATEGORICAL[i]`), `ArtifactGallery` + `ArtifactsApp` (per-artifact accents→matching
+  `cssVar` tokens; all `${accent}NN` alpha-appends→`color-mix`; preview ASCII hex→`▦ 7 harmonies`). **Exempted
+  `ColorPalette.tsx` in `metrics.mjs` `DS_INFRA`** (colour-theory tool; hexes are content). `tokens.test.ts` +3
+  (CATEGORICAL len/var-shape/uniqueness/real-token). **token-violations 134 → 59 (−75).** build🟢 vitest 115🟢
+  eslint clean. *(original spec text retained below for reference.)*
+  <br/>**— original spec —** The artifacts app was
+  the dominant remaining mass (75 of 134) and most of it was **categorical hue arrays** — `ChartBuilder.COLORS`,
   `Kanban` column accents + `TAG_COLORS` + per-task `tagColor` seeds, `FormBuilder` field-type colors,
   `ArtifactGallery` per-artifact accents — i.e. "give me N visually-distinct series colours." Don't dodge these
   and don't flatten them onto one token: serve the epic's actual thesis by giving the whole app **one categorical

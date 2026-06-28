@@ -4,12 +4,13 @@
  */
 import { useState, useMemo } from 'react'
 import { BarChart3, LineChart as LineIcon, PieChart as PieIcon, Plus, Trash2, Shuffle, Download } from 'lucide-react'
+import { CATEGORICAL, cssVar, tint } from '../../../design-system/tokens'
 
 type ChartType = 'bar' | 'line' | 'pie'
 
 interface Datum { label: string; value: number }
 
-const COLORS = ['#6366f1', '#22d3ee', '#f59e0b', '#ec4899', '#10b981', '#a855f7', '#3b82f6', '#ef4444']
+const COLORS = CATEGORICAL
 
 const seed = (n = 6): Datum[] => [
   { label: 'Jan', value: 32 },
@@ -127,7 +128,7 @@ export default function ChartBuilder() {
                 const y = 380 - p * 320
                 return (
                   <g key={i}>
-                    <line x1="60" y1={y} x2="780" y2={y} stroke="rgba(255,255,255,0.06)" />
+                    <line x1="60" y1={y} x2="780" y2={y} stroke={tint('xenon', 6)} />
                     <text x="50" y={y + 4} textAnchor="end" className="fill-slate-500" style={{ fontSize: 11 }}>{Math.round(max * p)}</text>
                   </g>
                 )
@@ -154,15 +155,15 @@ export default function ChartBuilder() {
               <text x="400" y="30" textAnchor="middle" className="fill-white" style={{ fontSize: 22, fontWeight: 700 }}>{title}</text>
               <defs>
                 <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.6" />
-                  <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+                  <stop offset="0%" stopColor={cssVar('signal')} stopOpacity="0.6" />
+                  <stop offset="100%" stopColor={cssVar('signal')} stopOpacity="0" />
                 </linearGradient>
               </defs>
               {[0, 0.25, 0.5, 0.75, 1].map((p, i) => {
                 const y = 380 - p * 320
                 return (
                   <g key={i}>
-                    <line x1="60" y1={y} x2="780" y2={y} stroke="rgba(255,255,255,0.06)" />
+                    <line x1="60" y1={y} x2="780" y2={y} stroke={tint('xenon', 6)} />
                     <text x="50" y={y + 4} textAnchor="end" className="fill-slate-500" style={{ fontSize: 11 }}>{Math.round(max * p)}</text>
                   </g>
                 )
@@ -175,10 +176,10 @@ export default function ChartBuilder() {
                 return (
                   <>
                     <path d={areaPath} fill="url(#lineGrad)" />
-                    <path d={path} fill="none" stroke="#22d3ee" strokeWidth="3" strokeLinejoin="round" />
+                    <path d={path} fill="none" stroke={cssVar('signal')} strokeWidth="3" strokeLinejoin="round" />
                     {points.map((p, i) => (
                       <g key={i}>
-                        <circle cx={p[0]} cy={p[1]} r="5" fill="white" stroke="#22d3ee" strokeWidth="2">
+                        <circle cx={p[0]} cy={p[1]} r="5" fill="white" stroke={cssVar('signal')} strokeWidth="2">
                           <title>{data[i].label}: {data[i].value}</title>
                         </circle>
                         <text x={p[0]} y={400} textAnchor="middle" className="fill-slate-400" style={{ fontSize: 12 }}>{data[i].label}</text>
@@ -209,7 +210,7 @@ export default function ChartBuilder() {
                       key={i}
                       d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`}
                       fill={COLORS[i % COLORS.length]}
-                      stroke="rgba(0,0,0,0.4)"
+                      stroke={tint('void', 40)}
                       strokeWidth="2"
                     >
                       <title>{d.label}: {d.value} ({Math.round((d.value / total) * 100)}%)</title>

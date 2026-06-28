@@ -66,19 +66,26 @@
   literal in a template literal). **Exempted `ai-agent/lib/providers.ts`** in `metrics.mjs` `DS_INFRA` — per-PROVIDER
   brand-accent identity manifest (registry precedent; two providers are blue `#4285f4`/`#3b82f6` → would both collapse
   to `ion`). **token-violations 221 → 134 (−87).** build🟢 vitest 112🟢 eslint clean.
-- **Remaining 134 violations are now fully enumerated & decomposed into exactly 3 stages (EPICS.md S6/S7/S8):**
-  - **S6 · artifacts app → 0 (NEXT, ~75):** the dominant mass. Most of it is **categorical hue arrays** (chart
-    series, kanban columns/tags, form field-types, gallery accents). **The move: add `export const CATEGORICAL:
-    string[]` to `src/design-system/tokens.ts`** = `[cssVar('ion'),cssVar('signal'),cssVar('ember'),cssVar('plasma'),
-    cssVar('c-success'),cssVar('aurora'),cssVar('c-danger'),cssVar('c-info')]` (8 distinct XENO accents, the canonical
-    "N-distinct-series" rail; index `CATEGORICAL[i % len]`). Point `ChartBuilder.COLORS` (15), `Kanban` accents+
-    `TAG_COLORS`+`tagColor` (13), `FormBuilder` field colors (9), `ArtifactGallery` accents (8) at it; de-hex
-    `ArtifactsApp.tsx` (7) chrome with `cssVar`/`tint`. **ChartBuilder SVG** is migratable (`stroke`/`stopColor`/`fill`
-    take `var(--…)`): grid `rgba(255,255,255,0.06)`→`tint('xenon',6)`, cyan `#22d3ee`→`cssVar('signal')`. **EXEMPT
-    `ColorPalette.tsx` (23)** in `metrics.mjs` `DS_INFRA` — colour-theory TOOL, hexes ARE content (seed palettes,
-    WCAG contrast-lab true `#0F172A`/`#FFFFFF`, user swatches); registry/providers precedent. Extend `tokens.test.ts`
-    (CATEGORICAL len/var-shape/unique). → **134 → ~59.** build🟢 vitest🟢.
-  - **S7 · shared-UI + shell → 0 (~45):** `Toast.tsx` (16: green→`c-success`/red→`c-danger`/cyan→`signal`/amber→`c-warn`,
+- **EPIC-2 S6 DONE (this run, 2026-06-28):** swept the **entire artifacts app** to zero with a new shared
+  categorical rail. **Added `export const CATEGORICAL: string[]` to `tokens.ts`** = `[cssVar('ion'),cssVar('signal'),
+  cssVar('ember'),cssVar('plasma'),cssVar('aurora'),cssVar('c-warn'),cssVar('c-danger'),cssVar('xenon')]` — **8
+  distinct-HEX accents** (deliberately chose aurora+c-warn over the spec's `c-success`/`c-info`, which collapse onto
+  aurora/signal — `new Set(CATEGORICAL).size===8` for genuinely distinct *colours*, not just distinct strings). The
+  canonical "N-distinct-series" rail; index `CATEGORICAL[i % len]`. Migrated: `ChartBuilder.tsx` (`COLORS = CATEGORICAL`;
+  SVG grid `rgba(255,255,255,0.06)`→`tint('xenon',6)`, cyan line/area/stops `#22d3ee`→`cssVar('signal')`, pie scrim
+  `rgba(0,0,0,0.4)`→`tint('void',40)` — **SVG `stroke`/`stopColor`/`fill` accept `var(--…)` AND `color-mix(…)`**),
+  `Kanban.tsx` (columns→`cssVar('ion'/'signal'/'c-success')`, `TAG_COLORS = CATEGORICAL`, seed `tagColor`→`CATEGORICAL[n]`),
+  `FormBuilder.tsx` (field colors→`CATEGORICAL[i]`, 9th wraps `[8%len]`), `ArtifactGallery.tsx` + `ArtifactsApp.tsx`
+  (per-artifact accents→matching `cssVar` tokens, **same 6-token mapping in both** so the launch chrome matches the
+  card: form→ion, chart→signal, kanban→c-danger, flashcards→aurora, markdown→c-warn, palette→plasma). **Alpha-append
+  trap hit 6×** (`${accent}80/30/15/40`, `t.tagColor+'33'`, `${accent}25`) — all → `color-mix(in srgb, ${x} N%, transparent)`
+  (0x80=50,0x33=20,0x30=19,0x25=15,0x15=8,0x40=25,0x10=6). **Content-hex trap:** ArtifactGallery's palette-card
+  `preview` ASCII held literal `#6366f1 #ec4899` → replaced with `▦ 7 harmonies` (decorative, not a swatch).
+  **Exempted `artifacts/artifacts/ColorPalette.tsx` in `metrics.mjs` `DS_INFRA`** — colour-theory tool, hexes ARE
+  content. `tokens.test.ts` +3 (len/var-shape/uniqueness/real-token). **token-violations 134 → 59 (−75: −52 swept,
+  −23 exempted).** build🟢 vitest 115🟢 eslint clean.
+- **Remaining 59 violations → 2 stages (EPICS.md S7/S8):**
+  - **S7 · shared-UI + shell → 0 (NEXT, ~45):** `Toast.tsx` (16: green→`c-success`/red→`c-danger`/cyan→`signal`/amber→`c-warn`,
     panel→`tint('void',85)`, glass→`tint('xenon',N)`), `ErrorBoundary.tsx` (7), `Utility.tsx` (6), `Desktop.tsx` (6),
     `Dashboard.tsx` (4), `AppShell.tsx` (3), `NodeActions.tsx` (3). All render code → `cssVar`/`tint`; hover tints stay
     `color-mix`, never raw `rgba`. Keep `${app.color}` registry interpolation in Desktop as-is (identity data). → **~59 → ~14.**
@@ -199,6 +206,10 @@
     and replace hex/rgba inline styles. Token names: signal/aurora/plasma/ion/ember/xenon/void/abyss,
     text/text2/text3, c-success/c-warn/c-danger/c-info. (Distinct from `network/nodeColors.ts`'s `rgbCss`,
     which builds colours from constant *triplets* for the canvas.)
+    - **`CATEGORICAL: string[]` (EPIC-2 S6, 2026-06-28):** the canonical "N-distinct-series" rail — 8 distinct-hex
+      `var(--…)` accents (ion/signal/ember/plasma/aurora/c-warn/c-danger/xenon). Index `CATEGORICAL[i % len]` for any
+      decorative categorical colour (chart series, kanban tags, form field-types). Use this instead of a hardcoded hex
+      array; reserve `DS_INFRA` exemptions for genuine brand/content identity data. Tested in `tokens.test.ts`.
 - **AI routing:** `src/lib/ai.ts` → `src/lib/apiBase.ts` (`aiApiUrl()`); live site routes
   Cakra to the Supabase proxy, dev stays same-origin.
 
