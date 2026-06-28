@@ -62,7 +62,13 @@ function assertRegistryCoverage() {
   const uniqIds = [...new Set(ids)];
   const missing = uniqIds.filter(id => !apps.includes(id));
   if (missing.length) throw new Error(`REGISTRY-COVERAGE: ${missing.length} registry app(s) not in smoke list: ${missing.join(', ')}`);
-  console.log(`REGISTRY-COVERAGE: ✅ all ${uniqIds.length} registry apps are in the smoke list`);
+  // Reverse guard (the phantom-route trap): an app deleted from the registry but
+  // left in the smoke list would be visited at a dead /app/<id> route, FAIL as
+  // "App not found", and red the whole run for a route that no longer exists.
+  // (e.g. the 2026-06-28 Hermes→Cakra redesign deleted ai-agent + hermes-cc.)
+  const orphan = apps.filter(id => !uniqIds.includes(id));
+  if (orphan.length) throw new Error(`REGISTRY-COVERAGE: ${orphan.length} smoke-list app(s) not in registry (deleted/renamed?): ${orphan.join(', ')}`);
+  console.log(`REGISTRY-COVERAGE: ✅ smoke list ↔ registry match exactly (${uniqIds.length} apps)`);
 }
 assertRegistryCoverage();
 
