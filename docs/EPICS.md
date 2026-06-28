@@ -23,6 +23,19 @@
 
 ---
 
+## ⚠️ Builder/Strategist note — REDESIGN LANDED 2026-06-28 (user-directed)
+
+The user-directed "JondriDev pass" landed on `main` (see CONTEXT.md → "🎨 REDESIGN LANDED"). It **partly
+pre-delivers EPIC-3** ("depth pass on shallow instruments"): **Maps** (real Leaflet + OSM + Nominatim),
+**Weather** (Open-Meteo, no key), **DataCenter** (local-first localStorage, offline), and **Language**
+(Cakra `chat()` translation) are now genuinely functional. **Strategist:** when seeding EPIC-3 stages,
+treat those four as done (add only a unit test if wanted) and aim the depth pass at the still-shallow
+instruments (Photos / Video / Music / Clock). **Intentional metric deltas — NOT regressions:** apps
+**27 → 25** (Hermes Agent + Hermes CC deleted, AI unified into **Cakra**), bundle **+~40 KB** (`leaflet`
+for the real Maps), token-violations **held at 0**. Do not re-add the deleted apps or strip `leaflet`.
+
+---
+
 ## ✅ DONE — EPIC-1 · Organism Completeness
 
 > **DONE 2026-06-23** (QA-confirmed on green main `6435a81`). All stages S1–S6c shipped;
