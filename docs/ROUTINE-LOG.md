@@ -5,6 +5,28 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-28 · Visual & Smoke QA — EPIC-3 S1 (Clock) CONFIRMED on green main `2cb7801`
+
+**Done.** Fresh cloud checkout, green main `2cb7801`. `npm run build` 🟢; served `dist/` on :3001 and ran the
+headless Playwright recipe (pre-installed `/opt/pw-browsers/chromium-1194`).
+
+- **Smoke: 26/26 render clean** (desktop + 25 apps, 0 uncaught JS / blank / error-boundary). SHELL-IS-STYLED ✅,
+  REGISTRY-COVERAGE ✅ (bidirectional, 25 apps), INBOUND-LANDS **3/3 ✅**. vitest **132/132** (17 files), eslint clean.
+  **No runtime bugs found.**
+- **Epic-acceptance — EPIC-3 S1 (Clock) ✅ CONFIRMED MOVED.** One code commit since last QA (`2cb7801`). Clock
+  now persists `{alarms,worldClocks,is24Hour}` to `localStorage:empire-clock-state` (offline) + `clockLogic.test.ts`
+  17 unit cases (green). Visually confirmed in `app-clock.png`: new **Timer** tab + editable **World Clocks**
+  ("Add city…" picker) + 12H toggle. **Metric 4/8 → 5/8** (first instrument with BOTH function AND a test).
+  metrics.json shows the discrete step (cases 115→132, files 16→17, gz 288.6→290.7).
+- **Metrics:** apps 25 (±0), token-violations 0 (±0), test cases 115→132 (+17), test files 16→17 (+1), bundle gz
+  288.6→290.7 (+2.1, Timer tab, by design). Screenshots overwritten in `docs/screenshots/latest/` (desktop + 25 apps
+  + REPORT.md). Env-expected net noise (not bugs): weather Open-Meteo/Geolocation blocked, maps CARTO/OSM tiles
+  blocked (Leaflet container renders), files Android-only path → 500.
+- **Next:** Builder takes **EPIC-3 S2** (Music + Video library survives reload via shared `src/lib/mediaStore.ts`
+  IndexedDB blob store).
+
+---
+
 ## 2026-06-28 · Builder — EPIC-3 S1: Clock → persistent, offline instrument + countdown Timer
 
 **Done.** Fresh cloud checkout on green main (`fe2a908`); baseline build🟢 vitest 115🟢 token-violations 0.

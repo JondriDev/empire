@@ -334,35 +334,37 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-28, post-EPIC-2-S7 green main `d66dd27` — token-violations 59→14)
+## 📊 Last QA confirmation (2026-06-28, post-EPIC-3-S1 green main `2cb7801` — Clock made offline + tested)
 
-- **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED ✅ (top-level
-  `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (all 27 registry
-  apps in the smoke list) + INBOUND-LANDS **3/3 ✅** (calendar←editor, goals←notes, messages←ai-chat each
-  show "Received from …" chip + prefilled control off the live render). build🟢 vitest **115/115 🟢** (16 files)
-  eslint clean. **No runtime bugs found.**
+- **Routes rendering clean: 25/25 ✅** (26/26 incl. desktop). SHELL-IS-STYLED ✅ (top-level
+  `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (bidirectional, all 25
+  registry apps ↔ smoke list) + INBOUND-LANDS **3/3 ✅** (calendar←editor, goals←notes, messages←ai-chat each
+  show "Received from …" chip + prefilled control off the live render). build🟢 vitest **132/132 🟢** (17 files)
+  eslint clean. **No runtime bugs found.** Visually verified: Earth-from-Space palette + alien icons + Cakra;
+  **Clock now shows the new Timer tab + editable World Clocks ("Add city…" picker) + 12H toggle**; Maps renders the
+  real Leaflet container (only OSM/CARTO tiles grey — egress-blocked, env-expected).
 - **Apps fully wired BOTH-ways: 9/9 entity-apps-with-inbound — ✅ EPIC-1 TARGET (held, EPIC-1 DONE).**
   Both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat, calendar, goals,
   messages. Intentionally emit-only (by design): files, photos, datacenter + tool apps via `NodeActions`.
   Re-verified live this run by the smoke harness's INBOUND-LANDS guard (3/3 receivers chip+prefill).
-- **Epic-acceptance: EPIC-2 S7 CONFIRMED MOVED** — the ACTIVE epic's target metric is *Design-token
-  violations* (501 → 0). Since the last QA (after S6, 59), one builder code commit landed: **S7** (`37e26db`,
-  swept the 7 shared-UI + shell surfaces → 0 with the `cssVar`/`tint` rails — Toast 16→0, ErrorBoundary 7→0,
-  Utility 6→0, Desktop 6→0, Dashboard 4→0, AppShell 3→0, NodeActions 3→0; claimed 59→14) plus a routines-retro
-  doc commit (`d66dd27`, no code). `node scripts/metrics.mjs` this run reports **14** → confirmed, no
-  contradiction (net **59→14, −45**; metrics.json history shows the discrete 59→14 step). Visually verified:
-  the desktop shell, app grid, telemetry rail render fully in XENO (Desktop/AppShell/Dashboard chrome intact),
-  artifacts categorical rail unbroken. **EPIC-2 is one stage from DONE** — only S8 (long-tail entity apps) left.
-  *Visual recolor (Tailwind→XENO) is intentional; the metric drop is the proof.*
-- **Remaining 14 → S8 (EPIC-2 close):** `apps/notes/Notes.tsx` (6), `apps/goals/Goals.tsx` (3),
-  `apps/ai-chat/AIChat.tsx` (2), `apps/weather/Weather.tsx` (1), `apps/calendar/Calendar.tsx` (1),
-  `apps/network/nodeColors.ts` (1, route through `rgbCss` not `cssVar`). After S8 → token-violations = 0,
-  flag QA to confirm 0 on green main, promote EPIC-3 (Depth pass on shallow instruments).
-- **Auto metrics vs last QA snapshot `4826447`:** token-violations **59→14 (−45)**, vitest **115 (±0)**,
-  test files **16 (±0)**, static count **108 (±0)**, bundle gz **248 (±0)**.
-- **`latest/` holds only:** current `desktop.png` + 27 `app-<id>.png` + `REPORT.md` (no dated/per-stage PNGs).
-- **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
-  datacenter `/api/dc/tables`→401 (authed API, no headless session).
+- **Epic-acceptance: EPIC-3 S1 (Clock) CONFIRMED MOVED** — the ACTIVE epic's target metric is *Shallow
+  instruments with genuine persistent/offline function + a unit test* (→ 8/8). Since the last QA (`23df6ce`), one
+  code commit landed: **`2cb7801` EPIC-3 S1** (persistent offline Clock + countdown Timer). Confirmed, no
+  contradiction: Clock now persists `{alarms,worldClocks,is24Hour}` to `localStorage:empire-clock-state`
+  (`Clock.tsx:52,92`, serialize/deserialize with tolerant migration) — fully offline; **`clockLogic.test.ts` adds
+  17 unit cases** (all green). New Timer tab fires `EVENT_CREATED` → Network pulse; WebAudio `beep()` (no asset).
+  **Metric 4/8 → 5/8** — Clock is the first instrument with BOTH function AND a dedicated test (the 4 redesign
+  instruments have function but still lack a test → S4 backfills). metrics.json shows the discrete step
+  (cases 108→125 static / vitest 115→132, files 16→17, gz 288.6→290.7).
+- **▶ NEXT STAGE = EPIC-3 S2** (Music + Video → library survives reload via shared `src/lib/mediaStore.ts`
+  IndexedDB blob store; persist metadata only, rehydrate blob `src` on mount). Then S3 (Photos thumbnails),
+  S4 (backfill a test for Weather/DataCenter).
+- **Auto metrics vs last QA snapshot `23df6ce`:** test cases **115→132 (+17)**, test files **16→17 (+1)**, bundle
+  gz **288.6→290.7 (+2.1, Timer tab, by design)**, apps **25 (±0)**, token-violations **0 (±0)**.
+- **`latest/` holds only:** current `desktop.png` + 25 `app-<id>.png` + `REPORT.md` (no dated/per-stage PNGs).
+- **Env-expected net noise (not bugs):** weather→Open-Meteo geocoding + Geolocation blocked, maps→CARTO/OSM
+  dark-tile PNGs blocked (Leaflet container + attribution still render), files `/api/files?path=/storage/emulated/0`
+  →500 (Android-only path).
 - QA harness note: project has **no `playwright` dep**; it's global at `/opt/node22/lib/node_modules`.
   The run symlinks it into `node_modules/` (env-only, not committed). Pre-installed Chromium at
   `/opt/pw-browsers/chromium-1194`. `scripts/qa-smoke.mjs` `launchBrowser()` auto-globs the version dir.
