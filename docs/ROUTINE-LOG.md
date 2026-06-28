@@ -5,6 +5,53 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-28 · Builder — EPIC-3 S1: Clock → persistent, offline instrument + countdown Timer
+
+**Done.** Fresh cloud checkout on green main (`fe2a908`); baseline build🟢 vitest 115🟢 token-violations 0.
+EPIC-3 ("depth pass on shallow instruments") was promoted but **un-decomposed**, so this run both **seeded
+EPIC-3 stages** (S1–S4 in EPICS.md, target metric *instruments with persistent/offline function + a unit
+test → 8/8*, now 5/8) **and shipped S1**: turned **Clock** from a session-only widget into a persistent,
+offline instrument.
+
+- **Bug fixed (priority #1):** Clock's alarms, 12/24h preference and world-clock list were all hardcoded
+  seeds re-created on every mount — a reload silently wiped anything the user set (a placeholder pretending
+  to remember). Now lazy-loaded from + persisted to `empire-clock-state`.
+- **New pure module `src/apps/clock/clockLogic.ts`** (storage-/DOM-agnostic, so it's unit-testable):
+  `formatStopwatch` / `formatTimer` (rounds up so a live countdown never shows 0 early) / `alarmShouldFire`
+  (the fire-once-per-minute rule in one place) + tolerant `serializeClockState`/`deserializeClockState`
+  (bad JSON / null / partial / corrupt all fall back **field-by-field** so a new field never wipes saved
+  alarms; drops corrupt entries + unknown weekdays) + `CITY_OPTIONS` picker data.
+- **World clocks are now editable** — add from a curated offline city list, remove (× on hover); persisted.
+- **Real countdown Timer tab** (the `Timer` icon was imported but only a stopwatch existed): presets
+  1/5/10/25m + custom mm:ss, start/pause/reset, a progress bar, and it fires `EVENT_CREATED` on hitting
+  zero (→ a Network pulse; verified `EVENT_CREATED` is consumed only by `Network.tsx`'s ticker, **not** any
+  graph-node syncer, so no Calendar-trap interaction).
+- **"Play sound" actually rings now** — the original `alarmRef` was dead (never assigned); replaced with a
+  WebAudio `beep()` (880 Hz sine, ~0.6s, no asset → fully offline). Used by both alarm-fire and timer-done.
+- Stopwatch's secondary button now does the standard **Lap while running / Reset while stopped** (was inert
+  while running).
+
+**Verified.** `npm run build` 🟢 (tsc -b && vite build). `npx vitest run` → **132/132** (new
+`clockLogic.test.ts`, 17 cases: formatting incl. round-up/clamp, the 5 alarm-fire branches, and persistence
+round-trip + partial-migration + corruption-tolerance). `npx eslint` clean on all touched files.
+`node scripts/metrics.mjs`: **token-violations 0 (±0)** — kept Clock's existing Tailwind-class idiom, added
+zero raw hex/rgba. Metrics row below.
+
+**Metrics (vs baseline `fe2a908`):** apps 25 (±0) · test cases 108→125 (+17) · test files 16→17 (+1) ·
+token-violations **0 (±0)** · bundle gz 288.6→290.7 (+2.1, the Timer tab + logic).
+
+**Not verifiable in cloud (no rendered UI):** the reload-restores-state behaviour and the audible beep /
+Network pulse are described for on-device confirmation — open **Clock**, set an alarm + switch to 24H + add
+a city, reload → all should be restored; start a 1-minute Timer → it counts down, beeps and pulses at zero.
+The underlying logic is covered by the 17 unit tests.
+
+**Next.** EPIC-3 **S2** — fix the **Music/Video blob-URL persistence bug** (they round-trip `createObjectURL`
+URLs through localStorage; those die on reload, so the restored library can't play) by adding a shared
+`src/lib/mediaStore.ts` IndexedDB blob store + metadata-only localStorage + on-mount rehydration. Exact
+shape in EPICS.md S2 / CONTEXT next-stage block.
+
+---
+
 ## 2026-06-28 · Builder — EPIC-2 S8: long-tail → 0, **EPIC-2 DONE** (token-violations 14 → 0)
 
 **Done.** Fresh cloud checkout on green main; baseline build🟢 vitest 115🟢 token-violations 14. Swept the

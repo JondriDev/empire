@@ -418,13 +418,53 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
 
 **Leap:** the thin apps (Photos, Maps, Video, Music, Clock) get genuine offline-capable
 function instead of placeholders — coherence over new surface area.
-**Target metric:** *Routes rendering clean* stays 27/27 while each gains real function
-(+ tests). Stage seeds: one app per stage, each with a concrete capability + acceptance.
+**Target metric:** *Shallow instruments with genuine persistent/offline function + a unit test* →
+target **8/8** (Weather, Maps, Language, DataCenter, Clock, Music, Video, Photos). The 2026-06-28
+redesign pre-delivered the first four (Weather=Open-Meteo, Maps=Leaflet+Nominatim, Language=Cakra
+translation, DataCenter=local-first localStorage — though those four shipped without a dedicated unit
+test, so a follow-up may backfill one). **Now 5/8** after S1 (Clock). *Routes rendering clean* stays
+25/25 throughout. Stage seeds: one instrument per stage, each a concrete capability + acceptance + test.
 
-Stages (Strategist to decompose; seeds below — Builder confirms current state vs. code first):
-- [ ] **S1 · (Strategist to define)** — pick the shallowest instrument with the steepest
-  capability gradient; name the file, the concrete offline capability, the acceptance check, and a
-  unit test. Keep it one green reviewable commit.
+> **Decomposition note:** EPIC-3 was Builder-seeded (2026-06-28) when no Strategist run had decomposed it
+> and a green Clock stage was ready to ship. The Strategist may refine the ordering/target; the shape below
+> is concrete enough to execute without re-planning.
+
+Stages (Builder takes the topmost `[ ]`; confirm current state vs. code first):
+- [x] **S1 · Clock → persistent, offline instrument + countdown Timer.** **Shipped 2026-06-28.**
+  Clock was session-only: alarms, the 12/24h preference and the world-clock list all reset to hardcoded
+  seeds on every reload (a placeholder masquerading as function), and there was no countdown timer (the
+  `Timer` icon was imported but only a stopwatch existed). **Done:** extracted pure, storage-agnostic logic
+  to `src/apps/clock/clockLogic.ts` (`formatStopwatch`/`formatTimer`/`alarmShouldFire` + tolerant
+  `serializeClockState`/`deserializeClockState` that migrate partial/old/corrupt saves field-by-field +
+  `CITY_OPTIONS` picker data); Clock now lazy-loads + persists `{alarms, worldClocks, is24Hour}` to
+  `empire-clock-state`, world clocks are **editable** (add from a curated offline city list, remove), a real
+  **Timer tab** (presets 1/5/10/25m + custom mm:ss, start/pause/reset, progress bar, fires `EVENT_CREATED`
+  on completion → Network pulse), and the formerly-dead "Play sound" now rings via a WebAudio `beep()` (no
+  asset, fully offline). `clockLogic.test.ts` (17 cases) covers formatting, alarm-fire rule, and
+  persistence round-trip/migration/corruption. *Acceptance met:* set an alarm / switch to 24H / add a city →
+  reload → all restored; start a 1m timer → it counts down and beeps/pulses at zero. Build🟢 vitest 115→132🟢
+  eslint clean; **token-violations 0 (±0)** (kept the existing Tailwind-class idiom, no raw hex), bundle gz
+  288.6→290.7 (+2.1, the Timer tab). *Cloud limit:* the reload-restores-state and timer-beep behaviours are
+  described for on-device confirmation; the persistence/alarm/timer *logic* is covered by the 17 unit tests.
+- [ ] **S2 · Music + Video → library actually survives a reload (IndexedDB blob store).** Both apps persist
+  their playlist to `localStorage` **including `URL.createObjectURL` blob URLs, which are dead after a reload**
+  — so the restored "library" is a list of unplayable ghosts (a latent data-integrity bug). Fix: a shared
+  `src/lib/mediaStore.ts` IndexedDB wrapper (`putMedia`/`getMedia`/`deleteMedia`/`allMediaIds`, graceful no-op
+  if IDB unavailable) that stores the actual file `Blob`s keyed by id; persist only metadata (title/artist/
+  duration/id, **no src**) in localStorage; on mount, read blobs from IDB and `createObjectURL` to rehydrate
+  real, playable `src`s. Guard a per-blob size cap (skip persisting very large videos to avoid quota; keep
+  them session-only with a "won't survive reload" hint). Keep the pure metadata (de)serialization in a tested
+  module (`mediaStore` glue stays thin); unit-test the strip/rehydrate transforms. *Acceptance:* add an audio
+  file → reload → it's still in the playlist AND plays. **One coherent commit covering both apps (shared store).**
+- [ ] **S3 · Photos → thumbnails persist + survive navigation (close the redesign gap).** Per CONTEXT
+  "Open follow-ups": Photos `photo` nodes carry no thumbnail and object URLs are revoked on delete. Give Photos
+  durable thumbnails (reuse the S2 `mediaStore` if landed, or a downscaled dataURL) so the gallery survives a
+  reload; add a unit test for the thumbnail/serialization logic. *Acceptance:* add a photo → reload → thumbnail
+  still renders.
+- [ ] **S4 · Backfill a unit test for one redesign-delivered instrument (Weather or DataCenter).** The four
+  redesign instruments work but shipped without a dedicated test; add one (e.g. Weather's Open-Meteo
+  response→view-model mapping, or DataCenter's localStorage table CRUD) to make EPIC-3's "+ a unit test"
+  acceptance honest for the target count.
 
 ### EPIC-4 · PWA + Android validation
 **Leap:** the installed PWA is byte-identical to dev and the APK degrades gracefully offline.

@@ -1,46 +1,72 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
-import { Clock as ClockIcon, Globe, Timer, AlarmClock, Play, Pause, RotateCcw, Trash2, Plus } from 'lucide-react'
+import { Clock as ClockIcon, Globe, Timer, AlarmClock, Hourglass, Play, Pause, RotateCcw, Trash2, Plus, X } from 'lucide-react'
+import {
+  DAYS,
+  CITY_OPTIONS,
+  CLOCK_STORAGE_KEY,
+  deserializeClockState,
+  serializeClockState,
+  formatStopwatch,
+  formatTimer,
+  alarmShouldFire,
+  type Alarm,
+  type WorldClock,
+} from './clockLogic'
 
-// ── Types ───────────────────────────────────────────────────────────────────
-interface WorldClock { city: string; timezone: string; time: string }
-interface Alarm { id: string; time: string; label: string; enabled: boolean; days: string[] }
 interface Stopwatch { elapsed: number; running: boolean; laps: number[] }
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const TIMER_PRESETS = [1, 5, 10, 25] // minutes
 
-// ── Stopwatch helpers ────────────────────────────────────────────────────────
-function formatStopwatch(ms: number): string {
-  const totalSeconds = Math.floor(ms / 1000)
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  const centiseconds = Math.floor((ms % 1000) / 10)
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centiseconds).padStart(2, '0')}`
+// A short offline beep via WebAudio — replaces the original dead `alarmRef` so
+// "Play sound" actually rings, with no asset to fetch and no network.
+function beep() {
+  try {
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+    if (!Ctx) return
+    const ctx = new Ctx()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.type = 'sine'
+    osc.frequency.value = 880
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.6)
+    osc.start()
+    osc.stop(ctx.currentTime + 0.62)
+    osc.onended = () => ctx.close()
+  } catch { /* noop — audio unavailable */ }
+}
+
+function safeGet(key: string): string | null {
+  try { return localStorage.getItem(key) } catch { return null }
 }
 
 // ── Clock App ───────────────────────────────────────────────────────────────
 export default function Clock() {
+  // Load persisted state once (lazy) so a reload restores the user's setup
+  // instead of snapping back to the seed defaults.
+  const initial = useMemo(() => deserializeClockState(safeGet(CLOCK_STORAGE_KEY)), [])
+
   const [time, setTime] = useState(() => new Date().toLocaleTimeString([], { hour12: false }))
   const [date, setDate] = useState(() => new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))
   const [timezone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone)
-  const [is24Hour, setIs24Hour] = useState(false)
-  const [worldClocks] = useState<WorldClock[]>([
-    { city: 'New York', timezone: 'America/New_York', time: '' },
-    { city: 'London', timezone: 'Europe/London', time: '' },
-    { city: 'Tokyo', timezone: 'Asia/Tokyo', time: '' },
-    { city: 'Dubai', timezone: 'Asia/Dubai', time: '' },
-    { city: 'Sydney', timezone: 'Australia/Sydney', time: '' },
-  ])
+  const [is24Hour, setIs24Hour] = useState(initial.is24Hour)
+  const [worldClocks, setWorldClocks] = useState<WorldClock[]>(initial.worldClocks)
+  const [addCityTz, setAddCityTz] = useState('')
 
   // ── Alarms ──────────────────────────────────────────────────────────────
-  const [alarms, setAlarms] = useState<Alarm[]>([
-    { id: '1', time: '08:00', label: 'Morning', enabled: true, days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] },
-  ])
+  const [alarms, setAlarms] = useState<Alarm[]>(initial.alarms)
   const [newAlarmTime, setNewAlarmTime] = useState('09:00')
   const [newAlarmLabel, setNewAlarmLabel] = useState('')
   const [alarmSound, setAlarmSound] = useState(false)
-  const alarmRef = useRef<{ current: () => void } | null>(null)
+  const alarmsRef = useRef(alarms)
+  alarmsRef.current = alarms
+  const soundRef = useRef(alarmSound)
+  soundRef.current = alarmSound
 
   // ── Stopwatch ────────────────────────────────────────────────────────────
   const [stopwatch, setStopwatch] = useState<Stopwatch>({ elapsed: 0, running: false, laps: [] })
@@ -48,10 +74,26 @@ export default function Clock() {
   const startTimeRef = useRef<number>(0)
   const elapsedRef = useRef<number>(0)
 
-  // ── Active tab ──────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<'clock' | 'stopwatch' | 'alarm'>('clock')
+  // ── Timer (countdown) ──────────────────────────────────────────────────────
+  const [timerDuration, setTimerDuration] = useState(5 * 60_000)
+  const [timerRemaining, setTimerRemaining] = useState(5 * 60_000)
+  const [timerRunning, setTimerRunning] = useState(false)
+  const [timerDone, setTimerDone] = useState(false)
+  const [customMin, setCustomMin] = useState(5)
+  const [customSec, setCustomSec] = useState(0)
+  const timerEndRef = useRef<number>(0)
 
-  // ── Tick ─────────────────────────────────────────────────────────────────
+  // ── Active tab ──────────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState<'clock' | 'timer' | 'stopwatch' | 'alarm'>('clock')
+
+  // ── Persist alarms / prefs / world clocks ──────────────────────────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem(CLOCK_STORAGE_KEY, serializeClockState({ alarms, worldClocks, is24Hour }))
+    } catch { /* ignore quota / unavailable */ }
+  }, [alarms, worldClocks, is24Hour])
+
+  // ── Tick (clock + alarm firing) ─────────────────────────────────────────────
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'clock' })
     const tick = () => {
@@ -60,25 +102,19 @@ export default function Clock() {
       setTime(now.toLocaleTimeString([], { hour12: !is24Hour, hour: hh, minute: '2-digit', second: '2-digit' }))
       setDate(now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))
 
-      // Check alarms
-      setAlarms(prev => prev.map(a => {
-        if (!a.enabled) return a
-        const alarmHHMM = a.time
-        const nowHHMM = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
-        const today = DAYS[now.getDay()]
-        if (alarmHHMM === nowHHMM && now.getSeconds() === 0 && a.days.includes(today)) {
-          if (alarmSound) {
-            try { alarmRef.current?.current() } catch { /* noop */ }
-          }
-          // Emit event for cross-app notification
+      const nowHHMM = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+      const today = DAYS[now.getDay()]
+      for (const a of alarmsRef.current) {
+        if (alarmShouldFire(a, nowHHMM, today, now.getSeconds())) {
+          if (soundRef.current) beep()
           emit({ type: 'EVENT_CREATED', eventId: a.id, title: a.label || 'Alarm', date: now.toISOString().split('T')[0], time: a.time })
         }
-        return a
-      }))
+      }
     }
+    tick()
     const interval = setInterval(tick, 1000)
     return () => clearInterval(interval)
-  }, [is24Hour, alarmSound])
+  }, [is24Hour])
 
   // ── Stopwatch interval ────────────────────────────────────────────────────
   useEffect(() => {
@@ -93,6 +129,51 @@ export default function Clock() {
     }
     return () => { if (stopwatchRef.current) clearInterval(stopwatchRef.current) }
   }, [stopwatch.running])
+
+  // ── Timer interval ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!timerRunning) return
+    timerEndRef.current = Date.now() + timerRemaining
+    const id = setInterval(() => {
+      const rem = timerEndRef.current - Date.now()
+      if (rem <= 0) {
+        setTimerRemaining(0)
+        setTimerRunning(false)
+        setTimerDone(true)
+        if (soundRef.current) beep()
+        const now = new Date()
+        emit({ type: 'EVENT_CREATED', eventId: `timer-${now.getTime()}`, title: 'Timer finished', date: now.toISOString().split('T')[0], time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) })
+      } else {
+        setTimerRemaining(rem)
+      }
+    }, 100)
+    return () => clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timerRunning])
+
+  const setTimerTo = useCallback((ms: number) => {
+    setTimerRunning(false)
+    setTimerDone(false)
+    setTimerDuration(ms)
+    setTimerRemaining(ms)
+  }, [])
+
+  const toggleTimer = useCallback(() => {
+    if (timerRemaining <= 0) { setTimerRemaining(timerDuration); setTimerDone(false); setTimerRunning(true); return }
+    setTimerDone(false)
+    setTimerRunning(r => !r)
+  }, [timerRemaining, timerDuration])
+
+  const resetTimer = useCallback(() => {
+    setTimerRunning(false)
+    setTimerDone(false)
+    setTimerRemaining(timerDuration)
+  }, [timerDuration])
+
+  const applyCustomTimer = useCallback(() => {
+    const ms = (Math.max(0, customMin) * 60 + Math.max(0, Math.min(59, customSec))) * 1000
+    if (ms > 0) setTimerTo(ms)
+  }, [customMin, customSec, setTimerTo])
 
   const addAlarm = useCallback(() => {
     if (!newAlarmTime) return
@@ -117,21 +198,37 @@ export default function Clock() {
     }))
   }, [])
 
-  // ── World clock time ─────────────────────────────────────────────────────
-  const worldTime = (tz: string) => {
-    return new Date().toLocaleTimeString([], { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: !is24Hour })
-  }
+  // ── World clocks ──────────────────────────────────────────────────────────
+  const availableCities = useMemo(
+    () => CITY_OPTIONS.filter(c => !worldClocks.some(w => w.timezone === c.timezone)),
+    [worldClocks],
+  )
+  const addWorldClock = useCallback(() => {
+    const city = CITY_OPTIONS.find(c => c.timezone === addCityTz)
+    if (!city) return
+    setWorldClocks(prev => prev.some(w => w.timezone === city.timezone) ? prev : [...prev, { ...city }])
+    setAddCityTz('')
+  }, [addCityTz])
+  const removeWorldClock = useCallback((tz: string) => {
+    setWorldClocks(prev => prev.filter(w => w.timezone !== tz))
+  }, [])
+
+  const worldTime = (tz: string) =>
+    new Date().toLocaleTimeString([], { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: !is24Hour })
+
+  const timerProgress = timerDuration > 0 ? Math.max(0, Math.min(1, timerRemaining / timerDuration)) : 0
 
   return (
     <div className="space-y-4 max-w-2xl mx-auto">
       {/* Tab bar */}
       <div className="flex gap-2 p-1 bg-black/20 rounded-xl">
-        {(['clock', 'stopwatch', 'alarm'] as const).map(tab => (
+        {(['clock', 'timer', 'stopwatch', 'alarm'] as const).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${activeTab === tab
               ? 'bg-cyan-600 text-white shadow-lg'
               : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             {tab === 'clock' && <ClockIcon className="inline w-4 h-4 mr-1" />}
+            {tab === 'timer' && <Hourglass className="inline w-4 h-4 mr-1" />}
             {tab === 'stopwatch' && <Timer className="inline w-4 h-4 mr-1" />}
             {tab === 'alarm' && <AlarmClock className="inline w-4 h-4 mr-1" />}
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -160,21 +257,114 @@ export default function Clock() {
           </Card>
 
           <Card className="p-4">
-            <h2 className="text-base font-semibold mb-3 flex items-center">
-              <Globe className="w-4 h-4 mr-2 text-teal-400" />
-              World Clocks
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {worldClocks.map(clock => (
-                <div key={clock.city} className="p-3 bg-black/20 rounded-lg border border-white/5">
-                  <div className="text-xs text-gray-400 mb-1">{clock.city}</div>
-                  <div className="text-xl font-mono font-semibold">{worldTime(clock.timezone)}</div>
-                  <div className="text-xs text-gray-500">{clock.timezone.split('/').pop()?.replace('_', ' ')}</div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-semibold flex items-center">
+                <Globe className="w-4 h-4 mr-2 text-teal-400" />
+                World Clocks
+              </h2>
+              {availableCities.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <select value={addCityTz} onChange={e => setAddCityTz(e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-lg px-2 py-1 text-sm text-white focus:border-cyan-500 focus:outline-none">
+                    <option value="">Add city…</option>
+                    {availableCities.map(c => <option key={c.timezone} value={c.timezone}>{c.city}</option>)}
+                  </select>
+                  <Button onClick={addWorldClock} className="text-xs px-2 py-1" disabled={!addCityTz}>
+                    <Plus className="w-3 h-3" />
+                  </Button>
                 </div>
-              ))}
+              )}
             </div>
+            {worldClocks.length === 0 ? (
+              <p className="text-gray-500 text-sm py-4 text-center">No world clocks — add a city above.</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {worldClocks.map(clock => (
+                  <div key={clock.timezone} className="group relative p-3 bg-black/20 rounded-lg border border-white/5">
+                    <button onClick={() => removeWorldClock(clock.timezone)}
+                      className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition"
+                      aria-label={`Remove ${clock.city}`}>
+                      <X className="w-3 h-3" />
+                    </button>
+                    <div className="text-xs text-gray-400 mb-1">{clock.city}</div>
+                    <div className="text-xl font-mono font-semibold">{worldTime(clock.timezone)}</div>
+                    <div className="text-xs text-gray-500">{clock.timezone.split('/').pop()?.replace('_', ' ')}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
         </>
+      )}
+
+      {/* ── Timer Tab ── */}
+      {activeTab === 'timer' && (
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <Hourglass className="w-5 h-5 mr-2 text-cyan-300" />
+            Timer
+          </h2>
+          <div className="text-center py-4">
+            <div className={`text-6xl font-mono font-bold tracking-wider mb-1 transition-colors ${timerDone ? 'text-cyan-300 animate-pulse' : 'text-white'}`}>
+              {formatTimer(timerRemaining)}
+            </div>
+            <div className="text-xs text-gray-500 mb-4">{timerDone ? 'Time’s up' : timerRunning ? 'Counting down' : 'Ready'}</div>
+
+            {/* Progress bar */}
+            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-5">
+              <div className="h-full bg-cyan-500 rounded-full transition-[width] duration-200 ease-linear"
+                style={{ width: `${timerProgress * 100}%` }} />
+            </div>
+
+            {/* Presets */}
+            <div className="flex justify-center gap-2 mb-4 flex-wrap">
+              {TIMER_PRESETS.map(min => (
+                <button key={min} onClick={() => setTimerTo(min * 60_000)}
+                  className={`text-sm px-3 py-1.5 rounded-lg transition ${timerDuration === min * 60_000 && !timerRunning
+                    ? 'bg-cyan-600 text-white' : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'}`}>
+                  {min}m
+                </button>
+              ))}
+            </div>
+
+            {/* Custom duration */}
+            <div className="flex items-end justify-center gap-2 mb-5">
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Min</label>
+                <input type="number" min={0} max={999} value={customMin}
+                  onChange={e => setCustomMin(parseInt(e.target.value) || 0)}
+                  className="w-16 bg-black/30 border border-white/10 rounded-lg px-2 py-1.5 text-white text-center font-mono focus:border-cyan-500 focus:outline-none" />
+              </div>
+              <span className="text-gray-500 pb-2">:</span>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Sec</label>
+                <input type="number" min={0} max={59} value={customSec}
+                  onChange={e => setCustomSec(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                  className="w-16 bg-black/30 border border-white/10 rounded-lg px-2 py-1.5 text-white text-center font-mono focus:border-cyan-500 focus:outline-none" />
+              </div>
+              <Button onClick={applyCustomTimer} className="text-xs px-3 py-2">Set</Button>
+            </div>
+
+            {/* Controls */}
+            <div className="flex justify-center gap-3">
+              <Button onClick={toggleTimer}
+                className="w-14 h-14 rounded-full bg-cyan-600 hover:bg-cyan-500 flex items-center justify-center"
+                disabled={timerRemaining <= 0 && !timerDone}>
+                {timerRunning ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+              </Button>
+              <Button onClick={resetTimer}
+                className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
+                <RotateCcw className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <input type="checkbox" id="timer-sound" checked={alarmSound} onChange={e => setAlarmSound(e.target.checked)}
+                className="accent-cyan-600" />
+              <label htmlFor="timer-sound" className="text-xs text-gray-400">Beep when done</label>
+            </div>
+          </div>
+        </Card>
       )}
 
       {/* ── Stopwatch Tab ── */}
@@ -201,6 +391,8 @@ export default function Clock() {
                   } else {
                     setStopwatch(s => ({ ...s, laps: [s.elapsed, ...s.laps] }))
                   }
+                } else {
+                  setStopwatch(s => ({ ...s, laps: [s.elapsed, ...s.laps] }))
                 }
               }} className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
                 <RotateCcw className="w-5 h-5" />
@@ -246,7 +438,7 @@ export default function Clock() {
             <div className="mt-3 flex items-center gap-2">
               <input type="checkbox" id="alarm-sound" checked={alarmSound} onChange={e => setAlarmSound(e.target.checked)}
                 className="accent-cyan-600" />
-              <label htmlFor="alarm-sound" className="text-xs text-gray-400">Play sound (uses browser audio)</label>
+              <label htmlFor="alarm-sound" className="text-xs text-gray-400">Play sound when an alarm fires</label>
             </div>
           </Card>
 
