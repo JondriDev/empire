@@ -3,10 +3,11 @@
  * Multi-language translation, phrase book, and Cakra integration.
  */
 
-import { useState, useEffect, useCallback } from 'react'
-import { Languages, Copy, Check, BookOpen, ArrowRightLeft, Globe, Bot } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Languages, Copy, Check, BookOpen, ArrowRightLeft, Globe, Bot, Loader2 } from 'lucide-react'
 import { Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
+import { chat } from '../../lib/ai'
 
 interface PhraseBookEntry {
   id: string
@@ -55,6 +56,8 @@ export default function Language() {
   const [copied, setCopied] = useState(false)
   const [phraseBook, setPhraseBook] = useState<PhraseBookEntry[]>([])
   const [showPhraseBook, setShowPhraseBook] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const reqIdRef = useRef(0)
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'language' })
@@ -88,52 +91,33 @@ export default function Language() {
     return 'en'
   }, [])
 
-  const translate = useCallback(() => {
-    if (!input.trim()) {
-      setTranslation('')
-      return
+  const translate = useCallback(async () => {
+    const text = input.trim()
+    if (!text) { setTranslation(''); setLoading(false); return }
+
+    const target = LANGUAGES.find(l => l.code === toLang)?.name || toLang
+    const myId = ++reqIdRef.current
+    setLoading(true)
+    try {
+      // Real translation through Cakra (proxy-routed on the live web, no key).
+      const result = await chat([
+        { role: 'system', content: `You are a precise translator. Translate the user's message into ${target}. Output ONLY the translation — no explanations, no quotes, no transliteration unless the user asks.` },
+        { role: 'user', content: text },
+      ])
+      if (myId !== reqIdRef.current) return // a newer request superseded this one
+      setTranslation((result || '').trim())
+    } catch (err: unknown) {
+      if (myId !== reqIdRef.current) return
+      setTranslation(`⚠️ ${err instanceof Error ? err.message : 'Translation failed'}`)
+    } finally {
+      if (myId === reqIdRef.current) setLoading(false)
     }
+  }, [input, toLang])
 
-    const detected = detectLanguage(input)
-    setDetectedLang(detected)
-
-    // If source is auto, set fromLang to detected
-    if (fromLang === 'auto') setDetectedLang(detectLanguage(input))
-
-    // Mock translation with pattern-based transformations
-    let result = input
-
-    // Simple word substitutions for common phrases
-    if (toLang === 'es') {
-      result = result.replace(/\bHello\b/gi, 'Hola')
-        .replace(/\bGood morning\b/gi, 'Buenos días')
-        .replace(/\bGood night\b/gi, 'Buenas noches')
-        .replace(/\bThank you\b/gi, 'Gracias')
-        .replace(/\bPlease\b/gi, 'Por favor')
-        .replace(/\bHow are you\?\b/gi, '¿Cómo estás?')
-        .replace(/\bYes\b/gi, 'Sí')
-        .replace(/\bNo\b/gi, 'No')
-        .replace(/\bFriend\b/gi, 'Amigo')
-        .replace(/\bWater\b/gi, 'Agua')
-      if (result === input) result = `[${LANGUAGES.find(l => l.code === toLang)?.name}] ${input}`
-    } else if (toLang === 'fr') {
-      result = result.replace(/\bHello\b/gi, 'Bonjour')
-        .replace(/\bThank you\b/gi, 'Merci')
-        .replace(/\bPlease\b/gi, 'S\'il vous plaît')
-        .replace(/\bYes\b/gi, 'Oui')
-        .replace(/\bNo\b/gi, 'Non')
-        .replace(/\bFriend\b/gi, 'Ami')
-      if (result === input) result = `[${LANGUAGES.find(l => l.code === toLang)?.name}] ${input}`
-    } else {
-      result = `[${LANGUAGES.find(l => l.code === toLang)?.name}] ${input}`
-    }
-
-    setTranslation(result)
-    emit({ type: 'CODE_RUN', language: 'language', code: input, output: result })
-  }, [input, fromLang, toLang, detectLanguage])
-
+  // Instant local detection for the hint; debounced network translation.
+  useEffect(() => { setDetectedLang(detectLanguage(input)) }, [input, detectLanguage])
   useEffect(() => {
-    const timer = setTimeout(translate, 400)
+    const timer = setTimeout(translate, 800)
     return () => clearTimeout(timer)
   }, [translate])
 
@@ -247,6 +231,10 @@ export default function Language() {
           style={{ color: 'var(--text)' }}
         />
       </div>
+
+      {loading && (
+        <div className="flex items-center gap-2 text-xs text-cyan-300"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Translating…</div>
+      )}
 
       {/* Translation */}
       {translation && (
