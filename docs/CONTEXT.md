@@ -266,29 +266,28 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-27, post-EPIC-2-S4+S5 green main `e0f8cb7` — token-violations 268→134)
+## 📊 Last QA confirmation (2026-06-28, post-EPIC-2-S6 green main `5bd2cd0` — token-violations 134→59)
 
 - **Routes rendering clean: 27/27 ✅** (28/28 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (all 27 registry
   apps in the smoke list) + INBOUND-LANDS **3/3 ✅** (calendar←editor, goals←notes, messages←ai-chat each
-  show "Received from …" chip + prefilled control off the live render). build🟢 vitest **112/112 🟢** (16 files)
+  show "Received from …" chip + prefilled control off the live render). build🟢 vitest **115/115 🟢** (16 files)
   eslint clean. **No runtime bugs found.**
 - **Apps fully wired BOTH-ways: 9/9 entity-apps-with-inbound — ✅ EPIC-1 TARGET (held, EPIC-1 DONE).**
   Both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat, calendar, goals,
   messages. Intentionally emit-only (by design): files, photos, datacenter + tool apps via `NodeActions`.
   Re-verified live this run by the smoke harness's INBOUND-LANDS guard (3/3 receivers chip+prefill).
-- **Epic-acceptance: EPIC-2 S4 + S5 CONFIRMED MOVED** — the ACTIVE epic's target metric is *Design-token
-  violations* (501 → 0). Since the last QA (after S2+S3, 268), two builder commits landed: **S4** (`b645762`,
-  exempt `lib/registry.ts` + de-hex Network canvas, claimed 268→221), **S5** (`e0f8cb7`, de-hex ai-agent/Cakra
-  cluster + exempt `ai-agent/lib/providers.ts`, claimed 221→134). `node scripts/metrics.mjs` this run reports
-  **134** → confirmed, no contradiction (net **268→134, −134**). Visually verified in screenshots: ai-agent
-  renders signal/ember/abyss tokens, Network canvas dot colours match its legend (the `rgbCss` recolor holds).
-  Top remaining offenders (next stage S6): `artifacts/artifacts/ColorPalette.tsx` (23 — decide exempt-vs-migrate,
-  lean exempt: swatches ARE content), `components/ui/Toast.tsx` (16 — migrate), `artifacts/artifacts/ChartBuilder.tsx`
-  (15), `Kanban.tsx` (13), `FormBuilder.tsx` (9). *Visual recolor (Tailwind→XENO) is intentional; the metric drop
-  is the proof.*
-- **Auto metrics vs last QA snapshot `181c81a`:** token-violations **268→134 (−134)**, vitest **107→112 (+5**,
-  S4 `nodeColors.test.ts`), test files **15→16 (+1)**, static count 100→105, bundle gz **248.3→248.1 (−0.2)**.
+- **Epic-acceptance: EPIC-2 S6 CONFIRMED MOVED** — the ACTIVE epic's target metric is *Design-token
+  violations* (501 → 0). Since the last QA (after S4+S5, 134), one builder commit landed: **S6** (`5bd2cd0`,
+  swept the entire artifacts app → 0 via the new shared `CATEGORICAL` 8-distinct-hex accent rail in `tokens.ts`
+  + exempted `ColorPalette.tsx` as content, claimed 134→59). `node scripts/metrics.mjs` this run reports
+  **59** → confirmed, no contradiction (net **134→59, −75**; metrics.json history shows the 134→59 step).
+  Visually verified: artifacts app (ChartBuilder/Kanban/FormBuilder/gallery) renders the categorical token
+  series, no broken/blank swatches. Top remaining offenders (next stage S7): `components/ui/Toast.tsx` (16),
+  `components/ErrorBoundary.tsx` (7), `apps/notes/Notes.tsx`/`components/Desktop.tsx`/`components/ui/Utility.tsx`
+  (6 each). *Visual recolor (Tailwind→XENO) is intentional; the metric drop is the proof.*
+- **Auto metrics vs last QA snapshot `e0f8cb7`:** token-violations **134→59 (−75)**, vitest **112→115 (+3**,
+  S6 `tokens.test.ts`), test files **16 (±0)**, static count 105→108, bundle gz **248.1 (±0)**.
 - **`latest/` holds only:** current `desktop.png` + 27 `app-<id>.png` + `REPORT.md` (no dated/per-stage PNGs).
 - **Env-expected net noise (not bugs):** files `/api/files?path=/storage/emulated/0`→500 (Android-only path),
   datacenter `/api/dc/tables`→401 (authed API, no headless session).
