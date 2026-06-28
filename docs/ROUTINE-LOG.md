@@ -5,6 +5,20 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-28 · Builder — EPIC-2 S7: shared-UI + shell chrome → 0 (token-violations 59 → 14)
+
+**Done.** Swept the seven reusable surfaces every app inherits to zero design-token violations with the `cssVar`/`tint` rails. These are the highest-leverage files in the codebase — toast, error fallback, empty/stat chrome, the desktop shell, dashboard, app shell and the ⚡ "Send to…" menu — so the recolor propagates to every app at once.
+- **`Toast.tsx` (16→0):** replaced the 4-entry `variantColors` map (raw hex stripe/fg + `rgba` bg) with a `variantAccent` map holding one `TokenName` per variant (success→`c-success`, error→`c-danger`, info→`signal`, warning→`c-warn`) + icon. `ToastCard` now derives stripe=`cssVar(accent)`, fg=`color-mix(… var(--accent) 70%, var(--text))` (legible lightened accent), bg=`tint(accent,12)`. Panel `rgba(13,18,36,0.85)`→`tint('void',85)`, borders `rgba(255,255,255,N)`→`tint('xenon',N)`, shadow `rgba(0,0,0,.5)`→`tint('void',50)`, hover→`tint('xenon',6)`.
+- **`ErrorBoundary.tsx` (7→0):** danger-panel chrome → `tint('c-danger',30)` border, heading→`color-mix(var(--c-danger) 70%, var(--text))`, body→`var(--text3)`; the "Try again" button → `tint('signal',20/40)` + lightened-signal text.
+- **`ui/Utility.tsx` (6→0):** EmptyState + SectionHeader icon chips `rgba(34,211,238,.08/.18)`→`tint('signal',8/18)`; StatCard delta up/down `#4ade80`/`#f87171`→`cssVar('c-success')`/`cssVar('c-danger')`.
+- **`Desktop.tsx` (6→0):** dot-badge shadow, footer border/bg, theme-toggle border + hover → `tint('void'/'xenon',N)`; opaque count-badge border `rgba(13,18,36,1)`→`var(--abyss)`. **Kept `${app.color}` registry-accent interpolation as-is** (identity data, not a violation in this file).
+- **`Dashboard.tsx` (4→0):** drag shadow→`tint('void',30)`, favorites-count + clear-fav chips amber `rgba(234,179,8,N)`→`tint('c-warn',N)`, X icon `#ca8a04`→`cssVar('c-warn')`.
+- **`AppShell.tsx` (3→0):** back-chevron bg/border→`tint('xenon',6/8)`, toast shadow→`tint('void',40)`.
+- **`ui/NodeActions.tsx` (3→0):** ⚡ button + menu-item hovers `#34f5d6`/`rgba(52,245,214,N)`→`cssVar('signal')` / `tint('signal',12/10)` (hover tints stay `color-mix`, never raw `rgba` — the metric greps JS strings too).
+- **Verified:** `npm run build` 🟢 (tsc -b + vite build), `npx vitest run` **115/115** 🟢 (16 files, ±0 — pure recolor), `npx eslint` clean on all 7 touched files. **`node scripts/metrics.mjs`: token-violations 59 → 14 (−45)** — exactly the S7 target. Remaining 14 are all S8 long-tail: Notes (6), Goals (3), AIChat (2), Calendar (1), `network/nodeColors.ts` (1), Weather (1). Bundle gz 248 KB (±0), test cases 108 (±0).
+- **Not visually verifiable in cloud** (no browser this run): the recolor is a Tailwind→XENO token swap — toasts, the error fallback, empty/stat chrome, shell footer/theme-toggle, dashboard favorites chips and the ⚡ menu should render identically but now theme-aware. The metric drop (−45) + green build/tests are the proof.
+- **Next:** EPIC-2 **S8 · long-tail → 0 (EPIC-2 CLOSE)** — the final 14 across `Notes.tsx`/`Goals.tsx`/`AIChat.tsx`/`Calendar.tsx`/`Weather.tsx` (→`cssVar`/`tint`, don't touch handoff/provenance logic) + `network/nodeColors.ts`'s 1 literal (→ its own `rgbCss`/triplet rail, NOT `cssVar`). Lands token-violations = **0** → retire EPIC-2, promote EPIC-3.
+
 ## 2026-06-28 · QA — visual + smoke on green main `5bd2cd0` (EPIC-2 S6 confirmed: token-violations 134→59)
 
 **All green, no runtime bugs.** Fresh cloud checkout, `npm run build` 🟢, served `dist/` on :3001, headless Chromium (`/opt/pw-browsers/chromium-1194`, playwright symlinked from global).

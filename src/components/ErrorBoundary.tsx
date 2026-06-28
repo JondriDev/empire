@@ -1,4 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
+import { tint } from '../design-system/tokens'
 
 interface Props { children: ReactNode; fallback?: ReactNode }
 interface State { hasError: boolean; error: Error | null }
@@ -25,25 +26,25 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div style={{
           background: 'var(--gl-bg)',
-          border: '1px solid rgba(239,68,68,0.3)',
+          border: `1px solid ${tint('c-danger', 30)}`,
           borderRadius: '1rem',
           padding: '2rem',
           textAlign: 'center',
-          color: 'rgba(255,255,255,0.8)',
+          color: 'var(--text)',
         }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚠️</div>
-          <h3 style={{ fontWeight: 700, marginBottom: '0.5rem', color: '#fca5a5' }}>Something went wrong</h3>
-          <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginBottom: '1rem' }}>
+          <h3 style={{ fontWeight: 700, marginBottom: '0.5rem', color: 'color-mix(in srgb, var(--c-danger) 70%, var(--text))' }}>Something went wrong</h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text3)', marginBottom: '1rem' }}>
             {this.state.error?.message || 'Unknown error'}
           </p>
           <button
             onClick={this.reset}
             style={{
-              background: 'rgba(34,211,238,0.2)',
-              border: '1px solid rgba(34,211,238,0.4)',
+              background: tint('signal', 20),
+              border: `1px solid ${tint('signal', 40)}`,
               borderRadius: '0.5rem',
               padding: '0.5rem 1.5rem',
-              color: '#a8e3e2',
+              color: 'color-mix(in srgb, var(--signal) 70%, var(--text))',
               cursor: 'pointer',
               fontSize: '0.85rem',
             }}

@@ -84,15 +84,24 @@
   **Exempted `artifacts/artifacts/ColorPalette.tsx` in `metrics.mjs` `DS_INFRA`** — colour-theory tool, hexes ARE
   content. `tokens.test.ts` +3 (len/var-shape/uniqueness/real-token). **token-violations 134 → 59 (−75: −52 swept,
   −23 exempted).** build🟢 vitest 115🟢 eslint clean.
-- **Remaining 59 violations → 2 stages (EPICS.md S7/S8):**
-  - **S7 · shared-UI + shell → 0 (NEXT, ~45):** `Toast.tsx` (16: green→`c-success`/red→`c-danger`/cyan→`signal`/amber→`c-warn`,
-    panel→`tint('void',85)`, glass→`tint('xenon',N)`), `ErrorBoundary.tsx` (7), `Utility.tsx` (6), `Desktop.tsx` (6),
-    `Dashboard.tsx` (4), `AppShell.tsx` (3), `NodeActions.tsx` (3). All render code → `cssVar`/`tint`; hover tints stay
-    `color-mix`, never raw `rgba`. Keep `${app.color}` registry interpolation in Desktop as-is (identity data). → **~59 → ~14.**
-  - **S8 · long-tail → 0, EPIC-2 CLOSE (~14):** `Notes.tsx` (6), `Goals.tsx` (3), `AIChat.tsx` (2), `Weather.tsx` (1),
-    `Calendar.tsx` (1) → `cssVar`/`tint` (don't touch handoff/provenance logic); `network/nodeColors.ts` (1) → route
-    through its own `rgbCss`/triplet rail (NOT cssVar — it's the canvas source). → **token-violations = 0 → EPIC-2 DONE,
-    promote EPIC-3.**
+- **EPIC-2 S7 DONE (this run, 2026-06-28):** swept the **7 shared-UI + shell surfaces** to zero with the `cssVar`/`tint`
+  rails — `Toast.tsx` 16→0 (collapsed the 4-entry hex map into a `variantAccent` map of one `TokenName` each:
+  success→`c-success`/error→`c-danger`/info→`signal`/warning→`c-warn`; `ToastCard` derives stripe=`cssVar(accent)`,
+  fg=`color-mix(… var(--accent) 70%, var(--text))`, bg=`tint(accent,12)`; panel→`tint('void',85)`, glass→`tint('xenon',N)`,
+  shadow→`tint('void',N)`), `ErrorBoundary.tsx` 7→0 (`tint('c-danger',30)` + lightened heading), `ui/Utility.tsx` 6→0
+  (icon chips→`tint('signal',8/18)`, StatCard delta→`cssVar('c-success'/'c-danger')`), `Desktop.tsx` 6→0 (shadows/borders
+  →`tint`, opaque badge border `rgba(13,18,36,1)`→`var(--abyss)`; **kept `${app.color}`** registry identity),
+  `Dashboard.tsx` 4→0 (amber fav chips→`tint('c-warn',N)`), `AppShell.tsx` 3→0, `ui/NodeActions.tsx` 3→0 (signal hovers
+  →`cssVar('signal')`/`tint('signal',N)`). **New mapping confirmed:** lighten an accent for legible fg/heading text via
+  `color-mix(in srgb, var(--accent) 70%, var(--text))`; opaque dark panel border→`var(--abyss)` (not a tint).
+  **token-violations 59 → 14 (−45).** build🟢 vitest 115🟢 eslint clean.
+- **Remaining 14 violations → 1 stage (EPICS.md S8 — NEXT, EPIC-2 CLOSE):**
+  - **S8 · long-tail → 0, EPIC-2 CLOSE (14):** `apps/notes/Notes.tsx` (6), `apps/goals/Goals.tsx` (3),
+    `apps/ai-chat/AIChat.tsx` (2), `apps/weather/Weather.tsx` (1), `apps/calendar/Calendar.tsx` (1) → `cssVar`/`tint`
+    per the established mappings (**don't touch handoff/provenance/inbound logic — only colours**); `apps/network/nodeColors.ts`
+    (1) → route the last literal through its own `rgbCss(triplet, alpha)`/named-triplet rail (**NOT `cssVar`** — it's the
+    canvas-colour source). → **token-violations = 0 → EPIC-2 DONE, flag QA to confirm 0 on green main, promote EPIC-3
+    (Depth pass on shallow instruments).** Watch the alpha-append trap (`${color}NN`→`color-mix`) in these entity apps.
   - **Reusable rail for data files:** if a file's colours are genuine external/brand/content identities that must stay
     distinct (registry, providers, ColorPalette swatches), add its repo-relative path to `DS_INFRA` in
     `scripts/metrics.mjs` with a one-line rationale — don't force-map identity data onto internal tokens. For

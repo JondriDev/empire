@@ -5,6 +5,7 @@
  * These are the polish that separates "it works" from "it's crafted".
  */
 import type { ReactNode } from 'react'
+import { cssVar, tint } from '../../design-system/tokens'
 
 /* ═══ EMPTY STATE ═══
    Empty-state design principle: befriend the user. Show what's missing,
@@ -41,8 +42,8 @@ export function EmptyState({ icon, title, description, action, className = '' }:
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(34, 211, 238, 0.08)',
-            border: '1px solid rgba(34, 211, 238, 0.18)',
+            background: tint('signal', 8),
+            border: `1px solid ${tint('signal', 18)}`,
             color: 'var(--color-cyan-3)',
           }}
         >
@@ -136,8 +137,8 @@ export function SectionHeader({ title, subtitle, action, icon, className = '' }:
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: 'rgba(34, 211, 238, 0.08)',
-              border: '1px solid rgba(34, 211, 238, 0.18)',
+              background: tint('signal', 8),
+              border: `1px solid ${tint('signal', 18)}`,
               color: 'var(--color-cyan-3)',
               flexShrink: 0,
             }}
@@ -192,8 +193,8 @@ interface StatCardProps {
 export function StatCard({ label, value, delta, deltaDirection = 'neutral', color, icon }: StatCardProps) {
   const accent = color || 'var(--color-cyan-3)'
   const deltaColor =
-    deltaDirection === 'up'    ? '#4ade80' :
-    deltaDirection === 'down'  ? '#f87171' :
+    deltaDirection === 'up'    ? cssVar('c-success') :
+    deltaDirection === 'down'  ? cssVar('c-danger') :
     'var(--text3)'
   return (
     <div

@@ -6,6 +6,7 @@
  */
 import { create } from 'zustand'
 import { CheckCircle2, AlertCircle, Info, X, AlertTriangle } from 'lucide-react'
+import { cssVar, tint, type TokenName } from '../../design-system/tokens'
 
 export type ToastVariant = 'success' | 'error' | 'info' | 'warning'
 
@@ -50,11 +51,14 @@ export function useToast() {
   }
 }
 
-const variantColors: Record<ToastVariant, { bg: string; stripe: string; fg: string; icon: typeof Info }> = {
-  success: { bg: 'rgba(34, 197, 94, 0.12)',  stripe: '#22c55e', fg: '#4ade80', icon: CheckCircle2 },
-  error:   { bg: 'rgba(239, 68, 68, 0.12)',  stripe: '#ef4444', fg: '#f87171', icon: AlertCircle },
-  info:    { bg: 'rgba(34, 211, 238, 0.12)', stripe: '#22d3ee', fg: 'var(--color-cyan-3)', icon: Info },
-  warning: { bg: 'rgba(245, 158, 11, 0.12)', stripe: '#f59e0b', fg: '#fbbf24', icon: AlertTriangle },
+/** Per-variant: one XENO accent token + icon. The stripe/fg/bg are derived from
+ *  the accent so a theme change carries through (stripe = solid `cssVar`, fg =
+ *  the accent lightened toward `--text`, bg = a 12% tint). */
+const variantAccent: Record<ToastVariant, { accent: TokenName; icon: typeof Info }> = {
+  success: { accent: 'c-success', icon: CheckCircle2 },
+  error:   { accent: 'c-danger',  icon: AlertCircle },
+  info:    { accent: 'signal',    icon: Info },
+  warning: { accent: 'c-warn',    icon: AlertTriangle },
 }
 
 /** Mount once at the app root */
@@ -85,8 +89,9 @@ export function ToastViewport() {
 }
 
 function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
-  const palette = variantColors[toast.variant]
-  const Icon = palette.icon
+  const { accent, icon: Icon } = variantAccent[toast.variant]
+  const stripe = cssVar(accent)
+  const fg = `color-mix(in srgb, ${cssVar(accent)} 70%, var(--text))`
 
   return (
     <div
@@ -99,19 +104,19 @@ function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
         alignItems: 'flex-start',
         gap: '10px',
         padding: '12px 14px 12px 16px',
-        background: 'rgba(13, 18, 36, 0.85)',
+        background: tint('void', 85),
         backdropFilter: 'blur(var(--blur-xl)) saturate(1.6)',
         WebkitBackdropFilter: 'blur(var(--blur-xl)) saturate(1.6)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderLeft: `3px solid ${palette.stripe}`,
+        border: `1px solid ${tint('xenon', 8)}`,
+        borderLeft: `3px solid ${stripe}`,
         borderRadius: 'var(--radius-lg)',
-        boxShadow: '0 12px 36px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset',
+        boxShadow: `0 12px 36px ${tint('void', 50)}, 0 0 0 1px ${tint('xenon', 4)} inset`,
         animation: 'toast-in 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
       }}
     >
       <Icon
         className="w-4 h-4 flex-shrink-0 mt-0.5"
-        style={{ color: palette.fg }}
+        style={{ color: fg }}
       />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
@@ -152,7 +157,7 @@ function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
           flexShrink: 0,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+          e.currentTarget.style.background = tint('xenon', 6)
           e.currentTarget.style.color = 'var(--text)'
         }}
         onMouseLeave={(e) => {
