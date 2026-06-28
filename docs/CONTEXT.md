@@ -23,13 +23,22 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** **EPIC-3 — Depth pass on shallow instruments** (promoted 2026-06-28 when EPIC-2 hit
-  **0** token violations). **⚠️ EPIC-3 has NO decomposed stages yet — needs the Strategist.** Until then,
-  the Builder's next move is to take the topmost ROADMAP-NOW follow-up (see "Open follow-ups discovered"
-  at the bottom of this file — e.g. DataCenter/Files/Photos node-coverage gaps) as one green reviewable
-  commit, and note in the log that EPICS needs the Strategist to seed EPIC-3 stages (one shallow
-  instrument per stage: Photos/Maps/Video/Music/Clock → genuine offline-capable function + a unit test).
-  EPIC-1 (Organism Completeness) **DONE & QA-confirmed** (both-ways 9/9). EPIC-2 (Design-system
-  conformance) **DONE 2026-06-28** — token-violations **501 → 0** across S1–S8 (see below).
+  **0** token violations). **✅ NOW DECOMPOSED (Builder-seeded 2026-06-28) — S1 SHIPPED.** Target metric:
+  *shallow instruments with genuine persistent/offline function + a unit test* → **8/8** (Weather, Maps,
+  Language, DataCenter, Clock, Music, Video, Photos); **now 5/8** (redesign delivered the first four; S1
+  delivered Clock).
+  - **▶ NEXT STAGE = EPIC-3 S2 (Music + Video → library survives a reload via IndexedDB).** Exact shape in
+    EPICS.md S2. **The bug to fix:** `Music.tsx`/`Video.tsx` persist their playlist to localStorage
+    *including* `URL.createObjectURL(...)` blob URLs (`empire-music-playlist` / `empire-video-playlist`),
+    but blob URLs are **session-scoped → dead after reload**, so the restored library is a list of
+    unplayable ghosts. **Build:** a shared `src/lib/mediaStore.ts` (IndexedDB; `putMedia`/`getMedia`/
+    `deleteMedia`/`allMediaIds`, graceful no-op when IDB absent) storing real `Blob`s by id; persist only
+    *metadata* (no `src`) in localStorage; rehydrate `src` via `createObjectURL` on mount. Size-cap large
+    blobs (quota). Unit-test the pure strip/rehydrate transforms (jsdom has **no** IndexedDB — keep the IDB
+    glue thin and untested, or add a tiny in-memory fake; do **not** add `fake-indexeddb` unless needed).
+    One commit covering both apps (shared store).
+  - EPIC-1 (Organism Completeness) **DONE & QA-confirmed** (both-ways 9/9). EPIC-2 (Design-system
+    conformance) **DONE 2026-06-28** — token-violations **501 → 0** across S1–S8 (see below).
 - **🎨 REDESIGN LANDED (2026-06-28) — user-directed "JondriDev pass"; do NOT revert.** A first-principles
   overhaul of The Empire. **Intentional metric deltas — read before "fixing" them:**
   - **apps 27 → 25 is BY DESIGN:** deleted `ai-agent` (Hermes Agent) + `hermes-cc` (Hermes CC) and folded
@@ -268,6 +277,18 @@
   green build**. Always **space out the slashes** in comments. Verify without a browser:
   `grep -o '/\*'` count == `grep -o '\*/'` count, and built `dist/assets/index-*.css` has a
   **top-level `.empire-desktop{position:fixed}`** with **zero `.hide-sm .empire-desktop`**.
+- **Blob-URL persistence trap (Music/Video — EPIC-3 S2 target):** `URL.createObjectURL(file)` returns a
+  *session-scoped* URL that is **invalid after a reload**. `Music.tsx`/`Video.tsx` persist their playlist
+  (with these `src` URLs) to localStorage, so the restored library can't actually play. Persist the real
+  `Blob` bytes (IndexedDB) + metadata, and rebuild `src` on mount — never round-trip a blob URL through
+  localStorage and expect it to work.
+- **Clock persists via a pure logic module (EPIC-3 S1):** `src/apps/clock/clockLogic.ts` owns the maths +
+  (de)serialization (`deserializeClockState` is tolerant — bad JSON / null / partial / corrupt all fall
+  back field-by-field, so adding a field never wipes saved alarms). The component lazy-loads from
+  `empire-clock-state` via a `useMemo(()=>deserialize(safeGet(KEY)),[])` initializer (no load-effect flash)
+  and persists in a `[alarms, worldClocks, is24Hour]` effect. Test the *pure module*, not the component
+  (localStorage is an inert `vi.fn()` mock in `src/test/setup.ts`). Pattern to reuse for any instrument that
+  needs to survive a reload.
 - **Calendar owns its own storage:** events live in `empire-calendar-events` (NOT the central
   store) and self-mirror via `mirrorCollection()` in a `[events]` effect. **Never add an
   `event` syncer to the central list** — it would delete Calendar's nodes.
