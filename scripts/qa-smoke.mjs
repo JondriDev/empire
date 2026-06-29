@@ -193,16 +193,29 @@ function makeWavBytes() {
   buf.write('data', 36); buf.writeUInt32LE(dataSize, 40);
   return buf;
 }
+// A minimal valid 1×1 PNG (so Photos' image filter + the new window.Image()
+// dimension probe both accept it); the bytes round-trip through IDB.
+function makePngBytes() {
+  return Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+    'base64'
+  );
+}
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'empire-qa-media-'));
 const wavPath = path.join(tmpDir, 'QAProbe MusicSurvive.wav');
 const webmPath = path.join(tmpDir, 'QAProbe VideoSurvive.webm');
+const pngPath = path.join(tmpDir, 'QAProbe PhotoSurvive.png');
 fs.writeFileSync(wavPath, makeWavBytes());
 // The blob bytes are irrelevant to the persistence roundtrip — only the .webm
 // extension (passes Video's file filter) and that real bytes round-trip matter.
 fs.writeFileSync(webmPath, Buffer.from('QAProbe-video-bytes-for-idb-roundtrip'));
+fs.writeFileSync(pngPath, makePngBytes());
 const mediaCases = [
   { id: 'music', file: wavPath, title: 'QAProbe MusicSurvive' },
   { id: 'video', file: webmPath, title: 'QAProbe VideoSurvive' },
+  // EPIC-3 S3: Photos now uses the same mediaStore IDB rail — add→reload→survive.
+  // Photos renders the full filename, so the .png substring is present in the body.
+  { id: 'photos', file: pngPath, title: 'QAProbe PhotoSurvive' },
 ];
 const mediaResults = [];
 for (const c of mediaCases) {
@@ -254,7 +267,7 @@ md += `| Receiver | From | Chip | Prefilled | Result |\n|---|---|---|---|---|\n`
 for (const r of inboundResults) {
   md += `| ${r.id} | ${r.from} | ${r.chip ? '✅' : '❌'} | ${r.prefilled ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
 }
-md += `\n## Media-persists guard (EPIC-3 S2 — IndexedDB blob roundtrip)\n\n`;
+md += `\n## Media-persists guard (EPIC-3 S2/S3 — IndexedDB blob roundtrip)\n\n`;
 md += `Each media app's real file \`<input>\` was driven with a small blob, then the page was reloaded; PASS = the item appeared after add AND survived the reload (rehydrated from IndexedDB, not dropped as a ghost). This exercises the S2 acceptance that jsdom cannot (no IndexedDB).\n\n`;
 md += `| App | Added | Survived reload | Result |\n|---|---|---|---|\n`;
 for (const r of mediaResults) {
