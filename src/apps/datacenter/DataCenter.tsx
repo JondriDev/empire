@@ -11,45 +11,17 @@ import { Bot, Plus, Trash2, Database, X } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
+import {
+  STORAGE_KEY, type DCStore, type DCTable, type TableRow,
+  deserializeStore, serializeStore, newId,
+  addRow as addRowTo, updateCell as updateCellIn, deleteRow as deleteRowFrom,
+  addTable, deleteTable as deleteTableFrom, normalizeTableName,
+} from './datacenterLogic'
 
-interface TableRow { id: string; [col: string]: string }
-interface DCTable { columns: string[]; rows: TableRow[] }
-type DCStore = Record<string, DCTable>
-
-const STORAGE_KEY = 'empire-datacenter'
 const ACCENT = 'var(--c-mesin)' // DS atmos-pale token — Data Center's accent
 
-// First-run seed so the table is alive on open instead of an empty void.
-const SEED: DCStore = {
-  tasks: {
-    columns: ['title', 'status', 'priority'],
-    rows: [
-      { id: 'r1', title: 'Ship Empire redesign', status: 'in progress', priority: 'high' },
-      { id: 'r2', title: 'Wire Open-Meteo weather', status: 'done', priority: 'medium' },
-    ],
-  },
-  ideas: {
-    columns: ['idea', 'category'],
-    rows: [
-      { id: 'r1', idea: 'Voice control for Cakra', category: 'ai' },
-      { id: 'r2', idea: 'Offline-first sync layer', category: 'infra' },
-    ],
-  },
-}
-
 function loadStore(): DCStore {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw)
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed as DCStore
-    }
-  } catch { /* ignore */ }
-  return SEED
-}
-
-function newId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
+  return deserializeStore(localStorage.getItem(STORAGE_KEY))
 }
 
 export default function DataCenter() {
@@ -67,7 +39,7 @@ export default function DataCenter() {
 
   // Persist on every change — this is the single source of truth.
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(store)) } catch { /* ignore */ }
+    try { localStorage.setItem(STORAGE_KEY, serializeStore(store)) } catch { /* ignore */ }
   }, [store])
 
   // If the active table disappears (deleted), fall back to the first one.
@@ -95,32 +67,23 @@ export default function DataCenter() {
     const row: TableRow = { id: newId() }
     table.columns.forEach(c => { row[c] = (newRow[c] || '').trim() })
     if (table.columns.every(c => !row[c])) return // don't add an all-blank row
-    setStore(prev => ({ ...prev, [activeTable]: { ...prev[activeTable], rows: [...prev[activeTable].rows, row] } }))
+    setStore(prev => addRowTo(prev, activeTable, row))
     setNewRow({})
   }
 
   const updateCell = (rowId: string, col: string, value: string) => {
-    setStore(prev => ({
-      ...prev,
-      [activeTable]: {
-        ...prev[activeTable],
-        rows: prev[activeTable].rows.map(r => (r.id === rowId ? { ...r, [col]: value } : r)),
-      },
-    }))
+    setStore(prev => updateCellIn(prev, activeTable, rowId, col, value))
   }
 
   const deleteRow = (rowId: string) => {
-    setStore(prev => ({
-      ...prev,
-      [activeTable]: { ...prev[activeTable], rows: prev[activeTable].rows.filter(r => r.id !== rowId) },
-    }))
+    setStore(prev => deleteRowFrom(prev, activeTable, rowId))
   }
 
   const createTable = () => {
-    const name = newTableName.trim().toLowerCase().replace(/\s+/g, '_')
-    const columns = newTableCols.split(',').map(c => c.trim()).filter(Boolean)
-    if (!name || store[name] || columns.length === 0) return
-    setStore(prev => ({ ...prev, [name]: { columns, rows: [] } }))
+    const name = normalizeTableName(newTableName)
+    const columns = newTableCols.split(',')
+    if (!name || store[name] || columns.every(c => !c.trim())) return
+    setStore(prev => addTable(prev, name, columns))
     setActiveTable(name)
     setNewTableName('')
     setNewTableCols('')
@@ -128,11 +91,7 @@ export default function DataCenter() {
   }
 
   const deleteTable = (name: string) => {
-    setStore(prev => {
-      const next = { ...prev }
-      delete next[name]
-      return next
-    })
+    setStore(prev => deleteTableFrom(prev, name))
   }
 
   const askCakra = () => {

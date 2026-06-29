@@ -22,22 +22,30 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **EPIC-3 — Depth pass on shallow instruments** (promoted 2026-06-28; **Strategist-refined
-  2026-06-28**). **S1 (Clock) + S2 (Music/Video) + S3 (Photos) SHIPPED.** **Target metric (PRIMARY):** *shallow
-  instruments with genuine persistent/offline function* → **8/8** (Weather, Maps, Language, DataCenter, Clock,
-  Music, Video, Photos); **now 8/8 — PRIMARY METRIC HIT** (S3 landed Photos 2026-06-29). The "+ a unit test" is
-  the **acceptance discipline** for each new deepening stage; only **S4** remains (test-backfill, EPIC-3 CLOSE).
-  - **▶ NEXT STAGE = EPIC-3 S4 (EPIC-3 CLOSE): backfill unit tests for the two logic-heavy redesign instruments
-    — DataCenter + Weather.** Full shape in EPICS.md S4. **The work:** extract the pure logic from these two
-    redesign-era apps (which shipped WITHOUT tests) into named modules + test them, mirroring the Clock/`clockLogic.ts`
-    pattern: (a) `src/apps/datacenter/datacenterLogic.ts` — table/dataset CRUD round-trip + tolerant
-    (de)serialization of `localStorage` state (read `DataCenter.tsx` for the exact storage key + state shape first);
-    (b) `src/apps/weather/weatherLogic.ts` — Open-Meteo JSON → view-model transform + the `wmo()` weather-code→label
-    mapping (read `Weather.tsx`; the fetch/parse logic is currently inline in the component — extract the pure parse
-    + mapping, leave the fetch in the component). Each gets a `*.test.ts`. Maps/Language stay render-smoke-covered
-    (no extractable pure logic worth a unit). **Acceptance:** 2 new logic modules + 2 new test files, build🟢
-    vitest🟢 eslint clean, token-violations stay 0. Then **EPIC-3 DONE** → promote **EPIC-4 · PWA completion**
-    (already decomposed in EPICS.md QUEUED: offline-boot guard → precache gap → base-path).
+- **Active epic:** **EPIC-4 — PWA completion → installable, offline-true** (promoted 2026-06-29 when EPIC-3 went
+  code-complete). **Target metric:** *Lighthouse PWA ≥ 90* **AND** a new **`offline-boots` smoke guard** (the
+  built app loads + renders the desktop with the network FULLY blocked — today's QA only blocks *external* hosts,
+  never a cold offline boot of the app's own chunks). Stages seeded in EPICS.md (S1 offline-boot guard + precache
+  audit → S2 close the precache gap → S3 base-path/install-flow).
+  - **▶ NEXT STAGE = EPIC-4 S1 · Offline-boot guard + SW precache audit.** Full shape in EPICS.md S1. **The work:**
+    (a) add `scripts/qa-offline.mjs` (or extend `qa-smoke.mjs`): serve `dist/`, do one warm load, then
+    `page.route('**', r => r.abort())` to block **all** subsequent requests and assert the desktop shell + one lazy
+    app route still render from the SW/precache. (b) Inventory what the SW actually precaches vs the 25 lazy app
+    chunks — the project uses **`vite-plugin-pwa`** (build log shows `PWA v1.3.0 mode generateSW`, `precache 63
+    entries`); find its config in `vite.config.ts` (Workbox `generateSW`/`globPatterns`). **Acceptance:** the guard
+    runs in QA and reports cold-offline pass/fail; the precache gap (chunks not cached) is enumerated. build🟢. Note:
+    the QA headless-render recipe (Chromium at `/opt/pw-browsers/chromium-1194`, playwright global-symlinked) is in
+    the QA section below — reuse `launchBrowser()` from `qa-smoke.mjs`.
+  - **✅ EPIC-3 CODE-COMPLETE (2026-06-29) — all of S1–S4 shipped, function metric 8/8 (QA-confirmed at S3).**
+  - **✅ S4 SHIPPED (2026-06-29, EPIC-3 CLOSE):** extracted the pure logic out of the two logic-heavy redesign
+    instruments into named modules + tests, mirroring `clockLogic.ts`. `src/apps/datacenter/datacenterLogic.ts`
+    (`DCStore` types + tolerant `deserializeStore`/`serializeStore` + immutable `addRow`/`updateCell`/`deleteRow`/
+    `addTable`/`deleteTable`/`normalizeTableName` — all return a fresh store, no React; no-op when the table is
+    gone) + `datacenterLogic.test.ts` (12 cases). `src/apps/weather/weatherLogic.ts` (`Cat`/`WeatherData`/
+    `OpenMeteo*` types + `wmo()` code map + pure `mapForecast(data, place)` that rounds/caps-at-5/tolerates-missing-
+    daily) + `weatherLogic.test.ts` (8 cases). Both components rewired to delegate (zero behaviour change). test-
+    files 19→21, test cases +21, token-violations 0 (±0), bundle 292.2→292.3. **Reuse pattern:** any app with inline
+    pure logic → extract to `<app>Logic.ts`, keep React/DS-specific bits (icons, colour maps) in the component.
   - **✅ S3 SHIPPED (2026-06-29):** Photos library now survives a reload — ported `Photos.tsx` to the shared
     `mediaStore` IDB rail 1:1 from Music (`url`→`src`, async-rehydrate behind `hydratedRef`, persist meta only,
     `putMedia`/`deleteMedia`, oversized→`ephemeral`+amber "session" chip in grid & list). New
@@ -378,11 +386,12 @@
   assert it survived from IDB, not a ghost): **photos ✅ added+survived — the live IDB roundtrip works.** All eight
   shallow instruments (Clock, Music, Video, Photos + Weather/Maps/Language/DataCenter) are now offline-capable —
   **EPIC-3 PRIMARY METRIC HIT.**
-- **▶ NEXT STAGE = EPIC-3 S4 (EPIC-3 CLOSE):** backfill the two logic-heavy redesign instruments — extract
-  `datacenterLogic.ts` (table/row CRUD + tolerant (de)serialize) + `weatherLogic.ts` (Open-Meteo JSON→view-model
-  + `wmo()` code map) into pure modules + a `*.test.ts` each (mirror `clockLogic.ts`). Maps/Language stay render-
-  smoke-covered. **No acceptance number for QA to move** (the 8/8 function metric is already hit) — S4 is the
-  "+ a unit test" discipline close. When S4 lands → EPIC-3 DONE → promote **EPIC-4 · PWA completion**.
+- **▶ NEXT STAGE = EPIC-4 S1 (PWA completion):** add an offline-boot guard (`scripts/qa-offline.mjs` or extend
+  `qa-smoke.mjs`) that blocks **all** network after a warm load and asserts the shell + one lazy app route still
+  render from the SW/precache, and inventory the `vite-plugin-pwa` (`generateSW`) precache vs the 25 lazy chunks.
+  **EPIC-3 is code-complete** (S1–S4 all shipped 2026-06-29; function 8/8 confirmed at S3) — next QA can move
+  EPIC-3 → DONE and confirm EPIC-4 S1's cold-offline guard. S4 (this run) added `datacenterLogic.ts` +
+  `weatherLogic.ts` + their tests; **no function-metric move** (it was already 8/8) — S4 was the unit-test close.
 - **Auto metrics vs last QA snapshot `88b70a7`:** test cases **143→149 (+6)** (`photosStore.test.ts`), test files
   **18→19 (+1)**, bundle gz **291.9→292.2 (+0.3, shared rail, by design)**, off-system utilities **1160→1164 (+4,
   the two amber "session" chips × grid+list — the mandated idiom)**, apps **25 (±0)**, token-violations **0 (±0)**.
