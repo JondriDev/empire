@@ -1,4 +1,47 @@
 @import "tailwindcss";
-@import "./design-system/theme.css";
 @import "./design-system.css";
 @import "./window-manager.css";
+
+/* ===================================================================
+   JONDRIDEV DESIGN SYSTEM - TAILWIND v4 @theme BRIDGE
+   Exposes the canonical tokens (colors_and_type.css) as ergonomic
+   Tailwind utilities so app code consumes the design system through
+   classes instead of raw Tailwind palette colours:
+     text-fg / text-muted / text-faint -> --text / --text2 / --text3
+     bg-glass / bg-void / border-hair  -> --holo-bg / --void / --hair
+     text-signal / text-aurora / ...   -> brand accents
+     text-success / text-warn / text-danger / text-info -> state
+   Uses `inline` because the values reference runtime vars, so each
+   utility resolves to var(--token) directly and stays theme-aware
+   under a [data-theme] ancestor. Radius + type scales are already
+   re-pointed onto --r-* / --text-* by the :root bridge in
+   design-system.css; spacing is on the --sp-* 4px grid - so only the
+   colour vocabulary lives here. Additive: the default palette stays
+   until the final lock stage neutralizes it (offSystemUtilities -> 0).
+   NOTE: keep this @theme in the entry stylesheet (not a nested
+   @import) and free of apostrophes/quotes in comments - the Tailwind
+   v4 parser treats a stray quote as an unterminated string.
+   =================================================================== */
+@theme inline {
+  /* Neutrals / text (theme-aware) */
+  --color-fg:    var(--text);
+  --color-muted: var(--text2);
+  --color-faint: var(--text3);
+  --color-hair:  var(--hair);
+  --color-glass: var(--holo-bg);
+  --color-void:  var(--void);
+
+  /* Brand accents */
+  --color-signal: var(--signal);
+  --color-aurora: var(--aurora);
+  --color-ion:    var(--ion);
+  --color-ember:  var(--ember);
+  --color-plasma: var(--plasma);
+  --color-xenon:  var(--xenon);
+
+  /* Semantic state */
+  --color-success: var(--c-success);
+  --color-warn:    var(--c-warn);
+  --color-danger:  var(--c-danger);
+  --color-info:    var(--c-info);
+}
