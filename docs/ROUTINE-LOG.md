@@ -5,6 +5,38 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · Builder — EPIC-4 S4 · installability assertion (EPIC-4 CLOSE)
+
+**Done.** Added the manifest-installability gate that closes EPIC-4 (the last leg of the *Lighthouse PWA ≥ 90*
+target). New pure helpers in `scripts/pwaBaseAudit.mjs`: **`auditInstallability(manifest)`** (asserts
+name+short_name, a ≥192 AND a ≥512 `any`-purpose icon, a `maskable` icon, standalone-ish `display` incl. via
+`display_override`, `start_url`, `background_color`+`theme_color`; returns per-criterion `criteria{}` + flat
+`missing[]`) and **`maxIconSize(sizes)`** (largest dim; `"any"`→Infinity). Folded into `auditPwaBase` (its issues
+join the base-path issues) and surfaced in `check-pwa-base.mjs` (console line + a PWA-BASE.md Installability table).
++12 unit cases in `pwaBaseAudit.test.mjs` (17→29).
+
+**Why pure-auditor, not Lighthouse.** Investigated Lighthouse first per the stage: no `lighthouse` dep (npm
+registry reachable, `lighthouse@13.4.0`) but it would add a heavy devDep + a browser-driven, egress/Chrome-flag-flaky
+check — wrong fit for an unattended fresh-checkout cloud routine that must stay deterministically green. The pure
+auditor is the stage's sanctioned fallback and gives an offline, reproducible gate on the same install criteria.
+
+**Verified.** `npm run build` 🟢 (63 precache entries). `npx vitest run` **205/205 🟢** (was 193; +12, 23 files).
+`npx eslint` on the 3 touched files — clean. `node scripts/check-pwa-base.mjs` → install surface consistent at
+`--base=/empire/` **and installable ✅ (4 icons)** — every criterion green against the real build. Metrics
+**no-regression**: apps 25 (±0) · token-violations 0 (±0) · off-system-utils 1076 (±0) · bundle gz 292.5 (±0) ·
+metrics-static (src/-only) test cases 163 / 21 files (±0 — the new tests live under `scripts/`, as designed).
+*Not verifiable in cloud:* no rendered-UI change this run (tooling only); a real on-device install/Lighthouse run
+isn't run here — the gate proves the manifest contract the install relies on.
+
+**Next.** EPIC-4 is code-complete (S1–S4, offline ✅ + base ✅ + installable ✅). **Single best next step:** the
+Strategist promotes **EPIC-5 · Android APK validation** and seeds its stages (QUEUED, currently no decomposed
+stages); QA confirms the `offline-boots` metric and moves EPIC-4 to fully DONE. Until EPICS.md has a fresh
+`▶ ACTIVE` stage, the next builder takes the topmost standing-priority item.
+
+**Metrics row:** apps 25 · test-cases(src) 163 · test-files(src) 21 · token-violations 0 · off-system-utils 1076 · bundle-gz 292.5 KB · vitest 205/205.
+
+---
+
 ## 2026-06-29 · QA — visual + smoke (green main `1b5e695`, EPIC-4 S3 confirmed)
 
 **Metrics (vs last QA `9051409`):** apps 25 (±0) · token-violations 0 (±0) · off-system-utils 1076 (±0) ·

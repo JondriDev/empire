@@ -11,4 +11,18 @@
 | manifest start_url/scope relative | ✅ both `.` |
 | manifest id stable non-root | ✅ `empire` |
 
-**Base-path check: ✅ PASS**
+## Installability (EPIC-4 S4)
+
+| Criterion | Result |
+|---|---|
+| name + short_name | ✅ |
+| icon ≥192px (any) | ✅ |
+| icon ≥512px (any) | ✅ |
+| maskable icon | ✅ |
+| display standalone-ish | ✅ `standalone` |
+| start_url | ✅ |
+| background_color + theme_color | ✅ |
+
+**Installable: ✅ PASS**
+
+**Base-path + install check: ✅ PASS**

@@ -6,6 +6,8 @@ import {
   auditSwBase,
   auditRegisterSw,
   auditManifest,
+  maxIconSize,
+  auditInstallability,
   auditPwaBase,
 } from './pwaBaseAudit.mjs';
 
@@ -19,7 +21,25 @@ const HTML = (base) => `<!doctype html><html><head>
   <body><div id="root"></div></body></html>`;
 const SW = (base) => `define(["./workbox-x"],function(s){"use strict";s.precacheAndRoute([{url:"index.html",revision:"a"}],{});s.registerRoute(new s.NavigationRoute(s.createHandlerBoundToURL("${base}index.html"),{denylist:[/^\\/api\\//]}))});`;
 const REG = (base) => `if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('${base}sw.js', { scope: '${base}' })})}`;
-const MANIFEST = JSON.stringify({ name: 'The Empire', start_url: '.', scope: '.', id: 'empire' });
+// Mirrors the real install surface vite.config.ts emits (relative + installable).
+const FULL_MANIFEST = {
+  name: 'The Empire — Desktop OS',
+  short_name: 'Empire',
+  start_url: '.',
+  scope: '.',
+  id: 'empire',
+  display: 'standalone',
+  display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
+  background_color: '#03060e',
+  theme_color: '#03060e',
+  icons: [
+    { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+    { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    { src: 'maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+  ],
+};
+const MANIFEST = JSON.stringify(FULL_MANIFEST);
 
 describe('normalizeBase', () => {
   it('forces leading + trailing slashes', () => {
@@ -120,6 +140,80 @@ describe('auditManifest', () => {
   });
 });
 
+describe('maxIconSize', () => {
+  it('reads the largest dimension out of a sizes string', () => {
+    expect(maxIconSize('192x192')).toBe(192);
+    expect(maxIconSize('512x512')).toBe(512);
+    expect(maxIconSize('48x48 256x256 128x128')).toBe(256);
+  });
+  it('treats "any" (scalable SVG) as covering every size', () => {
+    expect(maxIconSize('any')).toBe(Infinity);
+  });
+  it('returns 0 for a missing/garbage sizes string', () => {
+    expect(maxIconSize(undefined)).toBe(0);
+    expect(maxIconSize('round')).toBe(0);
+  });
+});
+
+describe('auditInstallability', () => {
+  it('greenlights the real Empire manifest', () => {
+    const r = auditInstallability(MANIFEST);
+    expect(r.ok).toBe(true);
+    expect(r.missing).toEqual([]);
+    expect(r.criteria.icon192).toBe(true);
+    expect(r.criteria.icon512).toBe(true);
+    expect(r.criteria.maskableIcon).toBe(true);
+  });
+  it('flags a manifest missing short_name and the color theming', () => {
+    const r = auditInstallability({ ...FULL_MANIFEST, short_name: '', background_color: undefined });
+    expect(r.ok).toBe(false);
+    expect(r.missing).toContain('short_name');
+    expect(r.missing).toContain('background_color');
+  });
+  it('requires a ≥512px any-icon, not just a 192px one', () => {
+    const r = auditInstallability({
+      ...FULL_MANIFEST,
+      icons: [{ src: 'a.png', sizes: '192x192', type: 'image/png', purpose: 'any' }],
+    });
+    expect(r.criteria.icon192).toBe(true);
+    expect(r.criteria.icon512).toBe(false);
+    expect(r.criteria.maskableIcon).toBe(false);
+    expect(r.ok).toBe(false);
+  });
+  it('does NOT count a maskable-only icon toward the any-size buckets', () => {
+    const r = auditInstallability({
+      ...FULL_MANIFEST,
+      icons: [{ src: 'm.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }],
+    });
+    expect(r.criteria.maskableIcon).toBe(true);
+    expect(r.criteria.icon512).toBe(false); // maskable-only doesn't satisfy "any"
+  });
+  it('counts a multi-purpose "any maskable" icon for both', () => {
+    const r = auditInstallability({
+      ...FULL_MANIFEST,
+      icons: [{ src: 'both.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }],
+    });
+    expect(r.criteria.icon512).toBe(true);
+    expect(r.criteria.maskableIcon).toBe(true);
+  });
+  it('treats a missing purpose as "any" (the spec default)', () => {
+    const r = auditInstallability({
+      ...FULL_MANIFEST,
+      icons: [{ src: 'big.png', sizes: '512x512', type: 'image/png' }],
+    });
+    expect(r.criteria.icon512).toBe(true);
+  });
+  it('accepts a standalone display supplied only via display_override', () => {
+    const r = auditInstallability({ ...FULL_MANIFEST, display: 'browser' });
+    expect(r.criteria.displayStandaloneish).toBe(true); // minimal-ui in display_override
+  });
+  it('rejects a browser-only display (no standalone-ish anywhere)', () => {
+    const r = auditInstallability({ ...FULL_MANIFEST, display: 'browser', display_override: ['browser'] });
+    expect(r.criteria.displayStandaloneish).toBe(false);
+    expect(r.ok).toBe(false);
+  });
+});
+
 describe('auditPwaBase', () => {
   it('greenlights a coherent /empire/ build', () => {
     const r = auditPwaBase({
@@ -128,6 +222,7 @@ describe('auditPwaBase', () => {
     });
     expect(r.ok).toBe(true);
     expect(r.issues).toEqual([]);
+    expect(r.installability.ok).toBe(true);
   });
   it('enumerates every base mismatch when a /-build is deployed under /empire/', () => {
     const r = auditPwaBase({
@@ -135,7 +230,16 @@ describe('auditPwaBase', () => {
       registerSwText: REG('/'), manifestText: JSON.stringify({ start_url: '.', scope: '.', id: '/' }), base: '/empire/',
     });
     expect(r.ok).toBe(false);
-    // html assets + manifest link + sw fallback + register + id → several issues.
+    // html assets + manifest link + sw fallback + register + id + installability → several issues.
     expect(r.issues.length).toBeGreaterThanOrEqual(3);
+  });
+  it('fails the whole audit when a base-correct build has a non-installable manifest', () => {
+    const r = auditPwaBase({
+      html: HTML('/empire/'), swText: SW('/empire/'), registerSwText: REG('/empire/'),
+      manifestText: JSON.stringify({ name: 'X', start_url: '.', scope: '.', id: 'empire' }),
+      base: '/empire/',
+    });
+    expect(r.ok).toBe(false);
+    expect(r.issues.some((i) => i.includes('not installable'))).toBe(true);
   });
 });

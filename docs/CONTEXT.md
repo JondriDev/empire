@@ -22,24 +22,23 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **EPIC-4 — PWA completion → installable, offline-true** (promoted 2026-06-29 when EPIC-3 went
-  code-complete). **Target metric:** *Lighthouse PWA ≥ 90* **AND** the **`offline-boots` smoke guard** (the
-  built app loads + renders the desktop with the network FULLY blocked). **Stages: S1 ✅ (offline-boot guard +
-  precache audit), S2 ✅ (no-op — audit proved zero gap), S3 ✅ (base-path/install-flow correctness), → ▶ S4
-  Lighthouse-PWA / installability assertion (CLOSES EPIC-4).**
-  - **▶ NEXT STAGE = EPIC-4 S4 · Lighthouse-PWA / installability assertion (EPIC-4 CLOSE).** Full shape in EPICS.md
-    S4. **The work:** S1–S3 made the app offline-true + base-correct, but nothing yet asserts the *installability*
-    criteria as a number (the target is *Lighthouse PWA ≥ 90*). **Step 1 — investigate first:** can Lighthouse run
-    headless in-cloud? Try `npx lighthouse` / `chrome-launcher` against the built app served on `:3101` (reuse
-    `qa-offline.mjs`'s `node:http` server + `launchBrowser()` Chromium path `/opt/pw-browsers/chromium-*`). It may
-    be egress/Chrome-flag-blocked (no `lighthouse` dep — would need install; CONTEXT says don't add deps unless the
-    stage calls for it — note it if you do). **Step 2 — fallback if Lighthouse won't run offline:** add a PURE
-    `auditInstallability(manifest)` to `scripts/pwaBaseAudit.mjs` (name+short_name, ≥192 & ≥512 `any` icons + a
-    `maskable` icon, `display` standalone-ish, `start_url`, `background_color`/`theme_color`) + cases in
-    `pwaBaseAudit.test.mjs`, and wire it into `scripts/check-pwa-base.mjs` so install-criteria are gated
-    programmatically. **The manifest already has all the icons** (`pwa-192/512`, `maskable-512`, `icon.svg`) so the
-    pure auditor should pass — this just pins it. **Acceptance:** a green check asserts every installability
-    criterion. **Reuse the `pwaBaseAudit.mjs` pure-helper + `*.test.mjs` pattern S3 established (below).**
+- **Active epic:** **EPIC-4 is CODE-COMPLETE (all S1–S4 shipped 2026-06-29) — offline ✅ + base ✅ + installable ✅.**
+  No active builder stage in EPIC-4. **Target metric** *Lighthouse PWA ≥ 90* is asserted as the deterministic,
+  offline-checkable manifest-installability contract (S4); the **`offline-boots` smoke guard** is LIVE (5/5 cold).
+  **→ NEXT RUN has no pre-decomposed stage:** EPIC-5 (Android APK validation) is QUEUED but **needs the Strategist
+  to promote it + seed stages** before a builder run. If EPICS.md still shows no `▶ ACTIVE` epic, the builder should
+  do the topmost ROADMAP NOW item (or a standing-priority FIX/INTERCONNECT/POLISH item) and note that EPICS needs
+  the Strategist. **QA's job next:** confirm the `offline-boots` metric and move EPIC-4 to fully DONE.
+  - **✅ EPIC-4 S4 SHIPPED (2026-06-29, EPIC-4 CLOSE):** installability assertion. *Investigated Lighthouse first* —
+    no `lighthouse` dep (registry reachable, v13.4.0) but it'd add a heavy devDep + flaky headless browser, wrong fit
+    for the unattended routine → took the pure-auditor fallback. Added **`auditInstallability(manifest)`** +
+    **`maxIconSize(sizes)`** to `scripts/pwaBaseAudit.mjs` (name+short_name; a ≥192 AND a ≥512 `any`-purpose icon; a
+    `maskable` icon; standalone-ish `display` incl. via `display_override`; `start_url`; `background_color`+`theme_color`).
+    Returns per-criterion `criteria{}` + flat `missing[]`. Folded into `auditPwaBase` (issues join the base-path issues)
+    + surfaced by `check-pwa-base.mjs` (console line + PWA-BASE.md Installability table). `pwaBaseAudit.test.mjs` 17→29
+    (+12). `node scripts/check-pwa-base.mjs` → **installable ✅ (4 icons)**. vitest 193→205, tokens 0, bundle 292.5 —
+    all no-regression. **Trap learned:** a maskable-ONLY icon must NOT count toward the `any` size buckets (Chrome
+    needs an `any` icon for the home-screen) — filter `iconPurposes(i).includes('any')` before the ≥192/≥512 check.
   - **✅ EPIC-4 S3 SHIPPED (2026-06-29):** base-path/install-flow correctness. New pure auditor
     `scripts/pwaBaseAudit.mjs` (`auditPwaBase` aggregates `auditHtmlBase`/`auditSwBase`/`auditRegisterSw`/
     `auditManifest`; `extractHtmlAssetUrls`, `normalizeBase`) + `pwaBaseAudit.test.mjs` (17 cases) + runner
@@ -339,6 +338,14 @@
     **`id:'empire'`** (was `'/'`; `id` resolves vs `start_url`'s ORIGIN with its path ignored — per MDN — so a
     root id collides on a shared origin like `github.io`; a relative path segment gives one stable
     `<origin>/empire` identity for every deploy base). Workbox `navigateFallback: base + 'index.html'`.
+  - **Installability auditor (EPIC-4 S4, 2026-06-29):** `auditInstallability(manifest)` + `maxIconSize(sizes)` in
+    `scripts/pwaBaseAudit.mjs` — PURE manifest-only check of the browser install criteria (name+short_name; a ≥192
+    AND a ≥512 `any`-purpose icon; a `maskable` icon; standalone-ish `display` incl. via `display_override`;
+    `start_url`; `background_color`+`theme_color`). Returns `{criteria{}, missing[], ok}`. `maxIconSize('any')` →
+    `Infinity` (scalable SVG); a missing `purpose` defaults to `'any'`. **`auditPwaBase` now also runs it** (adds a
+    `not installable — missing: …` issue) and `check-pwa-base.mjs` prints it + tables it in PWA-BASE.md. Tested by
+    the +12 cases in `pwaBaseAudit.test.mjs`. **The fixture there (`FULL_MANIFEST`) mirrors the real `vite.config.ts`
+    manifest** — if you change the manifest's icons/colors/display, update that fixture too.
   - `scripts/pwaBaseAudit.mjs` — **pure** seam (text + base in → report out, no fs/browser):
     `auditPwaBase({html, swText, registerSwText, manifestText, base})` aggregates `auditHtmlBase` (every local
     `<script src>`/`<link href>` prefixed with base + manifest linked), `auditSwBase` (Workbox inlines
