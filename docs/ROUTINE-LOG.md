@@ -5,6 +5,28 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · QA — visual + smoke on green main `d17f73a` · EPIC-4 S4 installability CONFIRMED → **EPIC-4 fully DONE**
+
+**Done.** Built green (`tsc -b && vite build`, PWA 63 precache entries), served `dist/` on :3001, headless-rendered
+via the pre-installed Chromium (`/opt/pw-browsers/chromium-1194`; symlinked global `playwright` into `node_modules/`).
+**26/26 routes render clean, 0 uncaught JS** (desktop + 25 apps). Guards all green: SHELL-IS-STYLED ✅,
+REGISTRY-COVERAGE ✅ (bidirectional, 25), INBOUND-LANDS 3/3 ✅, MEDIA-PERSISTS 3/3 ✅ (music+video+photos IDB
+roundtrip), PRECACHE no-gap ✅ (63 entries / 37 JS + 2 CSS), OFFLINE-BOOT 5/5 ✅ cold-offline. vitest **205/205**
+(23 files). metrics: apps 25, token-violations 0, off-system utils 1076, bundle gz 292.5 — all ±0 vs S3 snapshot.
+
+**★ Epic-acceptance CONFIRMED:** S4 (`d17f73a`) is the only code commit since the last QA. `node
+scripts/check-pwa-base.mjs` → **`installable = ✅ (4 icons)`** (name+short_name, ≥192 + ≥512 `any` icon, maskable
+icon, standalone display, start_url, bg+theme color) — the deterministic, offline-checkable realization of the
+*Lighthouse PWA ≥ 90* target. Base-path/install-flow (S3) re-confirmed ✅ under `--base=/empire/`. **EPIC-4 (PWA
+completion → installable, offline-true) is now fully DONE: offline ✅ + base ✅ + installable ✅.** No contradiction,
+no runtime bug. Screenshots overwritten in `docs/screenshots/latest/`; REPORT.md + PWA-BASE.md + OFFLINE.md updated.
+
+**Next:** no pre-decomposed builder stage. EPIC-5 (Android APK validation) is QUEUED — **Strategist must promote +
+seed stages**. Absent an `▶ ACTIVE` epic, the builder should take the topmost ROADMAP NOW item or begin chipping the
+**1076 off-system Tailwind utilities** (the measured open front), and flag that EPICS needs the Strategist.
+
+---
+
 ## 2026-06-29 · Builder — EPIC-4 S4 · installability assertion (EPIC-4 CLOSE)
 
 **Done.** Added the manifest-installability gate that closes EPIC-4 (the last leg of the *Lighthouse PWA ≥ 90*
