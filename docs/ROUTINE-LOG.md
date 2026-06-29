@@ -5,6 +5,49 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · EPIC-3 S4 — DataCenter + Weather pure-logic modules + tests (EPIC-3 CLOSE)
+
+**Metrics:** apps 25 (±0) · test files 19→21 (+2) · test cases 142→163 (+21) · **token-violations 0 (±0)** ·
+off-system-utils 1164 (±0) · bundle gz 292.2→292.3 (+0.1). build🟢 vitest 170🟢 eslint clean.
+
+**Done.** Fresh cloud checkout, baseline green. Closed EPIC-3 by extracting the inline pure logic out of the two
+logic-heavy redesign instruments into named, unit-tested modules — mirroring the `clock/clockLogic.ts` pattern —
+with zero behaviour change in the components:
+- **`src/apps/datacenter/datacenterLogic.ts`** — moved `DCStore`/`DCTable`/`TableRow` types, the `SEED`, `newId`,
+  `STORAGE_KEY`, and a **tolerant `deserializeStore(raw)`** (bad JSON / null / array / primitive → SEED) +
+  `serializeStore`. Added immutable, React-free transforms: `addRow`/`updateCell`/`deleteRow` (no-op when the
+  table is gone), `addTable` (trims cols; refuses blank/duplicate/no-column), `deleteTable`, `normalizeTableName`.
+  `DataCenter.tsx` now delegates every store mutation to these (the persist effect calls `serializeStore`, the
+  initializer calls `deserializeStore`). New `datacenterLogic.test.ts` — 12 cases: CRUD immutability (originals
+  untouched), no-op-on-missing-table, `deserialize(serialize(store))` round-trip, and the 4-way corrupt/partial
+  fallback contract.
+- **`src/apps/weather/weatherLogic.ts`** — moved `Cat`/`DayForecast`/`WeatherData`/`EMPTY` + the `wmo()` code map,
+  and added `OpenMeteo{Current,Daily,Forecast}` fixture types + **pure `mapForecast(data, place)`** (the transform
+  that was inline in the component's fetch handler): rounds temp/wind, caps the outlook at 5 days, tolerates a
+  missing `daily` block. `Weather.tsx`'s fetch handler now calls `mapForecast(data, place)` (network + geolocation
+  stay in the component). New `weatherLogic.test.ts` — 8 cases: `wmo` clear/rain/snow/cloud/storm + mapped current
+  (rounded) / daily hi-lo-cat / 5-day cap / missing-daily, all over a canned Open-Meteo fixture (no network).
+
+**Why.** The four redesign instruments (Weather/Maps/Language/DataCenter) shipped working but without dedicated
+tests, so the "+ a unit test" discipline was uneven. DataCenter & Weather carry real pure logic (store CRUD +
+tolerant parse; WMO mapping + JSON→view-model); extracting and pinning it regression-guards the suite's
+persistence/parsing layer. Maps/Language are thin Leaflet/Cakra wrappers — QA's render-smoke is their honest
+coverage. **This makes EPIC-3 code-complete** (S1 Clock + S2 Music/Video + S3 Photos + S4 tests; function metric
+8/8 confirmed at S3).
+
+**Verified (cloud).** `npm run build` 🟢 (tsc -b && vite build). `npx vitest run` 🟢 170/170 (21 files).
+`npx eslint` clean on all 6 touched files. `node scripts/metrics.mjs`: token-violations **0 (±0)**, off-system
+**1164 (±0)**, bundle **+0.1 KB** (logic moved, not added). No runtime-visual change — the two components render
+identically; both delegate to the new pure modules. *Not verifiable in cloud:* nothing visual changed this run,
+so no on-device check needed.
+
+**Next.** EPIC-4 · PWA completion is now ACTIVE → **S1: offline-boot guard + SW precache audit** — add
+`scripts/qa-offline.mjs` (or extend `qa-smoke.mjs`) that blocks **all** network after a warm load and asserts the
+shell + one lazy app route still render from the SW/precache, and inventory the `vite-plugin-pwa` (`generateSW`,
+63 precache entries) coverage vs the 25 lazy app chunks. Shape in EPICS.md S1 + CONTEXT.md.
+
+---
+
 ## 2026-06-29 · EPIC-3 S3 — Photos library survives a reload (mediaStore IDB rail); PRIMARY metric 8/8
 
 **Metrics:** apps 25 (±0) · test files 18→19 (+1) · test cases 136→142 (+6) · **token-violations 0 (±0)** ·

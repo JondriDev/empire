@@ -4,54 +4,20 @@ import {
   Settings, RefreshCw, Thermometer, Droplets, Wind, AlertCircle, MapPin,
 } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
+import { type Cat, type WeatherData, EMPTY, mapForecast } from './weatherLogic'
 
 /**
  * Weather — real forecasts via Open-Meteo (free, no API key, CORS-friendly).
  *
  * Geocodes a place name (or uses device geolocation for "Auto") then pulls the
- * current conditions + a multi-day outlook. WMO weather codes map to a small
- * set of categories so one icon set covers every condition.
+ * current conditions + a multi-day outlook. The pure WMO mapping + Open-Meteo
+ * JSON → view-model transform live in `weatherLogic.ts`; this component owns the
+ * network call, geolocation, and React state.
  */
 
 const WEATHER_CONFIG_KEY = 'empire-weather-config'
 
 interface WeatherConfig { location: string } // 'Auto' → device geolocation
-
-type Cat = 'clear' | 'cloud' | 'rain' | 'snow' | 'storm' | 'fog'
-
-interface DayForecast { day: string; cat: Cat; hi: number; lo: number }
-
-interface WeatherData {
-  temp: number
-  condition: string
-  humidity: number
-  windSpeed: number
-  location: string
-  description: string
-  cat: Cat
-  daily: DayForecast[]
-  isLoading?: boolean
-  error?: string
-}
-
-const EMPTY: WeatherData = {
-  temp: 0, condition: '—', humidity: 0, windSpeed: 0,
-  location: 'Weather', description: 'Loading…', cat: 'clear', daily: [],
-}
-
-// WMO weather interpretation codes → label / description / icon category.
-function wmo(code: number): { label: string; description: string; cat: Cat } {
-  if (code === 0) return { label: 'Clear', description: 'Clear sky', cat: 'clear' }
-  if (code <= 2) return { label: 'Partly Cloudy', description: 'Partly cloudy', cat: 'cloud' }
-  if (code === 3) return { label: 'Overcast', description: 'Overcast', cat: 'cloud' }
-  if (code <= 48) return { label: 'Fog', description: 'Fog', cat: 'fog' }
-  if (code <= 57) return { label: 'Drizzle', description: 'Light drizzle', cat: 'rain' }
-  if (code <= 67) return { label: 'Rain', description: 'Rain', cat: 'rain' }
-  if (code <= 77) return { label: 'Snow', description: 'Snow', cat: 'snow' }
-  if (code <= 82) return { label: 'Showers', description: 'Rain showers', cat: 'rain' }
-  if (code <= 86) return { label: 'Snow', description: 'Snow showers', cat: 'snow' }
-  return { label: 'Storm', description: 'Thunderstorm', cat: 'storm' }
-}
 
 const CAT_ICON: Record<Cat, typeof Sun> = {
   clear: Sun, cloud: Cloud, rain: CloudRain, snow: CloudSnow, storm: Zap, fog: CloudFog,
@@ -117,26 +83,7 @@ export default function Weather() {
       if (!res.ok) throw new Error(`Weather API error (${res.status})`)
       const data = await res.json()
 
-      const cur = data.current
-      const w = wmo(cur.weather_code)
-      const daily: DayForecast[] = (data.daily?.time ?? []).slice(0, 5).map((iso: string, i: number) => ({
-        day: i === 0 ? 'Today' : new Date(iso).toLocaleDateString([], { weekday: 'short' }),
-        cat: wmo(data.daily.weather_code[i]).cat,
-        hi: Math.round(data.daily.temperature_2m_max[i]),
-        lo: Math.round(data.daily.temperature_2m_min[i]),
-      }))
-
-      const next: WeatherData = {
-        temp: Math.round(cur.temperature_2m),
-        condition: w.label,
-        humidity: cur.relative_humidity_2m,
-        windSpeed: Math.round(cur.wind_speed_10m),
-        location: place,
-        description: w.description,
-        cat: w.cat,
-        daily,
-        isLoading: false,
-      }
+      const next: WeatherData = mapForecast(data, place)
       setWeather(next)
       emit({ type: 'WEATHER_UPDATED', temp: next.temp, condition: next.condition, humidity: next.humidity, windSpeed: next.windSpeed, location: next.location, description: next.description })
     } catch (error: unknown) {

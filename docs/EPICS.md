@@ -408,11 +408,13 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
 > (registry, providers, ColorPalette) exempted in `metrics.mjs` `DS_INFRA` with rationale. **EPIC-3 promoted to
 > ▶ ACTIVE.**
 
-## ▶ ACTIVE — EPIC-3 · Depth pass on shallow instruments
+## 🏁 CODE-COMPLETE — EPIC-3 · Depth pass on shallow instruments
 
-> Promoted 2026-06-28 when EPIC-2 hit 0 token violations. **✅ Decomposed & Strategist-refined 2026-06-28**
-> (S1 Clock + S2 Music/Video shipped; S3 Photos + S4 test-backfill remain, both razor-sharp below). Builder
-> takes the topmost `[ ]` (= **S3 · Photos**) and executes without re-planning.
+> Promoted 2026-06-28 when EPIC-2 hit 0 token violations. **✅ All stages S1–S4 SHIPPED (2026-06-29).**
+> Function metric *shallow instruments with genuine persistent/offline function* = **8/8 (HIT at S3, QA-confirmed
+> 2026-06-29)**; S4 landed the "+ a unit test" discipline for the two logic-heavy redesign instruments
+> (DataCenter + Weather). **EPIC-3 is code-complete** — move to DONE on the next QA pass. **EPIC-4 · PWA
+> completion is now ACTIVE** (below); the next builder takes EPIC-4 S1.
 
 **Leap:** the thin apps (Photos, Maps, Video, Music, Clock) get genuine offline-capable
 function instead of placeholders — coherence over new surface area.
@@ -512,7 +514,16 @@ Stages (Builder takes the topmost `[ ]`; confirm current state vs. code first):
     uses `amber-*` utility classes like Music, NOT inline hex). *Cloud limit:* the add→reload→still-renders
     path needs a real browser with IDB (jsdom has none) — the pure transforms carry the coverage, as in S2.
 
-- [ ] **S4 · Backfill unit tests for the two logic-heavy redesign instruments (DataCenter + Weather) — EPIC-3 CLOSE.**
+- [x] **S4 · Backfill unit tests for the two logic-heavy redesign instruments (DataCenter + Weather) — EPIC-3 CLOSE.**
+  **Shipped 2026-06-29.** Extracted `src/apps/datacenter/datacenterLogic.ts` (DCStore types + tolerant
+  `deserializeStore`/`serializeStore` + immutable `addRow`/`updateCell`/`deleteRow`/`addTable`/`deleteTable`/
+  `normalizeTableName`, all no-React) and `src/apps/weather/weatherLogic.ts` (`Cat`/`WeatherData`/`OpenMeteo*`
+  types + `wmo()` code map + pure `mapForecast(data, place)`), rewired both components to delegate (no behaviour
+  change). New `datacenterLogic.test.ts` (12 cases — CRUD immutability + no-op-on-missing-table + round-trip +
+  4-way tolerant-parse fallback) and `weatherLogic.test.ts` (8 cases — wmo clear/rain/snow/cloud/storm + mapped
+  current/daily/5-day-cap/missing-daily). build🟢 vitest 170🟢 eslint clean; test-files 19→21, token-violations
+  0 (±0), bundle 292.2→292.3. **EPIC-3 is now CODE-COMPLETE (all of S1–S4 shipped); function metric 8/8 hit at
+  S3.** → Strategist/QA: promote **EPIC-4 · PWA completion** (CONTEXT already points the next builder at S1).
   The four redesign instruments (Weather/Maps/Language/DataCenter) shipped working but **without a dedicated
   test**, so the "+ a unit test" discipline is uneven. Maps & Language are thin wrappers (Leaflet / Cakra
   `chat()`) with little pure logic worth unit-pinning — QA's render-smoke is their honest coverage. **DataCenter
@@ -538,8 +549,8 @@ Stages (Builder takes the topmost `[ ]`; confirm current state vs. code first):
 _When S3 ships (function 8/8) and S4 lands (DataCenter+Weather tests) and QA confirms the function metric hit
 8/8 → move EPIC-3 to DONE and promote **EPIC-4 · PWA + Android validation** (stages seeded below)._
 
-## ⏳ QUEUED — EPIC-4 · PWA completion → installable, offline-true
-> Promote when EPIC-3 is DONE (function 8/8 + S4 tests). Highest gradient after EPIC-3 because the
+## ▶ ACTIVE — EPIC-4 · PWA completion → installable, offline-true
+> **Promoted 2026-06-29** when EPIC-3 went code-complete (function 8/8 + S4 tests). Highest gradient after EPIC-3 because the
 > vision's end-state is "a complete offline-first PWA, then Android" and every app is now offline-capable
 > — the shell itself is the last thing that isn't guaranteed to load with no network.
 
