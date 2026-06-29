@@ -130,7 +130,7 @@ export default function Dashboard() {
                 <span className="text-xl font-mono font-medium tracking-widest" style={{ color: 'var(--text)' }}>
                   {hours}:{mins}
                 </span>
-                <span className="text-xs font-mono text-gray-500" style={{ color: 'var(--text3)' }}>
+                <span className="text-xs font-mono text-faint" style={{ color: 'var(--text3)' }}>
                   :{secs}
                 </span>
               </div>
@@ -168,7 +168,7 @@ export default function Dashboard() {
         {favCount > 0 && !search && (
           <div className="mb-8 animate-fade-in" style={{ animationDelay: '600ms' }}>
             <div className="flex items-center gap-2 mb-3">
-              <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+              <Star className="w-3.5 h-3.5 text-warn fill-warn" />
               <span className="text-xs font-medium" style={{ color: 'var(--text2)' }}>
                 Favorites
               </span>
@@ -233,7 +233,7 @@ export default function Dashboard() {
                 >
                   <Star
                     className={`w-3.5 h-3.5 transition-colors ${
-                      isFav ? 'text-yellow-400 fill-yellow-400' : 'text-gray-500 hover:text-yellow-400'
+                      isFav ? 'text-warn fill-warn' : 'text-faint hover:text-warn'
                     }`}
                   />
                 </button>
@@ -275,7 +275,7 @@ export default function Dashboard() {
         {/* Empty state */}
         {filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-            <Telescope size={36} className="text-cyan-400 opacity-60" />
+            <Telescope size={36} className="text-signal opacity-60" />
             <p className="text-sm font-medium mb-1" style={{ color: 'var(--text2)' }}>
               No apps found
             </p>

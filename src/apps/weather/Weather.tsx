@@ -119,16 +119,16 @@ export default function Weather() {
             <h1 className="text-2xl font-bold flex items-center gap-1.5">
               {weather.location}
             </h1>
-            <p className="text-sm text-gray-400 capitalize">{weather.description}</p>
+            <p className="text-sm text-muted capitalize">{weather.description}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => fetchWeather(config)} className="p-2 rounded-xl hover:bg-white/10 transition-colors" title="Refresh">
+          <button onClick={() => fetchWeather(config)} className="p-2 rounded-xl hover:bg-glass transition-colors" title="Refresh">
             <RefreshCw className={`w-5 h-5 ${weather.isLoading ? 'animate-spin' : ''}`} />
           </button>
           <button
             onClick={() => { setTempLocation(config.location === 'Auto' ? '' : config.location); setShowSettings(true) }}
-            className="p-2 rounded-xl hover:bg-white/10 transition-colors"
+            className="p-2 rounded-xl hover:bg-glass transition-colors"
             title="Settings"
           >
             <Settings className="w-5 h-5" />
@@ -138,39 +138,39 @@ export default function Weather() {
 
       {/* Main Display */}
       <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
+        <div className="p-6 rounded-2xl border border-hair" style={{ background: 'var(--card-bg)' }}>
           <div className="flex items-center gap-2 mb-2">
-            <Thermometer className="w-4 h-4 text-red-400" />
-            <span className="text-xs text-gray-400">Temperature</span>
+            <Thermometer className="w-4 h-4 text-danger" />
+            <span className="text-xs text-muted">Temperature</span>
           </div>
-          {weather.isLoading ? <div className="text-4xl font-light text-gray-600 animate-pulse">--°C</div>
+          {weather.isLoading ? <div className="text-4xl font-light text-faint animate-pulse">--°C</div>
             : <div className="text-4xl font-light">{weather.temp}°C</div>}
         </div>
 
-        <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
+        <div className="p-6 rounded-2xl border border-hair" style={{ background: 'var(--card-bg)' }}>
           <div className="flex items-center gap-2 mb-2">
-            <CloudSun className="w-4 h-4 text-yellow-400" />
-            <span className="text-xs text-gray-400">Condition</span>
+            <CloudSun className="w-4 h-4 text-warn" />
+            <span className="text-xs text-muted">Condition</span>
           </div>
-          {weather.isLoading ? <div className="text-lg font-medium text-gray-600 animate-pulse">--</div>
+          {weather.isLoading ? <div className="text-lg font-medium text-faint animate-pulse">--</div>
             : <div className="text-lg font-medium">{weather.condition}</div>}
         </div>
 
-        <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
+        <div className="p-6 rounded-2xl border border-hair" style={{ background: 'var(--card-bg)' }}>
           <div className="flex items-center gap-2 mb-2">
-            <Droplets className="w-4 h-4 text-blue-400" />
-            <span className="text-xs text-gray-400">Humidity</span>
+            <Droplets className="w-4 h-4 text-ion" />
+            <span className="text-xs text-muted">Humidity</span>
           </div>
-          {weather.isLoading ? <div className="text-2xl font-light text-gray-600 animate-pulse">--%</div>
+          {weather.isLoading ? <div className="text-2xl font-light text-faint animate-pulse">--%</div>
             : <div className="text-2xl font-light">{weather.humidity}%</div>}
         </div>
 
-        <div className="p-6 rounded-2xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
+        <div className="p-6 rounded-2xl border border-hair" style={{ background: 'var(--card-bg)' }}>
           <div className="flex items-center gap-2 mb-2">
-            <Wind className="w-4 h-4 text-teal-400" />
-            <span className="text-xs text-gray-400">Wind</span>
+            <Wind className="w-4 h-4 text-signal" />
+            <span className="text-xs text-muted">Wind</span>
           </div>
-          {weather.isLoading ? <div className="text-2xl font-light text-gray-600 animate-pulse">-- km/h</div>
+          {weather.isLoading ? <div className="text-2xl font-light text-faint animate-pulse">-- km/h</div>
             : <div className="text-2xl font-light">{weather.windSpeed} km/h</div>}
         </div>
       </div>
@@ -181,10 +181,10 @@ export default function Weather() {
           {weather.daily.map((d, i) => {
             const DayIcon = CAT_ICON[d.cat]
             return (
-              <div key={i} className="p-3 rounded-xl border border-white/10 flex flex-col items-center gap-1.5" style={{ background: 'var(--card-bg)' }}>
-                <span className="text-[11px] text-gray-400">{d.day}</span>
+              <div key={i} className="p-3 rounded-xl border border-hair flex flex-col items-center gap-1.5" style={{ background: 'var(--card-bg)' }}>
+                <span className="text-[11px] text-muted">{d.day}</span>
                 <DayIcon className="w-5 h-5" style={{ color: CAT_COLOR[d.cat] }} />
-                <span className="text-xs"><span className="font-medium">{d.hi}°</span> <span className="text-gray-500">{d.lo}°</span></span>
+                <span className="text-xs"><span className="font-medium">{d.hi}°</span> <span className="text-faint">{d.lo}°</span></span>
               </div>
             )
           })}
@@ -193,14 +193,14 @@ export default function Weather() {
 
       {/* Source / last updated */}
       {!weather.isLoading && !weather.error && (
-        <div className="text-center text-[10px] text-gray-600">
+        <div className="text-center text-[10px] text-faint">
           Open-Meteo · updated {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </div>
       )}
 
       {/* Error Display */}
       {weather.error && (
-        <div className="mt-4 p-3 rounded-xl border border-red-500/20 bg-red-500/10 text-xs text-red-300 flex items-center gap-2">
+        <div className="mt-4 p-3 rounded-xl border border-danger/20 bg-danger/10 text-xs text-danger flex items-center gap-2">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{weather.error}</span>
         </div>
@@ -208,36 +208,36 @@ export default function Weather() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={() => setShowSettings(false)}>
-          <div className="w-full max-w-md rounded-2xl border border-white/10 p-6" style={{ background: 'var(--card-bg)' }} onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-void/60" onClick={() => setShowSettings(false)}>
+          <div className="w-full max-w-md rounded-2xl border border-hair p-6" style={{ background: 'var(--card-bg)' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Settings className="w-4 h-4" /> Weather Settings
               </h2>
-              <button onClick={() => setShowSettings(false)} className="text-gray-400 hover:text-white">
+              <button onClick={() => setShowSettings(false)} className="text-muted hover:text-fg">
                 <span className="text-xl">×</span>
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-gray-400 mb-1 block flex items-center gap-1"><MapPin className="w-3 h-3" /> Location</label>
+                <label className="text-xs text-muted mb-1 block flex items-center gap-1"><MapPin className="w-3 h-3" /> Location</label>
                 <input
                   value={tempLocation}
                   onChange={e => setTempLocation(e.target.value)}
-                  className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ion"
                   style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
                   placeholder="City name (leave empty to use your location)"
                 />
-                <p className="text-[10px] text-gray-600 mt-1">Powered by Open-Meteo — free, no API key.</p>
+                <p className="text-[10px] text-faint mt-1">Powered by Open-Meteo — free, no API key.</p>
               </div>
             </div>
 
             <div className="flex gap-2 mt-6">
-              <button onClick={() => setShowSettings(false)} className="flex-1 px-4 py-2 rounded-xl border border-white/10 text-sm hover:bg-white/5 transition-colors">
+              <button onClick={() => setShowSettings(false)} className="flex-1 px-4 py-2 rounded-xl border border-hair text-sm hover:bg-glass transition-colors">
                 Cancel
               </button>
-              <button onClick={handleSaveConfig} className="flex-1 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm hover:bg-blue-500 transition-colors">
+              <button onClick={handleSaveConfig} className="flex-1 px-4 py-2 rounded-xl bg-ion text-fg text-sm hover:bg-ion transition-colors">
                 Save
               </button>
             </div>

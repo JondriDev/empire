@@ -103,8 +103,8 @@ export default function CacheCleaner() {
     return (
       <Card className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-white/10 rounded w-48" />
-          <div className="h-40 bg-white/10 rounded" />
+          <div className="h-8 bg-glass rounded w-48" />
+          <div className="h-40 bg-glass rounded" />
         </div>
       </Card>
     )
@@ -114,25 +114,25 @@ export default function CacheCleaner() {
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Cache Cleaner</h1>
-        <Button onClick={scan} className="text-sm bg-white/10 hover:bg-white/20">⟳ Rescan</Button>
+        <Button onClick={scan} className="text-sm bg-glass hover:bg-glass">⟳ Rescan</Button>
       </div>
 
       {freed > 0 && (
-        <div className="mb-4 p-3 rounded-lg bg-green-500/20 border border-green-500/30 text-green-300">
+        <div className="mb-4 p-3 rounded-lg bg-success/20 border border-success/30 text-success">
           ✓ Freed {formatBytes(freed)}
         </div>
       )}
 
       <div className="flex items-center justify-between mb-4">
-        <div className="text-sm text-white/60">
+        <div className="text-sm text-muted">
           {entries.length} entries · {formatBytes(totalSize)} total · {selected.size} selected
         </div>
         <div className="flex gap-2">
-          <Button onClick={selectAll} className="text-xs bg-white/10">Select All</Button>
-          <Button onClick={clearSelected} className="text-xs bg-yellow-600 hover:bg-yellow-500" >
+          <Button onClick={selectAll} className="text-xs bg-glass">Select All</Button>
+          <Button onClick={clearSelected} className="text-xs bg-warn hover:bg-warn" >
             Clear Selected
           </Button>
-          <Button onClick={clearAll} className="text-xs bg-red-600 hover:bg-red-500">
+          <Button onClick={clearAll} className="text-xs bg-danger hover:bg-danger">
             Clear All
           </Button>
         </div>
@@ -140,24 +140,24 @@ export default function CacheCleaner() {
 
       <div className="space-y-1 max-h-[60vh] overflow-y-auto pr-1">
         {entries.length === 0 ? (
-          <div className="text-center py-12 text-white/40">No cache entries found</div>
+          <div className="text-center py-12 text-faint">No cache entries found</div>
         ) : (
           entries.map(entry => (
             <label
               key={entry.key}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer group"
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-glass cursor-pointer group"
             >
               <input
                 type="checkbox"
                 checked={selected.has(entry.key)}
                 onChange={() => toggleSelect(entry.key)}
-                className="w-4 h-4 accent-cyan-600"
+                className="w-4 h-4 accent-signal"
               />
-              <span className={`text-xs px-1.5 py-0.5 rounded ${entry.type === 'localStorage' ? 'bg-blue-500/20 text-blue-300' : 'bg-cyan-500/20 text-cyan-200'}`}>
+              <span className={`text-xs px-1.5 py-0.5 rounded ${entry.type === 'localStorage' ? 'bg-ion/20 text-ion' : 'bg-signal/20 text-signal'}`}>
                 {entry.type === 'localStorage' ? 'LS' : 'SS'}
               </span>
-              <span className="flex-1 text-sm truncate group-hover:text-white">{entry.key}</span>
-              <span className="text-xs text-white/40">{formatBytes(entry.size)}</span>
+              <span className="flex-1 text-sm truncate group-hover:text-fg">{entry.key}</span>
+              <span className="text-xs text-faint">{formatBytes(entry.size)}</span>
             </label>
           ))
         )}

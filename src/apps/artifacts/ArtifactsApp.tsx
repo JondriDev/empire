@@ -51,7 +51,7 @@ export default function ArtifactsApp() {
   if (activeId && ARTIFACT_RENDERERS[activeId]) {
     const { component: Component, title, accent } = ARTIFACT_RENDERERS[activeId]
     return (
-      <div className="h-screen flex flex-col bg-slate-950 text-white overflow-hidden">
+      <div className="h-screen flex flex-col bg-faint text-fg overflow-hidden">
         <div
           className="flex items-center gap-3 px-4 py-2.5 border-b backdrop-blur-sm shrink-0"
           style={{
@@ -61,7 +61,7 @@ export default function ArtifactsApp() {
         >
           <button
             onClick={handleClose}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs transition-colors"
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-glass hover:bg-glass border border-hair text-xs transition-colors"
             title="Back to gallery (Esc)"
           >
             <ArrowLeft size={12} /> Gallery
@@ -75,7 +75,7 @@ export default function ArtifactsApp() {
           </span>
           <button
             onClick={handleClose}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/30 border border-white/10 text-white/70 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-glass hover:bg-danger/30 border border-hair text-muted hover:text-fg transition-colors"
             title="Close"
           >
             <X size={12} />

@@ -64,7 +64,7 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
                 justifyContent: settings.orchestrate ? 'flex-end' : 'flex-start',
               }}
             >
-              <div className="w-5 h-5 rounded-full bg-white" />
+              <div className="w-5 h-5 rounded-full bg-glass" />
             </div>
           </button>
           {settings.orchestrate && (

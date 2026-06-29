@@ -83,15 +83,15 @@ export default function Kanban() {
   const remove = (id: string) => setTasks(tasks.filter(t => t.id !== id))
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-pink-950/20 to-slate-950 text-white overflow-hidden">
-      <div className="px-6 py-4 border-b border-white/10 bg-black/20 backdrop-blur flex items-center justify-between">
+    <div className="h-full flex flex-col bg-gradient-to-br from-void via-danger/20 to-void text-fg overflow-hidden">
+      <div className="px-6 py-4 border-b border-hair bg-void/20 backdrop-blur flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Kanban Board</h1>
-          <p className="text-xs text-slate-500 mt-0.5">{tasks.length} tasks across {COLUMNS.length} columns · auto-saved</p>
+          <p className="text-xs text-faint mt-0.5">{tasks.length} tasks across {COLUMNS.length} columns · auto-saved</p>
         </div>
         <button
           onClick={() => { if (confirm('Clear all tasks?')) setTasks(seed()) }}
-          className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-300"
+          className="px-3 py-1.5 rounded-lg bg-glass hover:bg-glass border border-hair text-xs text-muted"
         >
           Reset to demo
         </button>
@@ -104,24 +104,24 @@ export default function Kanban() {
             return (
               <div
                 key={col.id}
-                className={`w-80 flex flex-col rounded-2xl border ${dragOverCol === col.id ? 'border-white/30 bg-white/10' : 'border-white/10 bg-white/5'} backdrop-blur transition`}
+                className={`w-80 flex flex-col rounded-2xl border ${dragOverCol === col.id ? 'border-hair bg-glass' : 'border-hair bg-glass'} backdrop-blur transition`}
                 onDragOver={e => e.preventDefault()}
                 onDragEnter={() => setDragOverCol(col.id)}
                 onDragLeave={() => setDragOverCol(null)}
                 onDrop={() => { if (dragId) moveTo(dragId, col.id) }}
               >
-                <div className="p-3 border-b border-white/10 flex items-center justify-between">
+                <div className="p-3 border-b border-hair flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full" style={{ background: col.accent }} />
                     <h2 className="font-semibold">{col.title}</h2>
-                    <span className="text-xs text-slate-500 bg-white/5 px-1.5 py-0.5 rounded-full">{colTasks.length}</span>
+                    <span className="text-xs text-faint bg-glass px-1.5 py-0.5 rounded-full">{colTasks.length}</span>
                   </div>
-                  <button onClick={() => setNewTaskCol(col.id)} className="text-slate-400 hover:text-white"><Plus size={14} /></button>
+                  <button onClick={() => setNewTaskCol(col.id)} className="text-muted hover:text-fg"><Plus size={14} /></button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-2 space-y-2">
                   {newTaskCol === col.id && (
-                    <div className="bg-black/40 border border-indigo-400/40 rounded-lg p-2">
+                    <div className="bg-void/40 border border-ion/40 rounded-lg p-2">
                       <input
                         autoFocus
                         value={newTitle}
@@ -135,11 +135,11 @@ export default function Kanban() {
                         onChange={e => setNewTag(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') addTask(col.id) }}
                         placeholder="Tag (optional)"
-                        className="w-full bg-black/30 text-xs px-2 py-1 rounded outline-none mb-1.5"
+                        className="w-full bg-void/30 text-xs px-2 py-1 rounded outline-none mb-1.5"
                       />
                       <div className="flex gap-1.5">
-                        <button onClick={() => addTask(col.id)} className="flex-1 bg-indigo-500 text-white text-xs py-1 rounded">Add</button>
-                        <button onClick={() => setNewTaskCol(null)} className="px-2 text-slate-400 hover:text-white"><X size={12} /></button>
+                        <button onClick={() => addTask(col.id)} className="flex-1 bg-ion text-fg text-xs py-1 rounded">Add</button>
+                        <button onClick={() => setNewTaskCol(null)} className="px-2 text-muted hover:text-fg"><X size={12} /></button>
                       </div>
                     </div>
                   )}
@@ -149,13 +149,13 @@ export default function Kanban() {
                       draggable
                       onDragStart={() => setDragId(t.id)}
                       onDragEnd={() => { setDragId(null); setDragOverCol(null) }}
-                      className={`group bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-3 cursor-grab active:cursor-grabbing transition ${dragId === t.id ? 'opacity-50' : ''}`}
+                      className={`group bg-glass hover:bg-glass border border-hair rounded-lg p-3 cursor-grab active:cursor-grabbing transition ${dragId === t.id ? 'opacity-50' : ''}`}
                     >
                       <div className="flex items-start gap-2">
-                        <GripVertical size={14} className="text-slate-600 mt-0.5" />
-                        <p className="flex-1 text-sm text-slate-100">{t.title}</p>
+                        <GripVertical size={14} className="text-faint mt-0.5" />
+                        <p className="flex-1 text-sm text-fg">{t.title}</p>
                         <NodeActions type="kanban" sourceId={t.id} />
-                        <button onClick={() => remove(t.id)} className="text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition"><Trash2 size={12} /></button>
+                        <button onClick={() => remove(t.id)} className="text-faint hover:text-danger opacity-0 group-hover:opacity-100 transition"><Trash2 size={12} /></button>
                       </div>
                       {t.tag && (
                         <div className="mt-2 flex items-center gap-1.5">
@@ -167,7 +167,7 @@ export default function Kanban() {
                   {colTasks.length === 0 && newTaskCol !== col.id && (
                     <button
                       onClick={() => setNewTaskCol(col.id)}
-                      className="w-full py-8 border-2 border-dashed border-white/10 rounded-lg text-slate-500 text-sm hover:border-white/20 hover:text-slate-300 transition"
+                      className="w-full py-8 border-2 border-dashed border-hair rounded-lg text-faint text-sm hover:border-hair hover:text-muted transition"
                     >
                       Drop here or + to add
                     </button>

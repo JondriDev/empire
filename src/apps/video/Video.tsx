@@ -187,11 +187,11 @@ export default function Video() {
           <h1 className="text-lg font-bold flex items-center gap-2">
             <Film className="w-5 h-5" /> Video Player
           </h1>
-          <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-cyan-600 hover:bg-cyan-500 ml-auto">
+          <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-signal hover:bg-signal ml-auto">
             <Plus className="w-4 h-4 mr-1" /> Add Video
           </Button>
           <input ref={fileInputRef} type="file" accept="video/*" multiple className="hidden" onChange={handleFileSelect} />
-          <Button onClick={() => setShowPlaylist(p => !p)} className="text-sm bg-white/10 hover:bg-white/20">
+          <Button onClick={() => setShowPlaylist(p => !p)} className="text-sm bg-glass hover:bg-glass">
             <ListVideo className="w-4 h-4" />
           </Button>
         </div>
@@ -201,7 +201,7 @@ export default function Video() {
         {/* Player */}
         <div ref={containerRef} className="flex-1">
           {current ? (
-            <Card className="overflow-hidden bg-black">
+            <Card className="overflow-hidden bg-void">
               <video
                 ref={videoRef}
                 src={current.src}
@@ -227,20 +227,20 @@ export default function Video() {
                   max={duration || 100}
                   value={currentTime}
                   onChange={seek}
-                  className="w-full h-1 accent-cyan-600 cursor-pointer"
+                  className="w-full h-1 accent-signal cursor-pointer"
                 />
                 <div className="flex items-center gap-3 flex-wrap">
-                  <button onClick={togglePlay} className="p-2 bg-white text-black rounded-full hover:bg-white/90">
+                  <button onClick={togglePlay} className="p-2 bg-glass text-void rounded-full hover:bg-glass">
                     {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                   </button>
-                  <button onClick={() => skip(-10)} className="p-1.5 text-white/60 hover:text-white">
+                  <button onClick={() => skip(-10)} className="p-1.5 text-muted hover:text-fg">
                     <SkipBack className="w-4 h-4" /> <span className="text-xs ml-0.5">10</span>
                   </button>
-                  <button onClick={() => skip(10)} className="p-1.5 text-white/60 hover:text-white">
+                  <button onClick={() => skip(10)} className="p-1.5 text-muted hover:text-fg">
                     <SkipForward className="w-4 h-4" /> <span className="text-xs ml-0.5">10</span>
                   </button>
                   <div className="flex items-center gap-1 flex-1">
-                    <button onClick={() => setMuted(m => !m)} className="p-1 text-white/60 hover:text-white">
+                    <button onClick={() => setMuted(m => !m)} className="p-1 text-muted hover:text-fg">
                       {muted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume1 className="w-4 h-4" />}
                     </button>
                     <input
@@ -248,27 +248,27 @@ export default function Video() {
                       min={0} max={1} step={0.05}
                       value={muted ? 0 : volume}
                       onChange={e => { setVolume(parseFloat(e.target.value)); setMuted(false) }}
-                      className="w-20 h-1 accent-cyan-600 cursor-pointer"
+                      className="w-20 h-1 accent-signal cursor-pointer"
                     />
                   </div>
-                  <span className="text-xs text-white/60">{formatTime(currentTime)} / {formatTime(duration)}</span>
+                  <span className="text-xs text-muted">{formatTime(currentTime)} / {formatTime(duration)}</span>
                   <div className="flex items-center gap-1">
                     {([0.5, 1, 1.5, 2] as const).map(rate => (
-                      <button key={rate} onClick={() => changeRate(rate)} className={`text-xs px-1.5 py-0.5 rounded ${playbackRate === rate ? 'bg-cyan-600 text-white' : 'text-white/40 hover:text-white'}`}>
+                      <button key={rate} onClick={() => changeRate(rate)} className={`text-xs px-1.5 py-0.5 rounded ${playbackRate === rate ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
                         {rate}×
                       </button>
                     ))}
                   </div>
-                  <button onClick={toggleFullscreen} className="p-1.5 text-white/60 hover:text-white">
+                  <button onClick={toggleFullscreen} className="p-1.5 text-muted hover:text-fg">
                     <Maximize className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="text-sm text-white/80 truncate">{current.title}</p>
+                <p className="text-sm text-fg truncate">{current.title}</p>
               </div>
             </Card>
           ) : (
-            <Card className="flex items-center justify-center py-20 bg-black/50">
-              <div className="text-center text-white/40">
+            <Card className="flex items-center justify-center py-20 bg-void/50">
+              <div className="text-center text-faint">
                 <Film className="w-16 h-16 mx-auto mb-3 opacity-20" />
                 <p>No video selected</p>
                 <p className="text-sm mt-1">Add video files to get started</p>
@@ -282,22 +282,22 @@ export default function Video() {
           <Card className="w-64 p-3 flex-shrink-0">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-sm font-bold flex items-center gap-1"><ListVideo className="w-4 h-4" /> Playlist</h2>
-              <span className="text-xs text-white/40">{videos.length}</span>
+              <span className="text-xs text-faint">{videos.length}</span>
             </div>
             <div className="space-y-1 max-h-[60vh] overflow-y-auto">
               {videos.map((video, i) => (
                 <div
                   key={video.id}
                   onClick={() => playVideo(video)}
-                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer group transition ${current?.id === video.id ? 'bg-cyan-600/30' : 'hover:bg-white/5'}`}
+                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer group transition ${current?.id === video.id ? 'bg-signal/30' : 'hover:bg-glass'}`}
                 >
-                  <span className="text-xs text-white/30 w-5 text-center">{i + 1}</span>
+                  <span className="text-xs text-faint w-5 text-center">{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs truncate ${current?.id === video.id ? 'text-cyan-200 font-bold' : ''}`}>{video.title}</p>
-                    {video.duration > 0 && <p className="text-xs text-white/30">{formatTime(video.duration)}</p>}
-                    {video.ephemeral && <p className="text-[10px] text-amber-300/70" title="Too large to save — won't survive a reload">session-only</p>}
+                    <p className={`text-xs truncate ${current?.id === video.id ? 'text-signal font-bold' : ''}`}>{video.title}</p>
+                    {video.duration > 0 && <p className="text-xs text-faint">{formatTime(video.duration)}</p>}
+                    {video.ephemeral && <p className="text-[10px] text-warn/70" title="Too large to save — won't survive a reload">session-only</p>}
                   </div>
-                  <button onClick={e => { e.stopPropagation(); removeVideo(video.id) }} className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-red-400 p-1">
+                  <button onClick={e => { e.stopPropagation(); removeVideo(video.id) }} className="opacity-0 group-hover:opacity-100 text-faint hover:text-danger p-1">
                     <X className="w-3 h-3" />
                   </button>
                 </div>

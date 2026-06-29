@@ -219,7 +219,7 @@ export default function Maps() {
         {/* Search */}
         <form onSubmit={handleSearch} className="p-3 border-b" style={{ borderColor: 'var(--border)' }}>
           <div className="flex gap-2">
-            <div className="flex-1 flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2">
+            <div className="flex-1 flex items-center gap-2 bg-glass rounded-xl px-3 py-2">
               <Search className="w-4 h-4" style={{ color: 'var(--text3)' }} />
               <input
                 type="text"
@@ -230,7 +230,7 @@ export default function Maps() {
                 style={{ color: 'var(--text)' }}
               />
             </div>
-            <button type="submit" className="px-3 py-2 rounded-xl text-white transition-colors" style={{ background: ACCENT }}>
+            <button type="submit" className="px-3 py-2 rounded-xl text-fg transition-colors" style={{ background: ACCENT }}>
               <Search className="w-4 h-4" />
             </button>
           </div>
@@ -240,7 +240,7 @@ export default function Maps() {
                 <button
                   key={q}
                   onClick={() => { setSearchQuery(q); searchLocations(q) }}
-                  className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 hover:bg-white/10"
+                  className="text-[10px] px-2 py-0.5 rounded-full bg-glass hover:bg-glass"
                   style={{ color: 'var(--text3)' }}
                 >
                   {q}
@@ -276,7 +276,7 @@ export default function Maps() {
               <p className="text-sm" style={{ color: 'var(--text3)' }}>Searching…</p>
             </div>
           )}
-          {error && !isSearching && <p className="text-xs text-red-400 px-1">{error}</p>}
+          {error && !isSearching && <p className="text-xs text-danger px-1">{error}</p>}
 
           {activeTab === 'search' && !isSearching && (
             <>
@@ -289,7 +289,7 @@ export default function Maps() {
                       <button
                         key={c}
                         onClick={() => { setSearchQuery(c); searchLocations(c) }}
-                        className="text-xs px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10"
+                        className="text-xs px-2 py-1 rounded-lg bg-glass hover:bg-glass"
                         style={{ color: 'var(--text2)' }}
                       >
                         {c}
@@ -316,10 +316,10 @@ export default function Maps() {
                     </div>
                     <button
                       onClick={e => { e.stopPropagation(); place.saved ? removePlace(place.id) : savePlace(place) }}
-                      className="p-1 hover:bg-yellow-500/20 rounded transition-colors"
+                      className="p-1 hover:bg-warn/20 rounded transition-colors"
                       title={place.saved ? 'Unsave' : 'Save'}
                     >
-                      <Star className={`w-3.5 h-3.5 ${place.saved ? 'text-yellow-400 fill-yellow-400' : ''}`} style={place.saved ? {} : { color: 'var(--text3)' }} />
+                      <Star className={`w-3.5 h-3.5 ${place.saved ? 'text-warn fill-warn' : ''}`} style={place.saved ? {} : { color: 'var(--text3)' }} />
                     </button>
                   </div>
                 </div>
@@ -344,14 +344,14 @@ export default function Maps() {
                   style={{ background: 'var(--card-bg)', borderColor: selectedPlace?.id === place.id ? ACCENT : 'var(--border)' }}
                 >
                   <div className="flex items-start gap-2">
-                    <Star className="w-4 h-4 mt-0.5 flex-shrink-0 text-yellow-400 fill-yellow-400" />
+                    <Star className="w-4 h-4 mt-0.5 flex-shrink-0 text-warn fill-warn" />
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">{place.name}</div>
                       <div className="text-xs truncate" style={{ color: 'var(--text3)' }}>{place.address}</div>
                     </div>
                     <button
                       onClick={e => { e.stopPropagation(); removePlace(place.id) }}
-                      className="p-1 hover:bg-red-500/20 rounded transition-colors"
+                      className="p-1 hover:bg-danger/20 rounded transition-colors"
                       title="Remove"
                     >
                       <Trash2 className="w-3.5 h-3.5" style={{ color: 'var(--text3)' }} />
@@ -376,7 +376,7 @@ export default function Maps() {
         <div className="p-3 border-t" style={{ borderColor: 'var(--border)' }}>
           <button
             onClick={getCurrentLocation}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-white text-sm transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-fg text-sm transition-colors"
             style={{ background: ACCENT }}
           >
             <Locate className="w-4 h-4" /> Use My Location
@@ -394,7 +394,7 @@ export default function Maps() {
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: ACCENT }}>
-                <MapPin className="w-5 h-5 text-white" />
+                <MapPin className="w-5 h-5 text-fg" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="font-semibold truncate">{selectedPlace.name}</div>
@@ -402,14 +402,14 @@ export default function Maps() {
               </div>
               <button
                 onClick={() => selectedPlace.saved ? removePlace(selectedPlace.id) : savePlace(selectedPlace)}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-2 rounded-lg hover:bg-glass transition-colors"
                 title={selectedPlace.saved ? 'Unsave' : 'Save'}
               >
-                <Star className={`w-4 h-4 ${selectedPlace.saved ? 'text-yellow-400 fill-yellow-400' : ''}`} style={selectedPlace.saved ? {} : { color: 'var(--text3)' }} />
+                <Star className={`w-4 h-4 ${selectedPlace.saved ? 'text-warn fill-warn' : ''}`} style={selectedPlace.saved ? {} : { color: 'var(--text3)' }} />
               </button>
               <button
                 onClick={() => directionsTo(selectedPlace)}
-                className="px-3 py-2 rounded-lg text-white text-xs transition-colors flex items-center gap-1"
+                className="px-3 py-2 rounded-lg text-fg text-xs transition-colors flex items-center gap-1"
                 style={{ background: ACCENT }}
               >
                 <Navigation className="w-3 h-3" /> Directions

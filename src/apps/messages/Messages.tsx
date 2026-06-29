@@ -69,18 +69,18 @@ export default function Messages() {
       <div className="w-72 border-r flex flex-col" style={{ borderColor: 'var(--border)' }}>
         <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <h1 className="text-lg font-bold">Messages</h1>
-          <p className="text-xs text-gray-400">{messages.length} messages</p>
+          <p className="text-xs text-muted">{messages.length} messages</p>
         </div>
         <div className="flex-1 overflow-auto">
           <button
             onClick={askCakraThread}
-            className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-white/5 transition-colors border-b"
+            className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-glass transition-colors border-b"
             style={{ borderColor: 'var(--border)' }}
           >
-            <Bot className="w-4 h-4 text-cyan-300" />
+            <Bot className="w-4 h-4 text-signal" />
             <div>
-              <div className="text-sm font-medium text-cyan-200">Ask Cakra</div>
-              <div className="text-xs text-gray-500">Analyze my messages</div>
+              <div className="text-sm font-medium text-signal">Ask Cakra</div>
+              <div className="text-xs text-faint">Analyze my messages</div>
             </div>
           </button>
           {CONTACTS.map(contact => {
@@ -90,22 +90,22 @@ export default function Messages() {
           <button
           key={contact}
           onClick={() => setRecipient(contact)}
-          className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b ${recipient === contact ? 'bg-cyan-500/10' : 'hover:bg-white/5'}`}
+          className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b ${recipient === contact ? 'bg-signal/10' : 'hover:bg-glass'}`}
           style={{ borderColor: 'var(--border)' }}
           >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ion to-ion flex items-center justify-center text-fg text-sm font-medium flex-shrink-0">
           {contact[0]}
           </div>
           <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
           <span className="text-sm font-medium">{contact}</span>
           {lastMsg && (
-          <span className="text-[10px] text-gray-600">
+          <span className="text-[10px] text-faint">
           {new Date(lastMsg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
           )}
           </div>
-          <div className="text-xs text-gray-500 truncate">
+          <div className="text-xs text-faint truncate">
           {lastMsg ? `${lastMsg.sender === 'Me' ? 'You: ' : ''}${lastMsg.content}` : `${messages.filter(m => m.sender === contact || m.sender === 'Me').length} messages`}
           </div>
           </div>
@@ -120,12 +120,12 @@ export default function Messages() {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-medium">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ion to-ion flex items-center justify-center text-fg text-sm font-medium">
               {recipient[0]}
             </div>
             <div>
               <div className="text-sm font-semibold">{recipient}</div>
-              <div className="text-xs text-gray-500">Active now</div>
+              <div className="text-xs text-faint">Active now</div>
             </div>
           </div>
         </div>
@@ -136,11 +136,11 @@ export default function Messages() {
         const thread = messages.filter(m => m.sender === recipient || m.sender === 'Me')
         if (thread.length === 0) return (
         <div className="text-center py-12">
-        <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-4">
-        <Send className="w-7 h-7 text-cyan-300 opacity-50" />
+        <div className="w-14 h-14 rounded-2xl bg-signal/10 flex items-center justify-center mx-auto mb-4">
+        <Send className="w-7 h-7 text-signal opacity-50" />
         </div>
-        <p className="text-gray-400 text-sm font-medium">No messages with {recipient} yet</p>
-        <p className="text-gray-600 text-xs mt-1">Start the conversation below</p>
+        <p className="text-muted text-sm font-medium">No messages with {recipient} yet</p>
+        <p className="text-faint text-xs mt-1">Start the conversation below</p>
         </div>
         )
         return thread.map(msg => {
@@ -149,13 +149,13 @@ export default function Messages() {
         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
         <div
         className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
-        isMe ? 'bg-cyan-600 text-white rounded-tr-sm' : 'border border-white/10 rounded-tl-sm'
+        isMe ? 'bg-signal text-fg rounded-tr-sm' : 'border border-hair rounded-tl-sm'
         }`}
         style={!isMe ? { background: 'var(--card-bg)' } : {}}
         >
         <p className="text-sm">{msg.content}</p>
         <div className="flex items-center justify-between gap-2 mt-1">
-        <p className={`text-[10px] ${isMe ? 'text-cyan-100' : 'text-gray-600'}`}>
+        <p className={`text-[10px] ${isMe ? 'text-signal' : 'text-faint'}`}>
         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
         <NodeActions type="message" sourceId={msg.id} />
@@ -186,13 +186,13 @@ export default function Messages() {
               }}
               placeholder={`Message ${recipient}...`}
               rows={1}
-              className="flex-1 resize-none rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
+              className="flex-1 resize-none rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-signal/50"
               style={{ background: 'var(--input-bg)', color: 'var(--text)', minHeight: '48px', maxHeight: '100px' }}
             />
             {draft.trim() && (
               <button
                 onClick={askCakraDraft}
-                className="w-10 h-10 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 flex items-center justify-center text-cyan-300 transition-colors flex-shrink-0"
+                className="w-10 h-10 rounded-xl bg-signal/20 hover:bg-signal/30 flex items-center justify-center text-signal transition-colors flex-shrink-0"
                 title="Refine with Cakra"
               >
                 <Bot className="w-4 h-4" />
@@ -201,12 +201,12 @@ export default function Messages() {
             <button
               onClick={send}
               disabled={!draft.trim()}
-              className="w-10 h-10 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 flex items-center justify-center text-white transition-colors flex-shrink-0"
+              className="w-10 h-10 rounded-xl bg-signal hover:bg-signal disabled:opacity-30 flex items-center justify-center text-fg transition-colors flex-shrink-0"
             >
               <Send className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[10px] text-gray-600 mt-1.5">Enter to send · Shift+Enter for newline</p>
+          <p className="text-[10px] text-faint mt-1.5">Enter to send · Shift+Enter for newline</p>
         </div>
       </div>
     </div>

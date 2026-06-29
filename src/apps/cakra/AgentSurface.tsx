@@ -239,8 +239,8 @@ export default function AgentSurface() {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-ion to-signal flex items-center justify-center">
+              <Bot className="w-5 h-5 text-fg" />
             </div>
             <div>
               <h1 className="text-base font-semibold">{AGENT_NAME}</h1>
@@ -288,7 +288,7 @@ export default function AgentSurface() {
             </button>
             <button
               onClick={clearChat}
-              className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors"
+              className="p-2 rounded-lg text-muted hover:text-fg transition-colors"
               title="Clear chat"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -299,7 +299,7 @@ export default function AgentSurface() {
             </button>
             <button
               onClick={() => setSettingsOpen(true)}
-              className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors"
+              className="p-2 rounded-lg text-muted hover:text-fg transition-colors"
               title="Settings"
             >
               <Settings className="w-4 h-4" />

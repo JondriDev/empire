@@ -261,7 +261,7 @@ export default function Music() {
             Music Player
           </h1>
           <div className="flex gap-2">
-            <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-cyan-600 hover:bg-cyan-500">
+            <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-signal hover:bg-signal">
               <Plus className="w-4 h-4 mr-1" /> Add Files
             </Button>
             <input
@@ -277,14 +277,14 @@ export default function Music() {
 
         {/* Now Playing */}
         {current ? (
-          <div className="bg-white/5 rounded-xl p-4 mb-4">
+          <div className="bg-glass rounded-xl p-4 mb-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center flex-shrink-0">
-                <MusicIcon className="w-8 h-8 text-white/80" />
+              <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-ion to-danger flex items-center justify-center flex-shrink-0">
+                <MusicIcon className="w-8 h-8 text-fg" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-lg truncate">{current.title}</p>
-                <p className="text-white/60 text-sm truncate">{current.artist}</p>
+                <p className="text-muted text-sm truncate">{current.artist}</p>
               </div>
             </div>
 
@@ -296,9 +296,9 @@ export default function Music() {
                 max={duration || 100}
                 value={currentTime}
                 onChange={seek}
-                className="w-full h-1 accent-cyan-600 cursor-pointer"
+                className="w-full h-1 accent-signal cursor-pointer"
               />
-              <div className="flex justify-between text-xs text-white/40 mt-1">
+              <div className="flex justify-between text-xs text-faint mt-1">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
@@ -306,26 +306,26 @@ export default function Music() {
 
             {/* Controls */}
             <div className="flex items-center justify-center gap-4 mt-3">
-              <button onClick={() => setShuffle(s => !s)} className={`p-2 rounded-full transition ${shuffle ? 'bg-cyan-600 text-white' : 'text-white/40 hover:text-white'}`}>
+              <button onClick={() => setShuffle(s => !s)} className={`p-2 rounded-full transition ${shuffle ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
                 <Shuffle className="w-4 h-4" />
               </button>
-              <button onClick={prevTrack} className="p-2 text-white/60 hover:text-white transition">
+              <button onClick={prevTrack} className="p-2 text-muted hover:text-fg transition">
                 <SkipBack className="w-5 h-5" />
               </button>
-              <button onClick={playPause} className="p-4 bg-white text-black rounded-full hover:bg-white/90 transition shadow-lg">
+              <button onClick={playPause} className="p-4 bg-glass text-void rounded-full hover:bg-glass transition shadow-lg">
                 {playing ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
               </button>
-              <button onClick={nextTrack} className="p-2 text-white/60 hover:text-white transition">
+              <button onClick={nextTrack} className="p-2 text-muted hover:text-fg transition">
                 <SkipForward className="w-5 h-5" />
               </button>
-              <button onClick={() => setRepeat(r => r === 'none' ? 'all' : r === 'all' ? 'one' : 'none')} className={`p-2 rounded-full transition ${repeat !== 'none' ? 'bg-cyan-600 text-white' : 'text-white/40 hover:text-white'}`}>
+              <button onClick={() => setRepeat(r => r === 'none' ? 'all' : r === 'all' ? 'one' : 'none')} className={`p-2 rounded-full transition ${repeat !== 'none' ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
                 <Repeat className={`w-4 h-4 ${repeat === 'one' ? 'text-xs' : ''}`} />
               </button>
             </div>
 
             {/* Volume */}
             <div className="flex items-center gap-2 mt-3">
-              <button onClick={() => setMuted(m => !m)} className="text-white/40 hover:text-white">
+              <button onClick={() => setMuted(m => !m)} className="text-faint hover:text-fg">
                 {muted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </button>
               <input
@@ -335,12 +335,12 @@ export default function Music() {
                 step={0.01}
                 value={muted ? 0 : volume}
                 onChange={e => { setVolume(parseFloat(e.target.value)); setMuted(false) }}
-                className="flex-1 h-1 accent-cyan-600 cursor-pointer"
+                className="flex-1 h-1 accent-signal cursor-pointer"
               />
             </div>
           </div>
         ) : (
-          <div className="text-center py-12 text-white/40">
+          <div className="text-center py-12 text-faint">
             <MusicIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p>No track playing</p>
             <p className="text-sm mt-1">Add audio files to get started</p>
@@ -348,7 +348,7 @@ export default function Music() {
         )}
 
         {/* Stats bar */}
-        <div className="flex items-center justify-between text-xs text-white/40 border-t border-white/5 pt-3">
+        <div className="flex items-center justify-between text-xs text-faint border-t border-hair pt-3">
           <span>{playlist.length} track{playlist.length !== 1 ? 's' : ''}</span>
           <span>{formatTime(totalDuration)} total</span>
           {current && <span>{playlist.findIndex(t => t.id === current.id) + 1} / {playlist.length}</span>}
@@ -362,7 +362,7 @@ export default function Music() {
             <h2 className="font-bold flex items-center gap-2">
               <ListMusic className="w-4 h-4" /> Playlist
             </h2>
-            <Button onClick={clearPlaylist} className="text-xs bg-red-600/30 hover:bg-red-600/50 text-red-300">
+            <Button onClick={clearPlaylist} className="text-xs bg-danger/30 hover:bg-danger/50 text-danger">
               <Trash2 className="w-3 h-3 mr-1" /> Clear
             </Button>
           </div>
@@ -371,7 +371,7 @@ export default function Music() {
               <div
                 key={track.id}
                 onDoubleClick={() => playTrack(track)}
-                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group transition ${current?.id === track.id ? 'bg-cyan-600/30' : 'hover:bg-white/5'}`}
+                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group transition ${current?.id === track.id ? 'bg-signal/30' : 'hover:bg-glass'}`}
                 draggable
                 onDragStart={(e) => { setDragged(true); e.dataTransfer.setData('text/plain', track.id) }}
                 onDragEnd={() => setDragged(false)}
@@ -392,19 +392,19 @@ export default function Music() {
                   }
                 }}
               >
-                <span className="w-6 text-center text-xs text-white/30">{i + 1}</span>
-                <MusicIcon className="w-4 h-4 text-white/30 flex-shrink-0" />
+                <span className="w-6 text-center text-xs text-faint">{i + 1}</span>
+                <MusicIcon className="w-4 h-4 text-faint flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm truncate ${current?.id === track.id ? 'text-cyan-200 font-bold' : ''}`}>{track.title}</p>
-                  <p className="text-xs text-white/40 truncate">{track.artist}</p>
+                  <p className={`text-sm truncate ${current?.id === track.id ? 'text-signal font-bold' : ''}`}>{track.title}</p>
+                  <p className="text-xs text-faint truncate">{track.artist}</p>
                 </div>
                 {track.ephemeral && (
-                  <span className="text-[10px] text-amber-300/70 px-1.5 py-0.5 rounded bg-amber-500/10" title="Too large to save — won't survive a reload">session</span>
+                  <span className="text-[10px] text-warn/70 px-1.5 py-0.5 rounded bg-warn/10" title="Too large to save — won't survive a reload">session</span>
                 )}
-                <span className="text-xs text-white/30">{track.duration ? formatTime(track.duration) : '—'}</span>
+                <span className="text-xs text-faint">{track.duration ? formatTime(track.duration) : '—'}</span>
                 <button
                   onClick={e => { e.stopPropagation(); removeTrack(track.id) }}
-                  className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-red-400 transition p-1"
+                  className="opacity-0 group-hover:opacity-100 text-faint hover:text-danger transition p-1"
                 >
                   <X className="w-3 h-3" />
                 </button>
