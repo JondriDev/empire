@@ -664,17 +664,8 @@ img, video, svg { display: block; max-width: 100%; }
 .stagger-children > *:nth-child(5) { animation-delay: 240ms; }
 .stagger-children > *:nth-child(6) { animation-delay: 300ms; }
 
-/* ═══════════════════════════════════════════════
-   DOCK STYLING
-   ═══════════════════════════════════════════════ */
-
-.dock-item {
-  transition: transform var(--dur-fast) var(--ease-spring),
-              background var(--dur-fast) var(--ease-out);
-}
-.dock-item:hover  { transform: translateY(-4px) scale(1.08); }
-.dock-item:active { transform: translateY(0px) scale(0.95); }
-.dock-dot { box-shadow: 0 0 6px currentColor; }
+/* DOCK removed — the macOS-style magnifying dock was "Apple Style".
+   The full-screen shell uses the HomeBar + Recents instead. */
 
 /* ═══════════════════════════════════════════════
    INPUT POLISH

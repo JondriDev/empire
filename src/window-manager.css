@@ -1,15 +1,19 @@
 /* ═══════════════════════════════════════════════
- EMPIRE WINDOW MANAGER — Desktop OS CSS
- Full web-app OS with glassmorphism windows,
- taskbar, desktop icons, and context menus.
- ═══════════════════════════════════════════════ */
+   EMPIRE SHELL — full-screen app model (no windows)
+   First principles: one app fills the screen at a time.
+   No floating windows, no macOS traffic-lights, no dock.
+   Just: launcher (home) · AppHost (active app) · HomeBar.
+   ═══════════════════════════════════════════════ */
+
+:root {
+  --homebar-h: 56px;
+  --topbar-h: 48px;
+}
 
 /* ── DESKTOP SHELL ── */
 .empire-desktop {
   position: fixed;
   inset: 0;
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
@@ -21,19 +25,38 @@
   z-index: 0;
 }
 
-.empire-desktop-icons {
+/* ═══════════════════════════════════════════════
+   HOME LAUNCHER — the app grid (revealed at home)
+   ═══════════════════════════════════════════════ */
+.empire-launcher {
   position: absolute;
   inset: 0;
+  bottom: var(--homebar-h);
   z-index: 1;
-  padding: 16px;
-  padding-bottom: 72px; /* taskbar space */
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 88px);
-  grid-template-rows: repeat(auto-fill, 96px);
-  gap: 8px;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px 24px;
   overflow-y: auto;
   pointer-events: none;
+}
+.empire-launcher > * { pointer-events: auto; }
+
+.empire-app-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 90px);
+  gap: 18px 8px;
+  justify-content: center;
+  max-width: min(94vw, 840px);
+  padding: 22px 26px;
+  border-radius: var(--radius-2xl);
+  background: var(--gl-bg);
+  border: 1px solid var(--gl-border-b);
+  border-top-color: var(--gl-border-t);
+  box-shadow: var(--gl-shadow);
+  backdrop-filter: var(--gl-blur);
+  -webkit-backdrop-filter: var(--gl-blur);
 }
 
 .empire-desktop-icon {
@@ -41,49 +64,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 6px 4px;
+  gap: 7px;
+  padding: 8px 4px;
   border-radius: var(--radius-lg);
   border: none;
   background: transparent;
   cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-out),
-              transform var(--dur-fast) var(--ease-spring);
   width: 84px;
   position: relative;
+  transition: transform var(--dur-fast) var(--ease-spring);
 }
-
-.empire-desktop-icon:hover {
-  background: rgba(255, 255, 255, 0.06);
-  transform: translateY(-2px);
-}
-
-.empire-desktop-icon:active {
-  transform: translateY(0) scale(0.95);
-  transition-duration: 80ms;
-}
-
-/* Top accent bar appears on hover — connects icon to launch transition */
-.empire-desktop-icon::before {
-  content: '';
-  position: absolute;
-  width: 28px;
-  height: 2px;
-  border-radius: 1px;
-  background: var(--app-color, var(--color-cyan-3));
-  opacity: 0;
-  transform: translateY(-4px);
-  transition: opacity var(--dur-fast), transform var(--dur-fast);
-  pointer-events: none;
-}
-.empire-desktop-icon:hover::before {
-  opacity: 0.6;
-  transform: translateY(0);
-}
+.empire-desktop-icon:active { transform: scale(0.93); transition-duration: 90ms; }
 
 .empire-desktop-icon-img {
-  width: 56px;
-  height: 56px;
+  width: 58px;
+  height: 58px;
   border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
@@ -91,23 +86,18 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(var(--blur-sm));
   -webkit-backdrop-filter: blur(var(--blur-sm));
-  transition: transform var(--dur-fast) var(--ease-spring),
-              box-shadow var(--dur-fast) var(--ease-out),
-              border-color var(--dur-fast) var(--ease-out);
   position: relative;
+  transition: transform var(--dur-mid) var(--ease-spring),
+              box-shadow var(--dur-mid) var(--ease-out),
+              border-color var(--dur-mid) var(--ease-out);
 }
-
 .empire-desktop-icon:hover .empire-desktop-icon-img {
-  transform: scale(1.08) translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3),
-              0 0 0 4px rgba(255, 255, 255, 0.02);
+  transform: translateY(-4px) scale(1.08);
+  border-color: color-mix(in srgb, var(--app-color, var(--signal)) 40%, transparent);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35),
+              0 0 22px color-mix(in srgb, var(--app-color, var(--signal)) 35%, transparent);
 }
-
-.empire-desktop-icon:active .empire-desktop-icon-img {
-  transform: scale(0.96);
-  transition-duration: 80ms;
-}
+.empire-desktop-icon:active .empire-desktop-icon-img { transform: scale(0.96); transition-duration: 90ms; }
 
 .empire-desktop-icon-label {
   font-size: 11px;
@@ -115,7 +105,7 @@
   color: var(--text2);
   text-align: center;
   line-height: 1.25;
-  max-width: 76px;
+  max-width: 78px;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -124,576 +114,249 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
   transition: color var(--dur-fast);
 }
+.empire-desktop-icon:hover .empire-desktop-icon-label { color: var(--text); }
+[data-theme="light"] .empire-desktop-icon-label { text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5); }
 
-.empire-desktop-icon:hover .empire-desktop-icon-label {
-  color: var(--text);
-}
-
-[data-theme="light"] .empire-desktop-icon-label {
-  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5);
-}
-
-.empire-windows-layer {
+/* ═══════════════════════════════════════════════
+   APP HOST — the active app, full-bleed
+   ═══════════════════════════════════════════════ */
+.empire-apphost {
   position: absolute;
   inset: 0;
+  bottom: var(--homebar-h);
   z-index: 10;
-  pointer-events: none;
-  padding-bottom: 56px; /* taskbar space */
-}
-
-/* ── WINDOW CHROME ── */
-.empire-window {
-  pointer-events: auto;
   display: flex;
   flex-direction: column;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  background: rgba(6, 9, 18, 0.85);
-  backdrop-filter: blur(var(--blur-lg)) saturate(1.2);
-  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow:
-    0 16px 44px rgba(0, 0, 0, 0.62),
-    0 1px 0 rgba(170, 227, 226, 0.06) inset;
-  animation: empire-window-open 280ms var(--ease-spring) forwards;
-  transition: box-shadow var(--dur-fast) var(--ease-out);
+  background: var(--bg);
 }
 
-[data-theme="light"] .empire-window {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 0 0 1px rgba(0, 0, 0, 0.04) inset,
-    0 1px 0 rgba(255, 255, 255, 0.8) inset;
-}
-
-.empire-window-active {
-  box-shadow:
-    0 12px 48px rgba(0, 0, 0, 0.5),
-    0 0 0 1px color-mix(in srgb, var(--window-accent, #22d3ee) 18%, transparent) inset,
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 0 28px color-mix(in srgb, var(--window-accent, #22d3ee) 0.08, transparent);
-  border-color: color-mix(in srgb, var(--window-accent, #22d3ee) 12%, rgba(255, 255, 255, 0.08));
-}
-
-[data-theme="light"] .empire-window-active {
-  box-shadow:
-    0 12px 48px rgba(0, 0, 0, 0.15),
-    0 0 0 1px color-mix(in srgb, var(--window-accent, #0891b2) 22%, transparent) inset,
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 0 28px color-mix(in srgb, var(--window-accent, #0891b2) 0.10, transparent);
-}
-
-@keyframes empire-window-open {
-  from {
-    opacity: 0;
-    transform: scale(0.92) translateY(16px);
-    filter: blur(8px);
-  }
-  60% {
-    filter: blur(0);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0);
-  }
-}
-
-/* Closing animation triggered by data-state="closing"
-   (Window.tsx can toggle this for higher-quality transitions later) */
-.empire-window[data-state="closing"] {
-  animation: empire-window-close 200ms cubic-bezier(0.4, 0, 1, 1) forwards;
-}
-@keyframes empire-window-close {
-  to {
-    opacity: 0;
-    transform: scale(0.94) translateY(8px);
-  }
-}
-
-/* Minimize animation: bird down to taskbar */
-.empire-window[data-state="minimizing"] {
-  animation: empire-window-minimize 280ms cubic-bezier(0.4, 0, 1, 1) forwards;
-  transform-origin: bottom center;
-}
-@keyframes empire-window-minimize {
-  to {
-    opacity: 0;
-    transform: scale(0.15) translateY(60vh);
-  }
-}
-
-/* ── TITLE BAR ── */
-.empire-window-titlebar {
+.empire-topbar {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 40px;
-  min-height: 40px;
-  padding: 0 12px;
-  background: rgba(255, 255, 255, 0.018);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  cursor: grab;
+  height: var(--topbar-h);
+  min-height: var(--topbar-h);
+  padding: 0 8px 0 4px;
   flex-shrink: 0;
   position: relative;
-  overflow: hidden;
+  background: color-mix(in srgb, var(--abyss) 55%, transparent);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  border-bottom: 1px solid var(--hair);
 }
-/* Subtle app-color accent line at the top of the title bar */
-.empire-window-titlebar::before {
+/* app-color accent hairline along the top edge */
+.empire-topbar::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--titlebar-accent, rgba(34, 211, 238, 0.4)) 50%,
-    transparent 100%
-  );
-  opacity: 0.85;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--app-color, var(--signal)) 50%, transparent);
+  opacity: 0.7;
   pointer-events: none;
 }
 
-[data-theme="light"] .empire-window-titlebar {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(255, 255, 255, 0.5) 100%
-  );
-  border-bottom-color: rgba(0, 0, 0, 0.06);
-}
-
-.empire-window-titlebar:active {
-  cursor: grabbing;
-}
-
-/* Traffic lights (macOS-style) */
-.empire-window-controls {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-shrink: 0;
-}
-
-.empire-window-controls-spacer {
-  width: 62px; /* balances the traffic lights */
-  flex-shrink: 0;
-}
-
-.empire-window-btn {
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  border: 0.5px solid rgba(0, 0, 0, 0.12);
+.empire-topbar-back,
+.empire-topbar-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  color: var(--text2);
   cursor: pointer;
-  transition: all var(--dur-fast) var(--ease-spring);
-  position: relative;
+  transition: background var(--dur-fast), color var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
 }
+.empire-topbar-back:hover,
+.empire-topbar-btn:hover { background: var(--holo-bg-h); color: var(--text); }
+.empire-topbar-back:active,
+.empire-topbar-btn:active { transform: scale(0.9); }
 
-.empire-window-btn svg {
-  opacity: 0;
-  width: 8px;
-  height: 8px;
-  transition: opacity var(--dur-fast) var(--ease-out);
-  color: rgba(0, 0, 0, 0.55);
-  stroke-width: 2.5;
-}
-
-.empire-window-titlebar:hover .empire-window-btn svg {
-  opacity: 1;
-}
-
-/* Show icons on touch devices (no hover) */
-@media (hover: none) {
-  .empire-window-btn svg { opacity: 1; }
-}
-
-.empire-window-titlebar:hover .empire-window-btn svg {
-  opacity: 1;
-}
-
-.empire-window-btn-close {
-  background: #ff5f57;
-}
-
-.empire-window-btn-close:hover {
-  background: #ff3b30;
-}
-
-.empire-window-btn-minimize {
-  background: #febc2e;
-}
-
-.empire-window-btn-minimize:hover {
-  background: #f5a623;
-}
-
-.empire-window-btn-maximize {
-  background: #28c840;
-}
-
-.empire-window-btn-maximize:hover {
-  background: #1db954;
-}
-
-[data-theme="light"] .empire-window-btn-close { background: #ff5f57; }
-[data-theme="light"] .empire-window-btn-minimize { background: #febc2e; }
-[data-theme="light"] .empire-window-btn-maximize { background: #28c840; }
-
-/* App identity in title bar */
-.empire-window-identity {
+.empire-topbar-identity {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
   min-width: 0;
-  justify-content: center;
 }
-
-.empire-window-title {
-  font-size: var(--text-xs);
+.empire-topbar-title {
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--text2);
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.empire-topbar-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
 
-/* ── WINDOW CONTENT ── */
-.empire-window-content {
+.empire-app-surface {
   flex: 1;
   overflow: auto;
   position: relative;
+  min-height: 0;
 }
 
-/* ── RESIZE HANDLES ── */
-.empire-resize-handle {
-  touch-action: none;
-  transition: background var(--dur-fast) var(--ease-out);
-}
-
-.empire-resize-handle:hover {
-  background: linear-gradient(
-    135deg,
-    transparent 0%,
-    rgba(34, 211, 238, 0.18) 100%
-  );
-}
-
-/* ── TASKBAR ── */
-.empire-taskbar {
+/* ═══════════════════════════════════════════════
+   HOME BAR — Home · Recents · Search · Theme · Lang · Clock
+   ═══════════════════════════════════════════════ */
+.empire-homebar {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
+  height: var(--homebar-h);
   z-index: 9000;
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  justify-content: space-between;
+  padding: 0 10px;
   gap: 8px;
-  background: rgba(4, 6, 14, 0.82);
+  background: color-mix(in srgb, var(--void) 78%, transparent);
   backdrop-filter: blur(var(--blur-xl)) saturate(1.3);
   -webkit-backdrop-filter: blur(var(--blur-xl)) saturate(1.3);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 -1px 0 rgba(34, 211, 238, 0.08);
+  border-top: 1px solid var(--hair);
+}
+[data-theme="light"] .empire-homebar {
+  background: rgba(255, 255, 255, 0.78);
 }
 
-[data-theme="light"] .empire-taskbar {
-  background: rgba(255, 255, 255, 0.75);
-  border-top-color: rgba(0, 0, 0, 0.06);
-}
-.empire-start-btn {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: var(--radius-lg);
-  transition: background var(--dur-fast);
-  flex-shrink: 0;
-}
+.empire-homebar-nav,
+.empire-homebar-tray { display: flex; align-items: center; gap: 4px; }
 
-.empire-start-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.empire-taskbar-apps {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.empire-taskbar-apps::-webkit-scrollbar {
-  display: none;
-}
-
-.empire-taskbar-app {
+.empire-homebar-btn {
   position: relative;
-  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
   height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0 10px;
   border: none;
   background: transparent;
   border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-out),
-              transform var(--dur-fast) var(--ease-spring);
-  flex-shrink: 0;
-}
-
-.empire-taskbar-app:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-3px) scale(1.10);
-}
-
-.empire-taskbar-app:active {
-  transform: translateY(0) scale(0.92);
-  transition-duration: 80ms;
-}
-
-/* Subtle tooltip on hover */
-.empire-taskbar-app::before {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  opacity: 0;
-  pointer-events: none;
-  padding: 5px 9px;
-  background: rgba(8, 12, 28, 0.94);
-  backdrop-filter: blur(var(--blur-md));
-  -webkit-backdrop-filter: blur(var(--blur-md));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-md);
-  color: var(--text);
-  font-size: 11px;
-  font-weight: 500;
-  white-space: nowrap;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-  transition: opacity var(--dur-fast), transform var(--dur-fast);
-  z-index: 9999;
-}
-[data-theme="light"] .empire-taskbar-app::before {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: rgba(0, 0, 0, 0.1);
-  color: var(--text);
-}
-.empire-taskbar-app:hover::before {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.empire-taskbar-app-active {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(34, 211, 238, 0.08) 100%
-  );
-  box-shadow: inset 0 -2px 0 0 var(--app-color, var(--color-cyan-4));
-}
-
-.empire-taskbar-indicator {
-  position: absolute;
-  bottom: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  transition: all var(--dur-fast) var(--ease-spring);
-  background: var(--app-color, var(--text3));
-}
-
-/* System tray (right side) */
-.empire-taskbar-tray {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.empire-taskbar-tray-btn {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  border-radius: var(--radius-md);
-  cursor: pointer;
   color: var(--text3);
+  cursor: pointer;
   transition: background var(--dur-fast) var(--ease-out),
               color var(--dur-fast) var(--ease-out),
               transform var(--dur-fast) var(--ease-spring);
 }
+.empire-homebar-btn:hover { background: var(--holo-bg-h); color: var(--text); transform: translateY(-1px); }
+.empire-homebar-btn:active { transform: scale(0.9); }
+.empire-homebar-btn.is-active { color: var(--signal); background: color-mix(in srgb, var(--signal) 12%, transparent); }
+.empire-homebar-lang { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; }
 
-.empire-taskbar-tray-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  transform: scale(1.08);
+.empire-homebar-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  min-width: 15px; height: 15px;
+  padding: 0 3px;
+  border-radius: var(--radius-full);
+  background: var(--signal);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 15px;
+  text-align: center;
 }
 
-.empire-taskbar-tray-btn:active {
-  transform: scale(0.92);
-  transition-duration: 80ms;
-}
-
-.empire-taskbar-clock {
+.empire-homebar-clock {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  line-height: 1.2;
+  line-height: 1.15;
   padding: 0 8px;
   cursor: default;
-  user-select: none;
 }
+.empire-homebar-time { font-size: var(--text-xs); font-weight: 600; color: var(--text2); font-variant-numeric: tabular-nums; }
+.empire-homebar-date { font-size: 10px; color: var(--text3); font-variant-numeric: tabular-nums; }
 
-.empire-taskbar-clock:hover .empire-taskbar-clock-row {
-  color: var(--text);
-}
-
-/* ── START MENU ── */
-.empire-start-menu {
-  width: 420px;
-  max-width: calc(100vw - 16px);
-  max-height: calc(100vh - 80px);
-  border-radius: var(--radius-xl);
-  background: rgba(13, 18, 36, 0.92);
-  backdrop-filter: blur(var(--blur-xl)) saturate(1.6);
-  -webkit-backdrop-filter: blur(var(--blur-xl)) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 16px 64px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 1px 0 rgba(255, 255, 255, 0.05) inset;
-  overflow: hidden; /* keep header/search from scrolling with grid */
-  animation: empire-start-menu-in 240ms var(--ease-spring) forwards;
+/* ═══════════════════════════════════════════════
+   RECENTS — app switcher overlay
+   ═══════════════════════════════════════════════ */
+.empire-recents {
+  position: fixed;
+  inset: 0;
+  bottom: var(--homebar-h);
+  z-index: 9400;
   display: flex;
   flex-direction: column;
+  padding: 24px 18px;
+  background: color-mix(in srgb, var(--void) 72%, transparent);
+  backdrop-filter: blur(var(--blur-lg));
+  -webkit-backdrop-filter: blur(var(--blur-lg));
+  animation: fade-in var(--dur-fast) var(--ease-out) forwards;
 }
-
-[data-theme="light"] .empire-start-menu {
-  background: rgba(255, 255, 255, 0.94);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.15);
-}
-
-@keyframes empire-start-menu-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.94);
-    transform-origin: bottom left;
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.empire-start-menu-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  flex-shrink: 0;
-}
-
-[data-theme="light"] .empire-start-menu-header {
-  border-bottom-color: rgba(0, 0, 0, 0.06);
-}
-
-.empire-start-menu-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
-  padding: 12px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-[data-theme="light"] .empire-start-menu-grid {
-  /* Note: no light override here, base grid is theme-neutral */
-}
-
-.empire-start-menu-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 6px;
-  padding: 10px 4px 8px;
-  border: none;
-  background: transparent;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-out),
-              transform var(--dur-fast) var(--ease-spring);
-  position: relative;
-}
-
-.empire-start-menu-item:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.empire-start-menu-item:active {
-  transform: scale(0.94);
-  transition-duration: 80ms;
-}
-
-.empire-start-menu-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.03);
-  transition: transform var(--dur-fast) var(--ease-spring),
-              box-shadow var(--dur-fast) var(--ease-out);
-}
-
-.empire-start-menu-item:hover .empire-start-menu-icon {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-}
-
-/* Footer with system info */
-.empire-start-menu-footer {
+.empire-recents-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(0, 0, 0, 0.15);
-  flex-shrink: 0;
+  margin-bottom: 16px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text2);
 }
-[data-theme="light"] .empire-start-menu-footer {
-  border-top-color: rgba(0, 0, 0, 0.06);
-  background: rgba(0, 0, 0, 0.03);
+.empire-recents-clear {
+  border: 1px solid var(--hair);
+  background: transparent;
+  color: var(--text3);
+  font-size: var(--text-xs);
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: color var(--dur-fast), border-color var(--dur-fast);
 }
+.empire-recents-clear:hover { color: var(--c-danger); border-color: color-mix(in srgb, var(--c-danger) 40%, transparent); }
+.empire-recents-empty { margin: auto; color: var(--text3); font-size: var(--text-sm); }
 
-/* ── CONTEXT MENU ── */
+.empire-recents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
+  overflow-y: auto;
+  align-content: start;
+}
+.empire-recents-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 12px 16px;
+  border-radius: var(--radius-xl);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border-b);
+  border-top-color: var(--card-border-t);
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-spring),
+              border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.empire-recents-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--app-color, var(--signal)) 35%, transparent);
+  box-shadow: var(--card-shadow), 0 0 22px color-mix(in srgb, var(--app-color, var(--signal)) 22%, transparent);
+}
+.empire-recents-icon {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+}
+.empire-recents-title { font-size: var(--text-sm); font-weight: 500; color: var(--text2); }
+.empire-recents-close {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--holo-bg-h);
+  color: var(--text3);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.empire-recents-close:hover { background: color-mix(in srgb, var(--c-danger) 22%, transparent); color: var(--c-danger); }
+
+/* ═══════════════════════════════════════════════
+   CONTEXT MENU
+   ═══════════════════════════════════════════════ */
 .empire-context-menu {
   min-width: 200px;
   max-width: 260px;
@@ -706,28 +369,16 @@
   padding: 6px;
   animation: empire-context-in 150ms var(--ease-out) forwards;
 }
-
 [data-theme="light"] .empire-context-menu {
   background: rgba(255, 255, 255, 0.95);
   border-color: rgba(0, 0, 0, 0.08);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
-
 @keyframes empire-context-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
 }
-
-.empire-context-menu-section {
-  padding: 2px 0;
-}
-
+.empire-context-menu-section { padding: 2px 0; }
 .empire-context-menu-label {
   font-size: 10px;
   font-weight: 600;
@@ -736,7 +387,6 @@
   letter-spacing: 0.05em;
   padding: 6px 10px 4px;
 }
-
 .empire-context-menu-item {
   display: flex;
   align-items: center;
@@ -751,27 +401,14 @@
   color: var(--text2);
   transition: background var(--dur-fast), color var(--dur-fast);
 }
+.empire-context-menu-item:hover { background: color-mix(in srgb, var(--signal) 12%, transparent); color: var(--text); }
+.empire-context-menu-item:active { background: color-mix(in srgb, var(--signal) 20%, transparent); }
+.empire-context-menu-divider { height: 1px; background: rgba(255, 255, 255, 0.06); margin: 4px 8px; }
+[data-theme="light"] .empire-context-menu-divider { background: rgba(0, 0, 0, 0.06); }
 
-.empire-context-menu-item:hover {
-  background: rgba(34, 211, 238, 0.1);
-  color: var(--text);
-}
-
-.empire-context-menu-item:active {
-  background: rgba(34, 211, 238, 0.18);
-}
-
-.empire-context-menu-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.06);
-  margin: 4px 8px;
-}
-
-[data-theme="light"] .empire-context-menu-divider {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-/* ── SEARCH OVERLAY ── */
+/* ═══════════════════════════════════════════════
+   SEARCH OVERLAY (command palette)
+   ═══════════════════════════════════════════════ */
 .empire-search-overlay {
   position: fixed;
   inset: 0;
@@ -785,7 +422,6 @@
   padding-top: 15vh;
   animation: fade-in 150ms var(--ease-out) forwards;
 }
-
 .empire-search-panel {
   width: 520px;
   max-width: calc(100vw - 32px);
@@ -799,24 +435,15 @@
   overflow: hidden;
   animation: empire-search-in 200ms var(--ease-spring) forwards;
 }
-
 [data-theme="light"] .empire-search-panel {
   background: rgba(255, 255, 255, 0.95);
   border-color: rgba(0, 0, 0, 0.08);
   box-shadow: 0 16px 64px rgba(0, 0, 0, 0.12);
 }
-
 @keyframes empire-search-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  from { opacity: 0; transform: scale(0.96) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
-
 .empire-search-input-wrap {
   display: flex;
   align-items: center;
@@ -824,11 +451,7 @@
   padding: 14px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
-
-[data-theme="light"] .empire-search-input-wrap {
-  border-bottom-color: rgba(0, 0, 0, 0.06);
-}
-
+[data-theme="light"] .empire-search-input-wrap { border-bottom-color: rgba(0, 0, 0, 0.06); }
 .empire-search-input {
   flex: 1;
   border: none;
@@ -838,12 +461,10 @@
   outline: none;
   font-family: var(--font-sans);
 }
-
-.empire-search-input::placeholder {
-  color: var(--text3);
-}
-
+.empire-search-input::placeholder { color: var(--text3); }
 .empire-search-kbd {
+  display: inline-flex;
+  align-items: center;
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 4px;
@@ -852,13 +473,7 @@
   color: var(--text3);
   font-family: var(--font-mono);
 }
-
-.empire-search-results {
-  max-height: 50vh;
-  overflow-y: auto;
-  padding: 6px;
-}
-
+.empire-search-results { max-height: 50vh; overflow-y: auto; padding: 6px; }
 .empire-search-result {
   display: flex;
   align-items: center;
@@ -871,105 +486,14 @@
   cursor: pointer;
   transition: background var(--dur-fast);
 }
+.empire-search-result:hover { background: color-mix(in srgb, var(--signal) 8%, transparent); }
+.empire-search-result:active { background: color-mix(in srgb, var(--signal) 14%, transparent); }
 
-.empire-search-result:hover {
-  background: rgba(34, 211, 238, 0.08);
-}
-
-.empire-search-result:active {
-  background: rgba(34, 211, 238, 0.14);
-}
-
-/* ── MAXIMIZED WINDOW OVERRIDE ── */
-.empire-window[style*="width: 100%"] {
-  border-radius: 0;
-}
-
-/* ── TOUCH OPTIMIZATIONS ── */
-@media (pointer: coarse) {
-  .empire-window-btn {
-    width: 16px;
-    height: 16px;
-  }
-
-  .empire-resize-handle {
-    /* Larger touch targets */
-  }
-
-  .empire-taskbar-app {
-    width: 48px;
-    height: 48px;
-  }
-
-  .empire-desktop-icon-img {
-    width: 56px;
-    height: 56px;
-  }
-}
-
-/* ── RESPONSIVE ── */
-@media (max-width: 480px) {
-  .empire-start-menu {
-    width: calc(100vw - 16px);
-    left: 8px !important;
-  }
-
-  .empire-start-menu-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .empire-desktop-icons {
-    grid-template-columns: repeat(auto-fill, 76px);
-    grid-template-rows: repeat(auto-fill, 84px);
-  }
-
-  .empire-taskbar-tray .empire-taskbar-clock span:last-child {
-    display: none;
-  }
-}
-
-/* ═══════════════════════════════════════════════
-   HOME SCREEN — minimal app launcher
-   (Decorative HUD/telemetry/hero centerpiece removed;
-    the app grid is the focus, on the Earth grad.)
-   ═══════════════════════════════════════════════ */
-
-.empire-launcher {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 40px;
-  padding: 32px 16px 88px;
-  overflow-y: auto;
-  pointer-events: none;
-}
-.empire-launcher > * { pointer-events: auto; }
-
-.empire-app-grid {
-  display: grid;
-  grid-template-columns: repeat(8, 90px);
-  gap: 14px 6px;
-  justify-content: center;
-  max-width: min(94vw, 820px);
-  padding: 18px 22px;
-  border-radius: var(--radius-xl);
-  background: var(--gl-bg);
-  border: 1px solid var(--gl-border-b);
-  border-top-color: var(--gl-border-t);
-  box-shadow: var(--gl-shadow);
-  backdrop-filter: var(--gl-blur);
-  -webkit-backdrop-filter: var(--gl-blur);
-}
-
-/* ── Responsive ── */
+/* ── TOUCH / RESPONSIVE ── */
 @media (max-width: 720px) {
-  .empire-app-grid { grid-template-columns: repeat(5, 76px); padding: 14px; }
-  .empire-launcher { gap: 28px; }
+  .empire-app-grid { grid-template-columns: repeat(5, 76px); padding: 16px; gap: 14px 6px; }
 }
 @media (max-width: 420px) {
   .empire-app-grid { grid-template-columns: repeat(4, 72px); }
+  .empire-homebar-date { display: none; }
 }

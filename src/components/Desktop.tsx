@@ -1,76 +1,47 @@
 /**
- * Empire Desktop — Full Web OS Shell
+ * Empire Desktop — full-screen app shell (no windows).
  *
  * Layers (bottom to top):
- * 1. Desktop background (Earth-from-Space gradient)
- * 2. Desktop icons (app grid on the desktop)
- * 3. Windows (draggable, resizable)
- * 4. Context menu
- * 5. Search overlay (command palette with keyboard nav)
- * 6. Taskbar (always on top)
+ *  0. background wash (planetary --grad)
+ *  1. home launcher (the app grid) — revealed when no app is active
+ *  2. AppHost — the active app, full-bleed
+ *  3. context menu / search palette / recents switcher
+ *  4. HomeBar (always on top): Home · Recents · Search · Theme · Lang · Clock
  */
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { useWindowStore } from '../lib/windowStore'
-import { apps, getAppIcon } from '../lib/registry'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { useWindowStore, openAppById } from '../lib/windowStore'
+import { apps, launcherApps, getAppIcon } from '../lib/registry'
 import { useStore } from '../lib/store'
 import { useLang } from '../lib/i18n'
-import WindowComponent from './Window'
+import AppHost from './AppHost'
+import Recents from './Recents'
 import ContextMenu from './ContextMenu'
 import CommandPalette from './CommandPalette'
 import { ToastViewport } from './ui/Toast'
 import {
-  Search, Sun, Moon, Volume2,
-  Command, ArrowUp, ArrowDown,
-  CornerDownLeft
+  Search, Sun, Moon, House, LayoutGrid,
+  ArrowUp, ArrowDown, CornerDownLeft,
 } from 'lucide-react'
 import { tint } from '../design-system/tokens'
-
-// Categories used in the start menu grouping
-const CATEGORY_ORDER = ['AI & Intelligence', 'Productivity & Data', 'Media & Files', 'Utilities'] as const
-
-function categorizeApp(name: string): typeof CATEGORY_ORDER[number] {
-  if (
-    name === 'Cakra' || name === 'Prompt Gen' ||
-    name === 'Token Counter' || name === 'Goals' || name === 'Grammar Fix'
-  ) return 'AI & Intelligence'
-  if (
-    name === 'Notes' || name === 'Calendar' || name === 'Calculator' ||
-    name === 'Data Center' || name === 'Maps' || name === 'Clock'
-  ) return 'Productivity & Data'
-  if (
-    name === 'Music' || name === 'Video' || name === 'Photos' ||
-    name === 'Files' || name === 'Browser'
-  ) return 'Media & Files'
-  return 'Utilities'
-}
-
-function groupApps() {
-  const groups: Record<string, typeof apps> = {}
-  for (const cat of CATEGORY_ORDER) groups[cat] = []
-  for (const a of apps) groups[categorizeApp(a.name)]?.push(a)
-  return groups
-}
 
 export default function Desktop() {
   const { theme, toggleTheme } = useStore()
   const { t, lang, toggleLang } = useLang()
-  // Localised display name for an app (registry English stays canonical).
   const appLabel = useCallback((a: typeof apps[number]) => t(`app.${a.id}.name`, a.name), [t])
-  const {
-  windows, openApp, minimizeWindow,
-  focusWindow, activeWindowId
-  } = useWindowStore()
+
+  const windows = useWindowStore(s => s.windows)
+  const activeWindowId = useWindowStore(s => s.activeWindowId)
+  const goHome = useWindowStore(s => s.goHome)
+
   const [showSearch, setShowSearch] = useState(false)
+  const [showRecents, setShowRecents] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchSelected, setSearchSelected] = useState(0)
-  const [showStartMenu, setShowStartMenu] = useState(false)
   const [clock, setClock] = useState(new Date())
   const searchInputRef = useRef<HTMLInputElement>(null)
-  // Remembers what was focused before the search palette opened, so focus can
-  // be restored when it closes (WCAG 2.4.3 focus order).
   const prevFocusRef = useRef<HTMLElement | null>(null)
 
-  // Restore focus to the previously-focused element when the palette closes.
+  // Restore focus when the palette closes (WCAG 2.4.3 focus order).
   useEffect(() => {
     if (!showSearch && prevFocusRef.current) {
       prevFocusRef.current.focus?.()
@@ -78,13 +49,12 @@ export default function Desktop() {
     }
   }, [showSearch])
 
-  // Update clock every second
   useEffect(() => {
     const timer = setInterval(() => setClock(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
 
-  // Keyboard shortcut: Ctrl+Space for search
+  // Ctrl+Space → search · Escape → close overlays
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.code === 'Space') {
@@ -97,126 +67,87 @@ export default function Desktop() {
         setSearchSelected(0)
       }
       if (e.key === 'Escape') {
-        setShowSearch(false)
-        setShowStartMenu(false)
+        if (showSearch) { setShowSearch(false); return }
+        if (showRecents) { setShowRecents(false); return }
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [])
+  }, [showSearch, showRecents])
 
   const handleAppOpen = useCallback((appId: string) => {
-  const appDef = apps.find(a => a.id === appId)
-  if (!appDef) return
-  // Check if already open — if so, focus it
-  const existing = windows.find(w => w.appId === appId)
-  if (existing) {
-  if (existing.minimized) {
-  minimizeWindow(existing.id)
-  }
-  focusWindow(existing.id)
-  } else {
-  openApp(appId, appDef.name, appDef.icon, appDef.color)
-  }
-  setShowSearch(false)
-  setShowStartMenu(false)
-  }, [windows, openApp, minimizeWindow, focusWindow])
+    openAppById(appId) // resolves merge-aliases (e.g. editor → Cakra tab)
+    setShowSearch(false)
+    setShowRecents(false)
+  }, [])
 
-  // Filtered apps for search
+  // Search across every app (incl. merged tools), not just launcher tiles.
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) return apps
+    if (!searchQuery.trim()) return launcherApps
+    const pool = apps.filter(a => !a.hidden || a.aliasOf)
     const q = searchQuery.toLowerCase()
-    return apps.filter(a =>
+    return pool.filter(a =>
       a.name.toLowerCase().includes(q) ||
       a.id.toLowerCase().includes(q) ||
       (a.description || '').toLowerCase().includes(q)
     )
   }, [searchQuery])
 
-  // Reset selected when results change
-  useEffect(() => {
-    setSearchSelected(0)
-  }, [searchQuery])
+  useEffect(() => { setSearchSelected(0) }, [searchQuery])
 
   const isLight = theme === 'light'
-  const grouped = useMemo(() => groupApps(), [])
+  const atHome = !activeWindowId
 
   return (
     <div className="empire-desktop" style={{ color: 'var(--text)' }}>
-      {/* Layer 0: Earth-from-Space gradient background */}
+      {/* Layer 0 — planetary background wash */}
       <div className="empire-desktop-bg starfield" aria-hidden="true" />
 
-      {/* Layer 1: App launcher */}
-      <div className="empire-launcher">
+      {/* Layer 1 — home launcher */}
+      <div className="empire-launcher" aria-hidden={!atHome}>
         <div className="empire-app-grid">
-        {apps.map(app => {
-          const Icon = getAppIcon(app.icon)
-          const isRunning = windows.some(w => w.appId === app.id)
-          return (
-            <button
-              key={app.id}
-              className="empire-desktop-icon"
-              style={{
-                ['--app-color' as any]: app.color,
-              }}
-              onClick={() => handleAppOpen(app.id)}
-              title={app.description || app.name}
-              aria-label={appLabel(app)}
-            >
-              <div
-                className="empire-desktop-icon-img"
-                style={{ background: `${app.color}15` }}
+          {launcherApps.map((app, i) => {
+            const Icon = getAppIcon(app.icon)
+            const isRunning = windows.some(w => w.appId === app.id)
+            return (
+              <button
+                key={app.id}
+                className="empire-desktop-icon app-card"
+                style={{ ['--app-color' as string]: app.color, animationDelay: `${Math.min(i * 35, 700)}ms` }}
+                onClick={() => handleAppOpen(app.id)}
+                title={app.description || app.name}
+                aria-label={appLabel(app)}
               >
-                <Icon className="w-7 h-7" style={{ color: app.color }} />
-                {isRunning && (
-                  <span
-                    aria-label="Running"
-                    style={{
-                      position: 'absolute',
-                      bottom: 3,
-                      right: 3,
-                      width: 7,
-                      height: 7,
-                      borderRadius: '50%',
-                      background: app.color,
-                      boxShadow: `0 0 8px ${app.color}, 0 0 0 1.5px ${tint('void', 60)}`,
-                    }}
-                  />
-                )}
-              </div>
-              <span className="empire-desktop-icon-label">{appLabel(app)}</span>
-            </button>
-          )
-        })}
+                <div className="empire-desktop-icon-img app-icon" style={{ background: `${app.color}15` }}>
+                  <Icon className="w-7 h-7" style={{ color: app.color }} />
+                  {isRunning && (
+                    <span
+                      aria-label="Running"
+                      style={{
+                        position: 'absolute', bottom: 3, right: 3, width: 7, height: 7,
+                        borderRadius: '50%', background: app.color,
+                        boxShadow: `0 0 8px ${app.color}, 0 0 0 1.5px ${tint('void', 60)}`,
+                      }}
+                    />
+                  )}
+                </div>
+                <span className="empire-desktop-icon-label">{appLabel(app)}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* Layer 2: Windows */}
-      <div className="empire-windows-layer">
-        {windows.map(win => {
-        return (
-        <WindowComponent
-        key={win.id}
-        win={win}
-        isActive={win.id === activeWindowId}
-        />
-        )
-        })}
-      </div>
+      {/* Layer 2 — the active app, full-bleed */}
+      <AppHost onRecents={() => setShowRecents(true)} />
 
-      {/* Layer 3: Context Menu */}
+      {/* Layer 3 — overlays */}
       <ContextMenu />
+      <Recents open={showRecents} onClose={() => setShowRecents(false)} />
 
-      {/* Layer 4: Search Overlay (Command Palette) */}
       {showSearch && (
-        <div
-          className="empire-search-overlay"
-          onClick={() => setShowSearch(false)}
-        >
-          <div
-            className="empire-search-panel"
-            onClick={e => e.stopPropagation()}
-          >
+        <div className="empire-search-overlay" onClick={() => setShowSearch(false)}>
+          <div className="empire-search-panel" onClick={e => e.stopPropagation()}>
             <div className="empire-search-input-wrap">
               <Search className="w-5 h-5" style={{ color: 'var(--text3)' }} />
               <input
@@ -245,13 +176,8 @@ export default function Desktop() {
             <div className="empire-search-results">
               {searchResults.length === 0 ? (
                 <div className="empire-search-empty">
-                  <div className="empire-search-empty-icon">
-                    <Search className="w-4 h-4" />
-                  </div>
+                  <div className="empire-search-empty-icon"><Search className="w-4 h-4" /></div>
                   <div>No apps match "{searchQuery}"</div>
-                  <div style={{ fontSize: '11px', marginTop: '4px', opacity: 0.7 }}>
-                    Try the app name like "calc" or "notes"
-                  </div>
                 </div>
               ) : (
                 searchResults.map((app, idx) => {
@@ -264,69 +190,38 @@ export default function Desktop() {
                       data-selected={isSelected || undefined}
                       onClick={() => handleAppOpen(app.id)}
                       onMouseEnter={() => setSearchSelected(idx)}
-                      style={{
-                        ['--app-color' as any]: app.color,
-                      }}
+                      style={{ ['--app-color' as string]: app.color }}
                     >
-                      <div
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: 'var(--radius-lg)',
-                          background: `${app.color}1A`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          border: `1px solid ${app.color}30`,
-                          flexShrink: 0,
-                        }}
-                      >
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 'var(--radius-lg)',
+                        background: `${app.color}1A`, display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', border: `1px solid ${app.color}30`, flexShrink: 0,
+                      }}>
                         <Icon className="w-4 h-4" style={{ color: app.color }} />
                       </div>
                       <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
                         <div className="empire-search-result-name">{appLabel(app)}</div>
-                        {app.description && (
-                          <div className="empire-search-result-desc">{app.description}</div>
-                        )}
+                        {app.description && <div className="empire-search-result-desc">{app.description}</div>}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                        {isSelected && (
-                          <span className="empire-search-kbd">
-                            <CornerDownLeft className="w-2.5 h-2.5" />
-                          </span>
-                        )}
-                      </div>
+                      {isSelected && (
+                        <span className="empire-search-kbd"><CornerDownLeft className="w-2.5 h-2.5" /></span>
+                      )}
                     </button>
                   )
                 })
               )}
             </div>
 
-            {/* Footer hints */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                padding: '8px 14px',
-                borderTop: `1px solid ${tint('xenon', 5)}`,
-                background: tint('void', 15),
-                fontSize: '10px',
-                color: 'var(--text3)',
-              }}
-            >
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '14px', padding: '8px 14px',
+              borderTop: `1px solid ${tint('xenon', 5)}`, background: tint('void', 15),
+              fontSize: '10px', color: 'var(--text3)',
+            }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <ArrowUp className="w-2.5 h-2.5" />
-                <ArrowDown className="w-2.5 h-2.5" />
-                navigate
+                <ArrowUp className="w-2.5 h-2.5" /><ArrowDown className="w-2.5 h-2.5" /> navigate
               </span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <CornerDownLeft className="w-2.5 h-2.5" />
-                open
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span className="empire-search-kbd" style={{ fontSize: '9px' }}>Ctrl+Space</span>
-                toggle
+                <CornerDownLeft className="w-2.5 h-2.5" /> open
               </span>
               <span style={{ marginLeft: 'auto' }}>
                 {searchResults.length} {searchResults.length === 1 ? 'app' : 'apps'}
@@ -336,220 +231,28 @@ export default function Desktop() {
         </div>
       )}
 
-      {/* Layer 5: Start Menu (pop-up from taskbar) */}
-      {showStartMenu && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 'var(--z-startmenu)' as unknown as number,
-          }}
-          onClick={() => setShowStartMenu(false)}
-        >
-          <div
-            className="empire-start-menu"
-            style={{
-              position: 'absolute',
-              bottom: 64,
-              left: 8,
-            }}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Start menu header */}
-            <div className="empire-start-menu-header">
-              <div
-                style={{
-                  width: 28, height: 28, borderRadius: 'var(--radius-md)',
-                  background: 'linear-gradient(135deg, var(--color-cyan-5), var(--color-teal-5))',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: 'var(--glow-teal)',
-                }}
-              >
-                <Command className="w-4 h-4 text-white" />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                <span style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text)', lineHeight: 1.2 }}>
-                  The Empire
-                </span>
-                <span style={{ fontSize: '9px', color: 'var(--text3)', fontWeight: 500 }}>
-                  {apps.length} apps · {windows.length} running
-                </span>
-              </div>
-            </div>
-
-            {/* Apps by category */}
-            <div className="empire-start-menu-grid">
-              {CATEGORY_ORDER.map(cat => {
-                const groupApps = grouped[cat]
-                if (!groupApps || groupApps.length === 0) return null
-                return (
-                  <div
-                    key={cat}
-                    style={{
-                      gridColumn: '1 / -1',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '4px',
-                      paddingTop: '4px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: '9px',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.08em',
-                        color: 'var(--text3)',
-                        padding: '4px 6px 2px',
-                      }}
-                    >
-                      {cat}
-                    </div>
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(5, 1fr)',
-                        gap: '4px',
-                      }}
-                    >
-                      {groupApps.map(app => {
-                        const Icon = getAppIcon(app.icon)
-                        return (
-                          <button
-                            key={app.id}
-                            className="empire-start-menu-item"
-                            onClick={() => handleAppOpen(app.id)}
-                            title={app.description || app.name}
-                            style={{
-                              ['--app-color' as any]: app.color,
-                            }}
-                          >
-                            <div
-                              className="empire-start-menu-icon"
-                              style={{ background: `${app.color}1A` }}
-                            >
-                              <Icon className="w-5 h-5" style={{ color: app.color }} />
-                            </div>
-                            <span className="line-clamp-2" style={{
-                              fontSize: '10px',
-                              fontWeight: 500,
-                              color: 'var(--text2)',
-                              textAlign: 'center',
-                              lineHeight: 1.25,
-                              width: '100%',
-                              transition: 'color var(--dur-fast)',
-                            }}>
-                              {appLabel(app)}
-                            </span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Footer */}
-            <div className="empire-start-menu-footer">
-              <button
-                onClick={toggleTheme}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '4px 8px',
-                  borderRadius: 'var(--radius-md)',
-                  background: 'transparent',
-                  border: `1px solid ${tint('xenon', 6)}`,
-                  color: 'var(--text2)',
-                  cursor: 'pointer',
-                  fontSize: '11px',
-                  transition: 'all var(--dur-fast)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = tint('xenon', 5)
-                  e.currentTarget.style.color = 'var(--text)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.color = 'var(--text2)'
-                }}
-              >
-                {isLight ? <Moon className="w-3 h-3" /> : <Sun className="w-3 h-3" />}
-                {isLight ? 'Dark' : 'Light'}
-              </button>
-              <span style={{ fontSize: '10px', color: 'var(--text3)' }}>
-                {clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Layer 6: Taskbar (always on top) */}
-      <div className="empire-taskbar" style={{ height: 56 }}>
-        {/* Start / Empire button */}
-        <button
-          className="empire-start-btn"
-          onClick={() => setShowStartMenu(v => !v)}
-          title="Start Menu"
-          aria-label="Start Menu"
-          aria-expanded={showStartMenu}
-          style={{ ['--app-color' as any]: 'var(--color-cyan-3)' }}
-        >
-          <Command className="w-5 h-5" style={{ color: 'var(--color-teal-3)' }} />
-        </button>
-
-        {/* Running apps */}
-        <div className="empire-taskbar-apps">
-          {windows.map(win => {
-            const appDef = apps.find(a => a.id === win.appId)
-            if (!appDef) return null
-            const Icon = getAppIcon(appDef.icon)
-            const isActive = win.id === activeWindowId
-            return (
-              <button
-                key={win.id}
-                className={`empire-taskbar-app ${isActive ? 'empire-taskbar-app-active' : ''}`}
-                data-tooltip={appLabel(appDef)}
-                aria-label={appLabel(appDef)}
-                onClick={() => {
-                  // focusWindow already handles minimize-restore + bring-to-front.
-                  // Toggle minimization when clicking the already-active window's taskbar entry.
-                  if (win.id === activeWindowId && !win.minimized) {
-                    minimizeWindow(win.id)
-                    return
-                  }
-                  focusWindow(win.id)
-                }}
-                style={{
-                  ['--app-color' as string]: appDef.color,
-                }}
-              >
-                <Icon
-                  className="w-5 h-5"
-                  style={{ color: isActive ? appDef.color : 'var(--text3)' }}
-                />
-                <span
-                  className="empire-taskbar-indicator"
-                  style={{
-                    width: isActive ? 8 : 4,
-                    height: isActive ? 2 : 4,
-                    borderRadius: isActive ? '1px' : '50%',
-                    opacity: isActive ? 1 : 0.4,
-                  }}
-                />
-              </button>
-            )
-          })}
-        </div>
-
-        {/* System tray */}
-        <div className="empire-taskbar-tray">
-          {/* Search */}
+      {/* Layer 4 — HomeBar (always on top) */}
+      <div className="empire-homebar">
+        <div className="empire-homebar-nav">
           <button
-            className="empire-taskbar-tray-btn"
+            className={`empire-homebar-btn ${atHome ? 'is-active' : ''}`}
+            onClick={goHome}
+            title="Home"
+            aria-label="Home"
+          >
+            <House className="w-5 h-5" />
+          </button>
+          <button
+            className="empire-homebar-btn"
+            onClick={() => setShowRecents(true)}
+            title="Recent apps"
+            aria-label="Recent apps"
+          >
+            <LayoutGrid className="w-5 h-5" />
+            {windows.length > 0 && <span className="empire-homebar-badge">{windows.length}</span>}
+          </button>
+          <button
+            className="empire-homebar-btn"
             onClick={() => {
               setShowSearch(v => {
                 if (!v) prevFocusRef.current = document.activeElement as HTMLElement
@@ -560,66 +263,40 @@ export default function Desktop() {
             title="Search (Ctrl+Space)"
             aria-label="Search apps (Ctrl+Space)"
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-5 h-5" />
           </button>
+        </div>
 
-          {/* Theme toggle */}
+        <div className="empire-homebar-tray">
           <button
-            className="empire-taskbar-tray-btn"
+            className="empire-homebar-btn"
             onClick={toggleTheme}
             title={isLight ? 'Dark mode' : 'Light mode'}
             aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
           >
             {isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </button>
-
-          {/* Language toggle (EN / ID) */}
           <button
-            className="empire-taskbar-tray-btn"
+            className="empire-homebar-btn empire-homebar-lang"
             onClick={toggleLang}
             title={`${t('shell.language', 'Language')}: ${lang === 'en' ? 'English' : 'Bahasa Indonesia'}`}
             aria-label={`${t('shell.language', 'Language')}: ${lang === 'en' ? 'English' : 'Bahasa Indonesia'}`}
-            style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', fontFamily: 'var(--font-mono)' }}
           >
             {lang.toUpperCase()}
           </button>
-
-          {/* Volume (decorative) */}
-          <button className="empire-taskbar-tray-btn" title="Volume" aria-label="Volume">
-            <Volume2 className="w-4 h-4" />
-          </button>
-
-          {/* Clock */}
-          <div className="empire-taskbar-clock" title={clock.toLocaleString()}>
-            <span
-              className="empire-taskbar-clock-row"
-              style={{
-                fontSize: 'var(--text-xs)',
-                fontWeight: 600,
-                color: 'var(--text2)',
-                fontVariantNumeric: 'tabular-nums',
-                transition: 'color var(--dur-fast)',
-              }}
-            >
+          <div className="empire-homebar-clock" title={clock.toLocaleString()}>
+            <span className="empire-homebar-time">
               {clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
-            <span
-              style={{
-                fontSize: '10px',
-                color: 'var(--text3)',
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
+            <span className="empire-homebar-date">
               {clock.toLocaleDateString([], { month: 'short', day: 'numeric' })}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Layer 7: Command Palette (⌘/Ctrl-K — acts on the focused node) */}
+      {/* Command palette (⌘/Ctrl-K) + toasts */}
       <CommandPalette />
-
-      {/* Layer 8: Toast Viewport (persistent) */}
       <ToastViewport />
     </div>
   )
