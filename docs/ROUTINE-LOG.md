@@ -5,6 +5,30 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · QA — visual + smoke (green main `1b5e695`, EPIC-4 S3 confirmed)
+
+**Metrics (vs last QA `9051409`):** apps 25 (±0) · token-violations 0 (±0) · off-system-utils 1076 (±0) ·
+bundle gz 292.5 (±0) · vitest **176→193 (+17** — S3 `pwaBaseAudit.test.mjs`) · vitest files **22→23 (+1)** ·
+metrics-static (src/-only) 163 cases / 21 files (±0). build🟢 vitest 193/193🟢.
+
+**Verified.** Fresh cloud checkout, built green (63 precache entries), served `dist/` on :3001, headless
+Chromium (`/opt/pw-browsers/chromium-1194`). **26/26 routes rendered clean, 0 uncaught JS, 0 failed.** All
+harness guards green: SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE ✅ (bidirectional, 25 apps) · INBOUND-LANDS 3/3 ✅ ·
+MEDIA-PERSISTS 3/3 ✅ (music+video+photos) · OFFLINE-BOOT 5/5 ✅ · PRECACHE-AUDIT no gap ✅. Screenshots
+overwritten in `docs/screenshots/latest/` (desktop + 25 apps); REPORT.md/OFFLINE.md/PWA-BASE.md refreshed.
+
+**★ Epic-acceptance — EPIC-4 S3 (base-path/install-flow correctness) CONFIRMED.** S3 (`1b5e695`) is the only
+code commit since the last QA. `node scripts/check-pwa-base.mjs` ✅ — a `--base=/empire/` build's install surface
+(11 base-prefixed assets + manifest linked), SW `navigateFallback="/empire/index.html"`,
+`registerSW("/empire/sw.js",{scope:"/empire/"})`, and base-agnostic manifest (`start_url="."`/`scope="."`/`id="empire"`)
+are all consistent → no blank-on-install under a sub-path deploy. EPIC-4 S1 `offline-boots` guard re-confirmed
+(5/5 cold-offline). **No runtime bugs. No regression on any ↓/steady metric.**
+
+**Next:** EPIC-4 S4 — Lighthouse-PWA / installability assertion (EPIC-4 CLOSE). Investigate headless `npx lighthouse`
+first; fall back to a pure `auditInstallability(manifest)` in `pwaBaseAudit.mjs` wired into `check-pwa-base.mjs`.
+
+---
+
 ## 2026-06-29 · EPIC-4 S3 — Base-path + install-flow correctness
 
 **Metrics:** apps 25 (±0) · test files 21 metrics / **23 vitest (+1)** · test cases 163 metrics / **193 vitest
