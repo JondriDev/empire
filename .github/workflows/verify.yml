@@ -4,8 +4,12 @@ name: Verify build
 # "shell-is-styled" guard (scripts/check-shell-styled.mjs) that asserts the built
 # bundle still has a top-level `.empire-desktop{…position:fixed…}` rule and zero
 # `.hide-sm .empire-desktop` — i.e. the desktop home shell can't silently render
-# unstyled behind a green build (the #10 blank-dark regression). Cheap; runs on
-# every PR and every push to main.
+# unstyled behind a green build (the #10 blank-dark regression). Also runs the
+# "route-parity" guard (scripts/check-route-parity.mjs) that asserts the app
+# registry (src/lib/registry.ts) and the lazy component map (src/lib/appComponents.tsx)
+# stay in lockstep — so an app added to one but not the other can't slip through
+# as an "App not available" fallback behind a green build. Cheap; runs on every
+# PR and every push to main.
 
 on:
   workflow_dispatch: {}
@@ -47,3 +51,6 @@ jobs:
 
       - name: Guard — desktop shell stays styled (blank-dark trap #10)
         run: node scripts/check-shell-styled.mjs
+
+      - name: Guard — registry ↔ appComponents route parity (App-not-available drift)
+        run: node scripts/check-route-parity.mjs
