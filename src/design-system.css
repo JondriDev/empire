@@ -874,6 +874,32 @@ textarea:focus {
 .app-tint      { background: var(--app-color, rgba(26, 140, 170, 0.12)); }
 .app-tint-bold { background: var(--app-color, rgba(26, 140, 170, 0.20)); }
 
+/* ═══════════════════════════════════════════════
+   SHELL DELIGHT — accessible focus + accent-aware glass
+   (refine, don't replace: leans on each app's --app-color)
+   ═══════════════════════════════════════════════ */
+
+/* Keyboard focus: a crisp, on-brand signal ring (pointer taps stay clean). */
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--signal) 72%, transparent);
+  outline-offset: 2px;
+  border-radius: 5px;
+}
+
+/* Interactive glass cards glow in their app's accent on hover — so every app
+   feels alive in its own colour, not a single fixed teal. */
+.gp-interactive:hover {
+  border-color: color-mix(in srgb, var(--app-color, var(--signal)) 38%, transparent);
+  box-shadow:
+    var(--card-shadow),
+    0 0 0 1px color-mix(in srgb, var(--app-color, var(--signal)) 14%, transparent),
+    0 8px 26px color-mix(in srgb, var(--app-color, var(--signal)) 16%, transparent);
+}
+
+/* A reusable spring-press for any tappable element. */
+.press { transition: transform var(--dur-fast) var(--ease-spring); }
+.press:active { transform: scale(0.96); }
+
 /* ─── Reduced motion (WCAG 2.3.3) ─── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
