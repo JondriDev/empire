@@ -172,9 +172,9 @@ export default function Language() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Languages className="w-6 h-6 text-cyan-300" /> Language Lab
+          <Languages className="w-6 h-6 text-signal" /> Language Lab
         </h1>
-        <Button onClick={() => setShowPhraseBook(!showPhraseBook)} className={`text-xs px-3 py-1 ${showPhraseBook ? 'bg-cyan-600' : 'bg-white/10'}`}>
+        <Button onClick={() => setShowPhraseBook(!showPhraseBook)} className={`text-xs px-3 py-1 ${showPhraseBook ? 'bg-signal' : 'bg-glass'}`}>
           <BookOpen className="w-3 h-3 mr-1" /> Phrases ({phraseBook.length})
         </Button>
       </div>
@@ -182,26 +182,26 @@ export default function Language() {
       {/* Language selector */}
       <div className="flex items-center gap-2">
         <select value={fromLang} onChange={e => setFromLang(e.target.value)}
-          className="flex-1 bg-white/10 border-0 rounded-xl px-3 py-2.5 text-sm text-white">
-          <option value="auto" className="bg-gray-900">🌐 Auto Detect</option>
+          className="flex-1 bg-glass border-0 rounded-xl px-3 py-2.5 text-sm text-fg">
+          <option value="auto" className="bg-faint">🌐 Auto Detect</option>
           {LANGUAGES.map(l => (
-            <option key={l.code} value={l.code} className="bg-gray-900">{l.name}</option>
+            <option key={l.code} value={l.code} className="bg-faint">{l.name}</option>
           ))}
         </select>
         <button onClick={swapLanguages}
-          className="p-2.5 rounded-xl hover:bg-white/10 text-cyan-300 transition-colors">
+          className="p-2.5 rounded-xl hover:bg-glass text-signal transition-colors">
           <ArrowRightLeft className="w-5 h-5" />
         </button>
         <select value={toLang} onChange={e => setToLang(e.target.value)}
-          className="flex-1 bg-white/10 border-0 rounded-xl px-3 py-2.5 text-sm text-white">
+          className="flex-1 bg-glass border-0 rounded-xl px-3 py-2.5 text-sm text-fg">
           {LANGUAGES.map(l => (
-            <option key={l.code} value={l.code} className="bg-gray-900">{l.name}</option>
+            <option key={l.code} value={l.code} className="bg-faint">{l.name}</option>
           ))}
         </select>
       </div>
 
       {detectedLang && fromLang === 'auto' && (
-        <div className="text-xs text-gray-500 flex items-center gap-1">
+        <div className="text-xs text-faint flex items-center gap-1">
           <Globe className="w-3 h-3" /> Detected: {LANGUAGES.find(l => l.code === detectedLang)?.name || 'Unknown'}
         </div>
       )}
@@ -210,16 +210,16 @@ export default function Language() {
       <div className="flex gap-1 flex-wrap">
         {Object.entries(GREETINGS).slice(0, 6).map(([code, greeting]) => (
           <button key={code} onClick={() => { setInput(greeting); setToLang(code); if (code !== 'en') setFromLang('en') }}
-            className="text-xs px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 transition-colors">
+            className="text-xs px-2 py-1 rounded-lg bg-glass hover:bg-glass text-muted transition-colors">
             {LANGUAGES.find(l => l.code === code)?.name}: {greeting}
           </button>
         ))}
       </div>
 
       {/* Input */}
-      <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
-        <div className="px-4 py-2 border-b border-white/10 bg-white/3">
-          <span className="text-xs text-gray-500">
+      <div className="rounded-2xl border border-hair overflow-hidden" style={{ background: 'var(--card-bg)' }}>
+        <div className="px-4 py-2 border-b border-hair bg-glass">
+          <span className="text-xs text-faint">
             {LANGUAGES.find(l => l.code === (fromLang === 'auto' ? detectedLang || 'en' : fromLang))?.name}
           </span>
         </div>
@@ -233,21 +233,21 @@ export default function Language() {
       </div>
 
       {loading && (
-        <div className="flex items-center gap-2 text-xs text-cyan-300"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Translating…</div>
+        <div className="flex items-center gap-2 text-xs text-signal"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Translating…</div>
       )}
 
       {/* Translation */}
       {translation && (
-        <div className="rounded-2xl border border-green-500/20 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
-          <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
-            <span className="text-xs text-gray-500">{LANGUAGES.find(l => l.code === toLang)?.name}</span>
+        <div className="rounded-2xl border border-success/20 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
+          <div className="flex items-center justify-between px-4 py-2 border-b border-hair">
+            <span className="text-xs text-faint">{LANGUAGES.find(l => l.code === toLang)?.name}</span>
             <div className="flex gap-1">
               <button onClick={copyTranslation}
-                className="p-1 rounded hover:bg-white/10 text-gray-400 transition-colors">
-                {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                className="p-1 rounded hover:bg-glass text-muted transition-colors">
+                {copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <button onClick={saveToPhraseBook}
-                className="p-1 rounded hover:bg-yellow-500/20 text-yellow-400 transition-colors" title="Save to phrase book">
+                className="p-1 rounded hover:bg-warn/20 text-warn transition-colors" title="Save to phrase book">
                 <BookOpen className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -261,23 +261,23 @@ export default function Language() {
       {/* Phrase Book */}
       {showPhraseBook && (
         <div className="space-y-2">
-          <h3 className="text-sm text-gray-400">Saved Phrases ({phraseBook.length})</h3>
+          <h3 className="text-sm text-muted">Saved Phrases ({phraseBook.length})</h3>
           {phraseBook.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 text-sm">No saved phrases yet. Translate something and click the book icon to save.</div>
+            <div className="text-center py-8 text-faint text-sm">No saved phrases yet. Translate something and click the book icon to save.</div>
           ) : (
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {phraseBook.map(p => (
-                <div key={p.id} className="p-3 rounded-xl border border-white/10" style={{ background: 'var(--card-bg)' }}>
+                <div key={p.id} className="p-3 rounded-xl border border-hair" style={{ background: 'var(--card-bg)' }}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-faint">
                         {LANGUAGES.find(l => l.code === p.from)?.name} → {LANGUAGES.find(l => l.code === p.to)?.name}
                       </p>
                       <p className="text-sm mt-1">{p.original}</p>
-                      <p className="text-sm text-green-300 mt-0.5">{p.translated}</p>
+                      <p className="text-sm text-success mt-0.5">{p.translated}</p>
                     </div>
                     <button onClick={() => deletePhrase(p.id)}
-                      className="text-gray-600 hover:text-red-400 text-xs p-1">✕</button>
+                      className="text-faint hover:text-danger text-xs p-1">✕</button>
                   </div>
                 </div>
               ))}
@@ -288,7 +288,7 @@ export default function Language() {
 
       {/* Cakra */}
       <div className="flex gap-2">
-        <Button onClick={askCakra} className="text-xs bg-cyan-600 hover:bg-cyan-500">
+        <Button onClick={askCakra} className="text-xs bg-signal hover:bg-signal">
           <Bot className="w-3 h-3 mr-1" /> Ask Cakra
         </Button>
       </div>

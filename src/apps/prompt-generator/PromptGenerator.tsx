@@ -125,12 +125,12 @@ const TEMPLATES: PromptTemplate[] = [
 ]
 
 const CATEGORY_COLORS: Record<Category, string> = {
-  general: 'bg-gray-600/30 text-gray-300',
-  coding: 'bg-blue-600/30 text-blue-300',
-  creative: 'bg-pink-600/30 text-pink-300',
-  analysis: 'bg-cyan-600/30 text-cyan-300',
-  learning: 'bg-green-600/30 text-green-300',
-  communication: 'bg-yellow-600/30 text-yellow-300',
+  general: 'bg-faint/30 text-muted',
+  coding: 'bg-ion/30 text-ion',
+  creative: 'bg-danger/30 text-danger',
+  analysis: 'bg-signal/30 text-signal',
+  learning: 'bg-success/30 text-success',
+  communication: 'bg-warn/30 text-warn',
 }
 
 const CATEGORY_LABELS: Record<Category, string> = {
@@ -278,10 +278,10 @@ export default function PromptGenerator() {
             <Wand2 className="w-5 h-5" /> Prompt Generator
           </h1>
           <div className="flex gap-1 ml-auto">
-            <button onClick={() => { setMode('template'); setShowTemplates(true) }} className={`text-xs px-3 py-1 rounded ${mode === 'template' ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white/60 hover:text-white'}`}>
+            <button onClick={() => { setMode('template'); setShowTemplates(true) }} className={`text-xs px-3 py-1 rounded ${mode === 'template' ? 'bg-signal text-fg' : 'bg-glass text-muted hover:text-fg'}`}>
               Templates
             </button>
-            <button onClick={() => setMode('custom')} className={`text-xs px-3 py-1 rounded ${mode === 'custom' ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white/60 hover:text-white'}`}>
+            <button onClick={() => setMode('custom')} className={`text-xs px-3 py-1 rounded ${mode === 'custom' ? 'bg-signal text-fg' : 'bg-glass text-muted hover:text-fg'}`}>
               Custom
             </button>
           </div>
@@ -295,9 +295,9 @@ export default function PromptGenerator() {
 
         {/* Category filter */}
         <div className="flex gap-1 flex-wrap">
-          <button onClick={() => setCategoryFilter('all')} className={`text-xs px-2 py-0.5 rounded ${categoryFilter === 'all' ? 'bg-white/20 text-white' : 'text-white/40'}`}>All</button>
+          <button onClick={() => setCategoryFilter('all')} className={`text-xs px-2 py-0.5 rounded ${categoryFilter === 'all' ? 'bg-glass text-fg' : 'text-faint'}`}>All</button>
           {(Object.keys(CATEGORY_LABELS) as Category[]).map(cat => (
-            <button key={cat} onClick={() => setCategoryFilter(cat)} className={`text-xs px-2 py-0.5 rounded ${categoryFilter === cat ? CATEGORY_COLORS[cat] : 'text-white/40'}`}>
+            <button key={cat} onClick={() => setCategoryFilter(cat)} className={`text-xs px-2 py-0.5 rounded ${categoryFilter === cat ? CATEGORY_COLORS[cat] : 'text-faint'}`}>
               {CATEGORY_LABELS[cat]}
             </button>
           ))}
@@ -312,7 +312,7 @@ export default function PromptGenerator() {
               <div
                 key={template.id}
                 onClick={() => applyTemplate(template)}
-                className={`p-3 cursor-pointer transition hover:bg-white/10 rounded-2xl shadow-2xl ${selectedTemplate?.id === template.id ? 'ring-1 ring-cyan-600' : ''}`}
+                className={`p-3 cursor-pointer transition hover:bg-glass rounded-2xl shadow-2xl ${selectedTemplate?.id === template.id ? 'ring-1 ring-signal' : ''}`}
                 style={{
                   background: 'var(--gl-bg)',
                   backdropFilter: 'var(--gl-blur)',
@@ -328,7 +328,7 @@ export default function PromptGenerator() {
                     {CATEGORY_LABELS[template.category]}
                   </span>
                 </div>
-                <p className="text-xs text-white/50">{template.description}</p>
+                <p className="text-xs text-muted">{template.description}</p>
               </div>
             ))}
           </div>
@@ -337,17 +337,17 @@ export default function PromptGenerator() {
  <Card className="p-3">
  <h2 className="text-sm font-bold mb-2 flex items-center gap-2"><Tag className="w-4 h-4" /> Saved Prompts</h2>
  {filteredSaved.length === 0 ? (
- <p className="text-center text-white/40 text-sm py-6">No saved prompts yet — generate one and tap Save to store it here.</p>
+ <p className="text-center text-faint text-sm py-6">No saved prompts yet — generate one and tap Save to store it here.</p>
  ) : (
  <div className="space-y-1">
  {filteredSaved.map(p => (
- <div key={p.id} className="flex items-center gap-2 p-2 rounded hover:bg-white/5 group">
+ <div key={p.id} className="flex items-center gap-2 p-2 rounded hover:bg-glass group">
  <button onClick={() => loadSaved(p)} className="flex-1 text-left">
  <p className="text-sm">{p.title}</p>
- <p className="text-xs text-white/40 truncate">{p.content}</p>
+ <p className="text-xs text-faint truncate">{p.content}</p>
  </button>
  <NodeActions type="prompt" sourceId={p.id} />
- <button onClick={() => deleteSaved(p.id)} className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-red-400 text-xs">✕</button>
+ <button onClick={() => deleteSaved(p.id)} className="opacity-0 group-hover:opacity-100 text-faint hover:text-danger text-xs">✕</button>
  </div>
  ))}
  </div>
@@ -362,26 +362,26 @@ export default function PromptGenerator() {
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h2 className="font-bold">{selectedTemplate.name}</h2>
-                  <p className="text-xs text-white/50">{selectedTemplate.description}</p>
+                  <p className="text-xs text-muted">{selectedTemplate.description}</p>
                 </div>
-                <Button onClick={() => setShowTemplates(true)} className="text-xs bg-white/10 hover:bg-white/20">
+                <Button onClick={() => setShowTemplates(true)} className="text-xs bg-glass hover:bg-glass">
                   ← Templates
                 </Button>
               </div>
               <div className="space-y-3">
                 {extractVariables(selectedTemplate.template).map(v => (
                   <div key={v}>
-                    <label className="text-xs text-white/60 capitalize mb-1 block">{v.replace(/_/g, ' ')}</label>
+                    <label className="text-xs text-muted capitalize mb-1 block">{v.replace(/_/g, ' ')}</label>
                     <input
                       type="text"
                       value={variables[v] || ''}
                       onChange={e => setVariables(prev => ({ ...prev, [v]: e.target.value }))}
                       placeholder={`Enter ${v.replace(/_/g, ' ')}...`}
-                      className="w-full bg-white/10 border-0 rounded px-3 py-2 text-sm"
+                      className="w-full bg-glass border-0 rounded px-3 py-2 text-sm"
                     />
                   </div>
                 ))}
-                <Button onClick={generate} className="w-full bg-cyan-600 hover:bg-cyan-500">
+                <Button onClick={generate} className="w-full bg-signal hover:bg-signal">
                   <Sparkles className="w-4 h-4 mr-2" /> Generate Prompt
                 </Button>
               </div>
@@ -394,7 +394,7 @@ export default function PromptGenerator() {
               <div className="flex items-center justify-between mb-2">
                 <h2 className="font-bold">Custom Prompt</h2>
                 {saved.length > 0 && (
-                  <select onChange={e => { const p = saved.find(s => s.id === e.target.value); if (p) loadSaved(p) }} className="bg-white/10 border-0 rounded px-2 py-1 text-xs">
+                  <select onChange={e => { const p = saved.find(s => s.id === e.target.value); if (p) loadSaved(p) }} className="bg-glass border-0 rounded px-2 py-1 text-xs">
                     <option value="">Load saved...</option>
                     {saved.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                   </select>
@@ -404,7 +404,7 @@ export default function PromptGenerator() {
                 value={customPrompt}
                 onChange={e => setCustomPrompt(e.target.value)}
                 placeholder="Write your prompt here... or start from a template above"
-                className="w-full bg-white/10 border-0 rounded px-3 py-2 text-sm min-h-[150px] resize-y"
+                className="w-full bg-glass border-0 rounded px-3 py-2 text-sm min-h-[150px] resize-y"
               />
             </Card>
           )}
@@ -417,18 +417,18 @@ export default function PromptGenerator() {
                   <Sparkles className="w-4 h-4" /> Generated Prompt
                 </h3>
                 <div className="flex gap-2">
- <Button onClick={enhanceWithAI} className="text-xs bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-200 opacity-50 cursor-not-allowed">
+ <Button onClick={enhanceWithAI} className="text-xs bg-signal/30 hover:bg-signal/50 text-signal opacity-50 cursor-not-allowed">
  <Sparkles className={`w-3 h-3 mr-1 ${enhancing ? 'animate-pulse' : ''}`} /> {enhancing ? 'Enhancing…' : 'Enhance'}
                   </Button>
-                  <Button onClick={copyToClipboard} className="text-xs bg-white/10 hover:bg-white/20">
+                  <Button onClick={copyToClipboard} className="text-xs bg-glass hover:bg-glass">
                     {copied ? <><Check className="w-3 h-3 mr-1" /> Copied</> : <><Copy className="w-3 h-3 mr-1" /> Copy</>}
                   </Button>
-                  <Button onClick={savePrompt} className="text-xs bg-green-600/30 hover:bg-green-600/50 text-green-200">
+                  <Button onClick={savePrompt} className="text-xs bg-success/30 hover:bg-success/50 text-success">
                     <Tag className="w-3 h-3 mr-1" /> Save
                   </Button>
                 </div>
               </div>
-              <pre className="text-sm whitespace-pre-wrap bg-black/30 rounded p-3 min-h-[100px] max-h-[400px] overflow-y-auto font-mono">
+              <pre className="text-sm whitespace-pre-wrap bg-void/30 rounded p-3 min-h-[100px] max-h-[400px] overflow-y-auto font-mono">
                 {generated || customPrompt}
               </pre>
             </Card>

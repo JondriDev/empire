@@ -92,34 +92,34 @@ export default function Flashcards() {
   const totalCards = decks.reduce((s, d) => s + d.cards.length, 0)
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 text-white overflow-hidden">
-      <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-black/20 backdrop-blur">
+    <div className="h-full flex flex-col bg-gradient-to-br from-void via-ion/30 to-void text-fg overflow-hidden">
+      <div className="px-6 py-4 border-b border-hair flex items-center justify-between bg-void/20 backdrop-blur">
         <div>
           <h1 className="text-2xl font-bold">Flashcards</h1>
-          <p className="text-xs text-slate-500 mt-0.5">{totalCards} cards · {totalKnown} mastered ({Math.round(totalCards ? (totalKnown / totalCards) * 100 : 0)}%)</p>
+          <p className="text-xs text-faint mt-0.5">{totalCards} cards · {totalKnown} mastered ({Math.round(totalCards ? (totalKnown / totalCards) * 100 : 0)}%)</p>
         </div>
-        <button onClick={newDeck} className="px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-sm flex items-center gap-2 hover:bg-indigo-500/30">
+        <button onClick={newDeck} className="px-3 py-1.5 rounded-lg bg-ion/20 text-ion border border-ion/30 text-sm flex items-center gap-2 hover:bg-ion/30">
           <Plus size={14} /> New Deck
         </button>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 border-r border-white/10 bg-black/20 p-3 overflow-auto">
-          <h3 className="text-xs uppercase tracking-wider text-slate-500 mb-2 px-2 font-semibold">Decks</h3>
+        <div className="w-64 border-r border-hair bg-void/20 p-3 overflow-auto">
+          <h3 className="text-xs uppercase tracking-wider text-faint mb-2 px-2 font-semibold">Decks</h3>
           <div className="space-y-1">
             {decks.map(d => {
               const known = d.cards.filter(c => c.known).length
               const pct = d.cards.length ? Math.round((known / d.cards.length) * 100) : 0
               return (
-                <div key={d.id} className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer ${activeDeck === d.id ? 'bg-indigo-500/20 border border-indigo-400/30' : 'hover:bg-white/5 border border-transparent'}`}
+                <div key={d.id} className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer ${activeDeck === d.id ? 'bg-ion/20 border border-ion/30' : 'hover:bg-glass border border-transparent'}`}
                   onClick={() => { setActiveDeck(d.id); setIdx(0); setFlipped(false) }}>
                   <span className="text-lg">{d.emoji}</span>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{d.name}</div>
-                    <div className="text-[10px] text-slate-500">{d.cards.length} cards · {pct}% mastered</div>
+                    <div className="text-[10px] text-faint">{d.cards.length} cards · {pct}% mastered</div>
                   </div>
-                  <button onClick={e => { e.stopPropagation(); removeDeck(d.id) }} className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400"><Trash2 size={12} /></button>
+                  <button onClick={e => { e.stopPropagation(); removeDeck(d.id) }} className="opacity-0 group-hover:opacity-100 text-faint hover:text-danger"><Trash2 size={12} /></button>
                 </div>
               )
             })}
@@ -129,27 +129,27 @@ export default function Flashcards() {
         {/* Main */}
         <div className="flex-1 flex items-center justify-center p-8">
           {!deck ? (
-            <div className="text-center text-slate-500">
+            <div className="text-center text-faint">
               <ListChecks size={48} className="mx-auto mb-3 opacity-30" />
               <p>Choose a deck on the left or create a new one.</p>
             </div>
           ) : deck.cards.length === 0 ? (
-            <div className="text-center text-slate-500">
+            <div className="text-center text-faint">
               <Sparkles size={48} className="mx-auto mb-3 opacity-30" />
               <p className="mb-3">This deck is empty.</p>
-              <button onClick={addCard} className="px-4 py-2 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">Add first card</button>
+              <button onClick={addCard} className="px-4 py-2 rounded-lg bg-ion/20 text-ion border border-ion/30">Add first card</button>
             </div>
           ) : (
             <div className="w-full max-w-2xl">
               {/* Progress */}
               <div className="mb-4">
-                <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+                <div className="flex items-center justify-between text-xs text-muted mb-1.5">
                   <span>{deck.emoji} {deck.name}</span>
                   <span>Card {idx + 1} of {deck.cards.length}</span>
                 </div>
-                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                <div className="h-1 bg-glass rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 transition-all"
+                    className="h-full bg-gradient-to-r from-ion to-ion transition-all"
                     style={{ width: `${deck.cards.length ? ((idx + 1) / deck.cards.length) * 100 : 0}%` }}
                   />
                 </div>
@@ -158,30 +158,30 @@ export default function Flashcards() {
               {/* Card */}
               <div
                 onClick={() => setFlipped(!flipped)}
-                className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur border border-white/20 rounded-3xl p-12 min-h-[320px] flex items-center justify-center cursor-pointer hover:border-white/30 transition shadow-2xl shadow-indigo-500/10"
+                className="relative bg-gradient-to-br from-xenon/10 to-xenon/5 backdrop-blur border border-hair rounded-3xl p-12 min-h-[320px] flex items-center justify-center cursor-pointer hover:border-hair transition shadow-2xl shadow-ion/10"
               >
                 <div className="text-center max-w-xl">
-                  <div className="text-xs uppercase tracking-widest text-slate-500 mb-4">{flipped ? 'Answer' : 'Question'}</div>
+                  <div className="text-xs uppercase tracking-widest text-faint mb-4">{flipped ? 'Answer' : 'Question'}</div>
                   <p className="text-3xl font-medium leading-relaxed">
                     {flipped ? card?.back : card?.front}
                   </p>
                 </div>
-                <div className="absolute top-4 right-4 text-xs text-slate-500">tap to flip</div>
+                <div className="absolute top-4 right-4 text-xs text-faint">tap to flip</div>
               </div>
 
               {/* Controls */}
               <div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <button onClick={prev} className="p-2 rounded-lg bg-white/5 hover:bg-white/10"><ChevronLeft size={16} /></button>
-                  <button onClick={() => setFlipped(!flipped)} className="p-2 rounded-lg bg-white/5 hover:bg-white/10"><RotateCcw size={16} /></button>
-                  <button onClick={next} className="p-2 rounded-lg bg-white/5 hover:bg-white/10"><ChevronRight size={16} /></button>
+                  <button onClick={prev} className="p-2 rounded-lg bg-glass hover:bg-glass"><ChevronLeft size={16} /></button>
+                  <button onClick={() => setFlipped(!flipped)} className="p-2 rounded-lg bg-glass hover:bg-glass"><RotateCcw size={16} /></button>
+                  <button onClick={next} className="p-2 rounded-lg bg-glass hover:bg-glass"><ChevronRight size={16} /></button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={addCard} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400" title="Add card"><Plus size={16} /></button>
-                  <button onClick={() => markKnown(false)} className="px-4 py-2 rounded-lg bg-red-500/20 text-red-300 border border-red-400/30 text-sm flex items-center gap-1.5 hover:bg-red-500/30">
+                  <button onClick={addCard} className="p-2 rounded-lg bg-glass hover:bg-glass text-muted" title="Add card"><Plus size={16} /></button>
+                  <button onClick={() => markKnown(false)} className="px-4 py-2 rounded-lg bg-danger/20 text-danger border border-danger/30 text-sm flex items-center gap-1.5 hover:bg-danger/30">
                     <XIcon size={14} /> Don't know
                   </button>
-                  <button onClick={() => markKnown(true)} className="px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-sm flex items-center gap-1.5 hover:bg-emerald-500/30">
+                  <button onClick={() => markKnown(true)} className="px-4 py-2 rounded-lg bg-success/20 text-success border border-success/30 text-sm flex items-center gap-1.5 hover:bg-success/30">
                     <Check size={14} /> Got it
                   </button>
                 </div>

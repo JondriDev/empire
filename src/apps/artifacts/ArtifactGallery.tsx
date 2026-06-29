@@ -103,29 +103,29 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
   const [hovered, setHovered] = useState<string | null>(null)
 
   return (
-    <div className="h-full overflow-auto bg-gradient-to-br from-slate-950 via-indigo-950/20 to-slate-950 text-white">
+    <div className="h-full overflow-auto bg-gradient-to-br from-void via-ion/20 to-void text-fg">
       {/* Hero */}
       <div className="relative px-8 pt-10 pb-8 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none opacity-40">
-          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl" />
-          <div className="absolute top-20 right-1/4 w-80 h-80 rounded-full bg-pink-500/15 blur-3xl" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-ion/20 blur-3xl" />
+          <div className="absolute top-20 right-1/4 w-80 h-80 rounded-full bg-danger/15 blur-3xl" />
         </div>
 
         <div className="relative max-w-6xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles size={18} className="text-indigo-400" />
-            <span className="text-xs uppercase tracking-[0.25em] text-indigo-300 font-semibold">Imperial Suite</span>
+            <Sparkles size={18} className="text-ion" />
+            <span className="text-xs uppercase tracking-[0.25em] text-ion font-semibold">Imperial Suite</span>
           </div>
-          <h1 className="text-5xl font-black tracking-tight mb-2 bg-gradient-to-r from-white via-indigo-100 to-purple-200 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-black tracking-tight mb-2 bg-gradient-to-r from-xenon via-ion to-ion bg-clip-text text-transparent">
             Artifacts
           </h1>
-          <p className="text-slate-400 text-lg max-w-2xl">
+          <p className="text-muted text-lg max-w-2xl">
             Self-contained mini-apps for makers. Drag, build, ship — every artifact is an entire tool in your pocket.
           </p>
-          <div className="mt-4 flex items-center gap-4 text-xs text-slate-500">
-            <span className="flex items-center gap-1.5"><Zap size={12} className="text-amber-400" /> 6 artifacts</span>
-            <span className="flex items-center gap-1.5"><Code2 size={12} className="text-cyan-400" /> All client-side</span>
-            <span className="flex items-center gap-1.5"><Star size={12} className="text-pink-400" /> 3 highlighted this week</span>
+          <div className="mt-4 flex items-center gap-4 text-xs text-faint">
+            <span className="flex items-center gap-1.5"><Zap size={12} className="text-warn" /> 6 artifacts</span>
+            <span className="flex items-center gap-1.5"><Code2 size={12} className="text-signal" /> All client-side</span>
+            <span className="flex items-center gap-1.5"><Star size={12} className="text-danger" /> 3 highlighted this week</span>
           </div>
         </div>
       </div>
@@ -142,7 +142,7 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
                 onMouseEnter={() => setHovered(a.id)}
                 onMouseLeave={() => setHovered(null)}
                 onClick={() => onLaunch?.(a.id)}
-                className="group relative text-left rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-5 hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300 hover:-translate-y-1 overflow-hidden animate-fadeIn"
+                className="group relative text-left rounded-2xl border border-hair bg-glass/[0.03] backdrop-blur p-5 hover:bg-glass/[0.06] hover:border-hair transition-all duration-300 hover:-translate-y-1 overflow-hidden animate-fadeIn"
                 style={{
                   animationDelay: `${i * 60}ms`,
                   animationFillMode: 'both',
@@ -150,7 +150,7 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
               >
                 {/* Highlight ribbon */}
                 {a.highlight && (
-                  <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-[10px] uppercase tracking-wider font-bold">
+                  <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-warn/15 border border-warn/30 text-warn text-[10px] uppercase tracking-wider font-bold">
                     <Star size={9} fill="currentColor" /> New
                   </div>
                 )}
@@ -170,27 +170,27 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
                       boxShadow: `0 8px 24px color-mix(in srgb, ${a.accent} 19%, transparent)`,
                     }}
                   >
-                    <Icon size={22} className="text-white" />
+                    <Icon size={22} className="text-fg" />
                   </div>
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ArrowRight size={18} className="text-slate-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                    <ArrowRight size={18} className="text-muted group-hover:text-fg group-hover:translate-x-1 transition-all" />
                   </div>
                 </div>
 
                 {/* Title + tagline */}
                 <div className="relative mb-2">
                   <h3 className="text-xl font-bold tracking-tight">{a.title}</h3>
-                  <p className="text-xs font-mono text-slate-500 mt-0.5">{a.tagline}</p>
+                  <p className="text-xs font-mono text-faint mt-0.5">{a.tagline}</p>
                 </div>
 
                 {/* Description */}
-                <p className="relative text-sm text-slate-400 leading-relaxed mb-4">
+                <p className="relative text-sm text-muted leading-relaxed mb-4">
                   {a.description}
                 </p>
 
                 {/* Preview */}
                 <div
-                  className="relative rounded-lg p-3 mb-3 font-mono text-xs whitespace-pre text-slate-300 border border-white/5"
+                  className="relative rounded-lg p-3 mb-3 font-mono text-xs whitespace-pre text-muted border border-hair"
                   style={{
                     background: `linear-gradient(135deg, color-mix(in srgb, ${a.accent} 6%, transparent), transparent)`,
                   }}
@@ -203,7 +203,7 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
                   {a.badges.map(b => (
                     <span
                       key={b}
-                      className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-400 text-[10px] uppercase tracking-wider"
+                      className="px-2 py-0.5 rounded-full bg-glass border border-hair text-muted text-[10px] uppercase tracking-wider"
                       style={isHovered ? { color: a.accent, borderColor: `color-mix(in srgb, ${a.accent} 25%, transparent)` } : {}}
                     >
                       {b}
@@ -216,7 +216,7 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
         </div>
 
         {/* Footer */}
-        <div className="max-w-6xl mx-auto mt-10 text-center text-xs text-slate-600">
+        <div className="max-w-6xl mx-auto mt-10 text-center text-xs text-faint">
           Tap any tile to launch · All artifacts are standalone and save data locally to your browser
         </div>
       </div>

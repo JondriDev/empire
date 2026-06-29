@@ -286,31 +286,31 @@ export default function MarkdownStudio() {
   }, [content])
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-amber-950/10 to-slate-950 text-slate-100">
+    <div className="h-full flex flex-col bg-gradient-to-br from-void via-warn/10 to-void text-fg">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/30 backdrop-blur">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-hair bg-void/30 backdrop-blur">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-lg"
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-fg shadow-lg"
                style={{ background: `linear-gradient(135deg, ${cssVar('ember')}, ${tint('ember', 50)})`, boxShadow: `0 8px 24px ${tint('ember', 19)}` }}>
             <FileText size={16} />
           </div>
           <div>
             <div className="font-bold text-sm flex items-center gap-1.5">
               Markdown Studio
-              <Sparkles size={11} className="text-amber-400" />
+              <Sparkles size={11} className="text-warn" />
             </div>
-            <div className="text-[10px] text-slate-500 font-mono">Write beautifully.</div>
+            <div className="text-[10px] text-faint font-mono">Write beautifully.</div>
           </div>
         </div>
 
         <div className="flex-1 flex justify-center">
-          <div className="inline-flex rounded-lg border border-white/10 bg-white/5 p-0.5">
+          <div className="inline-flex rounded-lg border border-hair bg-glass p-0.5">
             {(['edit', 'split', 'preview'] as const).map(m => (
               <button
                 key={m}
                 onClick={() => setMode(m)}
                 className={`px-3 py-1 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
-                  mode === m ? 'bg-amber-500 text-white shadow' : 'text-slate-400 hover:text-white'
+                  mode === m ? 'bg-warn text-fg shadow' : 'text-muted hover:text-fg'
                 }`}
               >
                 {m === 'edit' && <Edit3 size={11} />}
@@ -326,7 +326,7 @@ export default function MarkdownStudio() {
           <button
             onClick={handleClear}
             title="Clear"
-            className="px-2.5 py-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs flex items-center gap-1.5"
+            className="px-2.5 py-1.5 rounded-md bg-glass hover:bg-glass border border-hair text-muted text-xs flex items-center gap-1.5"
           >
             <RotateCcw size={12} />
             Reset
@@ -334,15 +334,15 @@ export default function MarkdownStudio() {
           <button
             onClick={handleCopy}
             title="Copy markdown"
-            className="px-2.5 py-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs flex items-center gap-1.5"
+            className="px-2.5 py-1.5 rounded-md bg-glass hover:bg-glass border border-hair text-muted text-xs flex items-center gap-1.5"
           >
-            {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+            {copied ? <Check size={12} className="text-success" /> : <Copy size={12} />}
             {copied ? 'Copied' : 'Copy'}
           </button>
           <button
             onClick={handleDownload}
             title="Download .md"
-            className="px-2.5 py-1.5 rounded-md text-xs flex items-center gap-1.5 text-white shadow"
+            className="px-2.5 py-1.5 rounded-md text-xs flex items-center gap-1.5 text-fg shadow"
             style={{ background: `linear-gradient(135deg, ${cssVar('ember')}, color-mix(in srgb, var(--ember) 70%, var(--void)))`, boxShadow: `0 4px 12px ${tint('ember', 19)}` }}
           >
             <Download size={12} />
@@ -355,17 +355,17 @@ export default function MarkdownStudio() {
       <div ref={splitContainerRef} className="flex-1 flex overflow-hidden">
         {(mode === 'edit' || mode === 'split') && (
           <div
-            className="relative flex flex-col overflow-hidden border-r border-white/10"
+            className="relative flex flex-col overflow-hidden border-r border-hair"
             style={{ width: mode === 'split' ? `${splitPct}%` : '100%' }}
           >
-            <div className="px-4 py-1.5 text-[10px] uppercase tracking-wider text-slate-500 bg-black/20 border-b border-white/5">
+            <div className="px-4 py-1.5 text-[10px] uppercase tracking-wider text-faint bg-void/20 border-b border-hair">
               Markdown
             </div>
             <textarea
               value={content}
               onChange={e => setContent(e.target.value)}
               spellCheck={false}
-              className="flex-1 w-full bg-transparent p-4 font-mono text-sm text-slate-200 resize-none focus:outline-none leading-relaxed"
+              className="flex-1 w-full bg-transparent p-4 font-mono text-sm text-fg resize-none focus:outline-none leading-relaxed"
               placeholder="# Start typing..."
             />
           </div>
@@ -373,7 +373,7 @@ export default function MarkdownStudio() {
 
         {mode === 'split' && (
           <div
-            className="w-1.5 bg-white/5 cursor-col-resize hover:bg-amber-500/40 transition-colors flex-shrink-0"
+            className="w-1.5 bg-glass cursor-col-resize hover:bg-warn/40 transition-colors flex-shrink-0"
             onMouseDown={() => { draggingRef.current = true }}
               onDoubleClick={() => setSplitPct(50)}
             title="Drag to resize · Double-click to reset"
@@ -384,7 +384,7 @@ export default function MarkdownStudio() {
           <div
             className="flex-1 overflow-auto"
           >
-            <div className="px-4 py-1.5 text-[10px] uppercase tracking-wider text-slate-500 bg-black/20 border-b border-white/5">
+            <div className="px-4 py-1.5 text-[10px] uppercase tracking-wider text-faint bg-void/20 border-b border-hair">
               Preview
             </div>
             <div
@@ -396,7 +396,7 @@ export default function MarkdownStudio() {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between px-4 py-1.5 text-[10px] text-slate-500 border-t border-white/10 bg-black/30 font-mono">
+      <div className="flex items-center justify-between px-4 py-1.5 text-[10px] text-faint border-t border-hair bg-void/30 font-mono">
         <div className="flex items-center gap-3">
           <span>{stats.words} words</span>
           <span>•</span>
@@ -407,7 +407,7 @@ export default function MarkdownStudio() {
           <span>~{stats.readMin} min read</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> auto-saved</span>
+          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" /> auto-saved</span>
           <span>Ctrl/⌘+S to download</span>
         </div>
       </div>

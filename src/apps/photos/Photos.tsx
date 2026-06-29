@@ -193,37 +193,37 @@ export default function Photos() {
           <h1 className="text-lg font-bold flex items-center gap-2 mr-2">
             <Image className="w-5 h-5" /> Photos
           </h1>
-          <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-cyan-600 hover:bg-cyan-500">
+          <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-signal hover:bg-signal">
             <Upload className="w-4 h-4 mr-1" /> Import
           </Button>
           <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => addFiles(e.target.files)} />
 
-          <div className="h-6 w-px bg-white/10 mx-1" />
+          <div className="h-6 w-px bg-glass mx-1" />
           <div className="flex gap-1">
                   {GRID_SIZES.map(size => (
-                          <button key={size} onClick={() => setGridSize(size)} className={`px-2 py-1 text-xs rounded ${gridSize === size ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}>
+                          <button key={size} onClick={() => setGridSize(size)} className={`px-2 py-1 text-xs rounded ${gridSize === size ? 'bg-glass text-fg' : 'text-faint hover:text-fg'}`}>
                                   {size}
                           </button>
                   ))}
           </div>
 
-          <div className="h-6 w-px bg-white/10 mx-1" />
+          <div className="h-6 w-px bg-glass mx-1" />
           <div className="flex gap-1">
-                  <button onClick={() => setViewMode('grid')} className={`p-1 rounded ${viewMode === 'grid' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}>
+                  <button onClick={() => setViewMode('grid')} className={`p-1 rounded ${viewMode === 'grid' ? 'bg-glass text-fg' : 'text-faint hover:text-fg'}`}>
                           <LayoutGrid className="w-3.5 h-3.5" />
                   </button>
-                  <button onClick={() => setViewMode('list')} className={`p-1 rounded ${viewMode === 'list' ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white'}`}>
+                  <button onClick={() => setViewMode('list')} className={`p-1 rounded ${viewMode === 'list' ? 'bg-glass text-fg' : 'text-faint hover:text-fg'}`}>
                           <List className="w-3.5 h-3.5" />
                   </button>
           </div>
 
-          <div className="h-6 w-px bg-white/10 mx-1" />
-          <button onClick={() => setFilter(f => f === 'all' ? 'favorites' : 'all')} className={`text-xs px-2 py-1 rounded ${filter === 'favorites' ? 'bg-pink-600/30 text-pink-300' : 'text-white/40 hover:text-white'}`}>
+          <div className="h-6 w-px bg-glass mx-1" />
+          <button onClick={() => setFilter(f => f === 'all' ? 'favorites' : 'all')} className={`text-xs px-2 py-1 rounded ${filter === 'favorites' ? 'bg-danger/30 text-danger' : 'text-faint hover:text-fg'}`}>
             <Heart className="w-3 h-3 inline mr-1" /> Favorites
           </button>
 
           <div className="flex-1" />
-          <span className="text-xs text-white/40">{photos.length} photo{photos.length !== 1 ? 's' : ''}</span>
+          <span className="text-xs text-faint">{photos.length} photo{photos.length !== 1 ? 's' : ''}</span>
         </div>
 
         {/* Search + Tags */}
@@ -234,11 +234,11 @@ export default function Photos() {
               placeholder="Search photos..."
               value={searchTag}
               onChange={e => setSearchTag(e.target.value)}
-              className="text-sm bg-white/10 border-0 rounded px-2 py-1 flex-1 min-w-[150px]"
+              className="text-sm bg-glass border-0 rounded px-2 py-1 flex-1 min-w-[150px]"
             />
             <div className="flex gap-1 flex-wrap">
               {allTags.slice(0, 8).map(tag => (
-                <button key={tag} onClick={() => setSearchTag(tag)} className={`text-xs px-1.5 py-0.5 rounded ${searchTag === tag ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}>
+                <button key={tag} onClick={() => setSearchTag(tag)} className={`text-xs px-1.5 py-0.5 rounded ${searchTag === tag ? 'bg-signal text-fg' : 'bg-glass text-muted hover:bg-glass'}`}>
                   #{tag}
                 </button>
               ))}
@@ -250,23 +250,23 @@ export default function Photos() {
       {/* Selected actions */}
       {selected && (
         <Card className="p-2 flex items-center gap-2">
-          <span className="text-sm text-white/60">{photos.find(p => p.id === selected)?.name}</span>
-          <Button onClick={() => openLightbox(filtered.findIndex(p => p.id === selected))} className="text-xs bg-white/10 hover:bg-white/20">
+          <span className="text-sm text-muted">{photos.find(p => p.id === selected)?.name}</span>
+          <Button onClick={() => openLightbox(filtered.findIndex(p => p.id === selected))} className="text-xs bg-glass hover:bg-glass">
             <Maximize2 className="w-3 h-3 mr-1" /> View
           </Button>
-          <Button onClick={() => toggleFavorite(selected)} className="text-xs bg-white/10 hover:bg-white/20">
+          <Button onClick={() => toggleFavorite(selected)} className="text-xs bg-glass hover:bg-glass">
             <Heart className="w-3 h-3 mr-1" /> Favorite
           </Button>
-          <Button onClick={deleteSelected} className="text-xs bg-red-600/30 hover:bg-red-600/50 text-red-300">
+          <Button onClick={deleteSelected} className="text-xs bg-danger/30 hover:bg-danger/50 text-danger">
             <Trash2 className="w-3 h-3 mr-1" /> Delete
           </Button>
-          <Button onClick={() => setSelected(null)} className="text-xs bg-white/10 ml-auto">✕</Button>
+          <Button onClick={() => setSelected(null)} className="text-xs bg-glass ml-auto">✕</Button>
         </Card>
       )}
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <Card className="p-12 text-center text-white/40">
+        <Card className="p-12 text-center text-faint">
           <Image className="w-12 h-12 mx-auto mb-3 opacity-20" />
           <p>No photos yet</p>
           <p className="text-sm mt-1">Import images to get started</p>
@@ -276,22 +276,22 @@ export default function Photos() {
           {filtered.map((photo, idx) => (
             <div
               key={photo.id}
-              className={`relative group aspect-square bg-white/5 rounded-lg overflow-hidden cursor-pointer ${selected === photo.id ? 'ring-2 ring-cyan-600' : 'hover:ring-1 hover:ring-white/30'}`}
+              className={`relative group aspect-square bg-glass rounded-lg overflow-hidden cursor-pointer ${selected === photo.id ? 'ring-2 ring-signal' : 'hover:ring-1 hover:ring-hair'}`}
               onClick={() => setSelected(photo.id === selected ? null : photo.id)}
               onDoubleClick={() => openLightbox(idx)}
             >
               <img src={photo.src} alt={photo.name} className="w-full h-full object-cover" loading="lazy" />
               {photo.favorite && (
-                <Heart className="absolute top-2 left-2 w-4 h-4 text-pink-500 fill-pink-500" />
+                <Heart className="absolute top-2 left-2 w-4 h-4 text-danger fill-danger" />
               )}
               {photo.ephemeral && (
-                <span className="absolute top-2 right-2 text-[10px] text-amber-300/80 px-1.5 py-0.5 rounded bg-amber-500/20" title="Too large to save — won't survive a reload">session</span>
+                <span className="absolute top-2 right-2 text-[10px] text-warn/80 px-1.5 py-0.5 rounded bg-warn/20" title="Too large to save — won't survive a reload">session</span>
               )}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-end">
+              <div className="absolute inset-0 bg-void/0 group-hover:bg-void/40 transition flex items-end">
                 <div className="p-2 w-full opacity-0 group-hover:opacity-100 transition flex items-end gap-1">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs truncate">{photo.name}</p>
-                    <p className="text-xs text-white/60">{formatBytes(photo.size)}</p>
+                    <p className="text-xs text-muted">{formatBytes(photo.size)}</p>
                   </div>
                   <div onClick={e => e.stopPropagation()}>
                     <NodeActions type="photo" sourceId={photo.id} />
@@ -308,22 +308,22 @@ export default function Photos() {
               <div
                 key={photo.id}
                 onClick={() => setSelected(photo.id === selected ? null : photo.id)}
-                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group ${selected === photo.id ? 'bg-cyan-600/30' : 'hover:bg-white/5'}`}
+                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group ${selected === photo.id ? 'bg-signal/30' : 'hover:bg-glass'}`}
               >
                 <img src={photo.src} alt={photo.name} className="w-12 h-12 object-cover rounded" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate flex items-center gap-1.5">
                     <span className="truncate">{photo.name}</span>
                     {photo.ephemeral && (
-                      <span className="text-[10px] text-amber-300/80 px-1.5 py-0.5 rounded bg-amber-500/20 flex-shrink-0" title="Too large to save — won't survive a reload">session</span>
+                      <span className="text-[10px] text-warn/80 px-1.5 py-0.5 rounded bg-warn/20 flex-shrink-0" title="Too large to save — won't survive a reload">session</span>
                     )}
                   </p>
-                  <p className="text-xs text-white/40">{formatBytes(photo.size)} · {formatDate(new Date(photo.date))}</p>
+                  <p className="text-xs text-faint">{formatBytes(photo.size)} · {formatDate(new Date(photo.date))}</p>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100" onClick={e => e.stopPropagation()}>
                   <NodeActions type="photo" sourceId={photo.id} />
                   <button onClick={e => { e.stopPropagation(); toggleFavorite(photo.id) }}>
-                    <Heart className={`w-4 h-4 ${photo.favorite ? 'text-pink-500 fill-pink-500' : 'text-white/40'}`} />
+                    <Heart className={`w-4 h-4 ${photo.favorite ? 'text-danger fill-danger' : 'text-faint'}`} />
                   </button>
                 </div>
               </div>
@@ -334,40 +334,40 @@ export default function Photos() {
 
       {/* Lightbox */}
       {lightboxIdx >= 0 && currentLightboxPhoto && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col" onClick={closeLightbox}>
+        <div className="fixed inset-0 z-50 bg-void/95 flex flex-col" onClick={closeLightbox}>
           {/* Header */}
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <p className="text-white font-bold">{currentLightboxPhoto.name}</p>
-              <span className="text-white/40 text-sm">{lightboxIdx + 1} / {filtered.length}</span>
+              <p className="text-fg font-bold">{currentLightboxPhoto.name}</p>
+              <span className="text-faint text-sm">{lightboxIdx + 1} / {filtered.length}</span>
             </div>
             <div className="flex gap-2">
-              <button onClick={e => { e.stopPropagation(); toggleFavorite(currentLightboxPhoto.id) }} className="p-2 text-white/60 hover:text-white">
-                <Heart className={`w-5 h-5 ${currentLightboxPhoto.favorite ? 'text-pink-500 fill-pink-500' : ''}`} />
+              <button onClick={e => { e.stopPropagation(); toggleFavorite(currentLightboxPhoto.id) }} className="p-2 text-muted hover:text-fg">
+                <Heart className={`w-5 h-5 ${currentLightboxPhoto.favorite ? 'text-danger fill-danger' : ''}`} />
               </button>
-              <a href={currentLightboxPhoto.src} download={currentLightboxPhoto.name} onClick={e => e.stopPropagation()} className="p-2 text-white/60 hover:text-white">
+              <a href={currentLightboxPhoto.src} download={currentLightboxPhoto.name} onClick={e => e.stopPropagation()} className="p-2 text-muted hover:text-fg">
                 <Download className="w-5 h-5" />
               </a>
-              <button onClick={e => { e.stopPropagation(); deletePhoto(currentLightboxPhoto.id) }} className="p-2 text-white/60 hover:text-red-400">
+              <button onClick={e => { e.stopPropagation(); deletePhoto(currentLightboxPhoto.id) }} className="p-2 text-muted hover:text-danger">
                 <Trash2 className="w-5 h-5" />
               </button>
-              <button onClick={closeLightbox} className="p-2 text-white/60 hover:text-white ml-2">
+              <button onClick={closeLightbox} className="p-2 text-muted hover:text-fg ml-2">
                 <X className="w-5 h-5" />
               </button>
             </div>
           </div>
           {/* Image */}
           <div className="flex-1 flex items-center justify-center relative" onClick={e => e.stopPropagation()}>
-            <button onClick={e => { e.stopPropagation(); lightboxPrev() }} className="absolute left-4 p-3 bg-white/10 rounded-full hover:bg-white/20 text-white">
+            <button onClick={e => { e.stopPropagation(); lightboxPrev() }} className="absolute left-4 p-3 bg-glass rounded-full hover:bg-glass text-fg">
               <ChevronLeft className="w-6 h-6" />
             </button>
             <img src={currentLightboxPhoto.src} alt={currentLightboxPhoto.name} className="max-h-[80vh] max-w-[90vw] object-contain" />
-            <button onClick={e => { e.stopPropagation(); lightboxNext() }} className="absolute right-4 p-3 bg-white/10 rounded-full hover:bg-white/20 text-white">
+            <button onClick={e => { e.stopPropagation(); lightboxNext() }} className="absolute right-4 p-3 bg-glass rounded-full hover:bg-glass text-fg">
               <ChevronRight className="w-6 h-6" />
             </button>
           </div>
           {/* Footer */}
-          <div className="p-4 flex justify-between text-sm text-white/40">
+          <div className="p-4 flex justify-between text-sm text-faint">
             <span>{formatBytes(currentLightboxPhoto.size)}</span>
             {currentLightboxPhoto.width && currentLightboxPhoto.height && (
               <span>{currentLightboxPhoto.width} × {currentLightboxPhoto.height}</span>

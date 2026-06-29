@@ -125,9 +125,9 @@ export default function Editor() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Code className="w-6 h-6 text-cyan-300" /> Code Editor
+            <Code className="w-6 h-6 text-signal" /> Code Editor
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-muted mt-1">
             {stats.lines} lines · {stats.chars.toLocaleString()} chars
           </p>
           {inbound.source && (
@@ -140,14 +140,14 @@ export default function Editor() {
           <select
             value={language}
             onChange={e => setLanguage(e.target.value)}
-            className="bg-white/10 border-0 rounded-lg px-3 py-1.5 text-xs text-white"
+            className="bg-glass border-0 rounded-lg px-3 py-1.5 text-xs text-fg"
           >
             {LANGUAGE_OPTIONS.map(l => (
-              <option key={l.id} value={l.id} className="bg-gray-900">{l.label}</option>
+              <option key={l.id} value={l.id} className="bg-faint">{l.label}</option>
             ))}
           </select>
           <button onClick={() => setShowStats(!showStats)}
-            className={`p-2 rounded-lg transition-colors ${showStats ? 'bg-cyan-600 text-white' : 'hover:bg-white/10 text-gray-400'}`}
+            className={`p-2 rounded-lg transition-colors ${showStats ? 'bg-signal text-fg' : 'hover:bg-glass text-muted'}`}
             title="Toggle stats">
             <BarChart2 className="w-4 h-4" />
           </button>
@@ -164,9 +164,9 @@ export default function Editor() {
             { label: 'Imports', value: stats.imports },
             { label: 'Brackets', value: stats.brackets },
           ].map(s => (
-            <div key={s.label} className="p-2 rounded-lg bg-white/5 border border-white/10">
+            <div key={s.label} className="p-2 rounded-lg bg-glass border border-hair">
               <div className="text-lg font-bold">{s.value}</div>
-              <div className="text-gray-500">{s.label}</div>
+              <div className="text-faint">{s.label}</div>
             </div>
           ))}
         </div>
@@ -177,28 +177,28 @@ export default function Editor() {
         <div className="flex gap-2 overflow-x-auto pb-2">
           {savedFiles.slice(0, 8).map(f => (
             <button key={f.name} onClick={() => loadFile(f)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs whitespace-nowrap border border-white/10">
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-glass hover:bg-glass text-xs whitespace-nowrap border border-hair">
               <FileText className="w-3 h-3" />
               {f.name}
               <span onClick={e => { e.stopPropagation(); deleteFile(f.name) }}
-                className="text-gray-500 hover:text-red-400 ml-1">×</span>
+                className="text-faint hover:text-danger ml-1">×</span>
             </button>
           ))}
         </div>
       )}
 
       {/* Editor */}
-      <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
-        <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 bg-white/3">
-          <span className="text-xs text-gray-500 font-mono">{language}</span>
+      <div className="rounded-2xl border border-hair overflow-hidden" style={{ background: 'var(--card-bg)' }}>
+        <div className="flex items-center justify-between px-4 py-2 border-b border-hair bg-glass">
+          <span className="text-xs text-faint font-mono">{language}</span>
           <div className="flex gap-1">
             <button onClick={askCakra}
-              className="p-1 rounded hover:bg-cyan-500/20 text-cyan-300 transition-colors" title="Ask Cakra about this code">
+              className="p-1 rounded hover:bg-signal/20 text-signal transition-colors" title="Ask Cakra about this code">
               <Bot className="w-3.5 h-3.5" />
             </button>
             <button onClick={copyCode}
-              className="p-1 rounded hover:bg-white/10 text-gray-400 transition-colors" title="Copy code">
-              {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+              className="p-1 rounded hover:bg-glass text-muted transition-colors" title="Copy code">
+              {copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
           </div>
         </div>
@@ -216,19 +216,19 @@ export default function Editor() {
       <div className="flex gap-2">
         <button onClick={handleSave}
           disabled={!code.trim()}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 text-white text-sm transition-colors">
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-signal hover:bg-signal disabled:opacity-30 text-fg text-sm transition-colors">
           <Save className="w-4 h-4" /> Save
         </button>
         <button onClick={() => emit({ type: 'CODE_RUN', language, code, output: 'Code saved to event bus' })}
           disabled={!code.trim()}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-green-600/30 hover:bg-green-600/50 disabled:opacity-30 text-green-300 text-sm transition-colors">
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-success/30 hover:bg-success/50 disabled:opacity-30 text-success text-sm transition-colors">
           <Play className="w-4 h-4" /> Run
         </button>
         {/* Re-inject this buffer into the organism — lights an editor→target arc. */}
         <SendResultMenu source="editor" text={code} title={`Code — ${language}`} label="Send code to…" />
         {code.trim() && (
           <button onClick={() => { setCode(''); setStats({ lines: 0, chars: 0, words: 0, functions: 0, imports: 0, brackets: 0 }) }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm transition-colors ml-auto">
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-danger/20 hover:bg-danger/30 text-danger text-sm transition-colors ml-auto">
             <Trash2 className="w-4 h-4" /> Clear
           </button>
         )}

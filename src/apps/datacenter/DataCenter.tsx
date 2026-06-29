@@ -122,7 +122,7 @@ export default function DataCenter() {
           <button
             onClick={askCakra}
             disabled={!table}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm border-b disabled:opacity-40 hover:bg-white/5"
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm border-b disabled:opacity-40 hover:bg-glass"
             style={{ borderColor: 'var(--border)', color: ACCENT }}
           >
             <Bot className="w-3.5 h-3.5" /> Ask Cakra
@@ -132,7 +132,7 @@ export default function DataCenter() {
             return (
               <div
                 key={t}
-                className="group flex items-center border-b hover:bg-white/5"
+                className="group flex items-center border-b hover:bg-glass"
                 style={{ borderColor: 'var(--border)', background: active ? 'color-mix(in srgb, var(--c-mesin) 14%, transparent)' : undefined }}
               >
                 <button
@@ -146,7 +146,7 @@ export default function DataCenter() {
                   <NodeActions type="dataset" sourceId={t} />
                   <button
                     onClick={() => deleteTable(t)}
-                    className="p-1 rounded hover:bg-red-500/20 text-red-400/50 hover:text-red-400 transition-colors"
+                    className="p-1 rounded hover:bg-danger/20 text-danger/50 hover:text-danger transition-colors"
                     title={`Delete ${t} table`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -172,7 +172,7 @@ export default function DataCenter() {
             <Database className="w-4 h-4" style={{ color: ACCENT }} />
             <span className="font-semibold capitalize">{activeTable || '—'}</span>
             {table && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-white/5" style={{ color: 'var(--text3)' }}>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-glass" style={{ color: 'var(--text3)' }}>
                 {table.rows.length} rows
               </span>
             )}
@@ -212,13 +212,13 @@ export default function DataCenter() {
                 </thead>
                 <tbody>
                   {table.rows.map(row => (
-                    <tr key={row.id} className="border-b group hover:bg-white/[0.03] transition-colors" style={{ borderColor: 'var(--border)' }}>
+                    <tr key={row.id} className="border-b group hover:bg-glass/[0.03] transition-colors" style={{ borderColor: 'var(--border)' }}>
                       {table.columns.map(col => (
                         <td key={col} className="px-1 py-0.5">
                           <input
                             value={row[col] ?? ''}
                             onChange={e => updateCell(row.id, col, e.target.value)}
-                            className="w-full bg-transparent px-2 py-1.5 rounded focus:outline-none focus:bg-white/5"
+                            className="w-full bg-transparent px-2 py-1.5 rounded focus:outline-none focus:bg-glass"
                             style={{ color: 'var(--text2)' }}
                           />
                         </td>
@@ -226,7 +226,7 @@ export default function DataCenter() {
                       <td className="px-2 text-right">
                         <button
                           onClick={() => deleteRow(row.id)}
-                          className="opacity-0 group-hover:opacity-100 text-red-400/50 hover:text-red-400 transition"
+                          className="opacity-0 group-hover:opacity-100 text-danger/50 hover:text-danger transition"
                           title="Delete row"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -243,7 +243,7 @@ export default function DataCenter() {
                           onChange={e => setNewRow(prev => ({ ...prev, [col]: e.target.value }))}
                           onKeyDown={e => { if (e.key === 'Enter') addRow() }}
                           placeholder={i === 0 ? 'Add a row…' : ''}
-                          className="w-full bg-transparent px-2 py-1.5 rounded focus:outline-none focus:bg-white/5 placeholder:text-[var(--text3)]"
+                          className="w-full bg-transparent px-2 py-1.5 rounded focus:outline-none focus:bg-glass placeholder:text-[var(--text3)]"
                           style={{ color: 'var(--text)' }}
                         />
                       </td>
@@ -263,7 +263,7 @@ export default function DataCenter() {
 
       {/* New-table modal */}
       {showNewTable && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowNewTable(false)}>
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-void/50 backdrop-blur-sm" onClick={() => setShowNewTable(false)}>
           <div
             className="w-80 rounded-2xl border p-5"
             style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}
@@ -283,7 +283,7 @@ export default function DataCenter() {
               value={newTableName}
               onChange={e => setNewTableName(e.target.value)}
               placeholder="contacts"
-              className="w-full mb-3 px-3 py-2 rounded-lg bg-white/5 text-sm focus:outline-none focus:bg-white/10"
+              className="w-full mb-3 px-3 py-2 rounded-lg bg-glass text-sm focus:outline-none focus:bg-glass"
               style={{ color: 'var(--text)' }}
             />
             <label className="block text-xs mb-1" style={{ color: 'var(--text3)' }}>Columns (comma-separated)</label>
@@ -292,7 +292,7 @@ export default function DataCenter() {
               onChange={e => setNewTableCols(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') createTable() }}
               placeholder="name, email, phone"
-              className="w-full mb-4 px-3 py-2 rounded-lg bg-white/5 text-sm focus:outline-none focus:bg-white/10"
+              className="w-full mb-4 px-3 py-2 rounded-lg bg-glass text-sm focus:outline-none focus:bg-glass"
               style={{ color: 'var(--text)' }}
             />
             <button

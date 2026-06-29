@@ -29,16 +29,16 @@ function formatBytes(bytes: number): string {
 }
 
 function getIcon(entry: FileEntry, open?: boolean) {
-  if (entry.isDirectory) return open ? <FolderOpen className="w-4 h-4 text-yellow-400" /> : <Folder className="w-4 h-4 text-yellow-400" />
+  if (entry.isDirectory) return open ? <FolderOpen className="w-4 h-4 text-warn" /> : <Folder className="w-4 h-4 text-warn" />
   const ext = entry.extension.toLowerCase()
-  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) return <Image className="w-4 h-4 text-green-400" />
-  if (['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'].includes(ext)) return <Music className="w-4 h-4 text-pink-400" />
-  if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)) return <Film className="w-4 h-4 text-cyan-300" />
-  if (['zip', 'tar', 'gz', 'rar', '7z'].includes(ext)) return <Archive className="w-4 h-4 text-orange-400" />
-  if (['js', 'ts', 'tsx', 'jsx', 'py', 'rs', 'go', 'java', 'c', 'cpp', 'h'].includes(ext)) return <Code className="w-4 h-4 text-blue-400" />
-  if (['json', 'xml', 'yaml', 'yml', 'toml', 'ini', 'cfg'].includes(ext)) return <Code className="w-4 h-4 text-cyan-400" />
-  if (['txt', 'md', 'log', 'readme'].includes(ext)) return <FileText className="w-4 h-4 text-gray-400" />
-  return <File className="w-4 h-4 text-gray-400" />
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) return <Image className="w-4 h-4 text-success" />
+  if (['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'].includes(ext)) return <Music className="w-4 h-4 text-danger" />
+  if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)) return <Film className="w-4 h-4 text-signal" />
+  if (['zip', 'tar', 'gz', 'rar', '7z'].includes(ext)) return <Archive className="w-4 h-4 text-ember" />
+  if (['js', 'ts', 'tsx', 'jsx', 'py', 'rs', 'go', 'java', 'c', 'cpp', 'h'].includes(ext)) return <Code className="w-4 h-4 text-ion" />
+  if (['json', 'xml', 'yaml', 'yml', 'toml', 'ini', 'cfg'].includes(ext)) return <Code className="w-4 h-4 text-signal" />
+  if (['txt', 'md', 'log', 'readme'].includes(ext)) return <FileText className="w-4 h-4 text-muted" />
+  return <File className="w-4 h-4 text-muted" />
 }
 
 const QUICK_PATHS = [
@@ -160,24 +160,24 @@ export default function Files() {
           <h1 className="text-lg font-bold flex items-center gap-2">
             <Folder className="w-5 h-5" /> File Browser
           </h1>
-          <Button onClick={() => loadDirectory(path)} className="text-sm bg-white/10 hover:bg-white/20 ml-auto">
+          <Button onClick={() => loadDirectory(path)} className="text-sm bg-glass hover:bg-glass ml-auto">
             <RefreshCw className="w-4 h-4" />
           </Button>
-          <Button onClick={navigateUp} className={`text-sm bg-white/10 hover:bg-white/20 ${path === '/storage/emulated/0' ? 'opacity-30 cursor-not-allowed' : ''}`}>
+          <Button onClick={navigateUp} className={`text-sm bg-glass hover:bg-glass ${path === '/storage/emulated/0' ? 'opacity-30 cursor-not-allowed' : ''}`}>
             ↑ Up
           </Button>
-          <button onClick={() => navigateTo('/storage/emulated/0')} className="text-sm text-white/40 hover:text-white">
+          <button onClick={() => navigateTo('/storage/emulated/0')} className="text-sm text-faint hover:text-fg">
             <Home className="w-5 h-5" />
           </button>
         </div>
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1 text-sm text-white/60 mb-2 overflow-x-auto">
-          <button onClick={() => navigateTo('/storage/emulated/0')} className="hover:text-white flex-shrink-0">storage</button>
+        <div className="flex items-center gap-1 text-sm text-muted mb-2 overflow-x-auto">
+          <button onClick={() => navigateTo('/storage/emulated/0')} className="hover:text-fg flex-shrink-0">storage</button>
           {breadcrumb.map((part, i) => (
             <span key={i} className="flex items-center gap-1 flex-shrink-0">
               <ChevronRight className="w-3 h-3" />
-              <button onClick={() => navigateTo('/' + breadcrumb.slice(0, i + 1).join('/'))} className="hover:text-white">
+              <button onClick={() => navigateTo('/' + breadcrumb.slice(0, i + 1).join('/'))} className="hover:text-fg">
                 {part}
               </button>
             </span>
@@ -187,7 +187,7 @@ export default function Files() {
         {/* Quick paths */}
         <div className="flex gap-1 flex-wrap mb-2">
           {QUICK_PATHS.map(qp => (
-            <button key={qp.path} onClick={() => navigateTo(qp.path)} className={`text-xs px-2 py-1 rounded ${path === qp.path ? 'bg-cyan-600/40 text-cyan-100' : 'bg-white/5 text-white/50 hover:bg-white/10'}`}>
+            <button key={qp.path} onClick={() => navigateTo(qp.path)} className={`text-xs px-2 py-1 rounded ${path === qp.path ? 'bg-signal/40 text-signal' : 'bg-glass text-muted hover:bg-glass'}`}>
               {qp.label}
             </button>
           ))}
@@ -199,27 +199,27 @@ export default function Files() {
           placeholder="Search files..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          className="w-full bg-white/10 border-0 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+          className="w-full bg-glass border-0 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-signal/50"
         />
       </Card>
 
       {/* Path display */}
-      <div className="text-xs text-white/30 px-1 font-mono">{path}</div>
+      <div className="text-xs text-faint px-1 font-mono">{path}</div>
 
       {/* Content */}
       {loading ? (
-      <Card className="p-8 text-center text-white/40">
-      <div className="animate-spin w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full mx-auto mb-3" />
+      <Card className="p-8 text-center text-faint">
+      <div className="animate-spin w-6 h-6 border-2 border-hair border-t-white/60 rounded-full mx-auto mb-3" />
       <p className="text-sm">Scanning directory…</p>
       </Card>
       ) : error ? (
         <Card className="p-6 text-center">
-          <p className="text-red-400 mb-2">Failed to load directory</p>
-          <p className="text-sm text-white/40">{error}</p>
-          <Button onClick={() => loadDirectory(path)} className="mt-3 text-sm bg-white/10 hover:bg-white/20">Retry</Button>
+          <p className="text-danger mb-2">Failed to load directory</p>
+          <p className="text-sm text-faint">{error}</p>
+          <Button onClick={() => loadDirectory(path)} className="mt-3 text-sm bg-glass hover:bg-glass">Retry</Button>
         </Card>
       ) : filtered.length === 0 ? (
-        <Card className="p-8 text-center text-white/40">
+        <Card className="p-8 text-center text-faint">
           <Folder className="w-12 h-12 mx-auto mb-2 opacity-20" />
           <p>Empty or no matches</p>
         </Card>
@@ -229,27 +229,27 @@ export default function Files() {
             <div
               key={entry.path}
               onClick={() => openFile(entry)}
-              className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer group transition ${selected === entry.name ? 'bg-cyan-600/20' : 'hover:bg-white/5'}`}
+              className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer group transition ${selected === entry.name ? 'bg-signal/20' : 'hover:bg-glass'}`}
             >
               {entry.isDirectory ? (
-                <button onClick={e => { e.stopPropagation(); toggleDir(entry.path) }} className="text-white/30 hover:text-white">
+                <button onClick={e => { e.stopPropagation(); toggleDir(entry.path) }} className="text-faint hover:text-fg">
                   {expandedDirs.has(entry.path) ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                 </button>
               ) : <span className="w-3" />}
               {getIcon(entry, expandedDirs.has(entry.path))}
               <div className="flex-1 min-w-0">
                 <p className="text-sm truncate">{entry.name}</p>
-                <p className="text-xs text-white/30">
+                <p className="text-xs text-faint">
                   {entry.isDirectory ? 'Folder' : formatBytes(entry.size)} · {new Date(entry.modified).toLocaleDateString()}
                 </p>
               </div>
               {!entry.isDirectory && (
                 <div className="flex gap-1 items-center opacity-0 group-hover:opacity-100" onClick={e => e.stopPropagation()}>
                   <NodeActions type="file" sourceId={entry.path} />
-                  <button onClick={e => { e.stopPropagation(); downloadFile(entry) }} className="p-1.5 text-white/40 hover:text-white">
+                  <button onClick={e => { e.stopPropagation(); downloadFile(entry) }} className="p-1.5 text-faint hover:text-fg">
                     <Download className="w-3.5 h-3.5" />
                   </button>
-                  <button onClick={e => { e.stopPropagation(); setPreviewContent(null); openFile(entry) }} className="p-1.5 text-white/40 hover:text-white">
+                  <button onClick={e => { e.stopPropagation(); setPreviewContent(null); openFile(entry) }} className="p-1.5 text-faint hover:text-fg">
                     <Eye className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -263,7 +263,7 @@ export default function Files() {
             <div
               key={entry.path}
               onClick={() => openFile(entry)}
-              className={`p-3 rounded-lg cursor-pointer text-center group transition ${selected === entry.name ? 'bg-cyan-600/20' : 'hover:bg-white/5'}`}
+              className={`p-3 rounded-lg cursor-pointer text-center group transition ${selected === entry.name ? 'bg-signal/20' : 'hover:bg-glass'}`}
             >
               <div className="text-3xl mb-1">{entry.isDirectory ? '📁' : '📄'}</div>
               <p className="text-xs truncate">{entry.name}</p>
@@ -279,11 +279,11 @@ export default function Files() {
             <h3 className="font-bold text-sm flex items-center gap-2">
               <FileText className="w-4 h-4" /> {previewContent.name}
             </h3>
-            <Button onClick={() => setPreviewContent(null)} className="text-xs bg-white/10 hover:bg-white/20">
+            <Button onClick={() => setPreviewContent(null)} className="text-xs bg-glass hover:bg-glass">
               <X className="w-3 h-3" /> Close
             </Button>
           </div>
-          <pre className="text-xs bg-black/30 rounded p-3 overflow-x-auto max-h-64 whitespace-pre-wrap font-mono text-white/70">
+          <pre className="text-xs bg-void/30 rounded p-3 overflow-x-auto max-h-64 whitespace-pre-wrap font-mono text-muted">
             {previewContent.content}
           </pre>
         </Card>

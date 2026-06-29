@@ -153,22 +153,22 @@ export default function Grammar() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'spelling': return 'bg-red-500/20 text-red-300 border-red-500/20'
-      case 'grammar': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/20'
-      case 'style': return 'bg-blue-500/20 text-blue-300 border-blue-500/20'
-      case 'punctuation': return 'bg-cyan-500/20 text-cyan-200 border-cyan-500/20'
-      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/20'
+      case 'spelling': return 'bg-danger/20 text-danger border-danger/20'
+      case 'grammar': return 'bg-warn/20 text-warn border-warn/20'
+      case 'style': return 'bg-ion/20 text-ion border-ion/20'
+      case 'punctuation': return 'bg-signal/20 text-signal border-signal/20'
+      default: return 'bg-faint/20 text-muted border-hair'
     }
   }
 
   const getReadabilityLabel = (score: number) => {
-    if (score >= 90) return { label: 'Very Easy', color: 'text-green-400' }
-    if (score >= 80) return { label: 'Easy', color: 'text-green-300' }
-    if (score >= 70) return { label: 'Fairly Easy', color: 'text-teal-300' }
-    if (score >= 60) return { label: 'Standard', color: 'text-yellow-300' }
-    if (score >= 50) return { label: 'Fairly Difficult', color: 'text-orange-300' }
-    if (score >= 30) return { label: 'Difficult', color: 'text-red-300' }
-    return { label: 'Very Difficult', color: 'text-red-400' }
+    if (score >= 90) return { label: 'Very Easy', color: 'text-success' }
+    if (score >= 80) return { label: 'Easy', color: 'text-success' }
+    if (score >= 70) return { label: 'Fairly Easy', color: 'text-signal' }
+    if (score >= 60) return { label: 'Standard', color: 'text-warn' }
+    if (score >= 50) return { label: 'Fairly Difficult', color: 'text-ember' }
+    if (score >= 30) return { label: 'Difficult', color: 'text-danger' }
+    return { label: 'Very Difficult', color: 'text-danger' }
   }
 
   return (
@@ -177,44 +177,44 @@ export default function Grammar() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <SpellCheck className="w-6 h-6 text-cyan-300" /> Grammar Fix
+            <SpellCheck className="w-6 h-6 text-signal" /> Grammar Fix
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-muted mt-1">
             {stats.words} words · {issues.length} issues found
           </p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setMode('check')}
-            className={`text-xs px-3 py-1 ${mode === 'check' ? 'bg-cyan-600' : 'bg-white/10'}`}>
+            className={`text-xs px-3 py-1 ${mode === 'check' ? 'bg-signal' : 'bg-glass'}`}>
             <ListChecks className="w-3 h-3 mr-1" /> Check
           </Button>
           <Button onClick={() => setMode('fix')}
-            className={`text-xs px-3 py-1 ${mode === 'fix' ? 'bg-cyan-600' : 'bg-white/10'}`}>
+            className={`text-xs px-3 py-1 ${mode === 'fix' ? 'bg-signal' : 'bg-glass'}`}>
             <SpellCheck className="w-3 h-3 mr-1" /> Fix
           </Button>
         </div>
       </div>
 
       {/* Input */}
-      <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
+      <div className="rounded-2xl border border-hair overflow-hidden" style={{ background: 'var(--card-bg)' }}>
         <textarea
           value={text}
           onChange={e => setText(e.target.value)}
           placeholder="Paste or type text to check grammar..."
-          className="w-full bg-transparent px-4 py-3 text-sm min-h-[180px] resize-y focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded-lg"
+          className="w-full bg-transparent px-4 py-3 text-sm min-h-[180px] resize-y focus:outline-none focus:ring-1 focus:ring-signal/50 rounded-lg"
           style={{ color: 'var(--text)' }}
         />
       </div>
 
       {/* Stats bar */}
       {text.trim() && (
-        <div className="flex items-center gap-4 p-3 rounded-xl bg-white/5 border border-white/10 text-xs">
+        <div className="flex items-center gap-4 p-3 rounded-xl bg-glass border border-hair text-xs">
           <span>{stats.chars.toLocaleString()} chars</span>
-          <span className="text-gray-500">·</span>
+          <span className="text-faint">·</span>
           <span>{stats.words} words</span>
-          <span className="text-gray-500">·</span>
+          <span className="text-faint">·</span>
           <span>{stats.sentences} sentences</span>
-          <span className="text-gray-500">·</span>
+          <span className="text-faint">·</span>
           <span className={getReadabilityLabel(stats.readability).color}>
             Readability: {getReadabilityLabel(stats.readability).label} ({stats.readability})
           </span>
@@ -225,7 +225,7 @@ export default function Grammar() {
       {text.trim() && mode === 'check' && issues.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-semibold flex items-center gap-1">
-            <AlertTriangle className="w-4 h-4 text-yellow-400" />
+            <AlertTriangle className="w-4 h-4 text-warn" />
             {issues.length} Issue{issues.length !== 1 ? 's' : ''} Found
           </h3>
           {issues.slice(0, 20).map((issue, i) => (
@@ -235,7 +235,7 @@ export default function Grammar() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="line-through opacity-60">"{issue.word}"</span>
-                    <span className="text-green-400 font-medium">→ {issue.suggestion}</span>
+                    <span className="text-success font-medium">→ {issue.suggestion}</span>
                   </div>
                   <p className="text-xs opacity-70 mt-0.5">{issue.description}</p>
                 </div>
@@ -246,19 +246,19 @@ export default function Grammar() {
       )}
 
       {text.trim() && mode === 'check' && issues.length === 0 && (
-        <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-300 text-sm flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-success/10 border border-success/20 text-success text-sm flex items-center gap-2">
           <Check className="w-4 h-4" /> No issues found! Your text looks clean.
         </div>
       )}
 
       {/* Corrected text */}
       {text.trim() && mode === 'fix' && (
-        <div className="rounded-2xl border border-green-500/20 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
-          <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
-            <span className="text-xs text-gray-400 flex items-center gap-1">
+        <div className="rounded-2xl border border-success/20 overflow-hidden" style={{ background: 'var(--card-bg)' }}>
+          <div className="flex items-center justify-between px-4 py-2 border-b border-hair">
+            <span className="text-xs text-muted flex items-center gap-1">
               <Info className="w-3 h-3" /> Corrected Text
             </span>
-            <button onClick={copyResult} className="text-xs text-cyan-300 hover:text-cyan-200 flex items-center gap-1">
+            <button onClick={copyResult} className="text-xs text-signal hover:text-signal flex items-center gap-1">
               {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
             </button>
           </div>
@@ -266,7 +266,7 @@ export default function Grammar() {
             {correctedText || text}
           </div>
           {correctedText !== text && (
-            <div className="px-4 py-2 border-t border-white/10 text-xs text-green-400 flex items-center gap-1">
+            <div className="px-4 py-2 border-t border-hair text-xs text-success flex items-center gap-1">
               <Check className="w-3 h-3" /> Auto-fixes applied (capitalization, spacing, ellipsis)
             </div>
           )}
@@ -276,13 +276,13 @@ export default function Grammar() {
       {/* Quick actions */}
       {text.trim() && (
         <div className="flex gap-2">
-          <Button onClick={copyResult} className="text-xs bg-white/10 hover:bg-white/20">
+          <Button onClick={copyResult} className="text-xs bg-glass hover:bg-glass">
             <Copy className="w-3 h-3 mr-1" /> Copy Report
           </Button>
           <Button onClick={() => {
             setText(correctedText || text)
             setIssues([])
-          }} className="text-xs bg-cyan-600 hover:bg-cyan-500">
+          }} className="text-xs bg-signal hover:bg-signal">
             <RefreshCw className="w-3 h-3 mr-1" /> Apply Fixes
           </Button>
         </div>

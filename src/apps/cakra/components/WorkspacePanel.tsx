@@ -126,7 +126,7 @@ export default function WorkspacePanel({ onClose, overlay }: Props) {
             <button
               onClick={clear}
               title="Clear activity"
-              className="p-1.5 rounded-lg transition-colors hover:text-white"
+              className="p-1.5 rounded-lg transition-colors hover:text-fg"
               style={{ color: cssVar('text3') }}
             >
               <Trash2 className="w-4 h-4" />
@@ -135,7 +135,7 @@ export default function WorkspacePanel({ onClose, overlay }: Props) {
           <button
             onClick={onClose}
             title="Hide workspace"
-            className="p-1.5 rounded-lg transition-colors hover:text-white"
+            className="p-1.5 rounded-lg transition-colors hover:text-fg"
             style={{ color: cssVar('text3') }}
           >
             <ChevronRight className="w-4 h-4" />
