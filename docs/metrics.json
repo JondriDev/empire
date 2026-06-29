@@ -1,42 +1,15 @@
 {
   "current": {
-    "generatedAt": "2026-06-29T01:10:30.593Z",
+    "generatedAt": "2026-06-29T01:17:05.061Z",
     "apps": 25,
-    "testFiles": 18,
-    "testCases": 136,
+    "testFiles": 19,
+    "testCases": 142,
     "tokenViolations": 0,
-    "offSystemUtilities": 1160,
-    "bundleGzKB": 291.9,
-    "bundleRawKB": 988.4
+    "offSystemUtilities": 1164,
+    "bundleGzKB": 292.2,
+    "bundleRawKB": 989.5
   },
   "history": [
-    {
-      "generatedAt": "2026-06-27T13:24:06.956Z",
-      "apps": 27,
-      "testFiles": 15,
-      "testCases": 100,
-      "tokenViolations": 283,
-      "bundleGzKB": 243.7,
-      "bundleRawKB": 836.4
-    },
-    {
-      "generatedAt": "2026-06-27T15:02:28.399Z",
-      "apps": 27,
-      "testFiles": 15,
-      "testCases": 100,
-      "tokenViolations": 321,
-      "bundleGzKB": null,
-      "bundleRawKB": null
-    },
-    {
-      "generatedAt": "2026-06-27T15:06:28.686Z",
-      "apps": 27,
-      "testFiles": 15,
-      "testCases": 100,
-      "tokenViolations": 268,
-      "bundleGzKB": 248.3,
-      "bundleRawKB": 851.5
-    },
     {
       "generatedAt": "2026-06-27T18:03:49.627Z",
       "apps": 27,
@@ -281,6 +254,36 @@
       "offSystemUtilities": 1160,
       "bundleGzKB": 291.9,
       "bundleRawKB": 988.4
+    },
+    {
+      "generatedAt": "2026-06-29T01:10:30.593Z",
+      "apps": 25,
+      "testFiles": 18,
+      "testCases": 136,
+      "tokenViolations": 0,
+      "offSystemUtilities": 1160,
+      "bundleGzKB": 291.9,
+      "bundleRawKB": 988.4
+    },
+    {
+      "generatedAt": "2026-06-29T01:14:56.350Z",
+      "apps": 25,
+      "testFiles": 18,
+      "testCases": 136,
+      "tokenViolations": 0,
+      "offSystemUtilities": 1160,
+      "bundleGzKB": 291.9,
+      "bundleRawKB": 988.4
+    },
+    {
+      "generatedAt": "2026-06-29T01:16:44.453Z",
+      "apps": 25,
+      "testFiles": 19,
+      "testCases": 142,
+      "tokenViolations": 0,
+      "offSystemUtilities": 1164,
+      "bundleGzKB": 292.2,
+      "bundleRawKB": 989.5
     }
   ]
 }

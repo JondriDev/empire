@@ -464,8 +464,18 @@ Stages (Builder takes the topmost `[ ]`; confirm current state vs. code first):
   *Acceptance:* add an audio/video file → reload → still in the playlist AND plays (the persistence/ghost-drop
   *logic* is unit-pinned; the IDB-roundtrip needs a real browser — jsdom has no IDB). Build🟢 vitest 132→143🟢
   eslint clean; **token-violations 0 (±0)**, bundle gz 290.7→291.9 (+1.2, the shared store). One commit, both apps.
-- [ ] **S3 · Photos → library survives a reload (reuse the S2 `mediaStore` blob rail) + a unit test.**
-  **This is the SAME latent data-integrity bug S2 just fixed in Music/Video — confirmed in code.**
+- [x] **S3 · Photos → library survives a reload (reuse the S2 `mediaStore` blob rail) + a unit test.**
+  **Shipped 2026-06-29.** Ported `Photos.tsx` to the shared `mediaStore` rail 1:1 from Music: `interface Photo
+  extends MediaRecord`, field `url`→`src` (8 read sites incl. both grid/list `<img>`, lightbox `<img>`/`<a
+  download>`, `addFiles`, `revokeObjectURL`), async-rehydrate on mount (`loadMediaUrls`+`rehydrateMedia` behind a
+  `hydratedRef` gate), persist `toStorableMeta(photos)` only, `putMedia(id,file)` on add (oversized >75 MB →
+  `ephemeral` + amber "session" chip in BOTH grid & list views), `deleteMedia(id)` on delete. New test
+  `src/apps/photos/photosStore.test.ts` (6 cases). **Function metric 7/8 → 8/8 — all shallow instruments now
+  offline-capable.** build🟢 vitest 149🟢 (19 files) eslint clean; token-violations 0 (±0), off-system +4 (the two
+  amber chips, the mandated idiom), gz +0.3 (shared rail). *Cloud limit:* add→reload→still-renders needs a real
+  browser with IDB (jsdom has none) — pure transforms carry the coverage, as in S2; QA should add `photos` to the
+  MEDIA-PERSISTS guard's `mediaCases`.
+  **This was the SAME latent data-integrity bug S2 just fixed in Music/Video — confirmed in code.**
   `Photos.tsx:51-58` persists each photo's `url` (a `URL.createObjectURL(file)` blob URL) to
   `localStorage('empire-photos')`; blob URLs are **session-scoped → dead after a reload**, so the restored
   gallery is a grid of broken images (a real bug, not a placeholder). Fix it by reusing the **exact rail**

@@ -4,14 +4,19 @@ import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
 import {
+  putMedia, deleteMedia, loadMediaUrls,
+  toStorableMeta, rehydrateMedia, shouldPersistBlob,
+  type MediaRecord, type StoredMeta,
+} from '../../lib/mediaStore'
+import {
  Image, Upload, Trash2, ChevronLeft,
  ChevronRight, X, Heart, Download,
  Maximize2, LayoutGrid, List
 } from 'lucide-react'
 
-interface Photo {
+interface Photo extends MediaRecord {
   id: string
-  url: string
+  src: string
   name: string
   size: number
   width?: number
@@ -19,7 +24,11 @@ interface Photo {
   date: string
   tags: string[]
   favorite: boolean
+  /** too large to persist — viewable this session, won't survive a reload. */
+  ephemeral?: boolean
 }
+
+const PHOTOS_KEY = 'empire-photos'
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B'
@@ -44,17 +53,36 @@ export default function Photos() {
   const [searchTag, setSearchTag] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // Gate persistence until the async rehydrate finishes, so the initial empty
+  // render never overwrites the saved library before its blobs are recovered.
+  const hydratedRef = useRef(false)
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'photos' })
-    try {
-      const saved = localStorage.getItem('empire-photos')
-      if (saved) setPhotos(JSON.parse(saved))
-    } catch { /* ignore */ }
+    let cancelled = false
+    // Restore metadata from localStorage, then recover real image blobs from
+    // IndexedDB and mint fresh object URLs — photos whose blob is gone are
+    // dropped (no broken-image ghosts, the bug this stage fixes).
+    ;(async () => {
+      let meta: Array<StoredMeta<Photo>> = []
+      try {
+        const saved = localStorage.getItem(PHOTOS_KEY)
+        if (saved) meta = JSON.parse(saved)
+      } catch { /* ignore */ }
+      const ids = Array.isArray(meta) ? meta.map(m => m.id) : []
+      const urls = await loadMediaUrls(ids)
+      const restored = rehydrateMedia<Photo>(Array.isArray(meta) ? meta : [], id => urls.get(id) ?? null)
+      if (!cancelled) {
+        setPhotos(restored)
+        hydratedRef.current = true
+      }
+    })()
+    return () => { cancelled = true }
   }, [])
 
   useEffect(() => {
-    try { localStorage.setItem('empire-photos', JSON.stringify(photos)) } catch { /* ignore */ }
+    if (!hydratedRef.current) return
+    try { localStorage.setItem(PHOTOS_KEY, JSON.stringify(toStorableMeta(photos))) } catch { /* ignore */ }
   }, [photos])
 
   // Mirror photos into the Core graph as `photo` nodes so they join the
@@ -74,15 +102,21 @@ export default function Photos() {
     if (!imgs.length) return
 
     const newPhotos: Photo[] = imgs.map(file => {
-      const url = URL.createObjectURL(file)
+      const src = URL.createObjectURL(file)
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+      // Persist the real bytes to IndexedDB so the photo survives a reload; skip
+      // oversized files (quota) and keep them session-only (ephemeral).
+      const ephemeral = !shouldPersistBlob(file.size)
+      if (!ephemeral) void putMedia(id, file)
       return {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        url,
+        id,
+        src,
         name: file.name,
         size: file.size,
         date: new Date().toISOString(),
         tags: [],
         favorite: false,
+        ephemeral,
       }
     })
 
@@ -94,7 +128,7 @@ export default function Photos() {
           p.id === photo.id ? { ...p, width: img.naturalWidth, height: img.naturalHeight } : p
         ))
       }
-      img.src = photo.url
+      img.src = photo.src
     })
 
     setPhotos(prev => [...prev, ...newPhotos])
@@ -106,7 +140,8 @@ export default function Photos() {
 
   const deletePhoto = (id: string) => {
     const photo = photos.find(p => p.id === id)
-    if (photo) URL.revokeObjectURL(photo.url)
+    if (photo) URL.revokeObjectURL(photo.src)
+    void deleteMedia(id)
     setPhotos(prev => prev.filter(p => p.id !== id))
     if (selected === id) setSelected(null)
     if (lightboxIdx >= 0 && photos[lightboxIdx]?.id === id) closeLightbox()
@@ -245,9 +280,12 @@ export default function Photos() {
               onClick={() => setSelected(photo.id === selected ? null : photo.id)}
               onDoubleClick={() => openLightbox(idx)}
             >
-              <img src={photo.url} alt={photo.name} className="w-full h-full object-cover" loading="lazy" />
+              <img src={photo.src} alt={photo.name} className="w-full h-full object-cover" loading="lazy" />
               {photo.favorite && (
                 <Heart className="absolute top-2 left-2 w-4 h-4 text-pink-500 fill-pink-500" />
+              )}
+              {photo.ephemeral && (
+                <span className="absolute top-2 right-2 text-[10px] text-amber-300/80 px-1.5 py-0.5 rounded bg-amber-500/20" title="Too large to save — won't survive a reload">session</span>
               )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-end">
                 <div className="p-2 w-full opacity-0 group-hover:opacity-100 transition flex items-end gap-1">
@@ -272,9 +310,14 @@ export default function Photos() {
                 onClick={() => setSelected(photo.id === selected ? null : photo.id)}
                 className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group ${selected === photo.id ? 'bg-cyan-600/30' : 'hover:bg-white/5'}`}
               >
-                <img src={photo.url} alt={photo.name} className="w-12 h-12 object-cover rounded" />
+                <img src={photo.src} alt={photo.name} className="w-12 h-12 object-cover rounded" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate">{photo.name}</p>
+                  <p className="text-sm truncate flex items-center gap-1.5">
+                    <span className="truncate">{photo.name}</span>
+                    {photo.ephemeral && (
+                      <span className="text-[10px] text-amber-300/80 px-1.5 py-0.5 rounded bg-amber-500/20 flex-shrink-0" title="Too large to save — won't survive a reload">session</span>
+                    )}
+                  </p>
                   <p className="text-xs text-white/40">{formatBytes(photo.size)} · {formatDate(new Date(photo.date))}</p>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100" onClick={e => e.stopPropagation()}>
@@ -302,7 +345,7 @@ export default function Photos() {
               <button onClick={e => { e.stopPropagation(); toggleFavorite(currentLightboxPhoto.id) }} className="p-2 text-white/60 hover:text-white">
                 <Heart className={`w-5 h-5 ${currentLightboxPhoto.favorite ? 'text-pink-500 fill-pink-500' : ''}`} />
               </button>
-              <a href={currentLightboxPhoto.url} download={currentLightboxPhoto.name} onClick={e => e.stopPropagation()} className="p-2 text-white/60 hover:text-white">
+              <a href={currentLightboxPhoto.src} download={currentLightboxPhoto.name} onClick={e => e.stopPropagation()} className="p-2 text-white/60 hover:text-white">
                 <Download className="w-5 h-5" />
               </a>
               <button onClick={e => { e.stopPropagation(); deletePhoto(currentLightboxPhoto.id) }} className="p-2 text-white/60 hover:text-red-400">
@@ -318,7 +361,7 @@ export default function Photos() {
             <button onClick={e => { e.stopPropagation(); lightboxPrev() }} className="absolute left-4 p-3 bg-white/10 rounded-full hover:bg-white/20 text-white">
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <img src={currentLightboxPhoto.url} alt={currentLightboxPhoto.name} className="max-h-[80vh] max-w-[90vw] object-contain" />
+            <img src={currentLightboxPhoto.src} alt={currentLightboxPhoto.name} className="max-h-[80vh] max-w-[90vw] object-contain" />
             <button onClick={e => { e.stopPropagation(); lightboxNext() }} className="absolute right-4 p-3 bg-white/10 rounded-full hover:bg-white/20 text-white">
               <ChevronRight className="w-6 h-6" />
             </button>
