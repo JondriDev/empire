@@ -81,6 +81,11 @@ function tokenViolations() {
     'src/lib/registry.ts',
     'src/apps/cakra/lib/providers.ts',
     'src/apps/artifacts/artifacts/ColorPalette.tsx',
+    // Reader render-surface colours are content, not brand: the day/sepia/night
+    // paper & ink values (#fff / #f4ecd8 / #0b1020 …) are reading conventions,
+    // mirrored into the EPUB iframe theme — same precedent as ColorPalette.
+    'src/apps/reader/reader.css',
+    'src/apps/reader/lib/render/epub.ts',
   ].map((p) => p.split('/').join(path.sep)));
   const files = walk(path.join(ROOT, 'src')).filter(
     (f) => /\.(ts|tsx|css)$/.test(f) &&
@@ -116,6 +121,11 @@ function offSystemUtilities() {
     'src/lib/registry.ts',
     'src/apps/cakra/lib/providers.ts',
     'src/apps/artifacts/artifacts/ColorPalette.tsx',
+    // Reader render-surface colours are content, not brand: the day/sepia/night
+    // paper & ink values (#fff / #f4ecd8 / #0b1020 …) are reading conventions,
+    // mirrored into the EPUB iframe theme — same precedent as ColorPalette.
+    'src/apps/reader/reader.css',
+    'src/apps/reader/lib/render/epub.ts',
   ].map((p) => p.split('/').join(path.sep)));
   const files = walk(path.join(ROOT, 'src')).filter(
     (f) => /\.(ts|tsx|css)$/.test(f) &&
