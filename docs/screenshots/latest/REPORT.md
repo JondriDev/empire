@@ -1,6 +1,6 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-06-29T08:06:05.757Z
+**Generated:** 2026-06-29T13:06:09.684Z
 
 **Result:** 26/26 rendered without crash, 0 failed.
 
@@ -26,7 +26,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -57,26 +57,22 @@ Each media app's real file `<input>` was driven with a small blob, then the page
 | video | ✅ | ✅ | ✅ |
 | photos | ✅ | ✅ | ✅ |
 
+## Offline-boot guard (EPIC-4 S1 — cold boot from SW precache)
+
+The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (`setOffline`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.
+
+**Precache:** 63 manifest entries; 37 JS + 2 CSS chunks emitted — ✅ no gap (all chunks precached).
+
+| Route | Renders offline |
+|---|---|
+| / | ✅ |
+| /app/clock | ✅ |
+| /app/maps | ✅ |
+| /app/network | ✅ |
+| /app/photos | ✅ |
+
+**Cold-offline boot: 5/5 ✅**
+
 ## Screenshots
 
 See PNGs in this folder. `desktop.png` is the shell; `app-<id>.png` is each app route.
-
-## Metric deltas (vs prior QA snapshot `3e666ce` / EPIC-3 S3, before `2126481` EPIC-3 S4 CLOSE landed)
-
-Verified on green main `2126481`. One code commit landed since the last QA run: **`2126481` EPIC-3 S4 CLOSE** — extracted DataCenter + Weather pure logic into tested modules (`datacenterLogic.ts` +12 cases, `weatherLogic.ts` +8 cases).
-
-| Metric | Prev | Now | Δ |
-|---|---|---|---|
-| Apps / routes | 25 | 25 | ±0 |
-| Routes rendering clean | 26/26 | 26/26 | ±0 |
-| Test files | 19 | 21 | +2 (datacenterLogic + weatherLogic) |
-| Test cases (vitest run) | 149 | 170 | +21 (S4 modules) |
-| Token violations | 0 | 0 | ±0 ✅ |
-| Off-system utilities | 1164 | 1164 | ±0 |
-| Bundle gz (KB) | 292.2 | 292.3 | +0.1 (logic-extraction only, by design) |
-
-All guards green: SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (25↔25), INBOUND-LANDS 3/3 ✅, MEDIA-PERSISTS 3/3 ✅.
-
-## Active-epic acceptance — EPIC-4 (PWA completion) S1 · offline-boot guard
-
-**Status this run: NOT YET STARTED (no contradiction, no confirmation possible).** EPIC-3 is CODE-COMPLETE (S4 closed it; function metric held 8/8). EPIC-4 was promoted ACTIVE 2026-06-29 but its **S1 is not yet shipped by the builder**: no `scripts/qa-offline.mjs` exists and `qa-smoke.mjs` has **no offline-boot (`page.route('**', abort)`) guard** — today's QA only blocks *external* hosts (Open-Meteo, CARTO tiles), never a cold offline boot of the app's own precached chunks. The PWA build is healthy (`vite-plugin-pwa` 1.3.0 `generateSW`, **precache 63 entries / 1150.93 KiB**), but the **EPIC-4 target metric (Lighthouse PWA ≥ 90 + an `offline-boots` smoke guard) has not moved** — there is nothing for QA to confirm-move until the builder ships S1. Recorded as awaiting-builder, not a regression.
