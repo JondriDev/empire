@@ -15,6 +15,7 @@
  */
 import { create } from 'zustand'
 import { apps, getAppIcon } from './registry'
+import { setCakraTab, type CakraTab } from './cakraTab'
 
 /** One open app. `id === appId` (apps are singletons in the stack). */
 export interface EmpireWindow {
@@ -109,6 +110,7 @@ export function openAppById(appId: string): string | null {
   }
   const target = def.aliasOf ? apps.find(a => a.id === def.aliasOf!.appId) : def
   if (!target) return null
+  if (def.aliasOf) setCakraTab(def.aliasOf.tab as CakraTab)
   void getAppIcon(target.icon) // touch to silence unused-import linters
   return useWindowStore.getState().openApp(target.id, target.name, target.icon, target.color)
 }
