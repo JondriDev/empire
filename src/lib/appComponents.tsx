@@ -37,4 +37,5 @@ export const appComponents: AppComponentMap = {
   'artifacts':          lazy(() => import('../apps/artifacts/ArtifactsApp')),
   'network':            lazy(() => import('../apps/network/Network')),
   'inbox':              lazy(() => import('../apps/inbox/Inbox')),
+  'reader':             lazy(() => import('../apps/reader/Reader')),
 }
