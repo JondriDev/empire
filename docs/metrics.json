@@ -1,6 +1,6 @@
 {
   "current": {
-    "generatedAt": "2026-06-29T08:06:12.482Z",
+    "generatedAt": "2026-06-29T10:10:19.962Z",
     "apps": 25,
     "testFiles": 21,
     "testCases": 163,
@@ -10,24 +10,6 @@
     "bundleRawKB": 989.9
   },
   "history": [
-    {
-      "generatedAt": "2026-06-27T20:08:16.303Z",
-      "apps": 27,
-      "testFiles": 16,
-      "testCases": 105,
-      "tokenViolations": 134,
-      "bundleGzKB": 248.1,
-      "bundleRawKB": 851.3
-    },
-    {
-      "generatedAt": "2026-06-27T23:02:41.987Z",
-      "apps": 27,
-      "testFiles": 16,
-      "testCases": 105,
-      "tokenViolations": 134,
-      "bundleGzKB": 248.1,
-      "bundleRawKB": 851.3
-    },
     {
       "generatedAt": "2026-06-28T00:02:48.333Z",
       "apps": 27,
@@ -282,6 +264,26 @@
     },
     {
       "generatedAt": "2026-06-29T05:06:26.265Z",
+      "apps": 25,
+      "testFiles": 21,
+      "testCases": 163,
+      "tokenViolations": 0,
+      "offSystemUtilities": 1164,
+      "bundleGzKB": 292.3,
+      "bundleRawKB": 989.9
+    },
+    {
+      "generatedAt": "2026-06-29T08:06:12.482Z",
+      "apps": 25,
+      "testFiles": 21,
+      "testCases": 163,
+      "tokenViolations": 0,
+      "offSystemUtilities": 1164,
+      "bundleGzKB": 292.3,
+      "bundleRawKB": 989.9
+    },
+    {
+      "generatedAt": "2026-06-29T10:03:10.550Z",
       "apps": 25,
       "testFiles": 21,
       "testCases": 163,

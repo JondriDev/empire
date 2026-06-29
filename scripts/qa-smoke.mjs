@@ -5,6 +5,7 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { spawnSync } from 'child_process';
 
 const BASE = 'http://localhost:3001';
 const OUT = path.resolve('docs/screenshots/latest');
@@ -246,6 +247,22 @@ console.log(`MEDIA-PERSISTS: ${mediaPass}/${mediaResults.length} ${mediaPass ===
 
 await browser.close();
 
+// ── OFFLINE-BOOT guard (EPIC-4 S1) ──────────────────────────────────────────
+// Cold-offline boot + SW precache audit: serves dist/, warm-loads so the SW
+// precaches, blocks ALL network (setOffline), then asserts the shell + lazy app
+// routes still render from precache, and enumerates any chunk NOT precached.
+// Self-contained (own static server + browser, own port). Non-fatal here so a
+// flaky launch can't red the render run — a real regression shows as ❌.
+let offline = null;
+try {
+  const r = spawnSync('node', ['scripts/qa-offline.mjs'], { encoding: 'utf8', timeout: 200000 });
+  if (r.stdout) process.stdout.write(r.stdout);
+  if (r.stderr) process.stderr.write(r.stderr);
+  offline = JSON.parse(fs.readFileSync('/tmp/qa-offline.json', 'utf8'));
+} catch (e) {
+  console.warn(`OFFLINE-BOOT: guard did not complete — ${e.message}`);
+}
+
 // Build report
 const now = new Date().toISOString();
 const pass = results.filter(r => r.pass).length;
@@ -273,7 +290,21 @@ md += `| App | Added | Survived reload | Result |\n|---|---|---|---|\n`;
 for (const r of mediaResults) {
   md += `| ${r.id} | ${r.added ? '✅' : '❌'} | ${r.survived ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
 }
+md += `\n## Offline-boot guard (EPIC-4 S1 — cold boot from SW precache)\n\n`;
+md += `The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (\`setOffline\`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.\n\n`;
+if (offline) {
+  md += `**Precache:** ${offline.precache.count} manifest entries; ${offline.precache.jsChunks} JS + ${offline.precache.cssChunks} CSS chunks emitted — ${offline.precache.missing.length === 0 ? '✅ no gap (all chunks precached)' : `⚠️ ${offline.precache.missing.length} NOT precached: ` + offline.precache.missing.map((f) => '`assets/' + f + '`').join(', ')}.\n\n`;
+  if (offline.routes) {
+    md += `| Route | Renders offline |\n|---|---|\n`;
+    for (const r of offline.routes) md += `| ${r.route} | ${r.pass ? '✅' : '❌'}${r.note ? ' (' + r.note + ')' : ''} |\n`;
+    md += `\n**Cold-offline boot: ${offline.passCount}/${offline.routes.length} ${offline.ok ? '✅' : '❌'}**\n`;
+  } else if (offline.error) {
+    md += `❌ guard could not run: ${offline.error}\n`;
+  }
+} else {
+  md += `⚠️ offline-boot guard did not produce a result this run (see console).\n`;
+}
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);

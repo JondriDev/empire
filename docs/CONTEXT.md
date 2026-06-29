@@ -23,19 +23,24 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** **EPIC-4 — PWA completion → installable, offline-true** (promoted 2026-06-29 when EPIC-3 went
-  code-complete). **Target metric:** *Lighthouse PWA ≥ 90* **AND** a new **`offline-boots` smoke guard** (the
-  built app loads + renders the desktop with the network FULLY blocked — today's QA only blocks *external* hosts,
-  never a cold offline boot of the app's own chunks). Stages seeded in EPICS.md (S1 offline-boot guard + precache
-  audit → S2 close the precache gap → S3 base-path/install-flow).
-  - **▶ NEXT STAGE = EPIC-4 S1 · Offline-boot guard + SW precache audit.** Full shape in EPICS.md S1. **The work:**
-    (a) add `scripts/qa-offline.mjs` (or extend `qa-smoke.mjs`): serve `dist/`, do one warm load, then
-    `page.route('**', r => r.abort())` to block **all** subsequent requests and assert the desktop shell + one lazy
-    app route still render from the SW/precache. (b) Inventory what the SW actually precaches vs the 25 lazy app
-    chunks — the project uses **`vite-plugin-pwa`** (build log shows `PWA v1.3.0 mode generateSW`, `precache 63
-    entries`); find its config in `vite.config.ts` (Workbox `generateSW`/`globPatterns`). **Acceptance:** the guard
-    runs in QA and reports cold-offline pass/fail; the precache gap (chunks not cached) is enumerated. build🟢. Note:
-    the QA headless-render recipe (Chromium at `/opt/pw-browsers/chromium-1194`, playwright global-symlinked) is in
-    the QA section below — reuse `launchBrowser()` from `qa-smoke.mjs`.
+  code-complete). **Target metric:** *Lighthouse PWA ≥ 90* **AND** the **`offline-boots` smoke guard** (the
+  built app loads + renders the desktop with the network FULLY blocked). **Stages: S1 ✅ (offline-boot guard +
+  precache audit), S2 ✅ (no-op — audit proved zero gap), → ▶ S3 base-path/install-flow.**
+  - **▶ NEXT STAGE = EPIC-4 S3 · Base-path + install-flow correctness.** Full shape in EPICS.md S3. **The work:**
+    confirm `base` resolves correctly for each deploy target so the installed PWA's asset URLs don't 404 (the
+    blank-on-install class of bug). `vite.config.ts:11` sets `base = process.env.EMPIRE_BASE || '/'`; the GitHub
+    Pages workflow sets `EMPIRE_BASE=/empire/`. The manifest uses **relative** `start_url:'.'`/`scope:'.'` (so the
+    same manifest works under `/` and `/empire/`) but `id:'/'` — check `id` consistency. **Shape:** add a
+    lightweight check (extend `scripts/qa-offline.mjs` or a new `scripts/check-pwa-base.mjs`) that **builds with
+    `EMPIRE_BASE=/empire/`**, asserts every `<script>/<link>` href in `dist/index.html` is prefixed with the base,
+    the manifest is reachable, and `sw.js`'s `navigateFallback` matches the base. Reuse the pure-helper +
+    `*.test.mjs` pattern S1 established. **Acceptance:** built app loads under the deploy base with no 404 asset;
+    a check asserts manifest `start_url`/`scope`/`base` agree. build🟢. **Reuse `launchBrowser()` recipe + the
+    `node:http` static server from `qa-offline.mjs`.**
+  - **✅ EPIC-4 S1 SHIPPED + S2 NO-OP (2026-06-29):** see seams below — `scripts/precacheAudit.mjs` (pure parse +
+    audit, 6 unit tests), `scripts/qa-offline.mjs` (cold-offline boot guard via `setOffline(true)`, 5/5 routes),
+    wired into `qa-smoke.mjs`. **Precache has ZERO gap** (63 entries cover all 37 JS + 2 CSS + fonts/icons), so S2
+    needed no code. EPIC-4's `offline-boots` metric now has a concrete green guard for QA to confirm-move.
   - **✅ EPIC-3 CODE-COMPLETE (2026-06-29) — all of S1–S4 shipped, function metric 8/8 (QA-confirmed at S3).**
   - **✅ S4 SHIPPED (2026-06-29, EPIC-3 CLOSE):** extracted the pure logic out of the two logic-heavy redesign
     instruments into named modules + tests, mirroring `clockLogic.ts`. `src/apps/datacenter/datacenterLogic.ts`
@@ -295,7 +300,36 @@
   thin/untested, test only the transforms. **Reuse this exact rail for any future blob-holding app** —
   `Photos.tsx` is the most recent verbatim port (`url`→`src`, `hydratedRef` gate, ephemeral "session" chip).
 
+- **PWA offline guard + precache audit (EPIC-4 S1, 2026-06-29):**
+  - `vite.config.ts:18-90` — the **`vite-plugin-pwa`** (`VitePWA`) config: Workbox `generateSW`,
+    `globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,json}']` + `maximumFileSizeToCacheInBytes: 5 MB`
+    (this is why the precache has no gap — it catches every chunk under 5 MB, incl. Maps' 160 KB). `manifest`
+    uses relative `start_url:'.'`/`scope:'.'`; `navigateFallback: base + 'index.html'`. The build prints
+    `precache N entries`.
+  - `scripts/precacheAudit.mjs` — **pure** seam: `extractPrecacheUrls(swText)` (regex-pulls the inlined
+    `{url,revision}` manifest out of `dist/sw.js`) + `auditPrecache(swText, assetFileNames)` →
+    `{precacheCount, jsChunks, cssChunks, missing[], ok}`. `precacheCount` = raw manifest entries (matches the
+    build log's "N entries"; ~8 icons appear twice via `includeAssets` + `globPatterns`); membership check
+    dedupes. Unit-tested in `scripts/precacheAudit.test.mjs` (6 cases).
+  - `scripts/qa-offline.mjs` — the **cold-offline boot guard**. Self-contained: own `node:http` static server
+    for `dist/` (SPA fallback → index.html; `Service-Worker-Allowed:/` on sw.js) on port 3101 + own browser
+    (reuses the `launchBrowser()` Chromium recipe). Warm-loads `/` → waits for the SW to be `active` + controlling
+    → **`context.setOffline(true)`** → asserts `/` (needs `.empire-desktop`) + 4 lazy routes render from precache.
+    Writes `docs/screenshots/latest/OFFLINE.md` + `/tmp/qa-offline.json`; exits non-zero on failure. **Run
+    standalone** `node scripts/qa-offline.mjs` (needs a fresh `npm run build` + the playwright symlink). Wired into
+    `qa-smoke.mjs` (spawned after smoke, non-fatal, folded into REPORT.md's "Offline-boot guard" section).
+  - **vitest `include` now also matches `scripts/**/*.{test,spec}.mjs`** (`vitest.config.ts:10`) so QA-tooling
+    logic can be unit-pinned alongside the app tests. (metrics.mjs still counts only `src/` tests — `scripts/`
+    tests don't move the test-cases metric.)
+
 ## ⚠️ Invariants & traps (do NOT relearn these the hard way)
+
+- **Offline PWA testing — use `context.setOffline(true)`, NOT `page.route('**',abort)`:** `setOffline` fails real
+  network egress while Cache Storage still serves, so a precached chunk loads and a non-precached one falls through
+  to a dead network (the render breaks) — the faithful "cold boot" signal. `page.route` interception is murkier with
+  a controlling service worker (SW-served responses never hit the route). Also: **warm-load + wait for the SW to be
+  `active` AND `navigator.serviceWorker.controller` set before going offline** — the precache only exists once the
+  SW's install (which runs `precacheAndRoute`) completes; cut the network too early and you test an empty cache.
 
 - **Blank-dark trap:** a `*/` sequence *inside* a CSS doc-comment in `design-system.css`
   (e.g. `--text*/`) closes the comment early → brace mismatch nests every `.empire-*`
