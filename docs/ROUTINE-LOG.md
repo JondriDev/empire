@@ -5,6 +5,45 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · EPIC-3 S3 — Photos library survives a reload (mediaStore IDB rail); PRIMARY metric 8/8
+
+**Metrics:** apps 25 (±0) · test files 18→19 (+1) · test cases 136→142 (+6) · **token-violations 0 (±0)** ·
+off-system-utils 1160→1164 (+4) · bundle gz 291.9→292.2 (+0.3). build🟢 vitest 149🟢 eslint clean.
+
+**Done.** Fresh cloud checkout, baseline green (build🟢, token-violations 0, 18 test files). Ported `Photos.tsx`
+to the shared `src/lib/mediaStore.ts` IndexedDB blob rail — a near-mechanical 1:1 port of the S2 Music fix:
+- `interface Photo extends MediaRecord`; renamed the persisted field **`url` → `src`** at all 8 read sites (grid
+  `<img>`, list `<img>`, lightbox `<img>`, lightbox `<a download href>`, `addFiles`, `revokeObjectURL`, dimension
+  probe).
+- **Mount:** async-rehydrate — read `empire-photos` metadata, `loadMediaUrls(ids)` from IDB, `rehydrateMedia<Photo>`
+  to mint fresh object URLs and **drop ghosts** (photos whose blob is gone). Gated behind a `hydratedRef` so the
+  initial empty render can't clobber the saved library before the async load finishes (the race S2 documents).
+- **Persist:** `localStorage.setItem('empire-photos', JSON.stringify(toStorableMeta(photos)))` — metadata only,
+  never a dead blob URL.
+- **Add:** `putMedia(id, file)` writes the real bytes to IDB; oversized (>75 MB) files stay session-only
+  (`ephemeral`) and show an amber **"session"** chip in BOTH grid & list views (mirrors Music's chip idiom).
+- **Delete:** `deleteMedia(id)` alongside the existing `revokeObjectURL`.
+- New test `src/apps/photos/photosStore.test.ts` (6 cases) pins the Photo strip/rehydrate contract: strips `src`,
+  keeps favorite/tags/width/height/date, drops ephemeral, re-attaches URL on recover, drops the ghost, never
+  persists a dead URL.
+
+**Why.** This fixed the SAME latent data-integrity bug S2 fixed in Music/Video — Photos persisted session-scoped
+`URL.createObjectURL` blob URLs to localStorage, so the "restored" gallery was a grid of broken images after any
+reload. A real bug, not a placeholder. **This lands the EPIC-3 PRIMARY metric: shallow instruments with genuine
+persistent/offline function 7/8 → 8/8 (all of Weather, Maps, Language, DataCenter, Clock, Music, Video, Photos).**
+
+**Verified.** build🟢 (`tsc -b && vite build`), vitest **149/149** (19 files), eslint clean on both touched files,
+metrics.mjs token-violations **0 (no regression)**. **Not verifiable in cloud:** the add→reload→still-renders path
+needs a real browser with IndexedDB (jsdom has none) — the pure transforms carry the coverage, as in S2. QA should
+add `photos` to the `scripts/qa-smoke.mjs` MEDIA-PERSISTS `mediaCases` to confirm the live IDB round-trip.
+
+**Next.** EPIC-3 S4 (EPIC-3 CLOSE): backfill unit tests for the two logic-heavy redesign instruments — extract
+`src/apps/datacenter/datacenterLogic.ts` (table CRUD + tolerant deserialize) and `src/apps/weather/weatherLogic.ts`
+(Open-Meteo JSON → view-model + `wmo()` mapping), each with a `*.test.ts`. Then EPIC-3 is DONE → promote EPIC-4
+(PWA completion).
+
+---
+
 ## 2026-06-29 · Deps & Security — safe minors applied; vite/vitest majors deferred (dev-only vulns); route-parity CI guard landed
 
 **Done.** Fresh cloud checkout on green main (`abac917`); baseline build🟢 vitest 143🟢 (18 files) shell-styled🟢.
