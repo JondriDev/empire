@@ -22,14 +22,28 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **EPIC-4 is fully DONE — QA-CONFIRMED 2026-06-29 on green main `d17f73a` (offline ✅ + base ✅ + installable ✅).**
-  All S1–S4 shipped AND each acceptance metric is confirmed-moved by QA (offline-boots 5/5 cold, base-path/install-flow
-  consistent under `--base=/empire/`, **`installable = ✅ (4 icons)`** — the deterministic, offline-checkable realization
-  of *Lighthouse PWA ≥ 90*). No active builder stage.
-  **→ NEXT RUN has no pre-decomposed stage:** EPIC-5 (Android APK validation) is QUEUED but **needs the Strategist
-  to promote it + seed stages** before a builder run. If EPICS.md still shows no `▶ ACTIVE` epic, the builder should
-  do the topmost ROADMAP NOW item (or a standing-priority FIX/INTERCONNECT/POLISH item — e.g. begin chipping the **1076
-  off-system Tailwind utilities**, the measured open front) and note that EPICS needs the Strategist.
+- **Active epic:** **▶ EPIC-5 · Design-system utility conformance → off-system utilities 1076 → 0** (promoted
+  2026-06-29; EPIC-4 fully DONE, QA-CONFIRMED on green main `d17f73a`/`1d2c052`). **Why:** EPIC-2 swept raw hex/rgba
+  to 0 but never touched the ~1076 Tailwind palette
+  classes (`text-gray-400`/`bg-cyan-600`/`text-white`/`bg-white/10`…) that bypass the JondriDev tokens AND break
+  `[data-theme]` theme-switching — the steepest *executable* gradient on the board. Android (now **EPIC-6**, QUEUED)
+  is device-gated → not unattended-executable, so it waits.
+  - **▶ NEXT BUILDER STAGE = EPIC-5 S1** (start editing, no re-planning): migrate the two heaviest entity apps —
+    **`src/apps/calendar/Calendar.tsx` (81 off-system → 0)** + **`src/apps/photos/Photos.tsx` (76 → 0)** — to the
+    token-backed utility vocabulary. **The rail already exists:** the `@theme inline` bridge in **`src/index.css:25-47`**
+    exposes `text-fg`/`text-muted`/`text-faint`, `bg-glass`/`bg-void`, `border-hair`, `text-/bg-/border-signal`
+    (+ aurora/ion/ember/plasma/xenon) and `text-/bg-success`/`-warn`/`-danger`/`-info` — each resolves to `var(--token)`
+    so it follows `[data-theme]`. **`Clock.tsx` is the worked reference — already 0 off-system** (migrated in `9051409`);
+    diff it for the idiom. **Full class→token map is in EPICS.md → EPIC-5 → "The migration rail" table** — apply it
+    verbatim; only add a `--color-*` to the `@theme` block if a target is genuinely missing. Photos' `ephemeral`
+    "session" chip swaps `amber-*` → `bg-warn`/`text-warn`. *Acceptance:* `node scripts/metrics.mjs` reports **0** for
+    both files (off-system **1076 → ~919**), `tokenViolations` stays **0** (swap classes for classes, never a raw hex),
+    build🟢 vitest🟢 eslint clean, both render in QA. Stages S2–S7 sweep the rest by descending mass; **S8 flips
+    `metrics.mjs --assert-zero` into a CI gate** so the 0 can't rot. **Trap:** `metrics.mjs` greps text — a raw
+    `rgb(`/`#hex` (even in a comment) regresses `tokenViolations`; keep everything as token *utilities*/`cssVar`/`tint`.
+  - **✅ EPIC-4 fully DONE & QA-CONFIRMED (2026-06-29, green main `d17f73a`/`1d2c052`) — PWA: offline ✅ + base ✅ +
+    installable ✅ (4 icons).** All S1–S4 shipped; every acceptance metric confirmed-moved by QA. EPIC-4 history
+    seams retained below.
   - **✅ EPIC-4 S4 SHIPPED (2026-06-29, EPIC-4 CLOSE):** installability assertion. *Investigated Lighthouse first* —
     no `lighthouse` dep (registry reachable, v13.4.0) but it'd add a heavy devDep + flaky headless browser, wrong fit
     for the unattended routine → took the pure-auditor fallback. Added **`auditInstallability(manifest)`** +
