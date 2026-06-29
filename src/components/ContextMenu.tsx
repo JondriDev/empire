@@ -22,7 +22,7 @@ export default function ContextMenu() {
     const handleContextMenu = (e: MouseEvent) => {
       // Only trigger on the desktop background, not on windows/apps
       const target = e.target as HTMLElement
-      if (target.closest('.empire-window') || target.closest('.empire-taskbar') || target.closest('.empire-context-menu')) {
+      if (target.closest('.empire-apphost') || target.closest('.empire-homebar') || target.closest('.empire-context-menu')) {
         return
       }
       e.preventDefault()
@@ -35,7 +35,7 @@ export default function ContextMenu() {
 
     const handleTouchStart = (e: TouchEvent) => {
       const target = e.target as HTMLElement
-      if (target.closest('.empire-window') || target.closest('.empire-taskbar')) return
+      if (target.closest('.empire-apphost') || target.closest('.empire-homebar')) return
       if (e.touches.length === 1) {
         longPressPos = { x: e.touches[0].clientX, y: e.touches[0].clientY }
         longPressTimer = window.setTimeout(() => {
