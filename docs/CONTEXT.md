@@ -22,13 +22,14 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **EPIC-4 is CODE-COMPLETE (all S1–S4 shipped 2026-06-29) — offline ✅ + base ✅ + installable ✅.**
-  No active builder stage in EPIC-4. **Target metric** *Lighthouse PWA ≥ 90* is asserted as the deterministic,
-  offline-checkable manifest-installability contract (S4); the **`offline-boots` smoke guard** is LIVE (5/5 cold).
+- **Active epic:** **EPIC-4 is fully DONE — QA-CONFIRMED 2026-06-29 on green main `d17f73a` (offline ✅ + base ✅ + installable ✅).**
+  All S1–S4 shipped AND each acceptance metric is confirmed-moved by QA (offline-boots 5/5 cold, base-path/install-flow
+  consistent under `--base=/empire/`, **`installable = ✅ (4 icons)`** — the deterministic, offline-checkable realization
+  of *Lighthouse PWA ≥ 90*). No active builder stage.
   **→ NEXT RUN has no pre-decomposed stage:** EPIC-5 (Android APK validation) is QUEUED but **needs the Strategist
   to promote it + seed stages** before a builder run. If EPICS.md still shows no `▶ ACTIVE` epic, the builder should
-  do the topmost ROADMAP NOW item (or a standing-priority FIX/INTERCONNECT/POLISH item) and note that EPICS needs
-  the Strategist. **QA's job next:** confirm the `offline-boots` metric and move EPIC-4 to fully DONE.
+  do the topmost ROADMAP NOW item (or a standing-priority FIX/INTERCONNECT/POLISH item — e.g. begin chipping the **1076
+  off-system Tailwind utilities**, the measured open front) and note that EPICS needs the Strategist.
   - **✅ EPIC-4 S4 SHIPPED (2026-06-29, EPIC-4 CLOSE):** installability assertion. *Investigated Lighthouse first* —
     no `lighthouse` dep (registry reachable, v13.4.0) but it'd add a heavy devDep + flaky headless browser, wrong fit
     for the unattended routine → took the pure-auditor fallback. Added **`auditInstallability(manifest)`** +
@@ -437,20 +438,21 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-29, post-EPIC-4-S3 green main `1b5e695` — EPIC-4 S3 base-path/install-flow CONFIRMED; offline-boots still LIVE; EPIC-3 CODE-COMPLETE)
+## 📊 Last QA confirmation (2026-06-29, post-EPIC-4-S4 green main `d17f73a` — EPIC-4 S4 installability CONFIRMED → **EPIC-4 fully DONE**; offline-boots + base-path still LIVE; EPIC-3 CODE-COMPLETE)
 
 - **Routes rendering clean: 25/25 ✅** (26/26 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (bidirectional, all 25
   registry apps ↔ smoke list) + INBOUND-LANDS **3/3 ✅** (calendar←editor, goals←notes, messages←ai-chat each
   show "Received from …" chip + prefilled control off the live render) + **MEDIA-PERSISTS 3/3 ✅ (music + video +
-  photos)**. build🟢 vitest **193/193 🟢** (23 files) eslint clean. **No runtime bugs found.** Visually verified:
+  photos)**. build🟢 vitest **205/205 🟢** (23 files) eslint clean. **No runtime bugs found.** Visually verified:
   Earth-from-Space palette + alien icons + Cakra (desktop.png); Maps renders the real Leaflet
   container w/ zoom + OSM/CARTO attribution (only tiles grey — egress-blocked, env-expected).
-- **★ EPIC-4 S3 ACCEPTANCE CONFIRMED — base-path/install-flow correctness.** S3 (`1b5e695`) is the only code commit
-  since the last QA (`9051409`). `node scripts/check-pwa-base.mjs` ✅ — a `--base=/empire/` build emits 11
-  base-prefixed asset URLs (manifest linked), SW `navigateFallback="/empire/index.html"`,
-  `registerSW("/empire/sw.js",{scope:"/empire/"})`, base-agnostic manifest (`start_url="."`/`scope="."`/**`id="empire"`**)
-  — install surface, SW & manifest all consistent → no blank-on-install under a sub-path deploy.
+- **★ EPIC-4 S4 ACCEPTANCE CONFIRMED — manifest installability (EPIC-4 CLOSE).** S4 (`d17f73a`) is the only code commit
+  since the last QA (`14466a8`, for S3 `1b5e695`). `node scripts/check-pwa-base.mjs` → **`installable = ✅ (4 icons)`**
+  — manifest passes name+short_name, a ≥192 AND a ≥512 `any`-purpose icon, a maskable icon, standalone display,
+  start_url, background_color+theme_color (`auditInstallability` in `pwaBaseAudit.mjs`; vitest +12 → 205). The
+  deterministic, offline-checkable realization of *Lighthouse-PWA ≥ 90*. **EPIC-4 (PWA completion) is now fully DONE:
+  offline ✅ + base ✅ + installable ✅.** Base-path/install-flow (S3) re-confirmed ✅ under `--base=/empire/`.
 - **EPIC-4 S1 `offline-boots` guard still PASSES (re-confirmed).** `scripts/qa-offline.mjs` warm-loaded → `setOffline(true)`
   blocked ALL network → **5/5 routes booted cold-offline** (`/`, `/app/clock`, `/app/maps`, `/app/network`,
   `/app/photos`) purely from precache. **PRECACHE-AUDIT: 63 entries (37 JS + 2 CSS), NO GAP ✅** (S2 no-op held).
@@ -458,15 +460,16 @@
   Both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat, calendar, goals,
   messages. Intentionally emit-only (by design): files, photos, datacenter + tool apps via `NodeActions`.
   Re-verified live this run by the smoke harness's INBOUND-LANDS guard (3/3 receivers chip+prefill).
-- **Epic-acceptance this run: EPIC-4 S3 CONFIRMED; S1 offline-boots re-confirmed; EPIC-3 CODE-COMPLETE (function 8/8 held).**
-  Since the last QA (`9051409`, S1) one code commit landed: **`1b5e695` EPIC-4 S3** (pure auditor `pwaBaseAudit.mjs`
-  + `pwaBaseAudit.test.mjs` 17 cases + runner `check-pwa-base.mjs`; fixed manifest `id:'/'`→`id:'empire'` in
-  `vite.config.ts`). Acceptance `node scripts/check-pwa-base.mjs` ✅. **No contradiction; no runtime bug.**
-  **▶ NEXT STAGE = EPIC-4 S4 (Lighthouse-PWA / installability assertion — EPIC-4 CLOSE)** — see the active-epic
-  block above for the exact shape (try `npx lighthouse` headless first; fall back to a pure `auditInstallability`
-  in `pwaBaseAudit.mjs` wired into `check-pwa-base.mjs`).
-- **Auto metrics vs last QA snapshot `9051409`:** test cases **176→193 vitest (+17)** (`pwaBaseAudit.test.mjs`),
-  test files **22→23 vitest (+1; metrics.mjs still 21, `src/`-only — the new test is under `scripts/`)**, bundle gz
+- **Epic-acceptance this run: EPIC-4 S4 CONFIRMED → EPIC-4 fully DONE; S1 offline-boots + S3 base-path re-confirmed; EPIC-3 CODE-COMPLETE (function 8/8 held).**
+  Since the last QA (`14466a8`, for S3 `1b5e695`) one code commit landed: **`d17f73a` EPIC-4 S4** (added
+  `auditInstallability(manifest)` + `maxIconSize` to `pwaBaseAudit.mjs`, surfaced via `check-pwa-base.mjs` +
+  PWA-BASE.md Installability table; `pwaBaseAudit.test.mjs` 17→29 cases). Acceptance `node scripts/check-pwa-base.mjs`
+  → **`installable = ✅ (4 icons)`**. **No contradiction; no runtime bug.**
+  **▶ NEXT STAGE = none pre-decomposed** — EPIC-5 (Android APK validation) QUEUED, needs the Strategist to promote +
+  seed stages. If no `▶ ACTIVE` epic, builder takes the topmost ROADMAP NOW (or begins chipping the 1076 off-system
+  Tailwind utilities, the measured open front) and flags EPICS needs the Strategist.
+- **Auto metrics vs last QA snapshot `1b5e695`:** test cases **193→205 vitest (+12)** (`pwaBaseAudit.test.mjs`
+  installability cases), test files **23 (±0; metrics.mjs still 21, `src/`-only)**, bundle gz
   **292.5 (±0)**, off-system utilities **1076 (±0)**, apps **25 (±0)**, token-violations **0 (±0)**.
 - **`latest/` holds only:** current `desktop.png` + 25 `app-<id>.png` + `REPORT.md` (no dated/per-stage PNGs).
 - **Env-expected net noise (not bugs):** weather→Open-Meteo geocoding + Geolocation blocked, maps→CARTO/OSM
