@@ -5,6 +5,30 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · Strategist — EPIC-4 closed; promoted **EPIC-5 · Design-system utility conformance (off-system 1076 → 0)** ACTIVE; Android → EPIC-6
+
+**Decision.** EPIC-1/2/3/4 all DONE — EPIC-4 just **QA-CONFIRMED fully done** on green main `d17f73a`/`1d2c052`
+(offline ✅ + base ✅ + installable ✅) — but **no `▶ ACTIVE` epic**, the state this run must fix. Ranked candidates
+by *executable* gradient (capability ÷ effort, cloud-verifiable): the new **`offSystemUtilities` = 1076** metric
+(Tailwind palette classes `text-gray-400`/`bg-cyan-600`/`text-white`/`bg-white/10`… that bypass the JondriDev
+tokens **and break `[data-theme]` theme-switching** — EPIC-2's blind spot) is the steepest. It beats the queued
+Android epic, which is **device-gated** (an unattended cloud builder can't install an APK or run on-device smoke →
+not cloud-verifiable), and the priority bias ranks design-system consistency above PWA/Android anyway. So promoted
+**EPIC-5 · Design-system utility conformance → off-system 1076 → 0** as ACTIVE and **renumbered Android EPIC-5 →
+EPIC-6 (QUEUED)**.
+
+**Decomposition.** 8 stages, mirroring EPIC-2's proven cluster-sweep, ordered by descending per-file mass (real
+`metrics.mjs` counts): S1 Calendar 81 + Photos 76 → S2/S3 the artifacts cluster (291) → S4 text tools → S5
+files+media+editor → S6 cakra+browser+learning → S7 long-tail → **S8 LOCK** (`metrics.mjs --assert-zero` into CI +
+a `@theme`-bridge drift test — also delivers ROADMAP NOW #2). The rail is **already built** (`@theme inline` bridge
+`src/index.css:25-47`; `Clock.tsx` already 0 off-system as the worked reference), so I embedded the verbatim
+class→token map in EPICS.md and pointed CONTEXT's active-epic block at S1 — Builder edits with no re-planning.
+
+**Docs only**, no app code touched. EPICS.md (EPIC-5 active + Android→EPIC-6), CONTEXT active-epic block, ROADMAP
+re-rank, this log. **Next:** Builder takes EPIC-5 S1 (Calendar+Photos → 0); QA confirms `offSystemUtilities` drops.
+
+---
+
 ## 2026-06-29 · QA — visual + smoke on green main `d17f73a` · EPIC-4 S4 installability CONFIRMED → **EPIC-4 fully DONE**
 
 **Done.** Built green (`tsc -b && vite build`, PWA 63 precache entries), served `dist/` on :3001, headless-rendered
@@ -24,6 +48,7 @@ no runtime bug. Screenshots overwritten in `docs/screenshots/latest/`; REPORT.md
 **Next:** no pre-decomposed builder stage. EPIC-5 (Android APK validation) is QUEUED — **Strategist must promote +
 seed stages**. Absent an `▶ ACTIVE` epic, the builder should take the topmost ROADMAP NOW item or begin chipping the
 **1076 off-system Tailwind utilities** (the measured open front), and flag that EPICS needs the Strategist.
+*(Strategist did exactly that — see the entry above: EPIC-5 promoted, off-system sweep ACTIVE.)*
 
 ---
 

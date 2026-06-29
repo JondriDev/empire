@@ -10,11 +10,13 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-06-28** (strategist) · Main: 🟢 green (build + vitest 136 / 18 files, token-violations 0) ·
-> QA: 26/26 routes render, no runtime errors. **EPIC-1 DONE** (both-ways 9/9). **EPIC-2 DONE** (token-violations
-> 501 → 0, S1–S8). **EPIC-3 · Depth pass ACTIVE** — shallow instruments offline-capable, **now 7/8** (S1 Clock +
-> S2 Music/Video shipped); **only Photos remains (S3)**, then S4 backfills DataCenter+Weather tests → EPIC-3 DONE
-> → **EPIC-4 · PWA completion** promotes (already decomposed in EPICS.md QUEUED).
+> Last re-ranked: **2026-06-29** (strategist) · Main: 🟢 green (build + vitest 205, token-violations 0,
+> off-system 1076) · QA: 26/26 routes render, no runtime errors. **EPIC-1 DONE** (both-ways 9/9). **EPIC-2 DONE**
+> (token-violations 501 → 0). **EPIC-3 DONE** (shallow instruments 8/8 offline-capable). **EPIC-4 DONE** (PWA:
+> offline ✅ + base ✅ + installable ✅, S1–S4). **▶ EPIC-5 · Design-system utility conformance ACTIVE** — sweep the
+> **1076 off-system Tailwind palette classes** (EPIC-2's blind spot; they break `[data-theme]` theme-switching) to
+> **0** via the already-built `@theme` utility bridge, cluster-by-cluster (S1 Calendar+Photos → … → S8 CI lock).
+> **Android renumbered to EPIC-6 (QUEUED)** — device-gated, not unattended-executable; promote only with on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
@@ -25,10 +27,10 @@
 ## NOW — next 3–5 increments (each one PR-sized)
 
 Pulled top-to-bottom. Each is small, concrete, and has an acceptance check.
-(The **active epic's stages (EPIC-3 S3 → S4) take precedence** — these are the on-deck
-themes feeding *future* epics.)
+(The **active epic's stages (EPIC-5 S1 → S8, design-system utility sweep) take precedence** — these are the
+on-deck themes feeding *future* epics.)
 
-### 1. Make the README tell the truth (27 apps, Cakra, current stack)
+### 1. Make the README tell the truth (25 apps, Cakra, current stack)
 **Priority: DESIGN-SYSTEM CONSISTENCY / hygiene.** `README.md` still says
 "21 Apps," centers a **Hermes AI** app, and omits the newer instruments
 (Cakra Agent, Cakra CC, AI Chat, Artifacts, Network). The product was rebranded
@@ -44,11 +46,11 @@ Hermes → **Cakra** and the registry now holds **25** apps + the desktop shell.
 - **Acceptance:** README inventory matches `registry.ts` 1:1; no stale "Hermes AI"
   central-app references; app count is correct.
 
-### 2. Lock the palette against future drift (assert CSS vars ≡ `tokens.ts`)
-**Priority: DESIGN-SYSTEM CONSISTENCY.** *(Feeds a post-EPIC-2 follow-up — promote once
-violations hit 0 so the win can't silently rot.)* Now that `src/design-system/tokens.ts` is
-the TS palette source and EPIC-2 is driving app code onto it, add a guard so a new hardcoded
-hex or a drifted CSS var fails fast.
+### 2. Lock the palette against future drift — **NOW FOLDED INTO EPIC-5 S8**
+**Priority: DESIGN-SYSTEM CONSISTENCY.** *(No longer a standalone NOW item — it became the close-out stage of the
+active epic.)* EPIC-5 S8 wires `metrics.mjs --assert-zero` into CI (fails if `tokenViolations>0 ||
+offSystemUtilities>0`) and adds a `@theme`-bridge↔`colors_and_type.css` drift test, so once off-system hits 0 the
+conformance is permanent. Kept here as a pointer; do not double-build.
 
 - **Why:** EPIC-2 gets violations to 0 by sweeping; without a ratchet, the count creeps back.
   A test that ties `colors_and_type.css` `--*` vars to their `tokens.ts` consts (and a CI check
@@ -79,18 +81,22 @@ presence is partial, so the organism's picture of it is incomplete:
 
 - **Complete the cross-app graph.** ✅ **DONE — this WAS EPIC-1** (emit↔receive loop closed,
   both-ways 9/9; Network inspector S3, ⌘K palette S4, Inbox S5 all shipped). Retired.
-- **Design-system consistency sweep.** ✅ **DONE — this WAS EPIC-2** (token-violations 501 → 0, S1–S8).
-  **Follow-on theme (not yet an epic):** extend the conformance audit to **spacing/radii/type** (ad-hoc px,
-  non-`--mono` code surfaces) with its own `metrics.mjs` row, so "design-system conformance" isn't colour-only.
-  Also: **lock the palette against drift** (NOW #2) so the 0 can't silently rot — promote alongside this.
-- **Depth pass on shallow apps.** *(In progress — this IS EPIC-3, 7/8.)* Photos (S3) is the last thin
-  instrument; S4 backfills DataCenter+Weather tests. Closes when function hits 8/8.
-- **PWA completion.** *(Decomposed as the QUEUED EPIC-4 in EPICS.md.)* Validate a **cold offline boot** of
-  the app's own chunks (not just external-host blocking), close the SW precache gap so the shell + all 25 app
-  chunks + fonts + alien icons precache, and verify base-path/install-flow so the installed PWA is identical
-  to dev. **Promotes the moment EPIC-3 is DONE.**
-- **Android APK validation.** *(QUEUED EPIC-5.)* Once PWA is solid, run the `Android APK` workflow, install
-  on-device, and verify the offline backend-optional layer degrades gracefully with no LAN server.
+- **Design-system colour conformance — full.** *(In progress — this IS EPIC-5.)* EPIC-2 zeroed raw hex/rgba
+  *literals*; EPIC-5 now zeroes the **1076 off-system Tailwind palette classes** that bypass the `@theme` token
+  bridge and break `[data-theme]`. Closes when `offSystemUtilities` hits 0 and S8's CI gate is live.
+  **Follow-on theme (next epic candidate, not yet decomposed):** extend the conformance audit to
+  **spacing/radii/type** (ad-hoc px, non-`--mono` code surfaces) with its own `metrics.mjs` row, so
+  "design-system conformance" isn't colour-only.
+- **Depth pass on shallow apps.** ✅ **DONE — this WAS EPIC-3** (shallow instruments 8/8 offline-capable; Clock,
+  Music/Video, Photos durable + DataCenter/Weather tests). Retired.
+- **PWA completion.** ✅ **DONE — this WAS EPIC-4** (cold offline boot 5/5 from precache, zero precache gap,
+  base-path/install-flow correct, installability asserted). Retired.
+- **Organism completeness II — deeper graph mirrors.** *(Next cloud-executable epic candidate after EPIC-5.)*
+  DataCenter mirrors only the active table; Files only the current directory (see NOW #3). Mirror the **whole**
+  collection so the Network reflects every app's full state — a real interconnection gradient.
+- **Android APK validation.** *(QUEUED EPIC-6 — renumbered from EPIC-5.)* Device-gated: an unattended cloud
+  builder can't install an APK or run on-device smoke, so its target isn't cloud-verifiable. Promote only when an
+  on-device QA path exists; until then it's lower *realizable* gradient than the cloud-executable themes above.
 
 ## LATER — parking lot (revisit; don't build yet)
 

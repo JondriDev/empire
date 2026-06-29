@@ -408,13 +408,13 @@ Stages (Builder takes the topmost `[ ]`; reuse the `cssVar`/`tint` rails from `t
 > (registry, providers, ColorPalette) exempted in `metrics.mjs` `DS_INFRA` with rationale. **EPIC-3 promoted to
 > ▶ ACTIVE.**
 
-## 🏁 CODE-COMPLETE — EPIC-3 · Depth pass on shallow instruments
+## ✅ DONE — EPIC-3 · Depth pass on shallow instruments
 
-> Promoted 2026-06-28 when EPIC-2 hit 0 token violations. **✅ All stages S1–S4 SHIPPED (2026-06-29).**
-> Function metric *shallow instruments with genuine persistent/offline function* = **8/8 (HIT at S3, QA-confirmed
-> 2026-06-29)**; S4 landed the "+ a unit test" discipline for the two logic-heavy redesign instruments
-> (DataCenter + Weather). **EPIC-3 is code-complete** — move to DONE on the next QA pass. **EPIC-4 · PWA
-> completion is now ACTIVE** (below); the next builder takes EPIC-4 S1.
+> **DONE 2026-06-29** (QA-confirmed). Promoted 2026-06-28 when EPIC-2 hit 0 token violations. **✅ All stages S1–S4
+> SHIPPED.** Function metric *shallow instruments with genuine persistent/offline function* = **8/8 (HIT at S3,
+> QA-confirmed 2026-06-29)**; S4 landed the "+ a unit test" discipline for the two logic-heavy redesign instruments
+> (DataCenter + Weather). EPIC-4 (PWA) shipped and closed after it; **EPIC-5 · Design-system utility conformance is
+> now ▶ ACTIVE** (below). Stage history retained for reference.
 
 **Leap:** the thin apps (Photos, Maps, Video, Music, Clock) get genuine offline-capable
 function instead of placeholders — coherence over new surface area.
@@ -556,7 +556,10 @@ _When S3 ships (function 8/8) and S4 lands (DataCenter+Weather tests) and QA con
 > install criterion against the real build). **Target metric** *Lighthouse PWA ≥ 90* is asserted as the
 > deterministic, offline-checkable manifest-installability contract those audits gate (in-cloud Lighthouse
 > rejected: heavy dep + flaky headless browser, wrong fit for the unattended routine — noted in S4).
-> **→ Strategist: confirm the offline-boots metric on the next QA pass and promote EPIC-5 · Android APK validation.**
+> **→ QA next pass:** confirm S4's `check-pwa-base.mjs` → installable ✅ on green main (the offline-boots primary
+> metric is already confirmed; S4 is deterministic + 205 green unit cases, so this is a formality). **Strategist
+> promoted the DESIGN-SYSTEM utility sweep (off-system 1076 → 0) as the new ▶ ACTIVE EPIC-5, NOT Android** — see
+> the gradient call in EPIC-5 below (Android renumbered to EPIC-6, QUEUED: device-gated, not unattended-executable).
 > **Promoted 2026-06-29** when EPIC-3 went code-complete (function 8/8 + S4 tests). Highest gradient after EPIC-3 because the
 > vision's end-state is "a complete offline-first PWA, then Android" and every app is now offline-capable
 > — the shell itself is the last thing that isn't guaranteed to load with no network.
@@ -619,8 +622,121 @@ Stages (Strategist to finalize on promotion; first-pass seeds — each one Build
   `--base=/empire/` build → **installable ✅ (4 icons)**. build🟢 vitest 205/205🟢 eslint clean; metrics no-regression
   (tokens 0, bundle 292.5, apps 25). **EPIC-4 CLOSED** (offline ✅ + base ✅ + installable ✅).
 
-## ⏳ QUEUED — EPIC-5 · Android APK validation
-> Promote after EPIC-4. **Leap:** the APK degrades gracefully with no LAN server (backend-optional layer).
+## ▶ ACTIVE — EPIC-5 · Design-system utility conformance → zero off-system utilities
+
+> **Promoted 2026-06-29** (EPIC-4 closed). **Why this is the highest-gradient move now** (one line):
+> EPIC-2 swept raw `#hex`/`rgba()` *literals* to 0 but never touched the **1076 ergonomic Tailwind palette
+> classes** (`text-gray-400`, `bg-cyan-600`, `bg-white/10`, `text-white`, `text-red-400`…) that still bypass the
+> JondriDev tokens — so apps are only *partly* on-system **and theme-switching is silently broken** (`text-white`/
+> `bg-gray-*` don't follow `[data-theme]`). This is the steepest **executable** metric gradient on the board
+> (design-system consistency ranks above PWA/Android in the priority bias), the rail is already built, and unlike
+> Android (EPIC-6) it is fully cloud + metric-verifiable. Closing it makes the organism's "one palette, themeable"
+> thesis *true*, not aspirational.
+
+**Leap:** every app consumes the design system through the token-backed utility vocabulary, so the whole Empire
+re-themes from one place under `[data-theme]` — the visual analogue of EPIC-1's "one organism."
+**Target metric:** *Off-system utilities* **1076 → 0** (`node scripts/metrics.mjs`, the `offSystemUtilities`
+row). *Routes rendering clean* stays **25/25** and *token violations* stays **0** throughout (no raw hex may
+sneak in while sweeping classes). The final stage flips `metrics.mjs --assert-zero` into a hard CI gate so the
+0 can't rot (this also delivers ROADMAP NOW #2, "lock the palette against drift").
+
+### The migration rail (already built — read ONCE, reuse every stage)
+
+The `@theme inline` bridge in **`src/index.css:25-47`** already exposes the canonical tokens as Tailwind
+utilities (theme-aware, because each resolves to `var(--token)` and follows `[data-theme]`). **`Clock.tsx` is
+the worked reference — already at 0 off-system** (migrated in `9051409`); diff it for the exact idiom. The
+canonical map (Builder: apply verbatim — do NOT invent new tokens unless a target is genuinely missing, in which
+case add ONE `--color-*` to the `@theme` block + note it):
+
+| Off-system class (and kin) | → token utility |
+|---|---|
+| `text-white`, `text-gray-100/200/300` (bright labels) | `text-fg` |
+| `text-gray-400/500`, `text-slate-400`, `text-zinc-400` | `text-muted` |
+| `text-gray-600`, `text-slate-500` (faintest), `text-white/40` | `text-faint` |
+| `bg-white/5`, `bg-white/10` (glass surfaces) | `bg-glass` (keep the `/N` opacity if present) |
+| `bg-gray-800/900`, `bg-slate-900`, `bg-black`, `bg-black/40` | `bg-void` (keep `/N`) |
+| `border-white/10`, `border-gray-700/800`, `border-slate-800` | `border-hair` |
+| `*-cyan-*`, `*-teal-*` (the brand accent) | `*-signal` (`text-`/`bg-`/`border-` all generate) |
+| `*-blue-*`, `*-indigo-*` | `*-ion` |
+| `*-purple-*`, `*-violet-*`, `*-fuchsia-*` | `*-plasma` |
+| `*-amber-*`, `*-orange-*` | `*-ember` (or `*-warn` for warning-state semantics) |
+| `*-emerald-*`, `*-green-*`, `*-lime-*` | `*-success` |
+| `*-red-*`, `*-rose-*`, `*-pink-*` | `*-danger` |
+| `*-sky-*` | `*-info` |
+| `*-yellow-*` | `*-warn` |
+| arbitrary `bg-[#…]` / `text-[rgb(…)]` | the matching token utility (NOT a new arbitrary value) |
+
+**Acceptance discipline (every stage):** the named files report **0** in `node scripts/metrics.mjs`
+(`offSystemUtilities` per-file → 0); `tokenViolations` stays **0** (you replaced classes with classes — never
+drop in a raw hex/rgba); build🟢 `vitest`🟢 eslint clean; the migrated apps still render in QA (25/25). Decide
+each accent by *role* (an accent button → `signal`; a destructive action → `danger`; a state pill → `success`/
+`warn`/`danger`/`info`) — don't mechanically collapse every blue to `ion` if it's really an accent. **Stages are
+ordered by descending mass so the heaviest leverage lands first; each is one Builder run, no re-planning.**
+
+Stages (Builder takes the topmost `[ ]`; counts are current `metrics.mjs` per-file values):
+
+- [ ] **S1 · Confirm the bridge + sweep the two heaviest entity apps (Calendar 81 + Photos 76 → 0).**
+  First, **verify the `@theme` bridge in `src/index.css` covers every target in the map above** (it does today —
+  fg/muted/faint/hair/glass/void + signal/aurora/ion/ember/plasma/xenon + success/warn/danger/info; if a clean
+  migration needs a token that's missing, add exactly one `--color-*: var(--…)` line there and note it). Then
+  migrate **`src/apps/calendar/Calendar.tsx`** (81→0) and **`src/apps/photos/Photos.tsx`** (76→0) class-by-class
+  per the map — Photos keeps its `ephemeral` "session" chip but swaps the `amber-*` utilities for `bg-warn`/
+  `text-warn` (the chip was the off-system idiom the mandate flagged). *Acceptance:* `metrics.mjs` reports 0 for
+  both files (off-system **1076 → ~919**); tokenViolations 0; build🟢 vitest🟢 eslint clean; both render in QA.
+  *(~157.)*
+- [ ] **S2 · Artifacts cluster A (FormBuilder 71 + Flashcards 53 + ArtifactGallery 34 + ArtifactsApp 10 → 0).**
+  `src/apps/artifacts/artifacts/FormBuilder.tsx`, `…/Flashcards.tsx`, `src/apps/artifacts/ArtifactGallery.tsx`,
+  `src/apps/artifacts/ArtifactsApp.tsx`. These are categorical-heavy — where a class is a *series/field* colour,
+  prefer the existing `CATEGORICAL` rail (`tokens.ts`) via inline style if a utility doesn't fit; otherwise map
+  per the table. *Acceptance:* 0 for all four (off-system **~919 → ~751**); tokenViolations 0; build🟢 vitest🟢. *(~168.)*
+- [ ] **S3 · Artifacts cluster B — CLOSES artifacts (ChartBuilder 46 + MarkdownStudio 39 + Kanban 38 → 0).**
+  `src/apps/artifacts/artifacts/ChartBuilder.tsx`, `…/MarkdownStudio.tsx`, `…/Kanban.tsx`. After this the whole
+  `src/apps/artifacts/**` (291 at epic start) is 0 off-system (ColorPalette stays exempt — content). *Acceptance:*
+  0 for all three (off-system **~751 → ~628**); tokenViolations 0; build🟢 vitest🟢. *(~123.)*
+- [ ] **S4 · Text-tool apps (TokenCounter 54 + PromptGenerator 52 + Grammar 51 → 0).**
+  `src/apps/token-counter/TokenCounter.tsx`, `src/apps/prompt-generator/PromptGenerator.tsx`,
+  `src/apps/grammar/Grammar.tsx`. Watch the provenance chips here (TokenCounter/PromptGenerator are S1 receivers) —
+  the `<ProvenanceChip>` already uses tokens; only the surrounding app chrome needs the sweep. *Acceptance:* 0 for
+  all three (off-system **~628 → ~471**); tokenViolations 0; build🟢 vitest🟢. *(~157.)*
+- [ ] **S5 · Files + media + editor (Files 49 + Music 44 + Video 35 + Editor 35 → 0).**
+  `src/apps/files/Files.tsx`, `src/apps/music/Music.tsx`, `src/apps/video/Video.tsx`, `src/apps/editor/Editor.tsx`.
+  Music/Video also carry the `ephemeral` "session" `amber-*` chip → `bg-warn`/`text-warn` (same swap as Photos S1).
+  *Acceptance:* 0 for all four (off-system **~471 → ~308**); tokenViolations 0; build🟢 vitest🟢. *(~163.)*
+- [ ] **S6 · Cakra + Browser + Learning (Cakra 58 + Browser 40 + LearningTracker 35 → 0).**
+  Cakra files: `src/apps/cakra/AIChat.tsx` (48), `…/AgentSurface.tsx` (7), `…/components/WorkspacePanel.tsx` (2),
+  `…/components/ModelPicker.tsx` (1) — **`cakra/lib/providers.ts` stays exempt** (brand-identity data, already in
+  `DS_INFRA`); plus `src/apps/browser/Browser.tsx` (40) and `src/apps/learning-tracker/LearningTracker.tsx` (35,
+  an S6a provenance receiver). *Acceptance:* 0 for all six (off-system **~308 → ~175**); tokenViolations 0;
+  build🟢 vitest🟢. *(~133.)*
+- [ ] **S7 · Long-tail → ZERO (Language 38 + Weather 38 + Messages 33 + Cache 22 + Maps 19 + DataCenter 16 +
+  Dashboard 8 + Desktop 1 → 0).** `src/apps/language/Language.tsx`, `src/apps/weather/Weather.tsx`,
+  `src/apps/messages/Messages.tsx`, `src/apps/cache/CacheCleaner.tsx`, `src/apps/maps/Maps.tsx`,
+  `src/apps/datacenter/DataCenter.tsx`, `src/dashboard/Dashboard.tsx`, `src/components/Desktop.tsx` (keep the
+  `${app.color}` registry-accent interpolation in Desktop — that's identity data, only the literal palette
+  classes get swept). *Acceptance:* `node scripts/metrics.mjs` reports **off-system 0** across all of `src/`;
+  tokenViolations 0; build🟢 vitest🟢 — every app on-system. *(~175.)*
+- [ ] **S8 · LOCK the win (EPIC-5 CLOSE).** Now that off-system is 0, make it un-rottable:
+  - Wire `node scripts/metrics.mjs --assert-zero` into the CI workflow (the gate already exists in
+    `scripts/metrics.mjs:225-234` — it fails if `tokenViolations>0 || offSystemUtilities>0`; just invoke it in the
+    repo's CI step, beside the existing route-parity guard). *(Build-routine task — CI/config, outside docs scope.)*
+  - Add a vitest (e.g. `src/design-system/themeBridge.test.ts`) asserting every `@theme` `--color-*` maps to a
+    real `--token` declared in `colors_and_type.css` (so a future bridge edit that points a utility at a dead var
+    fails fast). This also satisfies ROADMAP NOW #2 (palette-drift lock).
+  - *Acceptance:* a new off-system class **or** a drifted bridge var fails CI red; `metrics.mjs --assert-zero` →
+    `✓ design-system conformance: tokenViolations=0, offSystemUtilities=0`. **EPIC-5 CLOSED — off-system 1076 → 0.**
+
+_When S1–S7 ship and S8's gate is green AND QA confirms `offSystemUtilities` hit **0** on green main → move
+EPIC-5 to DONE and promote the next highest-gradient epic (re-rank EPIC-6 Android vs an organism-completeness-II
+epic from the ROADMAP — Android only if on-device QA becomes available; otherwise the DataCenter/Files
+whole-state graph-mirror theme is the next cloud-executable gradient)._
+
+---
+
+## ⏳ QUEUED — EPIC-6 · Android APK validation
+> **Renumbered from EPIC-5 (2026-06-29)** — design-system utility conformance took the EPIC-5 active slot as the
+> higher *realizable* gradient. **Device-gated:** an unattended cloud builder on a fresh checkout cannot install
+> an APK or run on-device smoke, so this epic's target metric isn't cloud-verifiable — **promote only when an
+> on-device QA path exists.** **Leap:** the APK degrades gracefully with no LAN server (backend-optional layer).
 > **Target metric:** APK installs + all offline-capable apps function on-device with `server.js` absent.
 > Stage seeds: run the `Android APK` workflow; verify the backend-optional fallbacks (Files' `/api/files`
 > 500 → on-device storage path, etc.); on-device smoke of the 8 offline instruments.
