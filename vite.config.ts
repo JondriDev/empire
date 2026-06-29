@@ -33,7 +33,12 @@ export default defineConfig({
         description: 'Your personal web desktop — 26 apps, one intelligence.',
         start_url: '.',
         scope: '.',
-        id: '/',
+        // `id` is resolved against start_url's ORIGIN (its path is ignored), so a
+        // root '/' would (a) collide with any other PWA on a shared origin like
+        // github.io and (b) not identify *this* app under /empire/. A relative
+        // path segment gives ONE stable identity (`<origin>/empire`) across every
+        // deploy base — same-origin-valid, never the bare origin root.
+        id: 'empire',
         display: 'standalone',
         display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
         background_color: '#03060e',

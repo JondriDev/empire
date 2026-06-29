@@ -582,10 +582,32 @@ Stages (Strategist to finalize on promotion; first-pass seeds — each one Build
   no code change — the precache config in `vite.config.ts` (Workbox `generateSW`, `globPatterns` + 5 MB cap) is
   already complete. *If a future chunk ever exceeds the 5 MB `maximumFileSizeToCacheInBytes` cap, the S1 audit will
   enumerate it as missing — that's the trip-wire.* → **EPIC-4 next real stage is S3.**
-- [ ] **S3 · Base-path + install-flow correctness.** Confirm `base` is correct for the deploy target so the
-  installed PWA's asset URLs resolve (the blank-on-install class of bug); add a lightweight check that the
-  manifest `start_url`/`scope` match `base`. *Acceptance:* built app loads under the deploy base with no 404
-  asset; install prompt criteria met.
+- [x] **S3 · Base-path + install-flow correctness.** **Shipped 2026-06-29.** Added a pure base-path auditor
+  `scripts/pwaBaseAudit.mjs` (`auditPwaBase` + `auditHtmlBase`/`auditSwBase`/`auditRegisterSw`/`auditManifest`/
+  `extractHtmlAssetUrls`/`normalizeBase`) + `scripts/pwaBaseAudit.test.mjs` (17 cases) and a self-contained runner
+  `scripts/check-pwa-base.mjs` that **builds with `EMPIRE_BASE=/empire/` into a throwaway `dist-pwa-base-check`**
+  (real `dist/` untouched) and asserts the whole install surface carries the base: every `<script src>`/`<link
+  href>` in `index.html` is base-prefixed, the manifest is linked+prefixed, `sw.js` `navigateFallback ===
+  base+'index.html'`, `registerSW.js` registers `base+'sw.js'` with `scope: base`, and the manifest is
+  base-agnostic (`start_url`/`scope` relative `.`). **Fixed the one real install bug found:** manifest `id` was
+  the bare root `'/'` — but `id` resolves against `start_url`'s **origin** (path ignored, per MDN), so on the
+  shared `github.io` origin a root id collides with any other PWA and doesn't identify *this* app under `/empire/`.
+  Changed to `id: 'empire'` → one stable `<origin>/empire` identity across every deploy base (same-origin-valid,
+  never bare-root). **Acceptance MET:** `node scripts/check-pwa-base.mjs` ✅ — 11 assets prefixed, manifest linked,
+  navigateFallback `/empire/index.html`, registerSW `/empire/sw.js` scope `/empire/`, start_url/scope `.`, id
+  `empire`. build🟢 vitest 176→193🟢 (+1 file, +17 cases) eslint clean; token-violations 0 (±0), bundle 292.5 (±0).
+  *Not browser-verifiable in cloud:* the actual install prompt + post-install boot under the Pages base needs a
+  real device/Lighthouse; the check proves the asset/SW/manifest surface that the install relies on.
+- [ ] **S4 · Lighthouse-PWA / installability assertion (close the target metric).** The target metric is
+  *Lighthouse PWA ≥ 90* — S1–S3 made the app offline-true + base-correct but nothing yet asserts the
+  *installability* criteria as a number. *Shape:* either run Lighthouse's PWA category against the built app
+  served locally (if the `lighthouse` CLI/`chrome-launcher` can be driven headless in-cloud — investigate first;
+  may be egress/Chrome-flag-blocked), OR, if not feasible offline, add a pure manifest-installability auditor
+  (`auditInstallability(manifest)` — name+short_name present, ≥192px & ≥512px `any` icons + a `maskable` icon,
+  `display` standalone-ish, `start_url`, `background_color`/`theme_color`) wired into `check-pwa-base.mjs` so the
+  install-criteria are gated programmatically. Reuse the `pwaBaseAudit.mjs` pure-helper + `*.test.mjs` pattern.
+  *Acceptance:* a green check asserts every installability criterion; if Lighthouse runs in-cloud, PWA ≥ 90 is
+  recorded. **This stage closes EPIC-4** (offline ✅ + base ✅ + installable ✅).
 
 ## ⏳ QUEUED — EPIC-5 · Android APK validation
 > Promote after EPIC-4. **Leap:** the APK degrades gracefully with no LAN server (backend-optional layer).

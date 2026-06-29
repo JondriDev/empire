@@ -25,18 +25,29 @@
 - **Active epic:** **EPIC-4 — PWA completion → installable, offline-true** (promoted 2026-06-29 when EPIC-3 went
   code-complete). **Target metric:** *Lighthouse PWA ≥ 90* **AND** the **`offline-boots` smoke guard** (the
   built app loads + renders the desktop with the network FULLY blocked). **Stages: S1 ✅ (offline-boot guard +
-  precache audit), S2 ✅ (no-op — audit proved zero gap), → ▶ S3 base-path/install-flow.**
-  - **▶ NEXT STAGE = EPIC-4 S3 · Base-path + install-flow correctness.** Full shape in EPICS.md S3. **The work:**
-    confirm `base` resolves correctly for each deploy target so the installed PWA's asset URLs don't 404 (the
-    blank-on-install class of bug). `vite.config.ts:11` sets `base = process.env.EMPIRE_BASE || '/'`; the GitHub
-    Pages workflow sets `EMPIRE_BASE=/empire/`. The manifest uses **relative** `start_url:'.'`/`scope:'.'` (so the
-    same manifest works under `/` and `/empire/`) but `id:'/'` — check `id` consistency. **Shape:** add a
-    lightweight check (extend `scripts/qa-offline.mjs` or a new `scripts/check-pwa-base.mjs`) that **builds with
-    `EMPIRE_BASE=/empire/`**, asserts every `<script>/<link>` href in `dist/index.html` is prefixed with the base,
-    the manifest is reachable, and `sw.js`'s `navigateFallback` matches the base. Reuse the pure-helper +
-    `*.test.mjs` pattern S1 established. **Acceptance:** built app loads under the deploy base with no 404 asset;
-    a check asserts manifest `start_url`/`scope`/`base` agree. build🟢. **Reuse `launchBrowser()` recipe + the
-    `node:http` static server from `qa-offline.mjs`.**
+  precache audit), S2 ✅ (no-op — audit proved zero gap), S3 ✅ (base-path/install-flow correctness), → ▶ S4
+  Lighthouse-PWA / installability assertion (CLOSES EPIC-4).**
+  - **▶ NEXT STAGE = EPIC-4 S4 · Lighthouse-PWA / installability assertion (EPIC-4 CLOSE).** Full shape in EPICS.md
+    S4. **The work:** S1–S3 made the app offline-true + base-correct, but nothing yet asserts the *installability*
+    criteria as a number (the target is *Lighthouse PWA ≥ 90*). **Step 1 — investigate first:** can Lighthouse run
+    headless in-cloud? Try `npx lighthouse` / `chrome-launcher` against the built app served on `:3101` (reuse
+    `qa-offline.mjs`'s `node:http` server + `launchBrowser()` Chromium path `/opt/pw-browsers/chromium-*`). It may
+    be egress/Chrome-flag-blocked (no `lighthouse` dep — would need install; CONTEXT says don't add deps unless the
+    stage calls for it — note it if you do). **Step 2 — fallback if Lighthouse won't run offline:** add a PURE
+    `auditInstallability(manifest)` to `scripts/pwaBaseAudit.mjs` (name+short_name, ≥192 & ≥512 `any` icons + a
+    `maskable` icon, `display` standalone-ish, `start_url`, `background_color`/`theme_color`) + cases in
+    `pwaBaseAudit.test.mjs`, and wire it into `scripts/check-pwa-base.mjs` so install-criteria are gated
+    programmatically. **The manifest already has all the icons** (`pwa-192/512`, `maskable-512`, `icon.svg`) so the
+    pure auditor should pass — this just pins it. **Acceptance:** a green check asserts every installability
+    criterion. **Reuse the `pwaBaseAudit.mjs` pure-helper + `*.test.mjs` pattern S3 established (below).**
+  - **✅ EPIC-4 S3 SHIPPED (2026-06-29):** base-path/install-flow correctness. New pure auditor
+    `scripts/pwaBaseAudit.mjs` (`auditPwaBase` aggregates `auditHtmlBase`/`auditSwBase`/`auditRegisterSw`/
+    `auditManifest`; `extractHtmlAssetUrls`, `normalizeBase`) + `pwaBaseAudit.test.mjs` (17 cases) + runner
+    `scripts/check-pwa-base.mjs` (builds with `--base=/empire/ --outDir=dist-pwa-base-check`, gitignored, cleaned
+    up; audits asset prefixes + sw navigateFallback + registerSW scope + relative manifest). **Fixed:** manifest
+    `id:'/'`→`id:'empire'` in `vite.config.ts` (`id` resolves vs `start_url`'s ORIGIN per MDN, so root `/` collides
+    on shared `github.io`; `'empire'` = stable `<origin>/empire` identity for every base). `node
+    scripts/check-pwa-base.mjs` ✅. vitest 176→193 (+17), tokens 0, bundle 292.5 — all no-regression.
   - **✅ EPIC-4 S1 SHIPPED + S2 NO-OP (2026-06-29):** see seams below — `scripts/precacheAudit.mjs` (pure parse +
     audit, 6 unit tests), `scripts/qa-offline.mjs` (cold-offline boot guard via `setOffline(true)`, 5/5 routes),
     wired into `qa-smoke.mjs`. **Precache has ZERO gap** (63 entries cover all 37 JS + 2 CSS + fonts/icons), so S2
@@ -321,6 +332,27 @@
   - **vitest `include` now also matches `scripts/**/*.{test,spec}.mjs`** (`vitest.config.ts:10`) so QA-tooling
     logic can be unit-pinned alongside the app tests. (metrics.mjs still counts only `src/` tests — `scripts/`
     tests don't move the test-cases metric.)
+
+- **PWA base-path / install-flow audit (EPIC-4 S3, 2026-06-29):**
+  - `vite.config.ts:11` — `const base = process.env.EMPIRE_BASE || '/'`. Manifest is **base-agnostic**:
+    `start_url:'.'`/`scope:'.'` (relative → resolve vs the manifest's own URL, adapt to any base) and now
+    **`id:'empire'`** (was `'/'`; `id` resolves vs `start_url`'s ORIGIN with its path ignored — per MDN — so a
+    root id collides on a shared origin like `github.io`; a relative path segment gives one stable
+    `<origin>/empire` identity for every deploy base). Workbox `navigateFallback: base + 'index.html'`.
+  - `scripts/pwaBaseAudit.mjs` — **pure** seam (text + base in → report out, no fs/browser):
+    `auditPwaBase({html, swText, registerSwText, manifestText, base})` aggregates `auditHtmlBase` (every local
+    `<script src>`/`<link href>` prefixed with base + manifest linked), `auditSwBase` (Workbox inlines
+    `createHandlerBoundToURL("<base>index.html")` — regex-pull + compare), `auditRegisterSw`
+    (`register('<base>sw.js',{scope:'<base>'})`), `auditManifest` (start_url/scope relative + id a stable
+    non-root same-origin path). Helpers `extractHtmlAssetUrls`, `normalizeBase`. Unit-tested in
+    `scripts/pwaBaseAudit.test.mjs` (17 cases).
+  - `scripts/check-pwa-base.mjs` — the **runner**. `spawnSync('npx', ['vite','build','--base=<BASE>',
+    '--outDir=dist-pwa-base-check','--emptyOutDir'])` (BASE = `PWA_CHECK_BASE` || `/empire/`), reads the emitted
+    `index.html`/`sw.js`/`registerSW.js`/`manifest.webmanifest`, runs `auditPwaBase`, writes
+    `docs/screenshots/latest/PWA-BASE.md` + `/tmp/pwa-base.json`, **rm's the throwaway outDir** (gitignored), exits
+    non-zero on any mismatch. **Run standalone** `node scripts/check-pwa-base.mjs` (does its own build — needs no
+    pre-existing dist, never touches the real `dist/`). NOT wired into `qa-smoke.mjs` (it does a full vite build;
+    avoid doubling smoke's build time) — QA can run it on demand; the pure-helper tests give the ongoing guard.
 
 ## ⚠️ Invariants & traps (do NOT relearn these the hard way)
 

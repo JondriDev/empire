@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-pwa-base-check
 *.local
 
 # Local data & secrets — never publish

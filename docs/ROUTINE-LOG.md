@@ -5,6 +5,45 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · EPIC-4 S3 — Base-path + install-flow correctness
+
+**Metrics:** apps 25 (±0) · test files 21 metrics / **23 vitest (+1)** · test cases 163 metrics / **193 vitest
+(+17)** · **token-violations 0 (±0)** · off-system-utils 1076 (±0) · bundle gz 292.5 (±0). build🟢 vitest
+193/193🟢 eslint clean.
+
+**Done.** Shipped EPIC-4 S3 — the install surface is now provably correct under a sub-path deploy (GitHub Pages
+serves at `/empire/`). The "blank-on-install" bug class is: a build whose asset URLs / SW navigateFallback / SW
+registration scope / manifest don't carry the deploy base, so the installed app 404s its own chunks.
+- **New pure auditor `scripts/pwaBaseAudit.mjs`** (text + base in → report out, no fs/browser):
+  `auditPwaBase({html,swText,registerSwText,manifestText,base})` aggregates `auditHtmlBase` (every local
+  `<script src>`/`<link href>` prefixed with base + manifest linked+prefixed), `auditSwBase` (Workbox inlines
+  `createHandlerBoundToURL("<base>index.html")`), `auditRegisterSw` (`register('<base>sw.js',{scope:'<base>'})`),
+  `auditManifest` (start_url/scope relative `.` + id a stable non-root same-origin path). + `pwaBaseAudit.test.mjs`
+  (17 cases).
+- **New runner `scripts/check-pwa-base.mjs`** — `spawnSync vite build --base=/empire/ --outDir=dist-pwa-base-check
+  --emptyOutDir` (gitignored throwaway, cleaned up; real `dist/` untouched), reads the emitted files, runs the
+  audit, writes `docs/screenshots/latest/PWA-BASE.md` + `/tmp/pwa-base.json`, exits non-zero on mismatch.
+- **Fixed the one real install bug found:** manifest `id` was bare root `'/'`. Per MDN, `id` resolves against
+  `start_url`'s **origin** (its path is ignored), so on the shared `github.io` origin a root id (a) could collide
+  with any other PWA there and (b) doesn't identify *this* app under `/empire/`. Changed `vite.config.ts`
+  `id:'/'`→`id:'empire'` → one stable `<origin>/empire` identity across every deploy base (same-origin-valid,
+  never bare-root). `start_url`/`scope` were already correctly relative `'.'`.
+
+**Verified.** `npm run build` 🟢 (default base + `/empire/` base both build clean). `node scripts/check-pwa-base.mjs`
+✅ — 11 index.html assets all `/empire/`-prefixed, manifest linked, `navigateFallback=/empire/index.html`,
+registerSW `/empire/sw.js` scope `/empire/`, manifest `start_url`/`scope`=`.`, `id`=`empire`. Full vitest 193/193🟢
+(176 + 17 new), eslint clean on touched files, `node scripts/metrics.mjs` no-regression (tokens 0, bundle 292.5,
+off-system 1076 — all ±0; the +17 tests live in `scripts/` which metrics counts separately, by design).
+**Not browser-verifiable in cloud:** the real install prompt + post-install cold boot under the Pages base needs a
+device/Lighthouse; this check proves the static asset/SW/manifest surface the install relies on.
+
+**Next step.** EPIC-4 **S4 · Lighthouse-PWA / installability assertion** (closes EPIC-4). Investigate whether
+Lighthouse can run headless in-cloud against the built app on `:3101`; if not (likely egress/Chrome-flag-blocked,
++ no `lighthouse` dep), add a pure `auditInstallability(manifest)` to `pwaBaseAudit.mjs` (name/short_name, ≥192 &
+≥512 `any` icons + maskable, display, start_url, theme/background colors) wired into `check-pwa-base.mjs`. The
+manifest already ships every icon, so the pure auditor should pass — this pins the installability criteria as a
+gated check. See CONTEXT.md active-epic block for the exact shape.
+
 ## 2026-06-29 · QA visual + smoke — 26/26 green on `9051409` (EPIC-4 S1 offline-boots guard CONFIRMED MOVED, LIVE)
 
 **Metrics:** apps 25 (±0) · test files 21 metrics / **22 vitest** · test cases 163 metrics / **176 vitest** ·
