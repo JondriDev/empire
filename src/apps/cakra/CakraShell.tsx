@@ -50,21 +50,31 @@ export default function CakraShell() {
   return (
     <div className="h-full flex flex-col" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       {/* Segmented tab bar */}
-      <div className="flex items-center gap-1 px-3 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
+      <div className="flex items-center gap-1 px-3 py-2 border-b" style={{ borderColor: 'var(--border)' }} role="tablist">
         {TABS.map(({ id, label, Icon }) => {
           const active = tab === id
           return (
             <button
               key={id}
               onClick={() => setTab(id)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+              role="tab"
+              aria-selected={active}
+              className="press relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
               style={active
-                ? { background: 'color-mix(in srgb, var(--c-cakra) 22%, transparent)', color: 'var(--c-cakra)' }
+                ? { background: 'color-mix(in srgb, var(--c-cakra) 20%, transparent)', color: 'var(--c-cakra)' }
                 : { color: 'var(--text3)' }}
-              aria-pressed={active}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'var(--text)' }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.color = 'var(--text3)' }}
             >
               <Icon className="w-4 h-4" />
               {label}
+              {active && (
+                <span
+                  aria-hidden
+                  className="absolute left-3 right-3 -bottom-[7px] h-0.5 rounded-full animate-fade-in"
+                  style={{ background: 'var(--c-cakra)' }}
+                />
+              )}
             </button>
           )
         })}
