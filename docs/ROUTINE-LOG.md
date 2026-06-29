@@ -5,6 +5,51 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · Deps & Security — safe minors applied; vite/vitest majors deferred (dev-only vulns); route-parity CI guard landed
+
+**Done.** Fresh cloud checkout on green main (`abac917`); baseline build🟢 vitest 143🟢 (18 files) shell-styled🟢.
+
+**Deps.**
+- **Applied (safe minors, build+tests still 🟢):** `lucide-react` 1.21.0→1.22.0, `motion` 12.40.0→12.42.0,
+  `typescript-eslint` 8.61.1→8.62.0. Bundle gz **291.2→291.9** (+0.7, the lucide/motion bumps). Lockfile intact.
+- **Security — 5 vulns (1 critical, 1 high, 3 moderate), ALL deferred to human decision (NOT applied).** Every
+  vuln chains through **vite** (HIGH: dev-server path-traversal in optimized-deps `.map`; Windows `server.fs.deny`
+  bypass; launch-editor NTLMv2 leak) and **vitest** (CRITICAL: Vitest UI server arbitrary file read+exec) — and
+  the *only* fix is **vite 5→8 + vitest 2→4 + @vitejs/plugin-react 4→6** (a coordinated triple-major).
+  - **Two reasons to defer (both decisive for an unattended, no-reviewer, LIVE-PWA run):**
+    1. **Not shipped.** All 5 are **dev-server / test-runner-UI** advisories. None of vite/vitest code is in the
+       built `dist/` PWA, so the live app's runtime attack surface is **unaffected** by staying on vite 5.
+    2. **Not "clearly safe."** **vite 8 swaps the bundler from rollup → rolldown** (`rolldown ~1.1.2`); the
+       existing `vite.config.ts` `manualChunks` record already fails to type-check under it
+       (`TS2769 … 'react-vendor' does not exist in type 'ManualChunksFunction'`), i.e. the production *bundler
+       engine* changes (chunking/tree-shaking/precache semantics) — exactly the kind of change that can't be
+       runtime-verified headless and shouldn't land on a live PWA without a human in the loop.
+  - **Attempted + reverted cleanly:** did a clean `vite@8 vitest@4 plugin-react@6` install (→ `0 vulnerabilities`),
+    hit the rolldown `manualChunks` build break, and restored the safe lockfile (build🟢 again). No partial state.
+  - **HUMAN DECISION NEEDED:** migrate `vite.config.ts` `manualChunks` to the rolldown-compatible form and adopt
+    vite 8 / vitest 4 (clears all 5 vulns), **or** stay on vite 5 (vulns are dev-only, no prod exposure). Other
+    deferred majors (no security pressure): eslint 10, @eslint/js 10, typescript 6, jsdom 29, globals 17,
+    @types/node 26, eslint-plugin-react-hooks 7.
+
+**Leverage (one this week) — static `registry ↔ appComponents` route-parity guard.** `scripts/check-route-parity.mjs`
+(dependency-free, Node built-ins; no build/browser needed) + a step in `.github/workflows/verify.yml`. Asserts the
+app **identity** manifest (`src/lib/registry.ts`, 25 apps) and the **lazy component** map (`src/lib/appComponents.tsx`)
+stay in lockstep — **(1)** every registry id has a component, **(2)** every component key is a real registry id,
+**(3)** every lazy `import()` path resolves to a file on disk. **This removes the recurring "App-not-available"
+drift cost** documented at the top of `appComponents.tsx`: an app added/renamed in one file but not the other
+renders the fallback when launched, yet `tsc -b && vite build` stays GREEN (a missing map key is an `undefined`
+lookup, not a type error) and QA only catches it with a *running browser*. Now it's a green/red static gate.
+Adversarially tested all 3 failure modes (forward-missing, reverse-orphan, bad import path → exit 1) + healthy
+tree (exit 0). No app-behavior change; reversible (delete script + workflow step).
+
+**Verified.** build🟢 (tsc -b && vite build) · vitest **143/143** (18 files) · `check-shell-styled.mjs` 🟢 ·
+`check-route-parity.mjs` 🟢 (25 ids agree both directions). **Metrics (vs `abac917`):** apps 25 (±0) · test cases
+136 (±0) · token-violations 0 (±0) · off-system-utils 1160 (±0) · bundle gz 291.2→291.9 (+0.7, dep bumps; the
+guard itself is CI-only, **±0** to the bundle). **Next:** human call on the vite 8 / vitest 4 (rolldown) migration
+to clear the dev-only vuln chain; otherwise next routine re-checks audit/outdated and lands the next guard.
+
+---
+
 ## 2026-06-28 · Strategist — EPIC-3 refined: razor-sharp S3 (Photos) + S4 close; EPIC-4 PWA seeded
 
 **Done.** EPIC-3 stays ACTIVE (S1 Clock + S2 Music/Video shipped; function now **7/8**). Reframed the target to
