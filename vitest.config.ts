@@ -7,7 +7,9 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    // src holds the app tests; scripts/ holds pure build/QA-tooling logic
+    // (e.g. the PWA precache audit) that is worth unit-pinning too.
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.{test,spec}.mjs'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

@@ -560,16 +560,28 @@ installable, and is byte-identical to dev — turning "26 offline apps" into "on
 loads + renders the desktop with the network fully blocked (today's QA only blocks *external* hosts; it
 never asserts a cold offline boot of the app's own chunks).
 Stages (Strategist to finalize on promotion; first-pass seeds — each one Builder run, build-green):
-- [ ] **S1 · Offline-boot guard + SW precache audit.** Add `scripts/qa-offline.mjs` (or extend
-  `qa-smoke.mjs`): serve `dist/`, load with `page.route('**', …)` aborting **all** requests after first
-  load, assert the desktop shell + one lazy app route still render from the SW/precache. Inventory what the
-  service worker actually precaches vs the 25 lazy app chunks (find the SW config — likely `vite-plugin-pwa`
-  in `vite.config.ts` or a manual `sw.js`). *Acceptance:* the guard runs in QA and reports cold-offline
-  pass/fail; the precache gap (chunks not cached) is enumerated.
-- [ ] **S2 · Close the precache gap.** Configure the SW (Workbox `globPatterns` / runtime caching) so the
-  shell + every app chunk + fonts + the alien SVG icon set are precached; verify `dist` includes a manifest
-  + icons at the right sizes. *Acceptance:* the S1 offline-boot guard goes green for the shell **and** a
-  cold-navigated app route; manifest + maskable icons present.
+- [x] **S1 · Offline-boot guard + SW precache audit.** **Shipped 2026-06-29.** Added pure
+  `scripts/precacheAudit.mjs` (`extractPrecacheUrls`/`auditPrecache` — parses the inlined Workbox manifest out
+  of `dist/sw.js` and cross-checks it against every emitted `dist/assets` chunk) + `scripts/precacheAudit.test.mjs`
+  (6 cases; vitest `include` broadened to `scripts/**/*.test.mjs`). New `scripts/qa-offline.mjs` — self-contained
+  (own `node:http` static server for `dist/` with SPA fallback + own browser): warm-loads so the SW installs +
+  precaches, then `context.setOffline(true)` to block **ALL** network and asserts the shell `/` + 4 lazy routes
+  (`clock`/`maps`/`network`/`photos`) still render from precache; writes `docs/screenshots/latest/OFFLINE.md` +
+  `/tmp/qa-offline.json`. Wired into `qa-smoke.mjs` (spawned after the smoke pass, folded into REPORT.md, non-fatal).
+  **Audit result: NO GAP** — 63 precache entries / 1150.93 KiB cover all 37 JS (incl. all 25 lazy app chunks) + 2 CSS
+  + fonts + icons (the existing `globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,json}']` + 5 MB cap already
+  catch everything; Maps' 160 KB chunk is under the cap). **Cold-offline boot 5/5 ✅** verified live this run.
+  build🟢 vitest 170→176🟢 (+1 file, +6 cases) eslint clean; token-violations 0 (±0), bundle 292.3 (±0).
+  *Used `setOffline(true)` rather than the seed's `page.route('**',abort)` — it's the faithful cold-offline
+  primitive: it fails real network while Cache Storage still serves, so a non-precached chunk falls through to a
+  dead network and the render breaks (exactly what the guard must catch).*
+- [x] **S2 · Close the precache gap.** **No-op — done by S1's audit (2026-06-29).** S1 proved the precache has
+  **zero gap**: the shell + every app chunk + fonts + the alien SVG icon set + `manifest.webmanifest` are already
+  precached (63 entries), and `dist` ships `pwa-192/512`, `maskable-512`, `icon.svg`. The S1 offline-boot guard is
+  green for the shell **and** cold-navigated app routes (5/5). There is no gap left to close, so this stage carries
+  no code change — the precache config in `vite.config.ts` (Workbox `generateSW`, `globPatterns` + 5 MB cap) is
+  already complete. *If a future chunk ever exceeds the 5 MB `maximumFileSizeToCacheInBytes` cap, the S1 audit will
+  enumerate it as missing — that's the trip-wire.* → **EPIC-4 next real stage is S3.**
 - [ ] **S3 · Base-path + install-flow correctness.** Confirm `base` is correct for the deploy target so the
   installed PWA's asset URLs resolve (the blank-on-install class of bug); add a lightweight check that the
   manifest `start_url`/`scope` match `base`. *Acceptance:* built app loads under the deploy base with no 404

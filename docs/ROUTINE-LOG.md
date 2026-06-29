@@ -5,6 +5,44 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · EPIC-4 S1 — Offline-boot guard + SW precache audit (S2 also closed: zero gap)
+
+**Metrics:** apps 25 (±0) · test files 21 (±0 in metrics; +1 `.mjs` tooling test it doesn't count) · test cases
+163 metrics / **176 vitest** (+6) · **token-violations 0 (±0)** · off-system-utils 1164 (±0) · bundle gz 292.3 (±0).
+build🟢 vitest 176🟢 eslint clean.
+
+**Done.** Fresh cloud checkout, baseline green (build🟢, vitest 170🟢, token-violations 0). Shipped the EPIC-4 S1
+offline-boot guard + precache audit:
+- **`scripts/precacheAudit.mjs`** (pure, dependency-free) — `extractPrecacheUrls(swText)` pulls the inlined
+  Workbox `{url,revision}` manifest out of `dist/sw.js`; `auditPrecache(swText, assetFiles)` cross-checks it
+  against every emitted `dist/assets` chunk → `{precacheCount, jsChunks, cssChunks, missing[], ok}`. `precacheCount`
+  is the raw manifest total (matches the build log's "63 entries"); the membership check dedupes leading slashes.
+- **`scripts/precacheAudit.test.mjs`** (6 cases) — pins the manifest parse, the no-gap case, and that a missing
+  lazy JS/CSS chunk is enumerated. Broadened `vitest.config.ts` `include` to also match `scripts/**/*.test.mjs`.
+- **`scripts/qa-offline.mjs`** — the cold-offline boot guard. Self-contained: a tiny `node:http` static server for
+  `dist/` (SPA fallback, `Service-Worker-Allowed:/`) + its own Chromium (reuses the `launchBrowser()` recipe). It
+  warm-loads `/` so the SW installs + precaches, waits for the SW to be `active` + controlling, then
+  **`context.setOffline(true)`** to block ALL network and asserts the shell `/` (needs `.empire-desktop`) + 4 lazy
+  routes (`clock`/`maps`/`network`/`photos`) still render purely from precache. Writes
+  `docs/screenshots/latest/OFFLINE.md` + `/tmp/qa-offline.json`; exits non-zero on failure. Wired into
+  `qa-smoke.mjs` (spawned after the smoke pass, non-fatal, folded into REPORT.md's new "Offline-boot guard" section).
+- **Audit result — ZERO GAP (this is also EPIC-4 S2):** 63 precache entries / 1150.93 KiB already cover all 37 JS
+  (incl. all 25 lazy app chunks), 2 CSS, fonts, and the alien SVG icons. The existing `globPatterns` + 5 MB cap in
+  `vite.config.ts` catch everything (Maps' 160 KB chunk is under the cap), so S2 needs no code change — marked done.
+
+**Verified.** Ran `node scripts/qa-offline.mjs` against a fresh build: **PRECACHE-AUDIT 63 entries, no gap ✅;
+cold-offline boot 5/5 routes ✅, exit 0.** vitest 176🟢 (the 6 new audit cases pass), build🟢, metrics no-regression
+(every tracked value ±0). eslint: the new files are `.mjs` (out of the `{ts,tsx}` lint scope, like `qa-smoke.mjs`);
+`vitest.config.ts` lints clean. *Used `setOffline(true)` instead of the seed's `page.route('**',abort)` — faithful
+cold-boot primitive (see CONTEXT trap).* *Cloud caveat: this WAS run live in-cloud (the guard is itself the verifier),
+so the offline boot is genuinely confirmed, not just described.*
+
+**Next:** **EPIC-4 S3 · base-path + install-flow correctness** — build with `EMPIRE_BASE=/empire/` and assert every
+`dist/index.html` asset href + the manifest + `sw.js` `navigateFallback` resolve under the base (the blank-on-install
+bug). Reuse the pure-helper + `*.test.mjs` pattern + the `node:http` server from `qa-offline.mjs`.
+
+---
+
 ## 2026-06-29 · QA visual + smoke — 26/26 green on `2126481` (EPIC-3 CODE-COMPLETE; EPIC-4 S1 awaiting builder)
 
 **Metrics:** apps 25 (±0) · test files 21 (±0 vs `2126481`) · test cases 170 vitest (±0) · **token-violations 0 (±0)** ·
