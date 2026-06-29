@@ -1,0 +1,58 @@
+/* Reader — reading surface, prose typography, day/sepia/night themes. */
+
+.reader-surface {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  --reader-font-scale: 1;
+  transition: background var(--dur-mid) var(--ease-out);
+}
+.reader-surface[data-reading-theme="day"]   { background: #ffffff; }
+.reader-surface[data-reading-theme="sepia"] { background: #f4ecd8; }
+.reader-surface[data-reading-theme="night"] { background: #0b1020; }
+
+/* Flowing prose for TXT / Markdown / DOCX */
+.reader-prose {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 40px 24px 96px;
+  font-family: var(--reader-serif, Georgia, 'Times New Roman', serif);
+  font-size: calc(1.08rem * var(--reader-font-scale, 1));
+  line-height: 1.75;
+  letter-spacing: 0.003em;
+}
+.reader-surface[data-reading-theme="day"]   .reader-prose { color: #1a1a1a; }
+.reader-surface[data-reading-theme="sepia"] .reader-prose { color: #4b3a26; }
+.reader-surface[data-reading-theme="night"] .reader-prose { color: #cdd6e3; }
+
+.reader-prose h1, .reader-prose h2, .reader-prose h3 { font-weight: 700; line-height: 1.25; margin: 1.6em 0 0.6em; }
+.reader-prose h1 { font-size: 1.7em; }
+.reader-prose h2 { font-size: 1.4em; }
+.reader-prose h3 { font-size: 1.2em; }
+.reader-prose p { margin: 0 0 1.1em; }
+.reader-prose a { color: var(--signal); text-decoration: underline; }
+.reader-prose img { max-width: 100%; border-radius: var(--radius-md); margin: 1em 0; }
+.reader-prose blockquote {
+  margin: 1.2em 0; padding: 0.4em 1.1em;
+  border-left: 3px solid color-mix(in srgb, var(--signal) 60%, transparent);
+  opacity: 0.85; font-style: italic;
+}
+.reader-prose pre, .reader-prose code { font-family: var(--font-mono); font-size: 0.9em; }
+.reader-prose pre { padding: 12px 14px; border-radius: var(--radius-md); overflow-x: auto; background: rgba(127,127,127,0.12); }
+.reader-prose ul, .reader-prose ol { margin: 0 0 1.1em 1.4em; }
+.reader-prose hr { border: none; border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent); margin: 2em 0; }
+
+/* PDF */
+.reader-pdf-col { max-width: 52rem; margin: 0 auto; padding: 20px 12px 96px; display: flex; flex-direction: column; gap: 16px; }
+.reader-pdf-page {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.35);
+  background: #fff;
+  min-height: 200px;
+}
+.reader-pdf-textlayer span::selection { background: color-mix(in srgb, var(--signal) 40%, transparent); }
+
+/* Selection highlight inside prose */
+.reader-prose ::selection { background: color-mix(in srgb, var(--signal) 32%, transparent); }

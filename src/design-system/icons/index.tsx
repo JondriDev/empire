@@ -251,6 +251,15 @@ const Cakra: AppIcon = (p) => (
   </S>
 )
 
+/** Reader — an open book (two pages on a central spine) with an orbital node. */
+const Reader: AppIcon = (p) => (
+  <S {...p}>
+    <path d="M12 7 C10 5.6 6.4 5.4 4.5 6.2 V17.8 C6.4 17 10 17.2 12 18.6 C14 17.2 17.6 17 19.5 17.8 V6.2 C17.6 5.4 14 5.6 12 7 Z" />
+    <line x1="12" y1="7" x2="12" y2="18.6" />
+    <Dot cx="12" cy="3.4" />
+  </S>
+)
+
 /** Fallback — the bare orbital node. */
 const Node: AppIcon = (p) => (
   <S {...p}>
@@ -287,6 +296,7 @@ export const alienIcons: Record<string, AppIcon> = {
   Palette: Artifacts,
   Network: NetworkIcon,
   Inbox: InboxIcon,
+  Reader,
   cakra: Cakra,
 }
 
