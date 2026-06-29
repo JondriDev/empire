@@ -5,6 +5,37 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · QA visual + smoke — 26/26 green on `9051409` (EPIC-4 S1 offline-boots guard CONFIRMED MOVED, LIVE)
+
+**Metrics:** apps 25 (±0) · test files 21 metrics / **22 vitest** · test cases 163 metrics / **176 vitest** ·
+**token-violations 0 (±0)** · **off-system-utils 1164 → 1076 (−88)** · bundle gz 292.3 → 292.5 (+0.2).
+build🟢 vitest 176/176🟢.
+
+**Done / Verified.** Fresh cloud checkout, `npm install` + `npm run build` GREEN (PWA generateSW, precache 63
+entries / 1151.76 KiB). Symlinked the global `playwright` into `node_modules/` (env-only, not committed) and ran
+`scripts/qa-smoke.mjs` against `node server.js` on :3001 with Chromium-1194.
+- **Smoke: 26/26 render clean, 0 uncaught JS.** SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (25↔25), INBOUND-LANDS
+  3/3 ✅ (calendar←editor, goals←notes, messages←ai-chat), MEDIA-PERSISTS 3/3 ✅ (music + video + photos).
+- **★ EPIC-4 S1 ACCEPTANCE CONFIRMED MOVED, LIVE — `offline-boots` guard PASSES.** This is the FIRST QA since the
+  S1 offline-boot guard shipped (`a119d71`): the in-harness `scripts/qa-offline.mjs` warm-loaded so the SW
+  precached, blocked ALL network (`setOffline(true)`), and **5/5 routes booted cold-offline** (`/`, `/app/clock`,
+  `/app/maps`, `/app/network`, `/app/photos`) — the app's own shell + lazy chunks render with no network at all.
+  **PRECACHE-AUDIT: 63 entries, 37 JS + 2 CSS, NO GAP ✅** (also confirms EPIC-4 **S2** no-op — zero precache gap).
+- **Design-system `@theme` + Clock migration (`9051409`) is healthy:** off-system-utils dropped **1164 → 1076
+  (−88)** (token-backed utilities now generate; Clock migrated off Tailwind palette classes). Clock renders
+  correctly (Clock/Timer/Stopwatch/Alarm tabs, World Clocks, 12H toggle) — verified visually; no style regression.
+- **Env-expected net noise (not bugs):** weather→Open-Meteo geocoding + Geolocation blocked; maps→8 CARTO dark
+  tiles blocked (Leaflet container + attribution still render); files→`/api/files?path=/storage/emulated/0` 500
+  (Android-only path).
+- **Epic-acceptance:** EPIC-4 **S1 CONFIRMED** (offline-boots 5/5, precache no-gap) + **S2 CONFIRMED no-op** (zero
+  gap). EPIC-3 remains CODE-COMPLETE (function 8/8 held — MEDIA 3/3). **No contradiction; no runtime bug.**
+
+**Next:** **EPIC-4 S3 · base-path + install-flow correctness** — build with `EMPIRE_BASE=/empire/`, assert every
+`dist/index.html` asset href + manifest `start_url`/`scope` + `sw.js` `navigateFallback` resolve under the base
+(the blank-on-install bug). Reuse the pure-helper + `*.test.mjs` + `node:http` server pattern from `qa-offline.mjs`.
+
+---
+
 ## 2026-06-29 · EPIC-4 S1 — Offline-boot guard + SW precache audit (S2 also closed: zero gap)
 
 **Metrics:** apps 25 (±0) · test files 21 (±0 in metrics; +1 `.mjs` tooling test it doesn't count) · test cases
