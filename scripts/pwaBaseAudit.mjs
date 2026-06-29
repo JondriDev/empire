@@ -99,6 +99,93 @@ export function auditManifest(manifest) {
   };
 }
 
+// ── Installability (EPIC-4 S4) ──────────────────────────────────────────────
+// The base-path audit above proves a sub-path deploy won't blank-on-install.
+// This proves the manifest ITSELF satisfies the browser's add-to-home-screen /
+// install criteria — the numeric target metric (Lighthouse PWA ≥ 90) distilled
+// into the deterministic, offline-checkable manifest contract those audits gate:
+// name + short_name, a ≥192px AND a ≥512px `any` icon, a `maskable` icon, a
+// standalone-ish display, a start_url, and background_color + theme_color.
+
+/** Largest pixel dimension in a manifest icon `sizes` string ("192x192 256x256" → 256). "any" → Infinity (scalable). */
+export function maxIconSize(sizes) {
+  if (typeof sizes !== 'string') return 0;
+  if (/\bany\b/i.test(sizes)) return Infinity;
+  let max = 0;
+  for (const m of sizes.matchAll(/(\d+)\s*[x×]\s*(\d+)/gi)) {
+    max = Math.max(max, Number(m[1]), Number(m[2]));
+  }
+  return max;
+}
+
+/** Purpose tokens of an icon (space-separated; defaults to ['any'] per the manifest spec). */
+const iconPurposes = (icon) =>
+  (typeof icon?.purpose === 'string' && icon.purpose.trim() ? icon.purpose.trim() : 'any')
+    .toLowerCase()
+    .split(/\s+/);
+
+const DISPLAY_STANDALONE_ISH = ['standalone', 'fullscreen', 'minimal-ui'];
+
+/**
+ * Audit the manifest against the browser installability criteria, returning a
+ * per-criterion report plus a flat `missing[]` of human-readable gaps.
+ * @param {string|object} manifest  JSON text or already-parsed object
+ */
+export function auditInstallability(manifest) {
+  const m = typeof manifest === 'string' ? JSON.parse(manifest) : manifest;
+  const icons = Array.isArray(m.icons) ? m.icons : [];
+
+  // An icon counts toward the `any` size buckets only if it can be used as a
+  // normal (non-maskable-only) icon — purpose 'any' or absent.
+  const anyIcons = icons.filter((i) => iconPurposes(i).includes('any'));
+  const has192 = anyIcons.some((i) => maxIconSize(i.sizes) >= 192);
+  const has512 = anyIcons.some((i) => maxIconSize(i.sizes) >= 512);
+  const hasMaskable = icons.some((i) => iconPurposes(i).includes('maskable'));
+
+  const isStr = (v) => typeof v === 'string' && v.trim() !== '';
+  const displayInline = isStr(m.display) && DISPLAY_STANDALONE_ISH.includes(m.display);
+  const displayFromOverride =
+    Array.isArray(m.display_override) &&
+    m.display_override.some((d) => DISPLAY_STANDALONE_ISH.includes(d));
+
+  const criteria = {
+    name: isStr(m.name),
+    short_name: isStr(m.short_name),
+    icon192: has192,
+    icon512: has512,
+    maskableIcon: hasMaskable,
+    displayStandaloneish: displayInline || displayFromOverride,
+    start_url: isStr(m.start_url),
+    background_color: isStr(m.background_color),
+    theme_color: isStr(m.theme_color),
+  };
+
+  const LABELS = {
+    name: 'name',
+    short_name: 'short_name',
+    icon192: 'an icon ≥192px with purpose "any"',
+    icon512: 'an icon ≥512px with purpose "any"',
+    maskableIcon: 'an icon with purpose "maskable"',
+    displayStandaloneish: `display one of ${DISPLAY_STANDALONE_ISH.join('/')} (or via display_override)`,
+    start_url: 'start_url',
+    background_color: 'background_color',
+    theme_color: 'theme_color',
+  };
+  const missing = Object.entries(criteria)
+    .filter(([, ok]) => !ok)
+    .map(([k]) => LABELS[k]);
+
+  return {
+    name: m.name,
+    short_name: m.short_name,
+    display: m.display,
+    iconCount: icons.length,
+    criteria,
+    missing,
+    ok: missing.length === 0,
+  };
+}
+
 /**
  * Full base-path / install-flow audit. Any missing input is reported, not thrown.
  * @param {{html:string, swText:string, registerSwText:string, manifestText:string, base:string}} files
@@ -109,6 +196,7 @@ export function auditPwaBase({ html, swText, registerSwText, manifestText, base 
   const swR = auditSwBase(swText, b);
   const regR = auditRegisterSw(registerSwText, b);
   const manR = auditManifest(manifestText);
+  const instR = auditInstallability(manifestText);
 
   const issues = [];
   if (htmlR.unprefixed.length) issues.push(`${htmlR.unprefixed.length} index.html asset(s) not prefixed with ${b}: ${htmlR.unprefixed.join(', ')}`);
@@ -119,6 +207,7 @@ export function auditPwaBase({ html, swText, registerSwText, manifestText, base 
   if (!manR.startUrlRelative) issues.push(`manifest start_url ${JSON.stringify(manR.start_url)} is not relative (won't adapt to base)`);
   if (!manR.scopeRelative) issues.push(`manifest scope ${JSON.stringify(manR.scope)} is not relative (won't adapt to base)`);
   if (!manR.idOk) issues.push(`manifest id ${JSON.stringify(manR.id)} is not a stable non-root identity`);
+  if (instR.missing.length) issues.push(`manifest not installable — missing: ${instR.missing.join(', ')}`);
 
-  return { base: b, html: htmlR, sw: swR, registerSw: regR, manifest: manR, issues, ok: issues.length === 0 };
+  return { base: b, html: htmlR, sw: swR, registerSw: regR, manifest: manR, installability: instR, issues, ok: issues.length === 0 };
 }

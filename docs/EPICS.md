@@ -549,7 +549,14 @@ Stages (Builder takes the topmost `[ ]`; confirm current state vs. code first):
 _When S3 ships (function 8/8) and S4 lands (DataCenter+Weather tests) and QA confirms the function metric hit
 8/8 → move EPIC-3 to DONE and promote **EPIC-4 · PWA + Android validation** (stages seeded below)._
 
-## ▶ ACTIVE — EPIC-4 · PWA completion → installable, offline-true
+## ✅ DONE — EPIC-4 · PWA completion → installable, offline-true
+> **CODE-COMPLETE 2026-06-29** — all stages S1–S4 shipped on green main. Offline ✅ (`offline-boots` guard:
+> 5/5 routes cold-boot from precache, no gap) + base-correct ✅ (`check-pwa-base.mjs` proves a `/empire/`
+> sub-path install surface is consistent) + installable ✅ (S4 `auditInstallability` gates every browser
+> install criterion against the real build). **Target metric** *Lighthouse PWA ≥ 90* is asserted as the
+> deterministic, offline-checkable manifest-installability contract those audits gate (in-cloud Lighthouse
+> rejected: heavy dep + flaky headless browser, wrong fit for the unattended routine — noted in S4).
+> **→ Strategist: confirm the offline-boots metric on the next QA pass and promote EPIC-5 · Android APK validation.**
 > **Promoted 2026-06-29** when EPIC-3 went code-complete (function 8/8 + S4 tests). Highest gradient after EPIC-3 because the
 > vision's end-state is "a complete offline-first PWA, then Android" and every app is now offline-capable
 > — the shell itself is the last thing that isn't guaranteed to load with no network.
@@ -598,16 +605,19 @@ Stages (Strategist to finalize on promotion; first-pass seeds — each one Build
   `empire`. build🟢 vitest 176→193🟢 (+1 file, +17 cases) eslint clean; token-violations 0 (±0), bundle 292.5 (±0).
   *Not browser-verifiable in cloud:* the actual install prompt + post-install boot under the Pages base needs a
   real device/Lighthouse; the check proves the asset/SW/manifest surface that the install relies on.
-- [ ] **S4 · Lighthouse-PWA / installability assertion (close the target metric).** The target metric is
-  *Lighthouse PWA ≥ 90* — S1–S3 made the app offline-true + base-correct but nothing yet asserts the
-  *installability* criteria as a number. *Shape:* either run Lighthouse's PWA category against the built app
-  served locally (if the `lighthouse` CLI/`chrome-launcher` can be driven headless in-cloud — investigate first;
-  may be egress/Chrome-flag-blocked), OR, if not feasible offline, add a pure manifest-installability auditor
-  (`auditInstallability(manifest)` — name+short_name present, ≥192px & ≥512px `any` icons + a `maskable` icon,
-  `display` standalone-ish, `start_url`, `background_color`/`theme_color`) wired into `check-pwa-base.mjs` so the
-  install-criteria are gated programmatically. Reuse the `pwaBaseAudit.mjs` pure-helper + `*.test.mjs` pattern.
-  *Acceptance:* a green check asserts every installability criterion; if Lighthouse runs in-cloud, PWA ≥ 90 is
-  recorded. **This stage closes EPIC-4** (offline ✅ + base ✅ + installable ✅).
+- [x] **S4 · Lighthouse-PWA / installability assertion (close the target metric). — SHIPPED 2026-06-29 (EPIC-4 CLOSE).**
+  *Investigated Lighthouse first:* no `lighthouse` dep (npm registry reachable, `lighthouse@13.4.0`), but it would add
+  a heavy devDep + a browser-driven, egress/Chrome-flag-flaky check — wrong fit for the unattended fresh-checkout
+  cloud routine. **Took the pure-auditor path** (the stage's sanctioned fallback). Added `auditInstallability(manifest)`
+  + `maxIconSize(sizes)` to `scripts/pwaBaseAudit.mjs` (name+short_name, a ≥192px AND a ≥512px `any` icon, a `maskable`
+  icon, standalone-ish `display` incl. via `display_override`, `start_url`, `background_color`+`theme_color`); returns
+  per-criterion `criteria{}` + flat `missing[]`. Folded into `auditPwaBase` (its issues join the base-path issues) and
+  surfaced in `check-pwa-base.mjs` (console line + a PWA-BASE.md Installability table). +12 unit cases in
+  `pwaBaseAudit.test.mjs` (17→29) — incl. that a maskable-ONLY icon doesn't satisfy the `any` buckets, a multi-purpose
+  `any maskable` counts for both, missing `purpose` defaults to `any`, and `display_override` can supply standalone.
+  *Acceptance met:* `node scripts/check-pwa-base.mjs` now asserts every installability criterion against the real
+  `--base=/empire/` build → **installable ✅ (4 icons)**. build🟢 vitest 205/205🟢 eslint clean; metrics no-regression
+  (tokens 0, bundle 292.5, apps 25). **EPIC-4 CLOSED** (offline ✅ + base ✅ + installable ✅).
 
 ## ⏳ QUEUED — EPIC-5 · Android APK validation
 > Promote after EPIC-4. **Leap:** the APK degrades gracefully with no LAN server (backend-optional layer).

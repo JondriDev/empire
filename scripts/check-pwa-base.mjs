@@ -59,6 +59,7 @@ console.log(`PWA-BASE: ${r.html.count} index.html asset(s); manifest ${r.html.ma
 console.log(`PWA-BASE: sw navigateFallback = ${JSON.stringify(r.sw.navigateFallback)} (expect ${JSON.stringify(r.sw.expected)})`);
 console.log(`PWA-BASE: registerSW = ${JSON.stringify(r.registerSw.swUrl)} scope ${JSON.stringify(r.registerSw.scope)}`);
 console.log(`PWA-BASE: manifest start_url=${JSON.stringify(r.manifest.start_url)} scope=${JSON.stringify(r.manifest.scope)} id=${JSON.stringify(r.manifest.id)}`);
+console.log(`PWA-BASE: installable = ${r.installability.ok ? '✅' : '✖ missing ' + r.installability.missing.join(', ')} (${r.installability.iconCount} icons)`);
 
 // ── 4. Report (alongside the smoke/offline reports for QA to fold in).
 try {
@@ -72,7 +73,18 @@ try {
   md += `| registerSW url + scope | ${r.registerSw.ok ? '✅ ' + r.registerSw.swUrl + ' / ' + r.registerSw.scope : '❌'} |\n`;
   md += `| manifest start_url/scope relative | ${r.manifest.startUrlRelative && r.manifest.scopeRelative ? '✅ both \`.\`' : '❌'} |\n`;
   md += `| manifest id stable non-root | ${r.manifest.idOk ? '✅ \`' + r.manifest.id + '\`' : '❌ \`' + r.manifest.id + '\`'} |\n`;
-  md += `\n**Base-path check: ${r.ok ? '✅ PASS' : '❌ FAIL'}**\n`;
+  const c = r.installability.criteria;
+  md += `\n## Installability (EPIC-4 S4)\n\n`;
+  md += `| Criterion | Result |\n|---|---|\n`;
+  md += `| name + short_name | ${c.name && c.short_name ? '✅' : '❌'} |\n`;
+  md += `| icon ≥192px (any) | ${c.icon192 ? '✅' : '❌'} |\n`;
+  md += `| icon ≥512px (any) | ${c.icon512 ? '✅' : '❌'} |\n`;
+  md += `| maskable icon | ${c.maskableIcon ? '✅' : '❌'} |\n`;
+  md += `| display standalone-ish | ${c.displayStandaloneish ? '✅ \`' + r.installability.display + '\`' : '❌'} |\n`;
+  md += `| start_url | ${c.start_url ? '✅' : '❌'} |\n`;
+  md += `| background_color + theme_color | ${c.background_color && c.theme_color ? '✅' : '❌'} |\n`;
+  md += `\n**Installable: ${r.installability.ok ? '✅ PASS' : '❌ FAIL — missing ' + r.installability.missing.join(', ')}**\n`;
+  md += `\n**Base-path + install check: ${r.ok ? '✅ PASS' : '❌ FAIL'}**\n`;
   if (!r.ok) md += `\n${r.issues.map((i) => `- ${i}`).join('\n')}\n`;
   fs.writeFileSync(path.join(OUTDIR, 'PWA-BASE.md'), md);
 } catch { /* best-effort */ }
@@ -85,4 +97,4 @@ if (!r.ok) {
   r.issues.forEach((i) => console.error(`   - ${i}`));
   process.exit(1);
 }
-console.log(`PWA-BASE: ✅ install surface agrees with base ${BASE} — assets, SW & manifest all consistent.`);
+console.log(`PWA-BASE: ✅ install surface agrees with base ${BASE} — assets, SW & manifest all consistent, and the manifest is installable.`);
