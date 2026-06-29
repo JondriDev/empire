@@ -59,7 +59,7 @@ export default function CakraShell() {
               onClick={() => setTab(id)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
               style={active
-                ? { background: 'color-mix(in srgb, var(--c-cakra, #5b8fb9) 22%, transparent)', color: 'var(--c-cakra, #5b8fb9)' }
+                ? { background: 'color-mix(in srgb, var(--c-cakra) 22%, transparent)', color: 'var(--c-cakra)' }
                 : { color: 'var(--text3)' }}
               aria-pressed={active}
             >

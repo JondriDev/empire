@@ -22,7 +22,7 @@ import './reader.css'
 type ReadingTheme = 'day' | 'sepia' | 'night'
 const THEME_KEY = 'empire-reader-theme'
 const FONT_KEY = 'empire-reader-font'
-const ACCENT = 'var(--c-pembaca, #f0c94e)'
+const ACCENT = 'var(--c-pembaca)'
 
 export default function Reader() {
   const [books, setBooks] = useState<BookMeta[]>(() => listBooks())
@@ -104,7 +104,7 @@ function Library({ books, importing, onOpen, onDelete, onImportClick }: {
           onClick={onImportClick}
           disabled={importing}
           className="empire-btn inline-flex items-center gap-2 text-sm font-medium px-3.5 py-2 rounded-xl disabled:opacity-60"
-          style={{ background: ACCENT, color: '#1a1205' }}
+          style={{ background: ACCENT, color: 'var(--void)' }}
         >
           {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
           {importing ? 'Importing…' : 'Add book'}
@@ -122,7 +122,7 @@ function Library({ books, importing, onOpen, onDelete, onImportClick }: {
               Add an EPUB, PDF, Markdown, text, or Word file. While you read, select any passage and ask Cakra about it.
             </p>
           </div>
-          <button onClick={onImportClick} className="empire-btn inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background: ACCENT, color: '#1a1205' }}>
+          <button onClick={onImportClick} className="empire-btn inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background: ACCENT, color: 'var(--void)' }}>
             <Plus className="w-4 h-4" /> Add your first book
           </button>
         </div>
@@ -136,7 +136,7 @@ function Library({ books, importing, onOpen, onDelete, onImportClick }: {
                     {b.cover
                       ? <img src={b.cover} alt="" className="w-full h-full object-cover" />
                       : <BookOpen className="w-10 h-10" style={{ color: ACCENT, opacity: 0.7 }} />}
-                    <span className="absolute top-2 left-2 text-[9px] font-bold tracking-wide px-1.5 py-0.5 rounded" style={{ background: 'rgba(0,0,0,0.55)', color: '#fff' }}>
+                    <span className="absolute top-2 left-2 text-[9px] font-bold tracking-wide px-1.5 py-0.5 rounded" style={{ background: 'color-mix(in srgb, var(--void) 60%, transparent)', color: 'var(--xenon)' }}>
                       {FORMAT_LABEL[b.format]}
                     </span>
                   </div>
@@ -244,7 +244,7 @@ function ReadingView({ book, onBack, onChanged }: { book: BookMeta; onBack: () =
         <button
           onClick={() => { setAskPassage(undefined); setAskOpen(o => !o) }}
           className="empire-btn inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg"
-          style={{ background: `color-mix(in srgb, var(--c-cakra, #5b8fb9) 22%, transparent)`, color: 'var(--c-cakra, #5b8fb9)' }}
+          style={{ background: `color-mix(in srgb, var(--c-cakra) 22%, transparent)`, color: 'var(--c-cakra)' }}
         >
           <Sparkles className="w-3.5 h-3.5" /> Cakra
         </button>
@@ -264,7 +264,7 @@ function ReadingView({ book, onBack, onChanged }: { book: BookMeta; onBack: () =
         {/* Selection action bar */}
         {selection.trim() && !askOpen && (
           <div className="absolute left-1/2 -translate-x-1/2 bottom-5 flex items-center gap-1.5 px-1.5 py-1.5 rounded-full animate-fade-in-up gp" style={{ zIndex: 5 }}>
-            <button onClick={askAboutSelection} className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: 'var(--c-cakra, #5b8fb9)', color: '#fff' }}>
+            <button onClick={askAboutSelection} className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: 'var(--c-cakra)', color: 'var(--xenon)' }}>
               <Sparkles className="w-3.5 h-3.5" /> Ask Cakra
             </button>
             <button onClick={highlightSelection} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full" style={{ color: 'var(--text2)' }}>
@@ -301,7 +301,7 @@ function ThemeControl({ theme, setTheme }: { theme: ReadingTheme; setTheme: (t: 
   const next = () => setTheme(order[(order.indexOf(theme) + 1) % order.length])
   return (
     <button onClick={next} className="empire-topbar-btn" aria-label={`Reading theme: ${theme}`} title={`Theme: ${theme}`} style={{ width: 34, height: 34 }}>
-      <Sun className="w-4 h-4" style={{ color: theme === 'day' ? '#f0c94e' : theme === 'sepia' ? '#c4a265' : 'var(--text3)' }} />
+      <Sun className="w-4 h-4" style={{ color: theme === 'day' ? 'var(--c-warn)' : theme === 'sepia' ? 'var(--ember)' : 'var(--text3)' }} />
     </button>
   )
 }
@@ -340,7 +340,7 @@ function AskPanel({ book, passage, onClose, onChanged }: { book: BookMeta; passa
     <div className="absolute top-0 right-0 bottom-0 flex flex-col animate-slide-up" style={{ width: 'min(420px, 92vw)', zIndex: 6, background: 'var(--card-bg)', backdropFilter: 'var(--gl-blur)', borderLeft: '1px solid var(--border)' }}>
       <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4" style={{ color: 'var(--c-cakra, #5b8fb9)' }} />
+          <Sparkles className="w-4 h-4" style={{ color: 'var(--c-cakra)' }} />
           <span className="text-sm font-semibold">Ask Cakra</span>
         </div>
         <button onClick={onClose} className="empire-topbar-btn" style={{ width: 32, height: 32 }} aria-label="Close"><X className="w-4 h-4" /></button>
@@ -348,8 +348,8 @@ function AskPanel({ book, passage, onClose, onChanged }: { book: BookMeta; passa
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {passage && (
-          <div className="text-xs rounded-xl p-3" style={{ background: 'var(--holo-bg-h)', borderLeft: '3px solid var(--c-cakra, #5b8fb9)' }}>
-            <div className="font-semibold mb-1" style={{ color: 'var(--c-cakra, #5b8fb9)' }}>Selected passage</div>
+          <div className="text-xs rounded-xl p-3" style={{ background: 'var(--holo-bg-h)', borderLeft: '3px solid var(--c-cakra)' }}>
+            <div className="font-semibold mb-1" style={{ color: 'var(--c-cakra)' }}>Selected passage</div>
             <div className="line-clamp-4" style={{ color: 'var(--text2)' }}>{passage}</div>
           </div>
         )}
@@ -372,7 +372,7 @@ function AskPanel({ book, passage, onClose, onChanged }: { book: BookMeta; passa
           <div key={i} className={m.role === 'user' ? 'flex justify-end' : ''}>
             <div className="max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap leading-relaxed"
               style={m.role === 'user'
-                ? { background: 'var(--c-cakra, #5b8fb9)', color: '#fff' }
+                ? { background: 'var(--c-cakra)', color: 'var(--xenon)' }
                 : { background: 'var(--holo-bg)', color: 'var(--text)' }}>
               {m.content || (streaming && i === turns.length - 1 ? '●' : '')}
               {m.role === 'assistant' && m.content && !streaming && (
@@ -408,8 +408,8 @@ function AskPanel({ book, passage, onClose, onChanged }: { book: BookMeta; passa
             className="empire-textarea w-full resize-none rounded-xl px-3 py-2.5 pr-11 text-sm focus:outline-none"
             style={{ background: 'var(--input-bg)', color: 'var(--text)', minHeight: 46, maxHeight: 120 }}
           />
-          <button type="submit" disabled={!input.trim() || streaming} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30" style={{ background: 'var(--c-cakra, #5b8fb9)' }}>
-            {streaming ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Send className="w-3.5 h-3.5 text-white" />}
+          <button type="submit" disabled={!input.trim() || streaming} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30" style={{ background: 'var(--c-cakra)' }}>
+            {streaming ? <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "var(--xenon)" }} /> : <Send className="w-3.5 h-3.5" style={{ color: "var(--xenon)" }} />}
           </button>
         </div>
       </form>
