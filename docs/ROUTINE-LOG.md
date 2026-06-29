@@ -5,6 +5,31 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-29 · QA visual + smoke — 26/26 green on `2126481` (EPIC-3 CODE-COMPLETE; EPIC-4 S1 awaiting builder)
+
+**Metrics:** apps 25 (±0) · test files 21 (±0 vs `2126481`) · test cases 170 vitest (±0) · **token-violations 0 (±0)** ·
+off-system-utils 1164 (±0) · bundle gz 292.3 (±0). build🟢 vitest 170🟢. Δ vs last QA snapshot `2a09b27`: files 19→21,
+cases 149→170, gz 292.2→292.3 (S4 logic-extraction landed between QA runs).
+
+**Done / Verified.** Fresh cloud checkout, `npm install` + `npm run build` GREEN (PWA generateSW, precache 63
+entries / 1150.93 KiB). Symlinked the global `playwright` into `node_modules/` (the fresh install wipes it; env-only,
+not committed) and ran `scripts/qa-smoke.mjs` against `node server.js` on :3001 with Chromium-1194.
+- **Smoke: 26/26 render clean, 0 uncaught JS.** SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (25↔25), INBOUND-LANDS
+  3/3 ✅, MEDIA-PERSISTS 3/3 ✅. Visually verified desktop shell (Earth-from-Space + alien icons) and Network mesh
+  (CORE + entity nodes + legend). Maps shows the real Leaflet container (only OSM/CARTO tiles grey — egress-blocked).
+- **Env-expected net noise (not bugs):** weather→Open-Meteo geocoding + Geolocation blocked; maps→8 CARTO dark
+  tiles blocked; files→`/api/files?path=/storage/emulated/0` 500 (Android-only path).
+- **Epic-acceptance:** EPIC-3 is CODE-COMPLETE (S4 closed it; function metric held 8/8, no move at S4 — it was the
+  unit-test close). **EPIC-4 (PWA completion) is ACTIVE but S1 (offline-boot guard) is NOT yet shipped** — no
+  `scripts/qa-offline.mjs`, no all-network-blocked cold-boot guard in `qa-smoke.mjs` — so the EPIC-4 target metric
+  has nothing to confirm-move yet. Recorded as awaiting-builder, no contradiction.
+- **No runtime bugs found.** Screenshots overwritten in `docs/screenshots/latest/` (desktop + 25 apps + REPORT.md).
+
+**Next:** builder ships **EPIC-4 S1** — add the cold-offline guard (`page.route('**', r => r.abort())` after a warm
+load; assert shell + one lazy route render from SW/precache) + enumerate the precache gap vs the 25 lazy chunks.
+
+---
+
 ## 2026-06-29 · EPIC-3 S4 — DataCenter + Weather pure-logic modules + tests (EPIC-3 CLOSE)
 
 **Metrics:** apps 25 (±0) · test files 19→21 (+2) · test cases 142→163 (+21) · **token-violations 0 (±0)** ·

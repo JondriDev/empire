@@ -1,41 +1,8 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-06-29T03:06:31.827Z
+**Generated:** 2026-06-29T08:06:05.757Z
 
 **Result:** 26/26 rendered without crash, 0 failed.
-
-## ✅ Epic-acceptance — EPIC-3 S3 (Photos persist) CONFIRMED MOVED, LIVE
-
-The ACTIVE epic's **PRIMARY target metric** is *shallow instruments with genuine
-persistent/offline function* → **8/8**. Since the last QA (`88b70a7`, S2 Music+Video)
-one code commit landed: **`2a09b27` EPIC-3 S3 — Photos library survives a reload** via
-the shared IndexedDB blob rail (`src/lib/mediaStore.ts`), the same fix S2 applied to
-Music/Video. S3's acceptance ("add a photo → reload → it still renders") could only be
-unit-pinned at the pure-transform layer (`photosStore.test.ts`, 6 cases) because **jsdom
-has no IndexedDB**. This run **extended the MEDIA-PERSISTS guard with a `photos` case**
-that drives the real image `<input>` (→ `addFiles` → `putMedia` → `setPhotos`), reloads,
-and asserts the photo survived (rehydrated from IDB, not dropped as a ghost):
-**photos ✅ added + survived-reload — the live IDB roundtrip works in a real browser.**
-**Function metric 7/8 → 8/8 — all eight shallow instruments are now offline-capable.
-PRIMARY METRIC HIT.** (Remaining EPIC-3 work = **S4**, the test-backfill close: DataCenter
-+ Weather logic modules + tests — a Builder task, no acceptance number for QA to move.)
-
-## Metric deltas (vs last QA snapshot `88b70a7`, EPIC-3 S2)
-
-| Metric | Last QA | This run | Δ |
-|---|---|---|---|
-| Apps / routes | 25 | 25 | ±0 |
-| Test cases (vitest) | 143 | 149 | +6 (`photosStore.test.ts`) |
-| Test files | 18 | 19 | +1 |
-| Design-token violations | 0 | 0 | ±0 |
-| Off-system utilities | 1160 | 1164 | +4 (S3's two amber "session" chips × grid+list — the mandated idiom) |
-| Bundle gz (KB) | 291.9 | 292.2 | +0.3 (shared rail, by design) |
-
-**No runtime bug found.** All 26 routes render with 0 uncaught JS; SHELL-IS-STYLED ✅,
-REGISTRY-COVERAGE ✅ (bidirectional, 25 apps), INBOUND-LANDS 3/3 ✅, MEDIA-PERSISTS 3/3 ✅
-(music + video + **photos** all add→reload→survive). Visually re-confirmed: Earth-from-Space
-palette + alien icons + Cakra (desktop.png); Photos renders its styled empty state. Maps
-renders the real Leaflet container (only OSM/CARTO tiles grey — egress-blocked, env-expected).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -59,7 +26,7 @@ renders the real Leaflet container (only OSM/CARTO tiles grey — egress-blocked
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -93,3 +60,23 @@ Each media app's real file `<input>` was driven with a small blob, then the page
 ## Screenshots
 
 See PNGs in this folder. `desktop.png` is the shell; `app-<id>.png` is each app route.
+
+## Metric deltas (vs prior QA snapshot `3e666ce` / EPIC-3 S3, before `2126481` EPIC-3 S4 CLOSE landed)
+
+Verified on green main `2126481`. One code commit landed since the last QA run: **`2126481` EPIC-3 S4 CLOSE** — extracted DataCenter + Weather pure logic into tested modules (`datacenterLogic.ts` +12 cases, `weatherLogic.ts` +8 cases).
+
+| Metric | Prev | Now | Δ |
+|---|---|---|---|
+| Apps / routes | 25 | 25 | ±0 |
+| Routes rendering clean | 26/26 | 26/26 | ±0 |
+| Test files | 19 | 21 | +2 (datacenterLogic + weatherLogic) |
+| Test cases (vitest run) | 149 | 170 | +21 (S4 modules) |
+| Token violations | 0 | 0 | ±0 ✅ |
+| Off-system utilities | 1164 | 1164 | ±0 |
+| Bundle gz (KB) | 292.2 | 292.3 | +0.1 (logic-extraction only, by design) |
+
+All guards green: SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (25↔25), INBOUND-LANDS 3/3 ✅, MEDIA-PERSISTS 3/3 ✅.
+
+## Active-epic acceptance — EPIC-4 (PWA completion) S1 · offline-boot guard
+
+**Status this run: NOT YET STARTED (no contradiction, no confirmation possible).** EPIC-3 is CODE-COMPLETE (S4 closed it; function metric held 8/8). EPIC-4 was promoted ACTIVE 2026-06-29 but its **S1 is not yet shipped by the builder**: no `scripts/qa-offline.mjs` exists and `qa-smoke.mjs` has **no offline-boot (`page.route('**', abort)`) guard** — today's QA only blocks *external* hosts (Open-Meteo, CARTO tiles), never a cold offline boot of the app's own precached chunks. The PWA build is healthy (`vite-plugin-pwa` 1.3.0 `generateSW`, **precache 63 entries / 1150.93 KiB**), but the **EPIC-4 target metric (Lighthouse PWA ≥ 90 + an `offline-boots` smoke guard) has not moved** — there is nothing for QA to confirm-move until the builder ships S1. Recorded as awaiting-builder, not a regression.
