@@ -430,35 +430,37 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-29, post-EPIC-4-S1 green main `9051409` — EPIC-4 S1 offline-boots guard CONFIRMED MOVED, LIVE; EPIC-3 CODE-COMPLETE)
+## 📊 Last QA confirmation (2026-06-29, post-EPIC-4-S3 green main `1b5e695` — EPIC-4 S3 base-path/install-flow CONFIRMED; offline-boots still LIVE; EPIC-3 CODE-COMPLETE)
 
 - **Routes rendering clean: 25/25 ✅** (26/26 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (bidirectional, all 25
   registry apps ↔ smoke list) + INBOUND-LANDS **3/3 ✅** (calendar←editor, goals←notes, messages←ai-chat each
   show "Received from …" chip + prefilled control off the live render) + **MEDIA-PERSISTS 3/3 ✅ (music + video +
-  photos)**. build🟢 vitest **176/176 🟢** (22 files) eslint clean. **No runtime bugs found.** Visually verified:
-  Earth-from-Space palette + alien icons + Cakra (desktop.png); **Clock renders correctly post-`@theme` migration**
-  (Clock/Timer/Stopwatch/Alarm tabs + World Clocks + 12H toggle, app-clock.png); Maps renders the real Leaflet
-  container (only OSM/CARTO tiles grey — egress-blocked, env-expected).
-- **★ EPIC-4 S1 ACCEPTANCE CONFIRMED MOVED, LIVE — `offline-boots` smoke guard PASSES.** First QA since the S1
-  guard shipped (`a119d71`). The in-harness `scripts/qa-offline.mjs` warm-loaded so the SW precached, then
-  `setOffline(true)` blocked ALL network → **5/5 routes booted cold-offline** (`/`, `/app/clock`, `/app/maps`,
-  `/app/network`, `/app/photos`) purely from precache. **PRECACHE-AUDIT: 63 entries (37 JS + 2 CSS), NO GAP ✅** —
-  also confirms EPIC-4 **S2 no-op** (zero precache gap). The EPIC-4 target metric now has a concrete green confirm.
+  photos)**. build🟢 vitest **193/193 🟢** (23 files) eslint clean. **No runtime bugs found.** Visually verified:
+  Earth-from-Space palette + alien icons + Cakra (desktop.png); Maps renders the real Leaflet
+  container w/ zoom + OSM/CARTO attribution (only tiles grey — egress-blocked, env-expected).
+- **★ EPIC-4 S3 ACCEPTANCE CONFIRMED — base-path/install-flow correctness.** S3 (`1b5e695`) is the only code commit
+  since the last QA (`9051409`). `node scripts/check-pwa-base.mjs` ✅ — a `--base=/empire/` build emits 11
+  base-prefixed asset URLs (manifest linked), SW `navigateFallback="/empire/index.html"`,
+  `registerSW("/empire/sw.js",{scope:"/empire/"})`, base-agnostic manifest (`start_url="."`/`scope="."`/**`id="empire"`**)
+  — install surface, SW & manifest all consistent → no blank-on-install under a sub-path deploy.
+- **EPIC-4 S1 `offline-boots` guard still PASSES (re-confirmed).** `scripts/qa-offline.mjs` warm-loaded → `setOffline(true)`
+  blocked ALL network → **5/5 routes booted cold-offline** (`/`, `/app/clock`, `/app/maps`, `/app/network`,
+  `/app/photos`) purely from precache. **PRECACHE-AUDIT: 63 entries (37 JS + 2 CSS), NO GAP ✅** (S2 no-op held).
 - **Apps fully wired BOTH-ways: 9/9 entity-apps-with-inbound — ✅ EPIC-1 TARGET (held, EPIC-1 DONE).**
   Both-ways: `prompt-generator`, notes, learning-tracker, editor, token-counter, ai-chat, calendar, goals,
   messages. Intentionally emit-only (by design): files, photos, datacenter + tool apps via `NodeActions`.
   Re-verified live this run by the smoke harness's INBOUND-LANDS guard (3/3 receivers chip+prefill).
-- **Epic-acceptance this run: EPIC-4 S1 CONFIRMED + S2 CONFIRMED no-op; EPIC-3 CODE-COMPLETE (function 8/8 held).**
-  Since the last QA (`2126481`, S4) two code commits landed: **`a119d71` EPIC-4 S1** (offline-boot guard
-  `qa-offline.mjs` + pure precache audit `precacheAudit.mjs` + 6 tests; wired into `qa-smoke.mjs`) and **`9051409`
-  design-system fix** (`@theme` in entry CSS so token utilities generate + migrate Clock off Tailwind palette
-  classes). The design-system fix dropped **off-system-utils 1164 → 1076 (−88)** — a real EPIC-2-blind-spot win.
-  **No contradiction; no runtime bug.** **▶ NEXT STAGE = EPIC-4 S3 (base-path + install-flow correctness)** — see
-  the active-epic block above for the exact shape.
-- **Auto metrics vs last QA snapshot `2126481`:** test cases **170→176 vitest (+6)** (`precacheAudit.test.mjs`),
-  test files **21→22 vitest (+1; metrics.mjs still 21, `src/`-only)**, **off-system utilities 1164→1076 (−88, the
-  `@theme`/Clock migration)**, bundle gz **292.3→292.5 (+0.2)**, apps **25 (±0)**, token-violations **0 (±0)**.
+- **Epic-acceptance this run: EPIC-4 S3 CONFIRMED; S1 offline-boots re-confirmed; EPIC-3 CODE-COMPLETE (function 8/8 held).**
+  Since the last QA (`9051409`, S1) one code commit landed: **`1b5e695` EPIC-4 S3** (pure auditor `pwaBaseAudit.mjs`
+  + `pwaBaseAudit.test.mjs` 17 cases + runner `check-pwa-base.mjs`; fixed manifest `id:'/'`→`id:'empire'` in
+  `vite.config.ts`). Acceptance `node scripts/check-pwa-base.mjs` ✅. **No contradiction; no runtime bug.**
+  **▶ NEXT STAGE = EPIC-4 S4 (Lighthouse-PWA / installability assertion — EPIC-4 CLOSE)** — see the active-epic
+  block above for the exact shape (try `npx lighthouse` headless first; fall back to a pure `auditInstallability`
+  in `pwaBaseAudit.mjs` wired into `check-pwa-base.mjs`).
+- **Auto metrics vs last QA snapshot `9051409`:** test cases **176→193 vitest (+17)** (`pwaBaseAudit.test.mjs`),
+  test files **22→23 vitest (+1; metrics.mjs still 21, `src/`-only — the new test is under `scripts/`)**, bundle gz
+  **292.5 (±0)**, off-system utilities **1076 (±0)**, apps **25 (±0)**, token-violations **0 (±0)**.
 - **`latest/` holds only:** current `desktop.png` + 25 `app-<id>.png` + `REPORT.md` (no dated/per-stage PNGs).
 - **Env-expected net noise (not bugs):** weather→Open-Meteo geocoding + Geolocation blocked, maps→CARTO/OSM
   dark-tile PNGs blocked (Leaflet container + attribution still render), files `/api/files?path=/storage/emulated/0`
