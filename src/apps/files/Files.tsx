@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import { apiUrl } from '../../lib/apiBase'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { accumulateFiles, fileNodeData, type AccumulatedFile } from './filesGraph'
 import {
   Folder, FolderOpen, File, FileText, Image, Film, Music,
   Code, Archive, ChevronRight, ChevronDown, Download,
@@ -71,15 +72,20 @@ export default function Files() {
     setBreadcrumb(path.split('/').filter(Boolean))
   }, [path])
 
-  // Mirror the current directory's files into the Core graph as `file` nodes so
-  // they join the organism. Only real files (not folders) are graph-worthy;
-  // navigating to a new directory reconciles the graph to that directory.
+  // Mirror files into the Core graph as `file` nodes so they join the organism.
+  // The browser shows one directory at a time, but `mirrorCollection` prunes any
+  // node not in its batch — so mirroring only the current folder would drop every
+  // file the moment you navigate away. Instead we accumulate the union of all
+  // files seen across this session (keyed by path) and mirror the whole union, so
+  // navigating ADDS to the graph. Held in a ref → bounded to one session and
+  // self-cleaning on reload (a fresh mount prunes stale nodes on its first pass).
+  const seenFiles = useRef<Map<string, AccumulatedFile>>(new Map())
   useEffect(() => {
-    const files = entries.filter(e => !e.isDirectory)
-    mirrorCollection('file', 'files', files, {
+    seenFiles.current = accumulateFiles(seenFiles.current, entries)
+    mirrorCollection('file', 'files', [...seenFiles.current.values()], {
       id: f => f.path,
       title: f => f.name,
-      data: f => ({ path: f.path, size: f.size, extension: f.extension }),
+      data: fileNodeData,
     })
   }, [entries])
 

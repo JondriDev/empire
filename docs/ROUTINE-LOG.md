@@ -5,6 +5,44 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-30 · Builder — **Files whole-state graph-mirror: accumulate the session union (organism INTERCONNECT; no active epic)**
+
+**Context.** Fresh checkout on green main `4017d3d`. No `▶ ACTIVE` epic (EPIC-5 CLOSED). Per the routine, with no
+pre-decomposed stage the Builder takes the topmost cloud-executable open-follow-up — the **DataCenter/Files
+whole-state graph-mirror** theme flagged in CONTEXT.md + the EPIC-5 close note. Investigated both: **DataCenter is
+already whole-state** (`DataCenter.tsx:57` mirrors `Object.keys(store)` — *every* table with its own row count, not
+just the active one), so that follow-up is **stale/resolved**. **Files was the real gap.**
+
+**Root cause (organism bug).** `mirrorCollection` (`src/lib/core/sync.ts:105` → `reconcile`) has exact/prune
+semantics: it **deletes every `file` node whose id isn't in the batch it's handed**. `Files.tsx` mirrored only the
+*current directory's* files, so the instant you navigated to another folder, every file from the prior directory was
+dropped from the Core graph — the organism never saw more than one directory at a time. The Network mesh / intents
+could only ever reach the last-listed folder.
+
+**Fix (session-union accumulation).** New pure module **`src/apps/files/filesGraph.ts`** —
+`accumulateFiles(prev, entries)` (immutable; merges real files into a `Map<path, AccumulatedFile>` union, excludes
+folders, dedupes+updates by path), `dirOf(path)` (parent dir, root-safe), `fileNodeData(f)` (node `data` payload, now
+also carries `dir`). `Files.tsx` holds the union in a `useRef` and on every directory load does
+`seenFiles.current = accumulateFiles(seenFiles.current, entries)` then mirrors the **whole union** — so navigating
+ADDS to the graph instead of resetting it. The ref bounds growth to one session and **self-cleans on reload**: a fresh
+mount starts empty, and its first `mirrorCollection` prunes any stale `file` nodes left in the persisted graph. New
+**`filesGraph.test.ts`** (8 cases): union-across-dirs (the navigate-drop regression guard), folder-exclusion,
+dedupe-by-path/metadata-update, immutability, `dir` recording, `dirOf` root-safety, `fileNodeData` shape.
+
+**Verified.** build🟢 (tsc -b && vite build, precache 70). vitest **208 → 216 🟢** (+8, +1 file). eslint clean on
+all three touched files. `node scripts/metrics.mjs`: **token-violations 0 (±0), off-system 0 (±0)**, bundle gz
+691.3→691.4 (+0.1, the new module), apps 26 (±0). `--assert-zero` CI gate passes. **No regression.**
+*Cloud limit:* the multi-directory graph accumulation needs live navigation + a populated `/api/files` backend
+(500 in cloud, Android-only path) to see end-to-end in the Network — the pure accumulation logic carries the
+coverage via the 8 unit tests (jsdom has no real file backend, same shape as the media-store unit-test discipline).
+
+**Next.** **EPICS still needs the Strategist** to promote a `▶ ACTIVE` epic. Best next cloud-executable step:
+**organism-completeness-II** — re-audit both-ways wiring against the post-redesign 26-route registry (the Cakra merge
+folded Prompt-Gen/Token-Counter/Editor into tabs + Reader is new; the `SendResultMenu`/`useInboundHandoff` targets
+may reference routes that changed). EPIC-6 (Android) stays device-gated/QUEUED.
+
+---
+
 ## 2026-06-30 · QA — **Visual + smoke: FIRST visual confirm of the redesign batch; EPIC-5 acceptance CONFIRMED-LOCKED**
 
 **Context.** Fresh checkout on green main `c51f79f`. Last QA (`d17f73a`, 2026-06-29) predated the out-of-band

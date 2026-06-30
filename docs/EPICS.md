@@ -751,10 +751,14 @@ Stages (Builder takes the topmost `[ ]`; counts are current `metrics.mjs` per-fi
 _**EPIC-5 DONE 2026-06-30** (off-system 1076 → 0, locked by the S8 CI gate + drift test). **QA to confirm**
 `node scripts/metrics.mjs --assert-zero` → green on main and the redesigned tree (full-screen app model, Cakra
 merge, Reader) still renders 26/26. **Strategist: promote the next ▶ ACTIVE epic** — EPIC-6 Android stays
-QUEUED (device-gated, not cloud-verifiable); the next **cloud-executable** gradient is the **DataCenter/Files
-whole-state graph-mirror** theme (today both only mirror the active table / current directory — see "Open
-follow-ups" in CONTEXT.md), or an organism-completeness-II pass on the post-redesign app set (the Cakra merge +
-Reader changed the surface; re-audit both-ways wiring against the new registry)._
+QUEUED (device-gated, not cloud-verifiable). **Builder progress (2026-06-30, no active epic):** the **Files
+whole-state graph-mirror** half of that theme is **DONE** — `Files.tsx` now accumulates the session union of files
+across every directory visited and mirrors the whole union (was: navigating pruned prior folders from the graph);
+new pure `src/apps/files/filesGraph.ts` + `filesGraph.test.ts` (8). The **DataCenter** half was **stale** —
+`DataCenter.tsx:57` already mirrors all tables with per-table row counts. **Remaining cloud-executable gradient:
+organism-completeness-II** — re-audit both-ways wiring against the post-redesign 26-route registry (the Cakra merge
+folded Prompt-Gen/Token-Counter/Editor into tabs; Reader is new; `SendResultMenu`/`useInboundHandoff` targets may
+reference routes that changed)._
 
 ---
 
