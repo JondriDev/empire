@@ -128,6 +128,7 @@ export default function Photos() {
           p.id === photo.id ? { ...p, width: img.naturalWidth, height: img.naturalHeight } : p
         ))
       }
+      img.onerror = () => { /* keep default dimensions if the blob can't decode */ }
       img.src = photo.src
     })
 

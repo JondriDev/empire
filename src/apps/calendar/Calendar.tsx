@@ -223,7 +223,7 @@ export default function Calendar() {
             if (day === null) {
               return <div key={`empty-${i}`} className="bg-void/20 p-2 min-h-[80px]" />
             }
-            const dateStr = formatDate(year, month + 1, day)
+            const dateStr = formatDate(year, month, day)
             const isToday = dateStr === today
             const dayEvents = getEventsForDay(day)
             const isSelected = dateStr === selectedDate
