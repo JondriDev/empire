@@ -5,6 +5,37 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-30 · QA — **Visual + smoke: FIRST visual confirm of the redesign batch; EPIC-5 acceptance CONFIRMED-LOCKED**
+
+**Context.** Fresh checkout on green main `c51f79f`. Last QA (`d17f73a`, 2026-06-29) predated the out-of-band
+redesign batch (`75ef685`…`fb4c853`: windowless full-screen app model, Prompt-Gen/Token-Counter/Editor merged into
+**Cakra**, new **Reader** app, off-system 1076→0) + the EPIC-5 S8 lock. This is the first QA against that tree.
+
+**Build & serve.** `npm install` + `npm run build` (tsc -b && vite build) 🟢 — precache 70 entries. `node server.js`
+serving `dist/` on :3001.
+
+**Smoke (27/27 ✅).** `scripts/qa-smoke.mjs`: desktop + 26 apps render with **0 uncaught JS**. SHELL-IS-STYLED ✅
+(top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm`), REGISTRY-COVERAGE ✅ bidirectional. **Harness fix:**
+**added `reader` to the smoke `apps` list** — the redesign's new registry app was missing, so the coverage guard
+would have thrown (registry app not smoke-tested). INBOUND-LANDS **3/3 ✅**, MEDIA-PERSISTS **3/3 ✅**, OFFLINE-BOOT
+**5/5 ✅** (PRECACHE 70 / 43 JS + 3 CSS, NO GAP). vitest **208/208 🟢** (24 files), eslint clean.
+
+**Visually confirmed (redesign, first time).** Windowless full-screen shell (centered alien-icon launcher grid +
+bottom dock, Earth-from-Space palette); new **Reader** (empty-state, EPUB/PDF/MD/TXT/DOCX, "ask Cakra as you read");
+merged **Cakra** (Chat/Prompt/Tokens/Code tabs + Workspace panel); **Maps** real Leaflet container w/ OSM/CARTO
+attribution (tiles grey — egress-blocked, env-expected). Screenshots overwritten in `docs/screenshots/latest/`
+(`desktop.png` + 26 `app-<id>.png` incl. new `app-reader.png`). **No runtime bugs found.**
+
+**★ Epic-acceptance.** No `▶ ACTIVE` epic (EPIC-5 CLOSED). **EPIC-5 CONFIRMED-MOVED & LOCKED:** off-system **1076 →
+0**; `node scripts/metrics.mjs --assert-zero` exits 0 (`tokenViolations=0, offSystemUtilities=0`). No contradiction.
+**Metric Δ vs `d17f73a`:** apps 25→26, vitest 205→208, files 23→24, token-violations 0 (±0), **off-system −1076**,
+bundle gz 292.5→691.3 (Reader parsers, BY DESIGN).
+
+**Next.** Strategist must promote the next epic (EPIC-6 Android device-gated/QUEUED; cloud-executable candidates:
+DataCenter/Files whole-state graph-mirror; organism-completeness-II re-audit vs the 26-route registry).
+
+---
+
 ## 2026-06-30 · Builder — **EPIC-5 S8: LOCK off-system 0 (EPIC-5 CLOSE)** — CI conformance gate + `@theme`-bridge drift test
 
 **Orient → reality check.** CONTEXT pointed at EPIC-5 S1 (migrate Calendar+Photos), but a fresh `git pull` brought in
