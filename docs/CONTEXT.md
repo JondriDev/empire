@@ -484,23 +484,30 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-30, green main `c51f79f` — FIRST visual QA of the redesign batch + EPIC-5 CLOSE)
+## 📊 Last QA confirmation (2026-06-30, green main `f9ec888` — confirms the security-harden + Files-graph-mirror commits; surfaced pre-existing eslint debt)
 
-- **Routes rendering clean: 26/26 ✅** (27/27 incl. desktop). **First visual confirm of the redesign batch**
-  (`75ef685`…`fb4c853`) + EPIC-5 S8 lock (`c51f79f`). All 27 routes render with **0 uncaught JS**; vitest
-  **208/208** (24 files); eslint clean; build 🟢. SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅ bidirectional (26
-  apps — **added `reader` to the smoke list**, it was the one registry app missing) + INBOUND-LANDS **3/3 ✅** +
-  MEDIA-PERSISTS **3/3 ✅** + OFFLINE-BOOT **5/5 ✅** (PRECACHE 70 entries / 43 JS + 3 CSS, NO GAP).
-- **★ EPIC-5 acceptance CONFIRMED-MOVED & LOCKED:** off-system utilities **1076 → 0**; `node scripts/metrics.mjs
-  --assert-zero` exits **0** (`tokenViolations=0, offSystemUtilities=0`). The S8 conformance CI gate + the
-  `themeBridge.test.ts` drift test hold. **No `▶ ACTIVE` epic now — Strategist must promote the next one.**
-- **Visually verified (redesign, first time):** windowless full-screen shell (centered alien-icon launcher grid
-  + bottom dock, Earth-from-Space palette); new **Reader** (empty-state, EPUB/PDF/MD/TXT/DOCX, "ask Cakra as you
-  read"); merged **Cakra** (Chat/Prompt/Tokens/Code tabs + Workspace panel); **Maps** real Leaflet container w/
-  OSM/CARTO attribution (only tiles grey — egress-blocked, env-expected, net:8 — NOT a bug). **No runtime bugs.**
-- **Metric deltas vs `d17f73a`:** apps 25→26 (+1), vitest 205→208 (+3), files 23→24 (+1), token-violations 0
-  (±0), **off-system 1076→0 (−1076)**, bundle gz 292.5→691.3 (+398.8, Reader parsers BY DESIGN).
-- `latest/` holds only: `desktop.png` + 26 `app-<id>.png` (incl. the new `app-reader.png`) + REPORT.md/OFFLINE.md/PWA-BASE.md.
+- **Routes rendering clean: 26/26 ✅** (27/27 incl. desktop). Green main `f9ec888` = 2 commits past last QA `c51f79f`:
+  `d866a7a` (Files whole-state graph-mirror) + `f9ec888` (security harden local backend/worker + Calendar month fix +
+  offline fonts + leak fixes). All 27 routes render with **0 uncaught JS**; vitest **216/216** (25 files, +8 from
+  `filesGraph.test.ts`); build 🟢. SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅ bidirectional (26 apps) + INBOUND-LANDS
+  **3/3 ✅** + MEDIA-PERSISTS **3/3 ✅** + OFFLINE-BOOT **5/5 ✅** (PRECACHE **78 entries** / 43 JS + 3 CSS, NO GAP).
+- **⚠️ NEW FINDING — eslint NOT clean (pre-existing, not from these 2 commits):** `npx eslint .` → **2 errors** in
+  `src/design-system/icons/index.tsx:274,306` (`react-refresh/only-export-components` on `alienIcons`/`getAppIcon` —
+  non-component exports from a component file). **NOT CI-gated** (`verify.yml` runs build+vitest+shell-styled+
+  route-parity+assert-zero, NOT eslint → CI is green), **NOT a runtime bug** (dev-HMR-only; app renders 27/27). The
+  file is unchanged since `c51f79f` and the config is unchanged, so prior "eslint clean" claims were unverified;
+  surfaced now on a fresh `npm install` (likely an `eslint-plugin-react-refresh` patch). **Builder fix:** extract
+  `alienIcons`/`FallbackIcon`/`getAppIcon` to a sibling `icons/appIcons.ts` (the `nodeColors.ts` precedent). Outside
+  QA's tiny/safe write scope. **Lesson: actually RUN `npx eslint .` each QA — don't trust the builder's "clean" claim.**
+- **★ Epic-acceptance:** **No `▶ ACTIVE` epic** (EPIC-5 CLOSED; Strategist must promote next). EPIC-5's lock re-held:
+  `node scripts/metrics.mjs --assert-zero` exits **0** (`tokenViolations=0, offSystemUtilities=0`) across both new
+  commits. No contradiction; no runtime regression.
+- **Visually verified:** windowless full-screen launcher shell (Earth-from-Space palette, alien icons, bottom dock);
+  **Calendar month fix CONFIRMED** — renders **June 2026** with the 30th highlighted on **Tuesday** (June 30 2026 IS a
+  Tuesday ✅); **Maps** real Leaflet container w/ OSM/CARTO attribution (only tiles grey — egress-blocked, net:8, NOT a bug).
+- **Metric deltas vs `c51f79f`:** apps 26 (±0), vitest 208→216 (+8, `filesGraph.test.ts`), files 24→25 (+1),
+  token-violations 0 (±0), off-system 0 (±0, locked), bundle gz 691.3→691.4 (+0.1), precache 70→78 (+8).
+- `latest/` holds only: `desktop.png` + 26 `app-<id>.png` + REPORT.md/OFFLINE.md/PWA-BASE.md.
 
 ---
 
