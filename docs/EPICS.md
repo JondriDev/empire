@@ -622,9 +622,25 @@ Stages (Strategist to finalize on promotion; first-pass seeds — each one Build
   `--base=/empire/` build → **installable ✅ (4 icons)**. build🟢 vitest 205/205🟢 eslint clean; metrics no-regression
   (tokens 0, bundle 292.5, apps 25). **EPIC-4 CLOSED** (offline ✅ + base ✅ + installable ✅).
 
-## ▶ ACTIVE — EPIC-5 · Design-system utility conformance → zero off-system utilities
+## ✅ DONE — EPIC-5 · Design-system utility conformance → zero off-system utilities
 
-> **Promoted 2026-06-29** (EPIC-4 closed). **Why this is the highest-gradient move now** (one line):
+> **DONE 2026-06-30.** Target metric *Off-system utilities* **1076 → 0** (`node scripts/metrics.mjs`,
+> live grep) and *Token violations* held **0**. The S1–S7 sweep was realized **out-of-band by the
+> user-directed redesign batch** (commits `75ef685`…`fb4c853`, 2026-06-30 — full-screen app model,
+> Prompt-Gen/Token-Counter/Editor merged into **Cakra**, a new **Reader** app, and the bulk
+> `98c61c7` "token-ize Tailwind palette classes across all apps" which drove every file's
+> `offSystemUtilities` to 0; the per-stage file lists below are superseded by that whole-tree pass).
+> **S8 (this run, 2026-06-30) LOCKED the win** so the 0 can't rot: wired
+> `scripts/metrics.mjs --assert-zero` into the `verify.yml` CI gate (fails any PR/push that
+> re-introduces a raw hex/rgb literal or an off-system palette class) **and** added
+> `src/design-system/themeBridge.test.ts` (3 cases) asserting every `@theme inline` `--color-*`
+> utility resolves to a `--token` actually declared in `colors_and_type.css` (a drifted bridge var
+> now fails fast — also satisfies ROADMAP NOW #2, palette-drift lock). build🟢 vitest 205→208🟢
+> eslint clean; tokens 0, off-system 0. **Next epic needs the Strategist** — EPIC-6 (Android) is
+> device-gated/QUEUED; the next *cloud-executable* gradient is the DataCenter/Files whole-state
+> graph-mirror theme (see the close note below). Stage history retained for reference.
+
+> **Promoted 2026-06-29** (EPIC-4 closed). **Why this was the highest-gradient move** (one line):
 > EPIC-2 swept raw `#hex`/`rgba()` *literals* to 0 but never touched the **1076 ergonomic Tailwind palette
 > classes** (`text-gray-400`, `bg-cyan-600`, `bg-white/10`, `text-white`, `text-red-400`…) that still bypass the
 > JondriDev tokens — so apps are only *partly* on-system **and theme-switching is silently broken** (`text-white`/
@@ -675,7 +691,7 @@ ordered by descending mass so the heaviest leverage lands first; each is one Bui
 
 Stages (Builder takes the topmost `[ ]`; counts are current `metrics.mjs` per-file values):
 
-- [ ] **S1 · Confirm the bridge + sweep the two heaviest entity apps (Calendar 81 + Photos 76 → 0).**
+- [x] **S1 · Confirm the bridge + sweep the two heaviest entity apps (Calendar 81 + Photos 76 → 0).**
   First, **verify the `@theme` bridge in `src/index.css` covers every target in the map above** (it does today —
   fg/muted/faint/hair/glass/void + signal/aurora/ion/ember/plasma/xenon + success/warn/danger/info; if a clean
   migration needs a token that's missing, add exactly one `--color-*: var(--…)` line there and note it). Then
@@ -684,51 +700,61 @@ Stages (Builder takes the topmost `[ ]`; counts are current `metrics.mjs` per-fi
   `text-warn` (the chip was the off-system idiom the mandate flagged). *Acceptance:* `metrics.mjs` reports 0 for
   both files (off-system **1076 → ~919**); tokenViolations 0; build🟢 vitest🟢 eslint clean; both render in QA.
   *(~157.)*
-- [ ] **S2 · Artifacts cluster A (FormBuilder 71 + Flashcards 53 + ArtifactGallery 34 + ArtifactsApp 10 → 0).**
+- [x] **S2 · Artifacts cluster A (FormBuilder 71 + Flashcards 53 + ArtifactGallery 34 + ArtifactsApp 10 → 0).**
   `src/apps/artifacts/artifacts/FormBuilder.tsx`, `…/Flashcards.tsx`, `src/apps/artifacts/ArtifactGallery.tsx`,
   `src/apps/artifacts/ArtifactsApp.tsx`. These are categorical-heavy — where a class is a *series/field* colour,
   prefer the existing `CATEGORICAL` rail (`tokens.ts`) via inline style if a utility doesn't fit; otherwise map
   per the table. *Acceptance:* 0 for all four (off-system **~919 → ~751**); tokenViolations 0; build🟢 vitest🟢. *(~168.)*
-- [ ] **S3 · Artifacts cluster B — CLOSES artifacts (ChartBuilder 46 + MarkdownStudio 39 + Kanban 38 → 0).**
+- [x] **S3 · Artifacts cluster B — CLOSES artifacts (ChartBuilder 46 + MarkdownStudio 39 + Kanban 38 → 0).**
   `src/apps/artifacts/artifacts/ChartBuilder.tsx`, `…/MarkdownStudio.tsx`, `…/Kanban.tsx`. After this the whole
   `src/apps/artifacts/**` (291 at epic start) is 0 off-system (ColorPalette stays exempt — content). *Acceptance:*
   0 for all three (off-system **~751 → ~628**); tokenViolations 0; build🟢 vitest🟢. *(~123.)*
-- [ ] **S4 · Text-tool apps (TokenCounter 54 + PromptGenerator 52 + Grammar 51 → 0).**
+- [x] **S4 · Text-tool apps (TokenCounter 54 + PromptGenerator 52 + Grammar 51 → 0).**
   `src/apps/token-counter/TokenCounter.tsx`, `src/apps/prompt-generator/PromptGenerator.tsx`,
   `src/apps/grammar/Grammar.tsx`. Watch the provenance chips here (TokenCounter/PromptGenerator are S1 receivers) —
   the `<ProvenanceChip>` already uses tokens; only the surrounding app chrome needs the sweep. *Acceptance:* 0 for
   all three (off-system **~628 → ~471**); tokenViolations 0; build🟢 vitest🟢. *(~157.)*
-- [ ] **S5 · Files + media + editor (Files 49 + Music 44 + Video 35 + Editor 35 → 0).**
+- [x] **S5 · Files + media + editor (Files 49 + Music 44 + Video 35 + Editor 35 → 0).**
   `src/apps/files/Files.tsx`, `src/apps/music/Music.tsx`, `src/apps/video/Video.tsx`, `src/apps/editor/Editor.tsx`.
   Music/Video also carry the `ephemeral` "session" `amber-*` chip → `bg-warn`/`text-warn` (same swap as Photos S1).
   *Acceptance:* 0 for all four (off-system **~471 → ~308**); tokenViolations 0; build🟢 vitest🟢. *(~163.)*
-- [ ] **S6 · Cakra + Browser + Learning (Cakra 58 + Browser 40 + LearningTracker 35 → 0).**
+- [x] **S6 · Cakra + Browser + Learning (Cakra 58 + Browser 40 + LearningTracker 35 → 0).**
   Cakra files: `src/apps/cakra/AIChat.tsx` (48), `…/AgentSurface.tsx` (7), `…/components/WorkspacePanel.tsx` (2),
   `…/components/ModelPicker.tsx` (1) — **`cakra/lib/providers.ts` stays exempt** (brand-identity data, already in
   `DS_INFRA`); plus `src/apps/browser/Browser.tsx` (40) and `src/apps/learning-tracker/LearningTracker.tsx` (35,
   an S6a provenance receiver). *Acceptance:* 0 for all six (off-system **~308 → ~175**); tokenViolations 0;
   build🟢 vitest🟢. *(~133.)*
-- [ ] **S7 · Long-tail → ZERO (Language 38 + Weather 38 + Messages 33 + Cache 22 + Maps 19 + DataCenter 16 +
+- [x] **S7 · Long-tail → ZERO (Language 38 + Weather 38 + Messages 33 + Cache 22 + Maps 19 + DataCenter 16 +
   Dashboard 8 + Desktop 1 → 0).** `src/apps/language/Language.tsx`, `src/apps/weather/Weather.tsx`,
   `src/apps/messages/Messages.tsx`, `src/apps/cache/CacheCleaner.tsx`, `src/apps/maps/Maps.tsx`,
   `src/apps/datacenter/DataCenter.tsx`, `src/dashboard/Dashboard.tsx`, `src/components/Desktop.tsx` (keep the
   `${app.color}` registry-accent interpolation in Desktop — that's identity data, only the literal palette
   classes get swept). *Acceptance:* `node scripts/metrics.mjs` reports **off-system 0** across all of `src/`;
   tokenViolations 0; build🟢 vitest🟢 — every app on-system. *(~175.)*
-- [ ] **S8 · LOCK the win (EPIC-5 CLOSE).** Now that off-system is 0, make it un-rottable:
-  - Wire `node scripts/metrics.mjs --assert-zero` into the CI workflow (the gate already exists in
-    `scripts/metrics.mjs:225-234` — it fails if `tokenViolations>0 || offSystemUtilities>0`; just invoke it in the
-    repo's CI step, beside the existing route-parity guard). *(Build-routine task — CI/config, outside docs scope.)*
-  - Add a vitest (e.g. `src/design-system/themeBridge.test.ts`) asserting every `@theme` `--color-*` maps to a
-    real `--token` declared in `colors_and_type.css` (so a future bridge edit that points a utility at a dead var
-    fails fast). This also satisfies ROADMAP NOW #2 (palette-drift lock).
-  - *Acceptance:* a new off-system class **or** a drifted bridge var fails CI red; `metrics.mjs --assert-zero` →
-    `✓ design-system conformance: tokenViolations=0, offSystemUtilities=0`. **EPIC-5 CLOSED — off-system 1076 → 0.**
+- [x] **S8 · LOCK the win (EPIC-5 CLOSE). — ✅ SHIPPED this run (2026-06-30).** off-system was already 0 (the
+  bulk redesign batch swept S1–S7's mass), so this run made the 0 un-rottable:
+  - **CI gate wired:** added a `design-system conformance` step to `.github/workflows/verify.yml` running
+    `node scripts/metrics.mjs --assert-zero` (the gate at `scripts/metrics.mjs:235-247` exits 1 if
+    `tokenViolations>0 || offSystemUtilities>0`), beside the existing shell-styled + route-parity guards — so every
+    PR/push to main that re-introduces a raw hex/rgb or an off-system palette class now fails red. Header comment
+    updated to document it.
+  - **Drift test added:** `src/design-system/themeBridge.test.ts` (3 cases) parses the `@theme inline` block in
+    `src/index.css` and asserts every `--color-*` utility resolves to a `--token` actually declared in
+    `colors_and_type.css` (+ a parse-floor guard so a broken regex can't pass vacuously, + a core-token-declared
+    floor). A bridge edit that points a utility at a dead var now fails fast — satisfies ROADMAP NOW #2
+    (palette-drift lock). vitest 205→208 (test-files 21→22 src, cases +3); build🟢 eslint clean; tokens 0,
+    off-system 0.
+  - *Acceptance MET:* `node scripts/metrics.mjs --assert-zero` →
+    `✓ design-system conformance: tokenViolations=0, offSystemUtilities=0`; a drifted bridge var or a new
+    off-system class now fails CI red. **EPIC-5 CLOSED — off-system 1076 → 0.**
 
-_When S1–S7 ship and S8's gate is green AND QA confirms `offSystemUtilities` hit **0** on green main → move
-EPIC-5 to DONE and promote the next highest-gradient epic (re-rank EPIC-6 Android vs an organism-completeness-II
-epic from the ROADMAP — Android only if on-device QA becomes available; otherwise the DataCenter/Files
-whole-state graph-mirror theme is the next cloud-executable gradient)._
+_**EPIC-5 DONE 2026-06-30** (off-system 1076 → 0, locked by the S8 CI gate + drift test). **QA to confirm**
+`node scripts/metrics.mjs --assert-zero` → green on main and the redesigned tree (full-screen app model, Cakra
+merge, Reader) still renders 26/26. **Strategist: promote the next ▶ ACTIVE epic** — EPIC-6 Android stays
+QUEUED (device-gated, not cloud-verifiable); the next **cloud-executable** gradient is the **DataCenter/Files
+whole-state graph-mirror** theme (today both only mirror the active table / current directory — see "Open
+follow-ups" in CONTEXT.md), or an organism-completeness-II pass on the post-redesign app set (the Cakra merge +
+Reader changed the surface; re-audit both-ways wiring against the new registry)._
 
 ---
 

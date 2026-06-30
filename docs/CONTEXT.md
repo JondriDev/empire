@@ -22,25 +22,36 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **▶ EPIC-5 · Design-system utility conformance → off-system utilities 1076 → 0** (promoted
-  2026-06-29; EPIC-4 fully DONE, QA-CONFIRMED on green main `d17f73a`/`1d2c052`). **Why:** EPIC-2 swept raw hex/rgba
-  to 0 but never touched the ~1076 Tailwind palette
-  classes (`text-gray-400`/`bg-cyan-600`/`text-white`/`bg-white/10`…) that bypass the JondriDev tokens AND break
-  `[data-theme]` theme-switching — the steepest *executable* gradient on the board. Android (now **EPIC-6**, QUEUED)
-  is device-gated → not unattended-executable, so it waits.
-  - **▶ NEXT BUILDER STAGE = EPIC-5 S1** (start editing, no re-planning): migrate the two heaviest entity apps —
-    **`src/apps/calendar/Calendar.tsx` (81 off-system → 0)** + **`src/apps/photos/Photos.tsx` (76 → 0)** — to the
-    token-backed utility vocabulary. **The rail already exists:** the `@theme inline` bridge in **`src/index.css:25-47`**
-    exposes `text-fg`/`text-muted`/`text-faint`, `bg-glass`/`bg-void`, `border-hair`, `text-/bg-/border-signal`
-    (+ aurora/ion/ember/plasma/xenon) and `text-/bg-success`/`-warn`/`-danger`/`-info` — each resolves to `var(--token)`
-    so it follows `[data-theme]`. **`Clock.tsx` is the worked reference — already 0 off-system** (migrated in `9051409`);
-    diff it for the idiom. **Full class→token map is in EPICS.md → EPIC-5 → "The migration rail" table** — apply it
-    verbatim; only add a `--color-*` to the `@theme` block if a target is genuinely missing. Photos' `ephemeral`
-    "session" chip swaps `amber-*` → `bg-warn`/`text-warn`. *Acceptance:* `node scripts/metrics.mjs` reports **0** for
-    both files (off-system **1076 → ~919**), `tokenViolations` stays **0** (swap classes for classes, never a raw hex),
-    build🟢 vitest🟢 eslint clean, both render in QA. Stages S2–S7 sweep the rest by descending mass; **S8 flips
-    `metrics.mjs --assert-zero` into a CI gate** so the 0 can't rot. **Trap:** `metrics.mjs` greps text — a raw
-    `rgb(`/`#hex` (even in a comment) regresses `tokenViolations`; keep everything as token *utilities*/`cssVar`/`tint`.
+- **Active epic:** **NONE — EPIC-5 CLOSED 2026-06-30 (off-system 1076 → 0). Strategist must promote the next epic.**
+  EPIC-5's whole metric was realized **out-of-band** by the user-directed redesign batch (commits `75ef685`…`fb4c853`,
+  2026-06-30: full-screen app model — *windows deleted*; Prompt-Gen/Token-Counter/Editor *merged into Cakra*; a new
+  **Reader** app; and `98c61c7` "token-ize Tailwind palette classes across all apps" which drove every file's
+  off-system count to 0). **S8 (this run, `f9dbf10`) LOCKED it** so it can't rot — see below.
+  - **▶ NEXT BUILDER STAGE = none pre-decomposed.** If you arrive with no `▶ ACTIVE` epic: EPIC-6 (Android) is
+    device-gated/QUEUED (not cloud-verifiable). The next **cloud-executable** gradients (Strategist to formalize into
+    stages): (a) **DataCenter/Files whole-state graph-mirror** — both only mirror the *active table* / *current
+    directory* today (see "Open follow-ups" below); (b) **organism-completeness-II** — the Cakra merge + Reader
+    changed the app surface (now 26 routes), so re-audit both-ways wiring against the new registry. Until an epic is
+    promoted, the builder takes the topmost ROADMAP NOW item and flags EPICS needs the Strategist.
+  - **✅ EPIC-5 S8 SHIPPED (this run, 2026-06-30) — LOCKED off-system 0 (EPIC-5 CLOSE).** off-system was already 0
+    (the redesign batch swept S1–S7's mass; nothing left to migrate), so this run made the 0 **un-rottable**:
+    (1) wired a **`design-system conformance` CI step** into `.github/workflows/verify.yml` running
+    `node scripts/metrics.mjs --assert-zero` (gate at `scripts/metrics.mjs:235-247`, exits 1 if `tokenViolations>0 ||
+    offSystemUtilities>0`) — beside the shell-styled + route-parity guards; (2) added
+    **`src/design-system/themeBridge.test.ts`** (3 cases) — parses the `@theme inline` block in `src/index.css` and
+    asserts every `--color-*` utility resolves to a `--token` declared in `colors_and_type.css` (+ a parse-floor so a
+    broken regex can't pass vacuously). A re-introduced off-system class **or** a drifted bridge var now fails CI red.
+    build🟢 vitest 205→208🟢 eslint clean; tokens 0, off-system 0 (live grep). **Trap (still live):** `metrics.mjs`
+    greps text — a raw `rgb(`/`#hex` *even in a comment* regresses `tokenViolations`; the CI gate now catches it.
+    **The `@theme inline` bridge is `src/index.css:25-49`** (16 `--color-*` utilities → `var(--token)`), token
+    declarations in `src/design-system/colors_and_type.css` (`:root` + `[data-theme]` blocks). **`Clock.tsx` is the
+    0-off-system reference idiom** for any future class→token work.
+  - **⚠️ REDESIGN BATCH 2026-06-30 (out-of-band, between QA `1d2c052` and this run) — read before "fixing" deltas:**
+    apps **25 → 26** (Reader added; Prompt-Gen/Token-Counter/Editor folded into **Cakra** but route count rose net +1
+    — the Reader); **windows deleted** (full-screen "Apple-style" app model — `src/components/Window.tsx` gone, new
+    `AppHost.tsx`/`Recents.tsx`, `src/lib/cakraTab.ts`); **bundle gz 292.5 → 691.3** (the Reader pulls EPUB/PDF/DOCX
+    parsers — by design, do NOT strip them). off-system 0, tokens 0 held. **Not yet QA-confirmed visually** — QA
+    should smoke all 26 routes against this tree (esp. Reader + the windowless shell).
   - **✅ EPIC-4 fully DONE & QA-CONFIRMED (2026-06-29, green main `d17f73a`/`1d2c052`) — PWA: offline ✅ + base ✅ +
     installable ✅ (4 icons).** All S1–S4 shipped; every acceptance metric confirmed-moved by QA. EPIC-4 history
     seams retained below.
