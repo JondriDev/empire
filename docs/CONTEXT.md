@@ -23,6 +23,18 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** **NONE — EPIC-5 CLOSED 2026-06-30 (off-system 1076 → 0). Strategist must promote the next epic.**
+  - **✅ LATEST BUILDER RUN (2026-06-30, no active epic — took the topmost cloud-executable open-follow-up):**
+    **Files whole-state graph-mirror.** Fixed a real organism bug: `mirrorCollection` prunes unseen nodes, so Files
+    mirroring only the *current* directory **dropped every file from prior folders on navigate** — the graph never
+    saw more than one directory. New pure **`src/apps/files/filesGraph.ts`** (`accumulateFiles` union by path +
+    `dirOf` + `fileNodeData`); `Files.tsx` now holds the session union in a `useRef` and mirrors the **whole union**
+    (navigating ADDS; ref bounds to one session + self-cleans on reload via the first prune pass). `file` node `data`
+    now also carries `dir`. New `filesGraph.test.ts` (8). build🟢 vitest 208→216🟢 eslint clean; tokens 0, off-system
+    0, bundle 691.3→691.4. **DataCenter follow-up was STALE** — `DataCenter.tsx:57` already mirrors *all* tables with
+    per-table row counts, not just the active one (the "active table only" note predated the redesign). **▶ NEXT
+    cloud-executable: organism-completeness-II** — re-audit both-ways wiring vs the post-redesign 26-route registry
+    (Cakra merge folded Prompt-Gen/Token-Counter/Editor into tabs; Reader is new; `SendResultMenu`/`useInboundHandoff`
+    targets may point at routes that changed). EPICS still needs the Strategist to formalize an epic.
   EPIC-5's whole metric was realized **out-of-band** by the user-directed redesign batch (commits `75ef685`…`fb4c853`,
   2026-06-30: full-screen app model — *windows deleted*; Prompt-Gen/Token-Counter/Editor *merged into Cakra*; a new
   **Reader** app; and `98c61c7` "token-ize Tailwind palette classes across all apps" which drove every file's
@@ -247,6 +259,11 @@
     core intents (`make-task`, `make-note-from`, `add-to-learning`) are registered in
     `src/lib/core/sync.ts` (they need `useGraph`), not here.
   - `src/lib/core/sync.ts` — `startCoreSync()` (called once in `main.tsx`); `mirrorCollection()`.
+    **⚠️ `mirrorCollection` PRUNES** (`reconcile` deletes any `<type>` node whose `sourceId` isn't in the batch).
+    An app surfacing a *window* onto a larger space (Files = one directory at a time) must NOT hand it only the
+    current window or it deletes everything else — accumulate the union first. See `src/apps/files/filesGraph.ts`
+    (`accumulateFiles` builds a session-union `Map<path,…>`; `Files.tsx` mirrors `[...union.values()]`). DataCenter
+    is fine — it already mirrors all tables at once.
   - `src/components/ui/NodeActions.tsx` — `<NodeActions type sourceId/>` ⚡ "Send to…" menu.
   - **Focus + command palette (S4, 2026-06-22):** `src/lib/core/focus.ts` — `useFocus` store
     (`focusedId`), pure `focusIdForEvent(event)` (NODE_CREATED/UPDATED/INTENT_RUN→nodeId,
@@ -530,8 +547,17 @@
 
 ## 📌 Open follow-ups discovered (promote into EPICS.md stages)
 
-- DataCenter `dataset` nodes only carry a row count for the *active* table.
-- Files `file` nodes only reflect the *current* directory (reconcile drops others on navigate).
+- ~~DataCenter `dataset` nodes only carry a row count for the *active* table.~~ **→ STALE/RESOLVED (2026-06-30):
+  `DataCenter.tsx:57` already mirrors `Object.keys(store)` — every table with its own `rows` count. The note
+  predated the redesign; no change needed.**
+- ~~Files `file` nodes only reflect the *current* directory (reconcile drops others on navigate).~~ **→ FIXED
+  2026-06-30: `Files.tsx` now accumulates the **session union** of files across every directory visited (new pure
+  `src/apps/files/filesGraph.ts` + ref) and mirrors the whole union, so navigating ADDS to the graph instead of
+  pruning prior folders. Bounded to one session; self-cleans on reload.**
+- **organism-completeness-II (NEW, cloud-executable):** the redesign changed the app surface (Cakra merged
+  Prompt-Gen/Token-Counter/Editor into tabs; Reader added; 26 routes). Re-audit both-ways wiring against the new
+  registry — `SendResultMenu`'s `ACTION_TARGET`/`DEFAULT_ACTIONS` and `useInboundHandoff` receivers may reference
+  app ids/routes that the merge changed (e.g. did `editor`/`token-counter`/`prompt-generator` become Cakra tabs?).
 - ~~Photos `photo` nodes carry no thumbnail (object URLs are revoked on delete).~~ **→ EPIC-3 S3 SHIPPED
   2026-06-29: Photos now uses the `mediaStore` IDB rail so the library survives a reload (the blob-URL bug is
   fixed). `photo` nodes still carry name/size/tags only (not the URL) — by design, URLs are session-scoped.**
