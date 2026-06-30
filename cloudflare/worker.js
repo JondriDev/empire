@@ -59,7 +59,9 @@ export default {
       const useKey = apiKey || key
       if (!useKey) return json({ error: 'No NIM key — run: wrangler secret put NIM_API_KEY' }, 500)
 
-      const base = (baseUrl || NIM_BASE).replace(/\/+$/, '')
+      // Never send the server's own NIM key to a client-supplied host (key exfiltration).
+      // A custom baseUrl is only honored when the caller brings its own apiKey.
+      const base = (apiKey && baseUrl ? baseUrl : NIM_BASE).replace(/\/+$/, '')
       const nimMessages = systemPrompt ? [{ role: 'system', content: systemPrompt }, ...messages] : messages
 
       const upstream = await fetch(`${base}/chat/completions`, {

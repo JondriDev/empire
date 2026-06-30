@@ -177,12 +177,15 @@ export default function Music() {
 
     // Get duration after load
     newTracks.forEach(track => {
-      const audio = new Audio(track.src)
+      const audio = new Audio()
+      audio.preload = 'metadata'
       audio.addEventListener('loadedmetadata', () => {
         setPlaylist(prev => prev.map(t =>
           t.id === track.id ? { ...t, duration: audio.duration } : t
         ))
-      })
+        audio.src = '' // release the element once the duration is read
+      }, { once: true })
+      audio.src = track.src
     })
 
     if (fileInputRef.current) fileInputRef.current.value = ''
