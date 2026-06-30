@@ -50,8 +50,12 @@
     apps **25 → 26** (Reader added; Prompt-Gen/Token-Counter/Editor folded into **Cakra** but route count rose net +1
     — the Reader); **windows deleted** (full-screen "Apple-style" app model — `src/components/Window.tsx` gone, new
     `AppHost.tsx`/`Recents.tsx`, `src/lib/cakraTab.ts`); **bundle gz 292.5 → 691.3** (the Reader pulls EPUB/PDF/DOCX
-    parsers — by design, do NOT strip them). off-system 0, tokens 0 held. **Not yet QA-confirmed visually** — QA
-    should smoke all 26 routes against this tree (esp. Reader + the windowless shell).
+    parsers — by design, do NOT strip them). off-system 0, tokens 0 held. **✅ QA-CONFIRMED VISUALLY 2026-06-30
+    (green main `c51f79f`):** all 26 routes (27 incl. desktop) render clean, 0 uncaught JS, vitest 208/208.
+    Verified — the windowless full-screen shell (centered alien-icon launcher grid + bottom dock), the new Reader
+    (empty-state, EPUB/PDF/MD/TXT/DOCX, "ask Cakra as you read"), the merged Cakra (Chat/Prompt/Tokens/Code tabs +
+    Workspace panel), Maps real Leaflet container. **Added `reader` to the `qa-smoke.mjs` smoke list** (the new
+    registry app was missing from it — would have thrown REGISTRY-COVERAGE).
   - **✅ EPIC-4 fully DONE & QA-CONFIRMED (2026-06-29, green main `d17f73a`/`1d2c052`) — PWA: offline ✅ + base ✅ +
     installable ✅ (4 icons).** All S1–S4 shipped; every acceptance metric confirmed-moved by QA. EPIC-4 history
     seams retained below.
@@ -463,7 +467,27 @@
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
 
-## 📊 Last QA confirmation (2026-06-29, post-EPIC-4-S4 green main `d17f73a` — EPIC-4 S4 installability CONFIRMED → **EPIC-4 fully DONE**; offline-boots + base-path still LIVE; EPIC-3 CODE-COMPLETE)
+## 📊 Last QA confirmation (2026-06-30, green main `c51f79f` — FIRST visual QA of the redesign batch + EPIC-5 CLOSE)
+
+- **Routes rendering clean: 26/26 ✅** (27/27 incl. desktop). **First visual confirm of the redesign batch**
+  (`75ef685`…`fb4c853`) + EPIC-5 S8 lock (`c51f79f`). All 27 routes render with **0 uncaught JS**; vitest
+  **208/208** (24 files); eslint clean; build 🟢. SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅ bidirectional (26
+  apps — **added `reader` to the smoke list**, it was the one registry app missing) + INBOUND-LANDS **3/3 ✅** +
+  MEDIA-PERSISTS **3/3 ✅** + OFFLINE-BOOT **5/5 ✅** (PRECACHE 70 entries / 43 JS + 3 CSS, NO GAP).
+- **★ EPIC-5 acceptance CONFIRMED-MOVED & LOCKED:** off-system utilities **1076 → 0**; `node scripts/metrics.mjs
+  --assert-zero` exits **0** (`tokenViolations=0, offSystemUtilities=0`). The S8 conformance CI gate + the
+  `themeBridge.test.ts` drift test hold. **No `▶ ACTIVE` epic now — Strategist must promote the next one.**
+- **Visually verified (redesign, first time):** windowless full-screen shell (centered alien-icon launcher grid
+  + bottom dock, Earth-from-Space palette); new **Reader** (empty-state, EPUB/PDF/MD/TXT/DOCX, "ask Cakra as you
+  read"); merged **Cakra** (Chat/Prompt/Tokens/Code tabs + Workspace panel); **Maps** real Leaflet container w/
+  OSM/CARTO attribution (only tiles grey — egress-blocked, env-expected, net:8 — NOT a bug). **No runtime bugs.**
+- **Metric deltas vs `d17f73a`:** apps 25→26 (+1), vitest 205→208 (+3), files 23→24 (+1), token-violations 0
+  (±0), **off-system 1076→0 (−1076)**, bundle gz 292.5→691.3 (+398.8, Reader parsers BY DESIGN).
+- `latest/` holds only: `desktop.png` + 26 `app-<id>.png` (incl. the new `app-reader.png`) + REPORT.md/OFFLINE.md/PWA-BASE.md.
+
+---
+
+### Prior QA confirmation (2026-06-29, post-EPIC-4-S4 green main `d17f73a` — EPIC-4 fully DONE; offline-boots + base-path still LIVE; EPIC-3 CODE-COMPLETE)
 
 - **Routes rendering clean: 25/25 ✅** (26/26 incl. desktop). SHELL-IS-STYLED ✅ (top-level
   `.empire-desktop{…position:fixed…}`, 0 `.hide-sm .empire-desktop`) + REGISTRY-COVERAGE ✅ (bidirectional, all 25

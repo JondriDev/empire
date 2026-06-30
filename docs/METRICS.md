@@ -14,14 +14,14 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-| Metric | Current (QA 2026-06-29, after **EPIC-4 S4 (installability assertion — EPIC-4 CLOSE)** — green main `d17f73a`) | Target | Direction |
+| Metric | Current (QA 2026-06-30, after the **redesign batch (windowless shell + Reader + Cakra merge)** + **EPIC-5 S8 lock (off-system 0, EPIC-5 CLOSE)** — green main `c51f79f`) | Target | Direction |
 |---|---|---|---|
-| Apps / routes | 25 | ~26 (steady) | coherence over new surface — not a growth metric |
-| Test cases | 163 (static) · 205 (vitest run) | 60+ | ↑ higher = safer to leap |
-| Test files | 21 (metrics, `src/` only) · 23 (vitest, incl. `scripts/precacheAudit.test.mjs` + `scripts/pwaBaseAudit.test.mjs`) | grow with code | ↑ |
+| Apps / routes | 26 | ~26 (steady) | coherence over new surface — not a growth metric |
+| Test cases | 166 (static) · 208 (vitest run) | 60+ | ↑ higher = safer to leap |
+| Test files | 22 (metrics, `src/` only) · 24 (vitest, incl. `scripts/precacheAudit.test.mjs` + `scripts/pwaBaseAudit.test.mjs`) | grow with code | ↑ |
 | Design-token violations | **0** | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
-| Off-system utilities | **1076** (↓ from 1164, −88: the `@theme` token utilities + Clock migration in `9051409`) | 0 | ↓ Tailwind palette classes (`text-gray-400`, `bg-cyan-600`, `bg-white/10`, `text-white`, `text-red-400`…) that bypass the JondriDev tokens — EPIC-2's blind spot, now being swept |
-| Bundle gz (KB) | 292.5 | hold / shrink | ↓ |
+| Off-system utilities | **0** (↓ from 1076 — the redesign batch's `98c61c7` "token-ize Tailwind palette classes across all apps" swept the whole mass; EPIC-5 S8 `c51f79f` LOCKED it with `--assert-zero` CI gate) | 0 | ↓ Tailwind palette classes (`text-gray-400`, `bg-cyan-600`, `bg-white/10`, `text-white`, `text-red-400`…) that bypass the JondriDev tokens — **EPIC-5 TARGET MET (0)** |
+| Bundle gz (KB) | 691.3 (↑ from 292.5 — the Reader pulls EPUB/PDF/DOCX parsers, BY DESIGN; do NOT strip) | hold / shrink | ↓ |
 
 > **Off-system utilities (added 2026-06-29).** `tokenViolations` only ever counted raw `#hex`/`rgba()`
 > *literals*, so it hit 0 while ~1,160 ergonomic-but-off-system Tailwind palette classes still bypassed
@@ -32,20 +32,22 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 > components, or `cssVar()`/`tint()`/`CATEGORICAL` for JS-computed colours. The lock stage flips
 > `node scripts/metrics.mjs --assert-zero` into a hard gate so it can't regress.
 
-> Last integration since prior QA snapshot (`1b5e695`, EPIC-4 S3, apps 25 / gz 292.5 / vitest 193 / files 23):
-> one code commit landed — **`d17f73a` feat(pwa): assert manifest installability (EPIC-4 S4, EPIC-4 close)**
-> (added `auditInstallability(manifest)` + `maxIconSize` to `scripts/pwaBaseAudit.mjs`, surfaced via
-> `scripts/check-pwa-base.mjs` + the PWA-BASE.md Installability table; `pwaBaseAudit.test.mjs` 17→29 cases).
-> Δ: test cases **193 → 205 vitest (+12)** (`pwaBaseAudit.test.mjs` installability cases), test files **23 (±0;
-> metrics.mjs still 21, counts `src/` only)**, apps ±0 (25), token violations ±0 (**0**), off-system utilities ±0
-> (1076), bundle gz ±0 (292.5). CONFIRMED on green main `d17f73a`, no contradiction. **★ EPIC-4 S4 acceptance
-> CONFIRMED MOVED: `node scripts/check-pwa-base.mjs` → `installable = ✅ (4 icons)`** — manifest passes name+short_name,
-> a ≥192 AND a ≥512 `any`-purpose icon, a maskable icon, standalone display, start_url, background_color+theme_color.
-> All prior EPIC-4 guards re-confirmed LIVE: **offline-boots 5/5** cold from precache, **PRECACHE no-gap** (63
-> entries / 37 JS + 2 CSS), **base-path/install-flow** consistent under `--base=/empire/` (S3). EPIC-3 remains
-> CODE-COMPLETE (function 8/8 held — MEDIA 3/3). **EPIC-4 (PWA completion → installable, offline-true) is now fully
-> DONE: offline ✅ + base ✅ + installable ✅.** **Next: no pre-decomposed stage — EPIC-5 (Android APK validation)
-> is QUEUED, needs the Strategist to promote + seed stages.**
+> Last integration since prior QA snapshot (`d17f73a`, EPIC-4 S4, apps 25 / gz 292.5 / vitest 205 / off-system
+> 1076): the **out-of-band redesign batch** (`75ef685`…`fb4c853`, 2026-06-30, user-directed) + **EPIC-5 S8
+> close** (`c51f79f`) landed. The batch: **full-screen "Apple-style" app model** (`src/components/Window.tsx`
+> deleted, new `AppHost.tsx`/`Recents.tsx`/`cakraTab.ts`); **Prompt-Gen / Token-Counter / Code-Editor folded
+> into Cakra** as tabs; a new **Reader** app (EPUB/PDF/TXT/MD/DOCX, Cakra-powered); and `98c61c7`
+> "token-ize Tailwind palette classes across all apps" which drove **off-system 1076 → 0**. Δ vs `d17f73a`:
+> apps **25 → 26** (+1, Reader net), test cases **205 → 208 vitest** / 163 → 166 static (+3), test files **23 →
+> 24 vitest** / 21 → 22 metrics (+1), token violations ±0 (**0**), **off-system 1076 → 0 (−1076, EPIC-5 target
+> met + LOCKED)**, bundle gz **292.5 → 691.3** (+398.8, the Reader's parser libs — BY DESIGN). CONFIRMED on green
+> main `c51f79f`, no contradiction, no runtime bug. **★ This run is the FIRST visual QA of the redesign batch —
+> all 26 routes render clean incl. the new windowless shell + Reader + the merged Cakra tabs.** EPIC-5
+> (design-system utility conformance → off-system 0) **CONFIRMED MET & LOCKED** (`node scripts/metrics.mjs
+> --assert-zero` exits 0: tokenViolations=0, offSystemUtilities=0). EPIC-4 (PWA) re-confirmed: offline-boots
+> 5/5, PRECACHE no-gap (70 entries / 43 JS + 3 CSS). **Next: NO active epic — EPIC-5 CLOSED; Strategist must
+> promote the next epic** (EPIC-6 Android is device-gated/QUEUED; cloud-executable candidates: DataCenter/Files
+> whole-state graph-mirror, organism-completeness-II re-audit vs the new 26-route registry).
 
 > Prior context (still load-bearing): the **JondriDev redesign** (`bf76cf5`…`23df6ce`) intentionally set apps
 > **27 → 25** (deleted `ai-agent` + `hermes-cc`; AI unified into **Cakra** at `/app/ai-chat`) and bundle gz
@@ -55,9 +57,9 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Manual / CI metrics (QA + human)
 
-| Metric | Source | Current (QA 2026-06-29, after **EPIC-4 S4 installability — EPIC-4 CLOSE** green main `d17f73a`) | Target |
+| Metric | Source | Current (QA 2026-06-30, after the **redesign batch + EPIC-5 S8 lock** green main `c51f79f`) | Target |
 |---|---|---|---|
-| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **25 / 25** ✅ (26/26 incl. desktop shell; SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅ bidirectional + INBOUND-LANDS 3/3 ✅ + **MEDIA-PERSISTS 3/3 ✅ (music + video + photos)**) — re-confirmed 2026-06-29 on `d17f73a` (all 26 routes render with 0 uncaught JS, vitest 205/205; Earth-from-Space palette + alien icons + Cakra verified visually; desktop shell verified visually; Maps renders the real Leaflet container — only OSM/CARTO tiles grey, env-blocked). | 25 / 25 (every entity route) |
+| Routes rendering clean | QA `REPORT.md` (headless render, no uncaught JS / blank) | **26 / 26** ✅ (27/27 incl. desktop shell; SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅ bidirectional, 26 apps + the new `reader`; INBOUND-LANDS 3/3 ✅ + **MEDIA-PERSISTS 3/3 ✅ (music + video + photos)**) — **FIRST visual confirm of the redesign batch** 2026-06-30 on `c51f79f`: all 27 routes render with 0 uncaught JS, vitest 208/208. Verified visually: the **windowless full-screen shell** (centered app-launcher grid, Earth-from-Space palette, alien icons, bottom dock); the new **Reader** (empty-state, EPUB/PDF/MD/TXT/DOCX, "ask Cakra as you read"); the merged **Cakra** (Chat/Prompt/Tokens/Code tabs + Workspace panel); **Maps** real Leaflet container w/ OSM/CARTO attribution (only tiles grey — env-blocked, net:8). | 26 / 26 (every entity route) |
 | Shallow instruments with offline function + a unit test (EPIC-3 target) | QA + code audit | **8 / 8 ✅ PRIMARY METRIC HIT** — Clock (S1: `empire-clock-state` persistence + `clockLogic.test.ts` 17 cases ✅) + Music + Video (S2: real `Blob`s in IndexedDB via `mediaStore.ts`, metadata-only localStorage, ghost-drop on rehydrate + `mediaStore.test.ts` 11 cases ✅) + **Photos (S3: same `mediaStore` IDB rail, `photosStore.test.ts` 6 cases ✅ — live IDB roundtrip CONFIRMED this run by the extended MEDIA-PERSISTS `photos` case: add image → reload → survives)** + the 4 redesign instruments Weather/Maps/Language/DataCenter (function ✅; DataCenter+Weather dedicated tests pending → S4 backfills, Maps/Language render-smoke-covered). **Moved 7/8 → 8/8 this run (S3 confirmed live). All eight shallow instruments now offline-capable.** | 8 / 8 ✅ |
 | Apps fully wired into the organism (both **emit** and **receive** honest handoffs, visible in The Network) | QA + code audit | **9 / 9 entity-apps-with-inbound ✅ TARGET HIT (↑ from 6 — S6c)** — both-ways now: `prompt-generator`, `notes`, `learning-tracker`, `editor`, `token-counter`, `ai-chat` **+ `calendar`, `goals`, `messages`** (S6c: each gained a natural text→entity inbound via `useInboundHandoff` → opens its own create form prefilled + a "From <source>" `ProvenanceChip`; reachable from `SendResultMenu` & `NodeActions`). **Confirmed LIVE this run** (`scripts/qa-s6c-confirm.mjs`, screenshots `s6c-inbound-{calendar,goals,messages}.png`): seeding each `empire-<x>-clipboard` payload + reload shows the chip AND a prefilled field (Calendar New-Event title+date+desc, Goals New-Goal title+desc, Messages composer draft) — 3/3 ✅. The HANDOFF emission is unit-tested (`appActions.test.ts`, vitest 103). **Entity emit↔receive loop CLOSED.** Intentionally emit-only (by design, no natural inbound): files, photos, datacenter (browse/manage stores) + tool apps (calculator, clock, weather, etc.) via `NodeActions`. | 9 / 9 entity-apps-with-inbound ✅ |
 | Lighthouse — PWA / Perf / A11y | CI (add to a workflow when feasible) | not measured headless | 90 / 90 / 90 |

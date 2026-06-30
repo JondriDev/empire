@@ -51,7 +51,7 @@ const apps = [
   'calculator','calendar','clock','weather','grammar','language','music','video',
   'files','cache','browser','editor','notes','photos','datacenter','maps','messages',
   'prompt-generator','token-counter','learning-tracker','ai-chat','goals',
-  'artifacts','network','inbox',
+  'artifacts','network','inbox','reader',
 ];
 
 // ── REGISTRY-COVERAGE assertion (the silently-skipped-app trap) ─────────────
