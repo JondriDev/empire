@@ -23,7 +23,21 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** **NONE — EPIC-5 CLOSED 2026-06-30 (off-system 1076 → 0). Strategist must promote the next epic.**
-  - **✅ LATEST BUILDER RUN (2026-06-30, no active epic — took the topmost cloud-executable open-follow-up):**
+  - **✅ LATEST BUILDER RUN (2026-06-30, `95300b3`→ this commit, no active epic — FIX broken: the lint gate):**
+    **Restored eslint to green + locked it in CI.** The last QA flagged `npx eslint .` was NOT clean (2 errors + 6
+    warnings) while CI stayed green (verify.yml had **no eslint step**). **Fix:** split the icons module —
+    `git mv icons/index.tsx → icons/glyphs.tsx` (now a pure *component* module: 27 glyph components + the `AppIcon`
+    type only), new **`icons/index.ts`** barrel holds the non-component surface (`alienIcons` map + `getAppIcon`;
+    `FallbackIcon` internalized) with **zero component exports** so `react-refresh/only-export-components` can't fire.
+    Public import path (`from '../design-system/icons'`) unchanged → `registry.ts` untouched. Deleted 6 unused
+    `no-explicit-any` disable directives in `reader/lib/render/{epub,pdf}.ts` (that rule isn't enabled). **Added an
+    `npx eslint .` step to `verify.yml`** (errors fail CI red — the EPIC-5-S8-style lock). build🟢 eslint **0
+    problems** (was 2err/6warn) vitest 216 (±0, pure refactor) metrics all ±0 (tokens 0, off-system 0, bundle 691.4).
+    **organism-completeness-II investigated → NOT broken** (deferred): the Cakra merge kept standalone Editor/
+    Token-Counter/Prompt-Gen as `aliasOf` apps; `appActions` handoffs (`window.open('/app/editor')` → `AppShell` →
+    standalone component w/ `useInboundHandoff`) still **land**. Its only win is making deep-links resolve to Cakra
+    *tabs* (via `openAppById`/`setCakraTab`) — a non-cloud-verifiable polish, not a bug.
+  - **▶ PRIOR BUILDER RUN (2026-06-30, no active epic — took the topmost cloud-executable open-follow-up):**
     **Files whole-state graph-mirror.** Fixed a real organism bug: `mirrorCollection` prunes unseen nodes, so Files
     mirroring only the *current* directory **dropped every file from prior folders on navigate** — the graph never
     saw more than one directory. New pure **`src/apps/files/filesGraph.ts`** (`accumulateFiles` union by path +
@@ -328,6 +342,11 @@
 - **Registry / shell:** `src/lib/registry.ts` (**25 apps** post-redesign — `ai-agent`+`hermes-cc` deleted,
   `ai-chat`→**Cakra**), `src/lib/appComponents.tsx` (route→component map), `src/components/Desktop.tsx` (shell).
   **App identity icons** now resolve from the bespoke alien SVG set `src/design-system/icons/` via `getAppIcon()`.
+  **Split 2026-06-30 (react-refresh fix):** the glyph *components* live in `icons/glyphs.tsx` (pure component module),
+  the `alienIcons` map + `getAppIcon` resolver live in the `icons/index.ts` barrel (no component export). Import path
+  unchanged. **Trap:** never add a non-component export (object/function) to `glyphs.tsx` or a component export to
+  `index.ts` — `react-refresh/only-export-components` (`error`, now CI-gated) fires when a file mixes the two. Same
+  split precedent as `network/nodeColors.ts`.
 - **Design system:** `src/design-system/colors_and_type.css` (canonical **JondriDev Earth-from-Space**
   palette — re-skinned 2026-06-28, was XENO; the `:root`/theme CSS custom props), `src/design-system.css`
   (legacy-token *bridge*, re-valued onto the DS tokens — edit here to restyle all apps),
@@ -491,14 +510,11 @@
   offline fonts + leak fixes). All 27 routes render with **0 uncaught JS**; vitest **216/216** (25 files, +8 from
   `filesGraph.test.ts`); build 🟢. SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE ✅ bidirectional (26 apps) + INBOUND-LANDS
   **3/3 ✅** + MEDIA-PERSISTS **3/3 ✅** + OFFLINE-BOOT **5/5 ✅** (PRECACHE **78 entries** / 43 JS + 3 CSS, NO GAP).
-- **⚠️ NEW FINDING — eslint NOT clean (pre-existing, not from these 2 commits):** `npx eslint .` → **2 errors** in
-  `src/design-system/icons/index.tsx:274,306` (`react-refresh/only-export-components` on `alienIcons`/`getAppIcon` —
-  non-component exports from a component file). **NOT CI-gated** (`verify.yml` runs build+vitest+shell-styled+
-  route-parity+assert-zero, NOT eslint → CI is green), **NOT a runtime bug** (dev-HMR-only; app renders 27/27). The
-  file is unchanged since `c51f79f` and the config is unchanged, so prior "eslint clean" claims were unverified;
-  surfaced now on a fresh `npm install` (likely an `eslint-plugin-react-refresh` patch). **Builder fix:** extract
-  `alienIcons`/`FallbackIcon`/`getAppIcon` to a sibling `icons/appIcons.ts` (the `nodeColors.ts` precedent). Outside
-  QA's tiny/safe write scope. **Lesson: actually RUN `npx eslint .` each QA — don't trust the builder's "clean" claim.**
+- **✅ RESOLVED (Builder 2026-06-30) — eslint back to green + CI-gated.** The flagged 2 errors in
+  `icons/index.tsx:274,306` (`react-refresh/only-export-components`) + 6 unused-disable warnings in reader are FIXED:
+  the icons module was split (`glyphs.tsx` components / `index.ts` barrel) and the 6 dead directives deleted →
+  `npx eslint .` exits 0 with **zero problems**. **`verify.yml` now runs `npx eslint .`** (errors fail CI red), so this
+  can't silently rot again. **Lesson kept: actually RUN `npx eslint .` each QA — and now CI does too.**
 - **★ Epic-acceptance:** **No `▶ ACTIVE` epic** (EPIC-5 CLOSED; Strategist must promote next). EPIC-5's lock re-held:
   `node scripts/metrics.mjs --assert-zero` exits **0** (`tokenViolations=0, offSystemUtilities=0`) across both new
   commits. No contradiction; no runtime regression.
@@ -561,10 +577,16 @@
   2026-06-30: `Files.tsx` now accumulates the **session union** of files across every directory visited (new pure
   `src/apps/files/filesGraph.ts` + ref) and mirrors the whole union, so navigating ADDS to the graph instead of
   pruning prior folders. Bounded to one session; self-cleans on reload.**
-- **organism-completeness-II (NEW, cloud-executable):** the redesign changed the app surface (Cakra merged
-  Prompt-Gen/Token-Counter/Editor into tabs; Reader added; 26 routes). Re-audit both-ways wiring against the new
-  registry — `SendResultMenu`'s `ACTION_TARGET`/`DEFAULT_ACTIONS` and `useInboundHandoff` receivers may reference
-  app ids/routes that the merge changed (e.g. did `editor`/`token-counter`/`prompt-generator` become Cakra tabs?).
+- **organism-completeness-II (investigated 2026-06-30 — NOT broken, polish only):** the Cakra merge kept the
+  standalone `editor`/`token-counter`/`prompt-generator` components in `appComponents.tsx` and marked them
+  `hidden + aliasOf:{appId:'ai-chat',tab}` in `registry.ts`. Two open-paths exist & BOTH work: (1) the desktop
+  launcher/CommandPalette/Network use `openAppById` (`windowStore.ts:105-116`) which **resolves the alias** → opens
+  Cakra + `setCakraTab`; (2) `appActions` handoffs use `window.open('/app/editor','_self')` → `App.tsx` `/app/:appId`
+  → `AppShell` (`dashboard/AppShell.tsx`, does NOT resolve aliasOf) → renders the **standalone** Editor, which still
+  has its `useInboundHandoff` receiver, so the **handoff lands**. **The remaining (optional) win:** make `AppShell` (or
+  `appActions`) resolve `aliasOf` so deep-links/handoffs land on the merged **Cakra tab** instead of the orphaned
+  standalone app — a coherence/consistency change, **needs on-device visual confirmation** (not a bug; nothing is
+  dead). `SendResultMenu` `ACTION_TARGET`/`DEFAULT_ACTIONS` reference ids that all still resolve — no dead targets.
 - ~~Photos `photo` nodes carry no thumbnail (object URLs are revoked on delete).~~ **→ EPIC-3 S3 SHIPPED
   2026-06-29: Photos now uses the `mediaStore` IDB rail so the library survives a reload (the blob-URL bug is
   fixed). `photo` nodes still carry name/size/tags only (not the URL) — by design, URLs are session-scoped.**
