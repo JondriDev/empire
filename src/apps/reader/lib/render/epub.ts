@@ -15,9 +15,7 @@ const THEME_STYLES: Record<string, Record<string, Record<string, string>>> = {
 export const epubRenderer: BookRenderer = {
   async mount(container: HTMLElement, blob: Blob, opts: MountOptions): Promise<ReaderHandle> {
     const buf = await blob.arrayBuffer()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const book: any = ePub(buf)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rendition: any = book.renderTo(container, {
       width: '100%',
       height: '100%',
@@ -77,7 +75,6 @@ export const epubRenderer: BookRenderer = {
 /** Pull title/author/cover from an EPUB at import time (best-effort). */
 export async function extractEpubMeta(blob: Blob): Promise<{ title?: string; author?: string; cover?: string }> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const book: any = ePub(await blob.arrayBuffer())
     await book.ready
     const meta = await book.loaded.metadata

@@ -4,7 +4,6 @@
  * "Ask Cakra". Position is the current page; progress is page / total.
  */
 import { getDocument, GlobalWorkerOptions, Util } from 'pdfjs-dist'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import type { BookRenderer, ReaderHandle, MountOptions } from '../types'
@@ -23,7 +22,6 @@ async function renderPage(page: PDFPageProxy, host: HTMLElement, scale: number):
   canvas.style.width = '100%'
   canvas.style.height = 'auto'
   host.appendChild(canvas)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (page as any).render({ canvasContext: ctx, viewport, transform: ratio !== 1 ? [ratio, 0, 0, ratio, 0, 0] : undefined }).promise
 
   // Transparent, selectable text layer.
@@ -37,7 +35,6 @@ async function renderPage(page: PDFPageProxy, host: HTMLElement, scale: number):
     } as CSSStyleDeclaration)
     const scaleX = 1 / viewport.width * 100
     const scaleY = 1 / viewport.height * 100
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const item of textContent.items as any[]) {
       if (!item.str) continue
       const tx = Util.transform(viewport.transform, item.transform)

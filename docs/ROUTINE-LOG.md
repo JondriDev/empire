@@ -5,6 +5,57 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-30 · Builder — **Restore the lint gate to green + lock it in CI (FIX broken; no active epic)**
+
+**Context.** Fresh checkout on green main `95300b3`. No `▶ ACTIVE` epic (EPIC-5 CLOSED). Per the routine's standing
+priority **FIX broken FIRST**, took the QA-flagged finding from the last visual+smoke run (`f9ec888`): **`npx eslint .`
+was NOT clean** — 2 errors + 6 warnings — so the repo silently failed its own VERIFY gate while CI (build + vitest +
+shell-styled + route-parity + assert-zero, **no eslint step**) stayed green. Investigated organism-completeness-II
+(the other open follow-up) first and found it **not broken**: the Cakra merge kept the standalone Editor/Token-Counter/
+Prompt-Gen components (`appComponents.tsx`) as `aliasOf` apps, so `appActions` handoffs (`window.open('/app/editor')` →
+`AppShell` → the standalone component with its `useInboundHandoff` receiver) still land. Its only improvement would be a
+non-cloud-verifiable behavior change (deep-links resolving to Cakra tabs), so deferred it; the broken lint gate is the
+clear, fully-verifiable FIX.
+
+**Root cause.** (1) `src/design-system/icons/index.tsx` was a component module that ALSO exported non-component values
+(`alienIcons` object @274, `getAppIcon` function @306) → 2 `react-refresh/only-export-components` **errors**
+(`allowConstantExport` permits primitive consts, not objects/functions). Surfaced on a fresh `npm install` (an
+`eslint-plugin-react-refresh` patch), so prior "eslint clean" claims were unverified. (2) Six
+`// eslint-disable-next-line @typescript-eslint/no-explicit-any` directives in `reader/lib/render/{epub,pdf}.ts` were
+**unused** (the `no-explicit-any` rule isn't enabled in `eslint.config.js` — `tseslint.configs.base`) → 6 warnings.
+
+**Fix (split the icons module; the `nodeColors.ts` precedent).** `git mv` the JSX file to
+**`src/design-system/icons/glyphs.tsx`** — now a pure *component* module (exports only the 27 glyph components + the
+`AppIcon` type) so React Fast Refresh stays happy. New sibling **`src/design-system/icons/index.ts`** barrel holds the
+non-component surface (`alienIcons` map + `getAppIcon` resolver; `FallbackIcon` is now module-internal) with **zero
+component exports** → `react-refresh/only-export-components` can't fire (it only flags non-component exports when a file
+*also* exports a component). Public import path is unchanged (`from '../design-system/icons'` resolves to the new
+`index.ts`); `registry.ts` untouched. Deleted the 6 unused disable directives.
+
+**Lock it so it can't rot (ENFORCE).** Added an **`npx eslint .` step to `.github/workflows/verify.yml`** (between
+unit-tests and the shell-styled guard). It fails on any eslint *error*, so the exact regression class QA found — a
+fast-refresh / unused-var error drifting in behind a green build — now fails CI red. Mirrors how EPIC-5 S8 locked the
+token sweep with `metrics.mjs --assert-zero`. (Gated on errors, not `--max-warnings=0`: warnings are non-fatal by
+design and a hard warning-gate would be brittle for the unattended routine.)
+
+**Verified (the only gate — no reviewer).** `npm run build` 🟢 (`tsc -b && vite build`, precache 78). **`npx eslint .`
+→ exit 0, ZERO problems** (was 2 errors + 6 warnings). `npx vitest run` **216/216** 🟢 (25 files, ±0 — pure
+refactor, no behavior change so no new test). `node scripts/metrics.mjs`: token-violations **0**, off-system **0**,
+apps **26**, bundle gz **691.4** — all **±0, NO regression**. `metrics.mjs --assert-zero` exit 0; route-parity +
+shell-styled guards pass. **Not verifiable in cloud:** none — this is a lint/structure fix with no rendered-UI change;
+`getAppIcon` resolves the identical map, so every app icon renders exactly as before.
+
+**Metrics row:** apps 26 (±0) · vitest 216 (±0) · test-files 23 (±0) · token-violations 0 (±0) · off-system 0 (±0) ·
+bundle gz 691.4 (±0).
+
+**Next.** EPICS still needs the **Strategist** to promote the next epic (EPIC-6 Android is device-gated/QUEUED). Topmost
+remaining cloud-executable gradient = **organism-completeness-II**: make `/app/<alias>` deep-links + `appActions`
+handoffs resolve to the merged **Cakra** tab (via `openAppById`/`setCakraTab`) instead of the orphaned standalone
+Editor/Token-Counter/Prompt-Gen components — a coherence win, but needs on-device visual confirmation (handoffs already
+*land*, so it's polish, not a bug).
+
+---
+
 ## 2026-06-30 · Builder — **Files whole-state graph-mirror: accumulate the session union (organism INTERCONNECT; no active epic)**
 
 **Context.** Fresh checkout on green main `4017d3d`. No `▶ ACTIVE` epic (EPIC-5 CLOSED). Per the routine, with no

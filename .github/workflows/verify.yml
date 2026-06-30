@@ -1,6 +1,9 @@
 name: Verify build
 
-# PR-blocking correctness gate. Builds the app, runs the unit tests, and runs the
+# PR-blocking correctness gate. Builds the app, runs the unit tests, lints
+# (`npx eslint .` — fails on any eslint *error*, so a react-refresh / unused-var
+# regression can't drift in behind a green build, the lesson from the
+# icons/index.tsx fast-refresh errors that CI silently let through), and runs the
 # "shell-is-styled" guard (scripts/check-shell-styled.mjs) that asserts the built
 # bundle still has a top-level `.empire-desktop{…position:fixed…}` rule and zero
 # `.hide-sm .empire-desktop` — i.e. the desktop home shell can't silently render
@@ -52,6 +55,9 @@ jobs:
 
       - name: Unit tests
         run: npx vitest run
+
+      - name: Lint (eslint — fails on any error)
+        run: npx eslint .
 
       - name: Guard — desktop shell stays styled (blank-dark trap #10)
         run: node scripts/check-shell-styled.mjs

@@ -269,40 +269,37 @@ const Node: AppIcon = (p) => (
   </S>
 )
 
-/** Map registry `icon` keys → alien glyphs. (Keys preserved from the prior
- *  Lucide names to avoid registry churn; `cakra` is the renamed AI app.) */
-export const alienIcons: Record<string, AppIcon> = {
+// Every glyph is exported so the sibling barrel (`./index.ts`) can assemble the
+// registry-key → glyph map and the `getAppIcon` resolver. This file stays a
+// pure *component* module (only components + the `AppIcon` type leave it) so
+// React Fast Refresh keeps working — the map/resolver (non-component values)
+// live in the `.ts` barrel, never mixed in here (react-refresh/only-export-components).
+export {
   Calculator,
   Calendar,
   Clock,
-  CloudSun: Weather,
-  SpellCheck: Grammar,
-  Languages: Language,
+  Weather,
+  Grammar,
+  Language,
   Music,
   Video,
-  Folder: Files,
-  Trash2: Cache,
-  Globe: Browser,
-  Code2: Editor,
-  StickyNote: Notes,
-  Image: Photos,
-  Database: Datacenter,
-  MapPin: Maps,
-  MessageSquare: Messages,
-  Wand2: Prompt,
-  Hash: Tokens,
-  GraduationCap: Learning,
-  Target: Goals,
-  Palette: Artifacts,
-  Network: NetworkIcon,
-  Inbox: InboxIcon,
+  Files,
+  Cache,
+  Browser,
+  Editor,
+  Notes,
+  Photos,
+  Datacenter,
+  Maps,
+  Messages,
+  Prompt,
+  Tokens,
+  Learning,
+  Goals,
+  Artifacts,
+  NetworkIcon,
+  InboxIcon,
   Reader,
-  cakra: Cakra,
-}
-
-export const FallbackIcon: AppIcon = Node
-
-/** Resolve an app's icon component by its registry `icon` key. */
-export function getAppIcon(key: string): AppIcon {
-  return alienIcons[key] ?? FallbackIcon
+  Cakra,
+  Node,
 }
