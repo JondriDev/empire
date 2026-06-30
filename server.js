@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -14,13 +15,34 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 const PORT = process.env.PORT || 3001;
+// Bind loopback by default. A 0.0.0.0 bind + CORS:* + the file/tool endpoints below
+// = LAN-reachable RCE/exfil. Opt into network exposure explicitly with EMPIRE_HOST=0.0.0.0.
+const HOST = process.env.EMPIRE_HOST || '127.0.0.1';
 const ALLOWED_BASE = process.env.EMPIRE_ROOT || '/storage/emulated/0';
-const JWT_SECRET = process.env.JWT_SECRET || 'empire-local-secret-change-in-production';
 const DB_PATH = path.join(__dirname, 'data', 'empire.db');
 
 // Ensure data directory exists
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
   fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
+}
+
+// JWT secret: prefer the env var; otherwise generate a random secret ONCE and
+// persist it (data/.jwt-secret, 0600). A hardcoded fallback is public in git, so
+// anyone could forge tokens — never ship one.
+const JWT_SECRET = loadOrCreateJwtSecret();
+function loadOrCreateJwtSecret() {
+  if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+  const secretPath = path.join(__dirname, 'data', '.jwt-secret');
+  try {
+    if (fs.existsSync(secretPath)) {
+      const existing = fs.readFileSync(secretPath, 'utf8').trim();
+      if (existing) return existing;
+    }
+  } catch { /* fall through and regenerate */ }
+  const secret = crypto.randomBytes(32).toString('hex');
+  try { fs.writeFileSync(secretPath, secret, { mode: 0o600 }); }
+  catch (e) { console.warn('[AUTH] Could not persist JWT secret, using an ephemeral one:', e.message); }
+  return secret;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -233,7 +255,9 @@ async function ensureDefaultUser() {
   const result = db.exec("SELECT id FROM users WHERE username = 'admin'");
   if (result.length === 0 || result[0].values.length === 0) {
     const id = uuidv4();
-    const pinHash = await bcrypt.hash('1234', 10);
+    // Generate a random one-time PIN instead of a guessable default (was '1234').
+    const pin = process.env.EMPIRE_ADMIN_PIN || String(crypto.randomInt(100000, 1000000));
+    const pinHash = await bcrypt.hash(pin, 10);
     db.run(
       "INSERT INTO users (id, username, pin_hash, display_name) VALUES (?, ?, ?, ?)",
       [id, 'admin', pinHash, 'Admin']
@@ -243,7 +267,8 @@ async function ensureDefaultUser() {
       [uuidv4(), id]
     );
     saveDatabase();
-    console.log('[AUTH] Created default user: admin / PIN: 1234');
+    console.log(`\n[AUTH] Created user "admin" with a one-time PIN: ${pin}`);
+    console.log('[AUTH] Shown ONCE — change it in Settings (or preset EMPIRE_ADMIN_PIN).\n');
   }
 }
 
@@ -254,7 +279,7 @@ function authMiddleware(req, res, next) {
   }
   const token = authHeader.slice(7);
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
     req.user = decoded;
     next();
   } catch (e) {
@@ -266,7 +291,7 @@ function optionalAuth(req, res, next) {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     try {
-      req.user = jwt.verify(authHeader.slice(7), JWT_SECRET);
+      req.user = jwt.verify(authHeader.slice(7), JWT_SECRET, { algorithms: ['HS256'] });
     } catch (e) {
       // token invalid, continue without user
     }
@@ -278,9 +303,19 @@ function optionalAuth(req, res, next) {
 // MIDDLEWARE
 // ═══════════════════════════════════════════════════════════════
 
+// CORS: reflect only allowlisted origins (NOT '*') so a hostile web page can't read
+// authed/tool/file responses if the port is reachable. Same-origin (the PWA served by
+// this server) and dev are covered; add LAN origins via EMPIRE_ALLOWED_ORIGINS (comma-sep).
+const ALLOWED_ORIGINS = (process.env.EMPIRE_ALLOWED_ORIGINS ||
+  'http://localhost:3001,http://127.0.0.1:3001,http://localhost:5173')
+  .split(',').map(s => s.trim()).filter(Boolean);
 // Security headers (helmet-equivalent, no extra dep)
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Vary', 'Origin');
+  }
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   // Defensive hardening headers
@@ -317,10 +352,12 @@ function rateLimit(scope, max, windowMs) {
 }
 
 function safePath(userPath) {
-  if (!userPath) return ALLOWED_BASE;
-  const resolved = path.resolve(String(userPath));
-  if (!resolved.startsWith(path.resolve(ALLOWED_BASE))) {
-    return path.resolve(ALLOWED_BASE);
+  const base = path.resolve(ALLOWED_BASE);
+  if (!userPath) return base;
+  const resolved = path.resolve(base, String(userPath));
+  // Boundary check with a trailing separator so a sibling like `${base}evil` can't pass.
+  if (resolved !== base && !resolved.startsWith(base + path.sep)) {
+    return base;
   }
   return resolved;
 }
@@ -588,18 +625,24 @@ app.post('/api/dc/tables/:tableId/rows', authMiddleware, (req, res) => {
 app.put('/api/dc/tables/:tableId/rows/:rowId', authMiddleware, (req, res) => {
   const { data } = req.body;
   if (!data) return res.status(400).json({ error: 'Data required' });
+  const owns = db.exec("SELECT id FROM dc_tables WHERE id = ? AND user_id = ?", [req.params.tableId, req.user.id]);
+  if (owns.length === 0 || owns[0].values.length === 0) return res.status(404).json({ error: 'Table not found' });
   db.run("UPDATE dc_rows SET data_json = ?, updated_at = datetime('now') WHERE id = ? AND table_id = ?", [JSON.stringify(data), req.params.rowId, req.params.tableId]);
   saveDatabase();
   res.json({ ok: true });
 });
 
 app.delete('/api/dc/tables/:tableId/rows/:rowId', authMiddleware, (req, res) => {
+  const owns = db.exec("SELECT id FROM dc_tables WHERE id = ? AND user_id = ?", [req.params.tableId, req.user.id]);
+  if (owns.length === 0 || owns[0].values.length === 0) return res.status(404).json({ error: 'Table not found' });
   db.run("DELETE FROM dc_rows WHERE id = ? AND table_id = ?", [req.params.rowId, req.params.tableId]);
   saveDatabase();
   res.json({ ok: true });
 });
 
 app.delete('/api/dc/tables/:tableId', authMiddleware, (req, res) => {
+  const owns = db.exec("SELECT id FROM dc_tables WHERE id = ? AND user_id = ?", [req.params.tableId, req.user.id]);
+  if (owns.length === 0 || owns[0].values.length === 0) return res.status(404).json({ error: 'Table not found' });
   db.run("DELETE FROM dc_rows WHERE table_id = ?", [req.params.tableId]);
   db.run("DELETE FROM dc_tables WHERE id = ? AND user_id = ?", [req.params.tableId, req.user.id]);
   saveDatabase();
@@ -1046,12 +1089,18 @@ const TOOL_DEFINITIONS = {
   shell_exec: { description: 'Execute a shell command', dangerous: true, schema: { command: 'string', timeout: 'number?' } },
   web_search: { description: 'Search the web', dangerous: false, schema: { query: 'string', limit: 'number?' } },
   web_fetch: { description: 'Fetch a URL', dangerous: false, schema: { url: 'string' } },
-  code_exec: { description: 'Execute code', dangerous: false, schema: { code: 'string', language: 'string' } },
+  code_exec: { description: 'Execute code', dangerous: true, schema: { code: 'string', language: 'string' } },
 };
 
 const DANGEROUS_PATTERNS = [/rm\s+-rf\s+\//, /dd\s+if=/, /mkfs/, /fdisk/, />\s*\/dev\//, /format\s+/, /shutdown/, /reboot/, /poweroff/, /init\s+0/];
 const SHELL_TIMEOUT = 30_000;
 const CODE_TIMEOUT = 10_000;
+
+// Tools that run shells / interpreters / write files are OFF by default — the
+// pattern denylist above is trivially bypassable, so exposing them over HTTP is
+// effectively unauthenticated RCE. Opt in with EMPIRE_ENABLE_DANGEROUS_TOOLS=1.
+const DANGEROUS_TOOLS = new Set(['shell_exec', 'code_exec', 'file_write']);
+const DANGEROUS_TOOLS_ENABLED = process.env.EMPIRE_ENABLE_DANGEROUS_TOOLS === '1';
 
 function validateCommand(cmd) {
   if (!cmd || typeof cmd !== 'string') return 'No command';
@@ -1068,6 +1117,9 @@ app.post('/api/tools/execute', async (req, res) => {
   if (!tool) return res.status(400).json({ success: false, error: 'Missing tool name' });
   const def = TOOL_DEFINITIONS[tool];
   if (!def) return res.status(400).json({ success: false, error: `Unknown tool: ${tool}` });
+  if ((def.dangerous || DANGEROUS_TOOLS.has(tool)) && !DANGEROUS_TOOLS_ENABLED) {
+    return res.status(403).json({ success: false, error: `Tool "${tool}" is disabled. Set EMPIRE_ENABLE_DANGEROUS_TOOLS=1 to enable shell/code/file-write tools.` });
+  }
 
   try {
     switch (tool) {
@@ -1079,7 +1131,6 @@ app.post('/api/tools/execute', async (req, res) => {
         break;
       }
       case 'file_write': {
-        if (def.dangerous) { const v = validateCommand(params.content); if (v) return res.json({ success: false, error: v }); }
         const { path: fp, content, append = false } = params;
         if (append) { fs.appendFileSync(safePath(fp), content, 'utf8'); }
         else { fs.writeFileSync(safePath(fp), content, 'utf8'); }
@@ -1187,12 +1238,13 @@ async function startServer() {
     await initDatabase();
     await ensureDefaultUser();
 
-    server.listen(PORT, '0.0.0.0', () => {
+    server.listen(PORT, HOST, () => {
       console.log('\n  🏛️  The Empire — Backend API v2');
       console.log('  ──────────────────────────────────────');
       console.log(`  API Server:    http://localhost:${PORT}`);
       console.log(`  DB:            ${DB_PATH}`);
-      console.log(`  Auth:          /api/auth/login (admin / 1234)`);
+      console.log(`  Host:          ${HOST} (set EMPIRE_HOST=0.0.0.0 to expose on LAN)`);
+      console.log(`  Auth:          /api/auth/login (admin / PIN shown above on first run)`);
       console.log(`  Health:        /api/health`);
       console.log(`  Notes API:     /api/notes`);
       console.log(`  Events API:    /api/events`);

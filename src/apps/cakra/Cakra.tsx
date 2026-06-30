@@ -32,7 +32,7 @@ export default function Cakra() {
     if (!isLocalRuntime()) return
     let alive = true
     // Confirm server.js actually answers; downgrade to proxy chat if not.
-    checkBackend(2000).then((ok) => { if (alive) setNative(ok) })
+    checkBackend(2000).then((ok) => { if (alive) setNative(ok) }).catch(() => { if (alive) setNative(false) })
     return () => { alive = false }
   }, [])
 
