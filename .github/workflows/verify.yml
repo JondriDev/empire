@@ -8,7 +8,11 @@ name: Verify build
 # "route-parity" guard (scripts/check-route-parity.mjs) that asserts the app
 # registry (src/lib/registry.ts) and the lazy component map (src/lib/appComponents.tsx)
 # stay in lockstep — so an app added to one but not the other can't slip through
-# as an "App not available" fallback behind a green build. Cheap; runs on every
+# as an "App not available" fallback behind a green build. Finally runs the
+# "design-system conformance" gate (scripts/metrics.mjs --assert-zero) that fails
+# if any raw hex/rgb literal (tokenViolations) or off-system Tailwind palette
+# class (offSystemUtilities) re-enters src/ — locking the EPIC-5 1076→0 sweep so
+# the one-palette/themeable win can't silently rot. Cheap; runs on every
 # PR and every push to main.
 
 on:
@@ -54,3 +58,6 @@ jobs:
 
       - name: Guard — registry ↔ appComponents route parity (App-not-available drift)
         run: node scripts/check-route-parity.mjs
+
+      - name: Guard — design-system conformance (tokenViolations=0, offSystemUtilities=0)
+        run: node scripts/metrics.mjs --assert-zero

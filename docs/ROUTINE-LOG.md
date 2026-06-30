@@ -5,6 +5,40 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-06-30 · Builder — **EPIC-5 S8: LOCK off-system 0 (EPIC-5 CLOSE)** — CI conformance gate + `@theme`-bridge drift test
+
+**Orient → reality check.** CONTEXT pointed at EPIC-5 S1 (migrate Calendar+Photos), but a fresh `git pull` brought in
+a **user-directed redesign batch** (commits `75ef685`…`fb4c853`, 2026-06-30: full-screen "Apple-style" app model —
+*windows deleted*, new `AppHost.tsx`/`Recents.tsx`/`cakraTab.ts`; Prompt-Gen/Token-Counter/Editor **merged into
+Cakra**; a new **Reader** app; and `98c61c7` "token-ize Tailwind palette classes across all apps"). `node
+scripts/metrics.mjs` on the live tree already read **off-system 0** (−1076) and **token-violations 0** — i.e. the
+whole S1–S7 sweep was realized out-of-band. So S1–S7's per-file migration work no longer exists; the one genuine
+remaining stage was **S8 · lock the win**.
+
+**Done (S8).** (1) **CI gate:** added a `design-system conformance` step to `.github/workflows/verify.yml` running
+`node scripts/metrics.mjs --assert-zero` (gate at `scripts/metrics.mjs:235-247` — exits 1 if `tokenViolations>0 ||
+offSystemUtilities>0`), beside the existing shell-styled + route-parity guards; updated the workflow header comment.
+Now any PR/push to main that re-introduces a raw hex/rgb literal or an off-system palette class fails red. (2) **Drift
+test:** new `src/design-system/themeBridge.test.ts` (3 cases) parses the `@theme inline` block in `src/index.css` and
+asserts every `--color-*` utility resolves to a `--token` actually declared in `colors_and_type.css` — plus a
+parse-floor guard (≥12 pairs) so a broken regex can't pass vacuously and a core-token-declared floor. A bridge edit
+that points a utility at a dead var now fails fast (satisfies ROADMAP NOW #2, palette-drift lock).
+
+**Verified (the only gate).** build🟢 (`tsc -b && vite build`); `npx vitest run` **208/208 🟢** (24 files, +3 cases /
++1 file from the new test); `npx eslint` clean on the touched test; `node scripts/metrics.mjs --assert-zero` →
+`✓ design-system conformance: tokenViolations=0, offSystemUtilities=0`. **Metrics row** (absolute, vs run-start
+baseline): apps **26**, test-cases **163→166 (+3)**, test-files **21→22 (+1)**, token-violations **0**, off-system
+**0**, bundle gz **691.3** (±0 — the 292.5→691.3 jump is the redesign batch's Reader EPUB/PDF/DOCX parsers, *not* this
+change). *Not cloud-verifiable:* the redesigned windowless shell + Reader render — flagged for QA below.
+
+**Next (best single step).** **Strategist must promote the next ▶ ACTIVE epic** — no epic is active now. EPIC-6
+(Android) stays QUEUED (device-gated). Best cloud-executable candidate: the **DataCenter/Files whole-state
+graph-mirror** theme, or an **organism-completeness-II** re-audit of both-ways wiring against the post-redesign
+registry (Cakra merge + Reader changed the surface). **QA:** confirm `--assert-zero` green on main and smoke all 26
+routes against the redesigned tree (esp. Reader + the windowless full-screen shell — first QA since the batch).
+
+---
+
 ## 2026-06-29 · Strategist — EPIC-4 closed; promoted **EPIC-5 · Design-system utility conformance (off-system 1076 → 0)** ACTIVE; Android → EPIC-6
 
 **Decision.** EPIC-1/2/3/4 all DONE — EPIC-4 just **QA-CONFIRMED fully done** on green main `d17f73a`/`1d2c052`
