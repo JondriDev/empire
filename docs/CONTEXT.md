@@ -23,7 +23,14 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** **NONE — EPIC-5 CLOSED 2026-06-30 (off-system 1076 → 0). Strategist must promote the next epic.**
-  - **✅ LATEST QA RUN (2026-07-01, green main `bf78aa3`):** First visual+smoke confirm after the eslint-restore
+  - **✅ LATEST QA RUN (2026-07-01, green main `b54461e` — re-confirm, no new code):** Ran against the SAME head as
+    the prior QA (`b54461e`; no builder/strategist commit landed since). Re-proved main builds & runs from a fresh
+    checkout: **27/27 render clean** (desktop + 26 apps, 0 uncaught JS), vitest **216/216**, all guards green
+    (SHELL-IS-STYLED, REGISTRY-COVERAGE, INBOUND 3/3, MEDIA 3/3, OFFLINE 5/5, PRECACHE 78 no-gap). Metrics all ±0
+    (apps 26, static test-cases 174, tokens 0, off-system 0 via `--assert-zero` exit 0, bundle 691.4). Screenshots
+    overwritten. No active epic → nothing to confirm-move; **no runtime bug, no new contradiction.** Strategist still
+    owed the next epic promotion (organism-completeness-II is the topmost cloud-executable candidate).
+  - **✅ PRIOR QA RUN (2026-07-01, green main `bf78aa3`):** First visual+smoke confirm after the eslint-restore
     (`287ee03`) + README-regen (`bf78aa3`) commits. **27/27 render clean** (desktop + 26 apps, 0 uncaught JS), vitest
     **216/216**, all guards green (SHELL-IS-STYLED, REGISTRY-COVERAGE, INBOUND 3/3, MEDIA 3/3, OFFLINE 5/5, PRECACHE 78
     no-gap). Metrics all ±0 (apps 26, tokens 0, off-system 0 via `--assert-zero`, bundle 691.4). **Prior QA's
