@@ -1,6 +1,6 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-01T21:34:41.927Z
+**Generated:** 2026-07-01T23:06:59.633Z
 
 **Result:** 27/27 rendered without crash, 0 failed.
 
@@ -8,27 +8,13 @@
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
 > listed separately — expected in the offline cloud sandbox and **not** a render failure.
 
-## Summary (this run — green main `287ee03`)
+## Metrics & epic-acceptance
 
-- **No runtime bug found.** All 27 routes (desktop + 26 apps) render clean, **0 uncaught JS**, 0 error boundaries, 0 blank screens.
-- **First QA of `287ee03`** (`fix(lint): restore eslint to green and gate it in CI`). The prior QA (`95300b3`) flagged `npx eslint .` was NOT clean (2 err/6 warn) while CI had no eslint step. **Confirmed fixed this run:** `npx eslint .` → **0 problems, exit 0**, and `verify.yml` now runs it as a hard gate. The eslint-debt contradiction from last run is **resolved**.
-- **Guards all green:** SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE ✅ (bidirectional, 26 apps) · INBOUND-LANDS 3/3 ✅ · MEDIA-PERSISTS 3/3 ✅ · OFFLINE-BOOT 5/5 ✅ · PRECACHE 78 entries NO GAP ✅.
-- **Tests:** vitest **216/216** (25 files). Build 🟢 (`tsc -b && vite build`).
-
-### Metric deltas (vs prior QA snapshot `95300b3`/`f9ec888`)
-
-| Metric | Value | Δ |
-|---|---|---|
-| Apps / routes | 26 | ±0 |
-| Test cases (vitest) | 216 | ±0 |
-| Test files | 25 | ±0 |
-| Token violations | 0 | ±0 |
-| Off-system utils | 0 | ±0 |
-| Bundle gz (KB) | 691.4 | ±0 |
-
-### Epic-acceptance confirmation
-
-**No ACTIVE epic** — EPIC-5 CLOSED 2026-06-30 (off-system 1076 → 0, LOCKED by `--assert-zero` CI gate). Nothing to confirm-move this run; the Strategist must promote the next epic. Standing locks re-verified holding: off-system **0** (`metrics.mjs --assert-zero` passes), token violations **0**, eslint **0** (new `287ee03` gate).
+- **Green main `b54461e`** (same head as the prior QA `b54461e` — no new code commits landed since; this run re-confirms main still builds & runs from a fresh checkout).
+- **Metric deltas (all ±0 vs last QA):** apps/routes **26**, vitest **216/216** (25 files), metrics.mjs test-cases **174**, token-violations **0**, off-system utils **0**, bundle gz **691.4 KB**, precache **78 entries** (43 JS + 3 CSS, no gap).
+- `node scripts/metrics.mjs --assert-zero` → **exit 0** (`tokenViolations=0, offSystemUtilities=0`) — EPIC-5 lock held.
+- **Epic-acceptance:** **No `▶ ACTIVE` epic** (EPIC-5 CLOSED; EPIC-6 Android is device-gated/QUEUED, not cloud-verifiable). Nothing to confirm-move this run; no contradiction surfaced.
+- **No runtime bug found.** All 27 routes render with 0 uncaught JS; guards SHELL-IS-STYLED / REGISTRY-COVERAGE / INBOUND 3/3 / MEDIA 3/3 / OFFLINE 5/5 all green.
 
 | App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|
@@ -48,7 +34,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |

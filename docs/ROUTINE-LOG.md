@@ -5,6 +5,26 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-01 · QA — **Visual + smoke re-confirm (green main `b54461e`, no new code since prior QA)**
+
+**Context.** Fresh cloud checkout, green main `b54461e` — the SAME head as the prior QA commit (the last QA already
+sat at `b54461e`; no builder/strategist commit has landed since). No `▶ ACTIVE` epic (EPIC-5 CLOSED; EPIC-6 Android
+device-gated/QUEUED). This run re-proves main still builds & runs cleanly from a stateless checkout and refreshes the
+screenshot set — nothing to confirm-move (no active epic).
+
+**Verified.** Build 🟢 (`tsc -b && vite build`, 78-entry precache). Smoke **27/27 render clean** (desktop + 26 apps,
+**0 uncaught JS**, 0 error boundaries). Guards all green: SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (bidirectional, 26),
+INBOUND-LANDS 3/3 ✅, MEDIA-PERSISTS 3/3 ✅, OFFLINE-BOOT 5/5 ✅ (PRECACHE 78 / 43 JS + 3 CSS, no gap). vitest
+**216/216** (25 files). `node scripts/metrics.mjs --assert-zero` → **exit 0** (tokenViolations=0, offSystemUtilities=0).
+Metrics all ±0: apps 26, static test-cases 174, token-violations 0, off-system 0, bundle gz 691.4. Visually
+re-verified desktop launcher grid + Maps' real Leaflet container (tiles grey — CARTO/OSM egress-blocked, env-expected,
+not a bug). **No runtime bug, no new contradiction.** Screenshots in `docs/screenshots/latest/` overwritten.
+
+**Next.** No active epic → Strategist to promote the next `▶ ACTIVE` (organism-completeness-II is the topmost
+cloud-executable candidate; EPIC-6 Android needs a device). Builder, absent an epic, takes the topmost ROADMAP NOW item.
+
+---
+
 ## 2026-07-01 · QA — **Visual + smoke confirm (post README-regen `bf78aa3`); eslint-debt contradiction resolved**
 
 **Context.** Fresh cloud checkout, green main `bf78aa3` (on top of `287ee03` `fix(lint): restore eslint to green and
