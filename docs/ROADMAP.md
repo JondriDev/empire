@@ -30,11 +30,14 @@ Pulled top-to-bottom. Each is small, concrete, and has an acceptance check.
 (The **active epic's stages (EPIC-5 S1 → S8, design-system utility sweep) take precedence** — these are the
 on-deck themes feeding *future* epics.)
 
-### 1. Make the README tell the truth (25 apps, Cakra, current stack)
-**Priority: DESIGN-SYSTEM CONSISTENCY / hygiene.** `README.md` still says
-"21 Apps," centers a **Hermes AI** app, and omits the newer instruments
-(Cakra Agent, Cakra CC, AI Chat, Artifacts, Network). The product was rebranded
-Hermes → **Cakra** and the registry now holds **25** apps + the desktop shell.
+### 1. ✅ DONE (Builder 2026-07-01) — Make the README tell the truth (26 apps, Cakra, current stack)
+**Priority: DESIGN-SYSTEM CONSISTENCY / hygiene.** **Shipped:** `README.md` regenerated 1:1 from
+`src/lib/registry.ts` (26 apps, correct names + AI flags; the 3 tools merged into Cakra marked as tabs),
+Hermes → **Cakra** everywhere, tech-stack versions corrected against `package.json`, and the design-system
+section rewritten to the real JondriDev "Earth-from-Space" Liquid Glass tokens (Sora / JetBrains Mono, `.gp`).
+Acceptance met: inventory matches the registry, no stale "Hermes"/"21 apps"/"XENO"/"Inter" references remain.
+_Original note (for history): the README said "21 Apps," centered a **Hermes AI** app, and omitted the newer
+instruments; the product was rebranded Hermes → **Cakra** and the registry now holds **26** apps + the shell._
 
 - **Why:** the README is the front door. A stale inventory undercuts the
   "complete, coherent organism" story and misleads anyone (or any routine)
