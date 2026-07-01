@@ -22,7 +22,35 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **NONE — EPIC-5 CLOSED 2026-06-30 (off-system 1076 → 0). Strategist must promote the next epic.**
+- **Active epic:** **▶ EPIC-6 · Organism Memory (durable provenance & lineage)** — promoted 2026-07-01 (EPIC-1..5
+  all DONE; primary metrics maxed → open a new frontier). **Leap:** the organism stops fires-and-forgetting — a
+  durable `empire-provenance` store records every real app→app transfer, The Network *remembers* (persistent memory
+  panel + all-time "fed by/feeds"), each entity's source survives a reload, and Reader's books (the last graph-island)
+  become legible. **Target metric:** a new `PROVENANCE-PERSISTS 0/3 → 3/3` guard in `qa-smoke.mjs` (seed handoff →
+  reload → durable source still shows) + Reader graph-legible. Full stage specs in `docs/EPICS.md` → EPIC-6.
+  - **▶ NEXT BUILDER STAGE = EPIC-6 S1 · the durable provenance store + tracker (pure infra, zero UI risk).** Start
+    here without re-planning:
+    - **New `src/lib/core/provenance.ts`:** `export interface ProvEdge { fromApp; toApp; label?; at }`; a
+      **Zustand+persist** store `useProvenance` (key `'empire-provenance'`, copy `src/lib/core/graph.ts`'s persist
+      setup) with `edges: ProvEdge[]` + `record(edge)` (append, cap last `MAX_EDGES=500`, coalesce a same-pair edge
+      fired within `DEDUP_MS=1500` → bump `at`, don't append) + `clear()`. Pure exported helpers (no store access, so
+      unit-testable): `recordEdges(edges,edge,now)`, `edgesInto(edges,appId)`, `edgesFrom(edges,appId)`,
+      `lineageOf(edges,appId,maxDepth=6)` (walk newest inbound edge backwards, cycle-guarded, returns `[app,parent,…]`).
+    - **`startProvenanceTracking()`** — `onAny(e => { const f = flowForEvent(e); if (f)
+      useProvenance.getState().record({ fromApp:f.fromId, toApp:f.toId, label:'label' in e ? e.label : undefined,
+      at:Date.now() }) })`, module-level `started` guard (mirror `focus.ts`). **Call once in `src/main.tsx:18`** right
+      after `startFocusTracking()`.
+    - **The ONLY edge source is `flowForEvent(e)`** (`src/lib/core/flow.ts`) — never invent an edge the user didn't
+      cause. Reuse: `onAny`/`HANDOFF` from `eventBus.ts`; persist pattern from `graph.ts`; `registry`/`getAppIcon` for
+      later UI stages.
+    - **Test `src/lib/core/provenance.test.ts`** (≥8, pure — no jsdom): append; cap at `MAX_EDGES`; coalesce within
+      `DEDUP_MS`; `edgesInto`/`edgesFrom` filter+order newest-first; `lineageOf` 3-deep chain + cycle-stop (A←B←A) +
+      `[app]` on no history.
+    - **Acceptance:** a `HANDOFF{calculator→notes}` appends a `ProvEdge` that **survives reload**; `provenance.test.ts`
+      green; build🟢 vitest🟢 (test-files +1) eslint clean; `metrics.mjs --assert-zero` still exit 0 (tokens 0,
+      off-system 0). **No UI this stage** — it's the spine S2 (Network memory) / S3 (durable per-entity source +
+      `PROVENANCE-PERSISTS` guard) / S4 (Reader island close) build on.
+  - _(History below retained as working memory; the "no active epic" notes are superseded by the EPIC-6 promotion above.)_
   - **✅ LATEST QA RUN (2026-07-01, green main `b54461e` — re-confirm, no new code):** Ran against the SAME head as
     the prior QA (`b54461e`; no builder/strategist commit landed since). Re-proved main builds & runs from a fresh
     checkout: **27/27 render clean** (desktop + 26 apps, 0 uncaught JS), vitest **216/216**, all guards green

@@ -36,6 +36,152 @@ for the real Maps), token-violations **held at 0**. Do not re-add the deleted ap
 
 ---
 
+## ▶ ACTIVE — EPIC-6 · Organism Memory (durable provenance & lineage)
+
+> **Promoted 2026-07-01** (EPIC-5 CLOSED; every prior epic DONE). **Why this is the highest-gradient move now**
+> (one line): the organism has a reflexive nervous system that **fires and forgets** — a `HANDOFF` lights one
+> arc, then the only trace is Network's capped, in-memory 6-item ticker that fades and does **not survive a
+> reload**; giving the organism *durable memory* is the steepest remaining interconnection gradient (it ranks
+> above design/PWA/Android in the priority bias, is fully cloud-verifiable, reuses every existing rail — `HANDOFF`,
+> `flowForEvent`, the graph, the `qa-smoke` guard pattern — and turns "one living organism" from a per-session
+> illusion into a persistent truth). It also **subsumes and closes the last two open interconnection follow-ups**:
+> organism-completeness-II (post-redesign wiring) and the Reader graph-island.
+
+**Leap:** The Empire stops forgetting. Every cross-app transfer is recorded in a **durable, queryable provenance
+store**; The Network gains a **persistent memory** (not a fading ticker) and each app's inspector shows its
+whole-history "fed by / feeds" adjacency; entities that arrived via a handoff show their **source durably across a
+reload**; and the last graph-island (Reader's books) becomes legible in the mesh. The nervous system grows a memory.
+
+**Target metric (new — Builder instruments it; QA confirms it moved):** a **`PROVENANCE-PERSISTS` guard** in
+`scripts/qa-smoke.mjs` (mirrors the existing `INBOUND-LANDS` / `MEDIA-PERSISTS` guards) — seed a cross-app handoff,
+**reload**, and assert the receiving entity still shows its source from the *durable provenance store* (not the
+consumed sessionStorage chip). **Headline number: `PROVENANCE-PERSISTS 0/3 → 3/3`** (Calculator→Notes,
+notes→Goals, editor→Messages — three durable receivers). Secondary: **graph-legible apps** — every collection-
+owning app's real entities mirrored into The Network → **close the one gap (Reader)**; and the "+ a unit test"
+discipline (`provenance.test.ts`, `LineageTrail` test). *Routes rendering clean* stays **26/26**,
+*token-violations*/*off-system* stay **0** throughout (`--assert-zero` must keep passing).
+
+### Rails to reuse (read ONCE — do NOT reinvent)
+- **`src/lib/eventBus.ts`** — `onAny(handler)` (subscribe to every event), `emit`, the `HANDOFF { fromId, toId,
+  label? }` event. In-memory `history` here is **not** persistence — the new store is the durable spine.
+- **`src/lib/core/flow.ts`** — `flowForEvent(e): Flow | null` (`{fromId,toId}`) is the ONE honest "did data move
+  app→app?" predicate (covers `HANDOFF` + `NOTE_CREATED` `from-<src>` tag + `LEARNING_LOGGED.from`). **The
+  provenance tracker records exactly what `flowForEvent` returns** — never invent an edge the user didn't cause.
+- **`src/lib/core/focus.ts` + `main.tsx:16-17`** — the exact precedent for a global `onAny` tracker started once
+  in `main.tsx` (`startFocusTracking()`); the new `startProvenanceTracking()` mirrors it (added at `main.tsx:18`).
+- **Zustand+persist** — `src/lib/core/graph.ts` (`empire-core-graph`) is the persist-store pattern to copy.
+- **`src/lib/registry.ts`** — `apps` (id→name/icon/color/route); `getAppIcon()` for the source glyph in a trail.
+- **`src/components/ui/ProvenanceChip.tsx`** — the styled "From <app>" glass pill; `LineageTrail` reuses its
+  token idiom (accent = `${app.color}` / `cssVar`/`tint`; **no raw hex, no off-system palette class**).
+
+Stages (Builder takes the topmost `[ ]`; each is one run, downhill given the ones before, build+vitest+eslint green,
+`tokenViolations`/`offSystemUtilities` stay 0):
+
+- [ ] **S1 · The durable provenance store + tracker (the memory spine — pure infra, zero UI risk).**
+  **New `src/lib/core/provenance.ts`:**
+  - `export interface ProvEdge { fromApp: string; toApp: string; label?: string; at: number }` — one durable
+    record of a real app→app transfer.
+  - A **Zustand+persist** store `useProvenance` (persist key `'empire-provenance'`, mirror `graph.ts`'s setup):
+    state `{ edges: ProvEdge[] }` + actions `record(edge: ProvEdge)` (append, **cap to the last `MAX_EDGES = 500`**
+    via slice, and **coalesce an immediate duplicate** — same `fromApp`+`toApp`+`label` fired within `DEDUP_MS = 1500`
+    just updates the existing edge's `at` instead of appending, so a double-emit doesn't double-count) and `clear()`.
+  - **Pure, exported helpers** (all `(edges, …)` → value, no store access, so they unit-test without React):
+    `edgesInto(edges, appId): ProvEdge[]` (edges where `toApp===appId`, newest-first), `edgesFrom(edges, appId)`
+    (`fromApp===appId`), and `lineageOf(edges, appId, maxDepth = 6): string[]` — walk the newest incoming edge
+    backwards (`appId ← its newest fromApp ← …`) building an ancestry path, **cycle-guarded** (stop if an app
+    repeats) and depth-capped; returns `[appId, parent, grandparent, …]` (length 1 when no inbound history).
+    Also export the pure `recordEdges(edges, edge, now): ProvEdge[]` that `record` wraps (append+cap+coalesce) so
+    the cap/dedup logic is testable without the store.
+  - `export function startProvenanceTracking(): void` — `onAny(e => { const f = flowForEvent(e); if (f)
+    useProvenance.getState().record({ fromApp: f.fromId, toApp: f.toId, label: 'label' in e ? e.label : undefined,
+    at: Date.now() }) })`. Idempotent-safe (a module-level `started` guard like focus.ts). **Call it once in
+    `src/main.tsx`** right after `startFocusTracking()` (line 18): `import { startProvenanceTracking } from
+    './lib/core/provenance'; startProvenanceTracking()`.
+  - **Test `src/lib/core/provenance.test.ts`** (≥8 cases): `recordEdges` appends; caps at `MAX_EDGES`; coalesces a
+    same-pair edge within `DEDUP_MS` (no new entry, `at` bumped) but appends after it; `edgesInto`/`edgesFrom`
+    filter+order correctly; `lineageOf` builds a 3-deep chain, stops on a cycle (A←B←A), and returns `[app]` with
+    no history. (Pure — no jsdom/store needed.)
+  - *Acceptance:* firing a `HANDOFF{fromId:'calculator',toId:'notes'}` (or any `flowForEvent` match) appends a
+    `ProvEdge` that **survives a reload** (persisted under `empire-provenance`); `provenance.test.ts` green.
+    Build🟢 vitest🟢 (test-files +1) eslint clean; `metrics.mjs --assert-zero` still exit 0 (tokens 0, off-system 0).
+    **No UI, no visual change — this is the load-bearing spine S2–S4 build on.**
+
+- [ ] **S2 · The Network remembers — durable "Fed by / Feeds" in the inspector + a persistent memory panel.**
+  Today `Network.tsx`'s inspector (EPIC-1 S3) shows only *current-graph* `appAdjacency`, and the ticker is capped/
+  in-memory/fading. Give the mesh durable memory sourced from S1's store:
+  - **`src/apps/network/Network.tsx`** — subscribe reactively `const provEdges = useProvenance(s => s.edges)`.
+    In the inspector panel for `selected`, add a **provenance section** below the live neighbours: **"Fed by"** =
+    `edgesInto(provEdges, selected).` unique `fromApp`s (each a row: source icon+name from `registry` + a count/last-
+    `at` age, a button → `openApp(fromApp)`); **"Feeds"** = `edgesFrom(provEdges, selected)` unique `toApp`s. Label it
+    so it reads as *history* ("has fed / been fed", all-time) vs the live graph adjacency (structural, now).
+  - **Persistent memory panel:** render a small always-available panel (corner, glass token surface, `--mono`)
+    listing the **most recent `N≈12` `ProvEdge`s newest-first** — each a `source → target` row with both registry
+    icons+accents and a relative age (reuse the ticker's age formatter). This is the durable analogue of the live
+    ticker: it is populated **from the store on mount**, so after a reload the organism's recent history is still
+    there (the ticker starts empty). Keep the existing live ticker as-is (it shows *this-session* pulses); the memory
+    panel is the persistent record. Both use **`nodeColors`/`registry` accents via `rgbCss`/`cssVar`/`tint`** — no raw
+    hex, no off-system class.
+  - **Test:** extend `src/apps/network/adjacency.test.ts` **or** a new `provenanceView.test.ts` — assert the pure
+    selection the panel uses (unique `fromApp`s from `edgesInto`, unique `toApp`s from `edgesFrom`) dedupes and orders
+    newest-first over a fixture edge list. (The canvas render itself isn't unit-tested; pin the selector.)
+  - *Acceptance:* seed a few handoffs → open The Network → the inspector shows durable "Fed by/Feeds" and the memory
+    panel lists them; **reload → they persist** (the ticker is empty, the memory panel is not). Build🟢 vitest🟢
+    eslint clean; tokens 0, off-system 0 (`--assert-zero` exit 0). *Cloud limit:* the live canvas/panel render is a
+    visual change QA screenshots; the selector logic is unit-pinned.
+
+- [ ] **S3 · Durable per-entity provenance — the "From <source>" survives a reload (headline-metric stage).**
+  The receivers that persist their entities carry `from` durably (Notes as a `from-<src>` tag, Learning as
+  `item.from`), so their chip is already reload-durable. The gap: **Calendar / Goals / Messages** (S6c receivers)
+  read the source from `sessionStorage` (`useInboundHandoff`, consumed on mount) — so after a reload the created
+  event/goal/draft has **lost its provenance**. Close it by stamping `from` onto the **persisted entity** exactly as
+  Notes/Learning do, and rendering a durable `<LineageTrail>` from it:
+  - **New `src/components/ui/LineageTrail.tsx`** — `<LineageTrail app={appId} from?={sourceId} />`: a compact glass
+    row (reuse `ProvenanceChip`'s token styling) rendering the ancestry `lineageOf(useProvenance.getState().edges,
+    app)` **or**, when a concrete `from` is supplied, the direct "`<app>` ← `<from>`" pair with registry icons+
+    accents. It reads the **durable store**, so it renders whether or not the sessionStorage chip is still present.
+  - **`src/lib/store.ts`** (or wherever `CalendarEvent`/`Goal`/`Message` persist) — add an optional `from?: string`
+    to those persisted shapes (backward-compatible; old items simply lack it), mirroring `LearningItem.from`.
+  - **`src/apps/calendar/Calendar.tsx` / `goals/Goals.tsx` / `messages/Messages.tsx`** — in the `[inbound.payload]`
+    create-form effect, set `from: inbound.source` on the entity that gets saved; render `{entity.from &&
+    <LineageTrail app='<app>' from={entity.from} />}` on that entity's card/row (keep the existing session
+    `<ProvenanceChip>` for the immediate pre-save hint). Dismiss clears `from` via the store updater (as Notes/
+    Learning do).
+  - **Add the `PROVENANCE-PERSISTS` guard to `scripts/qa-smoke.mjs`** (mirror the `INBOUND-LANDS` block exactly):
+    for each of **`{calculator→notes, notes→goals, editor→messages}`**, seed the `empire-*-clipboard` payload **and**
+    prime the persisted entity, **reload**, and assert the receiving entity renders a **durable lineage/source**
+    (the trail is present with the sessionStorage key already consumed). Fold a `PROVENANCE-PERSISTS N/3` line into
+    `REPORT.md`. (Notes/Goals already persist `from`; Messages/Calendar gain it here.)
+  - **Test:** `src/components/ui/LineageTrail.test.tsx` (≥2) — renders the `from` pair with the right source name; a
+    no-history `app` with no `from` renders nothing (or just the app), no crash.
+  - *Acceptance:* ⚡ Send-to-Goals from Calculator → **reload** → the goal still shows "Goals ← Calculator"; same for
+    Messages/Calendar. **`PROVENANCE-PERSISTS 0/3 → 3/3`.** Build🟢 vitest🟢 eslint clean; tokens 0, off-system 0.
+
+- [ ] **S4 · Close the last graph-island: Reader's books → the mesh (+ book-level emit). EPIC-6 CLOSE.**
+  Reader (the newest app) holds a real collection — loaded books — but **never mirrors them into the graph**, so it
+  is invisible in The Network (only a `SendResultMenu` on Cakra replies exists at `Reader.tsx:379`). It is the one
+  remaining collection-owning app that isn't graph-legible. Close it exactly like Files/Photos/Notes:
+  - **`src/apps/reader/Reader.tsx`** — on the book library changing, `mirrorCollection('book', books.map(b => ({
+    sourceId: b.id, title: b.title, app: 'reader', data: { format: b.format } })))` (use the real book shape — read
+    the component for its list state; **accumulate the whole library**, not one open book, per the `mirrorCollection`
+    prunes-unseen trap documented in CONTEXT). Add a `<NodeActions type='book' sourceId={b.id} />` (or the existing
+    emit affordance) on each book so a passage/selection can emit onward — Reader becomes a legible **emitter** in
+    the mesh (an honest emit-only source, like files/photos — a text→book *inbound* stays unnatural, do NOT invent one).
+  - **`scripts/qa-smoke.mjs`** — extend the graph-legibility check (or add a small `GRAPH-LEGIBLE` assertion): after
+    seeding a Reader book, assert a `book` node appears for `app==='reader'` (mirrors how Files/Photos are covered).
+  - **Test:** if Reader gains a pure mirror-shape helper, pin it (`readerGraph.test.ts`); otherwise the mirror is the
+    same tested `mirrorCollection` rail and QA's node assertion carries it.
+  - *Acceptance:* load a book in Reader → it appears as a node in The Network (and in its inspector's entities);
+    **every collection-owning app is now graph-legible.** With S1–S3 shipped and `PROVENANCE-PERSISTS 3/3` confirmed
+    by QA, **EPIC-6 is DONE.** Build🟢 vitest🟢 eslint clean; tokens 0, off-system 0; routes 26/26.
+
+_When S1–S4 ship and QA confirms **`PROVENANCE-PERSISTS 3/3`** (durable source survives reload) **and** Reader is
+graph-legible → retire EPIC-6 to DONE and promote **EPIC-7 · Android** only if an on-device QA path then exists;
+otherwise the next cloud-executable candidate is **node-level lineage** (correlate a `HANDOFF` with the entity it
+created for a true per-artifact ancestry, the natural depth-follow-on to this app-level memory) or **global
+cross-app search** (query every app's persisted collection — see ROADMAP LATER)._
+
+---
+
 ## ✅ DONE — EPIC-1 · Organism Completeness
 
 > **DONE 2026-06-23** (QA-confirmed on green main `6435a81`). All stages S1–S6c shipped;
@@ -762,9 +908,10 @@ reference routes that changed)._
 
 ---
 
-## ⏳ QUEUED — EPIC-6 · Android APK validation
-> **Renumbered from EPIC-5 (2026-06-29)** — design-system utility conformance took the EPIC-5 active slot as the
-> higher *realizable* gradient. **Device-gated:** an unattended cloud builder on a fresh checkout cannot install
+## ⏳ QUEUED — EPIC-7 · Android APK validation
+> **Renumbered EPIC-5→6→7** (2026-07-01) — design-system utility conformance took the old EPIC-5 slot, then
+> **EPIC-6 · Organism Memory** took the active slot as the higher *realizable* gradient (durable, cloud-verifiable
+> interconnection > device-gated packaging). **Device-gated:** an unattended cloud builder on a fresh checkout cannot install
 > an APK or run on-device smoke, so this epic's target metric isn't cloud-verifiable — **promote only when an
 > on-device QA path exists.** **Leap:** the APK degrades gracefully with no LAN server (backend-optional layer).
 > **Target metric:** APK installs + all offline-capable apps function on-device with `server.js` absent.
