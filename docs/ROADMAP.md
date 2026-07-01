@@ -10,13 +10,16 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-06-29** (strategist) · Main: 🟢 green (build + vitest 205, token-violations 0,
-> off-system 1076) · QA: 26/26 routes render, no runtime errors. **EPIC-1 DONE** (both-ways 9/9). **EPIC-2 DONE**
-> (token-violations 501 → 0). **EPIC-3 DONE** (shallow instruments 8/8 offline-capable). **EPIC-4 DONE** (PWA:
-> offline ✅ + base ✅ + installable ✅, S1–S4). **▶ EPIC-5 · Design-system utility conformance ACTIVE** — sweep the
-> **1076 off-system Tailwind palette classes** (EPIC-2's blind spot; they break `[data-theme]` theme-switching) to
-> **0** via the already-built `@theme` utility bridge, cluster-by-cluster (S1 Calendar+Photos → … → S8 CI lock).
-> **Android renumbered to EPIC-6 (QUEUED)** — device-gated, not unattended-executable; promote only with on-device QA.
+> Last re-ranked: **2026-07-01** (strategist) · Main: 🟢 green (build + vitest 216, token-violations 0,
+> off-system 0) · QA: 27/27 routes render, no runtime errors, all guards green. **EPIC-1..5 all DONE**
+> (organism both-ways 9/9 · token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable ·
+> off-system 1076→0, CI-locked). **▶ EPIC-6 · Organism Memory (durable provenance & lineage) ACTIVE** — the
+> organism fires-and-forgets today (a `HANDOFF` lights one arc, then only Network's capped in-memory ticker holds
+> it and it dies on reload); EPIC-6 adds a **durable, queryable provenance store** (`empire-provenance`), makes The
+> Network *remember* (persistent memory panel + all-time "fed by/feeds" in the inspector), makes each entity's
+> source **survive a reload**, and closes the last graph-island (Reader's books). Target: **`PROVENANCE-PERSISTS
+> 0/3 → 3/3`** guard + Reader graph-legible. **Android renumbered to EPIC-7 (QUEUED)** — device-gated, promote only
+> with on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
@@ -27,8 +30,8 @@
 ## NOW — next 3–5 increments (each one PR-sized)
 
 Pulled top-to-bottom. Each is small, concrete, and has an acceptance check.
-(The **active epic's stages (EPIC-5 S1 → S8, design-system utility sweep) take precedence** — these are the
-on-deck themes feeding *future* epics.)
+(The **active epic's stages (EPIC-6 S1 → S4, Organism Memory) take precedence** — these are the on-deck themes
+feeding *future* epics.)
 
 ### 1. ✅ DONE (Builder 2026-07-01) — Make the README tell the truth (26 apps, Cakra, current stack)
 **Priority: DESIGN-SYSTEM CONSISTENCY / hygiene.** **Shipped:** `README.md` regenerated 1:1 from
@@ -62,21 +65,20 @@ conformance is permanent. Kept here as a pointer; do not double-build.
   const, plus a `metrics.mjs --assert-zero`-style gate. (Build-routine task — outside docs scope.)
 - **Acceptance:** a drift or a new hardcoded hex fails CI. Build green.
 
-### 3. Deeper graph mirrors — DataCenter & Files reflect their WHOLE state (off-theme depth, feeds a future epic)
-**Priority: INTERCONNECTION (the living graph).** Two QA-surfaced gaps where an app's graph
-presence is partial, so the organism's picture of it is incomplete:
-- **DataCenter** `dataset` nodes only carry a row count for the *active* table — switching tables
-  doesn't surface the others into the graph.
-- **Files** `file` nodes only reflect the *current* directory; navigating away reconciles the
-  others out, so the graph forgets folders you've left.
+### 3. ✅ DONE / FOLDED — Deeper graph mirrors (whole-state legibility)
+**Priority: INTERCONNECTION (the living graph).** Two of the three whole-state gaps are closed and the last is
+now **EPIC-6 S4**:
+- **Files** ✅ **DONE** (Builder 2026-06-30) — `filesGraph.ts` accumulates the session union across every visited
+  directory and mirrors the whole union (was: navigating pruned prior folders). No longer forgets folders.
+- **DataCenter** ✅ **already correct** — `DataCenter.tsx:57` mirrors *all* tables with per-table row counts (the
+  "active table only" note predated the redesign; confirmed stale).
+- **Reader** ⏳ **folded into EPIC-6 S4** — the newest app never mirrors its book collection, so it's a graph
+  island; S4 closes it (mirror `book` nodes + book-level emit) as the epic's capstone.
 
-- **Why:** the thesis is "one organism where every app's real entities are legible in The Network."
-  A store that only mirrors its active slice under-represents itself in the mesh.
-- **Do (future epic, not now):** mirror **all** tables/visited directories (or a stable summary node
-  per table/dir) so the graph reflects the full collection. Off the EPIC-3 depth theme — park here
-  until EPIC-3/EPIC-4 close, then fold into an "organism completeness II" epic if still relevant.
-- **Acceptance:** switching DataCenter tables / navigating Files leaves prior tables/dirs represented
-  in The Network instead of being reconciled away.
+- **Why:** "one organism where every app's real entities are legible in The Network" — a collection that only
+  mirrors its active slice under-represents itself in the mesh. Files/DataCenter are done; Reader is the last gap.
+- **Acceptance:** (met for Files/DataCenter) prior tables/dirs stay represented; (EPIC-6 S4) a loaded Reader book
+  appears as a `book` node in The Network.
 
 ---
 
@@ -94,17 +96,21 @@ presence is partial, so the organism's picture of it is incomplete:
   Music/Video, Photos durable + DataCenter/Weather tests). Retired.
 - **PWA completion.** ✅ **DONE — this WAS EPIC-4** (cold offline boot 5/5 from precache, zero precache gap,
   base-path/install-flow correct, installability asserted). Retired.
-- **Organism completeness II — deeper graph mirrors.** *(Next cloud-executable epic candidate after EPIC-5.)*
-  DataCenter mirrors only the active table; Files only the current directory (see NOW #3). Mirror the **whole**
-  collection so the Network reflects every app's full state — a real interconnection gradient.
-- **Android APK validation.** *(QUEUED EPIC-6 — renumbered from EPIC-5.)* Device-gated: an unattended cloud
+- **Organism Memory — durable provenance & lineage.** *(In progress — this IS EPIC-6, ▶ ACTIVE.)* The organism
+  fires-and-forgets; EPIC-6 adds the durable `empire-provenance` store, a persistent Network memory, reload-durable
+  per-entity source, and closes the Reader graph-island. Closes when `PROVENANCE-PERSISTS` hits 3/3 and Reader is
+  graph-legible. **Follow-on (next epic candidate, not yet decomposed):** **node-level lineage** — correlate a
+  `HANDOFF` with the specific entity it created for a true per-artifact ancestry (app-level memory → artifact-level
+  memory), and/or **global cross-app search** over every app's persisted collection (see LATER).
+- **Android APK validation.** *(QUEUED EPIC-7 — renumbered EPIC-5→6→7.)* Device-gated: an unattended cloud
   builder can't install an APK or run on-device smoke, so its target isn't cloud-verifiable. Promote only when an
   on-device QA path exists; until then it's lower *realizable* gradient than the cloud-executable themes above.
 
 ## LATER — parking lot (revisit; don't build yet)
 
-- Organism-wide provenance/memory: a queryable trail of which app produced/consumed
-  each artifact (built on the `HANDOFF` + event history).
+- ~~Organism-wide provenance/memory: a queryable trail of which app produced/consumed
+  each artifact~~ → **PROMOTED to ▶ EPIC-6 (Organism Memory)**, 2026-07-01. App-level durable provenance is the
+  active epic; the artifact-level (node-scoped) trail is the named follow-on candidate.
 - Global search across all app data (notes, events, learning, bookmarks, prompts).
 - Multi-window desktop polish: snapping, persisted layout, per-app window state.
 - Real-device QA loop (rendered UI) so the Network animations, fonts, and handoff

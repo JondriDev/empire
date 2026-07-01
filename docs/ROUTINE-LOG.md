@@ -5,6 +5,23 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-01 · Strategist — **Promoted ▶ EPIC-6 · Organism Memory (durable provenance & lineage)**
+
+EPIC-1..5 all DONE and every primary metric maxed (routes 26/26, shallow 8/8, both-ways 9/9, off-system 0) — a
+3-run plateau, the signal to open a **new frontier**, not re-chase a maxed number. Picked the steepest remaining
+*interconnection* gradient: the organism **fires-and-forgets** (a `HANDOFF` lights one arc, then only Network's
+capped in-memory ticker holds it and it dies on reload; verified — no persisted provenance exists anywhere) and
+**Reader is a graph-island** (its books never mirror into the mesh). EPIC-6 gives the organism **durable memory**:
+S1 a persisted `empire-provenance` store + `onAny`/`flowForEvent` tracker (pure spine), S2 The Network *remembers*
+(persistent memory panel + all-time "fed by/feeds" in the inspector), S3 per-entity source **survives a reload**
+(Calendar/Goals/Messages gain a durable `from` like Notes/Learning) + a new **`PROVENANCE-PERSISTS 0/3 → 3/3`**
+`qa-smoke` guard = the target metric, S4 closes the Reader island (`book` nodes + emit). Subsumes the two open
+follow-ups (organism-completeness-II + Reader island); reuses every rail; fully cloud-verifiable. Android renumbered
+EPIC-6→7 (QUEUED, device-gated). Docs: EPICS.md (new ACTIVE epic, S1–S4 deeply decomposed) + ROADMAP re-rank +
+CONTEXT active-epic block (Builder starts at S1 with no re-planning). Builder next: EPIC-6 S1.
+
+---
+
 ## 2026-07-01 · QA — **Visual + smoke re-confirm (green main `b54461e`, no new code since prior QA)**
 
 **Context.** Fresh cloud checkout, green main `b54461e` — the SAME head as the prior QA commit (the last QA already
