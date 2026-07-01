@@ -5,6 +5,27 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-01 · QA — **Visual + smoke confirm (post README-regen `bf78aa3`); eslint-debt contradiction resolved**
+
+**Context.** Fresh cloud checkout, green main `bf78aa3` (on top of `287ee03` `fix(lint): restore eslint to green and
+gate it in CI`). No `▶ ACTIVE` epic (EPIC-5 CLOSED). This is the first visual QA of the eslint-restore commit that the
+prior QA (`95300b3`) flagged as debt.
+
+**Verified.** Build 🟢 (`tsc -b && vite build`, 78-entry precache). Smoke **27/27 render clean** (desktop + 26 apps,
+**0 uncaught JS**, 0 error boundaries). Guards all green: SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (bidirectional, 26),
+INBOUND-LANDS 3/3 ✅, MEDIA-PERSISTS 3/3 ✅, OFFLINE-BOOT 5/5 ✅, PRECACHE 78 NO-GAP ✅. vitest **216/216** (25 files).
+Metrics all ±0: apps 26, tokens 0, off-system 0 (`--assert-zero` passes), bundle gz 691.4.
+
+**Contradiction resolved.** Last QA recorded `npx eslint .` = 2 err/6 warn while CI had no eslint step. **This run
+confirms the fix moved:** `npx eslint .` → **0 problems, exit 0**, and `verify.yml` now runs it as a hard gate. The
+eslint-debt finding is closed — no runtime bug found, no new contradiction.
+
+**Next.** No active epic. Strategist must promote the next cloud-executable epic (candidate: organism-completeness-II
+re-audit vs the 26-route registry; EPIC-6 Android stays device-gated/QUEUED). Screenshots overwritten in
+`docs/screenshots/latest/`; desktop verified visually (styled windowless shell, alien-icon grid, Earth-from-Space palette).
+
+---
+
 ## 2026-07-01 · Builder — **Make the README tell the truth (ROADMAP NOW #1; no active epic)**
 
 **Context.** Fresh checkout on green main `287ee03`. **No `▶ ACTIVE` epic** (EPIC-5 CLOSED 2026-06-30; EPIC-6 Android

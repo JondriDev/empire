@@ -23,7 +23,14 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** **NONE — EPIC-5 CLOSED 2026-06-30 (off-system 1076 → 0). Strategist must promote the next epic.**
-  - **✅ LATEST BUILDER RUN (2026-07-01, `287ee03`→ this commit, no active epic — ROADMAP NOW #1: README truth):**
+  - **✅ LATEST QA RUN (2026-07-01, green main `bf78aa3`):** First visual+smoke confirm after the eslint-restore
+    (`287ee03`) + README-regen (`bf78aa3`) commits. **27/27 render clean** (desktop + 26 apps, 0 uncaught JS), vitest
+    **216/216**, all guards green (SHELL-IS-STYLED, REGISTRY-COVERAGE, INBOUND 3/3, MEDIA 3/3, OFFLINE 5/5, PRECACHE 78
+    no-gap). Metrics all ±0 (apps 26, tokens 0, off-system 0 via `--assert-zero`, bundle 691.4). **Prior QA's
+    eslint-debt contradiction RESOLVED:** `npx eslint .` now → **0 problems (exit 0)** and `verify.yml` gates it.
+    **No runtime bug, no new contradiction.** No active epic → nothing to confirm-move; Strategist to promote next
+    (organism-completeness-II is the topmost cloud-executable candidate).
+  - **✅ PRIOR BUILDER RUN (2026-07-01, `287ee03`→`bf78aa3`, no active epic — ROADMAP NOW #1: README truth):**
     **Regenerated the stale README 1:1 from source.** Docs-only, but a real design-system-consistency/hygiene fix —
     the front door misdescribed the whole product. Cross-checked every claim against `src/lib/registry.ts` +
     `package.json` + `colors_and_type.css`. Fixed: "21 Apps"→**26**; centered **"Hermes AI"** (deleted)→**Cakra**;
@@ -37,7 +44,7 @@
     cloud-executable = organism-completeness-II** (see Open follow-ups) — but the `aliasOf`-reroute win **must first
     confirm the Cakra tab receives the `empire-*-clipboard` handoff**, else it regresses a working standalone receiver.
     EPICS still needs the Strategist.
-  - **▶ PRIOR BUILDER RUN (2026-06-30, `95300b3`→ `287ee03`, no active epic — FIX broken: the lint gate):**
+  - **▶ EARLIER BUILDER RUN (2026-06-30, `95300b3`→ `287ee03`, no active epic — FIX broken: the lint gate):**
     **Restored eslint to green + locked it in CI.** The last QA flagged `npx eslint .` was NOT clean (2 errors + 6
     warnings) while CI stayed green (verify.yml had **no eslint step**). **Fix:** split the icons module —
     `git mv icons/index.tsx → icons/glyphs.tsx` (now a pure *component* module: 27 glyph components + the `AppIcon`
