@@ -23,7 +23,21 @@
 > be able to start editing **without re-planning**.
 
 - **Active epic:** **NONE — EPIC-5 CLOSED 2026-06-30 (off-system 1076 → 0). Strategist must promote the next epic.**
-  - **✅ LATEST BUILDER RUN (2026-06-30, `95300b3`→ this commit, no active epic — FIX broken: the lint gate):**
+  - **✅ LATEST BUILDER RUN (2026-07-01, `287ee03`→ this commit, no active epic — ROADMAP NOW #1: README truth):**
+    **Regenerated the stale README 1:1 from source.** Docs-only, but a real design-system-consistency/hygiene fix —
+    the front door misdescribed the whole product. Cross-checked every claim against `src/lib/registry.ts` +
+    `package.json` + `colors_and_type.css`. Fixed: "21 Apps"→**26**; centered **"Hermes AI"** (deleted)→**Cakra**;
+    21-row inventory→a **26-row table** with the 3 merged tools (Editor/Prompt Gen/Token Counter) marked as hidden
+    **Cakra tabs** (launcher shows 23); "glass-morphism/XENO/Inter/#0f172a/#6366f1"→JondriDev **Earth-from-Space**
+    Liquid Glass (`.gp`, accent tokens, **Sora**+**JetBrains Mono**, 0 hardcoded colors CI-enforced); fabricated
+    versions (Vite 8/TS 6/React 19.2.6/RR 7.15/Lucide 1.16)→real (Vite 5.4/TS 5.6/React 19.2/RR 7.18/Lucide 1.22) +
+    added Motion/Leaflet/Reader-parsers/vite-plugin-pwa/Capacitor; Termux prereq+footer→"runs in any browser".
+    Reverted 2 env-noise files (`package-lock.json` npm-normalization, `docs/metrics.json` timestamp churn) → final
+    diff = **README.md only**. build🟢 vitest 216 (±0) metrics all ±0 (tokens 0, off-system 0, bundle 691.4). **▶ NEXT
+    cloud-executable = organism-completeness-II** (see Open follow-ups) — but the `aliasOf`-reroute win **must first
+    confirm the Cakra tab receives the `empire-*-clipboard` handoff**, else it regresses a working standalone receiver.
+    EPICS still needs the Strategist.
+  - **▶ PRIOR BUILDER RUN (2026-06-30, `95300b3`→ `287ee03`, no active epic — FIX broken: the lint gate):**
     **Restored eslint to green + locked it in CI.** The last QA flagged `npx eslint .` was NOT clean (2 errors + 6
     warnings) while CI stayed green (verify.yml had **no eslint step**). **Fix:** split the icons module —
     `git mv icons/index.tsx → icons/glyphs.tsx` (now a pure *component* module: 27 glyph components + the `AppIcon`

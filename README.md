@@ -1,6 +1,6 @@
 # The Empire 🏛️
 
-**Your Personal Application Suite — 21 Apps in One Dashboard**
+**Your Personal Application Suite — 26 Apps in One Desktop**
 
 ### ▶️ [Open The Empire](https://jondridev.github.io/empire/)
 
@@ -14,47 +14,56 @@ app. Three ways to run it, just like Claude:
 | 🖥️ **Desktop app** | Same link → browser menu → **Install** (installable PWA) |
 | 📱 **Android app** | Download the APK from the [Actions tab](https://github.com/JondriDev/empire/actions/workflows/android.yml) → artifact `the-empire-debug-apk` |
 
-The Empire is a full-featured, offline-first application suite with a beautiful glass-morphism UI. Built with React 19, TypeScript, and Vite, it provides 21 integrated apps with AI-powered assistance through **Cakra** — a multi-model agent combining the strengths of Claude Code, Codex, Hermes, OpenClaw, Kimi Code, and AntiGravity.
+The Empire is a full-featured, offline-first application suite with a holographic **Liquid Glass** UI — recovered-alien-technology aesthetic: deep-field darkness, glass surfaces, light used sparingly as accent. Built with React 19, TypeScript, and Vite, it packs **26 integrated apps** into a windowless desktop shell, with AI woven throughout by **Cakra** — a multi-model AI agent that can act across your apps.
 
-![Empire Dashboard](https://via.placeholder.com/1200x600/6366f1/ffffff?text=The+Empire+Dashboard)
+It's not 26 loose apps: a shared node-graph and event bus interconnect them into one living organism, visible in the **Network** app.
 
 ---
 
 ## 🚀 Features
 
 ### Core Features
-- **21 Integrated Apps** — Calculator, Notes, Weather, Calendar, Music, Video, Files, and more
-- **Hermes AI Integration** — Context-aware AI assistant connected to all apps
-- **PWA Ready** — Install as a standalone app with offline support
-- **Glass-morphism Design** — Beautiful, modern UI with JondriDev theme
-- **Real-time Updates** — Event bus for cross-app communication
-- **LocalStorage Persistence** — Your data stays on your device
+- **26 Integrated Apps** — Cakra, Notes, Calendar, Reader, Artifacts, Network, and more
+- **Cakra AI Integration** — a multi-model AI agent wired into every AI-enabled app
+- **One Living Organism** — a shared node-graph + event bus interconnect the apps (see the **Network** app); handoffs carry provenance between them
+- **PWA Ready** — installable, and cold-boots **fully offline** from a precached shell
+- **Holographic Glass Design** — the JondriDev "Earth-from-Space" palette on one design-token system (zero hardcoded colors, CI-enforced)
+- **Local-First Persistence** — LocalStorage + IndexedDB (durable media blobs); your data stays on your device
 
 ### App Inventory
 
+26 apps live in `src/lib/registry.ts`. The launcher grid shows **23** — **Code Editor**,
+**Prompt Gen** and **Token Counter** were merged into **Cakra** as tabs, so they're hidden
+aliases that still answer their legacy routes/deep-links.
+
 | App | Description | AI-Enabled |
 |-----|-------------|------------|
-| **Hermes AI** | Central AI chat interface | ✅ |
-| **Calculator** | Scientific calculator with history | ✅ |
-| **Calendar** | Schedule and events | ✅ |
-| **Clock** | Time, alarms, stopwatch | ❌ |
-| **Weather** | Live weather with API config | ❌ |
-| **Grammar Fix** | Writing assistance | ✅ |
-| **Language Lab** | Language learning | ✅ |
-| **Music** | Local music player | ❌ |
-| **Video** | Video player | ❌ |
-| **Files** | File browser | ❌ |
-| **Cache Cleaner** | Storage management | ❌ |
-| **Browser** | Web browser | ✅ |
-| **Code Editor** | Code editor with syntax highlighting | ✅ |
-| **Notes** | Markdown notes with tags | ✅ |
-| **Photos** | Photo gallery | ❌ |
-| **Data Center** | Data management | ✅ |
-| **Maps** | Location explorer | ❌ |
+| **Cakra** | Chat that acts — your AI (Chat · Prompt · Tokens · Code tabs) | ✅ |
+| **Calculator** | Scientific calculations | ✅ |
+| **Calendar** | Schedule & events | ✅ |
+| **Clock** | Time & alarms, stopwatch, timer, world clocks | ❌ |
+| **Weather** | Forecasts & conditions (Open-Meteo, no key) | ❌ |
+| **Grammar Fix** | Fix your writing | ✅ |
+| **Language Lab** | Learn new languages (Cakra translation) | ✅ |
+| **Music** | Play your tracks (durable, IndexedDB blobs) | ❌ |
+| **Video** | Watch videos (durable, IndexedDB blobs) | ❌ |
+| **Files** | Browse files | ❌ |
+| **Cache Cleaner** | Free up space | ❌ |
+| **Browser** | Browse the web | ✅ |
+| **Code Editor** _(→ Cakra · Code tab)_ | Write & edit code | ✅ |
+| **Notes** | Write & organize (Markdown + tags) | ✅ |
+| **Photos** | Your gallery (durable, IndexedDB blobs) | ❌ |
+| **Data Center** | Manage data (local-first, offline) | ✅ |
+| **Maps** | Explore locations (Leaflet + OpenStreetMap) | ❌ |
 | **Messages** | Chat over WiFi | ✅ |
-| **Prompt Gen** | AI prompt generator | ✅ |
-| **Token Counter** | Count AI tokens | ✅ |
-| **Learning Tracker** | Track learning progress | ✅ |
+| **Prompt Gen** _(→ Cakra · Prompt tab)_ | Craft AI prompts | ✅ |
+| **Token Counter** _(→ Cakra · Tokens tab)_ | Count AI tokens | ✅ |
+| **Learning Tracker** | Track & challenge yourself | ✅ |
+| **Goals** | Set goals, track progress | ✅ |
+| **Artifacts** | Self-contained mini-apps & builders (charts, kanban, forms…) | ✅ |
+| **Network** | The ecosystem as a live node-graph | ❌ |
+| **Inbox** | Every open task, one home | ❌ |
+| **Reader** | Read your books (EPUB/PDF/MD/TXT/DOCX) · ask Cakra | ✅ |
 
 ---
 
@@ -62,24 +71,31 @@ The Empire is a full-featured, offline-first application suite with a beautiful 
 
 | Layer | Technology |
 |-------|-----------|
-| **Framework** | React 19.2.6 |
-| **Language** | TypeScript 6.0 |
-| **Bundler** | Vite 8.0 |
-| **Styling** | Tailwind CSS 4.3 + Custom CSS |
-| **Routing** | React Router DOM 7.15 |
+| **Framework** | React 19.2 |
+| **Language** | TypeScript 5.6 |
+| **Bundler** | Vite 5.4 |
+| **Styling** | Tailwind CSS 4.3 + token-based design system |
+| **Routing** | React Router DOM 7.18 |
 | **State** | Zustand 5.0 |
-| **Icons** | Lucide React 1.16 |
-| **Backend** | Express 5.2 |
-| **Realtime** | WebSocket (ws) |
+| **Animation** | Motion 12 |
+| **Maps** | Leaflet 1.9 (+ OpenStreetMap / Nominatim) |
+| **Reader** | pdfjs-dist 6 · epubjs · mammoth (DOCX) |
+| **Icons** | Lucide React 1.22 (controls) + bespoke alien SVG set (app identity) |
+| **PWA** | vite-plugin-pwa 1.3 (Workbox precache) |
+| **Android** | Capacitor 8 |
+| **Backend** _(optional)_ | Express 5.2 + ws 8.21 (WebSocket) |
 
 ---
 
 ## 📦 Installation
 
 ### Prerequisites
-- Node.js 20+ 
-- npm or pnpm
-- Android device with Termux (optional, for mobile use)
+- Node.js 20+
+- npm
+
+> No Termux, no local server, and no PC are required to *use* The Empire — it
+> runs entirely in the browser (see "Run it without Termux" below). The steps
+> here are for building/developing it locally.
 
 ### Quick Start
 
@@ -146,22 +162,24 @@ PORT=3001
 
 ## 🎨 Design System
 
-The Empire uses a custom glass-morphism theme with the following features:
+The Empire uses one token-backed design system — the JondriDev **"Earth-from-Space"**
+palette on a **Liquid Glass** UI. Every color resolves to a CSS custom property in
+`src/design-system/colors_and_type.css`, so the whole shell re-themes from one place;
+raw hex/rgb literals and off-system palette classes are **0 and CI-enforced**
+(`scripts/metrics.mjs --assert-zero`).
 
-### Colors
-- **Background:** `#0f172a` (slate-950)
-- **Primary Accent:** `#6366f1` (indigo-500)
-- **Glass Effect:** Dynamic blur with border highlights
+### Palette
+- **Deep-field near-black space** with overlapping radial washes as the backdrop
+- **Holographic glass** surfaces via the `.gp` primitive (blur + border highlights)
+- **Accents** — signal / aurora / plasma / ion / ember / xenon — used sparingly as *light*, not fill
 
 ### Typography
-- **Sans-serif:** Inter
-- **Monospace:** JetBrains Mono
+- **Sans-serif:** Sora (vendored, renders identically offline)
+- **Monospace:** JetBrains Mono (vendored)
 
-### Animations
-- Fade-in-up transitions
-- Pulsing AI badges
-- Animated starfield background
-- Smooth hover states
+### Motion
+- Physics-based spring/ease tokens (`--ease-spring`, `--dur-*`) — things glide, settle, breathe
+- Pulsing AI badges · animated node-graph in the Network app · smooth hover states
 
 ---
 
@@ -200,7 +218,7 @@ empire/
 │   ├── apps/              # App directories (one folder per app)
 │   ├── components/        # Shared UI components
 │   ├── dashboard/         # Dashboard & AppShell
-│   ├── design-system/     # Vendored XENO palette + Sora fonts
+│   ├── design-system/     # JondriDev Earth-from-Space palette + Sora / JetBrains Mono fonts
 │   ├── hooks/             # Custom React hooks
 │   ├── lib/               # Utils, registry, store, core graph
 │   ├── App.tsx            # Main router
@@ -251,8 +269,10 @@ npm run server     # Start backend server
 
 1. Create app directory in `src/apps/your-app/`
 2. Create `YourApp.tsx` component
-3. Add to `src/lib/registry.ts` app list
-4. Add route in `src/App.tsx`
+3. Add an entry to the `apps` list in `src/lib/registry.ts`
+4. Map its route → component in `src/lib/appComponents.tsx` (lazy-loaded)
+5. Join the organism (optional, ~3 lines): `mirrorCollection(...)` in a `useEffect`
+   + a `<NodeActions type="…" sourceId={id}/>` bar so its entities appear in the Network
 
 Example:
 ```typescript
@@ -261,8 +281,9 @@ export default function MyApp() {
   return <div>My App</div>
 }
 
-// src/lib/registry.ts
-{ id: 'my-app', name: 'My App', icon: 'Star', route: '/app/my-app', description: 'Description', color: '#fff' }
+// src/lib/registry.ts — `icon` is a key into the alien SVG set (src/design-system/icons),
+// `color` an accent from the Earth-from-Space palette.
+{ id: 'my-app', name: 'My App', icon: 'Star', route: '/app/my-app', description: 'Description', color: '#5b8fb9', cakraEnabled: false }
 ```
 
 ---
@@ -286,10 +307,10 @@ ws.send(JSON.stringify({ type: 'SUBSCRIBE', channel: 'all' }))
 
 ## 📊 Performance
 
-- **Build Time:** ~2.35s
-- **Bundle Size:** Optimized with code splitting
-- **Lazy Loading:** All apps loaded on demand
-- **Zero Warnings:** Clean build with no warnings
+- **Build:** `tsc -b && vite build` — clean, no warnings
+- **Bundle Size:** code-split; every app is a lazy chunk loaded on demand
+- **Offline:** shell + all app chunks precached (Workbox), cold-boots with the network fully blocked
+- **Lazy Loading:** all apps loaded on demand
 
 ---
 
@@ -319,6 +340,6 @@ MIT License — see LICENSE file for details.
 
 ---
 
-**Built with ❤️ for Android/Termux by Jondri**
+**Built with ❤️ by Jondri**
 
-*The Empire — All your apps, one dashboard.*
+*The Empire — All your apps, one organism.*

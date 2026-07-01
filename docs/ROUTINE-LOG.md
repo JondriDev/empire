@@ -5,6 +5,54 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-01 · Builder — **Make the README tell the truth (ROADMAP NOW #1; no active epic)**
+
+**Context.** Fresh checkout on green main `287ee03`. **No `▶ ACTIVE` epic** (EPIC-5 CLOSED 2026-06-30; EPIC-6 Android
+is device-gated/QUEUED and not cloud-verifiable). Per the routine's no-epic rule — *do the topmost ROADMAP NOW item and
+flag EPICS needs the Strategist* — worked the topmost **open** NOW item. NOW #2 is done (folded into EPIC-5 S8's CI
+gate) and NOW #3 is done (Files whole-state mirror) / stale (DataCenter already mirrors all tables), leaving **NOW #1 ·
+"Make the README tell the truth"** as the topmost open item. This is a real design-system-consistency/hygiene gap: the
+front door misdescribed the whole product.
+
+**Baseline confirmed green FIRST:** `npm run build` 🟢 (precache 78 entries), `npx vitest run` **216/216** 🟢,
+`node scripts/metrics.mjs --assert-zero` 🟢 (tokenViolations=0, offSystemUtilities=0), apps 26, bundle gz 691.4.
+
+**What was stale (README claimed → truth, all cross-checked against `src/lib/registry.ts` + `package.json` +
+`colors_and_type.css`):** "21 Apps" → **26**; centered **"Hermes AI"** (deleted in the redesign) → **Cakra**; the
+21-row inventory (wrong names, no Cakra/Reader/Network/Inbox/Artifacts/Goals, "Grammar Fix"…) → a **26-row table
+regenerated 1:1 from the registry**, with the 3 merged tools (**Code Editor / Prompt Gen / Token Counter**) marked as
+hidden **Cakra tabs** (launcher shows 23); **"glass-morphism / XENO palette / Inter / #0f172a / #6366f1"** → the
+JondriDev **"Earth-from-Space" Liquid Glass** system (deep-field space, `.gp` glass primitive, accent tokens
+signal/aurora/plasma/ion/ember/xenon, **Sora** sans + **JetBrains Mono** mono, all token-backed, 0 hardcoded colors
+CI-enforced); fabricated versions (**Vite 8.0, TS 6.0, React 19.2.6, RR 7.15, Lucide 1.16**) → real ones (**Vite 5.4,
+TS 5.6, React 19.2, RR 7.18, Lucide 1.22**), added **Motion / Leaflet / pdfjs-epubjs-mammoth / vite-plugin-pwa /
+Capacitor**; stale "for Android/Termux" footer + Termux prerequisite → the accurate "runs in any browser, no Termux"
+story; the "~2.35s build / Zero Warnings" perf blurb → an honest offline/code-split note; the "Adding a New App" steps
+(`src/App.tsx` route) → the real `appComponents.tsx` route map + the ~3-line organism-join idiom.
+
+**Verify (docs-only change — no `src/` touched, so build/tests/metrics are structurally unchanged and re-confirmed):**
+build 🟢 · vitest **216/216** 🟢 · `metrics.mjs --assert-zero` 🟢 · README is not compiled/linted. Reverted two
+env-noise working-tree files that appeared but aren't my work: `package-lock.json` (npm stripped `libc` fields from
+optional platform pkgs — npm-version normalization) and `docs/metrics.json` (the metrics run rewrote its own snapshot;
+values identical, timestamp-only churn). Final diff = **`README.md` only**.
+
+**Metrics (no-regression, ±0 across the board — docs-only):**
+`| Apps 26 ±0 | Tests 174 (files 23) ±0 | TokenViolations 0 ±0 | Off-system 0 ±0 | Bundle gz 691.4 ±0 |`
+
+**Verified:** README inventory now matches `registry.ts` 1:1 (26 apps, correct names + AI flags); zero "Hermes"/"21
+apps"/"XENO"/"Inter" references remain (grep-confirmed); tech-stack versions match `package.json`; design-system
+section matches `colors_and_type.css` (Sora/JetBrains Mono, Earth-from-Space, `.gp`). **Not cloud-verifiable:** none —
+this is a pure documentation-accuracy change, fully checkable against source.
+
+**Next (single best step):** **EPICS needs the Strategist** — promote the next `▶ ACTIVE` epic. The topmost
+cloud-executable gradient is **organism-completeness-II** (re-audit both-ways wiring vs the post-redesign 26-route
+registry; the standing candidate is resolving `aliasOf` in `AppShell`/`appActions` so Editor/Prompt/Token deep-links &
+handoffs land on the merged **Cakra tab** instead of the orphaned standalone component — investigated 2026-06-30 as
+*polish, not a bug*; **caution: verify the Cakra tab actually receives the `empire-*-clipboard` handoff before
+rerouting, or it regresses a working receiver**). Android (EPIC-6) stays QUEUED (device-gated).
+
+---
+
 ## 2026-06-30 · Builder — **Restore the lint gate to green + lock it in CI (FIX broken; no active epic)**
 
 **Context.** Fresh checkout on green main `95300b3`. No `▶ ACTIVE` epic (EPIC-5 CLOSED). Per the routine's standing
