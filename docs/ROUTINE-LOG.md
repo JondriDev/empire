@@ -5,6 +5,43 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · Builder — **EPIC-6 S1 · the durable provenance store + tracker (the memory spine)**
+
+**Done.** Shipped the load-bearing spine of EPIC-6: a durable, persisted ledger of every real app→app transfer.
+New **`src/lib/core/provenance.ts`** — `ProvEdge{fromApp,toApp,label?,at}`; a **Zustand+persist** store
+`useProvenance` (key `empire-provenance`, copied 1:1 from `graph.ts`'s persist setup) with `record`/`clear`; and
+four **pure, exported, unit-tested helpers** (no store/React access): `recordEdges(edges,edge,now)` — coalesce a
+same-pair edge fired within `DEDUP_MS=1500` (bump `at`, refresh `label`) else append and cap to the newest
+`MAX_EDGES=500`; `edgesInto`/`edgesFrom` — newest-first directional filters; `lineageOf(edges,appId,maxDepth=6)` —
+walk the newest inbound edge backwards into an ancestry chain, cycle-guarded (`A←B←A` stops), depth-capped, always
+≥`[appId]`. `startProvenanceTracking()` (module `started` guard, mirroring `focus.ts`) subscribes `onAny` and records
+**exactly `flowForEvent(e)`** — the one honest edge source, so the ledger holds precisely the arcs the Network mesh
+draws and nothing the user didn't cause. Wired once in **`main.tsx:20`**, right after `startFocusTracking()`.
+
+**Why.** EPIC-6's premise is that the organism *fires and forgets* — a `HANDOFF` lights one arc that dies on reload.
+This store is the persistence the whole epic stands on; S2 (Network memory panel + all-time Fed-by/Feeds), S3
+(durable per-entity source + the `PROVENANCE-PERSISTS` guard) and S4 (Reader island) all read from it. Pure infra,
+zero UI, zero visual risk — the safest possible foundation stage.
+
+**Verified.** `provenance.test.ts` **14 cases** green (append; distinct pairs; coalesce-within-window bumps `at`
+without appending; label refresh/retain; append after the window; cap at `MAX_EDGES` dropping oldest; `edgesInto`/
+`edgesFrom` filter+order; `lineageOf` 3-deep chain, follow-newest, cycle-stop, `maxDepth`, `[app]`-on-empty).
+`npm run build` 🟢 (tsc -b && vite build). `npx vitest run` **230/230** (was 216, +14). `npx eslint` on all touched
+files clean. **Metrics — no regression:** apps 26 ±0, token-violations **0** ±0, off-system **0** ±0
+(`metrics.mjs --assert-zero` exit 0), test-cases +14, test-files +1, bundle gz 691.4→**691.8** (+0.4, the tiny
+tracker). *Not visually verifiable in cloud* — but this stage has **no UI and no visual change** by design; durability
+across an actual browser reload is the S3 `PROVENANCE-PERSISTS` guard's job (the persist store is the same
+Zustand+persist rail already proven by `empire-core-graph`).
+
+**Metrics row:** `apps 26 ±0 | test-cases +14 | test-files +1 | token-violations 0 ±0 | off-system 0 ±0 | bundle 691.8 (+0.4)`
+
+**Next.** EPIC-6 **S2 · The Network remembers** — subscribe `useProvenance(s=>s.edges)` in `Network.tsx`; add durable
+"Fed by / Feeds" to the inspector + a persistent memory panel (recent N≈12 edges, populated from the store on mount so
+it survives reload). Consider adding pure `fedBy`/`feeds` de-duped selectors to `provenance.ts` so the panel logic is
+unit-pinned. Full spec: CONTEXT.md ▶ NEXT block + EPICS.md → EPIC-6 S2.
+
+---
+
 ## 2026-07-01 · Strategist — **Promoted ▶ EPIC-6 · Organism Memory (durable provenance & lineage)**
 
 EPIC-1..5 all DONE and every primary metric maxed (routes 26/26, shallow 8/8, both-ways 9/9, off-system 0) — a

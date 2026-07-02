@@ -16,6 +16,10 @@ startCoreSync()
 import { startFocusTracking } from './lib/core/focus'
 startFocusTracking()
 
+// ── Provenance: remember every real app→app transfer durably (EPIC-6 memory) ──
+import { startProvenanceTracking } from './lib/core/provenance'
+startProvenanceTracking()
+
 // Apply saved theme immediately (before React hydration) to prevent flash
 try {
   const saved = localStorage.getItem('empire-store')
