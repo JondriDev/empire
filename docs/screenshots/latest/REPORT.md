@@ -1,20 +1,36 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-02T03:14:20.621Z
+**Generated:** 2026-07-02T08:07:47.828Z
 
 **Result:** 27/27 rendered without crash, 0 failed.
+
+> **No runtime bug this run.** Build 🟢, vitest **236/236**, eslint clean (exit 0), `metrics.mjs --assert-zero` exit 0.
+
+### ★ EPIC-6 S2 CONFIRMED LIVE — "The Network remembers" (green main `f5ab6be`)
+
+First QA since S2 landed (`f5ab6be`, the commit under test; last QA was S1-confirm `312033c`). The durable
+provenance is now **visible and persistent** in The Network. Confirmed the headline surface directly:
+
+- **Persistent Memory panel (bottom-left):** seeded 5 real `empire-provenance` edges (calculator→notes, notes→goals,
+  editor→ai-chat, editor→prompt-generator, ai-chat→messages), opened The Network → the Memory panel renders all 5
+  newest-first as `source → target` rows (registry glyphs + accents + relative age), over an empty "awaiting signal…"
+  live ticker. See **`network-memory.png`**.
+- **Persists across reload — the S2 claim:** reloaded → Memory panel still shows all 5 edges (the newest row's age
+  ticked `21s → 24s`, i.e. the SAME durable data re-read from the store, not a fresh session) while the Live Signal
+  ticker stays empty (session-only). Durable ledger intact: `edges = 5` after reload. See
+  **`network-memory-after-reload.png`**. `S2-MEMORY-VISIBLE-PERSISTS ✅`.
+- **Inspector `Fed by / Feeds` (all-time):** the pure selection helpers `fedBy`/`feeds`/`recentEdges` are unit-pinned
+  (+6 vitest, `provenance.test.ts` → 236 total). The inspector section itself requires clicking a satellite node
+  (graph-dependent) and was **not** captured headless — noted honestly; the Memory panel proves the same durable
+  store reads + renders correctly.
+
+**PROVENANCE-PERSISTS 3/3 ✅** (the automated edge-store roundtrip guard — real `editor→{notes,ai-chat,prompt-generator}`
+handoffs fired from the Editor ⚡ Send menu, recorded + survived a full reload). EPIC-6 S2 **done-confirmed**: the
+epic's target-metric surface (durable app→app memory) is now visibly persistent in the organism.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
 > listed separately — expected in the offline cloud sandbox and **not** a render failure.
-
-## QA summary — green main `23860d5` (EPIC-6 S1)
-
-**No runtime bug found.** Build 🟢 (`tsc -b && vite build`), vitest **230/230** (26 files), eslint **0 problems** (exit 0), `metrics.mjs --assert-zero` **exit 0**. All 27 routes render clean (desktop + 26 apps, 0 uncaught JS). Every guard green: SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (bidirectional, 26 apps), INBOUND-LANDS 3/3 ✅, MEDIA-PERSISTS 3/3 ✅, **PROVENANCE-PERSISTS 3/3 ✅ (NEW)**, OFFLINE-BOOT 5/5 ✅, PRECACHE 78 entries NO GAP ✅.
-
-**★ Epic-acceptance — EPIC-6 S1 (durable provenance spine) CONFIRMED LIVE.** S1 (`23860d5`) shipped `src/lib/core/provenance.ts` (Zustand+persist `empire-provenance`, fed only by `flowForEvent`, wired at `main.tsx:20`) + `provenance.test.ts` (14 cases → vitest 216→230). This run adds a **new headless `PROVENANCE-PERSISTS` guard** that fires 3 REAL `editor→<target>` handoffs and proves each edge is recorded AND **survives a full reload** — the runtime roundtrip jsdom can't exercise. **S1 done-confirmed** (the memory spine persists). **S2 not built** — The Network still shows the live "awaiting signal" ticker, no durable Fed-by/Feeds or memory panel yet (that's the next builder stage; the durable source becomes *visible* there).
-
-**Metric deltas vs last QA (`b54461e`, 2026-07-01):** apps **26 (±0)**, vitest **216 → 230 (+14, `provenance.test.ts`)**, static test-cases **174 → 188 (+14)**, test files **23 → 24 (+1)**, token-violations **0 (±0)**, off-system **0 (±0, `--assert-zero` exit 0)**, bundle gz **691.4 → 691.8 (+0.4, the provenance store — no new deps)**, precache **78 (±0)**. No contradiction; no runtime regression.
 
 | App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|
@@ -34,7 +50,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |

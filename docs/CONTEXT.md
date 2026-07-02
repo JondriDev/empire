@@ -69,6 +69,22 @@
       I could not see them. **QA to confirm:** seed handoffs (Editor ⚡ Send menu, per S1 guard) → open The Network →
       click a node → inspector shows Fed by/Feeds; the bottom-left Memory panel lists `source → target` rows;
       **reload → Memory persists, Live ticker empty.**
+    - **✅ QA-CONFIRMED LIVE (2026-07-02, green main `f5ab6be`) — S2 done-confirmed, The Network visibly remembers.**
+      First QA since S2 landed (`f5ab6be`; last QA `312033c` was the S1 confirm). 27/27 render clean (0 uncaught JS),
+      vitest **236/236** (+6 `fedBy`/`feeds`/`recentEdges`), eslint 0, `--assert-zero` exit 0, all guards green
+      (SHELL-IS-STYLED, REGISTRY-COVERAGE, INBOUND 3/3, MEDIA 3/3, **PROVENANCE-PERSISTS 3/3**, OFFLINE 5/5, PRECACHE
+      78 no-gap). **Confirmed the headline Memory-panel surface directly** (`network-memory{,-after-reload}.png`):
+      seeded 5 durable `empire-provenance` edges → the bottom-left Memory panel renders them **newest-first** as
+      `source → target` rows (registry glyphs+accents + `ago`), over an empty "awaiting signal…" ticker; **reload →
+      Memory panel still shows all 5** (newest row's age ticked `21s→24s` = SAME durable data re-read, not a fresh
+      session) while the Live ticker stays empty (session-only). Durable ledger `edges=5` after reload. **The inspector
+      Fed-by/Feeds section was NOT captured headless** (it needs a clicked satellite node = a real core-graph node;
+      seeding the graph deterministically is fragile) — the helpers are unit-pinned (+6) and the Memory panel proves
+      the same durable store reads+renders. Metrics: static 188→194 (+6), vitest 230→236 (+6), bundle 691.8→692.5
+      (+0.7, S2 UI+helpers, no new deps); apps/tokens/off-system ±0. No runtime bug, no contradiction.
+      **Reuse for S3 visual acceptance:** the Memory-panel screenshot pattern (seed `localStorage['empire-provenance']`
+      with a `{state:{edges},version:0}` shape of real registry-id edges → load `/app/network` → shoot) is the cheapest
+      way to prove a durable-store render surface; S3's per-entity `LineageTrail` can be confirmed the same way once built.
   - **▶ NEXT BUILDER STAGE = EPIC-6 S3 · Durable per-entity provenance ("From <source>" survives a reload —
     HEADLINE-METRIC stage).** Full spec: `docs/EPICS.md` → EPIC-6 S3 (lines ~136-161). Shape:
     - The gap: **Calendar / Goals / Messages** (S6c receivers) read `from` from `sessionStorage`
