@@ -1,6 +1,6 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-01T23:06:59.633Z
+**Generated:** 2026-07-02T03:14:20.621Z
 
 **Result:** 27/27 rendered without crash, 0 failed.
 
@@ -8,13 +8,13 @@
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
 > listed separately — expected in the offline cloud sandbox and **not** a render failure.
 
-## Metrics & epic-acceptance
+## QA summary — green main `23860d5` (EPIC-6 S1)
 
-- **Green main `b54461e`** (same head as the prior QA `b54461e` — no new code commits landed since; this run re-confirms main still builds & runs from a fresh checkout).
-- **Metric deltas (all ±0 vs last QA):** apps/routes **26**, vitest **216/216** (25 files), metrics.mjs test-cases **174**, token-violations **0**, off-system utils **0**, bundle gz **691.4 KB**, precache **78 entries** (43 JS + 3 CSS, no gap).
-- `node scripts/metrics.mjs --assert-zero` → **exit 0** (`tokenViolations=0, offSystemUtilities=0`) — EPIC-5 lock held.
-- **Epic-acceptance:** **No `▶ ACTIVE` epic** (EPIC-5 CLOSED; EPIC-6 Android is device-gated/QUEUED, not cloud-verifiable). Nothing to confirm-move this run; no contradiction surfaced.
-- **No runtime bug found.** All 27 routes render with 0 uncaught JS; guards SHELL-IS-STYLED / REGISTRY-COVERAGE / INBOUND 3/3 / MEDIA 3/3 / OFFLINE 5/5 all green.
+**No runtime bug found.** Build 🟢 (`tsc -b && vite build`), vitest **230/230** (26 files), eslint **0 problems** (exit 0), `metrics.mjs --assert-zero` **exit 0**. All 27 routes render clean (desktop + 26 apps, 0 uncaught JS). Every guard green: SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (bidirectional, 26 apps), INBOUND-LANDS 3/3 ✅, MEDIA-PERSISTS 3/3 ✅, **PROVENANCE-PERSISTS 3/3 ✅ (NEW)**, OFFLINE-BOOT 5/5 ✅, PRECACHE 78 entries NO GAP ✅.
+
+**★ Epic-acceptance — EPIC-6 S1 (durable provenance spine) CONFIRMED LIVE.** S1 (`23860d5`) shipped `src/lib/core/provenance.ts` (Zustand+persist `empire-provenance`, fed only by `flowForEvent`, wired at `main.tsx:20`) + `provenance.test.ts` (14 cases → vitest 216→230). This run adds a **new headless `PROVENANCE-PERSISTS` guard** that fires 3 REAL `editor→<target>` handoffs and proves each edge is recorded AND **survives a full reload** — the runtime roundtrip jsdom can't exercise. **S1 done-confirmed** (the memory spine persists). **S2 not built** — The Network still shows the live "awaiting signal" ticker, no durable Fed-by/Feeds or memory panel yet (that's the next builder stage; the durable source becomes *visible* there).
+
+**Metric deltas vs last QA (`b54461e`, 2026-07-01):** apps **26 (±0)**, vitest **216 → 230 (+14, `provenance.test.ts`)**, static test-cases **174 → 188 (+14)**, test files **23 → 24 (+1)**, token-violations **0 (±0)**, off-system **0 (±0, `--assert-zero` exit 0)**, bundle gz **691.4 → 691.8 (+0.4, the provenance store — no new deps)**, precache **78 (±0)**. No contradiction; no runtime regression.
 
 | App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|
@@ -34,7 +34,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -65,6 +65,18 @@ Each media app's real file `<input>` was driven with a small blob, then the page
 | music | ✅ | ✅ | ✅ |
 | video | ✅ | ✅ | ✅ |
 | photos | ✅ | ✅ | ✅ |
+
+## Provenance-persists guard (EPIC-6 — durable app→app memory)
+
+Real `editor→<target>` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event `flowForEvent` turns into an edge in the durable `empire-provenance` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).
+
+| Edge | Recorded | Persisted (reload) | Result |
+|---|---|---|---|
+| editor→notes | ✅ | ✅ | ✅ |
+| editor→ai-chat | ✅ | ✅ | ✅ |
+| editor→prompt-generator | ✅ | ✅ | ✅ |
+
+**PROVENANCE-PERSISTS: 3/3 ✅**
 
 ## Offline-boot guard (EPIC-4 S1 — cold boot from SW precache)
 

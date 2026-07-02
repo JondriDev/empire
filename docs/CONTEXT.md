@@ -36,6 +36,18 @@
     source is `flowForEvent` ONLY. `provenance.test.ts` 14 cases. build🟢 vitest 230🟢 eslint clean; tokens 0,
     off-system 0, bundle 691.8. **Coalesce note:** `record` passes `edge.at` as `now`, so a repeat same-pair edge
     within 1500 ms of the prior one bumps its `at` (and refreshes `label` if the new one supplies it).
+    - **✅ QA-CONFIRMED LIVE (2026-07-02, green main `23860d5`) — S1 done-confirmed, the memory spine persists.**
+      First QA after EPIC-6 S1 landed (last QA was `b54461e`; S1 `23860d5` + its promotion `6b6c693` landed since).
+      27/27 render clean (0 uncaught JS), vitest **230/230** (+14 `provenance.test.ts`), eslint 0, `--assert-zero`
+      exit 0. **Added a NEW `PROVENANCE-PERSISTS` guard to `qa-smoke.mjs`** (the EPIC-6 target-metric harness): fires
+      3 REAL handoffs from the **Editor's ⚡ Send menu** (`editor→notes` via NOTE_CREATED-from-editor, `editor→ai-chat`
+      + `editor→prompt-generator` via HANDOFF) → asserts each edge is recorded in `empire-provenance` AND **survives a
+      full reload** — the tracker→persist→rehydrate roundtrip jsdom can't do. **3/3 ✅.** The guard is non-fatal
+      (recorded, not thrown) like INBOUND/MEDIA. **Reuse pattern for S2/S3 acceptance:** fill the Editor textarea →
+      click `button[aria-label="Send code to…"]` → click `button[role="menuitem"]` by label; read edges via
+      `JSON.parse(localStorage['empire-provenance']).state.edges`. **S2 NOT built** — The Network still shows the live
+      "awaiting signal" ticker (no durable Fed-by/Feeds or memory panel yet). Metrics all ±0 except vitest +14 &
+      bundle 691.4→691.8 (+0.4, the store module, no new deps). No runtime bug, no contradiction.
   - **▶ NEXT BUILDER STAGE = EPIC-6 S2 · The Network remembers (durable "Fed by / Feeds" + persistent memory panel).**
     First UI stage — a *visual* change (not cloud-screenshottable; pin the selector, describe the render). Start here:
     - **`src/apps/network/Network.tsx`** — reactively subscribe `const provEdges = useProvenance(s => s.edges)`
@@ -61,7 +73,7 @@
       `--assert-zero` exit 0. *Cloud limit:* render is visual (QA screenshots); the selector is unit-pinned. Full spec:
       `docs/EPICS.md` → EPIC-6 S2.
   - _(History below retained as working memory; the "no active epic" notes are superseded by the EPIC-6 promotion above.)_
-  - **✅ LATEST QA RUN (2026-07-01, green main `b54461e` — re-confirm, no new code):** Ran against the SAME head as
+  - **✅ PRIOR QA RUN (2026-07-01, green main `b54461e` — re-confirm, no new code):** Ran against the SAME head as
     the prior QA (`b54461e`; no builder/strategist commit landed since). Re-proved main builds & runs from a fresh
     checkout: **27/27 render clean** (desktop + 26 apps, 0 uncaught JS), vitest **216/216**, all guards green
     (SHELL-IS-STYLED, REGISTRY-COVERAGE, INBOUND 3/3, MEDIA 3/3, OFFLINE 5/5, PRECACHE 78 no-gap). Metrics all ±0
