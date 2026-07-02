@@ -10,6 +10,7 @@ import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { LineageTrail } from '../../components/ui/LineageTrail'
 import { tint } from '../../design-system/tokens'
 
 interface CalendarEvent {
@@ -20,6 +21,8 @@ interface CalendarEvent {
   description: string
   tags: string[]
   color: string
+  /** Source app id when created via a cross-app handoff (S3). Optional → backward-compatible. */
+  from?: string
 }
 
 const EVENT_COLORS = [
@@ -50,6 +53,9 @@ export default function Calendar() {
   const [newTags, setNewTags] = useState('')
   const [newColor, setNewColor] = useState('bg-signal')
   const [newDate, setNewDate] = useState('')
+  // Durable source of an inbound-created event; stamped onto the saved event so
+  // its origin survives a reload (the sessionStorage chip is consumed on mount).
+  const [draftFrom, setDraftFrom] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'calendar' })
@@ -86,6 +92,7 @@ export default function Calendar() {
     setEditingEvent(null)
     setSelectedDate(todayStr)
     setShowForm(true)
+    setDraftFrom(inbound.payload.from)
   }, [inbound.payload])
 
   const year = currentDate.getFullYear()
@@ -120,6 +127,7 @@ export default function Calendar() {
     setEditingEvent(null)
     setSelectedDate(dateStr)
     setShowForm(true)
+    setDraftFrom(undefined) // manual create has no cross-app source
   }
 
   const openEditForm = (event: CalendarEvent) => {
@@ -154,12 +162,14 @@ export default function Calendar() {
         description: newDescription,
         tags,
         color: newColor,
+        ...(draftFrom ? { from: draftFrom } : {}),
       }
       setEvents(prev => [...prev, event])
       emit({ type: 'EVENT_CREATED', eventId: event.id, title: event.title, date: event.date, time: event.time })
     }
     setShowForm(false)
     setEditingEvent(null)
+    setDraftFrom(undefined)
   }
 
   const deleteEvent = (id: string) => {
@@ -206,7 +216,7 @@ export default function Calendar() {
 
         {inbound.source && (
           <div className="mb-3">
-            <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+            <ProvenanceChip from={inbound.source} onDismiss={() => { inbound.dismiss(); setDraftFrom(undefined) }} />
           </div>
         )}
 
@@ -305,6 +315,11 @@ export default function Calendar() {
                   {e.description && (
                     <div className="text-xs text-faint mt-0.5 line-clamp-2">{e.description}</div>
                   )}
+                  {e.from && (
+                    <div className="mt-1.5" onClick={ev => ev.stopPropagation()}>
+                      <LineageTrail app="calendar" from={e.from} />
+                    </div>
+                  )}
                 </div>
                 <span onClick={(ev) => ev.stopPropagation()} className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                   <NodeActions type="event" sourceId={e.id} />
@@ -326,6 +341,7 @@ export default function Calendar() {
           setEditingEvent(null)
           setSelectedDate(todayStr)
           setShowForm(true)
+          setDraftFrom(undefined)
         }} className="mt-3 flex items-center justify-center gap-1 px-4 py-2 rounded-xl bg-signal hover:bg-signal text-fg text-sm transition-colors">
           <Plus className="w-4 h-4" /> Add Event
         </button>

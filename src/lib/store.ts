@@ -6,6 +6,8 @@ export interface Message {
   sender: string
   content: string
   timestamp: number
+  /** Source app id when this message arrived via a cross-app handoff (S3). Optional → backward-compatible with stored messages. */
+  from?: string
 }
 
 export interface Note {

@@ -10,12 +10,14 @@ import { emit } from '../../lib/eventBus'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { LineageTrail } from '../../components/ui/LineageTrail'
 
 const CONTACTS = ['Jondri', 'Work', 'Family', 'Urgent', 'AI Bot']
 
 export default function Messages() {
   const { messages, addMessage } = useStore()
  const [draft, setDraft] = useState('')
+ const [draftFrom, setDraftFrom] = useState<string | undefined>(undefined)
  const [recipient, setRecipient] = useState(CONTACTS[0])
 
  // Emit APP_OPENED for activity feed tracking
@@ -27,7 +29,11 @@ export default function Messages() {
   // message composer so the receive lands in Messages' own send flow.
   const inbound = useInboundHandoff<{ text?: string; title?: string; from?: string }>('empire-messages-clipboard')
   useEffect(() => {
-    if (inbound.payload?.text) setDraft(inbound.payload.text)
+    if (inbound.payload?.text) {
+      setDraft(inbound.payload.text)
+      // Remember the source so the SENT message carries it durably (survives reload).
+      setDraftFrom(inbound.payload.from)
+    }
   }, [inbound.payload])
 
  const send = () => {
@@ -37,10 +43,12 @@ export default function Messages() {
       sender: 'Me',
       content: draft.trim(),
       timestamp: Date.now(),
+      ...(draftFrom ? { from: draftFrom } : {}),
     }
     addMessage(msg)
     emit({ type: 'MESSAGE_SENT', sender: 'Me', content: draft.trim() })
     setDraft('')
+    setDraftFrom(undefined)
   }
 
   const askCakraDraft = () => {
@@ -154,6 +162,11 @@ export default function Messages() {
         style={!isMe ? { background: 'var(--card-bg)' } : {}}
         >
         <p className="text-sm">{msg.content}</p>
+        {msg.from && (
+        <div className="mt-1.5">
+        <LineageTrail app="messages" from={msg.from} />
+        </div>
+        )}
         <div className="flex items-center justify-between gap-2 mt-1">
         <p className={`text-[10px] ${isMe ? 'text-signal' : 'text-faint'}`}>
         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -171,7 +184,7 @@ export default function Messages() {
         <div className="px-6 pb-6 pt-2">
           {inbound.source && (
             <div className="mb-2">
-              <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+              <ProvenanceChip from={inbound.source} onDismiss={() => { inbound.dismiss(); setDraftFrom(undefined) }} />
             </div>
           )}
           <div className="flex gap-2 items-end">

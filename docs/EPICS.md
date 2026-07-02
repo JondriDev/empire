@@ -144,7 +144,16 @@ Stages (Builder takes the topmost `[ ]`; each is one run, downhill given the one
     eslint clean; tokens 0, off-system 0 (`--assert-zero` exit 0). *Cloud limit:* the live canvas/panel render is a
     visual change QA screenshots; the selector logic is unit-pinned.
 
-- [ ] **S3 · Durable per-entity provenance — the "From <source>" survives a reload (headline-metric stage).**
+- [x] **S3 · Durable per-entity provenance — the "From <source>" survives a reload (headline-metric stage).** ✅
+  SHIPPED 2026-07-02. New `src/components/ui/LineageTrail.tsx` (`role="note"` glass row, direct `<app> ← <from>` pair
+  or `lineageOf` walk, registry icons+accents, renders nothing with no ancestry). Added `from?: string` to the
+  persisted `Message`/`Goal`/`CalendarEvent` shapes; Calendar/Goals/Messages now stamp `from` (from `inbound.payload.from`,
+  via a `draftFrom` state kept off the effect deps so dismiss no longer re-prefills) onto the saved entity and render
+  `{entity.from && <LineageTrail …/>}` on its card/bubble/row. `LineageTrail.test.tsx` (3). Added a **distinct**
+  `PROVENANCE-ENTITY` guard to `qa-smoke.mjs` (seed→reload→create→reload→assert trail; does NOT clobber the edge-level
+  `PROVENANCE-PERSISTS`) + a `PROVENANCE-ENTITY N/3` REPORT section. build🟢 vitest 236→239🟢 eslint 0; tokens 0,
+  off-system 0 (`--assert-zero` exit 0); bundle 692.5→693.5. *Cloud limit:* the trail render is visual (QA screenshots);
+  the selection is unit-pinned + the guard exercises the full flow headless. Original spec ↓
   The receivers that persist their entities carry `from` durably (Notes as a `from-<src>` tag, Learning as
   `item.from`), so their chip is already reload-durable. The gap: **Calendar / Goals / Messages** (S6c receivers)
   read the source from `sessionStorage` (`useInboundHandoff`, consumed on mount) — so after a reload the created
