@@ -5,6 +5,31 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · Visual & Smoke QA — **EPIC-6 S3 done-confirmed: the HEADLINE metric moved (`PROVENANCE-ENTITY` 3/3)**
+
+**Done.** First QA since EPIC-6 S3 landed (green main `13a48dc`; last QA `3ef0955` confirmed S2 on `f5ab6be`). Proved
+main builds & runs from a fresh checkout and that S3's acceptance metric actually moved.
+- **Build & smoke:** `npm run build` 🟢, `node server.js` on :3001; headless Chromium (`/opt/pw-browsers/chromium-1194`,
+  playwright installed `--no-save` — package.json untouched). **27/27 routes render clean** (desktop + 26 apps, 0 uncaught
+  JS). SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (26 apps, bidirectional).
+- **★ S3 acceptance CONFIRMED — the new `PROVENANCE-ENTITY` guard ran 3/3 ✅** (`{calculator→goals, editor→messages,
+  notes→calendar}`): each seeds an inbound payload → reloads to consume+prefill → triggers the app's OWN create/send →
+  reloads AGAIN (sessionStorage chip gone) → a `<LineageTrail>` (`role="note"`, `From <source>`) STILL renders off the
+  persisted entity. **Visually confirmed** too: `s3-lineage-goals.png` shows the durable `Goals ← Calculator` pill on the
+  "Budget target 294" goal card after reload. A stage is only done-confirmed when its metric moves — it moved.
+- **All other guards green:** INBOUND 3/3, MEDIA 3/3, PROVENANCE-PERSISTS 3/3 (S1 edge ledger, untouched), OFFLINE 5/5,
+  PRECACHE **79** entries no-gap. vitest **239/239**, eslint 0, `metrics.mjs --assert-zero` exit 0.
+- **Env-expected noise only** (not bugs): Open-Meteo geocoding + CARTO map tiles blocked (offline sandbox), Files `/api`
+  → HTTP 500 (Android/authed backend), geolocation permissions-policy. No runtime bug, no contradiction.
+
+**Verified.** Metrics vs the committed S3 snapshot are ±0 (apps 26, static 197, vitest 239, tokens 0, off-system 0,
+bundle 693.5) — expected, no code landed since S3. Screenshots overwritten in `docs/screenshots/latest/` + REPORT.md.
+
+**Next:** EPIC-6 S4 (Reader's books → the graph mesh; EPIC-6 CLOSE) is the last stage — S1–S3 now all green. Awaiting the
+Builder. `docs/EPICS.md` → EPIC-6 S4.
+
+---
+
 ## 2026-07-02 · Builder — **EPIC-6 S3 · Durable per-entity provenance ("From <source>" survives a reload) — HEADLINE-METRIC stage**
 
 **Done.** Closed the last provenance gap: Calendar / Goals / Messages read their inbound `from` from `sessionStorage`
