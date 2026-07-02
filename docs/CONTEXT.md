@@ -37,6 +37,16 @@
     (+ `search` in the smoke list + REPORT section) — **ran LIVE this run 1/1 ✅** (`book=true task=true twoApps=true`,
     groups reader,goals). build🟢 vitest 242→255🟢 eslint 0; tokens 0, off-system 0 (`--assert-zero` exit 0); apps 26→27,
     bundle 693.6→696.0 (+2.4, no new deps). 28/28 routes render clean, every other guard green.
+    - **✅ QA-CONFIRMED LIVE (2026-07-02, green main `ac6af7b`) — S1 done-confirmed, the organism is queryable.**
+      First independent QA after S1 landed (last QA was `5b8163c` = EPIC-6 S4). Ran the full headless smoke end-to-end:
+      **28/28 routes render clean** (desktop + 27 apps, 0 uncaught JS), incl. the new **Search** app (`app-search.png`).
+      **`GLOBAL-SEARCH 1/1 ✅`** reproduced independently (`book=true task=true twoApps=true`, groups reader,goals) →
+      **EPIC-8 S1 target metric MOVED `0/1 → 1/1`, S1 done-confirmed, no contradiction.** vitest **255/255**, eslint 0,
+      `metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0), all other guards green (INBOUND 3/3, MEDIA 3/3,
+      GRAPH-LEGIBLE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 80 no-gap). Metrics
+      reproduce the builder's snapshot exactly (apps 27, tests 213 static/255 vitest, bundle 696, Δ ±0 vs the metrics.json
+      the builder committed with S1). **No runtime bug.** *Cloud limit:* the seed corpus is graph-only (see TRAP below), so
+      the visual of real cross-app hits is on-device; the guard carries the roundtrip headless.
     - **TRAP (learned + baked into the guard):** `startCoreSync()` (sync.ts) reconciles the CENTRALLY-mirrored types
       **note/learning/message** against the global store on boot and PRUNES any such node absent from that store. So a
       QA seed of a `note` on `/app/search` (empty Notes store) is DELETED before search runs — the guard seeds
