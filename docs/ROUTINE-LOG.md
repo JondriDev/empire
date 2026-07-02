@@ -5,6 +5,27 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · Strategist — **EPIC-8 held ACTIVE (S1 QA-confirmed); S2 re-cut against a code audit — "land on the exact entity" + the array/tag gap**
+
+Read the gradient: EPIC-8 S1 (`ac6af7b`) shipped **and** QA-confirmed live in `REPORT.md` (`GLOBAL-SEARCH 1/1 ✅`,
+28/28 routes clean, apps 26→27, all guards green, `--assert-zero` exit 0) — the headline metric moved, so EPIC-8 stays
+`▶ ACTIVE` with **S2 next** (not a promote). Audited the corpus in code before re-cutting S2: `nodeBodyText`
+(`search.ts:43`) already concatenates **every scalar in `node.data`**, and Notes `content` / Messages `content` /
+Goals `description` / Calendar `description` / Prompt-Gen `content` / Learning `learned` are already mirrored
+(`sync.ts:74-98` + each `mirrorCollection`). So S2's original "full bodies aren't searchable → enrich each mirror"
+premise was **stale — that work is mostly already done.** Re-cut S2 to the two *honest* remaining gaps: **(a)**
+`nodeBodyText` skips **arrays**, so `tags` are unsearchable → flatten string-array elements in that one function + a
+`search.test.ts` tag case + a `GLOBAL-SEARCH` tag-only match; **(b · meaty)** a hit opens the app's default view, not
+the item → add `openEntity(appId,nodeId)` to `windowStore.ts` (open + `setFocus`), point Search rows at it, and prove
+it on **Notes** (scroll+ring the focused card). Named every file/line/shape so the Builder starts without re-planning.
+
+**Done / Verified / Next.** Docs-only, committed to `main`. **Done:** `EPICS.md` S1 marked QA-confirmed + S2 rewritten
+against the audit; `CONTEXT.md` active-epic next-stage refreshed; `ROADMAP.md` re-ranked (EPIC-6 → DONE, EPIC-8 ACTIVE,
+global-search promoted out of LATER). **Verified:** claims cross-checked against `search.ts`/`sync.ts`/`windowStore.ts`/
+`focus.ts` + each app's `mirrorCollection` + `REPORT.md`. **Next:** Builder ships EPIC-8 S2 (land-on-entity + tag gap).
+
+---
+
 ## 2026-07-02 · QA (visual + smoke) — **EPIC-8 S1 CONFIRMED LIVE — `GLOBAL-SEARCH 0/1 → 1/1`, the organism is queryable**
 
 **Done.** First QA after EPIC-8 S1 landed (`ac6af7b`; last QA was `5b8163c` = EPIC-6 S4). Fresh cloud checkout of green
@@ -22,7 +43,8 @@ contradiction.** *Cloud limit:* the seed corpus is graph-only (the sync-prune TR
 on-device; the guard carries the roundtrip headless.
 
 **Next.** Builder → **EPIC-8 S2** (deepen the corpus: full note/message/learning bodies searchable via `mirrorCollection`
-`data`; deep-link focus/scroll on open; extend `GLOBAL-SEARCH` with a body-only match).
+`data`; deep-link focus/scroll on open; extend `GLOBAL-SEARCH` with a body-only match). _(Strategist re-cut S2 above —
+the "deepen the corpus" half is mostly already done; the honest gaps are arrays/tags + land-on-entity.)_
 
 ---
 

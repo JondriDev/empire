@@ -10,16 +10,17 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-07-01** (strategist) · Main: 🟢 green (build + vitest 216, token-violations 0,
-> off-system 0) · QA: 27/27 routes render, no runtime errors, all guards green. **EPIC-1..5 all DONE**
+> Last re-ranked: **2026-07-02** (strategist) · Main: 🟢 green (build + vitest 213 static, token-violations 0,
+> off-system 0) · QA: 28/28 routes render, no runtime errors, all guards green. **EPIC-1..6 all DONE**
 > (organism both-ways 9/9 · token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable ·
-> off-system 1076→0, CI-locked). **▶ EPIC-6 · Organism Memory (durable provenance & lineage) ACTIVE** — the
-> organism fires-and-forgets today (a `HANDOFF` lights one arc, then only Network's capped in-memory ticker holds
-> it and it dies on reload); EPIC-6 adds a **durable, queryable provenance store** (`empire-provenance`), makes The
-> Network *remember* (persistent memory panel + all-time "fed by/feeds" in the inspector), makes each entity's
-> source **survive a reload**, and closes the last graph-island (Reader's books). Target: **`PROVENANCE-PERSISTS
-> 0/3 → 3/3`** guard + Reader graph-legible. **Android renumbered to EPIC-7 (QUEUED)** — device-gated, promote only
-> with on-device QA.
+> off-system 1076→0, CI-locked · durable provenance `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` +
+> Reader graph-legible). **▶ EPIC-8 · Global cross-app search (the organism becomes queryable) ACTIVE** — the
+> organism now *remembers* and *mirrors* every collection into one Core graph, but you still navigate it one silo at
+> a time; EPIC-8 makes the unified graph **queryable from one lens** (type a word → every matching entity across
+> every app, ranked, grouped by owning app, one click from home). **S1 SHIPPED + QA-confirmed live** (`ac6af7b`):
+> pure `search.ts` spine + the 27th app `Search.tsx` + `GLOBAL-SEARCH` guard **1/1 ✅** (apps 26→27). S2 (land on the
+> exact entity + array/tag corpus gap) → S3 (filters/keyboard/summon) remain. **Android renumbered to EPIC-7
+> (QUEUED)** — device-gated, promote only with on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
@@ -96,12 +97,16 @@ now **EPIC-6 S4**:
   Music/Video, Photos durable + DataCenter/Weather tests). Retired.
 - **PWA completion.** ✅ **DONE — this WAS EPIC-4** (cold offline boot 5/5 from precache, zero precache gap,
   base-path/install-flow correct, installability asserted). Retired.
-- **Organism Memory — durable provenance & lineage.** *(In progress — this IS EPIC-6, ▶ ACTIVE.)* The organism
-  fires-and-forgets; EPIC-6 adds the durable `empire-provenance` store, a persistent Network memory, reload-durable
-  per-entity source, and closes the Reader graph-island. Closes when `PROVENANCE-PERSISTS` hits 3/3 and Reader is
-  graph-legible. **Follow-on (next epic candidate, not yet decomposed):** **node-level lineage** — correlate a
-  `HANDOFF` with the specific entity it created for a true per-artifact ancestry (app-level memory → artifact-level
-  memory), and/or **global cross-app search** over every app's persisted collection (see LATER).
+- **Organism Memory — durable provenance & lineage.** ✅ **DONE — this WAS EPIC-6** (durable `empire-provenance`
+  store, persistent Network memory panel + all-time "fed by/feeds", reload-durable per-entity source via
+  `LineageTrail`, Reader graph-island closed). `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` + `GRAPH-LEGIBLE
+  1/1` all QA-confirmed. Retired.
+- **Global cross-app search — the organism becomes queryable.** *(In progress — this IS EPIC-8, ▶ ACTIVE.)* One
+  Search lens over every app's mirrored entities, ranked + grouped by owning app. S1 shipped (`search.ts` spine + the
+  Search app + `GLOBAL-SEARCH 1/1`). Closes when hits land on the exact entity (S2) and Search gains filters/keyboard/
+  summon (S3). **Follow-on (next epic candidate, not yet decomposed):** **node-level lineage** — correlate a `HANDOFF`
+  with the specific entity it created for a true per-artifact ancestry (app-level memory → artifact-level memory);
+  `lineageOf` in `provenance.ts` is the rail.
 - **Android APK validation.** *(QUEUED EPIC-7 — renumbered EPIC-5→6→7.)* Device-gated: an unattended cloud
   builder can't install an APK or run on-device smoke, so its target isn't cloud-verifiable. Promote only when an
   on-device QA path exists; until then it's lower *realizable* gradient than the cloud-executable themes above.
@@ -111,7 +116,8 @@ now **EPIC-6 S4**:
 - ~~Organism-wide provenance/memory: a queryable trail of which app produced/consumed
   each artifact~~ → **PROMOTED to ▶ EPIC-6 (Organism Memory)**, 2026-07-01. App-level durable provenance is the
   active epic; the artifact-level (node-scoped) trail is the named follow-on candidate.
-- Global search across all app data (notes, events, learning, bookmarks, prompts).
+- ~~Global search across all app data (notes, events, learning, bookmarks, prompts)~~ → **PROMOTED to ▶ EPIC-8
+  (Global cross-app search)**, 2026-07-02. S1 shipped (`GLOBAL-SEARCH 1/1`); S2–S3 deepen it.
 - Multi-window desktop polish: snapping, persisted layout, per-app window state.
 - Real-device QA loop (rendered UI) so the Network animations, fonts, and handoff
   arcs get visual confirmation instead of "not verifiable in cloud."

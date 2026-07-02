@@ -82,18 +82,46 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   eslint clean; tokens 0, off-system 0 (`--assert-zero` exit 0); apps 26→27, bundle 693.6→696.0 (+2.4, no new deps).
   - *Acceptance:* type a term matching entities in ≥2 apps → the Search app lists them grouped by app, each opening
     its app; `search.test.ts` green; `GLOBAL-SEARCH 0/1 → 1/1`. **The queryable organism exists end-to-end.**
+  - **✅ QA-CONFIRMED LIVE 2026-07-02** (`REPORT.md`, green main incl. `ac6af7b`): 28/28 routes render clean (the new
+    `search` route among them), vitest 213 static / all guards green, `metrics.mjs --assert-zero` exit 0. **`GLOBAL-
+    SEARCH 1/1 ✅`** — the Core graph was seeded with a `note` (Notes) + a `task` (Goals) sharing the rare term
+    *"Xenolith"*, reloaded (persist rehydrate), the term typed into Search → **BOTH surfaced, grouped under their own
+    app sections.** The headline metric moved (apps 26→27, GLOBAL-SEARCH 0/1→1/1). **S2 is next.**
 
-- [ ] **S2 · Deepen the corpus + in-app deep-links (search reaches fields the graph doesn't mirror, and lands on
-  the exact entity).** The graph mirrors a *summary* of each entity (title + a shallow `data` slice), so full note
-  bodies / message text / file contents aren't all searchable, and opening a hit lands on the app's default view, not
-  the specific item. Close both: (a) **richer mirrored `data`** — audit each `mirrorCollection` call and include the
-  primary searchable text in `data` (e.g. Notes already mirrors `body`? confirm; Messages the message text; Learning
-  the note) so `nodeBodyText` sees it — a small, per-app, backward-compatible change (do NOT change the node `type`
-  or `id`). (b) **deep-link on open** — extend `openAppById` (or a thin `openEntity(appId, nodeId)`) + the target
-  app to focus/scroll the opened entity (reuse `useFocus`/`setFocus` from `lib/core/focus.ts` — Network already
-  `setFocus`es a node; the app reads `focusedId` on mount and scrolls to it). *Acceptance:* searching a word that
-  only appears in a note's *body* returns that note; clicking it opens Notes scrolled to that note. Extend the
-  `GLOBAL-SEARCH` guard with a body-only match. Build🟢 vitest🟢 eslint clean; tokens 0, off-system 0.
+- [ ] **S2 · Land on the exact entity (deep-link a hit to its item) + close the one real corpus gap (arrays).**
+  **Strategist audit (2026-07-02, code-confirmed — this SUPERSEDES S2's original "bodies aren't searchable" premise):**
+  the corpus is already deeper than assumed. `nodeBodyText` (`search.ts:43`) concatenates **every string/number/boolean
+  in `node.data`**, and the primary text of every text-bearing app is already mirrored there — Notes `content`,
+  Messages `content`, Goals `description`, Calendar `description`, Prompt-Gen `content`, Learning `learned` (audited in
+  `sync.ts:74-98` + each app's `mirrorCollection`). So a body-only word ALREADY matches; the "enrich each
+  `mirrorCollection`" work is **mostly already done — do NOT re-mirror fields that are already present.** Two honest
+  gaps remain — close both in this one run:
+  - **(a · the real corpus gap) `nodeBodyText` skips arrays, so `tags` are unsearchable.** `notes.data.tags`,
+    `calendar.data.tags`, `photos.data.tags` are string arrays; the `for…of Object.values` loop in `nodeBodyText`
+    only handles scalars, so a search for a tag word misses the note that carries it. Fix it **in one place** —
+    `src/lib/core/search.ts` `nodeBodyText`: when a value is an **array**, push each string/number/boolean element
+    (skip nested objects, keep it cheap, still lowercased+joined). Do NOT touch the per-app `mirrorCollection` calls
+    (the arrays are already mirrored; only the *reader* skipped them). Add a `search.test.ts` case: a node with
+    `data:{ tags:['xenon'] }` and no other match → `searchNodes(…, 'xenon')` returns it. (Reader `book` content stays
+    title-only **by design** — full book text is too large to mirror; leave it.)
+  - **(b · the meaty half) deep-link a hit onto its exact entity.** Today a Search row calls `openAppById(appId)`
+    (`Search.tsx:142,159`) → the app opens on its **default view**, not the clicked item. Add a thin
+    **`openEntity(appId, nodeId)`** to `src/lib/windowStore.ts` beside `openAppById` (line 105): resolve+open the app
+    exactly as `openAppById` does, then `useFocus.getState().setFocus(nodeId)` (import from `lib/core/focus.ts` — the
+    SAME rail the Network inspector already uses to gaze at a node). Point each Search result row at
+    `openEntity(appId, hit.node.id)` instead of `openAppById`. Then make **one** target app land on the focused item as
+    the proof: **`src/apps/notes/Notes.tsx`** — on mount read `useFocus(s => s.focusedId)`, map it to this app's mirrored
+    node (`node.data.sourceId === note.id`), scroll that card into view (`ref.scrollIntoView`) and briefly highlight it
+    (a token ring class — NO raw hex, NO off-system palette class). Notes is the acceptance example and already mirrors
+    `content`, so its hit is body-matchable end-to-end. (Scroll-to-focus for the other apps is later polish; S2 proves
+    the rail on Notes.)
+  - **Guard + tests:** extend the `GLOBAL-SEARCH` block in `scripts/qa-smoke.mjs` with a **tag-only match** (seed a
+    Notes node whose term lives ONLY in `data.tags`, reload, type it → the note surfaces) so (a) is covered headless;
+    the deep-link scroll is a visual QA screenshot (Notes opens scrolled+highlighted to the hit — flag for QA; the
+    `setFocus` wiring + `nodeBodyText` array case are unit-pinned). *Acceptance:* a word that lives only in a note's
+    **tag** returns that note; clicking any hit opens its app **focused on that entity** (Notes scrolls+rings the card).
+    `search.test.ts` +1 (array body), `GLOBAL-SEARCH` guard extended. Build🟢 vitest🟢 eslint clean; tokens 0,
+    off-system 0 (`--assert-zero` exit 0); routes 27/27.
 
 - [ ] **S3 · Type/app filters + keyboard nav + summon-from-anywhere (Search becomes the organism's command surface).**
   Make Search fast and global: (a) **filter chips** — by node `type` (note/task/event/…) and/or owning app, driven by
@@ -105,8 +133,9 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   → only tasks; ↑/↓/Enter opens a hit without the mouse; the summon key focuses the field. Build🟢 vitest🟢 (filter
   helpers pinned) eslint clean; tokens 0, off-system 0.
 
-_When S1 ships and QA confirms **`GLOBAL-SEARCH 1/1`** (a term surfaces entities across ≥2 apps, grouped), the epic's
-headline metric has moved; S2–S3 deepen it. When all three ship → retire EPIC-8 to DONE. The next cloud-executable
+_S1 has shipped **and** QA confirmed **`GLOBAL-SEARCH 1/1`** (a term surfaced entities across ≥2 apps, grouped) — the
+epic's headline metric has moved. S2–S3 deepen it (land on the exact entity → filters/keyboard/summon). When all
+three ship → retire EPIC-8 to DONE. The next cloud-executable
 candidate is **node-level lineage** (correlate a `HANDOFF` with the specific entity it created — per-artifact
 ancestry, `lineageOf` in `provenance.ts` is the rail); **EPIC-7 · Android** stays device-gated._
 
