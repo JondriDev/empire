@@ -153,7 +153,10 @@ Stages (Builder takes the topmost `[ ]`; each is one run, downhill given the one
   `PROVENANCE-ENTITY` guard to `qa-smoke.mjs` (seed→reload→create→reload→assert trail; does NOT clobber the edge-level
   `PROVENANCE-PERSISTS`) + a `PROVENANCE-ENTITY N/3` REPORT section. build🟢 vitest 236→239🟢 eslint 0; tokens 0,
   off-system 0 (`--assert-zero` exit 0); bundle 692.5→693.5. *Cloud limit:* the trail render is visual (QA screenshots);
-  the selection is unit-pinned + the guard exercises the full flow headless. Original spec ↓
+  the selection is unit-pinned + the guard exercises the full flow headless. **✅ QA-CONFIRMED LIVE 2026-07-02 (green
+  main `13a48dc`): `PROVENANCE-ENTITY` 3/3** ({calculator→goals, editor→messages, notes→calendar} — trail survives the
+  second reload off the persisted entity) + visually via `s3-lineage-goals.png` (durable `Goals ← Calculator` pill after
+  reload). The headline metric moved → S3 done-confirmed; only S4 (Reader island) remains to CLOSE EPIC-6. Original spec ↓
   The receivers that persist their entities carry `from` durably (Notes as a `from-<src>` tag, Learning as
   `item.from`), so their chip is already reload-durable. The gap: **Calendar / Goals / Messages** (S6c receivers)
   read the source from `sessionStorage` (`useInboundHandoff`, consumed on mount) — so after a reload the created

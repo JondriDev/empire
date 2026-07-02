@@ -107,6 +107,20 @@
       editor→messages, notes→calendar}` + a `PROVENANCE-ENTITY N/3` REPORT section. `node --check` clean; the headless
       run is QA's to confirm. **Note for QA:** Notes/Learning use their own `from-<src>` tag / `item.from` (NOT
       LineageTrail), so the entity guard covers the 3 apps that actually render `<LineageTrail>`.
+    - **✅ QA-CONFIRMED LIVE (2026-07-02, green main `13a48dc`) — S3 done-confirmed, the HEADLINE metric moved.**
+      First QA since S3 landed (last QA `3ef0955` confirmed S2 on `f5ab6be`; S3 `13a48dc` landed since). 27/27 render
+      clean (0 uncaught JS), vitest **239/239** (+3 `LineageTrail.test.tsx`), eslint 0, `--assert-zero` exit 0. **The
+      new `PROVENANCE-ENTITY` guard ran headless 3/3 ✅** — `{calculator→goals, editor→messages, notes→calendar}` each:
+      seed inbound → reload+consume+prefill → app's OWN create/send → reload AGAIN (chip gone) → `[role="note"]
+      [aria-label*="<src>"]` STILL renders off the persisted entity. **Confirmed the surface VISUALLY too**
+      (`s3-lineage-goals.png`): the durable `Goals ← Calculator` LineageTrail pill renders on the "Budget target 294"
+      goal card AFTER a reload (off the persisted `goal.from`, not the consumed sessionStorage chip). The S1 edge guard
+      `PROVENANCE-PERSISTS` stays 3/3 (left untouched, per the reconciliation note — distinct metric, no clobber). All
+      other guards green (SHELL-IS-STYLED, REGISTRY-COVERAGE, INBOUND 3/3, MEDIA 3/3, OFFLINE 5/5, PRECACHE **79**
+      no-gap). Metrics: static 194→197 (+3), vitest 236→239 (+3), test files 24→25 (+1), bundle 692.5→693.5 (+1.0, the
+      LineageTrail component + per-entity `from` plumbing, no new deps); apps/tokens/off-system ±0. No runtime bug, no
+      contradiction. **S1–S3 all green → only S4 (Reader island) remains to CLOSE EPIC-6.** *Visual note:* the
+      LineageTrail confirmation used the Goals case; Messages/Calendar are guard-confirmed (3/3) but not separately shot.
   - **▶ NEXT BUILDER STAGE = EPIC-6 S4 · Close the last graph-island: Reader's books → the mesh (EPIC-6 CLOSE).**
     Full spec: `docs/EPICS.md` → EPIC-6 S4 (lines ~183-199). Shape:
     - Reader holds a real collection (loaded books) but **never mirrors it into the graph** → invisible in The Network.
