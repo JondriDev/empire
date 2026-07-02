@@ -38,6 +38,7 @@ import {
   InboxIcon,
   Reader,
   Cakra,
+  Search,
   Node,
 } from './glyphs'
 import type { AppIcon } from './glyphs'
@@ -73,6 +74,7 @@ export const alienIcons: Record<string, AppIcon> = {
   Inbox: InboxIcon,
   Reader,
   cakra: Cakra,
+  Search,
 }
 
 /** The bare orbital node, shown when a registry `icon` key has no glyph. */

@@ -22,8 +22,32 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **▶ EPIC-6 · Organism Memory (durable provenance & lineage)** — promoted 2026-07-01 (EPIC-1..5
-  all DONE; primary metrics maxed → open a new frontier). **Leap:** the organism stops fires-and-forgetting — a
+- **Active epic:** **▶ EPIC-8 · Global cross-app search (the organism becomes queryable)** — promoted 2026-07-02
+  (EPIC-6 CLOSED & QA-confirmed on `e262f1b`; no active epic remained; EPIC-7 Android stays device-gated). **Leap:**
+  one Search surface queries EVERY app's real entities at once (the Core graph already mirrors them all) — ranked,
+  grouped by owning app, one click from each entity's home. **Target metric:** a `GLOBAL-SEARCH` guard in
+  `qa-smoke.mjs` (`0/1 → 1/1`) + `search.test.ts`. Full stage specs in `docs/EPICS.md` → EPIC-8.
+  - **✅ S1 SHIPPED + VERIFIED LIVE (2026-07-02) — the queryable organism exists end-to-end.** Pure spine
+    **`src/lib/core/search.ts`** (`searchNodes(nodes,query,limit=50)` / `scoreNode` / `nodeBodyText` / `queryTerms` /
+    `groupHitsByApp` — AND semantics, title-prefix≫substring≫type≫body, recency tie-break; `search.test.ts` 13 cases).
+    New **`src/apps/search/Search.tsx`** = the 27th app (registry `search` accent `#5b8fb9`/ion, `appComponents`, new
+    alien `Search` glyph in `icons/glyphs.tsx` + barrel): reactive `useGraph(s=>s.nodes)`, autofocused field, idle/empty/
+    no-match states, results grouped by `groupHitsByApp` into `<section data-search-group={app}>` (registry glyph+accent
+    header), each row → `openAppById(app)` + ⚡ `<NodeActions nodeId>`. New **`GLOBAL-SEARCH` guard** in `qa-smoke.mjs`
+    (+ `search` in the smoke list + REPORT section) — **ran LIVE this run 1/1 ✅** (`book=true task=true twoApps=true`,
+    groups reader,goals). build🟢 vitest 242→255🟢 eslint 0; tokens 0, off-system 0 (`--assert-zero` exit 0); apps 26→27,
+    bundle 693.6→696.0 (+2.4, no new deps). 28/28 routes render clean, every other guard green.
+    - **TRAP (learned + baked into the guard):** `startCoreSync()` (sync.ts) reconciles the CENTRALLY-mirrored types
+      **note/learning/message** against the global store on boot and PRUNES any such node absent from that store. So a
+      QA seed of a `note` on `/app/search` (empty Notes store) is DELETED before search runs — the guard seeds
+      graph-survivable types instead (`task` graph-only; `book` self-mirrored by an unmounted Reader). In real usage
+      those types come from real non-empty stores → the feature searches them fine.
+    - **▶ NEXT BUILDER STAGE = EPIC-8 S2** (deepen the corpus: audit each `mirrorCollection` to include primary
+      searchable text in `data` so full note/message/learning bodies are hit; + deep-link on open — focus/scroll the
+      opened entity via `useFocus`/`setFocus`). Extend `GLOBAL-SEARCH` with a body-only match. Exact shape in EPICS.md.
+  - _(EPIC-6 history retained below as working memory.)_
+- **Prior active epic (DONE):** **EPIC-6 · Organism Memory (durable provenance & lineage)** — promoted 2026-07-01,
+  CLOSED 2026-07-02 (all S1–S4 shipped + QA-confirmed). **Leap:** the organism stops fires-and-forgetting — a
   durable `empire-provenance` store records every real app→app transfer, The Network *remembers* (persistent memory
   panel + all-time "fed by/feeds"), each entity's source survives a reload, and Reader's books (the last graph-island)
   become legible. **Target metric:** a new `PROVENANCE-PERSISTS 0/3 → 3/3` guard in `qa-smoke.mjs` (seed handoff →
@@ -461,6 +485,14 @@
     current window or it deletes everything else — accumulate the union first. See `src/apps/files/filesGraph.ts`
     (`accumulateFiles` builds a session-union `Map<path,…>`; `Files.tsx` mirrors `[...union.values()]`). DataCenter
     is fine — it already mirrors all tables at once.
+  - **`src/lib/core/search.ts` (EPIC-8 S1, 2026-07-02):** the pure global-search spine over the Core graph. `searchNodes(nodes,query,limit=50)`
+    → ranked `SearchHit[]` (`{node,score,field,snippet}`); `scoreNode(node,terms)` (AND semantics — every term must
+    match title/type/body or the node is dropped; title-prefix 12≫word-boundary 9≫substring 6≫type 4/2≫body 2, +20/+10
+    whole-query title bonus, recency tie-break); `nodeBodyText` (shallow string/number/bool `data` values, lowercased);
+    `queryTerms`; `groupHitsByApp` → `AppHitGroup[]` ordered by best hit. No React/store — `src/apps/search/Search.tsx`
+    feeds it `useGraph` nodes. `search.test.ts` (13). **Add filters/richer fields HERE, not in the component.**
+    **Corpus caveat:** only what's mirrored into `empire-core-graph` is searchable; central-sync types (note/learning/
+    message) reflect their real stores (safe in prod, PRUNED to empty in a bare QA seed — see the sync.ts prune trap).
   - `src/components/ui/NodeActions.tsx` — `<NodeActions type sourceId/>` ⚡ "Send to…" menu.
   - **Focus + command palette (S4, 2026-06-22):** `src/lib/core/focus.ts` — `useFocus` store
     (`focusedId`), pure `focusIdForEvent(event)` (NODE_CREATED/UPDATED/INTENT_RUN→nodeId,

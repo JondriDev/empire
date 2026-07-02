@@ -36,7 +36,83 @@ for the real Maps), token-violations **held at 0**. Do not re-add the deleted ap
 
 ---
 
-## ▶ ACTIVE — EPIC-6 · Organism Memory (durable provenance & lineage)
+## ▶ ACTIVE — EPIC-8 · Global cross-app search (the organism becomes queryable)
+
+> **Promoted 2026-07-02** (EPIC-6 CLOSED, QA-confirmed on green main `e262f1b`; every prior epic DONE; EPIC-7 ·
+> Android stays device-gated / not cloud-verifiable). **Why this is the highest realizable gradient now** (one line):
+> the organism now *remembers* movement (EPIC-6) and *mirrors* every collection into one Core graph — but you still
+> navigate it one silo at a time (open Notes for notes, Inbox for tasks, Reader for books…). The steepest remaining
+> interconnection gradient is making that unified graph **queryable from one lens**: type a word, see every matching
+> entity across every app, ranked, grouped, one keystroke from its home. It ranks above device-gated Android in the
+> priority bias, is fully cloud-verifiable (pure ranking + a headless guard), reuses every existing rail
+> (`useGraph`/`empire-core-graph`, `registry`, `openAppById`, `NodeActions`, the Inbox "real-home-app" precedent),
+> and is the natural payoff of EPIC-1 (everything mirrors in) + EPIC-6 (durable memory): the whole organism, one field.
+
+**Leap:** The Empire stops being 26 silos you navigate one at a time. One Search surface queries **every** app's real
+entities at once — notes, tasks, events, goals, messages, learning, files, photos, books, prompts, datasets — ranked by
+relevance, grouped by owning app, each result one click from its app (`openAppById`) or onward via ⚡ `NodeActions`.
+
+**Target metric (new — Builder instruments it; QA confirms it moved):** a **`GLOBAL-SEARCH` guard** in
+`scripts/qa-smoke.mjs` — seed the Core graph with entities that share a rare term across ≥2 apps, reload (persist
+rehydrate), type the term into the Search field, and assert BOTH surface **grouped under their own app sections**.
+**Headline: `GLOBAL-SEARCH 0/1 → 1/1`** + the "+ a unit test" discipline (`search.test.ts`). *Routes rendering clean*
+rises to **27/27** (the new Search app); *token-violations*/*off-system* stay **0** (`--assert-zero` must keep passing).
+
+### Rails to reuse (read ONCE — do NOT reinvent)
+- **`src/lib/core/graph.ts`** — `useGraph(s => s.nodes)` is the live corpus (`empire-core-graph`); every collection app
+  already mirrors into it via `mirrorCollection`. Search reads it reactively; it does NOT own a private store.
+- **`src/lib/core/search.ts` (S1, 2026-07-02)** — the pure ranking spine: `searchNodes(nodes, query, limit)`,
+  `scoreNode`, `nodeBodyText`, `queryTerms`, `groupHitsByApp`. AND semantics (all terms must match), title-prefix ≫
+  substring ≫ body, type-name match, recency tie-break. **Add filters/fields here, not in the component.**
+- **`src/apps/inbox/Inbox.tsx`** — the exact precedent for a graph-reading "real home" app (reactive `useGraph`,
+  registry glyph+accent chips, `<NodeActions nodeId>`). Search mirrors its shape.
+- **`src/lib/windowStore.ts` `openAppById(id)`** — resolves aliases → opens the app. **`src/lib/registry.ts`** app
+  identity; **`src/design-system/icons/`** the alien glyph set (new `Search` glyph added in S1).
+
+Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones before, build+vitest+eslint green,
+`tokenViolations`/`offSystemUtilities` stay 0):
+
+- [x] **S1 · The search spine + the Search app + the guard (the queryable organism, end-to-end).** ✅ SHIPPED
+  2026-07-02. New pure `src/lib/core/search.ts` (`searchNodes`/`scoreNode`/`nodeBodyText`/`queryTerms`/
+  `groupHitsByApp`) with `search.test.ts` (13 cases). New `src/apps/search/Search.tsx` — reactive `useGraph`, an
+  autofocused query field, idle/empty/no-match states, results grouped by owning app (registry glyph+accent header),
+  each row → `openAppById` + ⚡ `<NodeActions nodeId>`. Registered as the **27th app** (registry `search`,
+  `appComponents`, new alien `Search` glyph). New `GLOBAL-SEARCH` guard in `qa-smoke.mjs` (seed 2 apps → reload →
+  type → assert both grouped hits) + `search` added to the smoke list + a REPORT section. build🟢 vitest 242→255🟢
+  eslint clean; tokens 0, off-system 0 (`--assert-zero` exit 0); apps 26→27, bundle 693.6→696.0 (+2.4, no new deps).
+  - *Acceptance:* type a term matching entities in ≥2 apps → the Search app lists them grouped by app, each opening
+    its app; `search.test.ts` green; `GLOBAL-SEARCH 0/1 → 1/1`. **The queryable organism exists end-to-end.**
+
+- [ ] **S2 · Deepen the corpus + in-app deep-links (search reaches fields the graph doesn't mirror, and lands on
+  the exact entity).** The graph mirrors a *summary* of each entity (title + a shallow `data` slice), so full note
+  bodies / message text / file contents aren't all searchable, and opening a hit lands on the app's default view, not
+  the specific item. Close both: (a) **richer mirrored `data`** — audit each `mirrorCollection` call and include the
+  primary searchable text in `data` (e.g. Notes already mirrors `body`? confirm; Messages the message text; Learning
+  the note) so `nodeBodyText` sees it — a small, per-app, backward-compatible change (do NOT change the node `type`
+  or `id`). (b) **deep-link on open** — extend `openAppById` (or a thin `openEntity(appId, nodeId)`) + the target
+  app to focus/scroll the opened entity (reuse `useFocus`/`setFocus` from `lib/core/focus.ts` — Network already
+  `setFocus`es a node; the app reads `focusedId` on mount and scrolls to it). *Acceptance:* searching a word that
+  only appears in a note's *body* returns that note; clicking it opens Notes scrolled to that note. Extend the
+  `GLOBAL-SEARCH` guard with a body-only match. Build🟢 vitest🟢 eslint clean; tokens 0, off-system 0.
+
+- [ ] **S3 · Type/app filters + keyboard nav + summon-from-anywhere (Search becomes the organism's command surface).**
+  Make Search fast and global: (a) **filter chips** — by node `type` (note/task/event/…) and/or owning app, driven by
+  pure helpers in `search.ts` (`filterHits(hits, {types?, apps?})`, unit-pinned); (b) **keyboard nav** — ↑/↓ move a
+  highlight across the flat ranked list, Enter opens the highlighted hit (roving-focus like `NodeActions`/
+  `CommandPalette`); (c) **global summon** — a shell keybinding (distinct from ⌘K's focused-node palette and
+  Ctrl+Space's app-search) opens the Search app with the field focused (or fold global entity-search INTO the
+  existing `CommandPalette` as a second mode — decide by which is less shell-risk). *Acceptance:* filter to `task`
+  → only tasks; ↑/↓/Enter opens a hit without the mouse; the summon key focuses the field. Build🟢 vitest🟢 (filter
+  helpers pinned) eslint clean; tokens 0, off-system 0.
+
+_When S1 ships and QA confirms **`GLOBAL-SEARCH 1/1`** (a term surfaces entities across ≥2 apps, grouped), the epic's
+headline metric has moved; S2–S3 deepen it. When all three ship → retire EPIC-8 to DONE. The next cloud-executable
+candidate is **node-level lineage** (correlate a `HANDOFF` with the specific entity it created — per-artifact
+ancestry, `lineageOf` in `provenance.ts` is the rail); **EPIC-7 · Android** stays device-gated._
+
+---
+
+## ✅ DONE — EPIC-6 · Organism Memory (durable provenance & lineage)
 
 > **Promoted 2026-07-01** (EPIC-5 CLOSED; every prior epic DONE). **Why this is the highest-gradient move now**
 > (one line): the organism has a reflexive nervous system that **fires and forgets** — a `HANDOFF` lights one

@@ -260,6 +260,16 @@ const Reader: AppIcon = (p) => (
   </S>
 )
 
+/** Search — the organism's lens: an orbital ring with a core node, trained on a
+ *  point, and a short sightline (the "handle") receding to the corner. */
+const Search: AppIcon = (p) => (
+  <S {...p}>
+    <circle cx="10.5" cy="10.5" r="6" />
+    <Dot cx="10.5" cy="10.5" />
+    <line x1="15" y1="15" x2="20" y2="20" />
+  </S>
+)
+
 /** Fallback — the bare orbital node. */
 const Node: AppIcon = (p) => (
   <S {...p}>
@@ -301,5 +311,6 @@ export {
   InboxIcon,
   Reader,
   Cakra,
+  Search,
   Node,
 }
