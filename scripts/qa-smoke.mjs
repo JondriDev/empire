@@ -245,6 +245,53 @@ try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { /* ignore *
 const mediaPass = mediaResults.filter(r => r.pass).length;
 console.log(`MEDIA-PERSISTS: ${mediaPass}/${mediaResults.length} ${mediaPass === mediaResults.length ? '✅' : '⚠️'}`);
 
+// ── GRAPH-LEGIBLE guard (EPIC-6 S4: Reader's books join the organism graph) ──
+// Reader owns a real collection (imported books) but was the LAST such app that
+// never mirrored into the Core graph — invisible in The Network. S4 wires
+// `mirrorCollection('book','reader', books, …)`, so a loaded book must now appear
+// as a `book` CoreNode owned by app==='reader'. jsdom can't drive the real import
+// → setBooks → mirror effect → persisted `empire-core-graph` roundtrip (no real
+// file input / no reload), so do it for real: drive Reader's file <input> with a
+// small .txt book, assert a reader-owned `book` node exists in the persisted
+// graph, then reload and assert the re-mounted Reader re-mirrors it (idempotent,
+// not dropped). Non-fatal like the guards above — a regression shows as ❌.
+const GRAPH_KEY = 'empire-core-graph';
+const readReaderBookNodes = (page) => page.evaluate((k) => {
+  try {
+    const raw = localStorage.getItem(k);
+    if (!raw) return 0;
+    const nodes = JSON.parse(raw)?.state?.nodes || {};
+    return Object.values(nodes).filter(n => n?.type === 'book' && n?.meta?.app === 'reader').length;
+  } catch { return 0; }
+}, GRAPH_KEY);
+const readerTmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'empire-qa-reader-'));
+const txtBookPath = path.join(readerTmpDir, 'QAProbe BookLegible.txt');
+fs.writeFileSync(txtBookPath, 'QA graph-legibility probe — a small book so Reader mirrors a book node into the organism graph.');
+const graphLegible = { added: false, node: false, persisted: false, pass: false };
+try {
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/app/reader`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(700);
+  await page.setInputFiles('input[type="file"]', txtBookPath);
+  await page.waitForTimeout(1500);
+  const bodyAfterAdd = await page.evaluate(() => document.body.innerText || '');
+  graphLegible.added = bodyAfterAdd.includes('QAProbe BookLegible');
+  graphLegible.node = (await readReaderBookNodes(page)) > 0;
+  // Reload — the mirrored node lives in the persisted graph, and the re-mounted
+  // Reader must re-mirror the same library (idempotent reconcile), not drop it.
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(1500);
+  graphLegible.persisted = (await readReaderBookNodes(page)) > 0;
+  graphLegible.pass = graphLegible.node && graphLegible.persisted;
+  console.log(`GRAPH-LEGIBLE  reader/book  added=${graphLegible.added} node=${graphLegible.node} persisted=${graphLegible.persisted}`);
+  await page.close();
+} catch (e) {
+  graphLegible.err = e.message;
+  console.warn(`GRAPH-LEGIBLE: guard did not complete — ${e.message}`);
+}
+try { fs.rmSync(readerTmpDir, { recursive: true, force: true }); } catch { /* ignore */ }
+console.log(`GRAPH-LEGIBLE: ${graphLegible.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
+
 // ── PROVENANCE-PERSISTS guard (EPIC-6 target metric: durable app→app memory) ──
 // EPIC-6 S1 laid the spine: `src/lib/core/provenance.ts` — a Zustand+persist
 // store (`empire-provenance`) fed ONLY by `flowForEvent`, wired via
@@ -421,6 +468,11 @@ md += `| App | Added | Survived reload | Result |\n|---|---|---|---|\n`;
 for (const r of mediaResults) {
   md += `| ${r.id} | ${r.added ? '✅' : '❌'} | ${r.survived ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
 }
+md += `\n## Graph-legible guard (EPIC-6 S4 — Reader's books join the organism)\n\n`;
+md += `Reader's real file \`<input>\` was driven with a small \`.txt\` book, then the persisted Core graph (\`empire-core-graph\`) was inspected; PASS = a \`book\` node owned by \`app==='reader'\` appeared AND survived a reload (the re-mounted Reader re-mirrors its library). This closes the last graph-island — every collection-owning app is now graph-legible.\n\n`;
+md += `| Collection | Node created | Survived reload | Result |\n|---|---|---|---|\n`;
+md += `| reader/book | ${graphLegible.node ? '✅' : '❌'} | ${graphLegible.persisted ? '✅' : '❌'} | ${graphLegible.pass ? '✅' : '❌'}${graphLegible.err ? ' (' + graphLegible.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n**GRAPH-LEGIBLE: ${graphLegible.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
 md += `\n## Provenance-persists guard (EPIC-6 — durable app→app memory)\n\n`;
 md += `Real \`editor→<target>\` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event \`flowForEvent\` turns into an edge in the durable \`empire-provenance\` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).\n\n`;
 md += `| Edge | Recorded | Persisted (reload) | Result |\n|---|---|---|---|\n`;
@@ -451,5 +503,5 @@ if (offline) {
 }
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, provResults, entityResults, offline }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, provResults, entityResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);
