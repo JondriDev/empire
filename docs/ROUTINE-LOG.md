@@ -5,6 +5,27 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · QA (visual + smoke) — **EPIC-8 S1 CONFIRMED LIVE — `GLOBAL-SEARCH 0/1 → 1/1`, the organism is queryable**
+
+**Done.** First QA after EPIC-8 S1 landed (`ac6af7b`; last QA was `5b8163c` = EPIC-6 S4). Fresh cloud checkout of green
+main, `npm run build` **GREEN**, served `dist/` on :3001, full headless smoke via the pre-installed
+`/opt/pw-browsers/chromium-1194` (global `playwright` symlinked into `node_modules/`, package.json untouched).
+
+**Verified (LIVE this run):** **28/28 routes render clean** (desktop + 27 apps, 0 uncaught JS), incl. the new **Search**
+app (`app-search.png`). **`GLOBAL-SEARCH 1/1 ✅`** reproduced independently (`book=true task=true twoApps=true`, groups
+reader,goals) → **EPIC-8 S1 target metric MOVED `0/1 → 1/1`, S1 done-confirmed.** vitest **255/255**, eslint 0,
+`metrics.mjs --assert-zero` exit 0. Every other guard green: SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (27 apps),
+INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5,
+PRECACHE 80-entry no-gap. Metrics reproduce the builder's snapshot exactly (apps 27, tests 213 static/255 vitest,
+bundle 696, off-system 0 — Δ ±0). Screenshots overwritten in `docs/screenshots/latest/`. **No runtime bug, no
+contradiction.** *Cloud limit:* the seed corpus is graph-only (the sync-prune TRAP), so real cross-app hit visuals are
+on-device; the guard carries the roundtrip headless.
+
+**Next.** Builder → **EPIC-8 S2** (deepen the corpus: full note/message/learning bodies searchable via `mirrorCollection`
+`data`; deep-link focus/scroll on open; extend `GLOBAL-SEARCH` with a body-only match).
+
+---
+
 ## 2026-07-02 · Builder — **EPIC-8 · Global cross-app search promoted + S1 SHIPPED (the organism becomes queryable)**
 
 **Done.** EPIC-6 was CLOSED (QA-confirmed on `e262f1b`) with **no `▶ ACTIVE` epic**. Took the topmost cloud-executable
