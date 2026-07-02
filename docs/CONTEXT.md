@@ -52,9 +52,16 @@
       QA seed of a `note` on `/app/search` (empty Notes store) is DELETED before search runs — the guard seeds
       graph-survivable types instead (`task` graph-only; `book` self-mirrored by an unmounted Reader). In real usage
       those types come from real non-empty stores → the feature searches them fine.
-    - **▶ NEXT BUILDER STAGE = EPIC-8 S2** (deepen the corpus: audit each `mirrorCollection` to include primary
-      searchable text in `data` so full note/message/learning bodies are hit; + deep-link on open — focus/scroll the
-      opened entity via `useFocus`/`setFocus`). Extend `GLOBAL-SEARCH` with a body-only match. Exact shape in EPICS.md.
+    - **▶ NEXT BUILDER STAGE = EPIC-8 S2 · land on the exact entity + close the array corpus gap.** **Strategist
+      audit (code-confirmed): the "deepen the corpus" work is MOSTLY ALREADY DONE** — `nodeBodyText` (`search.ts:43`)
+      already concatenates every scalar in `node.data`, and Notes `content` / Messages `content` / Goals `description` /
+      Calendar `description` / Prompt-Gen `content` / Learning `learned` are already mirrored (`sync.ts:74-98` +
+      per-app `mirrorCollection`). So DO NOT re-mirror those. Two honest gaps: **(a)** `nodeBodyText` skips **arrays**,
+      so `tags` are unsearchable → flatten string-array elements in that ONE function + a `search.test.ts` tag case;
+      **(b · meaty)** hits open the app's default view, not the item → add `openEntity(appId,nodeId)` to
+      `windowStore.ts` (open-as-`openAppById` then `useFocus.getState().setFocus(nodeId)`), point Search rows at it,
+      and make **Notes** scroll+ring the focused card (`node.data.sourceId===note.id`) as the proof. Extend
+      `GLOBAL-SEARCH` with a **tag-only match**. Reader book content stays title-only by design. Exact shape in EPICS.md.
   - _(EPIC-6 history retained below as working memory.)_
 - **Prior active epic (DONE):** **EPIC-6 · Organism Memory (durable provenance & lineage)** — promoted 2026-07-01,
   CLOSED 2026-07-02 (all S1–S4 shipped + QA-confirmed). **Leap:** the organism stops fires-and-forgetting — a
