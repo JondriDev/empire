@@ -9,7 +9,10 @@ import {
   Highlighter, Type, Sun, Trash2, Loader2,
 } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
+import { mirrorCollection } from '../../lib/core/sync'
 import { SendResultMenu } from '../../components/ui/SendResultMenu'
+import { NodeActions } from '../../components/ui/NodeActions'
+import { bookNodeData } from './readerGraph'
 import {
   listBooks, getBook, addBook, getBookBlob, updateBook, deleteBook,
   addHighlight, removeHighlight,
@@ -32,6 +35,19 @@ export default function Reader() {
 
   useEffect(() => { emit({ type: 'APP_OPENED', appId: 'reader' }) }, [])
   const refresh = useCallback(() => setBooks(listBooks()), [])
+
+  // Mirror the whole book library into the Core graph as `book` nodes so Reader
+  // joins the organism — the last collection-owning app to become graph-legible.
+  // `books` is always the entire library (not one open book), so a direct mirror
+  // is safe against mirrorCollection's prune-unseen semantics. The blob lives in
+  // IDB; the node carries only durable metadata (see readerGraph.bookNodeData).
+  useEffect(() => {
+    mirrorCollection('book', 'reader', books, {
+      id: b => b.id,
+      title: b => b.title,
+      data: bookNodeData,
+    })
+  }, [books])
 
   const onImport = useCallback(async (files: FileList | null) => {
     if (!files?.length) return
@@ -150,6 +166,7 @@ function Library({ books, importing, onOpen, onDelete, onImportClick }: {
                     <div className="h-full rounded-full" style={{ width: `${Math.round((b.progress || 0) * 100)}%`, background: ACCENT }} />
                   </div>
                   <span className="text-[10px] tabular-nums" style={{ color: 'var(--text3)' }}>{Math.round((b.progress || 0) * 100)}%</span>
+                  <NodeActions type="book" sourceId={b.id} />
                   <button onClick={() => onDelete(b.id)} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded" aria-label="Delete" style={{ color: 'var(--text3)' }}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

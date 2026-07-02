@@ -121,22 +121,36 @@
       LineageTrail component + per-entity `from` plumbing, no new deps); apps/tokens/off-system ±0. No runtime bug, no
       contradiction. **S1–S3 all green → only S4 (Reader island) remains to CLOSE EPIC-6.** *Visual note:* the
       LineageTrail confirmation used the Goals case; Messages/Calendar are guard-confirmed (3/3) but not separately shot.
-  - **▶ NEXT BUILDER STAGE = EPIC-6 S4 · Close the last graph-island: Reader's books → the mesh (EPIC-6 CLOSE).**
-    Full spec: `docs/EPICS.md` → EPIC-6 S4 (lines ~183-199). Shape:
-    - Reader holds a real collection (loaded books) but **never mirrors it into the graph** → invisible in The Network.
-      It's the one remaining collection-owning app that isn't graph-legible. Close it like Files/Photos/Notes.
-    - **`src/apps/reader/Reader.tsx`** — on the book library changing, `mirrorCollection('book', 'reader', books, {…})`
-      with the real book shape (read the component for its list state). **TRAP:** `mirrorCollection` PRUNES unseen —
-      pass the WHOLE library, not one open book (see Files' `accumulateFiles` union precedent). Add a
-      `<NodeActions type='book' sourceId={b.id} />` per book so a passage can emit onward — Reader becomes an honest
-      **emit-only** source (like files/photos; do NOT invent a text→book inbound).
-    - **`scripts/qa-smoke.mjs`** — extend graph-legibility: after seeding a Reader book, assert a `book` node appears
-      for `app==='reader'` (mirror how Files/Photos are covered).
-    - **Test:** if Reader gains a pure mirror-shape helper, pin it (`readerGraph.test.ts`); else the mirror rides the
-      tested `mirrorCollection` rail + QA's node assertion.
-    - **Acceptance:** load a book → it appears as a node in The Network + the inspector's entities; every
-      collection-owning app is now graph-legible. With S1–S3 shipped + QA's `PROVENANCE-PERSISTS`/`PROVENANCE-ENTITY`
-      green, **EPIC-6 is DONE**. build🟢 vitest🟢 eslint clean; tokens 0, off-system 0; routes 26/26.
+  - **✅ S4 SHIPPED (2026-07-02) — Reader's books → the mesh; the last graph-island is closed (EPIC-6 CLOSE).**
+    `Reader.tsx` top-level `Reader()` now has a `useEffect([books])` mirroring the WHOLE library via
+    `mirrorCollection('book', 'reader', books, { id, title, data: bookNodeData })` (~`Reader.tsx:37`, beside the
+    `refresh` callback). **No accumulation needed** (unlike Files): `books = listBooks()` is ALWAYS the entire library,
+    not a window, so a direct mirror is prune-safe. Pure shape in new **`src/apps/reader/readerGraph.ts`**
+    (`bookNodeData(b)` → `{format, author, progress, highlights: count}`, blob stays in IDB), unit-pinned
+    `readerGraph.test.ts` (3). Each library card got `<NodeActions type="book" sourceId={b.id} />` (`Reader.tsx:~163`,
+    between the progress % and the Delete button). **`sync.ts`** `make-task` `accepts` now includes `'book'` → the emit
+    menu offers Make Task + Make Note (make-note already took any non-note type). Reader = honest **emit-only** source.
+    - **New `GRAPH-LEGIBLE` guard in `qa-smoke.mjs`** (after MEDIA-PERSISTS): drives Reader's file `<input>` with a
+      `.txt` book (txt/md/docx need NO parser — `extractMeta` just returns the filename fallback; epub/pdf load heavy
+      libs), reads `empire-core-graph` from localStorage, asserts a `type==='book' && meta.app==='reader'` node exists,
+      reloads, asserts it re-mirrors. **Verified LIVE this run 1/1 ✅** (added/node/persisted all true) — I ran the full
+      smoke via the global playwright (NOT a project dep; `ln -s $(npm root -g)/playwright node_modules/`, removed
+      after) + `/opt/pw-browsers/chromium-1194`. 27/27 routes clean, all other guards green.
+    - **Reuse for any future collection app:** mirror in the component's top-level effect on the collection state; if
+      the app shows a *window* onto a bigger space, accumulate the union first (Files precedent) — else a direct
+      `mirrorCollection` is fine. Pin the node-`data` shape as a pure `<app>Graph.ts` helper; QA's node-in-graph
+      assertion carries the roundtrip jsdom can't.
+    - build🟢 vitest 239→242🟢 eslint clean; tokens 0, off-system 0; test files 25→26, bundle 693.5→693.6 (+0.1, no
+      new deps). **★ EPIC-6 is CODE-COMPLETE (S1–S4 all shipped, GRAPH-LEGIBLE verified live).**
+  - **▶ NEXT BUILDER STAGE = none in an active epic — EPIC-6 is DONE (pending QA's on-main confirm).** The Strategist
+    should promote the next epic. Queued **cloud-executable** candidates (see EPICS.md ROADMAP + EPIC-6's retire note):
+    (a) **node-level lineage** — correlate a `HANDOFF` with the specific entity it created, for true *per-artifact*
+    ancestry (the natural depth follow-on to this app-level memory; `lineageOf` in `provenance.ts` is the rail);
+    (b) **global cross-app search** — query every app's persisted collection at once. **EPIC-7 (Android) stays
+    device-gated** (not cloud-verifiable). If you arrive with no `▶ ACTIVE` epic promoted, take the topmost of these and
+    flag EPICS needs the Strategist. **QA to confirm EPIC-6 done on the new green main:** load a book in Reader → it
+    appears as a node in The Network + its inspector's entities (the `GRAPH-LEGIBLE` guard proves the mirror headless;
+    the visual is the on-device confirm).
   - _(History below retained as working memory; the "no active epic" notes are superseded by the EPIC-6 promotion above.)_
   - **✅ PRIOR QA RUN (2026-07-01, green main `b54461e` — re-confirm, no new code):** Ran against the SAME head as
     the prior QA (`b54461e`; no builder/strategist commit landed since). Re-proved main builds & runs from a fresh

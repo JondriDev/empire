@@ -5,6 +5,43 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · Builder — **EPIC-6 S4 · Close the last graph-island: Reader's books → the mesh (EPIC-6 CLOSE)**
+
+**Done.** Reader owned a real collection — the imported books — but never mirrored it into the Core graph, so it was
+the one remaining collection-owning app invisible in The Network. Closed it exactly like Files/Photos/Notes, making
+Reader an honest **emit-only** source (no unnatural text→book inbound).
+- **`src/apps/reader/Reader.tsx`** — a `useEffect([books])` in the top-level `Reader()` mirrors the WHOLE library via
+  the tested `mirrorCollection('book', 'reader', books, …)` rail. Unlike Files (one directory at a time → must
+  accumulate a union first, or prune-unseen deletes the rest), Reader's `books` state is ALWAYS the entire library, so
+  a direct mirror is safe. Each library card gains a `<NodeActions type="book" sourceId={b.id} />` ⚡ emit menu.
+- **New `src/apps/reader/readerGraph.ts`** — pure `bookNodeData(b)` maps a `BookMeta` → the `book` node `data` payload
+  (durable metadata only: format/author/progress/highlight-count — the blob stays in IDB). Unit-pinned in
+  `readerGraph.test.ts` (3 cases: shape, progress-default + highlight-count, tolerates missing highlights).
+- **`src/lib/core/sync.ts`** — added `book` to the `make-task` intent's `accepts` list so the emit menu offers both
+  "Make Task" and "Make Note from this" (make-note already accepted any non-note type). Reader now emits onward honestly.
+- **`scripts/qa-smoke.mjs`** — new **`GRAPH-LEGIBLE`** guard: drives Reader's real file `<input>` with a small `.txt`
+  book, asserts a `book` CoreNode owned by `app==='reader'` appears in the persisted `empire-core-graph`, then reloads
+  and asserts the re-mounted Reader re-mirrors it (idempotent). Non-fatal like INBOUND/MEDIA. + a REPORT.md section.
+
+**Verified.** `npm run build` 🟢, `npx vitest run` **242/242** 🟢 (+3), `npx eslint` on all touched files clean,
+`node --check scripts/qa-smoke.mjs` OK. **Ran the full live QA smoke end-to-end** (global playwright + pre-installed
+Chromium): **27/27 routes render clean, GRAPH-LEGIBLE reader/book 1/1 ✅** (added=true, node=true, persisted=true — the
+book mirrors AND survives reload), and every other guard held green (INBOUND 3/3, MEDIA 3/3, PROVENANCE-PERSISTS 3/3,
+PROVENANCE-ENTITY 3/3). Metrics: `test files 25→26 (+1)`, `test cases 197→200 (+3)`, `bundle gz 693.5→693.6 (+0.1,
+the readerGraph module + wiring, no new deps)`; `apps 26 ±0`, `token-violations 0 ±0`, `off-system 0 ±0`. No regression.
+Reverted QA-run env noise (screenshots, REPORT.md, OFFLINE.md, package-lock normalization) — those are QA's artifacts.
+
+**★ EPIC-6 is now CODE-COMPLETE (S1–S4 all shipped, GRAPH-LEGIBLE verified live).** Every collection-owning app is
+graph-legible; the organism remembers movement (durable edges + per-entity source) and no island remains.
+
+**Next:** QA to confirm EPIC-6 done on the new green main (visual: load a book → it appears as a node in The Network +
+its inspector). Then the **Strategist** promotes the next epic — the queued cloud-executable candidates are
+**node-level lineage** (correlate a HANDOFF with the entity it created, for true per-artifact ancestry — the natural
+depth follow-on to app-level memory) or **global cross-app search** (query every app's persisted collection). EPIC-7
+(Android) stays device-gated.
+
+---
+
 ## 2026-07-02 · Visual & Smoke QA — **EPIC-6 S3 done-confirmed: the HEADLINE metric moved (`PROVENANCE-ENTITY` 3/3)**
 
 **Done.** First QA since EPIC-6 S3 landed (green main `13a48dc`; last QA `3ef0955` confirmed S2 on `f5ab6be`). Proved

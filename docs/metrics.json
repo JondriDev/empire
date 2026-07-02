@@ -1,45 +1,15 @@
 {
   "current": {
-    "generatedAt": "2026-07-02T13:09:57.531Z",
+    "generatedAt": "2026-07-02T15:21:49.183Z",
     "apps": 26,
-    "testFiles": 25,
-    "testCases": 197,
+    "testFiles": 26,
+    "testCases": 200,
     "tokenViolations": 0,
     "offSystemUtilities": 0,
-    "bundleGzKB": 693.5,
-    "bundleRawKB": 2366
+    "bundleGzKB": 693.6,
+    "bundleRawKB": 2366.3
   },
   "history": [
-    {
-      "generatedAt": "2026-06-29T23:03:05.725Z",
-      "apps": 25,
-      "testFiles": 21,
-      "testCases": 163,
-      "tokenViolations": 0,
-      "offSystemUtilities": 1076,
-      "bundleGzKB": 292.5,
-      "bundleRawKB": 990.7
-    },
-    {
-      "generatedAt": "2026-06-30T00:03:11.967Z",
-      "apps": 26,
-      "testFiles": 21,
-      "testCases": 163,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "bundleGzKB": null,
-      "bundleRawKB": null
-    },
-    {
-      "generatedAt": "2026-06-30T00:05:40.205Z",
-      "apps": 26,
-      "testFiles": 22,
-      "testCases": 167,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "bundleGzKB": 691.3,
-      "bundleRawKB": 2358.5
-    },
     {
       "generatedAt": "2026-06-30T00:06:56.020Z",
       "apps": 26,
@@ -309,6 +279,36 @@
       "offSystemUtilities": 0,
       "bundleGzKB": 693.5,
       "bundleRawKB": 2366
+    },
+    {
+      "generatedAt": "2026-07-02T13:09:57.531Z",
+      "apps": 26,
+      "testFiles": 25,
+      "testCases": 197,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "bundleGzKB": 693.5,
+      "bundleRawKB": 2366
+    },
+    {
+      "generatedAt": "2026-07-02T15:12:01.783Z",
+      "apps": 26,
+      "testFiles": 25,
+      "testCases": 197,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "bundleGzKB": 693.5,
+      "bundleRawKB": 2366
+    },
+    {
+      "generatedAt": "2026-07-02T15:14:57.511Z",
+      "apps": 26,
+      "testFiles": 26,
+      "testCases": 200,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "bundleGzKB": 693.6,
+      "bundleRawKB": 2366.3
     }
   ]
 }

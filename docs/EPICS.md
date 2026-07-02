@@ -183,7 +183,11 @@ Stages (Builder takes the topmost `[ ]`; each is one run, downhill given the one
   - *Acceptance:* ⚡ Send-to-Goals from Calculator → **reload** → the goal still shows "Goals ← Calculator"; same for
     Messages/Calendar. **`PROVENANCE-PERSISTS 0/3 → 3/3`.** Build🟢 vitest🟢 eslint clean; tokens 0, off-system 0.
 
-- [ ] **S4 · Close the last graph-island: Reader's books → the mesh (+ book-level emit). EPIC-6 CLOSE.**
+- [x] **S4 · Close the last graph-island: Reader's books → the mesh (+ book-level emit). EPIC-6 CLOSE.** — SHIPPED
+  2026-07-02. `Reader.tsx` mirrors the whole book library into the Core graph as `book` nodes via `mirrorCollection`
+  (pure shape in `readerGraph.ts`, unit-pinned) + a `<NodeActions type="book">` emit affordance per card; `make-task`
+  now accepts `book`. New `GRAPH-LEGIBLE` guard in `qa-smoke.mjs` — **verified live 1/1 ✅** (loaded book → reader-owned
+  `book` node → survives reload). Every collection-owning app is now graph-legible. **EPIC-6 DONE.**
   Reader (the newest app) holds a real collection — loaded books — but **never mirrors them into the graph**, so it
   is invisible in The Network (only a `SendResultMenu` on Cakra replies exists at `Reader.tsx:379`). It is the one
   remaining collection-owning app that isn't graph-legible. Close it exactly like Files/Photos/Notes:
