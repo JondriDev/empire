@@ -51,7 +51,7 @@ const apps = [
   'calculator','calendar','clock','weather','grammar','language','music','video',
   'files','cache','browser','editor','notes','photos','datacenter','maps','messages',
   'prompt-generator','token-counter','learning-tracker','ai-chat','goals',
-  'artifacts','network','inbox','reader',
+  'artifacts','network','inbox','reader','search',
 ];
 
 // ── REGISTRY-COVERAGE assertion (the silently-skipped-app trap) ─────────────
@@ -292,6 +292,69 @@ try {
 try { fs.rmSync(readerTmpDir, { recursive: true, force: true }); } catch { /* ignore */ }
 console.log(`GRAPH-LEGIBLE: ${graphLegible.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
 
+// ── GLOBAL-SEARCH guard (EPIC-8 S1: the organism becomes queryable) ──────────
+// Every collection-owning app mirrors its real entities into the Core graph;
+// EPIC-8's Search app queries them ALL at once via the pure `searchNodes` spine
+// (lib/core/search.ts, unit-pinned) and groups the hits by owning app. The pure
+// ranking is covered by search.test.ts, but jsdom can't drive the real
+// graph→input→grouped-render roundtrip. Do it for real: seed `empire-core-graph`
+// with two entities that share a rare term across TWO different apps (a note in
+// `notes`, a task in `goals`), reload so the persist store rehydrates, type the
+// term into the Search field, and assert BOTH entities surface under their own
+// app groups (checked via the `[data-search-group]` section, NOT body text — the
+// desktop launcher grid also prints every app name). Non-fatal like the guards
+// above — a regression shows as ❌.
+// NOTE on seed types: `startCoreSync()` reconciles the CENTRALLY-mirrored types
+// (note/learning/message) against the global store on boot and PRUNES any such
+// node absent from that (empty, in a fresh QA session) store. So the seed uses
+// graph-survivable types — a `task` (graph-only, no syncer) owned by `goals` and
+// a `book` (self-mirrored by Reader, which isn't mounted on /app/search) owned by
+// `reader` — two DIFFERENT apps, both surviving the boot reconcile.
+const SEARCH_TERM = 'Xenolith';
+const searchSeed = {
+  state: {
+    nodes: {
+      'qa-search-book': {
+        id: 'qa-search-book', type: 'book', title: 'Xenolith fragment log',
+        data: { author: 'QA', format: 'txt' }, links: [],
+        meta: { created: 1, updated: 2, app: 'reader' },
+      },
+      'qa-search-task': {
+        id: 'qa-search-task', type: 'task', title: 'Survey the Xenolith site',
+        data: { done: false }, links: [],
+        meta: { created: 1, updated: 3, app: 'goals' },
+      },
+    },
+  },
+  version: 0,
+};
+const globalSearch = { book: false, task: false, twoApps: false, pass: false };
+try {
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/app/search`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.evaluate(([k, v]) => localStorage.setItem(k, v), [GRAPH_KEY, JSON.stringify(searchSeed)]);
+  // Reload so the zustand+persist graph store rehydrates from the seeded key.
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(700);
+  await page.fill('input[aria-label="Search across every app"]', SEARCH_TERM);
+  await page.waitForTimeout(600);
+  const body = await page.evaluate(() => document.body.innerText || '');
+  globalSearch.book = body.includes('Xenolith fragment log');
+  globalSearch.task = body.includes('Survey the Xenolith site');
+  // Distinct result app-groups (from the rendered sections, not the launcher).
+  const groupApps = await page.$$eval('[data-search-group]', els => els.map(e => e.getAttribute('data-search-group')));
+  globalSearch.twoApps = groupApps.includes('reader') && groupApps.includes('goals');
+  globalSearch.pass = globalSearch.book && globalSearch.task && globalSearch.twoApps;
+  console.log(`GLOBAL-SEARCH  book=${globalSearch.book} task=${globalSearch.task} twoApps=${globalSearch.twoApps} (groups: ${groupApps.join(',')})`);
+  // Leave the graph clean for later guards.
+  await page.evaluate((k) => localStorage.removeItem(k), GRAPH_KEY);
+  await page.close();
+} catch (e) {
+  globalSearch.err = e.message;
+  console.warn(`GLOBAL-SEARCH: guard did not complete — ${e.message}`);
+}
+console.log(`GLOBAL-SEARCH: ${globalSearch.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
+
 // ── PROVENANCE-PERSISTS guard (EPIC-6 target metric: durable app→app memory) ──
 // EPIC-6 S1 laid the spine: `src/lib/core/provenance.ts` — a Zustand+persist
 // store (`empire-provenance`) fed ONLY by `flowForEvent`, wired via
@@ -473,6 +536,11 @@ md += `Reader's real file \`<input>\` was driven with a small \`.txt\` book, the
 md += `| Collection | Node created | Survived reload | Result |\n|---|---|---|---|\n`;
 md += `| reader/book | ${graphLegible.node ? '✅' : '❌'} | ${graphLegible.persisted ? '✅' : '❌'} | ${graphLegible.pass ? '✅' : '❌'}${graphLegible.err ? ' (' + graphLegible.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**GRAPH-LEGIBLE: ${graphLegible.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
+md += `\n## Global-search guard (EPIC-8 S1 — the organism becomes queryable)\n\n`;
+md += `The Core graph was seeded with two entities sharing a rare term across TWO apps (a \`note\` in Notes, a \`task\` in Goals); after a reload (persist rehydrate) the term was typed into the Search field. PASS = BOTH entities surface, grouped under their own app sections — one lens querying every app's real entities at once. The pure ranking spine (\`searchNodes\`) is unit-pinned in \`search.test.ts\`; this carries the graph→input→grouped-render roundtrip jsdom cannot.\n\n`;
+md += `| Query | Book hit | Task hit | Spans 2 apps | Result |\n|---|---|---|---|---|\n`;
+md += `| ${SEARCH_TERM} | ${globalSearch.book ? '✅' : '❌'} | ${globalSearch.task ? '✅' : '❌'} | ${globalSearch.twoApps ? '✅' : '❌'} | ${globalSearch.pass ? '✅' : '❌'}${globalSearch.err ? ' (' + globalSearch.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n**GLOBAL-SEARCH: ${globalSearch.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
 md += `\n## Provenance-persists guard (EPIC-6 — durable app→app memory)\n\n`;
 md += `Real \`editor→<target>\` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event \`flowForEvent\` turns into an edge in the durable \`empire-provenance\` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).\n\n`;
 md += `| Edge | Recorded | Persisted (reload) | Result |\n|---|---|---|---|\n`;
@@ -503,5 +571,5 @@ if (offline) {
 }
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, provResults, entityResults, offline }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, provResults, entityResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);

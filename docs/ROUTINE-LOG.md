@@ -5,6 +5,52 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · Builder — **EPIC-8 · Global cross-app search promoted + S1 SHIPPED (the organism becomes queryable)**
+
+**Done.** EPIC-6 was CLOSED (QA-confirmed on `e262f1b`) with **no `▶ ACTIVE` epic**. Took the topmost cloud-executable
+candidate — **global cross-app search** — formalized it as **EPIC-8** in `docs/EPICS.md` (3 stages, target metric
+`GLOBAL-SEARCH 0/1 → 1/1`) and shipped **S1 end-to-end** in one coherent commit. The organism already *mirrors* every
+collection into one Core graph (EPIC-1) and *remembers* movement (EPIC-6) — S1 makes that graph **queryable from one
+lens**: type a word, see every matching entity across every app, ranked, grouped by app, one click from its home.
+
+- **New pure spine `src/lib/core/search.ts`** (no React/store): `searchNodes(nodes, query, limit)`, `scoreNode`,
+  `nodeBodyText`, `queryTerms`, `groupHitsByApp`. AND semantics (every term must match somewhere → narrows), scoring
+  gradient title-prefix (12) ≫ word-boundary (9) ≫ substring (6) ≫ type-name (4/2) ≫ body (2), whole-query title
+  bonuses (+20 exact / +10 prefix), recency tie-break. `search.test.ts` **13 cases**.
+- **New Search app `src/apps/search/Search.tsx`** — the 27th app (registry `search`, `appComponents`, a new alien
+  `Search` glyph in `design-system/icons/glyphs.tsx`). Reactive `useGraph(s => s.nodes)`, autofocused query field,
+  idle/empty/no-match states, results grouped by owning app (registry glyph+accent header, `data-search-group` hook),
+  each row → `openAppById` + ⚡ `<NodeActions nodeId>`. One accent (`--ion`); all colour via tokens.
+- **New `GLOBAL-SEARCH` guard in `qa-smoke.mjs`** + `search` added to the smoke list + a REPORT section: seed the Core
+  graph with a `book`(app=reader) + `task`(app=goals) sharing a rare term, reload (persist rehydrate), type it, assert
+  BOTH surface under their own `[data-search-group]` sections.
+
+**Verified (LIVE, this run — full headless smoke via the pre-installed Chromium, global playwright symlinked in then
+removed):** `npm run build` 🟢 (precache **80 entries**) · `npx vitest run` **242→255** 🟢 (+13 `search.test.ts`) ·
+`npx eslint .` **0** · `node scripts/metrics.mjs --assert-zero` exit **0**. **`GLOBAL-SEARCH 1/1 ✅`** (`book=true
+task=true twoApps=true`, groups: `reader,goals`) — the headline metric MOVED. **28/28 routes render clean** (desktop +
+27 apps, Search `uncaught:0`), every other guard green (REGISTRY-COVERAGE 27, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE
+1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE 5/5, PRECACHE 80 no-gap).
+
+**Metric row (Δ vs `e262f1b`):** apps **26→27** (+1, Search), test cases **200→213** (+13), test files **26→27** (+1),
+token-violations **0** (±0), off-system **0** (±0), bundle gz **693.6→696.0** (+2.4, the search module + Search app, no
+new deps).
+
+**Trap learned (baked into the guard + EPIC-8 S2 spec):** `startCoreSync()` reconciles the CENTRALLY-mirrored types
+(note/learning/message) against the global store on boot and **prunes** any such node absent from that store — so a QA
+seed of a `note` on `/app/search` (empty Notes store) gets deleted before the search runs. The guard now seeds
+graph-survivable types (`task` graph-only, `book` self-mirrored by an unmounted Reader). In *real* usage those types
+come from their real non-empty stores, so the feature searches them fine; S2 will enrich the mirrored `data` so full
+bodies are searchable.
+
+**Next.** **EPIC-8 S2** — deepen the corpus (audit each `mirrorCollection` to include primary searchable text in
+`data` so full note/message bodies are hit) + deep-link on open (focus/scroll the opened entity via `useFocus`). Exact
+shape in `docs/EPICS.md` → EPIC-8 S2. *Honest cloud limit:* the Search app's live grouped render is a visual QA
+screenshots (`app-search.png` captured this run shows the empty-graph idle state — a fresh checkout's graph is empty);
+the `GLOBAL-SEARCH` guard carries the seed→query→grouped-hit roundtrip headless.
+
+---
+
 ## 2026-07-02 · Visual & Smoke QA — **EPIC-6 S4 confirmed LIVE on green main `e262f1b` → EPIC-6 CLOSED**
 
 **Done / Verified.** First QA since the builder shipped S4 (`e262f1b`); last QA `0f17fc3` confirmed S3 on `13a48dc`.

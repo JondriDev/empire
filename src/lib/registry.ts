@@ -55,6 +55,7 @@ export const apps: AppDefinition[] = [
   { id: 'network', name: 'Network', icon: 'Network', route: '/app/network', description: 'The ecosystem as a live node-graph', color: '#1a8caa', cakraEnabled: false },
   { id: 'inbox', name: 'Inbox', icon: 'Inbox', route: '/app/inbox', description: 'Every open task, one home', color: '#66d9a0', cakraEnabled: false },
   { id: 'reader', name: 'Reader', icon: 'Reader', route: '/app/reader', description: 'Read your books · ask Cakra', color: '#f0c94e', cakraEnabled: true },
+  { id: 'search', name: 'Search', icon: 'Search', route: '/app/search', description: 'Find anything across every app', color: '#5b8fb9', cakraEnabled: false },
 ]
 
 /** Apps shown on the home launcher grid (excludes hidden tools + merge aliases). */
