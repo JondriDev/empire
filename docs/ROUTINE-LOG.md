@@ -5,6 +5,41 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · Builder — **EPIC-6 S2 · The Network remembers (durable "Fed by / Feeds" + persistent Memory panel)**
+
+**Done.** Made the organism's durable provenance (EPIC-6 S1's `empire-provenance` store) *visible* in The Network —
+the first UI stage of Organism Memory. Two surfaces in `src/apps/network/Network.tsx`, both reading a new reactive
+sub `const provEdges = useProvenance(s => s.edges)`:
+1. **Inspector `Provenance · all-time` section** (between the live "Connected apps" structural adjacency and the Open
+   button): **Fed by** (`fedBy(provEdges, selected.id)`) and **Feeds** (`feeds(provEdges, selected.id)`) — each a
+   clickable row (`←`/`→` glyph + app icon in its `${app.color}` accent + name + the newest edge's relative age)
+   that opens that app. Labelled as all-time *history*, distinct from the live *structural* neighbours above it.
+2. **Persistent Memory panel** (bottom-left): I refactored the live ticker into a column container and placed a
+   glass Memory panel *above* it. Lists `recentEdges(provEdges, 12)` newest-first as `source → target` rows (both
+   registry icons+accents + age), plasma pulse-dot header, scrollable (`maxHeight:34vh`). It reads the store, so it
+   **survives a reload** — the durable analogue of the session-only ticker (kept as-is beneath it).
+
+New **pure helpers in `src/lib/core/provenance.ts`** (unit-pinned, reused by both panels): `ProvNeighbor{app,at,
+label?}`; `fedBy`/`feeds` (de-duped, newest-first via `uniqueNeighbours` first-wins over the newest-first edge list)
+and `recentEdges(edges,n=12)`. **+6 tests** in `provenance.test.ts`.
+
+**Verified (the only gate — no reviewer).** `npm run build` 🟢 (tsc -b && vite build); **vitest 236/236** 🟢 (+6);
+full `npx eslint .` **exit 0** 🟢. Metrics — `node scripts/metrics.mjs`:
+`apps 26 ±0 · test-cases 194 (+6) · token-violations 0 ±0 · off-system 0 ±0 · bundle gz 692.5 (+0.7) · --assert-zero exit 0`.
+Bundle +0.7 KB = the new UI + helpers; **no new deps**. Colour rail respected: `cssVar('plasma')` (header dot),
+`tint('signal',10)` (row hover), registry `${app.color}` (glyph tint, DS_INFRA-exempt) — zero raw hex/rgb.
+
+**Not verifiable in cloud (visual).** I cannot see the render. QA to confirm: seed handoffs (Editor ⚡ Send menu,
+per the S1 `PROVENANCE-PERSISTS` guard) → open The Network → click a node → inspector shows **Fed by / Feeds**; the
+bottom-left **Memory** panel lists `source → target` rows; **reload → Memory persists, Live ticker empty.**
+
+**Next.** Builder: **EPIC-6 S3 · Durable per-entity provenance** (headline-metric stage) — Calendar/Goals/Messages
+persist `from` on the saved entity + a new `<LineageTrail>` reads the durable store, so "From <source>" survives a
+reload. Add the entity-level `PROVENANCE-PERSISTS 0/3 → 3/3` guard to `qa-smoke.mjs`. Full shape in
+`docs/CONTEXT.md` → next builder stage + `docs/EPICS.md` → EPIC-6 S3.
+
+---
+
 ## 2026-07-02 · Visual & Smoke QA — **EPIC-6 S1 confirmed LIVE; new `PROVENANCE-PERSISTS` guard (3/3)**
 
 **Done.** Fresh-checkout QA of green main `23860d5` (EPIC-6 S1 + its promotion `6b6c693` landed since the last QA

@@ -73,6 +73,51 @@ export function edgesFrom(_edges: ProvEdge[], _appId: string): ProvEdge[] {
   return _edges.filter(e => e.fromApp === _appId).sort((a, b) => b.at - a.at)
 }
 
+/** A de-duped neighbour on the provenance ledger: an app + its newest edge. */
+export interface ProvNeighbor {
+  /** The other app id (source for `fedBy`, target for `feeds`). */
+  app: string
+  /** When the newest edge to/from this app fired (ms epoch). */
+  at: number
+  /** The label carried by that newest edge, if any. */
+  label?: string
+}
+
+/** Pure: collapse a newest-first edge list into unique neighbours (first wins). */
+function uniqueNeighbours(_edges: ProvEdge[], _pick: (_e: ProvEdge) => string): ProvNeighbor[] {
+  const seen = new Set<string>()
+  const out: ProvNeighbor[] = []
+  for (const e of _edges) {
+    const app = _pick(e)
+    if (seen.has(app)) continue
+    seen.add(app)
+    out.push({ app, at: e.at, ...(e.label !== undefined ? { label: e.label } : {}) })
+  }
+  return out
+}
+
+/**
+ * Pure: the distinct apps that have ever fed INTO `appId`, newest first, each
+ * carrying its newest edge's `at`/`label`. The all-time "Fed by" list — the
+ * durable analogue of the live structural adjacency.
+ */
+export function fedBy(_edges: ProvEdge[], _appId: string): ProvNeighbor[] {
+  return uniqueNeighbours(edgesInto(_edges, _appId), e => e.fromApp)
+}
+
+/** Pure: the distinct apps `appId` has ever fed, newest first. The "Feeds" list. */
+export function feeds(_edges: ProvEdge[], _appId: string): ProvNeighbor[] {
+  return uniqueNeighbours(edgesFrom(_edges, _appId), e => e.toApp)
+}
+
+/**
+ * Pure: the `n` most recent transfers, newest first — the durable memory panel's
+ * feed. The store keeps edges oldest-first, so we take the tail and reverse.
+ */
+export function recentEdges(_edges: ProvEdge[], _n = 12): ProvEdge[] {
+  return _edges.slice(Math.max(0, _edges.length - _n)).reverse()
+}
+
 /**
  * Pure: the ancestry chain of `appId` — walk the newest inbound edge backwards,
  * cycle-guarded, up to `maxDepth` hops. Returns `[app, parent, grandparent, …]`
