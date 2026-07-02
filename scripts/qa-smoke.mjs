@@ -245,6 +245,88 @@ try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { /* ignore *
 const mediaPass = mediaResults.filter(r => r.pass).length;
 console.log(`MEDIA-PERSISTS: ${mediaPass}/${mediaResults.length} ${mediaPass === mediaResults.length ? '✅' : '⚠️'}`);
 
+// ── PROVENANCE-PERSISTS guard (EPIC-6 target metric: durable app→app memory) ──
+// EPIC-6 S1 laid the spine: `src/lib/core/provenance.ts` — a Zustand+persist
+// store (`empire-provenance`) fed ONLY by `flowForEvent`, wired via
+// `startProvenanceTracking()` at main.tsx. The whole epic's claim is that the
+// organism STOPS fire-and-forgetting: a real handoff is remembered across a
+// reload. jsdom's unit tests (`provenance.test.ts`) pin the pure fold/filter
+// logic but cannot exercise the real tracker → persist → rehydrate roundtrip
+// (no real localStorage reload). Do it for real here: fire genuine app→app
+// handoffs from the Editor's ⚡ Send menu (each executor emits the honest event
+// that `flowForEvent` turns into an edge), then reload and assert every edge
+// survived in the durable ledger. This is the runtime realization of the epic's
+// "seed handoff → reload → durable source still shows" acceptance (the S2
+// Network memory panel will make it *visible*; the durable store is the spine).
+// Non-fatal (recorded, not thrown) like INBOUND/MEDIA so a flaky browser can't
+// red the whole render run — a real regression shows as ❌ for the build routine.
+const PROV_KEY = 'empire-provenance';
+const readProvEdges = (page) => page.evaluate((k) => {
+  try {
+    const raw = localStorage.getItem(k);
+    if (!raw) return [];
+    return JSON.parse(raw)?.state?.edges || [];
+  } catch { return []; }
+}, PROV_KEY);
+const hasProvEdge = (edges, from, to) => edges.some(e => e.fromApp === from && e.toApp === to);
+// Fire one REAL handoff from the Editor: fill the code textarea (enables the
+// Send menu), open it, click the target action. `nav` = executor navigates away
+// (window.open('_self')) — the HANDOFF is emitted + persisted BEFORE the nav, so
+// the ensuing full page load itself proves the edge survived a reload.
+async function fireEditorHandoff(page, actionLabel, nav) {
+  await page.goto(`${BASE}/app/editor`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(600);
+  await page.fill('textarea', 'QA provenance probe — durable edge seed');
+  await page.click('button[aria-label="Send code to…"]');
+  await page.waitForTimeout(300);
+  const item = page.locator('button[role="menuitem"]', { hasText: actionLabel });
+  if (nav) {
+    await Promise.all([page.waitForNavigation({ timeout: 15000 }).catch(() => {}), item.click()]);
+  } else {
+    await item.click();
+  }
+  await page.waitForTimeout(600);
+}
+// Each case pairs the Send-menu label (appActions.ts) with the honest edge it
+// produces via flowForEvent: NOTE_CREATED(from-editor)→notes (in-place) and two
+// HANDOFF arcs (navigating). Distinct targets so the 3 edges can't collapse.
+const provCases = [
+  { label: 'Send to Notes', from: 'editor', to: 'notes', nav: false },
+  { label: 'Ask Cakra', from: 'editor', to: 'ai-chat', nav: true },
+  { label: 'Use as Prompt', from: 'editor', to: 'prompt-generator', nav: true },
+];
+const provResults = [];
+try {
+  const page = await ctx.newPage();
+  // Clean slate so a stale ledger from a prior probe can't mask a regression.
+  await page.goto(`${BASE}/app/editor`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.evaluate((k) => localStorage.removeItem(k), PROV_KEY);
+  for (const c of provCases) {
+    let recorded = false;
+    try {
+      await fireEditorHandoff(page, c.label, c.nav);
+      recorded = hasProvEdge(await readProvEdges(page), c.from, c.to);
+    } catch (e) { c.err = e.message; }
+    provResults.push({ ...c, recorded });
+    console.log(`PROVENANCE  ${c.from}→${c.to}  recorded=${recorded}${c.err ? ' ERR ' + c.err.slice(0, 60) : ''}`);
+  }
+  // Full reload from a different route — the durable ledger must rehydrate.
+  await page.goto(`${BASE}/app/network`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(800);
+  const persistedEdges = await readProvEdges(page);
+  for (const r of provResults) {
+    r.persisted = hasProvEdge(persistedEdges, r.from, r.to);
+    r.pass = r.recorded && r.persisted;
+    console.log(`PROVENANCE-PERSIST  ${r.from}→${r.to}  ${r.persisted ? '✅' : '❌'}`);
+  }
+  await page.close();
+} catch (e) {
+  console.warn(`PROVENANCE-PERSISTS: guard did not complete — ${e.message}`);
+}
+const provPass = provResults.filter(r => r.pass).length;
+console.log(`PROVENANCE-PERSISTS: ${provPass}/${provCases.length} ${provPass === provCases.length ? '✅' : '⚠️'}`);
+
 await browser.close();
 
 // ── OFFLINE-BOOT guard (EPIC-4 S1) ──────────────────────────────────────────
@@ -290,6 +372,13 @@ md += `| App | Added | Survived reload | Result |\n|---|---|---|---|\n`;
 for (const r of mediaResults) {
   md += `| ${r.id} | ${r.added ? '✅' : '❌'} | ${r.survived ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
 }
+md += `\n## Provenance-persists guard (EPIC-6 — durable app→app memory)\n\n`;
+md += `Real \`editor→<target>\` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event \`flowForEvent\` turns into an edge in the durable \`empire-provenance\` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).\n\n`;
+md += `| Edge | Recorded | Persisted (reload) | Result |\n|---|---|---|---|\n`;
+for (const r of provResults) {
+  md += `| ${r.from}→${r.to} | ${r.recorded ? '✅' : '❌'} | ${r.persisted ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
+}
+md += `\n**PROVENANCE-PERSISTS: ${provPass}/${provCases.length} ${provPass === provCases.length ? '✅' : '⚠️'}**\n`;
 md += `\n## Offline-boot guard (EPIC-4 S1 — cold boot from SW precache)\n\n`;
 md += `The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (\`setOffline\`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.\n\n`;
 if (offline) {
@@ -306,5 +395,5 @@ if (offline) {
 }
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, offline }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, provResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);

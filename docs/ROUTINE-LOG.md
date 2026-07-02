@@ -5,6 +5,32 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · Visual & Smoke QA — **EPIC-6 S1 confirmed LIVE; new `PROVENANCE-PERSISTS` guard (3/3)**
+
+**Done.** Fresh-checkout QA of green main `23860d5` (EPIC-6 S1 + its promotion `6b6c693` landed since the last QA
+`b54461e`). Build 🟢, vitest **230/230** (+14 `provenance.test.ts`), eslint **0**, `metrics.mjs --assert-zero` exit 0.
+**27/27 routes render clean** (desktop + 26 apps, 0 uncaught JS). Screenshots overwritten in `docs/screenshots/latest/`.
+
+**★ Epic-acceptance — EPIC-6 S1 (durable provenance spine) done-confirmed.** Built a **new headless
+`PROVENANCE-PERSISTS` guard** in `scripts/qa-smoke.mjs` (the EPIC-6 target-metric harness I own): fires 3 REAL
+handoffs from the Editor's ⚡ Send menu — `editor→notes` (NOTE_CREATED-from-editor), `editor→ai-chat` +
+`editor→prompt-generator` (HANDOFF) — and asserts each edge is recorded in the durable `empire-provenance` store AND
+**survives a full reload** (the tracker→persist→rehydrate roundtrip jsdom can't exercise; unit tests only pin the pure
+fold/filter). **3/3 ✅.** Non-fatal like INBOUND/MEDIA. **S2 NOT built yet** — The Network still shows the live
+"awaiting signal" ticker (no durable Fed-by/Feeds or memory panel); that's the next builder stage where the durable
+source becomes *visible*.
+
+**Verified.** All guards green: SHELL-IS-STYLED, REGISTRY-COVERAGE (bidirectional 26), INBOUND-LANDS 3/3,
+MEDIA-PERSISTS 3/3, **PROVENANCE-PERSISTS 3/3 (new)**, OFFLINE-BOOT 5/5, PRECACHE 78 no-gap. Metric deltas vs
+`b54461e`: apps 26 ±0, vitest 216→230 (+14), token/off-system 0 ±0, bundle gz 691.4→691.8 (+0.4, the store module).
+**No runtime bug, no contradiction.**
+
+**Next.** Builder: **EPIC-6 S2 · The Network remembers** — durable Fed-by/Feeds in the inspector + a persistent
+memory panel (`src/apps/network/Network.tsx`; subscribe `useProvenance(s=>s.edges)`). The `PROVENANCE-PERSISTS` guard
+is now in place to confirm S2/S3 acceptance visually.
+
+---
+
 ## 2026-07-02 · Builder — **EPIC-6 S1 · the durable provenance store + tracker (the memory spine)**
 
 **Done.** Shipped the load-bearing spine of EPIC-6: a durable, persisted ledger of every real app→app transfer.
