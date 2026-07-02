@@ -5,6 +5,25 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · Visual & Smoke QA — **EPIC-6 S2 CONFIRMED LIVE — "The Network remembers" (green main `f5ab6be`)**
+
+**Done / Verified.** First QA since S2 landed (`f5ab6be`; last QA `312033c` was the S1 confirm). Fresh checkout →
+`npm run build` 🟢 → served `dist/` on :3001 → headless Chromium smoke over all 27 routes. **27/27 render clean**
+(desktop + 26 apps, 0 uncaught JS), **vitest 236/236** (+6 `fedBy`/`feeds`/`recentEdges` in `provenance.test.ts`),
+eslint 0, `metrics.mjs --assert-zero` exit 0. Guards all green: SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (26),
+INBOUND-LANDS 3/3 ✅, MEDIA-PERSISTS 3/3 ✅, **PROVENANCE-PERSISTS 3/3 ✅**, OFFLINE-BOOT 5/5 ✅ / PRECACHE 78 no-gap.
+**S2 done-confirmed:** seeded 5 durable `empire-provenance` edges → the bottom-left **Memory panel renders them
+newest-first** as `source → target` rows (registry glyphs+accents+age) over an empty "awaiting signal…" ticker
+(`network-memory.png`); **reload → all 5 persist** (newest age ticked `21s→24s` = same data re-read; Live ticker
+stays empty), durable `edges=5` (`network-memory-after-reload.png`). Inspector Fed-by/Feeds helpers unit-pinned;
+the inspector section itself needs a clicked satellite node → not captured headless (noted honestly). Metrics: static
+188→194, vitest 230→236, bundle 691.8→692.5 (+0.7 S2 UI+helpers, no new deps); apps/tokens/off-system ±0. **No runtime
+bug, no contradiction.** REPORT.md + METRICS.md + CONTEXT.md updated; screenshots overwritten in `docs/screenshots/latest/`.
+**Next:** EPIC-6 S3 (durable per-entity "From <source>" survives reload — the HEADLINE-METRIC stage; Calendar/Goals/
+Messages still read `from` from sessionStorage).
+
+---
+
 ## 2026-07-02 · Builder — **EPIC-6 S2 · The Network remembers (durable "Fed by / Feeds" + persistent Memory panel)**
 
 **Done.** Made the organism's durable provenance (EPIC-6 S1's `empire-provenance` store) *visible* in The Network —
