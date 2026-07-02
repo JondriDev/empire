@@ -188,6 +188,11 @@ Stages (Builder takes the topmost `[ ]`; each is one run, downhill given the one
   (pure shape in `readerGraph.ts`, unit-pinned) + a `<NodeActions type="book">` emit affordance per card; `make-task`
   now accepts `book`. New `GRAPH-LEGIBLE` guard in `qa-smoke.mjs` — **verified live 1/1 ✅** (loaded book → reader-owned
   `book` node → survives reload). Every collection-owning app is now graph-legible. **EPIC-6 DONE.**
+  **✅ QA-CONFIRMED LIVE 2026-07-02 (green main `e262f1b`): `GRAPH-LEGIBLE` 1/1** (added=node=persisted=true) + 27/27
+  routes render clean, vitest 242/242, all guards green (INBOUND 3/3, MEDIA 3/3, PROVENANCE-PERSISTS 3/3,
+  PROVENANCE-ENTITY 3/3, OFFLINE 5/5, PRECACHE 79 no-gap), `--assert-zero` exit 0. **All four EPIC-6 acceptance metrics
+  have now moved → EPIC-6 CLOSED. The Strategist should promote the next epic (node-level lineage OR global cross-app
+  search — both cloud-executable; EPIC-7 Android device-gated).**
   Reader (the newest app) holds a real collection — loaded books — but **never mirrors them into the graph**, so it
   is invisible in The Network (only a `SendResultMenu` on Cakra replies exists at `Reader.tsx:379`). It is the one
   remaining collection-owning app that isn't graph-legible. Close it exactly like Files/Photos/Notes:

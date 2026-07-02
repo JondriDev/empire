@@ -142,7 +142,22 @@
       assertion carries the roundtrip jsdom can't.
     - build🟢 vitest 239→242🟢 eslint clean; tokens 0, off-system 0; test files 25→26, bundle 693.5→693.6 (+0.1, no
       new deps). **★ EPIC-6 is CODE-COMPLETE (S1–S4 all shipped, GRAPH-LEGIBLE verified live).**
-  - **▶ NEXT BUILDER STAGE = none in an active epic — EPIC-6 is DONE (pending QA's on-main confirm).** The Strategist
+    - **✅ QA-CONFIRMED LIVE (2026-07-02, green main `e262f1b`) — S4 done-confirmed, EPIC-6 CLOSED.** First QA since S4
+      landed (last QA `0f17fc3` confirmed S3 on `13a48dc`; S4 `e262f1b` landed since). 27/27 render clean (0 uncaught
+      JS), vitest **242/242** (+3 `readerGraph.test.ts`), eslint 0, `--assert-zero` exit 0. **The new `GRAPH-LEGIBLE`
+      guard ran headless 1/1 ✅** (added=true, node=true, persisted=true): Reader's file `<input>` driven with a `.txt`
+      book → a `book` CoreNode owned by `app==='reader'` appears in `empire-core-graph` AND the re-mounted Reader
+      re-mirrors it after a reload (idempotent, not dropped). Every other guard held green (SHELL-IS-STYLED,
+      REGISTRY-COVERAGE 26, INBOUND 3/3, MEDIA 3/3, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE 5/5,
+      PRECACHE 79 no-gap). Metrics: static 197→200 (+3), vitest 239→242 (+3), test files 25→26 (+1), bundle
+      693.5→693.6 (+0.1); apps 26, tokens 0, off-system 0 all ±0. No runtime bug, no contradiction. **★ All four EPIC-6
+      acceptance metrics have now moved (PROVENANCE-PERSISTS + PROVENANCE-ENTITY + GRAPH-LEGIBLE) → EPIC-6 is DONE.**
+      *Cloud limit:* a fresh-checkout Network canvas is empty, so the book node's live inspector render can't be shot
+      headless — the guard carries the mirror→persist→re-mirror roundtrip; on-device is the visual confirm.
+      **▶ NEXT = the Strategist promotes the next epic** (no `▶ ACTIVE` epic remains): topmost cloud-executable
+      candidates are **node-level lineage** (`lineageOf` in `provenance.ts` is the rail) OR **global cross-app search**;
+      EPIC-7 (Android) stays device-gated.
+  - **▶ NEXT BUILDER STAGE = none in an active epic — EPIC-6 is DONE (QA-confirmed on-main `e262f1b`).** The Strategist
     should promote the next epic. Queued **cloud-executable** candidates (see EPICS.md ROADMAP + EPIC-6's retire note):
     (a) **node-level lineage** — correlate a `HANDOFF` with the specific entity it created, for true *per-artifact*
     ancestry (the natural depth follow-on to this app-level memory; `lineageOf` in `provenance.ts` is the rail);
