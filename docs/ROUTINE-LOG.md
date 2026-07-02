@@ -5,6 +5,39 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · Visual & Smoke QA — **EPIC-6 S4 confirmed LIVE on green main `e262f1b` → EPIC-6 CLOSED**
+
+**Done / Verified.** First QA since the builder shipped S4 (`e262f1b`); last QA `0f17fc3` confirmed S3 on `13a48dc`.
+Fresh cloud checkout → `npm run build` 🟢 (tsc -b && vite build, precache **79 entries**) → `node server.js` on :3001 →
+full headless smoke via the pre-installed `/opt/pw-browsers/chromium-1194` (global playwright symlinked in, removed
+after).
+
+- **27/27 routes render clean** (desktop shell + 26 apps, 0 uncaught JS, no error boundary, no blank). SHELL-IS-STYLED
+  ✅ + REGISTRY-COVERAGE ✅ (bidirectional, 26 apps).
+- **`GRAPH-LEGIBLE` guard 1/1 ✅ — the S4 acceptance metric MOVED** (added=true, node=true, persisted=true): Reader's
+  real file `<input>` driven with a small `.txt` book → a `book` CoreNode owned by `app==='reader'` appears in the
+  persisted `empire-core-graph` AND the re-mounted Reader re-mirrors it after a reload (idempotent, not dropped). The
+  last graph-island is closed — every collection-owning app is now graph-legible.
+- **Every other guard green:** INBOUND-LANDS 3/3, MEDIA-PERSISTS 3/3, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3,
+  OFFLINE-BOOT 5/5, PRECACHE 79 entries no-gap. `npx vitest run` **242/242** (+3 `readerGraph.test.ts`), eslint 0,
+  `node scripts/metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0).
+- **Metrics Δ vs prior QA (`13a48dc`, S3):** static test cases 197→**200** (+3), vitest 239→**242** (+3), test files
+  25→**26** (+1), bundle gz 693.5→**693.6** (+0.1, the `readerGraph` module + Reader wiring, no new deps); apps **26**,
+  token-violations **0**, off-system **0** all ±0. Screenshots overwritten in `docs/screenshots/latest/` (30 PNGs +
+  REPORT.md). No runtime bug, no contradiction.
+
+**★ All four EPIC-6 acceptance metrics have now moved (PROVENANCE-PERSISTS + PROVENANCE-ENTITY + GRAPH-LEGIBLE) →
+EPIC-6 · Organism Memory is DONE.** *Honest cloud limit:* a fresh-checkout Network canvas is empty, so the book node's
+live inspector render can't be screenshotted headless — the `GRAPH-LEGIBLE` guard carries the mirror→persist→re-mirror
+roundtrip; the on-device Network view is the visual confirm.
+
+**Next.** No `▶ ACTIVE` epic remains — **the Strategist promotes the next epic**: topmost cloud-executable candidates
+are **node-level lineage** (correlate a HANDOFF with the entity it created — per-artifact ancestry; `lineageOf` in
+`provenance.ts` is the rail) OR **global cross-app search** (query every app's persisted collection). EPIC-7 (Android)
+stays device-gated.
+
+---
+
 ## 2026-07-02 · Builder — **EPIC-6 S4 · Close the last graph-island: Reader's books → the mesh (EPIC-6 CLOSE)**
 
 **Done.** Reader owned a real collection — the imported books — but never mirrored it into the Core graph, so it was
