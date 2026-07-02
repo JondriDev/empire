@@ -327,6 +327,55 @@ try {
 const provPass = provResults.filter(r => r.pass).length;
 console.log(`PROVENANCE-PERSISTS: ${provPass}/${provCases.length} ${provPass === provCases.length ? '✅' : '⚠️'}`);
 
+// ── PROVENANCE-ENTITY guard (EPIC-6 S3: the per-entity source survives reload) ─
+// The PROVENANCE-PERSISTS guard above proves the *edge* ledger roundtrips. S3 is
+// a distinct assertion: a created event/goal/draft must itself remember WHERE it
+// came from after a reload (the sessionStorage chip is consumed on mount, so the
+// durable source now lives on the persisted entity + renders as a <LineageTrail>,
+// `role="note"` aria-label `From <source>`). Reconciled with the edge guard on
+// purpose — different metric name, no clobber. Flow per case: seed the inbound
+// clipboard → reload so the receiver consumes it + prefills → trigger the app's
+// OWN create/send → reload AGAIN (chip now gone) → assert the durable trail shows
+// the source. Non-fatal (recorded, not thrown) like the guards above.
+const entityCases = [
+  { id: 'goals', key: 'empire-goals-clipboard', from: 'calculator', srcName: 'Calculator',
+    payload: { text: 'Budget target 294', title: 'Budget target 294', from: 'calculator' },
+    save: async (page) => { await page.click('button:has-text("Add Goal")'); } },
+  { id: 'messages', key: 'empire-messages-clipboard', from: 'editor', srcName: 'Code Editor',
+    payload: { text: 'Ship the S3 lineage trail', from: 'editor' },
+    save: async (page) => { await page.locator('textarea').first().press('Enter'); } },
+  { id: 'calendar', key: 'empire-calendar-clipboard', from: 'notes', srcName: 'Notes',
+    payload: { text: 'Review the roadmap', title: 'Review the roadmap', from: 'notes' },
+    save: async (page) => { await page.click('button:has-text("Create")'); } },
+];
+const entityResults = [];
+for (const c of entityCases) {
+  const page = await ctx.newPage();
+  let created = false, persisted = false, err;
+  try {
+    await page.goto(`${BASE}/app/${c.id}`, { waitUntil: 'networkidle', timeout: 30000 });
+    // Seed the inbound payload, reload so the receiver consumes it (prefill +
+    // remember the durable source on the draft).
+    await page.evaluate(([k, v]) => sessionStorage.setItem(k, JSON.stringify(v)), [c.key, c.payload]);
+    await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+    await page.waitForTimeout(1200);
+    // Trigger the app's own create/send so the entity is saved with `from`.
+    await c.save(page);
+    await page.waitForTimeout(800);
+    created = (await page.locator(`[role="note"][aria-label*="${c.srcName}"]`).count()) > 0;
+    // Reload — the sessionStorage chip is gone; only the persisted entity's
+    // durable `from` can render the trail now.
+    await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+    await page.waitForTimeout(1200);
+    persisted = (await page.locator(`[role="note"][aria-label*="${c.srcName}"]`).count()) > 0;
+  } catch (e) { err = e.message; }
+  entityResults.push({ id: c.id, from: c.from, created, persisted, pass: created && persisted, err });
+  console.log(`PROV-ENTITY  ${c.from}→${c.id}  created=${created} persisted=${persisted}${err ? ' ERR ' + err.slice(0, 60) : ''}`);
+  await page.close();
+}
+const entityPass = entityResults.filter(r => r.pass).length;
+console.log(`PROVENANCE-ENTITY: ${entityPass}/${entityCases.length} ${entityPass === entityCases.length ? '✅' : '⚠️'}`);
+
 await browser.close();
 
 // ── OFFLINE-BOOT guard (EPIC-4 S1) ──────────────────────────────────────────
@@ -379,6 +428,13 @@ for (const r of provResults) {
   md += `| ${r.from}→${r.to} | ${r.recorded ? '✅' : '❌'} | ${r.persisted ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
 }
 md += `\n**PROVENANCE-PERSISTS: ${provPass}/${provCases.length} ${provPass === provCases.length ? '✅' : '⚠️'}**\n`;
+md += `\n## Provenance-entity guard (EPIC-6 S3 — per-entity source survives reload)\n\n`;
+md += `Distinct from the edge guard above: each S3 receiver was seeded with an inbound payload, reloaded so it consumed the chip + prefilled, then its OWN create/send was triggered so the entity persisted its durable \`from\`; the page was reloaded again (chip now gone) and a \`<LineageTrail>\` ("From <source>") must still render off the persisted entity. This is the headline S3 acceptance jsdom cannot exercise.\n\n`;
+md += `| Entity edge | Trail after create | Trail after reload | Result |\n|---|---|---|---|\n`;
+for (const r of entityResults) {
+  md += `| ${r.from}→${r.id} | ${r.created ? '✅' : '❌'} | ${r.persisted ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
+}
+md += `\n**PROVENANCE-ENTITY: ${entityPass}/${entityCases.length} ${entityPass === entityCases.length ? '✅' : '⚠️'}**\n`;
 md += `\n## Offline-boot guard (EPIC-4 S1 — cold boot from SW precache)\n\n`;
 md += `The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (\`setOffline\`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.\n\n`;
 if (offline) {
@@ -395,5 +451,5 @@ if (offline) {
 }
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, provResults, offline }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, provResults, entityResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);

@@ -10,6 +10,7 @@ import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { LineageTrail } from '../../components/ui/LineageTrail'
 
 interface Goal {
   id: string
@@ -19,12 +20,15 @@ interface Goal {
   createdAt: string
   completed: boolean
   progress: number // 0-100
+  /** Source app id when created via a cross-app handoff (S3). Optional → backward-compatible. */
+  from?: string
 }
 
 export default function Goals() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [deadline, setDeadline] = useState('')
+  const [draftFrom, setDraftFrom] = useState<string | undefined>(undefined)
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
   const [goals, setGoals] = useState<Goal[]>([])
 
@@ -62,6 +66,8 @@ export default function Goals() {
     const t = inbound.payload.text
     setTitle(inbound.payload.title || t.split('\n')[0].slice(0, 80))
     setDescription(inbound.payload.title ? t : '')
+    // Remember the source so the SAVED goal carries it durably (survives reload).
+    setDraftFrom(inbound.payload.from)
   }, [inbound.payload])
 
   const add = () => {
@@ -73,14 +79,16 @@ export default function Goals() {
       deadline: deadline || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       createdAt: new Date().toISOString().split('T')[0],
       completed: false,
-      progress: 0
+      progress: 0,
+      ...(draftFrom ? { from: draftFrom } : {}),
     }
-    
+
     setGoals(prev => [...prev, newGoal])
     emit({ type: 'NOTE_CREATED', noteId: newGoal.id, title: newGoal.title, content: newGoal.description, tags: ['goal'] })
     setTitle('')
     setDescription('')
     setDeadline('')
+    setDraftFrom(undefined)
   }
 
   const toggleCompleted = (id: string, completed: boolean) => {
@@ -162,7 +170,7 @@ export default function Goals() {
 
       {inbound.source && (
         <div className="mb-4">
-          <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+          <ProvenanceChip from={inbound.source} onDismiss={() => { inbound.dismiss(); setDraftFrom(undefined) }} />
         </div>
       )}
 
@@ -265,6 +273,11 @@ export default function Goals() {
                 </div>
                 {goal.description && (
                   <p className="text-sm mt-1" style={{ color: 'var(--text2)' }}>{goal.description}</p>
+                )}
+                {goal.from && (
+                  <div className="mt-2">
+                    <LineageTrail app="goals" from={goal.from} />
+                  </div>
                 )}
                 <div className="flex items-center gap-3 mt-2 text-xs" style={{ color: 'var(--text3)' }}>
                   <span>📅 Created: {goal.createdAt}</span>

@@ -85,26 +85,44 @@
       **Reuse for S3 visual acceptance:** the Memory-panel screenshot pattern (seed `localStorage['empire-provenance']`
       with a `{state:{edges},version:0}` shape of real registry-id edges → load `/app/network` → shoot) is the cheapest
       way to prove a durable-store render surface; S3's per-entity `LineageTrail` can be confirmed the same way once built.
-  - **▶ NEXT BUILDER STAGE = EPIC-6 S3 · Durable per-entity provenance ("From <source>" survives a reload —
-    HEADLINE-METRIC stage).** Full spec: `docs/EPICS.md` → EPIC-6 S3 (lines ~136-161). Shape:
-    - The gap: **Calendar / Goals / Messages** (S6c receivers) read `from` from `sessionStorage`
-      (`useInboundHandoff`, consumed on mount) → after a reload the created event/goal/draft has **lost its
-      provenance**. Notes (`from-<src>` tag) + Learning (`item.from`) already persist it — mirror them.
-    - **New `src/components/ui/LineageTrail.tsx`** — `<LineageTrail app from?/>`: compact glass row (reuse
-      `ProvenanceChip` token styling) showing `lineageOf(useProvenance.getState().edges, app)` OR, given a concrete
-      `from`, the direct "`<app>` ← `<from>`" pair (registry icons+accents). Reads the **durable store** → renders
-      regardless of the (consumed) sessionStorage chip. Test `LineageTrail.test.tsx` (≥2).
-    - Add optional `from?: string` to the persisted `CalendarEvent`/`Goal`/`Message` shapes (backward-compat; old
-      items lack it) — find where they persist (`src/lib/store.ts`?). In each app's `[inbound.payload]` create-effect
-      set `from: inbound.source` on the **saved** entity; render `{entity.from && <LineageTrail .../>}` on its card.
-    - **Add `PROVENANCE-PERSISTS` guard to `scripts/qa-smoke.mjs`** (mirror `INBOUND-LANDS`): for
-      `{calculator→notes, notes→goals, editor→messages}` seed clipboard + prime entity, **reload**, assert durable
-      lineage renders. Fold `PROVENANCE-PERSISTS N/3` into `REPORT.md`. **This is the epic's target metric (0→3).**
-    - **Acceptance:** ⚡ Send-to-Goals from Calculator → reload → goal still shows "Goals ← Calculator"; same for
-      Messages/Calendar. `PROVENANCE-PERSISTS 0/3 → 3/3`. build🟢 vitest🟢 eslint clean; tokens 0, off-system 0.
-    - **TRAP:** the existing `PROVENANCE-PERSISTS` line in QA's REPORT (added by QA at S1-confirm) tests the *edge*
-      store roundtrip via the Editor Send menu — S3's guard is the *entity*-level durable source (different assertion,
-      same metric name). Reconcile with QA's harness (don't double-count / clobber). Colour rail as always.
+  - **✅ S3 SHIPPED (2026-07-02) — durable per-entity "From <source>" survives a reload (HEADLINE-METRIC stage).**
+    New **`src/components/ui/LineageTrail.tsx`** — `<LineageTrail app from? />`: a glass `role="note"` row (`--mono`,
+    aria-label `From <source>`) that renders the direct `<app> ← <from>` pair when a concrete stored `from` is passed,
+    else walks `lineageOf(edges, app)`; returns **null** when `chain.length < 2` (no ancestry). Inner `AppToken`
+    renders each hop's registry icon + `${app.color}` accent (identity data, no raw hex literal — mirrors
+    `ProvenanceChip`). Reactive sub `useProvenance(s => s.edges)`. Added `from?: string` to the persisted shapes:
+    `Message` (**`src/lib/store.ts:4`**), local `Goal` (**`Goals.tsx:14`**), local `CalendarEvent` (**`Calendar.tsx:15`**).
+    Each app tracks a `draftFrom` state read from **`inbound.payload.from`** (NOT `inbound.source` — see trap) in the
+    `[inbound.payload]` effect, stamps it onto the saved entity (Goals `add`, Messages `send`, Calendar `saveEvent`
+    non-editing branch), clears it on send / manual-create / dismiss, and renders `{entity.from && <LineageTrail …/>}`
+    on the goal card / message bubble / sidebar event row (session `<ProvenanceChip>` kept as the pre-save hint).
+    `LineageTrail.test.tsx` (3). build🟢 vitest 236→239🟢 eslint 0; tokens 0, off-system 0; bundle 692.5→693.5.
+    - **TRAP (learned this run):** stamp from **`inbound.payload.from`**, keeping the effect deps `[inbound.payload]`
+      only. Do NOT read `inbound.source` + add it to the deps — `dismiss()` nulls `source`, which would re-fire the
+      prefill effect and **re-fill the form after the user dismissed it**. The payload already carries `from`.
+    - **QA guard reconciled (per the S1-confirm trap):** the pre-existing `PROVENANCE-PERSISTS` in `qa-smoke.mjs` tests
+      the *edge* store via the Editor Send menu — left UNTOUCHED. Added a **distinct** `PROVENANCE-ENTITY` block (seed
+      inbound clipboard → reload+consume+prefill → trigger the app's OWN create/send → reload again → assert
+      `[role="note"][aria-label*="<src>"]` still renders off the persisted entity) for `{calculator→goals,
+      editor→messages, notes→calendar}` + a `PROVENANCE-ENTITY N/3` REPORT section. `node --check` clean; the headless
+      run is QA's to confirm. **Note for QA:** Notes/Learning use their own `from-<src>` tag / `item.from` (NOT
+      LineageTrail), so the entity guard covers the 3 apps that actually render `<LineageTrail>`.
+  - **▶ NEXT BUILDER STAGE = EPIC-6 S4 · Close the last graph-island: Reader's books → the mesh (EPIC-6 CLOSE).**
+    Full spec: `docs/EPICS.md` → EPIC-6 S4 (lines ~183-199). Shape:
+    - Reader holds a real collection (loaded books) but **never mirrors it into the graph** → invisible in The Network.
+      It's the one remaining collection-owning app that isn't graph-legible. Close it like Files/Photos/Notes.
+    - **`src/apps/reader/Reader.tsx`** — on the book library changing, `mirrorCollection('book', 'reader', books, {…})`
+      with the real book shape (read the component for its list state). **TRAP:** `mirrorCollection` PRUNES unseen —
+      pass the WHOLE library, not one open book (see Files' `accumulateFiles` union precedent). Add a
+      `<NodeActions type='book' sourceId={b.id} />` per book so a passage can emit onward — Reader becomes an honest
+      **emit-only** source (like files/photos; do NOT invent a text→book inbound).
+    - **`scripts/qa-smoke.mjs`** — extend graph-legibility: after seeding a Reader book, assert a `book` node appears
+      for `app==='reader'` (mirror how Files/Photos are covered).
+    - **Test:** if Reader gains a pure mirror-shape helper, pin it (`readerGraph.test.ts`); else the mirror rides the
+      tested `mirrorCollection` rail + QA's node assertion.
+    - **Acceptance:** load a book → it appears as a node in The Network + the inspector's entities; every
+      collection-owning app is now graph-legible. With S1–S3 shipped + QA's `PROVENANCE-PERSISTS`/`PROVENANCE-ENTITY`
+      green, **EPIC-6 is DONE**. build🟢 vitest🟢 eslint clean; tokens 0, off-system 0; routes 26/26.
   - _(History below retained as working memory; the "no active epic" notes are superseded by the EPIC-6 promotion above.)_
   - **✅ PRIOR QA RUN (2026-07-01, green main `b54461e` — re-confirm, no new code):** Ran against the SAME head as
     the prior QA (`b54461e`; no builder/strategist commit landed since). Re-proved main builds & runs from a fresh

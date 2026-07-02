@@ -5,6 +5,42 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-02 · Builder — **EPIC-6 S3 · Durable per-entity provenance ("From <source>" survives a reload) — HEADLINE-METRIC stage**
+
+**Done.** Closed the last provenance gap: Calendar / Goals / Messages read their inbound `from` from `sessionStorage`
+(consumed on mount by `useInboundHandoff`), so after a reload the created event/goal/draft had *forgotten* where it
+came from. Now each **stamps `from` onto the persisted entity** (mirroring Notes' `from-<src>` tag + `LearningItem.from`)
+and renders a durable trail off it.
+- **New `src/components/ui/LineageTrail.tsx`** — `<LineageTrail app from? />`: a compact glass `role="note"` row
+  (`--mono`, `From <source>` aria-label) that renders the direct `<app> ← <from>` pair when a concrete stored `from`
+  is given, else walks `lineageOf(useProvenance.getState().edges, app)`; renders **nothing** when there's no ancestry.
+  Each hop shows the app's registry icon + `${app.color}` accent (identity data — no raw hex literal, mirrors
+  `ProvenanceChip`). Reactive sub `useProvenance(s => s.edges)` so the walk-the-ledger mode refreshes live.
+- **Persisted shapes gained `from?: string`** (backward-compatible; old items lack it): `Message` (`src/lib/store.ts`),
+  `Goal` (`Goals.tsx`), `CalendarEvent` (`Calendar.tsx`).
+- **Wiring** — each app tracks a `draftFrom` (read from `inbound.payload.from`, kept off the effect deps so *dismiss*
+  no longer re-prefills the form), stamps it onto the saved entity (Goals `add`, Messages `send`, Calendar `saveEvent`
+  non-editing branch), clears it on send/manual-create/dismiss, and renders `{entity.from && <LineageTrail …/>}` on
+  the goal card / message bubble / sidebar event row (kept the existing session `<ProvenanceChip>` for the pre-save hint).
+- **Tests** — `LineageTrail.test.tsx` (3): direct pair renders both names + `From <source>` label; no-`from`/no-history
+  renders nothing; walk-the-ledger mode resolves `editor→notes`. vitest **236 → 239**.
+- **QA guard** — added a **distinct `PROVENANCE-ENTITY`** block to `scripts/qa-smoke.mjs` (NOT clobbering the existing
+  edge-level `PROVENANCE-PERSISTS`, per the CONTEXT trap): seeds each inbound clipboard → reload (consume+prefill) →
+  triggers the app's OWN create/send → reload again (chip gone) → asserts the `<LineageTrail>` still renders off the
+  persisted entity. Folded a `PROVENANCE-ENTITY N/3` section into `REPORT.md`. `node --check` clean (headless-run is QA's).
+
+**Verified (cloud gate — the only gate).** `npm run build` 🟢 (`tsc -b && vite build`), `npx vitest run` **239/239** 🟢,
+`npx eslint .` exit 0, `node scripts/metrics.mjs --assert-zero` exit 0. Metrics row: apps **26** (±0), test-cases
+**194 → 197** (+3), test-files **24 → 25** (+1), token-violations **0** (±0), off-system **0** (±0), bundle gz
+**692.5 → 693.5** (+1.0 — LineageTrail + wiring, no new deps). **Not verifiable in cloud:** the trail is a live render —
+the pure selection is unit-pinned and the `PROVENANCE-ENTITY` guard exercises the full seed→create→reload→assert flow
+when QA runs it headless; I could not see the rendered pill.
+
+**Next:** EPIC-6 S4 (close the last graph-island — Reader's books → the mesh via `mirrorCollection('book', …)` +
+book-level emit; EPIC-6 CLOSE). Full spec: `docs/EPICS.md` → EPIC-6 S4.
+
+---
+
 ## 2026-07-02 · Visual & Smoke QA — **EPIC-6 S2 CONFIRMED LIVE — "The Network remembers" (green main `f5ab6be`)**
 
 **Done / Verified.** First QA since S2 landed (`f5ab6be`; last QA `312033c` was the S1 confirm). Fresh checkout →
