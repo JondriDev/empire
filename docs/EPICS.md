@@ -77,7 +77,11 @@ discipline (`provenance.test.ts`, `LineageTrail` test). *Routes rendering clean*
 Stages (Builder takes the topmost `[ ]`; each is one run, downhill given the ones before, build+vitest+eslint green,
 `tokenViolations`/`offSystemUtilities` stay 0):
 
-- [ ] **S1 · The durable provenance store + tracker (the memory spine — pure infra, zero UI risk).**
+- [x] **S1 · The durable provenance store + tracker (the memory spine — pure infra, zero UI risk).** ✅ SHIPPED
+  2026-07-02. `src/lib/core/provenance.ts` (`ProvEdge`, `useProvenance` persist store key `empire-provenance`,
+  `MAX_EDGES=500`/`DEDUP_MS=1500`, pure `recordEdges`/`edgesInto`/`edgesFrom`/`lineageOf`, `startProvenanceTracking()`
+  wired once at `main.tsx:20`). `provenance.test.ts` **14 cases** green. Build🟢 vitest 216→230🟢 eslint clean;
+  tokens 0, off-system 0 (`--assert-zero` exit 0), bundle 691.4→691.8. **Spine laid — S2 is next.**
   **New `src/lib/core/provenance.ts`:**
   - `export interface ProvEdge { fromApp: string; toApp: string; label?: string; at: number }` — one durable
     record of a real app→app transfer.
