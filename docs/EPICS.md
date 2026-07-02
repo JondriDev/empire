@@ -110,7 +110,18 @@ Stages (Builder takes the topmost `[ ]`; each is one run, downhill given the one
     Build🟢 vitest🟢 (test-files +1) eslint clean; `metrics.mjs --assert-zero` still exit 0 (tokens 0, off-system 0).
     **No UI, no visual change — this is the load-bearing spine S2–S4 build on.**
 
-- [ ] **S2 · The Network remembers — durable "Fed by / Feeds" in the inspector + a persistent memory panel.**
+- [x] **S2 · The Network remembers — durable "Fed by / Feeds" in the inspector + a persistent memory panel.** ✅
+  SHIPPED 2026-07-02. `Network.tsx` subscribes `useProvenance(s => s.edges)` reactively. **Inspector** gained a
+  *Provenance · all-time* section (below the live structural neighbours): **Fed by** (`fedBy(provEdges, selected)`)
+  and **Feeds** (`feeds(provEdges, selected)`) — each a clickable row with the app glyph+registry accent, name, and
+  the newest edge's relative age (`ago`), opening that app. **Persistent Memory panel** added to the bottom-left,
+  stacked *above* the live ticker in a shared column: lists `recentEdges(provEdges, 12)` newest-first as
+  `source → target` rows (both registry icons+accents + age), a plasma pulse-dot header. It reads the store, so it
+  **survives a reload** while the ticker starts empty. New pure helpers in `provenance.ts`: `fedBy`/`feeds`
+  (de-duped `ProvNeighbor[]`, newest-first) + `recentEdges` — 6 new tests in `provenance.test.ts` (194 static /
+  236 vitest). Colours via `cssVar('plasma')`/`tint('signal',N)` + registry `${app.color}` identity — tokens 0,
+  off-system 0 (`--assert-zero` exit 0). build🟢 eslint clean; bundle 691.8→692.5. *Cloud limit:* the panels are a
+  visual render QA screenshots; the pure selection is unit-pinned. Original spec ↓
   Today `Network.tsx`'s inspector (EPIC-1 S3) shows only *current-graph* `appAdjacency`, and the ticker is capped/
   in-memory/fading. Give the mesh durable memory sourced from S1's store:
   - **`src/apps/network/Network.tsx`** — subscribe reactively `const provEdges = useProvenance(s => s.edges)`.

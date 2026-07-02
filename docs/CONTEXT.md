@@ -48,30 +48,47 @@
       `JSON.parse(localStorage['empire-provenance']).state.edges`. **S2 NOT built** — The Network still shows the live
       "awaiting signal" ticker (no durable Fed-by/Feeds or memory panel yet). Metrics all ±0 except vitest +14 &
       bundle 691.4→691.8 (+0.4, the store module, no new deps). No runtime bug, no contradiction.
-  - **▶ NEXT BUILDER STAGE = EPIC-6 S2 · The Network remembers (durable "Fed by / Feeds" + persistent memory panel).**
-    First UI stage — a *visual* change (not cloud-screenshottable; pin the selector, describe the render). Start here:
-    - **`src/apps/network/Network.tsx`** — reactively subscribe `const provEdges = useProvenance(s => s.edges)`
-      (import from `../../lib/core/provenance`). In the **inspector panel** for `selected` (the EPIC-1 S3 panel that
-      already shows live `appAdjacency`), add a **provenance section** below the live neighbours:
-      **"Fed by"** = unique `fromApp`s of `edgesInto(provEdges, selected)`; **"Feeds"** = unique `toApp`s of
-      `edgesFrom(provEdges, selected)`. Each row = source glyph+name (`getAppIcon`/`registry`) + a relative age of the
-      newest edge + a button → open that app. Label it as *all-time history* vs the live (structural, now) adjacency.
-    - **Persistent memory panel** — a small always-visible glass panel (corner, `--mono`) listing the most recent
-      **N≈12** `ProvEdge`s newest-first, each a `source → target` row (both registry icons+accents + relative age).
-      Populated **from the store on mount** so after a reload the recent history is still there (the live ticker starts
-      empty — keep the ticker as-is; this is its durable analogue). Reuse the ticker's age formatter if present.
-    - **Colour rail (TRAP):** every accent via `rgbCss` (`network/nodeColors.ts`) / `cssVar` / `tint` — **no raw
-      hex/rgb, no off-system Tailwind palette class** (both regress a `--assert-zero`-gated metric). `${app.color}`
-      registry identity is allowed (exempted in `DS_INFRA`).
-    - **Test** — new `src/apps/network/provenanceView.test.ts` (or extend `adjacency.test.ts`): pin the *pure
-      selection* the panel uses — unique `fromApp`s from `edgesInto` + unique `toApp`s from `edgesFrom` dedupe and
-      order newest-first over a fixture edge list. (The canvas render itself isn't unit-tested.) Consider a tiny pure
-      helper in `provenance.ts` (e.g. `fedBy(edges,appId)`/`feeds(edges,appId)` = de-duped `edgesInto/From` app lists)
-      so the selector is testable without React and reused by both panels.
-    - **Acceptance:** seed handoffs → open The Network → inspector shows durable Fed-by/Feeds + the memory panel lists
-      recent edges; **reload → they persist** (ticker empty, memory panel not). build🟢 vitest🟢 eslint clean;
-      `--assert-zero` exit 0. *Cloud limit:* render is visual (QA screenshots); the selector is unit-pinned. Full spec:
-      `docs/EPICS.md` → EPIC-6 S2.
+  - **✅ S2 SHIPPED (2026-07-02) — The Network remembers.** `Network.tsx` now subscribes `const provEdges =
+    useProvenance(s => s.edges)` reactively (**`Network.tsx:~142`**, beside the `graphNodes` sub). Two surfaces:
+    (1) **Inspector `Provenance · all-time` section** (rendered between "Connected apps" and the Open button): **Fed
+    by** = `fedBy(provEdges, selected.id)`, **Feeds** = `feeds(provEdges, selected.id)` — each a clickable `provRow`
+    (glyph `←`/`→` + app glyph+`${app.color}` + name + `ago(newest at)` → `openById`). `provRow`/`rowStyle` are
+    defined *inside the inspector IIFE*. (2) **Persistent Memory panel** in the bottom-left: I **refactored the
+    ticker into a column container** (`position:absolute; left:16; bottom:16`) holding the Memory panel (top) over
+    the live ticker (bottom, at the corner). Memory lists `recentEdges(provEdges, MEMORY_ROWS=12)` newest-first as
+    `from-glyph name → to-glyph name age` rows, plasma pulse-dot header, `maxHeight:34vh; overflowY:auto;
+    pointerEvents:auto` (scrollable). Reads the store → survives reload; ticker stays session-only.
+    - **New pure helpers in `provenance.ts`** (unit-pinned, reused by both panels): `ProvNeighbor{app,at,label?}`;
+      `fedBy(edges,appId)`/`feeds(edges,appId)` = `uniqueNeighbours(edgesInto/From, pick)` (de-dupe first-wins over
+      the already newest-first list → newest edge per app); `recentEdges(edges,n=12)` = `slice(-n).reverse()`. +6
+      cases in `provenance.test.ts`. **Reuse for S3:** `lineageOf` is the same store; `LineageTrail` can read it.
+    - **Colour rail respected:** `cssVar('plasma')` (memory header dot), `tint('signal',10)` (row hover), registry
+      `${app.color}` for glyph tint (DS_INFRA-exempt). tokens 0, off-system 0, `--assert-zero` exit 0. build🟢
+      vitest 236🟢 eslint clean (full `npx eslint .` exit 0); bundle 691.8→692.5 (+0.7, UI+helpers, no new deps).
+    - *Cloud limit:* the two panels are a **visual render** (QA screenshots) — the pure selection is unit-pinned;
+      I could not see them. **QA to confirm:** seed handoffs (Editor ⚡ Send menu, per S1 guard) → open The Network →
+      click a node → inspector shows Fed by/Feeds; the bottom-left Memory panel lists `source → target` rows;
+      **reload → Memory persists, Live ticker empty.**
+  - **▶ NEXT BUILDER STAGE = EPIC-6 S3 · Durable per-entity provenance ("From <source>" survives a reload —
+    HEADLINE-METRIC stage).** Full spec: `docs/EPICS.md` → EPIC-6 S3 (lines ~136-161). Shape:
+    - The gap: **Calendar / Goals / Messages** (S6c receivers) read `from` from `sessionStorage`
+      (`useInboundHandoff`, consumed on mount) → after a reload the created event/goal/draft has **lost its
+      provenance**. Notes (`from-<src>` tag) + Learning (`item.from`) already persist it — mirror them.
+    - **New `src/components/ui/LineageTrail.tsx`** — `<LineageTrail app from?/>`: compact glass row (reuse
+      `ProvenanceChip` token styling) showing `lineageOf(useProvenance.getState().edges, app)` OR, given a concrete
+      `from`, the direct "`<app>` ← `<from>`" pair (registry icons+accents). Reads the **durable store** → renders
+      regardless of the (consumed) sessionStorage chip. Test `LineageTrail.test.tsx` (≥2).
+    - Add optional `from?: string` to the persisted `CalendarEvent`/`Goal`/`Message` shapes (backward-compat; old
+      items lack it) — find where they persist (`src/lib/store.ts`?). In each app's `[inbound.payload]` create-effect
+      set `from: inbound.source` on the **saved** entity; render `{entity.from && <LineageTrail .../>}` on its card.
+    - **Add `PROVENANCE-PERSISTS` guard to `scripts/qa-smoke.mjs`** (mirror `INBOUND-LANDS`): for
+      `{calculator→notes, notes→goals, editor→messages}` seed clipboard + prime entity, **reload**, assert durable
+      lineage renders. Fold `PROVENANCE-PERSISTS N/3` into `REPORT.md`. **This is the epic's target metric (0→3).**
+    - **Acceptance:** ⚡ Send-to-Goals from Calculator → reload → goal still shows "Goals ← Calculator"; same for
+      Messages/Calendar. `PROVENANCE-PERSISTS 0/3 → 3/3`. build🟢 vitest🟢 eslint clean; tokens 0, off-system 0.
+    - **TRAP:** the existing `PROVENANCE-PERSISTS` line in QA's REPORT (added by QA at S1-confirm) tests the *edge*
+      store roundtrip via the Editor Send menu — S3's guard is the *entity*-level durable source (different assertion,
+      same metric name). Reconcile with QA's harness (don't double-count / clobber). Colour rail as always.
   - _(History below retained as working memory; the "no active epic" notes are superseded by the EPIC-6 promotion above.)_
   - **✅ PRIOR QA RUN (2026-07-01, green main `b54461e` — re-confirm, no new code):** Ran against the SAME head as
     the prior QA (`b54461e`; no builder/strategist commit landed since). Re-proved main builds & runs from a fresh
@@ -352,7 +369,10 @@
     {fromApp,toApp,label?,at}`. Pure exported helpers (unit-tested, no store/React): `recordEdges(edges,edge,now)`
     (coalesce a same-pair edge within `DEDUP_MS=1500` → bump `at`+label, else append+cap to `MAX_EDGES=500`),
     `edgesInto`/`edgesFrom` (newest-first filters), `lineageOf(edges,appId,maxDepth=6)` (newest-inbound walk backwards,
-    cycle-guarded). `startProvenanceTracking()` (module `started` guard, mirror `focus.ts`) subscribes `onAny` and
+    cycle-guarded). **EPIC-6 S2 added panel-selection helpers:** `ProvNeighbor{app,at,label?}`;
+    `fedBy(edges,appId)`/`feeds(edges,appId)` (de-duped `ProvNeighbor[]`, first-wins over the newest-first list =
+    newest edge per app) + `recentEdges(edges,n=12)` (`slice(-n).reverse()`) — the pure selection behind the Network
+    inspector Fed-by/Feeds + the durable Memory panel. `startProvenanceTracking()` (module `started` guard, mirror `focus.ts`) subscribes `onAny` and
     records **exactly `flowForEvent(e)`** — the ONE honest edge source, never an invented link. Started once at
     `main.tsx:20`. **This is the spine for S2 (Network memory) / S3 (durable per-entity source) / S4 (Reader island).**
   - `src/lib/core/intents.ts` — `registerIntent/intentsFor/runIntent`. Graph-mutating
@@ -414,6 +434,10 @@
   what launches the app now. Panels subscribe reactively via `useGraph(s=>s.nodes)` +
   memoized `appAdjacency`/`entitiesByApp`; the canvas render loop still reads the graph
   imperatively (animation unaffected — the effect does NOT depend on `selected`).
+  **EPIC-6 S2 (2026-07-02):** the inspector gained a durable `Provenance · all-time` section (Fed by/Feeds via
+  `fedBy`/`feeds`; `provRow`/`rowStyle` live inside the inspector IIFE), and the bottom-left ticker was wrapped in a
+  column container with a persistent **Memory panel** above it (`recentEdges(provEdges,12)`, scrollable, reads the
+  store so it survives reload). `provEdges = useProvenance(s => s.edges)` is a reactive sub next to `graphNodes`.
   - **`src/apps/network/adjacency.ts`** — pure seam: `appAdjacency(nodes): Record<app,{out,in}>`
     (owner→owner from node links; drops self-edges, owners not in registry, dangling links)
     and `entitiesByApp(nodes): Record<app, CoreNode[]>` (grouped, newest first). Unit-tested

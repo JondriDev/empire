@@ -3,6 +3,9 @@ import {
   recordEdges,
   edgesInto,
   edgesFrom,
+  fedBy,
+  feeds,
+  recentEdges,
   lineageOf,
   MAX_EDGES,
   DEDUP_MS,
@@ -91,6 +94,56 @@ describe('edgesInto / edgesFrom', () => {
   it('returns an empty array when nothing matches', () => {
     expect(edgesInto(ledger, 'weather')).toEqual([])
     expect(edgesFrom(ledger, 'weather')).toEqual([])
+  })
+})
+
+describe('fedBy / feeds (the Network inspector selection)', () => {
+  const ledger = [
+    edge('calculator', 'notes', 1000),
+    edge('weather', 'notes', 2000),
+    edge('calculator', 'notes', 4000, 'again'), // newer calculator→notes
+    edge('notes', 'goals', 3000),
+    edge('notes', 'calendar', 5000),
+  ]
+
+  it('fedBy = distinct sources into an app, newest first, carrying newest at/label', () => {
+    const into = fedBy(ledger, 'notes')
+    expect(into.map(n => n.app)).toEqual(['calculator', 'weather'])
+    // calculator's newest inbound edge (4000, "again") wins the dedupe.
+    expect(into[0]).toEqual({ app: 'calculator', at: 4000, label: 'again' })
+    expect(into[1]).toEqual({ app: 'weather', at: 2000 })
+  })
+
+  it('feeds = distinct targets from an app, newest first', () => {
+    const out = feeds(ledger, 'notes')
+    expect(out.map(n => n.app)).toEqual(['calendar', 'goals'])
+    expect(out[0].at).toBe(5000)
+  })
+
+  it('returns empty arrays when the app has no history on that side', () => {
+    expect(fedBy(ledger, 'goals')).toEqual([{ app: 'notes', at: 3000 }])
+    expect(feeds(ledger, 'goals')).toEqual([])
+    expect(fedBy(ledger, 'weather')).toEqual([])
+  })
+})
+
+describe('recentEdges (the durable memory panel feed)', () => {
+  const ledger = [
+    edge('a', 'b', 1000),
+    edge('b', 'c', 2000),
+    edge('c', 'd', 3000),
+  ]
+
+  it('returns the newest N edges, newest first', () => {
+    expect(recentEdges(ledger, 2).map(e => e.at)).toEqual([3000, 2000])
+  })
+
+  it('returns all edges newest-first when fewer than N exist', () => {
+    expect(recentEdges(ledger, 12).map(e => e.at)).toEqual([3000, 2000, 1000])
+  })
+
+  it('returns an empty array for an empty ledger', () => {
+    expect(recentEdges([], 12)).toEqual([])
   })
 })
 

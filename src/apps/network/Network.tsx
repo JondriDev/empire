@@ -16,8 +16,10 @@ import { useGraph } from '../../lib/core/graph'
 import { useFocus } from '../../lib/core/focus'
 import type { CoreNode } from '../../lib/core/graph'
 import { flowForEvent } from '../../lib/core/flow'
+import { useProvenance, fedBy, feeds, recentEdges, type ProvNeighbor } from '../../lib/core/provenance'
 import { appAdjacency, entitiesByApp } from './adjacency'
 import { TYPE_RGB, typeRgb, rgbCss, SIGNAL, ION, PLASMA, VOID } from './nodeColors'
+import { cssVar, tint } from '../../design-system/tokens'
 
 // Map a hex accent (the registry `color`) to an "r,g,b" string for canvas fills.
 function rgbOf(hex: string): string {
@@ -113,6 +115,8 @@ function ago(ms: number): string {
 // handoff, rendered as `source → target`.
 type Signal = { key: number; name: string; rgb: string; to?: string; label: string; at: number }
 const MAX_SIGNALS = 6
+// Rows shown in the durable memory panel — the persistent analogue of the ticker.
+const MEMORY_ROWS = 12
 
 // Node colour by *type* lives in ./nodeColors so the canvas, legend and
 // inspector share ONE source and can never drift.
@@ -138,6 +142,11 @@ export default function Network() {
   const allNodes = useMemo(() => Object.values(graphNodes), [graphNodes])
   const adjacency = useMemo(() => appAdjacency(allNodes), [allNodes])
   const entities = useMemo(() => entitiesByApp(allNodes), [allNodes])
+  // Durable provenance — the organism's recollection of real transfers. Read
+  // reactively so both the inspector's all-time "Fed by / Feeds" and the always
+  // -visible memory panel update live AND survive a reload (the ticker doesn't).
+  const provEdges = useProvenance(s => s.edges)
+  const memory = useMemo(() => recentEdges(provEdges, MEMORY_ROWS), [provEdges])
 
   useEffect(() => {
     if (signals.length === 0) return
@@ -398,14 +407,19 @@ export default function Network() {
     return acc
   }, {})
   const selEdges = selected ? adjacency[selected.id] : undefined
+  // All-time provenance for the focused app (durable; survives reload). Distinct
+  // from `selEdges`, which is the live *structural* graph adjacency (now).
+  const selFedBy = selected ? fedBy(provEdges, selected.id) : []
+  const selFeeds = selected ? feeds(provEdges, selected.id) : []
   // Selecting an app points global focus at its newest node, so ⌘K opens the
   // command palette already aimed at something real in that app.
   useEffect(() => {
     if (selEntities[0]) useFocus.getState().setFocus(selEntities[0].id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected])
+  const appById = (id: string) => apps.find(x => x.id === id)
   const appName = (id: string) => {
-    const a = apps.find(x => x.id === id)
+    const a = appById(id)
     return a ? t(`app.${a.id}.name`, a.name) : id
   }
   const openById = (id: string) => {
@@ -431,12 +445,79 @@ export default function Network() {
       </div>
       <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />
 
+      {/* Bottom-left signal column: durable Memory (top) over the live ticker
+          (anchored at the corner). The ticker is per-session and starts empty;
+          Memory is the persistent recollection that survives a reload. */}
+      <div
+        style={{
+          position: 'absolute', left: 16, bottom: 16, zIndex: 2,
+          width: 'min(248px, calc(100% - 32px))',
+          display: 'flex', flexDirection: 'column', gap: 'var(--space-2)',
+        }}
+      >
+      {/* Durable memory — recent real transfers, loaded from the provenance store
+          on mount, so they persist across reloads (the ticker below does not). */}
+      <div
+        className="gp"
+        style={{
+          pointerEvents: 'auto',
+          padding: 'var(--space-3)', borderRadius: 'var(--radius-md)',
+          display: 'flex', flexDirection: 'column', gap: 'var(--space-2)',
+          maxHeight: '34vh', overflowY: 'auto',
+        }}
+      >
+        <div className="t-label" style={{ color: 'var(--text3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+          <span
+            style={{
+              width: 6, height: 6, borderRadius: 'var(--radius-full)',
+              background: memory.length ? cssVar('plasma') : 'var(--text3)',
+              boxShadow: memory.length ? `0 0 8px ${cssVar('plasma')}` : 'none',
+            }}
+          />
+          {t('network.memory', 'Memory')}
+        </div>
+        {memory.length === 0 ? (
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)', fontFamily: 'var(--mono)' }}>
+            {t('network.noMemory', 'no transfers remembered yet')}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {memory.map((e, i) => {
+              const from = appById(e.fromApp)
+              const to = appById(e.toApp)
+              const FromIcon = from ? getAppIcon(from.icon) : null
+              const ToIcon = to ? getAppIcon(to.icon) : null
+              return (
+                <div
+                  key={`${e.fromApp}-${e.toApp}-${e.at}-${i}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-xs)' }}
+                >
+                  {FromIcon && from && (
+                    <span style={{ color: from.color, flex: '0 0 auto', display: 'flex' }}><FromIcon className="w-3 h-3" /></span>
+                  )}
+                  <span style={{ color: 'var(--text2)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 78 }}>
+                    {appName(e.fromApp)}
+                  </span>
+                  <span style={{ color: 'var(--text3)', flex: '0 0 auto' }}>→</span>
+                  {ToIcon && to && (
+                    <span style={{ color: to.color, flex: '0 0 auto', display: 'flex' }}><ToIcon className="w-3 h-3" /></span>
+                  )}
+                  <span style={{ color: 'var(--text)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>
+                    {appName(e.toApp)}
+                  </span>
+                  <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', flex: '0 0 auto' }}>{ago(Date.now() - e.at)}</span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Live signal ticker — a glanceable readout of recent nerve traffic. */}
       <div
         className="gp"
         style={{
-          position: 'absolute', left: 16, bottom: 16, zIndex: 2, pointerEvents: 'none',
-          width: 'min(248px, calc(100% - 32px))',
+          pointerEvents: 'none',
           padding: 'var(--space-3)',
           borderRadius: 'var(--radius-md)',
           display: 'flex', flexDirection: 'column', gap: 'var(--space-2)',
@@ -493,6 +574,7 @@ export default function Network() {
           </div>
         )}
       </div>
+      </div>
 
       {/* Legend — node-type → accent, always visible so the coloured dots and
           arcs are readable. Sourced from TYPE_RGB so it can never drift. */}
@@ -527,6 +609,35 @@ export default function Network() {
           graph entities and its true cross-app neighbours. */}
       {selected && (() => {
         const Icon = getAppIcon(selected.icon)
+        // One provenance row — a directed neighbour (glyph ← fed-by / → feeds)
+        // with the app's own glyph, name and the newest transfer's relative age.
+        const rowStyle = {
+          display: 'flex', alignItems: 'center', gap: 'var(--space-2)', width: '100%',
+          padding: '6px 8px', background: 'transparent', border: 'none',
+          borderRadius: 'var(--radius-md)', color: 'var(--text)', textAlign: 'left',
+          fontSize: 'var(--text-xs)', cursor: 'pointer',
+          transition: 'background var(--dur-fast)',
+        } as const
+        const provRow = (glyph: string, n: ProvNeighbor) => {
+          const a = appById(n.app)
+          const RowIcon = a ? getAppIcon(a.icon) : null
+          return (
+            <button
+              key={glyph + n.app}
+              onClick={() => openById(n.app)}
+              style={rowStyle}
+              onMouseEnter={(e) => { e.currentTarget.style.background = tint('signal', 10) }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+            >
+              <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', flex: '0 0 auto', width: 12 }}>{glyph}</span>
+              {RowIcon && a && (
+                <span style={{ color: a.color, flex: '0 0 auto', display: 'flex' }}><RowIcon className="w-3 h-3" /></span>
+              )}
+              <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{appName(n.app)}</span>
+              <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', flex: '0 0 auto' }}>{ago(Date.now() - n.at)}</span>
+            </button>
+          )
+        }
         return (
           <div
             className="gp animate-fade-in-up"
@@ -618,6 +729,39 @@ export default function Network() {
                     </button>
                   )
                 })
+              )}
+            </div>
+
+            {/* All-time provenance — the durable "Fed by / Feeds" ledger. Unlike
+                the live structural adjacency above, this is history that survives
+                a reload: who has ever fed this app, and what it has ever fed. */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div className="t-label" style={{ color: 'var(--text3)' }}>
+                {t('network.provenance', 'Provenance')} · {t('network.allTime', 'all-time')}
+              </div>
+              {selFedBy.length === 0 && selFeeds.length === 0 ? (
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)', fontFamily: 'var(--mono)' }}>
+                  {t('network.noProvenance', 'no transfers recorded yet')}
+                </div>
+              ) : (
+                <>
+                  {selFedBy.length > 0 && (
+                    <>
+                      <div className="t-label" style={{ color: 'var(--text3)', opacity: 0.75, marginTop: 2 }}>
+                        {t('network.fedBy', 'Fed by')}
+                      </div>
+                      {selFedBy.map(n => provRow('←', n))}
+                    </>
+                  )}
+                  {selFeeds.length > 0 && (
+                    <>
+                      <div className="t-label" style={{ color: 'var(--text3)', opacity: 0.75, marginTop: 2 }}>
+                        {t('network.feeds', 'Feeds')}
+                      </div>
+                      {selFeeds.map(n => provRow('→', n))}
+                    </>
+                  )}
+                </>
               )}
             </div>
 
