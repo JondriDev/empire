@@ -129,6 +129,61 @@ export function searchNodes(nodes: CoreNode[], query: string, limit = 50): Searc
   return hits.slice(0, limit)
 }
 
+/** A facet value the UI can offer as a filter chip, with how many hits carry it. */
+export interface Facet {
+  value: string
+  count: number
+}
+
+/** Which dimensions of the hit set the user has narrowed to (empty = no narrowing). */
+export interface HitFilter {
+  /** Keep only hits whose node `type` is in this set (ignored when empty/absent). */
+  types?: string[]
+  /** Keep only hits whose owning `app` is in this set (ignored when empty/absent). */
+  apps?: string[]
+}
+
+/**
+ * Narrow a ranked hit list to the chosen node types and/or owning apps. AND
+ * across dimensions (a type AND an app filter must both pass), OR within a
+ * dimension (any of the chosen types). An empty/absent dimension does not filter,
+ * so `filterHits(hits, {})` returns the input untouched (and preserves its order).
+ */
+export function filterHits(hits: SearchHit[], filter: HitFilter): SearchHit[] {
+  const types = filter.types && filter.types.length ? new Set(filter.types) : null
+  const apps = filter.apps && filter.apps.length ? new Set(filter.apps) : null
+  if (!types && !apps) return hits
+  return hits.filter(h =>
+    (!types || types.has(h.node.type)) &&
+    (!apps || apps.has(h.node.meta.app)),
+  )
+}
+
+/**
+ * Derive the available filter facets from a hit set — the distinct node `types`
+ * and owning `apps` present, each with its hit count. Sorted by count desc then
+ * value asc so the busiest chips lead and the order is deterministic. Computed
+ * over the UNFILTERED hits so the chips always show every way to widen back.
+ */
+export function hitFacets(hits: SearchHit[]): { types: Facet[]; apps: Facet[] } {
+  const byType = new Map<string, number>()
+  const byApp = new Map<string, number>()
+  for (const h of hits) {
+    byType.set(h.node.type, (byType.get(h.node.type) ?? 0) + 1)
+    byApp.set(h.node.meta.app, (byApp.get(h.node.meta.app) ?? 0) + 1)
+  }
+  const toFacets = (m: Map<string, number>): Facet[] =>
+    [...m.entries()]
+      .map(([value, count]) => ({ value, count }))
+      .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
+  return { types: toFacets(byType), apps: toFacets(byApp) }
+}
+
+/** Toggle one value in a filter dimension list — add if absent, remove if present. */
+export function toggleFacet(current: string[], value: string): string[] {
+  return current.includes(value) ? current.filter(v => v !== value) : [...current, value]
+}
+
 /**
  * Group ranked hits by owning app (`node.meta.app`), preserving each group's
  * internal rank and ordering the groups by their best hit — the shape the

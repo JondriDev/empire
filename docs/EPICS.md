@@ -36,7 +36,7 @@ for the real Maps), token-violations **held at 0**. Do not re-add the deleted ap
 
 ---
 
-## ▶ ACTIVE — EPIC-8 · Global cross-app search (the organism becomes queryable)
+## ✅ DONE (code-complete 2026-07-03, QA to confirm) — EPIC-8 · Global cross-app search (the organism becomes queryable)
 
 > **Promoted 2026-07-02** (EPIC-6 CLOSED, QA-confirmed on green main `e262f1b`; every prior epic DONE; EPIC-7 ·
 > Android stays device-gated / not cloud-verifiable). **Why this is the highest realizable gradient now** (one line):
@@ -133,15 +133,25 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
     `search.test.ts` +1 (array body), `GLOBAL-SEARCH` guard extended. Build🟢 vitest🟢 eslint clean; tokens 0,
     off-system 0 (`--assert-zero` exit 0); routes 27/27.
 
-- [ ] **S3 · Type/app filters + keyboard nav + summon-from-anywhere (Search becomes the organism's command surface).**
-  Make Search fast and global: (a) **filter chips** — by node `type` (note/task/event/…) and/or owning app, driven by
-  pure helpers in `search.ts` (`filterHits(hits, {types?, apps?})`, unit-pinned); (b) **keyboard nav** — ↑/↓ move a
-  highlight across the flat ranked list, Enter opens the highlighted hit (roving-focus like `NodeActions`/
-  `CommandPalette`); (c) **global summon** — a shell keybinding (distinct from ⌘K's focused-node palette and
-  Ctrl+Space's app-search) opens the Search app with the field focused (or fold global entity-search INTO the
-  existing `CommandPalette` as a second mode — decide by which is less shell-risk). *Acceptance:* filter to `task`
-  → only tasks; ↑/↓/Enter opens a hit without the mouse; the summon key focuses the field. Build🟢 vitest🟢 (filter
-  helpers pinned) eslint clean; tokens 0, off-system 0.
+- [x] **S3 · Type/app filters + keyboard nav + summon-from-anywhere (Search becomes the organism's command surface).**
+  ✅ **Shipped 2026-07-03 (`main`) — EPIC-8 CODE-COMPLETE.** All three parts landed: (a) **filter chips** — new pure
+  helpers in `search.ts` (`filterHits(hits, {types?, apps?})` AND-across/OR-within, `hitFacets(hits)` → distinct
+  type/app facets w/ counts busiest-first, `toggleFacet`) drive Type + App chip rows above the results; chips derive
+  from the UNFILTERED hits (always show every way to widen back), the results render `filterHits(hits, …)`. (b)
+  **keyboard nav** — `activeIndex` roves the FLAT rank-ordered list (`groups.flatMap(g=>g.hits)`, same order the groups
+  render); ↑/↓ move + `scrollIntoView({block:'nearest'})`, Enter → `openEntity(hit.node.meta.app, hit.node.id)`; the
+  active row gets an `inset 0 0 0 1px var(--ion)` ring + always-visible ⚡ actions; index resets to 0 on query/filter
+  change. (c) **global summon** — a THIRD distinct shell key **⌘/Ctrl+Shift+F** in `Desktop.tsx`'s keydown handler
+  (distinct from ⌘K focused-node palette + Ctrl+Space app-search — lowest shell-risk per the "don't overload"
+  decision): `openAppById('search')` + `dispatchEvent(new CustomEvent('empire:summon-search'))`; `Search.tsx` listens
+  and (re)focuses+selects the field even when already foregrounded (mount autofocus covers first-open). `search.test.ts`
+  +8 (`filterHits` ×5 incl. AND-across-dims + rank-order-preserved, `hitFacets` ×2, `toggleFacet` ×1). **VERIFIED:**
+  build🟢, vitest 257→265🟢, eslint . clean, `metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0); static
+  215→223 (+8), bundle 696.4→697.5 (+1.1, chips/keyboard/summon UI + helpers, **no new deps**); **smoke 28/28 render
+  clean incl. search, GLOBAL-SEARCH 1/1 ✅ still holds.** *Cloud limit:* filter-chip narrowing + ↑/↓/Enter roving +
+  ⌘⇧F summon are on-device interactions — the pure `filterHits`/`hitFacets`/`toggleFacet` are unit-pinned, the smoke
+  carries the render+GLOBAL-SEARCH roundtrip headless. **★ EPIC-8 is CODE-COMPLETE (S1–S3 all shipped) → QA confirms
+  then Strategist promotes node-level lineage.**
 
 _S1 has shipped **and** QA confirmed **`GLOBAL-SEARCH 1/1`** (a term surfaced entities across ≥2 apps, grouped) — the
 epic's headline metric has moved. S2–S3 deepen it (land on the exact entity → filters/keyboard/summon). When all
