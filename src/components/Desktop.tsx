@@ -54,7 +54,8 @@ export default function Desktop() {
     return () => clearInterval(timer)
   }, [])
 
-  // Ctrl+Space → search · Escape → close overlays
+  // Ctrl+Space → app launcher search · ⌘/Ctrl+Shift+F → summon global entity
+  // Search (distinct from ⌘K's focused-node palette) · Escape → close overlays
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.code === 'Space') {
@@ -65,6 +66,12 @@ export default function Desktop() {
         })
         setSearchQuery('')
         setSearchSelected(0)
+      }
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'f') {
+        // Open the Search app full-screen and (re)focus its field from anywhere.
+        e.preventDefault()
+        openAppById('search')
+        window.dispatchEvent(new CustomEvent('empire:summon-search'))
       }
       if (e.key === 'Escape') {
         if (showSearch) { setShowSearch(false); return }

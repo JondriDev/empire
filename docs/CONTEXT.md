@@ -81,18 +81,37 @@
         `node.data.sourceId` → your local item → scroll + `.focus-land`. TRAP: read the graph via `getState()` (NOT a
         reactive `useGraph` sub) inside the effect, or every mirror tick re-fires the scroll; gate with a `handledFocus`
         ref keyed on the focusedId you already handled.
-    - **▶ NEXT BUILDER STAGE = EPIC-8 S3 · Type/app filters + keyboard nav + summon-from-anywhere (Search → the
-      organism's command surface).** Full spec in `docs/EPICS.md` → EPIC-8 S3. Three parts, all cloud-verifiable via
-      unit tests + the existing smoke: **(a)** filter chips by node `type` and/or owning app, driven by a NEW pure
-      `filterHits(hits, {types?, apps?})` in `search.ts` (unit-pin it like `searchNodes`/`groupHitsByApp`) — render the
-      chips in `Search.tsx` above the results, derive the available type/app sets from the current hits. **(b)** keyboard
-      nav — ↑/↓ move a highlight across the FLAT ranked `hits` list (keep an `activeIndex` state), Enter calls
-      `openEntity(hits[activeIndex].node.meta.app, hits[activeIndex].node.id)` — roving-focus idiom, see
-      `NodeActions`/`CommandPalette`. **(c)** global summon — a shell keybinding that opens `/app/search` focused is the
-      LOWER-shell-risk choice (`CommandPalette` already owns ⌘K + Ctrl+Space, so a THIRD distinct key beats overloading
-      it). *Acceptance:* filter to `task` → only tasks; ↑/↓/Enter opens a hit mouse-free; the summon key focuses the
-      field. Add a `search.test.ts` `filterHits` block. build🟢 vitest🟢 eslint 0; tokens 0, off-system 0. **S3 is the
-      last EPIC-8 stage → shipping it retires EPIC-8 to DONE** (then Strategist promotes node-level lineage; Android gated).
+    - **✅ S3 SHIPPED 2026-07-03 (`main`) — filters + keyboard nav + summon → EPIC-8 CODE-COMPLETE.** Three parts:
+      **(a)** three new pure helpers in **`search.ts`** (after `groupHitsByApp`): `filterHits(hits,{types?,apps?})`
+      (AND-across-dims, OR-within; empty dims → returns input untouched, order preserved), `hitFacets(hits)` →
+      `{types:Facet[], apps:Facet[]}` (distinct values w/ counts, busiest-first then value-asc — computed over
+      UNFILTERED hits so chips always widen back), `toggleFacet(list,v)` (add/remove). `Search.tsx` holds `typeFilter`/
+      `appFilter` state, renders Type + App chip rows (`chip()` helper, ion tint when on, `aria-pressed`) between the
+      field and results, filters the rendered hits via `filterHits`. **(b)** `activeIndex` state roves the FLAT list
+      `groups.flatMap(g=>g.hits)` (same order groups render); `onKeyDown` on the input handles ↑/↓ (clamp) + Enter →
+      `openEntity(hit.node.meta.app, hit.node.id)`; an effect `scrollIntoView({block:'nearest'})` via a
+      `[data-result-id]` selector; active row = `boxShadow: inset 0 0 0 1px var(--ion)` + always-on ⚡ actions;
+      `activeIndex` resets to 0 on `[query,typeFilter,appFilter]`. **(c)** THIRD distinct shell key **⌘/Ctrl+Shift+F**
+      in **`Desktop.tsx`** keydown (beside Ctrl+Space): `openAppById('search')` + `dispatchEvent(new
+      CustomEvent('empire:summon-search'))`; `Search.tsx` has a `window.addEventListener('empire:summon-search')`
+      effect that `focus()`+`select()`s the field (mount autofocus covers first-open, so both open-paths refocus).
+      `search.test.ts` +8. build🟢 vitest 257→265🟢 eslint . clean; tokens 0, off-system 0 (`--assert-zero` exit 0);
+      static 215→223, bundle 696.4→697.5 (+1.1, no new deps). **Ran the full smoke LIVE: 28/28 render clean incl.
+      search, GLOBAL-SEARCH 1/1 ✅ (unchanged — S3 didn't regress the corpus/deep-link).**
+      - **SEAM for keyboard-nav / faceted-search reuse:** the roving cursor pattern is `flat = groups.flatMap(g=>g.hits)`
+        + `activeIndex` clamped + `scrollIntoView({block:'nearest'})` off a `[data-result-id]` attr; DON'T index into the
+        grouped structure directly — flatten in render order so the visual cursor matches. Filter chips = derive facets
+        from the UNFILTERED hit set (`hitFacets`), render the FILTERED set (`filterHits`) — never facet the filtered set
+        or you can't widen back. Global summon that must refocus an already-open app = openAppById + a window CustomEvent
+        the app listens for (a mount effect alone won't refire when the app is already foregrounded).
+    - **▶ NEXT BUILDER STAGE = none in an active epic — EPIC-8 is CODE-COMPLETE (S1–S3 all shipped on `main`).** The
+      Strategist should promote the next epic. Topmost cloud-executable candidate = **node-level lineage** (correlate a
+      `HANDOFF` with the specific entity it created — per-artifact ancestry; `lineageOf` in `provenance.ts` is the rail;
+      the durable `empire-provenance` edge store + `openEntity`/`focusedId` deep-link are both built). **EPIC-7 · Android
+      stays device-gated** (not cloud-verifiable). If you arrive with no `▶ ACTIVE` epic promoted, take node-level
+      lineage and flag EPICS needs the Strategist. **QA to confirm EPIC-8 done on the new green main:** type a term
+      matching ≥2 apps → grouped hits; click a Type chip → only that type; ↑/↓/Enter opens a hit mouse-free; ⌘⇧F from any
+      app opens Search with the field focused (the smoke's GLOBAL-SEARCH 1/1 carries the corpus roundtrip headless).
   - _(EPIC-6 history retained below as working memory.)_
 - **Prior active epic (DONE):** **EPIC-6 · Organism Memory (durable provenance & lineage)** — promoted 2026-07-01,
   CLOSED 2026-07-02 (all S1–S4 shipped + QA-confirmed). **Leap:** the organism stops fires-and-forgetting — a

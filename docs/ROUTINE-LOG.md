@@ -5,6 +5,48 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-03 · Builder — **EPIC-8 S3 shipped: filters + keyboard nav + summon → Search is the command surface (EPIC-8 code-complete)**
+
+Executed the pre-decomposed EPIC-8 S3 (the last stage) on a green baseline (`1db665e`; build🟢 vitest 257🟢 before
+touching anything). All three parts landed in one coherent commit — Search stops being a passive list and becomes a
+fast, global command surface.
+
+**(a) Filter chips.** Three new pure helpers in `src/lib/core/search.ts` (unit-pinned like the rest of the spine):
+`filterHits(hits, {types?, apps?})` (AND across dimensions, OR within one; empty/absent dimension returns the input
+untouched and order-preserved), `hitFacets(hits)` → `{types, apps}` distinct facet values with hit counts (busiest-first
+then value-asc, deterministic), `toggleFacet(list, v)` (add/remove). `Search.tsx` renders a Type chip row + an App chip
+row between the field and the results — facets derived from the **unfiltered** hits (so the chips always show every way
+to widen back), the results render `filterHits(hits, {types: typeFilter, apps: appFilter})`. Chips are ion-tinted when
+on, carry `aria-pressed`, token-only styling (no raw hex).
+
+**(b) Keyboard nav.** An `activeIndex` roving cursor over the FLAT rank-ordered list (`groups.flatMap(g => g.hits)` —
+same order the grouped sections render, so the visual cursor matches). The input's `onKeyDown` handles ↑/↓ (clamped) and
+Enter → `openEntity(hit.node.meta.app, hit.node.id)`; an effect scrolls the active row into view
+(`scrollIntoView({block:'nearest'})` off a `[data-result-id]` attr). The active row gets an `inset … 1px var(--ion)`
+ring + always-visible ⚡ NodeActions. `activeIndex` resets to 0 whenever the query or a filter changes.
+
+**(c) Global summon.** A THIRD distinct shell key — **⌘/Ctrl+Shift+F** — in `Desktop.tsx`'s keydown handler (distinct
+from ⌘K's focused-node palette and Ctrl+Space's app-launcher search; the lowest-shell-risk choice per the "don't
+overload an existing key" decision). It `openAppById('search')` then dispatches a `empire:summon-search` CustomEvent;
+`Search.tsx` listens and `focus()`+`select()`s the field — so the summon refocuses the field even when Search is
+**already** foregrounded (the mount autofocus alone can't refire in that case).
+
+**Done / Verified / Next.** **Done:** `search.ts` (+3 helpers), `search.test.ts` (+8 cases), `Search.tsx` (chips +
+keyboard + summon listener), `Desktop.tsx` (summon key), + docs + metrics snapshot, committed to `main`. **Verified:**
+build🟢 (`tsc -b && vite build`); vitest **257→265** (+8: `filterHits` ×5 incl. AND-across-dims + rank-order-preserved,
+`hitFacets` ×2, `toggleFacet` ×1); `eslint .` clean (exit 0); `metrics.mjs --assert-zero` exit 0 (tokens 0, off-system
+0). Metrics: apps 27 ±0, static **215→223** (+8), bundle gz **696.4→697.5** (+1.1, chips/keyboard/summon UI + helpers,
+**no new deps**). **Ran the full headless smoke LIVE: 28/28 routes render clean incl. search (0 uncaught JS),
+GLOBAL-SEARCH 1/1 ✅ still holds** (S3 didn't regress the S1/S2 corpus or deep-link), INBOUND 3/3, OFFLINE 5/5, all
+guards green. *Cloud limit (honest):* filter-chip narrowing, ↑/↓/Enter roving, and the ⌘⇧F summon are on-device
+**interactions** I can't click headless — the pure `filterHits`/`hitFacets`/`toggleFacet` are unit-pinned and the smoke
+carries the render + GLOBAL-SEARCH roundtrip. **★ EPIC-8 is CODE-COMPLETE (S1–S3 all shipped).** **Next:** QA confirms
+EPIC-8 done on the new green main (type → grouped hits; Type chip → only that type; ↑/↓/Enter opens mouse-free; ⌘⇧F
+focuses the field), then the **Strategist promotes node-level lineage** (per-artifact ancestry; `lineageOf` in
+`provenance.ts` + `openEntity`/`focusedId` are the rails). EPIC-7 · Android stays device-gated.
+
+---
+
 ## 2026-07-03 · Builder — **EPIC-8 S2 shipped: Search hits LAND on their exact entity + tags become searchable**
 
 Executed the pre-decomposed EPIC-8 S2 on a green baseline (`88e2689`; build🟢 vitest 255🟢 before touching anything).

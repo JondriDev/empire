@@ -5,6 +5,9 @@ import {
   scoreNode,
   searchNodes,
   groupHitsByApp,
+  filterHits,
+  hitFacets,
+  toggleFacet,
 } from './search'
 import type { CoreNode } from './graph'
 
@@ -144,5 +147,71 @@ describe('groupHitsByApp', () => {
 
   it('returns [] for no hits', () => {
     expect(groupHitsByApp([])).toEqual([])
+  })
+})
+
+describe('filterHits', () => {
+  const corpus = () => searchNodes([
+    node({ title: 'Alien task one', type: 'task', app: 'goals' }),
+    node({ title: 'Alien task two', type: 'task', app: 'inbox' }),
+    node({ title: 'Alien note', type: 'note', app: 'notes' }),
+    node({ title: 'Alien event', type: 'event', app: 'calendar' }),
+  ], 'alien')
+
+  it('returns the input untouched when no dimension is set', () => {
+    const hits = corpus()
+    expect(filterHits(hits, {})).toBe(hits)
+    expect(filterHits(hits, { types: [], apps: [] })).toBe(hits)
+  })
+
+  it('filters by node type (OR within the dimension)', () => {
+    const hits = filterHits(corpus(), { types: ['task'] })
+    expect(hits).toHaveLength(2)
+    expect(hits.every(h => h.node.type === 'task')).toBe(true)
+  })
+
+  it('filters by owning app', () => {
+    const hits = filterHits(corpus(), { apps: ['notes'] })
+    expect(hits).toHaveLength(1)
+    expect(hits[0].node.meta.app).toBe('notes')
+  })
+
+  it('ANDs across dimensions (type AND app must both pass)', () => {
+    const hits = filterHits(corpus(), { types: ['task'], apps: ['inbox'] })
+    expect(hits).toHaveLength(1)
+    expect(hits[0].node.title).toBe('Alien task two')
+  })
+
+  it('preserves rank order of the surviving hits', () => {
+    const hits = corpus()
+    const filtered = filterHits(hits, { types: ['task'] })
+    const rankInAll = filtered.map(h => hits.indexOf(h))
+    expect(rankInAll).toEqual([...rankInAll].sort((a, b) => a - b))
+  })
+})
+
+describe('hitFacets', () => {
+  it('counts distinct types and apps, busiest first', () => {
+    const hits = searchNodes([
+      node({ title: 'Alien task one', type: 'task', app: 'goals' }),
+      node({ title: 'Alien task two', type: 'task', app: 'inbox' }),
+      node({ title: 'Alien note', type: 'note', app: 'notes' }),
+    ], 'alien')
+    const { types, apps } = hitFacets(hits)
+    expect(types).toEqual([{ value: 'task', count: 2 }, { value: 'note', count: 1 }])
+    expect(apps.map(a => a.value)).toEqual(['goals', 'inbox', 'notes']) // ties broken by value asc
+    expect(apps.every(a => a.count === 1)).toBe(true)
+  })
+
+  it('returns empty facets for no hits', () => {
+    expect(hitFacets([])).toEqual({ types: [], apps: [] })
+  })
+})
+
+describe('toggleFacet', () => {
+  it('adds a value when absent and removes it when present', () => {
+    expect(toggleFacet([], 'task')).toEqual(['task'])
+    expect(toggleFacet(['task'], 'note')).toEqual(['task', 'note'])
+    expect(toggleFacet(['task', 'note'], 'task')).toEqual(['note'])
   })
 })
