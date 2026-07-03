@@ -30,6 +30,7 @@ import {
 import { apps, getAppIcon } from '../../lib/registry'
 import { openEntity } from '../../lib/windowStore'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { NodeLineage } from '../../components/ui/NodeLineage'
 
 // One accent per view — Search reads as ion-blue, the calm scanning light.
 const ACCENT = 'var(--ion)'
@@ -281,9 +282,11 @@ function ResultRow({
         <div className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>
           {node.title || '(untitled)'}
         </div>
-        <div className="flex items-center gap-2 mt-0.5 text-xs" style={{ color: 'var(--text3)' }}>
+        <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs" style={{ color: 'var(--text3)' }}>
           <span style={{ fontFamily: 'var(--mono)' }}>{node.type}</span>
           {hit.snippet && <span className="truncate">— {hit.snippet}</span>}
+          {/* Node-level lineage — the exact entity this hit descended from. */}
+          <NodeLineage nodeId={node.id} />
         </div>
       </button>
 

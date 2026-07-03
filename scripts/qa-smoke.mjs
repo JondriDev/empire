@@ -410,7 +410,7 @@ const lineageSeed = {
   version: 0,
 };
 const readLineageEls = (page) => page.$$eval('[data-node-lineage]', els => els.map(e => e.getAttribute('data-node-lineage')));
-const nodeLineage = { rendered: false, title: false, persisted: false, pass: false };
+const nodeLineage = { rendered: false, title: false, persisted: false, search: false, pass: false };
 try {
   const page = await ctx.newPage();
   await page.goto(`${BASE}/app/inbox`, { waitUntil: 'networkidle', timeout: 30000 });
@@ -426,8 +426,18 @@ try {
   await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
   await page.waitForTimeout(800);
   nodeLineage.persisted = (await readLineageEls(page)).includes('qa-lineage-parent');
-  nodeLineage.pass = nodeLineage.rendered && nodeLineage.title && nodeLineage.persisted;
-  console.log(`NODE-LINEAGE  rendered=${nodeLineage.rendered} title=${nodeLineage.title} persisted=${nodeLineage.persisted}`);
+  // S2: the same durable ancestry must now surface on the SECOND node-rendering
+  // view — Search. The graph already holds the seeded pair; open Search, query a
+  // term matching the CHILD, and assert its result row renders the parent's
+  // <NodeLineage> (`[data-node-lineage="qa-lineage-parent"]`). Proves the Search
+  // mount reuses the same walker + surface as the Inbox row.
+  await page.goto(`${BASE}/app/search`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(400);
+  await page.fill('input[aria-label="Search across every app"]', 'anomaly');
+  await page.waitForTimeout(600);
+  nodeLineage.search = (await readLineageEls(page)).includes('qa-lineage-parent');
+  nodeLineage.pass = nodeLineage.rendered && nodeLineage.title && nodeLineage.persisted && nodeLineage.search;
+  console.log(`NODE-LINEAGE  rendered=${nodeLineage.rendered} title=${nodeLineage.title} persisted=${nodeLineage.persisted} search=${nodeLineage.search}`);
   // Leave the graph clean for later guards.
   await page.evaluate((k) => localStorage.removeItem(k), GRAPH_KEY);
   await page.close();
@@ -701,9 +711,9 @@ md += `| Query | Book hit | Task hit | Spans 2 apps | Tag-only hit | Result |\n|
 md += `| ${SEARCH_TERM} / ${TAG_TERM} | ${globalSearch.book ? '✅' : '❌'} | ${globalSearch.task ? '✅' : '❌'} | ${globalSearch.twoApps ? '✅' : '❌'} | ${globalSearch.tagOnly ? '✅' : '❌'} | ${globalSearch.pass ? '✅' : '❌'}${globalSearch.err ? ' (' + globalSearch.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**GLOBAL-SEARCH: ${globalSearch.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
 md += `\n## Node-lineage guard (node-level lineage — per-artifact ancestry is legible)\n\n`;
-md += `App-level provenance remembers which app fed which app; node-level lineage answers which ENTITY an exact artifact descended from. The core intents stamp \`data.from = sourceNode.id\` on every node they create, so the graph already holds a durable per-artifact ancestry edge. Two graph-survivable \`task\` nodes were seeded — a parent and a child whose \`data.from\` points at it — then reloaded so the persist store rehydrated; PASS = the Inbox child row renders a \`<NodeLineage>\` (\`[data-node-lineage]\`) carrying the parent entity's real title, AND it still resolves after a second reload (the \`from\` link is durable). The pure walker \`nodeLineageOf\` is unit-pinned in \`nodeLineage.test.ts\`; this carries the graph→persist→rehydrate→render roundtrip jsdom cannot.\n\n`;
-md += `| Artifact | Lineage rendered | Parent title shown | Survived reload | Result |\n|---|---|---|---|---|\n`;
-md += `| task ← ${LINEAGE_PARENT_TITLE} | ${nodeLineage.rendered ? '✅' : '❌'} | ${nodeLineage.title ? '✅' : '❌'} | ${nodeLineage.persisted ? '✅' : '❌'} | ${nodeLineage.pass ? '✅' : '❌'}${nodeLineage.err ? ' (' + nodeLineage.err.slice(0, 80) + ')' : ''} |\n`;
+md += `App-level provenance remembers which app fed which app; node-level lineage answers which ENTITY an exact artifact descended from. The core intents stamp \`data.from = sourceNode.id\` on every node they create, so the graph already holds a durable per-artifact ancestry edge. Two graph-survivable \`task\` nodes were seeded — a parent and a child whose \`data.from\` points at it — then reloaded so the persist store rehydrated; PASS = the Inbox child row renders a \`<NodeLineage>\` (\`[data-node-lineage]\`) carrying the parent entity's real title, AND it still resolves after a second reload (the \`from\` link is durable). **S2 extends the surface:** the same seeded ancestry must ALSO render on the Search result row (query "anomaly" → the child hit shows \`[data-node-lineage=qa-lineage-parent]\`), proving \`<NodeLineage>\` is now legible on every node-rendering view, not just the Inbox — the same drop-in surface also mounts on The Network inspector's per-entity list (visual/on-device). The pure walker \`nodeLineageOf\` is unit-pinned in \`nodeLineage.test.ts\`; this carries the graph→persist→rehydrate→render roundtrip jsdom cannot.\n\n`;
+md += `| Artifact | Lineage rendered | Parent title shown | Survived reload | Search surface | Result |\n|---|---|---|---|---|---|\n`;
+md += `| task ← ${LINEAGE_PARENT_TITLE} | ${nodeLineage.rendered ? '✅' : '❌'} | ${nodeLineage.title ? '✅' : '❌'} | ${nodeLineage.persisted ? '✅' : '❌'} | ${nodeLineage.search ? '✅' : '❌'} | ${nodeLineage.pass ? '✅' : '❌'}${nodeLineage.err ? ' (' + nodeLineage.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
 md += `\n## Home-alive guard (The Bridge — the home screen is living telemetry)\n\n`;
 md += `The Core graph was seeded with a today-dated \`event\` (Calendar), an open \`task\` (Goals) and a \`book\` (Reader), then home was reloaded (persist rehydrate). PASS = the Today and Open Tasks widgets show the live count + entity, the jump-back-in strip lists all three newest-first, clicking a row lands in its owning app (the \`openEntity\` rail), and a question typed into the Cakra line opens Cakra prefilled (the \`empire-ai-clipboard\` rail). The pure selectors are unit-pinned in \`bridge.test.ts\`; this carries the rendered-home roundtrip jsdom cannot.\n\n`;

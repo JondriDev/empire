@@ -209,25 +209,42 @@ second reload). **Headline: `NODE-LINEAGE 0/1 → 1/1`** + the "+ a unit test" d
     Inbox row shows `↖ ⌾ <parent entity title>`). 28/28 routes render clean (0 uncaught JS), vitest **276/276**, eslint 0,
     `metrics.mjs --assert-zero` exit 0, every other guard green. No runtime bug, no contradiction. **▶ NEXT = S2.**
 
-- [ ] **S2 · Surface node-lineage on the other derived surfaces (Notes / Learning / Network inspector).** Drop
-  `<NodeLineage nodeId>` wherever a derived entity renders: **Notes** cards made via `make-note-from` (carry
-  `data.from`), **Learning** items via `add-to-learning`, and the **Network inspector**'s per-entity list (show each
-  node's ancestry chain when clicked). Reuse the S1 component + walker verbatim — no new logic. *Acceptance:* a note
-  spun off a message shows "↖ «that message»"; the Network inspector shows an entity's ancestor chain. Extend the
-  `NODE-LINEAGE` guard with a Notes/Network seed OR add a `childrenOf` "what this spawned" row. Build🟢 vitest🟢
-  eslint clean; tokens 0, off-system 0. **(Strategist: confirm the surface set + whether to also show descendants.)**
+- [x] **S2 · Surface node-lineage on the graph's node-rendering views (Network inspector + Search).** ✅ SHIPPED
+  2026-07-03 (`main`). Dropped `<NodeLineage nodeId>` on the two surfaces that render REAL graph nodes by id: the
+  **Network inspector's per-entity list** (upgraded from bare type-counts to an actual entity list — newest-first,
+  capped at `ENTITY_ROWS=12` + a "+ N more" line — each row showing the entity title + type dot + its ancestry trail)
+  and **Search result rows** (lineage under the type/snippet meta line). Both reuse the S1 component + walker verbatim —
+  zero new logic. Extended the `NODE-LINEAGE` guard with a **Search axis** (`search=true`): query "anomaly" → the seeded
+  child hit renders `[data-node-lineage=qa-lineage-parent]`. **Ran the full smoke LIVE: NODE-LINEAGE 1/1 ✅**
+  (`rendered=true title=true persisted=true search=true`), 28/28 clean, every guard green. build🟢 vitest 288🟢 eslint
+  clean; tokens 0, off-system 0 (`--assert-zero` exit 0); bundle gz 701.2 ±0 (NodeLineage already bundled).
+  - **⚠️ CORRECTION to the original premise — Notes/Learning app cards CANNOT carry node-lineage (architectural, not
+    skipped):** the intents `make-note-from`/`add-to-learning` (`sync.ts:139-159`) create standalone GRAPH nodes with
+    `data.from`, NOT local Notes/Learning store items — and those `note`/`learning` graph nodes get PRUNED by the
+    central reconcile (`sync.ts:64`) on the next store tick (they have no `sourceId` in their store). Meanwhile the
+    Notes/Learning apps render ONLY local `useStore` items (`notes`/`learningItems`), whose mirror mapping drops `from`
+    entirely (`sync.ts:80-91` map only content/tags, learned/mastered) → a local note/learning item NEVER carries
+    `data.from`. So `<NodeLineage>` on a Notes/Learning card is always null. The derived nodes that DO carry `data.from`
+    (durably: make-task tasks, owned by their source app) live in the graph → surfaced in **The Network inspector** and
+    **Search**, which is exactly where S2 mounted them. *(Descendants (`childrenOf`) row deferred — not needed to move
+    the metric; a candidate for S3's ancestry view.)*
 
-- [ ] **S3 · Node-lineage in Search + a full ancestry view (the organism's provenance lens).** Make lineage
-  *navigable*: a Search hit shows its ancestor chain (`<NodeLineage>` under each row) and clicking a hop deep-links to
-  that ancestor via `openEntity(app, nodeId)` (the EPIC-8 rail). Optionally a dedicated "lineage of X" panel that
-  renders both `nodeLineageOf` (ancestors) and `childrenOf` (descendants) as a mini-tree. *Acceptance:* from any
-  Search hit you can walk up to its source entity mouse-free. Extend the guard to assert a hit row carries
-  `[data-node-lineage]`. Build🟢 vitest🟢 eslint clean; tokens 0, off-system 0. **(Strategist: ratify scope; this
-  closes EPIC-9 → then EPIC-7 · Android if an on-device QA path exists.)**
+- [ ] **S3 · Make node-lineage NAVIGABLE + a full ancestry view (the organism's provenance lens).** The display
+  surfaces exist (Inbox S1, Network inspector + Search S2); S3 makes them *walkable*: clicking a lineage hop in
+  `<NodeLineage>` deep-links to that ancestor via `openEntity(app, nodeId)` (the EPIC-8 rail) — so from any Search hit or
+  inspector row you can climb to the source entity mouse-free. Optionally a dedicated "lineage of X" panel rendering
+  both `nodeLineageOf` (ancestors) and `childrenOf` (descendants) as a mini-tree (the `childrenOf` walker is already
+  built + unit-pinned). *Acceptance:* click an ancestor token → its owning app opens focused on that entity; extend the
+  guard to assert the click navigates. Build🟢 vitest🟢 eslint clean; tokens 0, off-system 0. **NOTE:** the Search
+  `<NodeLineage>`-under-each-row portion that S3 originally listed was pulled forward into S2 (it's a pure display mount);
+  S3 is now the *navigation* layer. **(Strategist: ratify; this closes EPIC-9 → then EPIC-7 · Android if an on-device QA
+  path exists.)**
 
 _S1 shipped **and QA-confirmed LIVE** on green main `fcfa06d` (`NODE-LINEAGE 1/1`, 28/28 clean, vitest 276) — the epic's
-headline metric has moved. Strategist still to ratify EPIC-9's ranking and refine S2–S3. **EPIC-7 · Android** stays
-device-gated._
+headline metric has moved. **S2 shipped 2026-07-03** (node-lineage now legible on the Network inspector's per-entity
+list + Search rows; guard grew a `search=true` axis; Notes/Learning cards proven architecturally impossible — see S2
+correction). **▶ NEXT = S3** (make the lineage tokens NAVIGABLE via `openEntity` + optional ancestry mini-tree). Strategist
+still to ratify EPIC-9's ranking. **EPIC-7 · Android** stays device-gated._
 
 ---
 
