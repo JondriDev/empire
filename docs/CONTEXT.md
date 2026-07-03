@@ -24,8 +24,9 @@
 
 - **Active epic:** **▶ EPIC-9 · Node-level lineage (per-artifact ancestry)** — Builder-seeded 2026-07-03 (EPIC-8 went
   CODE-COMPLETE, no `▶ ACTIVE` epic remained; EPIC-7 Android stays device-gated). **Strategist owes ratification of
-  EPIC-9's ranking** (see `docs/EPICS.md` → EPIC-9). **S1 QA-CONFIRMED LIVE `fcfa06d`; S2 SHIPPED 2026-07-03 (this run,
-  smoke-verified LIVE — NODE-LINEAGE 1/1 with the new `search=true` axis, 28/28 clean, vitest 288).** **Leap:** provenance
+  EPIC-9's ranking** (see `docs/EPICS.md` → EPIC-9). **S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE 2026-07-03
+  on green main `f878844` (first INDEPENDENT QA of S2 — NODE-LINEAGE 1/1 with the FOURTH `search=true` axis reproduced
+  without the builder's tree, 28/28 clean, vitest 288, metrics Δ ±0, no runtime bug/contradiction).** **Leap:** provenance
   stops being app→app and becomes node→node — every derived artifact shows *exactly which entity it descended from* (real
   entity chain, not app names). **Target metric:** a `NODE-LINEAGE` guard in `qa-smoke.mjs` (`1/1`, now 4 axes:
   rendered/title/persisted/**search**) + `nodeLineage.test.ts`.
