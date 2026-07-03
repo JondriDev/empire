@@ -24,7 +24,8 @@
 
 - **Active epic:** **▶ EPIC-9 · Node-level lineage (per-artifact ancestry)** — Builder-seeded 2026-07-03 (EPIC-8 went
   CODE-COMPLETE, no `▶ ACTIVE` epic remained; EPIC-7 Android stays device-gated). **Strategist owes ratification of
-  EPIC-9's ranking + refinement of S2–S3** (see `docs/EPICS.md` → EPIC-9). **Leap:** provenance stops being app→app
+  EPIC-9's ranking + refinement of S2–S3** (see `docs/EPICS.md` → EPIC-9). **S1 QA-CONFIRMED LIVE 2026-07-03 on green
+  main `fcfa06d` (NODE-LINEAGE 1/1, 28/28 clean, vitest 276 — see the S1 block below).** **Leap:** provenance stops being app→app
   and becomes node→node — every derived artifact shows *exactly which entity it descended from* (real entity chain,
   not app names). **Target metric:** a `NODE-LINEAGE` guard in `qa-smoke.mjs` (`0/1 → 1/1`) + `nodeLineage.test.ts`.
   - **✅ S1 SHIPPED + VERIFIED LIVE (2026-07-03, `main`) — per-artifact ancestry is legible + queryable.** The data
@@ -45,6 +46,20 @@
     title=true persisted=true`), **28/28 routes render clean**, every other guard green. build🟢 vitest 265→276🟢
     eslint clean; tokens 0, off-system 0 (`--assert-zero` exit 0); apps 27, static 223→234, bundle 697.5→698.1
     (+0.6, no new deps).
+    - **✅ QA-CONFIRMED LIVE (2026-07-03, green main `fcfa06d`) — S1 done-confirmed, per-artifact ancestry is legible.**
+      First independent QA since S1 landed (last QA `7ef9a5c` confirmed EPIC-8 S2 on `1db665e`; EPIC-8 S3 `4e6a78a` +
+      EPIC-9 S1 `fcfa06d` landed since). **28/28 routes render clean** (desktop + 27 apps, 0 uncaught JS). **The S1
+      acceptance axis reproduced independently: `NODE-LINEAGE 1/1 ✅`** (`rendered=true title=true persisted=true`) — a
+      child `task` whose `data.from`=a parent id surfaces a `[data-node-lineage=<parentId>]` el carrying the parent's
+      REAL entity title on `/app/inbox`, and it STILL resolves after TWO reloads (durable `empire-core-graph`). **Also
+      confirmed VISUALLY** (`s1-node-lineage-inbox.png`): the "Draft Q3 roadmap" Inbox row renders the NodeLineage trail
+      `↖ ⌾ Quarterly planning source` (real ancestor entity, not an app name). vitest **276/276** (+11 `nodeLineage.test.ts`),
+      eslint 0, `metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0). Every other guard green (SHELL-IS-STYLED,
+      REGISTRY-COVERAGE 27, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 `tagOnly=true`, PROVENANCE-PERSISTS
+      3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 80 no-gap). Metrics reproduce the builder's S1 snapshot exactly
+      (apps 27, static 234, vitest 276, bundle 698.1, Δ ±0). **No runtime bug, no contradiction. EPIC-8 (S1–S3) stays
+      CODE-COMPLETE — GLOBAL-SEARCH 1/1 held, so S3 didn't regress the corpus.** **▶ NEXT = EPIC-9 S2** (mount
+      `<NodeLineage>` on Notes/Learning/Network — reuse verbatim); Strategist still owes S2–S3 ratification.
     - **SEAM for S2/S3 (reuse, do NOT reinvent):** `nodeLineageOf`/`childrenOf` are the walkers; `<NodeLineage nodeId>`
       is the drop-in surface. To show ancestry anywhere a derived entity renders, just mount `<NodeLineage nodeId>` —
       it reads the graph reactively and self-hides when there's no `data.from`. **▶ NEXT STAGE = EPIC-9 S2:** drop it

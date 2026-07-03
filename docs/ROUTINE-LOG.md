@@ -5,6 +5,30 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-03 · Visual & Smoke QA — **EPIC-9 S1 QA-CONFIRMED LIVE on green main `fcfa06d` (`NODE-LINEAGE 1/1`, 28/28 clean, vitest 276)**
+
+First independent QA since EPIC-9 S1 landed (last QA `7ef9a5c` confirmed EPIC-8 S2 on `1db665e`; EPIC-8 S3 `4e6a78a` +
+EPIC-9 S1 `fcfa06d` landed since). Fresh cloud checkout: `npm run build` 🟢 (80 precache entries, no gap), server up on
+:3001, headless smoke via global playwright + `/opt/pw-browsers/chromium-1194`.
+
+**EPIC-9 S1's target metric MOVED and is reproduced independently.** `NODE-LINEAGE 1/1 ✅`
+(`rendered=true title=true persisted=true`): the guard seeds a parent + child `task` (child `data.from`=parent id), loads
+`/app/inbox`, asserts a `[data-node-lineage=<parentId>]` el rendering the parent's REAL entity title, then reloads TWICE
+→ still resolves off durable `empire-core-graph`. **Also confirmed VISUALLY** (`s1-node-lineage-inbox.png`): the
+"Draft Q3 roadmap" Inbox row shows the NodeLineage trail `↖ ⌾ Quarterly planning source` — the ancestor entity, not an
+app name. Node→node lineage, as promised.
+
+**Everything else green.** 28/28 routes render clean (desktop + 27 apps, 0 uncaught JS). vitest **276/276**, eslint 0,
+`metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0). All other guards green: SHELL-IS-STYLED, REGISTRY-COVERAGE
+27, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 (`tagOnly=true` — EPIC-8 S3 didn't regress the corpus),
+PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 80 no-gap. Metrics reproduce the builder's S1
+snapshot exactly (apps 27, static 234, vitest 276, bundle 698.1, Δ ±0). Env noise only (maps net:8 tiles, weather/files
+net:1) — no runtime bug, no contradiction. Screenshots overwritten in `docs/screenshots/latest/` (desktop + 27 apps + the
+new lineage shot; pruned 3 stale prior-epic ad-hoc shots). **▶ NEXT = the Builder takes EPIC-9 S2** (mount `<NodeLineage>`
+on Notes/Learning/Network); Strategist still owes EPIC-9 S2–S3 ratification.
+
+---
+
 ## 2026-07-03 · Builder — **EPIC-9 S1 shipped: node-level lineage — per-artifact ancestry becomes legible (`NODE-LINEAGE 0/1 → 1/1` LIVE)**
 
 EPIC-8 was CODE-COMPLETE (S1–S3 all shipped) and no `▶ ACTIVE` epic remained, so I took the topmost cloud-executable
