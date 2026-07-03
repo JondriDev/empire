@@ -310,7 +310,15 @@ console.log(`GRAPH-LEGIBLE: ${graphLegible.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
 // graph-survivable types — a `task` (graph-only, no syncer) owned by `goals` and
 // a `book` (self-mirrored by Reader, which isn't mounted on /app/search) owned by
 // `reader` — two DIFFERENT apps, both surviving the boot reconcile.
+// S2 adds a THIRD seed: a node whose rare term ('Tessellate') lives ONLY in
+// `data.tags` (a string array) and NOWHERE in its title/type — so it surfaces
+// iff `nodeBodyText` now flattens array elements (S2 corpus gap (a)). It's a
+// `task` (graph-only, no central syncer) so it survives the boot reconcile — a
+// `note`-typed seed on /app/search would be PRUNED (empty Notes store), which is
+// why S1's guard already avoids note seeds. The tag-only term is orthogonal to
+// Xenolith so the two assertions don't cross-contaminate.
 const SEARCH_TERM = 'Xenolith';
+const TAG_TERM = 'Tessellate';
 const searchSeed = {
   state: {
     nodes: {
@@ -324,11 +332,16 @@ const searchSeed = {
         data: { done: false }, links: [],
         meta: { created: 1, updated: 3, app: 'goals' },
       },
+      'qa-search-tag': {
+        id: 'qa-search-tag', type: 'task', title: 'Untitled fragment',
+        data: { done: false, tags: [TAG_TERM] }, links: [],
+        meta: { created: 1, updated: 4, app: 'goals' },
+      },
     },
   },
   version: 0,
 };
-const globalSearch = { book: false, task: false, twoApps: false, pass: false };
+const globalSearch = { book: false, task: false, twoApps: false, tagOnly: false, pass: false };
 try {
   const page = await ctx.newPage();
   await page.goto(`${BASE}/app/search`, { waitUntil: 'networkidle', timeout: 30000 });
@@ -336,7 +349,8 @@ try {
   // Reload so the zustand+persist graph store rehydrates from the seeded key.
   await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
   await page.waitForTimeout(700);
-  await page.fill('input[aria-label="Search across every app"]', SEARCH_TERM);
+  const searchInput = 'input[aria-label="Search across every app"]';
+  await page.fill(searchInput, SEARCH_TERM);
   await page.waitForTimeout(600);
   const body = await page.evaluate(() => document.body.innerText || '');
   globalSearch.book = body.includes('Xenolith fragment log');
@@ -344,8 +358,13 @@ try {
   // Distinct result app-groups (from the rendered sections, not the launcher).
   const groupApps = await page.$$eval('[data-search-group]', els => els.map(e => e.getAttribute('data-search-group')));
   globalSearch.twoApps = groupApps.includes('reader') && groupApps.includes('goals');
-  globalSearch.pass = globalSearch.book && globalSearch.task && globalSearch.twoApps;
-  console.log(`GLOBAL-SEARCH  book=${globalSearch.book} task=${globalSearch.task} twoApps=${globalSearch.twoApps} (groups: ${groupApps.join(',')})`);
+  // S2 corpus gap (a): a term that lives ONLY in the node's tags surfaces it.
+  await page.fill(searchInput, TAG_TERM);
+  await page.waitForTimeout(600);
+  const tagBody = await page.evaluate(() => document.body.innerText || '');
+  globalSearch.tagOnly = tagBody.includes('Untitled fragment');
+  globalSearch.pass = globalSearch.book && globalSearch.task && globalSearch.twoApps && globalSearch.tagOnly;
+  console.log(`GLOBAL-SEARCH  book=${globalSearch.book} task=${globalSearch.task} twoApps=${globalSearch.twoApps} tagOnly=${globalSearch.tagOnly} (groups: ${groupApps.join(',')})`);
   // Leave the graph clean for later guards.
   await page.evaluate((k) => localStorage.removeItem(k), GRAPH_KEY);
   await page.close();
@@ -536,10 +555,10 @@ md += `Reader's real file \`<input>\` was driven with a small \`.txt\` book, the
 md += `| Collection | Node created | Survived reload | Result |\n|---|---|---|---|\n`;
 md += `| reader/book | ${graphLegible.node ? '✅' : '❌'} | ${graphLegible.persisted ? '✅' : '❌'} | ${graphLegible.pass ? '✅' : '❌'}${graphLegible.err ? ' (' + graphLegible.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**GRAPH-LEGIBLE: ${graphLegible.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
-md += `\n## Global-search guard (EPIC-8 S1 — the organism becomes queryable)\n\n`;
-md += `The Core graph was seeded with two entities sharing a rare term across TWO apps (a \`note\` in Notes, a \`task\` in Goals); after a reload (persist rehydrate) the term was typed into the Search field. PASS = BOTH entities surface, grouped under their own app sections — one lens querying every app's real entities at once. The pure ranking spine (\`searchNodes\`) is unit-pinned in \`search.test.ts\`; this carries the graph→input→grouped-render roundtrip jsdom cannot.\n\n`;
-md += `| Query | Book hit | Task hit | Spans 2 apps | Result |\n|---|---|---|---|---|\n`;
-md += `| ${SEARCH_TERM} | ${globalSearch.book ? '✅' : '❌'} | ${globalSearch.task ? '✅' : '❌'} | ${globalSearch.twoApps ? '✅' : '❌'} | ${globalSearch.pass ? '✅' : '❌'}${globalSearch.err ? ' (' + globalSearch.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n## Global-search guard (EPIC-8 S1 + S2 — the organism becomes queryable)\n\n`;
+md += `The Core graph was seeded with entities sharing a rare term across TWO apps (a \`book\` in Reader, a \`task\` in Goals); after a reload (persist rehydrate) the term was typed into the Search field. PASS = BOTH entities surface, grouped under their own app sections — one lens querying every app's real entities at once. **S2 adds a tag-only match:** a third node carries the term \`${TAG_TERM}\` ONLY in \`data.tags\` (a string array) — it surfaces iff \`nodeBodyText\` now flattens array elements (the S2 corpus gap). The pure ranking spine (\`searchNodes\`) is unit-pinned in \`search.test.ts\`; this carries the graph→input→grouped-render roundtrip jsdom cannot.\n\n`;
+md += `| Query | Book hit | Task hit | Spans 2 apps | Tag-only hit | Result |\n|---|---|---|---|---|---|\n`;
+md += `| ${SEARCH_TERM} / ${TAG_TERM} | ${globalSearch.book ? '✅' : '❌'} | ${globalSearch.task ? '✅' : '❌'} | ${globalSearch.twoApps ? '✅' : '❌'} | ${globalSearch.tagOnly ? '✅' : '❌'} | ${globalSearch.pass ? '✅' : '❌'}${globalSearch.err ? ' (' + globalSearch.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**GLOBAL-SEARCH: ${globalSearch.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
 md += `\n## Provenance-persists guard (EPIC-6 — durable app→app memory)\n\n`;
 md += `Real \`editor→<target>\` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event \`flowForEvent\` turns into an edge in the durable \`empire-provenance\` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).\n\n`;

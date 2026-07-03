@@ -16,6 +16,7 @@
 import { create } from 'zustand'
 import { apps, getAppIcon } from './registry'
 import { setCakraTab, type CakraTab } from './cakraTab'
+import { useFocus } from './core/focus'
 
 /** One open app. `id === appId` (apps are singletons in the stack). */
 export interface EmpireWindow {
@@ -113,4 +114,17 @@ export function openAppById(appId: string): string | null {
   if (def.aliasOf) setCakraTab(def.aliasOf.tab as CakraTab)
   void getAppIcon(target.icon) // touch to silence unused-import linters
   return useWindowStore.getState().openApp(target.id, target.name, target.icon, target.color)
+}
+
+/**
+ * Open an app AND point the organism's gaze at one specific node — so a Search
+ * hit lands on its exact entity, not the app's default view. Resolves+opens the
+ * app exactly like `openAppById`, then sets `focusedId` (the same focus rail the
+ * Network inspector uses); the target app reads it on mount to scroll/highlight
+ * the item. Returns the opened app id, or null if the app is unknown.
+ */
+export function openEntity(appId: string, nodeId: string): string | null {
+  const opened = openAppById(appId)
+  if (opened) useFocus.getState().setFocus(nodeId)
+  return opened
 }

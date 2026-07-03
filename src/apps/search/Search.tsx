@@ -17,7 +17,7 @@ import { emit } from '../../lib/eventBus'
 import { useGraph } from '../../lib/core/graph'
 import { searchNodes, groupHitsByApp, type SearchHit } from '../../lib/core/search'
 import { apps, getAppIcon } from '../../lib/registry'
-import { openAppById } from '../../lib/windowStore'
+import { openEntity } from '../../lib/windowStore'
 import { NodeActions } from '../../components/ui/NodeActions'
 
 // One accent per view — Search reads as ion-blue, the calm scanning light.
@@ -139,7 +139,7 @@ function ResultRow({ hit, accent, appId }: { hit: SearchHit; accent?: string; ap
       />
 
       <button
-        onClick={() => openAppById(appId)}
+        onClick={() => openEntity(appId, node.id)}
         className="flex-1 min-w-0 text-left"
         aria-label={`Open ${node.title} in ${appId}`}
       >
@@ -156,7 +156,7 @@ function ResultRow({ hit, accent, appId }: { hit: SearchHit; accent?: string; ap
         style={{ transitionDuration: 'var(--dur-fast)' }}>
         <NodeActions nodeId={node.id} />
         <button
-          onClick={() => openAppById(appId)}
+          onClick={() => openEntity(appId, node.id)}
           aria-label={`Open in ${appId}`}
           className="p-1.5 rounded-lg"
           style={{ color: 'var(--text3)' }}

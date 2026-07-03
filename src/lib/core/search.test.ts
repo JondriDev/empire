@@ -39,13 +39,22 @@ describe('nodeBodyText', () => {
     const n = node({
       title: 'T',
       app: 'notes',
-      data: { body: 'Hello World', count: 3, done: true, nested: { x: 'skip' }, arr: ['skip'] },
+      data: { body: 'Hello World', count: 3, done: true, nested: { x: 'skip' } },
     })
     const text = nodeBodyText(n)
     expect(text).toContain('hello world')
     expect(text).toContain('3')
     expect(text).toContain('true')
-    expect(text).not.toContain('skip')
+    expect(text).not.toContain('skip') // nested objects stay skipped
+  })
+
+  it('flattens the scalar elements of array values (so tags become searchable)', () => {
+    const n = node({ title: 'T', app: 'notes', data: { tags: ['Xenon', 'signal', 7], nope: [{ deep: 'skip' }] } })
+    const text = nodeBodyText(n)
+    expect(text).toContain('xenon')
+    expect(text).toContain('signal')
+    expect(text).toContain('7')
+    expect(text).not.toContain('skip') // nested objects inside arrays stay skipped
   })
 })
 
@@ -109,6 +118,15 @@ describe('searchNodes', () => {
   it('respects the limit', () => {
     const many = Array.from({ length: 10 }, (_, i) => node({ title: `alien ${i}`, app: 'notes' }))
     expect(searchNodes(many, 'alien', 3)).toHaveLength(3)
+  })
+
+  it('finds a node whose term lives ONLY in a tag (array body)', () => {
+    const tagged = node({ title: 'Untitled', app: 'notes', data: { content: '', tags: ['xenon'] } })
+    const other = node({ title: 'Unrelated', app: 'notes', data: { content: 'nothing here', tags: [] } })
+    const hits = searchNodes([tagged, other], 'xenon')
+    expect(hits).toHaveLength(1)
+    expect(hits[0].node).toBe(tagged)
+    expect(hits[0].field).toBe('body')
   })
 })
 

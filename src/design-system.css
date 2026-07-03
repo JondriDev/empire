@@ -652,6 +652,16 @@ img, video, svg { display: block; max-width: 100%; }
 
 .animate-fade-in    { animation: fade-in    var(--dur-mid)  var(--ease-out)    forwards; }
 .animate-fade-in-up { animation: fade-in-up var(--dur-slow) var(--ease-out)    forwards; }
+
+/* Landing ring — a Search hit that lands on its exact entity gets one bright
+   signal ring that swells and settles (never blinks). Token-only colour, so it
+   respects the design system; 1.6s so it's still visible after the scroll. */
+@keyframes focus-land-ring {
+  0%   { box-shadow: 0 0 0 0   color-mix(in srgb, var(--signal) 0%,  transparent); }
+  18%  { box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 55%, transparent); }
+  100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 0%,  transparent); }
+}
+.focus-land { animation: focus-land-ring 1.6s var(--ease-out); border-radius: var(--radius-lg, 16px); }
 .animate-scale-in   { animation: scale-in   var(--dur-mid)  var(--ease-spring) forwards; }
 .animate-slide-up   { animation: slide-up   var(--dur-slow) var(--ease-out)    forwards; }
 .animate-float      { animation: float      6s ease-in-out  infinite; }
