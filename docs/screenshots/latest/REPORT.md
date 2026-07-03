@@ -1,8 +1,32 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-02T23:07:39.086Z
+**Generated:** 2026-07-03T03:07:39.639Z
 
 **Result:** 28/28 rendered without crash, 0 failed.
+
+## QA verdict — EPIC-8 S2 done-confirmed LIVE (green main `1db665e`)
+
+First independent QA since **EPIC-8 S2** landed (`1db665e`; last QA `ce30e4e` confirmed S1 on `ac6af7b`,
+with the strategy doc `88e2689` also landing since). Built from a fresh checkout, served `dist/`, ran the full
+headless smoke end-to-end. **No runtime bug, no contradiction.**
+
+- **28/28 routes render clean** (desktop shell + 27 apps, 0 uncaught JS), incl. Search (`app-search.png`) —
+  styled field + "Find anything, anywhere" empty state; the launcher grid (`desktop.png`) shows all 24 tiles.
+- **EPIC-8 S2 acceptance metric MOVED (done-confirmed):** the `GLOBAL-SEARCH` guard now reproduces
+  **`tagOnly=true`** independently — a node carrying `Tessellate` ONLY in `data.tags` (a string array) surfaces,
+  proving `nodeBodyText` now flattens array elements (the S2 corpus gap). `book=true task=true twoApps=true
+  tagOnly=true`, groups `reader,goals` → **GLOBAL-SEARCH 1/1 ✅**. Backed by `search.test.ts` array-flatten +
+  tag-only cases (**vitest 255 → 257**). S2's "land on exact entity" (`openEntity` + `.focus-land` ring) is
+  unit-pinned + on-device visual (a fresh-checkout corpus is graph-only — see the TRAP in CONTEXT.md).
+- **Metric deltas vs last QA snapshot (`ac6af7b`, S1):** apps 27 (±0), vitest **255 → 257 (+2)**, static
+  test-cases **213 → 215 (+2)**, test files 27/29 (±0), token-violations **0** (±0), off-system **0** (±0,
+  `metrics.mjs --assert-zero` exit 0), bundle gz **696.0 → 696.4 (+0.4** — S2's array-flatten + `openEntity` +
+  Notes focus-land, no new deps).
+- **All other guards green:** SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (27 apps, bidirectional), INBOUND 3/3,
+  MEDIA-PERSISTS 3/3, GRAPH-LEGIBLE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5,
+  PRECACHE 80 entries no-gap.
+- **Env-expected noise (NOT bugs):** weather geocoding API + geolocation (blocked/authed), `files` `/api/files`
+  500 (Android-only backend), maps CARTO tiles (egress-blocked → grey tiles over a real Leaflet container).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -26,7 +50,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -69,13 +93,13 @@ Reader's real file `<input>` was driven with a small `.txt` book, then the persi
 
 **GRAPH-LEGIBLE: 1/1 ✅**
 
-## Global-search guard (EPIC-8 S1 — the organism becomes queryable)
+## Global-search guard (EPIC-8 S1 + S2 — the organism becomes queryable)
 
-The Core graph was seeded with two entities sharing a rare term across TWO apps (a `note` in Notes, a `task` in Goals); after a reload (persist rehydrate) the term was typed into the Search field. PASS = BOTH entities surface, grouped under their own app sections — one lens querying every app's real entities at once. The pure ranking spine (`searchNodes`) is unit-pinned in `search.test.ts`; this carries the graph→input→grouped-render roundtrip jsdom cannot.
+The Core graph was seeded with entities sharing a rare term across TWO apps (a `book` in Reader, a `task` in Goals); after a reload (persist rehydrate) the term was typed into the Search field. PASS = BOTH entities surface, grouped under their own app sections — one lens querying every app's real entities at once. **S2 adds a tag-only match:** a third node carries the term `Tessellate` ONLY in `data.tags` (a string array) — it surfaces iff `nodeBodyText` now flattens array elements (the S2 corpus gap). The pure ranking spine (`searchNodes`) is unit-pinned in `search.test.ts`; this carries the graph→input→grouped-render roundtrip jsdom cannot.
 
-| Query | Book hit | Task hit | Spans 2 apps | Result |
-|---|---|---|---|---|
-| Xenolith | ✅ | ✅ | ✅ | ✅ |
+| Query | Book hit | Task hit | Spans 2 apps | Tag-only hit | Result |
+|---|---|---|---|---|---|
+| Xenolith / Tessellate | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **GLOBAL-SEARCH: 1/1 ✅**
 

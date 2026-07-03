@@ -64,6 +64,18 @@
       guards against re-ringing on unrelated graph ticks; deps `[focusedId, notes]` so it retries once the card mounts.
       `GLOBAL-SEARCH` guard grew a **third seed** (`Tessellate` in `data.tags` of a graph-survivable task) — **ran LIVE
       `tagOnly=true`, GLOBAL-SEARCH 1/1 ✅, 28/28 clean.** vitest 255→257, tokens 0, off-system 0, bundle 696.0→696.4.
+      - **✅ QA-CONFIRMED LIVE (2026-07-03, green main `1db665e`) — S2 done-confirmed, tags/arrays now searchable.**
+        First independent QA since S2 landed (last QA `ce30e4e` confirmed S1 on `ac6af7b`; S2 `1db665e` + the strategy
+        doc `88e2689` landed since). **28/28 routes render clean** (desktop + 27 apps, 0 uncaught JS). **The S2 acceptance
+        axis reproduced independently: `GLOBAL-SEARCH` guard `tagOnly=true`** — a node carrying `Tessellate` ONLY in
+        `data.tags` (a string array) surfaces, proving `nodeBodyText`'s array-flatten (`book=true task=true twoApps=true
+        tagOnly=true`, groups reader,goals → 1/1 ✅). vitest **257/257** (+2 array-flatten + tag-only cases), eslint 0,
+        `metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0). Every other guard green (SHELL-IS-STYLED,
+        REGISTRY-COVERAGE 27, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3,
+        OFFLINE-BOOT 5/5, PRECACHE 80 no-gap). Metrics: apps 27, static 213→215, vitest 255→257, bundle 696.0→696.4
+        (+0.4, no new deps); tokens/off-system ±0. **No runtime bug, no contradiction.** *Cloud limit:* `openEntity` +
+        Notes `.focus-land` ring is an on-device visual (fresh-checkout corpus is graph-only, see the TRAP above) —
+        unit-pinned; the guard carries the tag/array roundtrip headless. **S2 done-confirmed → only S3 remains to CLOSE EPIC-8.**
       - **SEAM for S3 / any deep-link:** `openEntity(appId, nodeId)` is the rail — open + gaze. To land another app on
         its focused item, copy the Notes pattern: `useFocus(s=>s.focusedId)` → `useGraph.getState().nodes[id]` →
         `node.data.sourceId` → your local item → scroll + `.focus-land`. TRAP: read the graph via `getState()` (NOT a
