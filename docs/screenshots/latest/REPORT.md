@@ -1,8 +1,41 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-03T20:19:33.794Z
+**Generated:** 2026-07-03T23:08:38.169Z
 
 **Result:** 28/28 rendered without crash, 0 failed.
+
+## ✅ QA verdict — EPIC-9 S3 DONE-CONFIRMED LIVE on green main `0378d8e` (no runtime bug)
+
+**No runtime bug found.** First independent QA since EPIC-9 S3 landed (last QA `36f33f5` confirmed S2 on
+`f878844`; S3 feature commit `0378d8e` — *node-lineage is NAVIGABLE* — landed since). Build 🟢, server 🟢,
+28/28 routes render clean (0 uncaught JS), vitest **292/292**, `metrics.mjs --assert-zero` exit 0 (tokens 0,
+off-system 0).
+
+**★ EPIC-9 S3 acceptance axis reproduced independently — `NODE-LINEAGE 1/1` now carries a FIFTH axis
+`clickable=true`:** `rendered=true title=true persisted=true search=true clickable=true`. In the live Search
+DOM the seeded parent hop renders as a real `[role="button"]` whose accessible name targets the parent entity,
+and the guard clicks it without the handler throwing — the click layer (`EntityToken` → `openEntity(app, id)`)
+is wired. Backed by `NodeLineage.test.tsx` (+4, vitest 288→292) which unit-pins the actual window/focus state
+change. **S3 acceptance moved → S3 done-confirmed, no contradiction. ★ EPIC-9 is CODE-COMPLETE (S1–S3 all
+shipped + QA-confirmed) → no `▶ ACTIVE` epic remains; the Strategist owes: retire EPIC-9 + promote the next
+epic (EPIC-7 · Android stays device-gated).**
+
+*Cloud limit (load-bearing, unchanged from the builder's note):* on the `/app/search` route AppShell renders
+by URL param, not windowStore, so the in-app window swap after the click is NOT observable headless — the
+`clickable` axis carries the live click-path + correct parent wiring; the actual navigation state change is
+unit-pinned in `NodeLineage.test.tsx`. Real navigation is observable on-device only from the Bridge/home (`/`)
+shell (renders by windowStore).
+
+**Metric deltas vs the builder's S3 snapshot (`0378d8e`) — all ±0 (this is a confirmation run, no new code):**
+apps/routes **27** (±0), static test cases **250** (±0), test files **30** (±0), vitest **292/292** (±0),
+token violations **0** (±0), off-system utilities **0** (±0), bundle gz **701.4 KB** (±0), SW precache **81
+entries** no-gap. Every guard green: SHELL-IS-STYLED ✅, REGISTRY-COVERAGE ✅ (27 apps, bidirectional),
+INBOUND-LANDS 3/3, MEDIA-PERSISTS 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 (`tagOnly=true`), **NODE-LINEAGE
+1/1 (`clickable=true`)**, HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5.
+
+**Env-expected noise (NOT bugs):** Weather geocoding CDN + Maps CARTO tiles = `net::ERR_TUNNEL_CONNECTION_FAILED`
+(egress-blocked CDNs); Files `/api/files` HTTP 500 (Android-only backend); Weather geolocation permissions-policy
+block. All routes still render clean.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -26,7 +59,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |

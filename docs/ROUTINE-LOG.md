@@ -5,6 +5,38 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-03 · QA (visual + smoke) — **EPIC-9 S3 DONE-CONFIRMED LIVE on green main `0378d8e`** (★ EPIC-9 fully QA-confirmed, no runtime bug)
+
+**Ran:** fresh checkout → build 🟢 → `node server.js` :3001 → full headless `qa-smoke.mjs` + `metrics.mjs`. First
+independent QA since S3 landed (last QA `36f33f5` confirmed S2 on `f878844`; S3 feature `0378d8e` — *node-lineage is
+NAVIGABLE* — landed since). **Verdict: S3 acceptance moved, no contradiction, no runtime bug.**
+
+**Confirmed:**
+- **28/28 routes render clean** (desktop + 27 apps, 0 uncaught JS). Env-noise only (Weather geocoding CDN + Maps CARTO
+  tiles `ERR_TUNNEL_CONNECTION_FAILED`, Files `/api/files` HTTP 500 Android-backend, Weather geolocation policy block).
+- **★ EPIC-9 S3 headline: `NODE-LINEAGE 1/1 ✅` now carries the FIFTH axis `clickable=true`** —
+  `rendered=true title=true persisted=true search=true clickable=true`. In the live Search DOM the seeded parent hop
+  renders as a real `[role="button"]` targeting the parent entity and the guard clicks it (handler doesn't throw). The
+  actual window/focus state change is unit-pinned in `NodeLineage.test.tsx` (+4). **★ EPIC-9 CODE-COMPLETE + all three
+  acceptance axes (S1 headline + S2 `search` + S3 `clickable`) confirmed-moved → EPIC-9 is DONE.**
+- vitest **292/292**, `metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0). Every guard green: SHELL-IS-STYLED,
+  REGISTRY-COVERAGE 27, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 `tagOnly=true`, HOME-ALIVE 1/1,
+  PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 81 no-gap.
+- **Metrics reproduce the builder's S3 snapshot EXACTLY (Δ ±0):** apps 27, static 250, vitest 292, test files 30,
+  tokens 0, off-system 0, bundle gz 701.4.
+- **Visually verified:** the Bridge home (`desktop.png` — "Good night" greeting, "Ask Cakra anything…" bar, live
+  TODAY/OPEN TASKS/GOALS/ORGANISM cards, 24-tile launcher grid) + Search route (`app-search.png` — styled field,
+  "Find anything, anywhere", ⌘⇧F summon hint). Screenshots overwritten in `docs/screenshots/latest/`.
+
+**Cloud limit (unchanged):** the `/app/search` route renders by URL param not windowStore → the post-click window swap
+isn't observable headless; the `clickable` axis carries the live click-path, the state change is unit-pinned. Real
+navigation is observable on-device from the Bridge/home (`/`) shell.
+
+**▶ NEXT:** no `▶ ACTIVE` epic remains — **Strategist owes: retire EPIC-9 + promote the next epic** (EPIC-7 · Android
+stays device-gated; topmost cloud-executable candidate to be ranked).
+
+---
+
 ## 2026-07-03 · EPIC-9 **S3 SHIPPED** — node-lineage is NAVIGABLE; each ancestry hop climbs to its source entity (★ EPIC-9 CODE-COMPLETE)
 
 **Stage:** EPIC-9 · Node-level lineage → **S3** (the click layer — the display surfaces from S1/S2 become *walkable*).
