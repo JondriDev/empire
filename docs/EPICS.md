@@ -229,22 +229,33 @@ second reload). **Headline: `NODE-LINEAGE 0/1 → 1/1`** + the "+ a unit test" d
     **Search**, which is exactly where S2 mounted them. *(Descendants (`childrenOf`) row deferred — not needed to move
     the metric; a candidate for S3's ancestry view.)*
 
-- [ ] **S3 · Make node-lineage NAVIGABLE + a full ancestry view (the organism's provenance lens).** The display
-  surfaces exist (Inbox S1, Network inspector + Search S2); S3 makes them *walkable*: clicking a lineage hop in
-  `<NodeLineage>` deep-links to that ancestor via `openEntity(app, nodeId)` (the EPIC-8 rail) — so from any Search hit or
-  inspector row you can climb to the source entity mouse-free. Optionally a dedicated "lineage of X" panel rendering
-  both `nodeLineageOf` (ancestors) and `childrenOf` (descendants) as a mini-tree (the `childrenOf` walker is already
-  built + unit-pinned). *Acceptance:* click an ancestor token → its owning app opens focused on that entity; extend the
-  guard to assert the click navigates. Build🟢 vitest🟢 eslint clean; tokens 0, off-system 0. **NOTE:** the Search
-  `<NodeLineage>`-under-each-row portion that S3 originally listed was pulled forward into S2 (it's a pure display mount);
-  S3 is now the *navigation* layer. **(Strategist: ratify; this closes EPIC-9 → then EPIC-7 · Android if an on-device QA
-  path exists.)**
+- [x] **S3 · Make node-lineage NAVIGABLE (each ancestry hop climbs to its source entity).** ✅ SHIPPED 2026-07-03
+  (`main`). Every `<NodeLineage>` hop is now a real control: `EntityToken` became a `role="button"` span (tabIndex 0,
+  Enter/Space) that `openEntity(node.meta.app, node.id)`s the ancestor — opens its owning app + points the organism's
+  gaze (`focusedId`) at it — so from any Search hit / Inbox row / Network inspector row you climb the ancestry
+  mouse-free. `stopPropagation`+`preventDefault` keeps it valid + self-contained even nested inside Search's outer
+  `<button>` row (a span-with-role isn't interactive content, so no invalid button-in-button). Token-only
+  `.gp-lineage-hop` affordance in `design-system.css` (ion hover tint + focus-visible ring, `color-mix`, no raw hex).
+  **`NodeLineage.test.tsx` (+4)** deterministically pins the navigation: click/Enter a hop → `useWindowStore.activeWindowId`
+  = the ancestor's owning app AND `useFocus.focusedId` = the ancestor id. **`NODE-LINEAGE` guard grew a 5th axis
+  `clickable`:** in the live Search DOM the parent hop renders as a `[role="button"]` whose accessible name targets the
+  parent entity, then the guard clicks it (handler must not throw). **Ran the full smoke LIVE: NODE-LINEAGE 1/1 ✅**
+  (`rendered=true title=true persisted=true search=true clickable=true`), 28/28 routes clean, every other guard green.
+  build🟢 vitest 288→292🟢 eslint clean; tokens 0, off-system 0 (`--assert-zero` exit 0); static 246→250, bundle
+  701.2→701.4 (+0.2, no new deps). **Cloud limit:** on the `/app/search` *route* AppShell renders by URL param, not
+  windowStore, so the in-app window swap isn't observable headless — the `clickable` axis carries the live click-path +
+  correct wiring; the actual window/focus state change is unit-pinned. **Ancestry mini-tree deferred** (optional, not
+  needed to make lineage navigable — the `childrenOf` descendants walker stays built + unit-pinned for a future view).
+  **★ EPIC-9 is CODE-COMPLETE (S1–S3 all shipped) → QA confirms on the new green main; then EPIC-7 · Android if an
+  on-device QA path exists.**
 
 _S1 shipped **and QA-confirmed LIVE** on green main `fcfa06d` (`NODE-LINEAGE 1/1`, 28/28 clean, vitest 276) — the epic's
-headline metric has moved. **S2 shipped 2026-07-03** (node-lineage now legible on the Network inspector's per-entity
-list + Search rows; guard grew a `search=true` axis; Notes/Learning cards proven architecturally impossible — see S2
-correction). **▶ NEXT = S3** (make the lineage tokens NAVIGABLE via `openEntity` + optional ancestry mini-tree). Strategist
-still to ratify EPIC-9's ranking. **EPIC-7 · Android** stays device-gated._
+headline metric has moved. **S2 shipped 2026-07-03** (node-lineage legible on the Network inspector's per-entity list +
+Search rows; guard grew a `search=true` axis; Notes/Learning cards proven architecturally impossible — see S2
+correction). **S3 shipped 2026-07-03** — each lineage hop is now NAVIGABLE (`openEntity` on click/Enter; guard grew a
+`clickable` axis, unit-pinned window+focus in `NodeLineage.test.tsx`). **★ EPIC-9 is CODE-COMPLETE — QA to confirm; no
+`▶ ACTIVE` epic remains.** Strategist still to promote the next epic (ratify EPIC-9's retire + rank the next candidate).
+**EPIC-7 · Android** stays device-gated._
 
 ---
 

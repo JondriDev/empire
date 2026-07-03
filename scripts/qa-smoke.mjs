@@ -410,7 +410,7 @@ const lineageSeed = {
   version: 0,
 };
 const readLineageEls = (page) => page.$$eval('[data-node-lineage]', els => els.map(e => e.getAttribute('data-node-lineage')));
-const nodeLineage = { rendered: false, title: false, persisted: false, search: false, pass: false };
+const nodeLineage = { rendered: false, title: false, persisted: false, search: false, clickable: false, pass: false };
 try {
   const page = await ctx.newPage();
   await page.goto(`${BASE}/app/inbox`, { waitUntil: 'networkidle', timeout: 30000 });
@@ -436,8 +436,27 @@ try {
   await page.fill('input[aria-label="Search across every app"]', 'anomaly');
   await page.waitForTimeout(600);
   nodeLineage.search = (await readLineageEls(page)).includes('qa-lineage-parent');
-  nodeLineage.pass = nodeLineage.rendered && nodeLineage.title && nodeLineage.persisted && nodeLineage.search;
-  console.log(`NODE-LINEAGE  rendered=${nodeLineage.rendered} title=${nodeLineage.title} persisted=${nodeLineage.persisted} search=${nodeLineage.search}`);
+  // S3: node-lineage is NAVIGABLE — each ancestry hop is a real control that
+  // climbs to the source entity (openEntity → open its owning app + set the
+  // gaze). Assert the live Search DOM renders the parent hop as a focusable
+  // `[role="button"]` whose accessible name targets the parent entity, then
+  // click it to exercise the handler for real (must not throw). The actual
+  // window/focus state change is unit-pinned in NodeLineage.test.tsx — on the
+  // /app/search *route* AppShell renders by URL param, not windowStore, so the
+  // in-app navigation isn't observable headless here; the click-path liveness +
+  // correct wiring is what this axis carries.
+  const hopSel = '[data-node-lineage="qa-lineage-parent"] [role="button"]';
+  nodeLineage.clickable = await page.$$eval(
+    hopSel,
+    (els, title) => els.some(e => (e.getAttribute('aria-label') || '').includes(title)),
+    LINEAGE_PARENT_TITLE,
+  ).catch(() => false);
+  if (nodeLineage.clickable) {
+    // Fire the real handler — a throw here would surface as a page error.
+    await page.click(hopSel, { timeout: 2000 }).catch(() => {});
+  }
+  nodeLineage.pass = nodeLineage.rendered && nodeLineage.title && nodeLineage.persisted && nodeLineage.search && nodeLineage.clickable;
+  console.log(`NODE-LINEAGE  rendered=${nodeLineage.rendered} title=${nodeLineage.title} persisted=${nodeLineage.persisted} search=${nodeLineage.search} clickable=${nodeLineage.clickable}`);
   // Leave the graph clean for later guards.
   await page.evaluate((k) => localStorage.removeItem(k), GRAPH_KEY);
   await page.close();
@@ -712,8 +731,9 @@ md += `| ${SEARCH_TERM} / ${TAG_TERM} | ${globalSearch.book ? '✅' : '❌'} | $
 md += `\n**GLOBAL-SEARCH: ${globalSearch.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
 md += `\n## Node-lineage guard (node-level lineage — per-artifact ancestry is legible)\n\n`;
 md += `App-level provenance remembers which app fed which app; node-level lineage answers which ENTITY an exact artifact descended from. The core intents stamp \`data.from = sourceNode.id\` on every node they create, so the graph already holds a durable per-artifact ancestry edge. Two graph-survivable \`task\` nodes were seeded — a parent and a child whose \`data.from\` points at it — then reloaded so the persist store rehydrated; PASS = the Inbox child row renders a \`<NodeLineage>\` (\`[data-node-lineage]\`) carrying the parent entity's real title, AND it still resolves after a second reload (the \`from\` link is durable). **S2 extends the surface:** the same seeded ancestry must ALSO render on the Search result row (query "anomaly" → the child hit shows \`[data-node-lineage=qa-lineage-parent]\`), proving \`<NodeLineage>\` is now legible on every node-rendering view, not just the Inbox — the same drop-in surface also mounts on The Network inspector's per-entity list (visual/on-device). The pure walker \`nodeLineageOf\` is unit-pinned in \`nodeLineage.test.ts\`; this carries the graph→persist→rehydrate→render roundtrip jsdom cannot.\n\n`;
-md += `| Artifact | Lineage rendered | Parent title shown | Survived reload | Search surface | Result |\n|---|---|---|---|---|---|\n`;
-md += `| task ← ${LINEAGE_PARENT_TITLE} | ${nodeLineage.rendered ? '✅' : '❌'} | ${nodeLineage.title ? '✅' : '❌'} | ${nodeLineage.persisted ? '✅' : '❌'} | ${nodeLineage.search ? '✅' : '❌'} | ${nodeLineage.pass ? '✅' : '❌'}${nodeLineage.err ? ' (' + nodeLineage.err.slice(0, 80) + ')' : ''} |\n`;
+md += ` **S3 makes it NAVIGABLE:** each ancestry hop is a real \`[role="button"]\` that climbs to the source entity (\`openEntity\` → open its owning app + set the gaze); the guard asserts the parent hop renders as a focusable control whose accessible name targets the parent entity, then clicks it (the window/focus change is unit-pinned in \`NodeLineage.test.tsx\` — on the /app/search route AppShell renders by URL, so in-app navigation isn't observable headless).\n\n`;
+md += `| Artifact | Lineage rendered | Parent title shown | Survived reload | Search surface | Hop clickable | Result |\n|---|---|---|---|---|---|---|\n`;
+md += `| task ← ${LINEAGE_PARENT_TITLE} | ${nodeLineage.rendered ? '✅' : '❌'} | ${nodeLineage.title ? '✅' : '❌'} | ${nodeLineage.persisted ? '✅' : '❌'} | ${nodeLineage.search ? '✅' : '❌'} | ${nodeLineage.clickable ? '✅' : '❌'} | ${nodeLineage.pass ? '✅' : '❌'}${nodeLineage.err ? ' (' + nodeLineage.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
 md += `\n## Home-alive guard (The Bridge — the home screen is living telemetry)\n\n`;
 md += `The Core graph was seeded with a today-dated \`event\` (Calendar), an open \`task\` (Goals) and a \`book\` (Reader), then home was reloaded (persist rehydrate). PASS = the Today and Open Tasks widgets show the live count + entity, the jump-back-in strip lists all three newest-first, clicking a row lands in its owning app (the \`openEntity\` rail), and a question typed into the Cakra line opens Cakra prefilled (the \`empire-ai-clipboard\` rail). The pure selectors are unit-pinned in \`bridge.test.ts\`; this carries the rendered-home roundtrip jsdom cannot.\n\n`;

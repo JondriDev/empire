@@ -22,22 +22,38 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **▶ EPIC-9 · Node-level lineage (per-artifact ancestry)** — Builder-seeded 2026-07-03 (EPIC-8 went
-  CODE-COMPLETE, no `▶ ACTIVE` epic remained; EPIC-7 Android stays device-gated). **Strategist owes ratification of
-  EPIC-9's ranking** (see `docs/EPICS.md` → EPIC-9). **S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE 2026-07-03
-  on green main `f878844` (first INDEPENDENT QA of S2 — NODE-LINEAGE 1/1 with the FOURTH `search=true` axis reproduced
-  without the builder's tree, 28/28 clean, vitest 288, metrics Δ ±0, no runtime bug/contradiction).** **Leap:** provenance
-  stops being app→app and becomes node→node — every derived artifact shows *exactly which entity it descended from* (real
-  entity chain, not app names). **Target metric:** a `NODE-LINEAGE` guard in `qa-smoke.mjs` (`1/1`, now 4 axes:
-  rendered/title/persisted/**search**) + `nodeLineage.test.ts`.
-  - **▶ NEXT STAGE = EPIC-9 S3 — make node-lineage NAVIGABLE (the display surfaces exist; S3 is the click layer).**
-    Display mounts are DONE (Inbox S1, Network inspector + Search S2). S3 = make each `<NodeLineage>` hop CLICKABLE →
-    `openEntity(app, nodeId)` (EPIC-8 rail, `windowStore.ts:119`) so you climb ancestry mouse-free; optionally a "lineage
-    of X" mini-tree rendering `nodeLineageOf` (ancestors) + `childrenOf` (descendants, walker already built + unit-pinned).
-    **SEAM:** `<NodeLineage>` is `src/components/ui/NodeLineage.tsx` — `EntityToken` (line 25) is the per-hop span to make
-    a button; each hop already has the node id (`n.id`). Extend the guard to assert the click navigates. TRAP: NodeLineage
-    is mounted INSIDE a `<button>` in Search's ResultRow (`Search.tsx:276`) — nesting a real `<button>` inside would be
-    invalid HTML; either lift it out of the outer button or use a non-button clickable (role+onClick on the span) there.
+- **Active epic:** **EPIC-9 · Node-level lineage (per-artifact ancestry) — ★ CODE-COMPLETE (S1–S3 all shipped
+  2026-07-03).** S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE `f878844`; **S3 SHIPPED `main` 2026-07-03 (this
+  run) — node-lineage is now NAVIGABLE.** No `▶ ACTIVE` epic remains — **Strategist owes: retire EPIC-9 + promote the
+  next epic** (EPIC-7 Android stays device-gated). **Leap achieved:** provenance is node→node — every derived artifact
+  shows *exactly which entity it descended from*, and you can now CLICK any ancestor hop to climb to it. **Target metric
+  (all axes met):** `NODE-LINEAGE` guard in `qa-smoke.mjs` = **1/1, now 5 axes** (rendered/title/persisted/search/**clickable**)
+  + `nodeLineage.test.ts` + `NodeLineage.test.tsx`.
+  - **✅ S3 SHIPPED 2026-07-03 (`main`, this run) — each ancestry hop climbs to its source entity.** `EntityToken` in
+    **`src/components/ui/NodeLineage.tsx:25`** is now a `role="button"` span (tabIndex 0, Enter/Space) calling
+    `openEntity(node.meta.app, node.id)` (EPIC-8 rail, `windowStore.ts:126`) → opens the ancestor's owning app + sets
+    `useFocus.focusedId`. `stopPropagation`+`preventDefault` on the hop keeps it valid INSIDE Search's outer `<button>`
+    row (a span-with-role isn't interactive content → no invalid button-in-button; the trap is resolved). Token-only
+    `.gp-lineage-hop` affordance in **`design-system.css`** (~line 665: ion hover `color-mix` tint + focus-visible ring,
+    no raw hex). **`NodeLineage.test.tsx` (+4)** pins navigation deterministically (click/Enter → `useWindowStore.activeWindowId`
+    = ancestor app + `useFocus.focusedId` = ancestor id). Guard grew a 5th axis **`clickable`**. **Ran the full smoke LIVE:
+    NODE-LINEAGE 1/1 ✅** (`rendered=true title=true persisted=true search=true clickable=true`), 28/28 clean, GLOBAL-SEARCH
+    1/1, PROVENANCE 3/3, OFFLINE 5/5, PRECACHE no-gap. build🟢 vitest 288→292🟢 eslint clean; tokens 0, off-system 0
+    (`--assert-zero` exit 0); static 246→250, bundle 701.2→701.4 (+0.2, no new deps).
+    - **TRAP / cloud limit (load-bearing):** the smoke drives Search via the `/app/search` **route**, where `AppShell`
+      renders by URL param (NOT windowStore) — so `openEntity`'s window swap is NOT observable headless on that route. The
+      `clickable` axis therefore asserts the hop renders as a live `[role="button"]` wired to the right parent + clicks it
+      (must not throw); the actual window/focus state change is unit-pinned in `NodeLineage.test.tsx`. Real navigation is
+      observable only in the Bridge/home (`/`) shell, which DOES render by windowStore (`AppHost.tsx:18`).
+    - **SEAM (reuse):** to make ANY lineage-style token navigable, mirror `EntityToken` — `role="button"` + tabIndex +
+      `openEntity(app, id)` + `stopPropagation`/`preventDefault` (so it works nested in a clickable row). `.gp-lineage-hop`
+      is the shared hop affordance class. Optional future: a "lineage of X" mini-tree (`nodeLineageOf` ancestors +
+      `childrenOf` descendants — both walkers built + unit-pinned; not needed to close S3, deferred).
+  - **▶ NEXT STAGE = none in an active epic — EPIC-9 is CODE-COMPLETE.** The Strategist promotes the next epic. If you
+    arrive with no `▶ ACTIVE` epic, take the topmost cloud-executable candidate and flag EPICS needs the Strategist
+    (EPIC-7 Android is device-gated). QA to confirm EPIC-9 done on the new green main: on the Bridge/home (`/`) open Search,
+    query a term, click a result's lineage hop → the ancestor's app opens focused on it (the smoke's `clickable` axis +
+    `NodeLineage.test.tsx` carry the wiring + state-change headless; the visual climb is the on-device confirm).
   - **✅ S2 SHIPPED (2026-07-03, `main`) — node-lineage legible on the two graph-node-rendering views.** Dropped
     `<NodeLineage nodeId>` on: **(a)** the **Network inspector's per-entity list** (`Network.tsx` ~line 680) — REPLACED the
     bare type-count summary with a real entity list (newest-first, `ENTITY_ROWS=12` cap + "+ N more"), each row = type dot
