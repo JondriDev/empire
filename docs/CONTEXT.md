@@ -52,16 +52,35 @@
       QA seed of a `note` on `/app/search` (empty Notes store) is DELETED before search runs — the guard seeds
       graph-survivable types instead (`task` graph-only; `book` self-mirrored by an unmounted Reader). In real usage
       those types come from real non-empty stores → the feature searches them fine.
-    - **▶ NEXT BUILDER STAGE = EPIC-8 S2 · land on the exact entity + close the array corpus gap.** **Strategist
-      audit (code-confirmed): the "deepen the corpus" work is MOSTLY ALREADY DONE** — `nodeBodyText` (`search.ts:43`)
-      already concatenates every scalar in `node.data`, and Notes `content` / Messages `content` / Goals `description` /
-      Calendar `description` / Prompt-Gen `content` / Learning `learned` are already mirrored (`sync.ts:74-98` +
-      per-app `mirrorCollection`). So DO NOT re-mirror those. Two honest gaps: **(a)** `nodeBodyText` skips **arrays**,
-      so `tags` are unsearchable → flatten string-array elements in that ONE function + a `search.test.ts` tag case;
-      **(b · meaty)** hits open the app's default view, not the item → add `openEntity(appId,nodeId)` to
-      `windowStore.ts` (open-as-`openAppById` then `useFocus.getState().setFocus(nodeId)`), point Search rows at it,
-      and make **Notes** scroll+ring the focused card (`node.data.sourceId===note.id`) as the proof. Extend
-      `GLOBAL-SEARCH` with a **tag-only match**. Reader book content stays title-only by design. Exact shape in EPICS.md.
+    - **✅ S2 SHIPPED 2026-07-03 (`main`) — hits land on their exact entity + tags are searchable.** Both gaps closed:
+      **(a)** `nodeBodyText` (`search.ts:43`, via a new `pushScalar` helper) now flattens the scalar elements of ARRAY
+      values (nested objects still skipped) → `notes.data.tags` / `calendar.data.tags` / `photos.data.tags` are
+      searchable. **(b)** new **`openEntity(appId, nodeId)`** in **`windowStore.ts:119`** = `openAppById(appId)` then
+      `useFocus.getState().setFocus(nodeId)` (imports `useFocus` from `core/focus.ts`); both `Search.tsx` result-row
+      buttons now call `openEntity(appId, node.id)` (was `openAppById`). **Notes lands on the focused card**
+      (`Notes.tsx`): reads `useFocus(s=>s.focusedId)`, looks up `useGraph.getState().nodes[focusedId]`, maps to its note
+      via `gnode.data.sourceId`, `el.scrollIntoView({block:'center'})` + a one-shot `.focus-land` class (a token-only
+      signal ring, `@keyframes focus-land-ring` in **`design-system.css:656`**, no raw hex). A `handledFocus` ref
+      guards against re-ringing on unrelated graph ticks; deps `[focusedId, notes]` so it retries once the card mounts.
+      `GLOBAL-SEARCH` guard grew a **third seed** (`Tessellate` in `data.tags` of a graph-survivable task) — **ran LIVE
+      `tagOnly=true`, GLOBAL-SEARCH 1/1 ✅, 28/28 clean.** vitest 255→257, tokens 0, off-system 0, bundle 696.0→696.4.
+      - **SEAM for S3 / any deep-link:** `openEntity(appId, nodeId)` is the rail — open + gaze. To land another app on
+        its focused item, copy the Notes pattern: `useFocus(s=>s.focusedId)` → `useGraph.getState().nodes[id]` →
+        `node.data.sourceId` → your local item → scroll + `.focus-land`. TRAP: read the graph via `getState()` (NOT a
+        reactive `useGraph` sub) inside the effect, or every mirror tick re-fires the scroll; gate with a `handledFocus`
+        ref keyed on the focusedId you already handled.
+    - **▶ NEXT BUILDER STAGE = EPIC-8 S3 · Type/app filters + keyboard nav + summon-from-anywhere (Search → the
+      organism's command surface).** Full spec in `docs/EPICS.md` → EPIC-8 S3. Three parts, all cloud-verifiable via
+      unit tests + the existing smoke: **(a)** filter chips by node `type` and/or owning app, driven by a NEW pure
+      `filterHits(hits, {types?, apps?})` in `search.ts` (unit-pin it like `searchNodes`/`groupHitsByApp`) — render the
+      chips in `Search.tsx` above the results, derive the available type/app sets from the current hits. **(b)** keyboard
+      nav — ↑/↓ move a highlight across the FLAT ranked `hits` list (keep an `activeIndex` state), Enter calls
+      `openEntity(hits[activeIndex].node.meta.app, hits[activeIndex].node.id)` — roving-focus idiom, see
+      `NodeActions`/`CommandPalette`. **(c)** global summon — a shell keybinding that opens `/app/search` focused is the
+      LOWER-shell-risk choice (`CommandPalette` already owns ⌘K + Ctrl+Space, so a THIRD distinct key beats overloading
+      it). *Acceptance:* filter to `task` → only tasks; ↑/↓/Enter opens a hit mouse-free; the summon key focuses the
+      field. Add a `search.test.ts` `filterHits` block. build🟢 vitest🟢 eslint 0; tokens 0, off-system 0. **S3 is the
+      last EPIC-8 stage → shipping it retires EPIC-8 to DONE** (then Strategist promotes node-level lineage; Android gated).
   - _(EPIC-6 history retained below as working memory.)_
 - **Prior active epic (DONE):** **EPIC-6 · Organism Memory (durable provenance & lineage)** — promoted 2026-07-01,
   CLOSED 2026-07-02 (all S1–S4 shipped + QA-confirmed). **Leap:** the organism stops fires-and-forgetting — a

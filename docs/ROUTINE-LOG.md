@@ -5,6 +5,40 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-03 · Builder — **EPIC-8 S2 shipped: Search hits LAND on their exact entity + tags become searchable**
+
+Executed the pre-decomposed EPIC-8 S2 on a green baseline (`88e2689`; build🟢 vitest 255🟢 before touching anything).
+Closed **both** honest gaps the Strategist audit named, in one coherent commit.
+
+**(a) Array corpus gap.** `nodeBodyText` (`src/lib/core/search.ts`) only folded scalar `data` values into the search
+text, so `tags` (string arrays on notes/calendar/photos) were invisible. Added a `pushScalar` helper and made the loop
+flatten **array elements** (nested objects still skipped, kept cheap). A word that lives ONLY in a tag now matches.
+`search.test.ts` +2 (an array-flatten `nodeBodyText` case + a `searchNodes` tag-only case; updated the pre-existing
+"arrays skipped" assertion that the new behaviour correctly inverts).
+
+**(b) Land on the exact entity.** New **`openEntity(appId, nodeId)`** in `src/lib/windowStore.ts` = `openAppById` then
+`useFocus.getState().setFocus(nodeId)` (the same focus rail the Network inspector uses). Both Search result-row buttons
+(`Search.tsx`) now call `openEntity(appId, node.id)` instead of `openAppById(appId)` — so a hit opens its app **gazing at
+that node**. Proved it on **Notes** (`Notes.tsx`): on focus it maps the focused graph node → its note via
+`gnode.data.sourceId`, `scrollIntoView({block:'center'})`, and rings the card once with a new token-only `.focus-land`
+signal ring (`@keyframes focus-land-ring` in `design-system.css` — no raw hex, swells-and-settles, never blinks). A
+`handledFocus` ref + `getState()` read keep it from re-firing on every graph mirror tick.
+
+**Guard.** Extended the `GLOBAL-SEARCH` block in `scripts/qa-smoke.mjs` with a **third seed** — a graph-survivable task
+whose term `Tessellate` lives ONLY in `data.tags` — asserting it surfaces after a reload (headless proof of gap (a)).
+
+**Done / Verified / Next.** **Done:** the 6 source/test files + qa-smoke guard + metrics snapshot, committed to `main`.
+**Verified (LIVE):** `npm run build` 🟢, `npx vitest run` **257/257** 🟢 (+2), `npx eslint` on touched files **exit 0**,
+`node scripts/metrics.mjs --assert-zero` **exit 0** — and I served `dist/` on :3001 and ran the **full headless smoke**
+(global playwright symlinked in, removed after): **28/28 routes render clean, GLOBAL-SEARCH 1/1 ✅ with `tagOnly=true`**
+(`book=true task=true twoApps=true`, groups reader,goals). Metrics: `| apps 27 ±0 | test-cases 215 (+2) | tokens 0 ±0 |
+off-system 0 ±0 | bundle 696.0→696.4 (+0.4, S2 UI+helper, no new deps) |`. *Cloud limit:* the Notes scroll+ring is a
+visual — the `setFocus` wiring + array-flatten are unit- & guard-pinned; the on-device confirm is a QA screenshot of
+Notes opening scrolled+ringed to a searched hit. **Next:** EPIC-8 **S3** (type/app filter chips + ↑/↓/Enter keyboard nav
++ a summon keybinding) — the last EPIC-8 stage; shipping it retires the epic. Exact shape in `CONTEXT.md`/`EPICS.md`.
+
+---
+
 ## 2026-07-02 · Strategist — **EPIC-8 held ACTIVE (S1 QA-confirmed); S2 re-cut against a code audit — "land on the exact entity" + the array/tag gap**
 
 Read the gradient: EPIC-8 S1 (`ac6af7b`) shipped **and** QA-confirmed live in `REPORT.md` (`GLOBAL-SEARCH 1/1 ✅`,

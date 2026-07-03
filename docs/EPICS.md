@@ -88,7 +88,17 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
     *"Xenolith"*, reloaded (persist rehydrate), the term typed into Search → **BOTH surfaced, grouped under their own
     app sections.** The headline metric moved (apps 26→27, GLOBAL-SEARCH 0/1→1/1). **S2 is next.**
 
-- [ ] **S2 · Land on the exact entity (deep-link a hit to its item) + close the one real corpus gap (arrays).**
+- [x] **S2 · Land on the exact entity (deep-link a hit to its item) + close the one real corpus gap (arrays).**
+  **✅ SHIPPED 2026-07-03 (`main`).** Both gaps closed in one run. **(a)** `nodeBodyText` (`search.ts`) now flattens
+  the scalar elements of array values (nested objects still skipped) → `tags` are searchable; `search.test.ts` +2
+  (array-flatten + a `searchNodes` tag-only case). **(b)** new `openEntity(appId, nodeId)` in `windowStore.ts`
+  (opens the app via `openAppById` then `useFocus.getState().setFocus(nodeId)`); both Search result-row buttons point
+  at it; **Notes** lands on the focused card — reads `useFocus(s=>s.focusedId)`, maps the graph node to its note via
+  `node.data.sourceId`, `scrollIntoView` + a token-only `.focus-land` signal ring (design-system.css, no raw hex).
+  `GLOBAL-SEARCH` guard extended with a **tag-only** seed (`Tessellate` living ONLY in `data.tags` of a graph-survivable
+  task) — **ran LIVE `tagOnly=true`, GLOBAL-SEARCH 1/1 ✅, 28/28 routes clean.** build🟢 vitest 255→257🟢 eslint 0;
+  tokens 0, off-system 0 (`--assert-zero` exit 0); apps 27, bundle 696.0→696.4 (no new deps). *Cloud limit:* the
+  Notes scroll+ring is a visual (screenshot) — the `setFocus` wiring + array-flatten are unit- & guard-pinned.
   **Strategist audit (2026-07-02, code-confirmed — this SUPERSEDES S2's original "bodies aren't searchable" premise):**
   the corpus is already deeper than assumed. `nodeBodyText` (`search.ts:43`) concatenates **every string/number/boolean
   in `node.data`**, and the primary text of every text-bearing app is already mirrored there — Notes `content`,

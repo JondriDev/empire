@@ -8,10 +8,12 @@
  * + toast notifications for feedback (no console.log).
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Plus, Trash2, Edit2, Check, StickyNote, Sparkles, FileText, MessageSquare } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
+import { useGraph } from '../../lib/core/graph'
+import { useFocus } from '../../lib/core/focus'
 import type { Note } from '../../lib/store'
 import { Button, Input, TextArea, Card, Badge } from '../../components/ui'
 import { EmptyState, SectionHeader } from '../../components/ui/Utility'
@@ -33,10 +35,31 @@ export default function Notes() {
   const [content, setContent] = useState('')
   const toast = useToast()
 
+  // Deep-link landing: a Search hit opens Notes with the organism's gaze
+  // (useFocus) on one graph node; that node mirrors a note via data.sourceId.
+  // We scroll that card into view and ring it once — landing on the exact entity.
+  const focusedId = useFocus(s => s.focusedId)
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const handledFocus = useRef<string | null>(null)
+  const [landedId, setLandedId] = useState<string | null>(null)
+
   // Emit APP_OPENED for activity feed tracking
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'notes' })
   }, [])
+
+  useEffect(() => {
+    if (!focusedId || handledFocus.current === focusedId) return
+    const gnode = useGraph.getState().nodes[focusedId]
+    const noteId = gnode && gnode.type === 'note' ? String(gnode.data.sourceId ?? '') : ''
+    const el = noteId ? cardRefs.current.get(noteId) : null
+    if (!el) return // card not rendered yet / not a note we own — retry when notes change
+    handledFocus.current = focusedId
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setLandedId(noteId)
+    const t = setTimeout(() => setLandedId(null), 1700)
+    return () => clearTimeout(t)
+  }, [focusedId, notes])
 
   const handleCreate = () => {
     if (!title.trim() && !content.trim()) {
@@ -222,6 +245,8 @@ export default function Notes() {
             <NoteCard
               key={note.id}
               note={note}
+              landed={landedId === note.id}
+              cardRef={el => { if (el) cardRefs.current.set(note.id, el); else cardRefs.current.delete(note.id) }}
               isEditing={editingId === note.id}
               onStartEdit={() => startEditing(note)}
               onSaveEdit={() => handleSaveEdit(note.id)}
@@ -244,6 +269,8 @@ export default function Notes() {
 /* ── Single NoteCard subcomponent ── */
 interface NoteCardProps {
   note: Note
+  landed?: boolean
+  cardRef?: (_el: HTMLDivElement | null) => void
   isEditing: boolean
   onStartEdit: () => void
   onSaveEdit: () => void
@@ -257,14 +284,15 @@ interface NoteCardProps {
   setEditContent: (v: string) => void
 }
 
-function NoteCard({ note, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDelete, onAskCakra, onDismissSource, editTitle, editContent, setEditTitle, setEditContent }: NoteCardProps) {
+function NoteCard({ note, landed, cardRef, isEditing, onStartEdit, onSaveEdit, onCancelEdit, onDelete, onAskCakra, onDismissSource, editTitle, editContent, setEditTitle, setEditContent }: NoteCardProps) {
   // Provenance tag → source app; the remaining tags render as normal badges.
   const fromTag = note.tags.find(t => t.startsWith(FROM_PREFIX))
   const source = fromTag?.slice(FROM_PREFIX.length)
   const otherTags = note.tags.filter(t => !t.startsWith(FROM_PREFIX))
   return (
     <div
-      className="gp gp-interactive"
+      ref={cardRef}
+      className={`gp gp-interactive${landed ? ' focus-land' : ''}`}
       style={{
         padding: '16px',
         position: 'relative',

@@ -35,16 +35,24 @@ export function queryTerms(query: string): string[] {
   return query.toLowerCase().split(/\s+/).filter(Boolean)
 }
 
+/** True for the scalar kinds we can meaningfully fold into search text. */
+function pushScalar(parts: string[], v: unknown): void {
+  if (typeof v === 'string') parts.push(v)
+  else if (typeof v === 'number' || typeof v === 'boolean') parts.push(String(v))
+}
+
 /**
- * Flatten a node's searchable text: its `data`'s shallow string/number values.
- * Nested objects/arrays are skipped (kept cheap + predictable); the volatile
- * blob-url fields apps never store here anyway. Returned lowercased.
+ * Flatten a node's searchable text: its `data`'s shallow string/number/boolean
+ * values, PLUS the scalar elements of any string/number array (so `tags` become
+ * searchable — a note tagged `xenon` matches "xenon"). Nested objects are still
+ * skipped (kept cheap + predictable); the volatile blob-url fields apps never
+ * store here anyway. Returned lowercased.
  */
 export function nodeBodyText(node: CoreNode): string {
   const parts: string[] = []
   for (const v of Object.values(node.data ?? {})) {
-    if (typeof v === 'string') parts.push(v)
-    else if (typeof v === 'number' || typeof v === 'boolean') parts.push(String(v))
+    if (Array.isArray(v)) for (const el of v) pushScalar(parts, el)
+    else pushScalar(parts, v)
   }
   return parts.join(' ').toLowerCase()
 }
