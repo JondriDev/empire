@@ -42,8 +42,10 @@ const rules: AutomationRule[] = [
             type: 'CAKRA_CTX_QUEUED',
             payload: { text: ctx.text, title: ctx.title, from: ctx.from },
           })
-          // Clear it so it doesn't persist
-          sessionStorage.removeItem('empire-ai-clipboard')
+          // Do NOT remove the key here. `emit(APP_OPENED)` is synchronous and
+          // both Cakra surfaces emit it BEFORE their own clipboard-read effect,
+          // so clearing here destroyed every handoff payload before the surface
+          // could prefill from it. The reading surface consumes-and-clears.
         }
       } catch { /* ignore parse errors */ }
     },

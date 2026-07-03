@@ -437,6 +437,83 @@ try {
 }
 console.log(`NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
 
+
+// ── HOME-ALIVE guard (The Bridge — the home screen is living telemetry) ──
+// The launcher used to be a mute grid; The Bridge renders the organism's real
+// state at home: Today (calendar events), Open Tasks, Goals, Organism stats,
+// a jump-back-in strip (exact-landing via openEntity) and a direct Cakra ask
+// line. The pure selectors are unit-pinned in `bridge.test.ts`; this carries
+// the graph→persist→reload→rendered-home roundtrip jsdom cannot. Seed types
+// follow the GLOBAL-SEARCH rule: graph-survivable only (`event` is
+// self-mirrored by Calendar, `task` is graph-only, `book` is Reader-owned —
+// none is pruned by the boot reconcile while their apps stay unmounted).
+// Non-fatal like the guards above — a regression shows as ❌.
+const homeAlive = { today: false, tasks: false, recent: false, land: false, ask: false, pass: false };
+try {
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 30000 });
+  const todayStamp = await page.evaluate(() => {
+    const d = new Date(); const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  });
+  const seedNow = Date.now();
+  const homeSeed = { state: { nodes: {
+    'qa-home-event': {
+      id: 'qa-home-event', type: 'event', title: 'Bridge probe sync',
+      data: { date: todayStamp, time: '09:30', description: '' }, links: [],
+      meta: { created: seedNow - 3000, updated: seedNow - 3000, app: 'calendar' },
+    },
+    'qa-home-task': {
+      id: 'qa-home-task', type: 'task', title: 'Do: Verify the bridge lives',
+      data: { done: false }, links: [],
+      meta: { created: seedNow - 2000, updated: seedNow - 2000, app: 'goals' },
+    },
+    'qa-home-book': {
+      id: 'qa-home-book', type: 'book', title: 'Bridgeprobe Chronicle',
+      data: { format: 'txt' }, links: [],
+      meta: { created: seedNow - 1000, updated: seedNow, app: 'reader' },
+    },
+  } }, version: 0 };
+  await page.evaluate(([k, v]) => localStorage.setItem(k, v), [GRAPH_KEY, JSON.stringify(homeSeed)]);
+  // Reload home so the zustand+persist graph rehydrates and The Bridge reads it.
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(700);
+  const widgetText = (sel) => page.$eval(sel, (el) => el.innerText || '').catch(() => '');
+  const todayTxt = await widgetText('[data-widget="today"]');
+  homeAlive.today = todayTxt.includes('1') && todayTxt.includes('Bridge probe sync');
+  const tasksTxt = await widgetText('[data-widget="tasks"]');
+  homeAlive.tasks = tasksTxt.includes('1') && tasksTxt.includes('Verify the bridge lives');
+  // Jump-back-in strip: all three seeds are content nodes → three rows, the
+  // freshest (the book) first.
+  const recents = await page.$$eval('[data-bridge-recent]', (els) => els.map((e) => e.innerText || ''));
+  homeAlive.recent = recents.length === 3 && recents[0].includes('Bridgeprobe Chronicle');
+  // Exact-landing rail: clicking the book row must open Reader (openEntity).
+  await page.click('[data-bridge-recent="qa-home-book"]');
+  await page.waitForTimeout(700);
+  const topbar = await page.$eval('.empire-topbar-title', (el) => el.textContent || '').catch(() => '');
+  homeAlive.land = topbar.includes('Reader');
+  // The Cakra line: ask from home → Cakra opens with the question prefilled
+  // (same `empire-ai-clipboard` rail every app's "Ask Cakra" uses).
+  await page.click('button[aria-label="Home"]');
+  await page.waitForTimeout(400);
+  await page.fill('.bridge-ask-input', 'Bridge probe question');
+  await page.press('.bridge-ask-input', 'Enter');
+  await page.waitForTimeout(900);
+  const cakraBar = await page.$eval('.empire-topbar-title', (el) => el.textContent || '').catch(() => '');
+  const prefilled = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('textarea, input')).some((el) => (el.value || '').includes('Bridge probe question')));
+  homeAlive.ask = cakraBar.includes('Cakra') && prefilled;
+  homeAlive.pass = homeAlive.today && homeAlive.tasks && homeAlive.recent && homeAlive.land && homeAlive.ask;
+  console.log(`HOME-ALIVE  today=${homeAlive.today} tasks=${homeAlive.tasks} recent=${homeAlive.recent} land=${homeAlive.land} ask=${homeAlive.ask}`);
+  // Leave the graph clean for later guards.
+  await page.evaluate((k) => localStorage.removeItem(k), GRAPH_KEY);
+  await page.close();
+} catch (e) {
+  homeAlive.err = e.message;
+  console.warn(`HOME-ALIVE: guard did not complete — ${e.message}`);
+}
+console.log(`HOME-ALIVE: ${homeAlive.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
+
 // ── PROVENANCE-PERSISTS guard (EPIC-6 target metric: durable app→app memory) ──
 // EPIC-6 S1 laid the spine: `src/lib/core/provenance.ts` — a Zustand+persist
 // store (`empire-provenance`) fed ONLY by `flowForEvent`, wired via
@@ -628,6 +705,11 @@ md += `App-level provenance remembers which app fed which app; node-level lineag
 md += `| Artifact | Lineage rendered | Parent title shown | Survived reload | Result |\n|---|---|---|---|---|\n`;
 md += `| task ← ${LINEAGE_PARENT_TITLE} | ${nodeLineage.rendered ? '✅' : '❌'} | ${nodeLineage.title ? '✅' : '❌'} | ${nodeLineage.persisted ? '✅' : '❌'} | ${nodeLineage.pass ? '✅' : '❌'}${nodeLineage.err ? ' (' + nodeLineage.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
+md += `\n## Home-alive guard (The Bridge — the home screen is living telemetry)\n\n`;
+md += `The Core graph was seeded with a today-dated \`event\` (Calendar), an open \`task\` (Goals) and a \`book\` (Reader), then home was reloaded (persist rehydrate). PASS = the Today and Open Tasks widgets show the live count + entity, the jump-back-in strip lists all three newest-first, clicking a row lands in its owning app (the \`openEntity\` rail), and a question typed into the Cakra line opens Cakra prefilled (the \`empire-ai-clipboard\` rail). The pure selectors are unit-pinned in \`bridge.test.ts\`; this carries the rendered-home roundtrip jsdom cannot.\n\n`;
+md += `| Today widget | Tasks widget | Recents strip | Exact landing | Cakra line | Result |\n|---|---|---|---|---|---|\n`;
+md += `| ${homeAlive.today ? '✅' : '❌'} | ${homeAlive.tasks ? '✅' : '❌'} | ${homeAlive.recent ? '✅' : '❌'} | ${homeAlive.land ? '✅' : '❌'} | ${homeAlive.ask ? '✅' : '❌'} | ${homeAlive.pass ? '✅' : '❌'}${homeAlive.err ? ' (' + homeAlive.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n**HOME-ALIVE: ${homeAlive.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
 md += `\n## Provenance-persists guard (EPIC-6 — durable app→app memory)\n\n`;
 md += `Real \`editor→<target>\` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event \`flowForEvent\` turns into an edge in the durable \`empire-provenance\` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).\n\n`;
 md += `| Edge | Recorded | Persisted (reload) | Result |\n|---|---|---|---|\n`;
@@ -658,5 +740,5 @@ if (offline) {
 }
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, nodeLineage, provResults, entityResults, offline }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, nodeLineage, homeAlive, provResults, entityResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);

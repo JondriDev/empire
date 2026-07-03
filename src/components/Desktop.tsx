@@ -14,6 +14,7 @@ import { apps, launcherApps, getAppIcon } from '../lib/registry'
 import { useStore } from '../lib/store'
 import { useLang } from '../lib/i18n'
 import AppHost from './AppHost'
+import Bridge from './Bridge'
 import Recents from './Recents'
 import ContextMenu from './ContextMenu'
 import CommandPalette from './CommandPalette'
@@ -110,38 +111,41 @@ export default function Desktop() {
       {/* Layer 0 — planetary background wash */}
       <div className="empire-desktop-bg starfield" aria-hidden="true" />
 
-      {/* Layer 1 — home launcher */}
+      {/* Layer 1 — home: The Bridge (living telemetry) over the app grid */}
       <div className="empire-launcher" aria-hidden={!atHome}>
-        <div className="empire-app-grid">
-          {launcherApps.map((app, i) => {
-            const Icon = getAppIcon(app.icon)
-            const isRunning = windows.some(w => w.appId === app.id)
-            return (
-              <button
-                key={app.id}
-                className="empire-desktop-icon app-card"
-                style={{ ['--app-color' as string]: app.color, animationDelay: `${Math.min(i * 35, 700)}ms` }}
-                onClick={() => handleAppOpen(app.id)}
-                title={app.description || app.name}
-                aria-label={appLabel(app)}
-              >
-                <div className="empire-desktop-icon-img app-icon" style={{ background: `${app.color}15` }}>
-                  <Icon className="w-7 h-7" style={{ color: app.color }} />
-                  {isRunning && (
-                    <span
-                      aria-label="Running"
-                      style={{
-                        position: 'absolute', bottom: 3, right: 3, width: 7, height: 7,
-                        borderRadius: '50%', background: app.color,
-                        boxShadow: `0 0 8px ${app.color}, 0 0 0 1.5px ${tint('void', 60)}`,
-                      }}
-                    />
-                  )}
-                </div>
-                <span className="empire-desktop-icon-label">{appLabel(app)}</span>
-              </button>
-            )
-          })}
+        <div className="empire-home-wrap">
+          <Bridge />
+          <div className="empire-app-grid">
+            {launcherApps.map((app, i) => {
+              const Icon = getAppIcon(app.icon)
+              const isRunning = windows.some(w => w.appId === app.id)
+              return (
+                <button
+                  key={app.id}
+                  className="empire-desktop-icon app-card"
+                  style={{ ['--app-color' as string]: app.color, animationDelay: `${Math.min(i * 35, 700)}ms` }}
+                  onClick={() => handleAppOpen(app.id)}
+                  title={app.description || app.name}
+                  aria-label={appLabel(app)}
+                >
+                  <div className="empire-desktop-icon-img app-icon" style={{ background: `${app.color}15` }}>
+                    <Icon className="w-7 h-7" style={{ color: app.color }} />
+                    {isRunning && (
+                      <span
+                        aria-label="Running"
+                        style={{
+                          position: 'absolute', bottom: 3, right: 3, width: 7, height: 7,
+                          borderRadius: '50%', background: app.color,
+                          boxShadow: `0 0 8px ${app.color}, 0 0 0 1.5px ${tint('void', 60)}`,
+                        }}
+                      />
+                    )}
+                  </div>
+                  <span className="empire-desktop-icon-label">{appLabel(app)}</span>
+                </button>
+              )
+            })}
+            </div>
         </div>
       </div>
 

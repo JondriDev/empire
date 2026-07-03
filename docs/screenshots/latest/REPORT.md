@@ -1,69 +1,144 @@
-# The Empire — Visual & Smoke QA Report
+# Empire QA — Visual + Smoke Report
 
-**Run:** 2026-07-03 · **Green main:** `fcfa06d` (EPIC-9 S1 — node-level lineage) · **Build:** 🟢 (tsc -b && vite build, 80 precache entries)
+**Generated:** 2026-07-03T12:44:28.378Z
 
-**No runtime bug found.** Main builds, serves, and renders clean end-to-end from a fresh cloud checkout.
+**Result:** 28/28 rendered without crash, 0 failed.
 
----
+> **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
+> Network & console noise (failed external CDN fetches, backend API calls needing auth) is
+> listed separately — expected in the offline cloud sandbox and **not** a render failure.
 
-## Headline — EPIC-9 S1 done-confirmed (per-artifact ancestry is legible)
+| App | Render | Uncaught JS / crash | Network / console notes |
+|---|---|---|---|
+| desktop | ✅ | — | — |
+| calculator | ✅ | — | — |
+| calendar | ✅ | — | — |
+| clock | ✅ | — | — |
+| weather | ✅ | — | — |
+| grammar | ✅ | — | — |
+| language | ✅ | — | — |
+| music | ✅ | — | — |
+| video | ✅ | — | — |
+| files | ✅ | — | — |
+| cache | ✅ | — | — |
+| browser | ✅ | — | — |
+| editor | ✅ | — | — |
+| notes | ✅ | — | — |
+| photos | ✅ | — | — |
+| datacenter | ✅ | — | — |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| messages | ✅ | — | — |
+| prompt-generator | ✅ | — | — |
+| token-counter | ✅ | — | — |
+| learning-tracker | ✅ | — | — |
+| ai-chat | ✅ | — | /api/health (net::ERR_ABORTED) |
+| goals | ✅ | — | — |
+| artifacts | ✅ | — | — |
+| network | ✅ | — | — |
+| inbox | ✅ | — | — |
+| reader | ✅ | — | — |
+| search | ✅ | — | — |
 
-First independent QA since EPIC-9 S1 landed (last QA `7ef9a5c` confirmed EPIC-8 S2 on `1db665e`; since then EPIC-8 S3 `4e6a78a` **and** EPIC-9 S1 `fcfa06d` landed). **EPIC-9 S1's target metric MOVED and is reproduced independently:**
+## Inbound-lands guard (organism emit↔receive loop)
 
-- **`NODE-LINEAGE 0/1 → 1/1` ✅** — `rendered=true title=true persisted=true`. The guard seeds two graph-survivable `task` nodes (a parent + a child whose `data.from` = the parent id), loads `/app/inbox`, and asserts the child row renders a `[data-node-lineage=<parentId>]` element carrying the **parent's real entity title** — then reloads TWICE and the ancestry still resolves off the durable `empire-core-graph`. Node→node lineage, not app names.
-- **Visually confirmed** (`s1-node-lineage-inbox.png`): the "Draft Q3 roadmap" Inbox task row shows its owning-app chip **plus** the NodeLineage trail `↖ ⌾ Quarterly planning source` — the actual ancestor entity title, exactly as EPIC-9 S1 promised. Self-hides when a node has no `data.from`.
-- Backed by `nodeLineage.test.ts` (11 cases) — part of vitest **276/276** (builder shipped 265→276).
+Each entity receiver was seeded with a cross-app payload + reloaded; PASS = a "Received from <source>" chip rendered AND a control was prefilled.
 
-**No contradiction.** EPIC-8 (S1–S3) stays CODE-COMPLETE — `GLOBAL-SEARCH 1/1 ✅` (`tagOnly=true`) reproduced this run, so S3's filters/keyboard/summon did not regress the search corpus.
+| Receiver | From | Chip | Prefilled | Result |
+|---|---|---|---|---|
+| calendar | editor | ✅ | ✅ | ✅ |
+| goals | notes | ✅ | ✅ | ✅ |
+| messages | ai-chat | ✅ | ✅ | ✅ |
 
----
+## Media-persists guard (EPIC-3 S2/S3 — IndexedDB blob roundtrip)
 
-## Smoke — 28/28 render clean (desktop shell + 27 apps, 0 uncaught JS)
+Each media app's real file `<input>` was driven with a small blob, then the page was reloaded; PASS = the item appeared after add AND survived the reload (rehydrated from IndexedDB, not dropped as a ghost). This exercises the S2 acceptance that jsdom cannot (no IndexedDB).
 
-| Guard | Result |
+| App | Added | Survived reload | Result |
+|---|---|---|---|
+| music | ✅ | ✅ | ✅ |
+| video | ✅ | ✅ | ✅ |
+| photos | ✅ | ✅ | ✅ |
+
+## Graph-legible guard (EPIC-6 S4 — Reader's books join the organism)
+
+Reader's real file `<input>` was driven with a small `.txt` book, then the persisted Core graph (`empire-core-graph`) was inspected; PASS = a `book` node owned by `app==='reader'` appeared AND survived a reload (the re-mounted Reader re-mirrors its library). This closes the last graph-island — every collection-owning app is now graph-legible.
+
+| Collection | Node created | Survived reload | Result |
+|---|---|---|---|
+| reader/book | ✅ | ✅ | ✅ |
+
+**GRAPH-LEGIBLE: 1/1 ✅**
+
+## Global-search guard (EPIC-8 S1 + S2 — the organism becomes queryable)
+
+The Core graph was seeded with entities sharing a rare term across TWO apps (a `book` in Reader, a `task` in Goals); after a reload (persist rehydrate) the term was typed into the Search field. PASS = BOTH entities surface, grouped under their own app sections — one lens querying every app's real entities at once. **S2 adds a tag-only match:** a third node carries the term `Tessellate` ONLY in `data.tags` (a string array) — it surfaces iff `nodeBodyText` now flattens array elements (the S2 corpus gap). The pure ranking spine (`searchNodes`) is unit-pinned in `search.test.ts`; this carries the graph→input→grouped-render roundtrip jsdom cannot.
+
+| Query | Book hit | Task hit | Spans 2 apps | Tag-only hit | Result |
+|---|---|---|---|---|---|
+| Xenolith / Tessellate | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**GLOBAL-SEARCH: 1/1 ✅**
+
+## Node-lineage guard (node-level lineage — per-artifact ancestry is legible)
+
+App-level provenance remembers which app fed which app; node-level lineage answers which ENTITY an exact artifact descended from. The core intents stamp `data.from = sourceNode.id` on every node they create, so the graph already holds a durable per-artifact ancestry edge. Two graph-survivable `task` nodes were seeded — a parent and a child whose `data.from` points at it — then reloaded so the persist store rehydrated; PASS = the Inbox child row renders a `<NodeLineage>` (`[data-node-lineage]`) carrying the parent entity's real title, AND it still resolves after a second reload (the `from` link is durable). The pure walker `nodeLineageOf` is unit-pinned in `nodeLineage.test.ts`; this carries the graph→persist→rehydrate→render roundtrip jsdom cannot.
+
+| Artifact | Lineage rendered | Parent title shown | Survived reload | Result |
+|---|---|---|---|---|
+| task ← Chart the Xenobloom anomaly | ✅ | ✅ | ✅ | ✅ |
+
+**NODE-LINEAGE: 1/1 ✅**
+
+## Home-alive guard (The Bridge — the home screen is living telemetry)
+
+The Core graph was seeded with a today-dated `event` (Calendar), an open `task` (Goals) and a `book` (Reader), then home was reloaded (persist rehydrate). PASS = the Today and Open Tasks widgets show the live count + entity, the jump-back-in strip lists all three newest-first, clicking a row lands in its owning app (the `openEntity` rail), and a question typed into the Cakra line opens Cakra prefilled (the `empire-ai-clipboard` rail). The pure selectors are unit-pinned in `bridge.test.ts`; this carries the rendered-home roundtrip jsdom cannot.
+
+| Today widget | Tasks widget | Recents strip | Exact landing | Cakra line | Result |
+|---|---|---|---|---|---|
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**HOME-ALIVE: 1/1 ✅**
+
+## Provenance-persists guard (EPIC-6 — durable app→app memory)
+
+Real `editor→<target>` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event `flowForEvent` turns into an edge in the durable `empire-provenance` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).
+
+| Edge | Recorded | Persisted (reload) | Result |
+|---|---|---|---|
+| editor→notes | ✅ | ✅ | ✅ |
+| editor→ai-chat | ✅ | ✅ | ✅ |
+| editor→prompt-generator | ✅ | ✅ | ✅ |
+
+**PROVENANCE-PERSISTS: 3/3 ✅**
+
+## Provenance-entity guard (EPIC-6 S3 — per-entity source survives reload)
+
+Distinct from the edge guard above: each S3 receiver was seeded with an inbound payload, reloaded so it consumed the chip + prefilled, then its OWN create/send was triggered so the entity persisted its durable `from`; the page was reloaded again (chip now gone) and a `<LineageTrail>` ("From <source>") must still render off the persisted entity. This is the headline S3 acceptance jsdom cannot exercise.
+
+| Entity edge | Trail after create | Trail after reload | Result |
+|---|---|---|---|
+| calculator→goals | ✅ | ✅ | ✅ |
+| editor→messages | ✅ | ✅ | ✅ |
+| notes→calendar | ✅ | ✅ | ✅ |
+
+**PROVENANCE-ENTITY: 3/3 ✅**
+
+## Offline-boot guard (EPIC-4 S1 — cold boot from SW precache)
+
+The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (`setOffline`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.
+
+**Precache:** 80 manifest entries; 45 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
+
+| Route | Renders offline |
 |---|---|
-| SHELL-IS-STYLED | ✅ top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm .empire-desktop` |
-| REGISTRY-COVERAGE | ✅ smoke list ↔ registry match exactly (27 apps) |
-| Routes render (desktop + 27 apps) | **28/28 PASS** — 0 uncaught JS, 0 error-boundary, none blank |
-| INBOUND-LANDS | 3/3 ✅ (editor→calendar, notes→goals, ai-chat→messages) |
-| MEDIA-PERSISTS | 3/3 ✅ (music + video + photos survive reload) |
-| GRAPH-LEGIBLE | 1/1 ✅ (Reader `.txt` book → `book` node in graph, re-mirrors after reload) |
-| GLOBAL-SEARCH | 1/1 ✅ (`book=true task=true twoApps=true tagOnly=true`, groups reader,goals) |
-| **NODE-LINEAGE** | **1/1 ✅ (`rendered=true title=true persisted=true`) — EPIC-9 S1 acceptance** |
-| PROVENANCE-PERSISTS | 3/3 ✅ (editor→{notes,ai-chat,prompt-generator} edge ledger survives reload) |
-| PROVENANCE-ENTITY | 3/3 ✅ (calculator→goals, editor→messages, notes→calendar per-entity `from`) |
-| PRECACHE-AUDIT | ✅ 80 entries; 45 JS + 3 CSS chunks emitted, **no gap** |
-| OFFLINE-BOOT | 5/5 ✅ routes boot cold-offline from precache |
+| / | ✅ |
+| /app/clock | ✅ |
+| /app/maps | ✅ |
+| /app/network | ✅ |
+| /app/photos | ✅ |
 
-### Per-app render (all PASS, uncaught:0)
+**Cold-offline boot: 5/5 ✅**
 
-desktop · calculator · calendar · clock · weather (net:1) · grammar · language · music · video · files (net:1) · cache · browser · editor · notes · photos · datacenter · maps (net:8) · messages · prompt-generator · token-counter · learning-tracker · ai-chat · goals · artifacts · network · inbox · reader · search
+## Screenshots
 
-**Console/network errors — all env-expected, NOT bugs:** `maps` net:8 (OSM/CARTO tiles egress-blocked in cloud), `weather` net:1 (Open-Meteo API call), `files` net:1. No uncaught JS exceptions anywhere.
-
----
-
-## Metrics (deltas vs the metrics.json the builder committed with EPIC-9 S1)
-
-| Metric | Value | Δ |
-|---|---|---|
-| Apps / routes | 27 | ±0 |
-| Test cases (static) | 234 | ±0 |
-| Test cases (vitest) | 276/276 🟢 | ±0 |
-| Test files (metrics / vitest) | 28 / 30 | ±0 |
-| Token violations | 0 | ±0 |
-| Off-system utilities | 0 | ±0 (`--assert-zero` exit 0) |
-| Bundle gz (KB) | 698.1 | ±0 |
-
-`node scripts/metrics.mjs --assert-zero` → **exit 0** (tokens 0, off-system 0). eslint clean. Metrics reproduce the builder's S1 snapshot exactly (Δ ±0 across the board).
-
----
-
-## Cloud limits (honest)
-
-- The `NodeLineage` render is confirmed both headless (the `NODE-LINEAGE` guard's DOM assertion) **and** visually (`s1-node-lineage-inbox.png`, a QA-seeded parent+child pair on `/app/inbox`). On-device with a real derived-entity corpus is the fuller visual.
-- `maps` tiles are grey (OSM/CARTO egress-blocked) — the Leaflet container itself renders; expected env noise, not a regression.
-
-## Screenshots in this folder
-
-`desktop.png` + `app-<id>.png` × 27 + **`s1-node-lineage-inbox.png`** (EPIC-9 S1 lineage surface). Prior-epic ad-hoc shots (EPIC-6 memory panel, EPIC-6 S3 goals lineage) were pruned to keep the folder current.
+See PNGs in this folder. `desktop.png` is the shell; `app-<id>.png` is each app route.

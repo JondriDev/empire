@@ -22,6 +22,24 @@ const DICT: Record<string, Entry> = {
   'shell.start':    { en: 'The Empire', id: 'The Empire' },
   'shell.language': { en: 'Language', id: 'Bahasa' },
 
+  // ── The Bridge (living home) ──
+  'home.greet.morning':   { en: 'Good morning', id: 'Selamat pagi' },
+  'home.greet.afternoon': { en: 'Good afternoon', id: 'Selamat siang' },
+  'home.greet.evening':   { en: 'Good evening', id: 'Selamat sore' },
+  'home.greet.night':     { en: 'Good night', id: 'Selamat malam' },
+  'home.ask':             { en: 'Ask Cakra anything…', id: 'Tanya Cakra apa saja…' },
+  'home.ask.label':       { en: 'Ask Cakra', id: 'Tanya Cakra' },
+  'home.today':           { en: 'Today', id: 'Hari Ini' },
+  'home.today.free':      { en: 'no events — clear sky', id: 'tanpa acara — langit cerah' },
+  'home.tasks':           { en: 'Open Tasks', id: 'Tugas Terbuka' },
+  'home.tasks.clear':     { en: 'all clear', id: 'semua beres' },
+  'home.goals':           { en: 'Goals', id: 'Target' },
+  'home.goals.none':      { en: 'none set yet', id: 'belum ada target' },
+  'home.goals.avg':       { en: 'avg progress', id: 'rata-rata progres' },
+  'home.organism':        { en: 'Organism', id: 'Organisme' },
+  'home.links':           { en: 'links', id: 'tautan' },
+  'home.continue':        { en: 'Jump back in', id: 'Lanjutkan' },
+
   // ── Network app ──
   'network.title':  { en: 'The Network', id: 'Jaringan Hidup' },
   'network.hint':   { en: 'CORE wired to every instrument — click a node to open it', id: 'INTI terhubung ke tiap instrumen — klik node untuk membuka' },
