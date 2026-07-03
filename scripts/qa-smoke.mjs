@@ -374,6 +374,69 @@ try {
 }
 console.log(`GLOBAL-SEARCH: ${globalSearch.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
 
+// ── NODE-LINEAGE guard (node-level lineage: per-artifact ancestry is legible) ─
+// `provenance.ts`/`lineageOf` remember which APP fed which app. Node-level
+// lineage answers the finer question — which ENTITY did this exact artifact
+// descend from? The core intents (make-task / make-note-from / add-to-learning)
+// already stamp `data.from = sourceNode.id` on every node they create, so the
+// per-artifact ancestry lives durably in `empire-core-graph`. The new pure
+// `nodeLineageOf` walks it (unit-pinned in nodeLineage.test.ts) and the Inbox
+// row renders a `<NodeLineage>` showing the real source entity. jsdom can't
+// drive the graph→persist→rehydrate→render roundtrip, so do it for real: seed
+// two graph-survivable `task` nodes — a PARENT and a CHILD whose `data.from`
+// points at the parent — reload so the persist store rehydrates, open the Inbox,
+// and assert the child row renders the parent entity's lineage (a
+// `[data-node-lineage="<parentId>"]` element carrying the parent's real title).
+// Then reload AGAIN and assert it still resolves (the `from` link is durable).
+// Seed types are `task` (graph-only, no central syncer) so the boot reconcile
+// in startCoreSync() can't prune them — the same trap GLOBAL-SEARCH documents.
+// Non-fatal like the guards above — a regression shows as ❌.
+const LINEAGE_PARENT_TITLE = 'Chart the Xenobloom anomaly';
+const lineageSeed = {
+  state: {
+    nodes: {
+      'qa-lineage-parent': {
+        id: 'qa-lineage-parent', type: 'task', title: LINEAGE_PARENT_TITLE,
+        data: { done: false }, links: ['qa-lineage-child'],
+        meta: { created: 1, updated: 2, app: 'goals' },
+      },
+      'qa-lineage-child': {
+        id: 'qa-lineage-child', type: 'task', title: 'Do: follow up on the anomaly',
+        data: { done: false, from: 'qa-lineage-parent' }, links: [],
+        meta: { created: 1, updated: 3, app: 'goals' },
+      },
+    },
+  },
+  version: 0,
+};
+const readLineageEls = (page) => page.$$eval('[data-node-lineage]', els => els.map(e => e.getAttribute('data-node-lineage')));
+const nodeLineage = { rendered: false, title: false, persisted: false, pass: false };
+try {
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/app/inbox`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.evaluate(([k, v]) => localStorage.setItem(k, v), [GRAPH_KEY, JSON.stringify(lineageSeed)]);
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(800);
+  const lineageEls = await readLineageEls(page);
+  nodeLineage.rendered = lineageEls.includes('qa-lineage-parent');
+  const body = await page.evaluate(() => document.body.innerText || '');
+  nodeLineage.title = body.includes(LINEAGE_PARENT_TITLE);
+  // Reload AGAIN — the `data.from` ancestry link lives in the persisted graph,
+  // so the child must still resolve its parent entity after a fresh load.
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(800);
+  nodeLineage.persisted = (await readLineageEls(page)).includes('qa-lineage-parent');
+  nodeLineage.pass = nodeLineage.rendered && nodeLineage.title && nodeLineage.persisted;
+  console.log(`NODE-LINEAGE  rendered=${nodeLineage.rendered} title=${nodeLineage.title} persisted=${nodeLineage.persisted}`);
+  // Leave the graph clean for later guards.
+  await page.evaluate((k) => localStorage.removeItem(k), GRAPH_KEY);
+  await page.close();
+} catch (e) {
+  nodeLineage.err = e.message;
+  console.warn(`NODE-LINEAGE: guard did not complete — ${e.message}`);
+}
+console.log(`NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
+
 // ── PROVENANCE-PERSISTS guard (EPIC-6 target metric: durable app→app memory) ──
 // EPIC-6 S1 laid the spine: `src/lib/core/provenance.ts` — a Zustand+persist
 // store (`empire-provenance`) fed ONLY by `flowForEvent`, wired via
@@ -560,6 +623,11 @@ md += `The Core graph was seeded with entities sharing a rare term across TWO ap
 md += `| Query | Book hit | Task hit | Spans 2 apps | Tag-only hit | Result |\n|---|---|---|---|---|---|\n`;
 md += `| ${SEARCH_TERM} / ${TAG_TERM} | ${globalSearch.book ? '✅' : '❌'} | ${globalSearch.task ? '✅' : '❌'} | ${globalSearch.twoApps ? '✅' : '❌'} | ${globalSearch.tagOnly ? '✅' : '❌'} | ${globalSearch.pass ? '✅' : '❌'}${globalSearch.err ? ' (' + globalSearch.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**GLOBAL-SEARCH: ${globalSearch.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
+md += `\n## Node-lineage guard (node-level lineage — per-artifact ancestry is legible)\n\n`;
+md += `App-level provenance remembers which app fed which app; node-level lineage answers which ENTITY an exact artifact descended from. The core intents stamp \`data.from = sourceNode.id\` on every node they create, so the graph already holds a durable per-artifact ancestry edge. Two graph-survivable \`task\` nodes were seeded — a parent and a child whose \`data.from\` points at it — then reloaded so the persist store rehydrated; PASS = the Inbox child row renders a \`<NodeLineage>\` (\`[data-node-lineage]\`) carrying the parent entity's real title, AND it still resolves after a second reload (the \`from\` link is durable). The pure walker \`nodeLineageOf\` is unit-pinned in \`nodeLineage.test.ts\`; this carries the graph→persist→rehydrate→render roundtrip jsdom cannot.\n\n`;
+md += `| Artifact | Lineage rendered | Parent title shown | Survived reload | Result |\n|---|---|---|---|---|\n`;
+md += `| task ← ${LINEAGE_PARENT_TITLE} | ${nodeLineage.rendered ? '✅' : '❌'} | ${nodeLineage.title ? '✅' : '❌'} | ${nodeLineage.persisted ? '✅' : '❌'} | ${nodeLineage.pass ? '✅' : '❌'}${nodeLineage.err ? ' (' + nodeLineage.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n**NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
 md += `\n## Provenance-persists guard (EPIC-6 — durable app→app memory)\n\n`;
 md += `Real \`editor→<target>\` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event \`flowForEvent\` turns into an edge in the durable \`empire-provenance\` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).\n\n`;
 md += `| Edge | Recorded | Persisted (reload) | Result |\n|---|---|---|---|\n`;
@@ -590,5 +658,5 @@ if (offline) {
 }
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, provResults, entityResults, offline }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, nodeLineage, provResults, entityResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);

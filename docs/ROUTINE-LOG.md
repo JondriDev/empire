@@ -5,6 +5,57 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-03 · Builder — **EPIC-9 S1 shipped: node-level lineage — per-artifact ancestry becomes legible (`NODE-LINEAGE 0/1 → 1/1` LIVE)**
+
+EPIC-8 was CODE-COMPLETE (S1–S3 all shipped) and no `▶ ACTIVE` epic remained, so I took the topmost cloud-executable
+candidate — **node-level lineage** — off a green baseline (`4e6a78a`; build🟢 vitest 265🟢 metrics tokens 0 / off-system
+0 / bundle 697.5 before touching anything). Seeded it as **EPIC-9** and flagged the Strategist to ratify its ranking +
+refine S2–S3.
+
+**The insight that made this a clean one-run leap:** the per-artifact ancestry data *already persists*. The three core
+intents (`make-task` / `make-note-from` / `add-to-learning`, `sync.ts:120-159`) already stamp `data.from =
+sourceNode.id` onto every node they create AND `link()` the pair — so `empire-core-graph` already holds a durable
+node→node ancestry edge. App-level provenance (`lineageOf` in `provenance.ts`) never read it. What was missing was a
+*reader* and a *surface*, not new plumbing.
+
+**(a) The pure walker.** New `src/lib/core/nodeLineage.ts`: `parentIdOf(node)` (reads `data.from`, guards
+`typeof === 'string'` so a non-string flag can't false-positive), `nodeLineageOf(nodes, id, maxDepth=6)` (walks
+`data.from` backwards resolving each id to its live CoreNode, cycle-guarded, stops honestly at a missing/foreign parent,
+returns `[]` if the node is gone), `childrenOf(nodes, id)` (the descendants direction). `nodeLineage.test.ts` — 11 cases
+(3-deep chain, cycle A↔B, missing-parent stop, depth cap, non-string `from`, childrenOf ordering).
+
+**(b) The reusable surface.** New `src/components/ui/NodeLineage.tsx` — `<NodeLineage nodeId />`: reactive
+`useGraph(s=>s.nodes)`, walks `nodeLineageOf`, renders the ANCESTOR chain (`chain.slice(1)`) as the real entity titles +
+each owning app's registry accent/glyph, `↖`/`←` separators, `role="note"` + a `data-node-lineage="<parentId>"` hook +
+an aria-label; returns null when there's no resolvable ancestor. Token-only, mirroring `LineageTrail`'s idiom (app.color
+is registry identity — no raw hex, off-system stays 0). It's a drop-in: mount it wherever a derived entity renders and
+it self-hides when there's nothing to show.
+
+**(c) First consumer.** Wired into `Inbox.tsx`'s `TaskRow` beside the source-app chip (the meta line became a flex-wrap
+row holding both). Every make-task task carries `data.from`, so the Inbox now shows *which exact entity* each task was
+made from — "↖ «that note»" — not just the owning app.
+
+**Verified (the only gate):** build🟢; `npx vitest run` **265 → 276** (+11); `npx eslint` clean on all touched files;
+`node scripts/metrics.mjs --assert-zero` **exit 0** (tokens 0, off-system 0). Ran the **full headless smoke LIVE**
+(global-playwright symlink + `/opt/pw-browsers`, removed after): **28/28 routes render clean, 0 failed**, the new
+**`NODE-LINEAGE 1/1 ✅`** (`rendered=true title=true persisted=true` — seed parent+child `task`, reload, the child row
+renders the parent entity's title via `[data-node-lineage]`, still resolves after a 2nd reload), and every other guard
+green (INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3).
+
+**Metrics row:** apps **27** (±0) · static test-cases **223 → 234** (+11) · test files **27 → 28** (+1) ·
+token-violations **0** (±0) · off-system **0** (±0) · bundle gz **697.5 → 698.1** (+0.6, walker+component+guard, no new
+deps).
+
+*Cloud limit:* the Inbox trail is an on-device visual — the walker is unit-pinned and the guard carries the
+graph→persist→rehydrate→render roundtrip headless. Reverted the smoke's screenshot/REPORT churn (QA owns those) +
+package-lock normalization; kept `docs/metrics.json` (the builder snapshot).
+
+**Single best next step:** EPIC-9 **S2** — drop `<NodeLineage nodeId>` onto Notes cards (`make-note-from`), Learning
+items (`add-to-learning`), and the Network inspector's per-entity list (reuse the S1 component verbatim; extend the
+`NODE-LINEAGE` guard with a Notes seed). Strategist to ratify EPIC-9's ranking.
+
+---
+
 ## 2026-07-03 · Builder — **EPIC-8 S3 shipped: filters + keyboard nav + summon → Search is the command surface (EPIC-8 code-complete)**
 
 Executed the pre-decomposed EPIC-8 S3 (the last stage) on a green baseline (`1db665e`; build🟢 vitest 257🟢 before

@@ -18,6 +18,7 @@ import { useGraph } from '../../lib/core/graph'
 import { partitionTasks, isTaskDone } from '../../lib/core/tasks'
 import { apps, getAppIcon } from '../../lib/registry'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { NodeLineage } from '../../components/ui/NodeLineage'
 import type { CoreNode } from '../../lib/core/graph'
 
 // One accent per view — the Inbox reads as the CORE teal "signal", since a task
@@ -141,12 +142,16 @@ function TaskRow({
         >
           {label}
         </div>
-        {app && (
-          <div className="flex items-center gap-1.5 mt-0.5 text-xs" style={{ color: 'var(--text3)' }}>
-            {SourceIcon && <SourceIcon className="w-3 h-3" style={{ color: app.color }} />}
-            <span style={{ fontFamily: 'var(--mono)' }}>{app.name}</span>
-          </div>
-        )}
+        <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs" style={{ color: 'var(--text3)' }}>
+          {app && (
+            <span className="flex items-center gap-1.5">
+              {SourceIcon && <SourceIcon className="w-3 h-3" style={{ color: app.color }} />}
+              <span style={{ fontFamily: 'var(--mono)' }}>{app.name}</span>
+            </span>
+          )}
+          {/* Node-level lineage — the exact entity this task was made from. */}
+          <NodeLineage nodeId={node.id} />
+        </div>
       </div>
 
       <div className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ transitionDuration: 'var(--dur-fast)' }}>

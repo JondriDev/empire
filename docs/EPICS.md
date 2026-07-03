@@ -161,6 +161,70 @@ ancestry, `lineageOf` in `provenance.ts` is the rail); **EPIC-7 · Android** sta
 
 ---
 
+## ▶ ACTIVE (Builder-seeded 2026-07-03 — **Strategist to ratify S2–S3**) — EPIC-9 · Node-level lineage (per-artifact ancestry)
+
+> **Taken by the Builder as the topmost cloud-executable candidate** when EPIC-8 went code-complete and no `▶ ACTIVE`
+> epic remained (EPIC-7 · Android stays device-gated). EPICS.md needs the **Strategist** to formally rank/ratify this
+> epic and refine S2–S3 below. **Why highest realizable gradient now** (one line): the organism *remembers* movement
+> at the **app** level (EPIC-6: "Goals ← Calculator") but not at the **entity** level — you can't yet see that *this
+> exact task* was made from *that exact note*. Yet the data already exists: the three core intents
+> (`make-task`/`make-note-from`/`add-to-learning`, `sync.ts:120-159`) stamp `data.from = sourceNode.id` on every node
+> they create AND `link()` the pair, so `empire-core-graph` already holds a durable per-artifact ancestry edge. The
+> steepest remaining interconnection gradient is making that ancestry **legible** — walk it, and show the real entity
+> chain wherever an artifact appears. Fully cloud-verifiable (pure walker + a headless guard), reuses every rail.
+
+**Leap:** every derived artifact shows *exactly which entity it descended from* — "Inbox task ← «Field log» (Notes) ←
+«Anomaly» (Messages)" — the real entity chain, not just app names. Provenance stops being app→app and becomes node→node.
+
+**Target metric:** a **`NODE-LINEAGE` guard** in `scripts/qa-smoke.mjs` — seed a parent node + a child whose
+`data.from` points at it, reload, assert the child's row renders the parent entity's real title (durable across a
+second reload). **Headline: `NODE-LINEAGE 0/1 → 1/1`** + the "+ a unit test" discipline (`nodeLineage.test.ts`).
+*token-violations*/*off-system* stay **0**.
+
+### Rails to reuse (read ONCE — do NOT reinvent)
+- **`src/lib/core/nodeLineage.ts` (S1, 2026-07-03)** — the pure spine: `parentIdOf(node)` (reads `data.from`),
+  `nodeLineageOf(nodes, id, maxDepth=6)` (walk `data.from` backwards → live CoreNode chain, cycle-guarded,
+  stops at a missing/foreign parent), `childrenOf(nodes, id)` (descendants). **Add walks/queries here, not in components.**
+- **`src/components/ui/NodeLineage.tsx` (S1)** — the reusable surface: `<NodeLineage nodeId />` renders the ancestor
+  entity chain (real titles + owning-app registry accent/glyph, `data-node-lineage` attr, token-only). Drop it into
+  any app row. Mirrors `LineageTrail`'s idiom but node-level (entity titles, not app names).
+- **`data.from`** — the honest ancestry link, stamped ONLY by the three core intents (`sync.ts`). Never invent one.
+
+- [x] **S1 · The node-lineage walker + the reusable surface + the guard (per-artifact ancestry becomes legible).**
+  ✅ SHIPPED 2026-07-03 (`main`). New pure `src/lib/core/nodeLineage.ts` (`parentIdOf`/`nodeLineageOf`/`childrenOf`,
+  11 cases in `nodeLineage.test.ts`). New `src/components/ui/NodeLineage.tsx` — reactive `useGraph`, walks
+  `nodeLineageOf`, renders the ancestor entity chain (real titles + registry accent/glyph), null when no ancestry.
+  Wired into the **Inbox** `TaskRow` beside the source-app chip (every make-task task carries `data.from`). New
+  `NODE-LINEAGE` guard in `qa-smoke.mjs` (seed parent+child `task` nodes → reload → assert the child row shows the
+  parent's title, durable across a 2nd reload) — **ran LIVE 1/1 ✅** (`rendered=true title=true persisted=true`),
+  28/28 routes clean, every other guard green. build🟢 vitest 265→276🟢 eslint clean; tokens 0, off-system 0
+  (`--assert-zero` exit 0); static 223→234, bundle 697.5→698.1 (+0.6, no new deps).
+  - *Acceptance:* a task made via ⚡ make-task from a note shows "↖ «that note»" in the Inbox, surviving reload;
+    `nodeLineage.test.ts` green; `NODE-LINEAGE 0/1 → 1/1`. **Per-artifact ancestry is legible + queryable.**
+  - *Cloud limit:* the Inbox trail is an on-device visual — the pure walker is unit-pinned + the guard carries the
+    graph→persist→rehydrate→render roundtrip headless (`[data-node-lineage]` + parent title).
+
+- [ ] **S2 · Surface node-lineage on the other derived surfaces (Notes / Learning / Network inspector).** Drop
+  `<NodeLineage nodeId>` wherever a derived entity renders: **Notes** cards made via `make-note-from` (carry
+  `data.from`), **Learning** items via `add-to-learning`, and the **Network inspector**'s per-entity list (show each
+  node's ancestry chain when clicked). Reuse the S1 component + walker verbatim — no new logic. *Acceptance:* a note
+  spun off a message shows "↖ «that message»"; the Network inspector shows an entity's ancestor chain. Extend the
+  `NODE-LINEAGE` guard with a Notes/Network seed OR add a `childrenOf` "what this spawned" row. Build🟢 vitest🟢
+  eslint clean; tokens 0, off-system 0. **(Strategist: confirm the surface set + whether to also show descendants.)**
+
+- [ ] **S3 · Node-lineage in Search + a full ancestry view (the organism's provenance lens).** Make lineage
+  *navigable*: a Search hit shows its ancestor chain (`<NodeLineage>` under each row) and clicking a hop deep-links to
+  that ancestor via `openEntity(app, nodeId)` (the EPIC-8 rail). Optionally a dedicated "lineage of X" panel that
+  renders both `nodeLineageOf` (ancestors) and `childrenOf` (descendants) as a mini-tree. *Acceptance:* from any
+  Search hit you can walk up to its source entity mouse-free. Extend the guard to assert a hit row carries
+  `[data-node-lineage]`. Build🟢 vitest🟢 eslint clean; tokens 0, off-system 0. **(Strategist: ratify scope; this
+  closes EPIC-9 → then EPIC-7 · Android if an on-device QA path exists.)**
+
+_S1 shipped (walker + surface + `NODE-LINEAGE 1/1` LIVE). QA to independently confirm on the new green main. Strategist
+to ratify EPIC-9's ranking and refine S2–S3. **EPIC-7 · Android** stays device-gated._
+
+---
+
 ## ✅ DONE — EPIC-6 · Organism Memory (durable provenance & lineage)
 
 > **Promoted 2026-07-01** (EPIC-5 CLOSED; every prior epic DONE). **Why this is the highest-gradient move now**

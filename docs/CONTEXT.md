@@ -22,7 +22,41 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **▶ EPIC-8 · Global cross-app search (the organism becomes queryable)** — promoted 2026-07-02
+- **Active epic:** **▶ EPIC-9 · Node-level lineage (per-artifact ancestry)** — Builder-seeded 2026-07-03 (EPIC-8 went
+  CODE-COMPLETE, no `▶ ACTIVE` epic remained; EPIC-7 Android stays device-gated). **Strategist owes ratification of
+  EPIC-9's ranking + refinement of S2–S3** (see `docs/EPICS.md` → EPIC-9). **Leap:** provenance stops being app→app
+  and becomes node→node — every derived artifact shows *exactly which entity it descended from* (real entity chain,
+  not app names). **Target metric:** a `NODE-LINEAGE` guard in `qa-smoke.mjs` (`0/1 → 1/1`) + `nodeLineage.test.ts`.
+  - **✅ S1 SHIPPED + VERIFIED LIVE (2026-07-03, `main`) — per-artifact ancestry is legible + queryable.** The data
+    already existed: the three core intents (`make-task`/`make-note-from`/`add-to-learning`, `sync.ts:120-159`) stamp
+    **`data.from = sourceNode.id`** on every node they create AND `link()` the pair, so `empire-core-graph` already
+    held a durable per-artifact ancestry edge — what was missing was a *reader*. New pure **`src/lib/core/nodeLineage.ts`**:
+    `parentIdOf(node)` (`typeof data.from === 'string'`), `nodeLineageOf(nodes, id, maxDepth=6)` (walk `data.from`
+    backwards → live CoreNode chain `[node, parent, …]`, cycle-guarded, STOPS at a missing/foreign parent id, returns
+    `[]` if node absent), `childrenOf(nodes, id)` (descendants, newest-first). `nodeLineage.test.ts` **11 cases**. New
+    **`src/components/ui/NodeLineage.tsx`** = `<NodeLineage nodeId />`: reactive `useGraph(s=>s.nodes)`, walks
+    `nodeLineageOf`, renders the ANCESTOR chain (`chain.slice(1)`) as real entity titles + owning-app registry
+    accent/glyph, `↖`/`←` separators, `role="note"` + **`data-node-lineage="<parentId>"`** attr + aria-label; returns
+    **null** when no resolvable ancestor. Token-only (mirrors `LineageTrail`: `app.color` is registry identity, no raw
+    hex). Wired into **`Inbox.tsx` `TaskRow`** beside the source-app chip (meta line refactored to a flex-wrap row).
+    New **`NODE-LINEAGE` guard** in `qa-smoke.mjs` (after GLOBAL-SEARCH): seeds two graph-survivable `task` nodes
+    (parent + child with `data.from`=parent), loads `/app/inbox`, reload, asserts a `[data-node-lineage=parent]` el +
+    the parent title, reload AGAIN → still resolves. **Ran the full smoke LIVE: NODE-LINEAGE 1/1 ✅** (`rendered=true
+    title=true persisted=true`), **28/28 routes render clean**, every other guard green. build🟢 vitest 265→276🟢
+    eslint clean; tokens 0, off-system 0 (`--assert-zero` exit 0); apps 27, static 223→234, bundle 697.5→698.1
+    (+0.6, no new deps).
+    - **SEAM for S2/S3 (reuse, do NOT reinvent):** `nodeLineageOf`/`childrenOf` are the walkers; `<NodeLineage nodeId>`
+      is the drop-in surface. To show ancestry anywhere a derived entity renders, just mount `<NodeLineage nodeId>` —
+      it reads the graph reactively and self-hides when there's no `data.from`. **▶ NEXT STAGE = EPIC-9 S2:** drop it
+      onto **Notes** cards (`make-note-from` → `data.from`), **Learning** items (`add-to-learning`), and the **Network
+      inspector**'s per-entity list. Reuse verbatim; extend the `NODE-LINEAGE` guard with a Notes seed.
+    - **TRAP (same as GLOBAL-SEARCH):** the guard MUST seed graph-survivable types — `startCoreSync()` prunes
+      centrally-mirrored types (note/learning/message) absent from their (empty, fresh-QA) stores. `task` is graph-only
+      → survives the boot reconcile. A `note`-typed seed on `/app/inbox` would be DELETED before render.
+    - **TRAP:** `parentIdOf` guards `typeof from === 'string'` — some nodes could carry `data.from` as a non-string
+      flag, so a bare truthiness check would false-positive. Keep the string + non-empty guard.
+  - _(EPIC-8 history retained below as working memory — it is CODE-COMPLETE, S1–S2 QA-confirmed, S3 shipped/QA-pending.)_
+- **Prior active epic (CODE-COMPLETE):** **▶ EPIC-8 · Global cross-app search (the organism becomes queryable)** — promoted 2026-07-02
   (EPIC-6 CLOSED & QA-confirmed on `e262f1b`; no active epic remained; EPIC-7 Android stays device-gated). **Leap:**
   one Search surface queries EVERY app's real entities at once (the Core graph already mirrors them all) — ranked,
   grouped by owning app, one click from each entity's home. **Target metric:** a `GLOBAL-SEARCH` guard in
