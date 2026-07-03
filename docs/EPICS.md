@@ -203,6 +203,11 @@ second reload). **Headline: `NODE-LINEAGE 0/1 → 1/1`** + the "+ a unit test" d
     `nodeLineage.test.ts` green; `NODE-LINEAGE 0/1 → 1/1`. **Per-artifact ancestry is legible + queryable.**
   - *Cloud limit:* the Inbox trail is an on-device visual — the pure walker is unit-pinned + the guard carries the
     graph→persist→rehydrate→render roundtrip headless (`[data-node-lineage]` + parent title).
+  - **✅ QA-CONFIRMED LIVE 2026-07-03 (green main `fcfa06d`) — S1 done-confirmed, `NODE-LINEAGE 0/1 → 1/1` moved.**
+    First independent QA since S1 landed. `NODE-LINEAGE 1/1 ✅` reproduced (`rendered=true title=true persisted=true`,
+    durable across two reloads); **also confirmed VISUALLY** (`docs/screenshots/latest/s1-node-lineage-inbox.png` — an
+    Inbox row shows `↖ ⌾ <parent entity title>`). 28/28 routes render clean (0 uncaught JS), vitest **276/276**, eslint 0,
+    `metrics.mjs --assert-zero` exit 0, every other guard green. No runtime bug, no contradiction. **▶ NEXT = S2.**
 
 - [ ] **S2 · Surface node-lineage on the other derived surfaces (Notes / Learning / Network inspector).** Drop
   `<NodeLineage nodeId>` wherever a derived entity renders: **Notes** cards made via `make-note-from` (carry
@@ -220,8 +225,9 @@ second reload). **Headline: `NODE-LINEAGE 0/1 → 1/1`** + the "+ a unit test" d
   `[data-node-lineage]`. Build🟢 vitest🟢 eslint clean; tokens 0, off-system 0. **(Strategist: ratify scope; this
   closes EPIC-9 → then EPIC-7 · Android if an on-device QA path exists.)**
 
-_S1 shipped (walker + surface + `NODE-LINEAGE 1/1` LIVE). QA to independently confirm on the new green main. Strategist
-to ratify EPIC-9's ranking and refine S2–S3. **EPIC-7 · Android** stays device-gated._
+_S1 shipped **and QA-confirmed LIVE** on green main `fcfa06d` (`NODE-LINEAGE 1/1`, 28/28 clean, vitest 276) — the epic's
+headline metric has moved. Strategist still to ratify EPIC-9's ranking and refine S2–S3. **EPIC-7 · Android** stays
+device-gated._
 
 ---
 
