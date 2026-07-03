@@ -13,9 +13,18 @@
  * (a top-level entity, or one whose parent was pruned). Colours come from each
  * app's registry accent + icon (identity data — no raw hex literal, mirrors
  * LineageTrail / ProvenanceChip).
+ *
+ * NAVIGABLE (EPIC-9 S3): each ancestor hop is a real control — clicking it
+ * `openEntity(app, nodeId)`s the source entity (open its owning app + point the
+ * organism's gaze at it), so you climb the whole ancestry mouse-free. A hop is a
+ * `role="button"` span (not a `<button>`) with `stopPropagation`, so it stays
+ * valid HTML and self-contained even when the trail is nested inside a larger
+ * clickable row (Search's ResultRow wraps it in a `<button>`).
  */
+import type { KeyboardEvent, MouseEvent } from 'react'
 import { useGraph } from '../../lib/core/graph'
 import { nodeLineageOf } from '../../lib/core/nodeLineage'
+import { openEntity } from '../../lib/windowStore'
 import { apps, getAppIcon } from '../../lib/registry'
 import type { CoreNode } from '../../lib/core/graph'
 
@@ -26,12 +35,27 @@ function EntityToken({ node }: { node: CoreNode }) {
   const app = apps.find(a => a.id === node.meta.app)
   const accent = app?.color ?? 'var(--text3)'
   const Icon = getAppIcon(app?.icon ?? '')
+  const label = entityLabel(node)
+  // Climb one hop up the ancestry. stopPropagation so a hop inside a larger
+  // clickable row (Search result) navigates to the ANCESTOR, not the row entity.
+  const climb = (e: MouseEvent | KeyboardEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    openEntity(node.meta.app, node.id)
+  }
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
+    <span
+      role="button"
+      tabIndex={0}
+      onClick={climb}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') climb(e) }}
+      aria-label={`Open ${label} in ${app?.name ?? node.meta.app}`}
+      title={`Open ${label}`}
+      className="gp-lineage-hop"
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0 }}
+    >
       <Icon className="w-3 h-3" aria-hidden style={{ color: accent, flexShrink: 0 }} />
-      <span style={{ color: 'var(--text2)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-        {entityLabel(node)}
-      </span>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
     </span>
   )
 }

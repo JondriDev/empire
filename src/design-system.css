@@ -662,6 +662,19 @@ img, video, svg { display: block; max-width: 100%; }
   100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 0%,  transparent); }
 }
 .focus-land { animation: focus-land-ring 1.6s var(--ease-out); border-radius: var(--radius-lg, 16px); }
+
+/* Node-lineage hop — a clickable ancestry link (EPIC-9 S3). Reads as calm text
+   until you reach for it, then brightens and lifts on a glass tint; the gaze
+   ring is the ion accent. Token-only, so it stays on-system. */
+.gp-lineage-hop {
+  color: var(--text2);
+  cursor: pointer;
+  border-radius: var(--radius-sm, 6px);
+  padding: 0 2px;
+  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.gp-lineage-hop:hover { color: var(--text); background: color-mix(in srgb, var(--ion) 12%, transparent); }
+.gp-lineage-hop:focus-visible { outline: 2px solid var(--ion); outline-offset: 1px; color: var(--text); }
 .animate-scale-in   { animation: scale-in   var(--dur-mid)  var(--ease-spring) forwards; }
 .animate-slide-up   { animation: slide-up   var(--dur-slow) var(--ease-out)    forwards; }
 .animate-float      { animation: float      6s ease-in-out  infinite; }

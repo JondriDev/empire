@@ -5,6 +5,48 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-03 · EPIC-9 **S3 SHIPPED** — node-lineage is NAVIGABLE; each ancestry hop climbs to its source entity (★ EPIC-9 CODE-COMPLETE)
+
+**Stage:** EPIC-9 · Node-level lineage → **S3** (the click layer — the display surfaces from S1/S2 become *walkable*).
+Built directly on green main. **Done:** turned every `<NodeLineage>` hop into a real control:
+- **`src/components/ui/NodeLineage.tsx`** — `EntityToken` (the per-hop token) is now a `role="button"` span with
+  `tabIndex=0`, `onClick` + `onKeyDown` (Enter/Space) calling **`openEntity(node.meta.app, node.id)`** (the EPIC-8 rail,
+  `windowStore.ts:126`) → opens the ancestor's owning app AND sets `useFocus.focusedId` to it. You now climb the whole
+  ancestry mouse-free from any Search hit / Inbox row / Network inspector row. `stopPropagation`+`preventDefault` on the
+  hop means it stays correct even when nested inside Search's outer `<button>` ResultRow (a `span[role=button]` isn't
+  interactive content, so no invalid button-in-button — the documented S3 trap is resolved without lifting anything out).
+- **`src/design-system.css`** — new token-only `.gp-lineage-hop` affordance: calm `--text2` at rest, brightens to
+  `--text` on an ion `color-mix` glass tint on hover, ion focus-visible ring. No raw hex → off-system stays 0.
+- **`src/components/ui/NodeLineage.test.tsx`** (NEW, +4) — deterministically pins navigation (the part the smoke can't
+  observe on the route): seed graph → render `<NodeLineage>` → click/Enter the hop → assert `useWindowStore.activeWindowId`
+  = the ancestor's owning app AND `useFocus.focusedId` = the ancestor id; plus the null-when-orphan case.
+- **`scripts/qa-smoke.mjs`** — `NODE-LINEAGE` guard grew a 5th axis **`clickable`**: in the live Search DOM the parent
+  hop renders as a `[role="button"]` whose accessible name targets the parent entity, then the guard clicks it (handler
+  must not throw). REPORT table + pass condition updated.
+
+**Why the guard can't watch the window swap (honest cloud limit):** the smoke drives Search via the `/app/search`
+**route**, where `AppShell` renders by URL param, NOT windowStore — so `openEntity`'s app open isn't observable there.
+The `clickable` axis carries the live click-path + correct wiring; the actual window/focus state change is unit-pinned in
+`NodeLineage.test.tsx`. Real navigation is observable in the Bridge/home (`/`) shell (renders by windowStore) — the
+on-device confirm.
+
+**Verified (the only gate):** `npm run build` 🟢 (tsc -b + vite build), `npx vitest run` **292/292** 🟢 (+4), `npx eslint`
+on touched files clean, `node scripts/metrics.mjs --assert-zero` **exit 0** (tokens 0, off-system 0). **Ran the full
+headless smoke LIVE on the built dist** (server :3001 + `/opt/pw-browsers/chromium-1194`): **28/28 routes pass, 0 failed**,
+**`NODE-LINEAGE 1/1 ✅`** — `rendered=true title=true persisted=true search=true clickable=true`; GLOBAL-SEARCH 1/1,
+PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE no-gap all green.
+
+**Metrics row (no regression):** apps 27 ±0 · static tests 246→250 (+4) · test files 29→30 (+1) · token-violations 0 ±0 ·
+off-system 0 ±0 · bundle gz 701.2→701.4 (+0.2, no new deps).
+
+**★ EPIC-9 is CODE-COMPLETE (S1–S3 all shipped + verified LIVE).** No `▶ ACTIVE` epic remains.
+**Single best next step:** the Strategist retires EPIC-9 and promotes the next epic (EPIC-7 · Android stays device-gated
+until an on-device QA path exists). QA to confirm EPIC-9 done: on the Bridge/home (`/`) open Search, query a term, click a
+result's lineage hop → the ancestor's app opens focused on it (visual climb = the on-device confirm; smoke + unit tests
+carry the wiring headless).
+
+---
+
 ## 2026-07-03 · EPIC-9 **S2 SHIPPED** — node-lineage legible on the Network inspector + Search (guard grew a `search` axis; Notes/Learning proven impossible)
 
 **Stage:** EPIC-9 · Node-level lineage → **S2** (surface the per-artifact ancestry beyond the Inbox). Built directly on
