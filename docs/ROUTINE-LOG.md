@@ -5,6 +5,46 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-03 · EPIC-9 **S2 SHIPPED** — node-lineage legible on the Network inspector + Search (guard grew a `search` axis; Notes/Learning proven impossible)
+
+**Stage:** EPIC-9 · Node-level lineage → **S2** (surface the per-artifact ancestry beyond the Inbox). Built directly on
+green main `b71ffe4` (S1 already live). **Done:** dropped the S1 `<NodeLineage nodeId>` component — reused VERBATIM,
+zero new logic — on the two views that render REAL Core-graph nodes by id:
+- **The Network inspector's per-entity list** (`Network.tsx`): replaced the bare type-count summary ("task 3, note 2")
+  with an actual entity list — newest-first, capped at `ENTITY_ROWS=12` + a "+ N more" line — each row showing the
+  entity title + type dot + its ancestry trail (self-hides when no `data.from`). Removed the now-unused `selTypeCounts`.
+  The inspector is now a browsable per-artifact ancestry surface, not just a counter.
+- **Search result rows** (`Search.tsx`): lineage renders under the type/snippet meta line (made `flex-wrap`).
+
+**Why these, not Notes/Learning (the run's key discovery):** the original S2 spec listed Notes/Learning cards, but that
+is **architecturally impossible**. The `make-note-from`/`add-to-learning` intents (`sync.ts:139-159`) create standalone
+GRAPH nodes with `data.from`, not local store items — and those `note`/`learning` graph nodes get PRUNED by the central
+reconcile (`sync.ts:64`) on the next store tick. The Notes/Learning apps render ONLY local `useStore` items, whose mirror
+mapping DROPS `from` (`sync.ts:80-91`) → a local note/learning item never carries `data.from` → `<NodeLineage>` there is
+always null. The nodes that DO carry durable `data.from` are make-task **tasks** (graph-only, owned by their source app)
+→ they surface in Inbox (S1), the Network inspector, and Search (S2). Correction documented in CONTEXT + EPICS S2 note.
+
+**Verified (the only gate):** `npm run build` 🟢 (tsc -b + vite build), `npx vitest run` **288/288** 🟢, `npx eslint`
+on both touched files clean, `node scripts/metrics.mjs --assert-zero` **exit 0** (tokens 0, off-system 0). **Ran the full
+headless smoke LIVE on the built dist** (server :3001 + `/opt/pw-browsers/chromium-1194`): **28/28 routes render clean**,
+**`NODE-LINEAGE 1/1 ✅`** with the new 4th axis — `rendered=true title=true persisted=true search=true` (the guard now
+opens `/app/search`, queries "anomaly", and asserts the seeded child hit carries `[data-node-lineage=qa-lineage-parent]`).
+Every other guard green (GLOBAL-SEARCH 1/1, HOME-ALIVE 1/1, INBOUND/MEDIA 3/3, GRAPH-LEGIBLE 1/1, PROVENANCE 3/3+3/3,
+OFFLINE 5/5, PRECACHE no-gap). **Metrics row:** apps 27, test cases 246, test files 29, token-violations **0**,
+off-system **0**, bundle gz **701.2 KB** (±0 — NodeLineage was already bundled by S1); vitest 288 (±0 static count).
+
+**Not verifiable in cloud:** the Network inspector list is a visual/on-device render — driving the canvas node-click
+headless is fragile, so the Search axis carries the mount roundtrip and the inspector reuses the same unit-pinned
+component. On-device: open The Network → click an app node → the inspector lists that app's entities, each derived one
+showing its "↖ «source entity»" trail.
+
+**▶ Single best next step = EPIC-9 S3** (make the lineage NAVIGABLE): make each `<NodeLineage>` hop clickable →
+`openEntity(app, nodeId)` so you climb ancestry mouse-free; optionally a "lineage of X" mini-tree (ancestors via
+`nodeLineageOf` + descendants via `childrenOf`, walker already built). **Trap for S3:** NodeLineage is mounted inside a
+`<button>` in Search's ResultRow — a nested real `<button>` is invalid HTML, so lift it out or use role+onClick there.
+
+---
+
 ## 2026-07-03 · Visual & Smoke QA — **green main `436cebf` (The Bridge): 28/28 clean, `HOME-ALIVE 1/1` NEW, EPIC-9 S1 held (`NODE-LINEAGE 1/1`), vitest 288**
 
 First QA since `f1303b6` (which confirmed EPIC-9 S1 on `fcfa06d`). One commit landed since: **`436cebf feat(home): The

@@ -24,11 +24,40 @@
 
 - **Active epic:** **▶ EPIC-9 · Node-level lineage (per-artifact ancestry)** — Builder-seeded 2026-07-03 (EPIC-8 went
   CODE-COMPLETE, no `▶ ACTIVE` epic remained; EPIC-7 Android stays device-gated). **Strategist owes ratification of
-  EPIC-9's ranking + refinement of S2–S3** (see `docs/EPICS.md` → EPIC-9). **S1 QA-CONFIRMED LIVE 2026-07-03 on green
-  main `fcfa06d` (NODE-LINEAGE 1/1, 28/28 clean, vitest 276 — see the S1 block below); S1 RE-CONFIRMED still-green 2026-07-03
-  on `436cebf` (NODE-LINEAGE 1/1 held after The Bridge landed).** **Leap:** provenance stops being app→app
-  and becomes node→node — every derived artifact shows *exactly which entity it descended from* (real entity chain,
-  not app names). **Target metric:** a `NODE-LINEAGE` guard in `qa-smoke.mjs` (`0/1 → 1/1`) + `nodeLineage.test.ts`.
+  EPIC-9's ranking** (see `docs/EPICS.md` → EPIC-9). **S1 QA-CONFIRMED LIVE `fcfa06d`; S2 SHIPPED 2026-07-03 (this run,
+  smoke-verified LIVE — NODE-LINEAGE 1/1 with the new `search=true` axis, 28/28 clean, vitest 288).** **Leap:** provenance
+  stops being app→app and becomes node→node — every derived artifact shows *exactly which entity it descended from* (real
+  entity chain, not app names). **Target metric:** a `NODE-LINEAGE` guard in `qa-smoke.mjs` (`1/1`, now 4 axes:
+  rendered/title/persisted/**search**) + `nodeLineage.test.ts`.
+  - **▶ NEXT STAGE = EPIC-9 S3 — make node-lineage NAVIGABLE (the display surfaces exist; S3 is the click layer).**
+    Display mounts are DONE (Inbox S1, Network inspector + Search S2). S3 = make each `<NodeLineage>` hop CLICKABLE →
+    `openEntity(app, nodeId)` (EPIC-8 rail, `windowStore.ts:119`) so you climb ancestry mouse-free; optionally a "lineage
+    of X" mini-tree rendering `nodeLineageOf` (ancestors) + `childrenOf` (descendants, walker already built + unit-pinned).
+    **SEAM:** `<NodeLineage>` is `src/components/ui/NodeLineage.tsx` — `EntityToken` (line 25) is the per-hop span to make
+    a button; each hop already has the node id (`n.id`). Extend the guard to assert the click navigates. TRAP: NodeLineage
+    is mounted INSIDE a `<button>` in Search's ResultRow (`Search.tsx:276`) — nesting a real `<button>` inside would be
+    invalid HTML; either lift it out of the outer button or use a non-button clickable (role+onClick on the span) there.
+  - **✅ S2 SHIPPED (2026-07-03, `main`) — node-lineage legible on the two graph-node-rendering views.** Dropped
+    `<NodeLineage nodeId>` on: **(a)** the **Network inspector's per-entity list** (`Network.tsx` ~line 680) — REPLACED the
+    bare type-count summary with a real entity list (newest-first, `ENTITY_ROWS=12` cap + "+ N more"), each row = type dot
+    + title + its ancestry trail (self-hides when no `data.from`); removed the now-unused `selTypeCounts`. **(b)** **Search
+    result rows** (`Search.tsx` ResultRow meta line, ~line 284) — lineage under the type/snippet, meta line made
+    `flex-wrap`. Both reuse the S1 component + walker VERBATIM (no new logic). Extended the `NODE-LINEAGE` guard
+    (`qa-smoke.mjs`) with a 4th axis `search`: after the Inbox check, open `/app/search`, query "anomaly", assert the
+    child hit renders `[data-node-lineage=qa-lineage-parent]`. **Smoke LIVE: NODE-LINEAGE 1/1 ✅** (`rendered=true
+    title=true persisted=true search=true`), 28/28 clean. build🟢 vitest 288🟢 eslint clean; tokens 0, off-system 0
+    (`--assert-zero` exit 0); bundle gz 701.2 ±0. *Cloud limit:* the Network inspector list is a visual/on-device render
+    (driving the canvas node-click headless is fragile) — the Search axis carries the mount roundtrip; the inspector reuses
+    the same unit-pinned component.
+    - **⚠️ TRAP / CORRECTION (load-bearing — do NOT try Notes/Learning cards again):** the original S2 spec said "drop it
+      on Notes cards (make-note-from) + Learning items (add-to-learning)". **This is architecturally impossible** and was
+      the run's key discovery. The intents (`sync.ts:139-159`) create standalone GRAPH nodes with `data.from`, NOT local
+      Notes/Learning store items; those `note`/`learning` graph nodes get PRUNED by the central reconcile (`sync.ts:64`,
+      keyed on `data.sourceId` which they lack) on the next store tick. The Notes/Learning apps render ONLY local `useStore`
+      items whose mirror mapping DROPS `from` (`sync.ts:80-91` map content/tags / learned/mastered only) → a local
+      note/learning item NEVER carries `data.from` → `<NodeLineage>` there is always null. The derived nodes that DO carry
+      durable `data.from` are **make-task tasks** (graph-only → not pruned, owned by their source app) → they surface in
+      Inbox (S1), the Network inspector, and Search (S2) — which is exactly where lineage now renders.
   - **↪ OFF-EPIC LANDING (user-directed) — `436cebf` The Bridge · living home screen.** The desktop root (`/`) is now
     **`src/components/Bridge.tsx`** (+ `Recents.tsx`, `AppHost.tsx`; `Window.tsx` deleted): a greeting header, an "Ask
     Cakra anything…" bar, four live stat cards (TODAY / OPEN TASKS / GOALS / ORGANISM), and the app-launcher grid. Guarded

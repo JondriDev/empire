@@ -14,6 +14,7 @@ import { useLang } from '../../lib/i18n'
 import { onAny, type EmpireEvent } from '../../lib/eventBus'
 import { useGraph } from '../../lib/core/graph'
 import { useFocus } from '../../lib/core/focus'
+import { NodeLineage } from '../../components/ui/NodeLineage'
 import type { CoreNode } from '../../lib/core/graph'
 import { flowForEvent } from '../../lib/core/flow'
 import { useProvenance, fedBy, feeds, recentEdges, type ProvNeighbor } from '../../lib/core/provenance'
@@ -117,6 +118,8 @@ type Signal = { key: number; name: string; rgb: string; to?: string; label: stri
 const MAX_SIGNALS = 6
 // Rows shown in the durable memory panel — the persistent analogue of the ticker.
 const MEMORY_ROWS = 12
+// Entity rows shown in the inspector before collapsing into a "+ N more" line.
+const ENTITY_ROWS = 12
 
 // Node colour by *type* lives in ./nodeColors so the canvas, legend and
 // inspector share ONE source and can never drift.
@@ -402,10 +405,6 @@ export default function Network() {
 
   // ── Inspector data for the focused app (cheap; only when a node is selected) ──
   const selEntities = selected ? entities[selected.id] ?? [] : []
-  const selTypeCounts = selEntities.reduce<Record<string, number>>((acc, n) => {
-    acc[n.type] = (acc[n.type] ?? 0) + 1
-    return acc
-  }, {})
   const selEdges = selected ? adjacency[selected.id] : undefined
   // All-time provenance for the focused app (durable; survives reload). Distinct
   // from `selEdges`, which is the live *structural* graph adjacency (now).
@@ -676,7 +675,10 @@ export default function Network() {
               </button>
             </div>
 
-            {/* Entities owned by this app, grouped + counted by type. */}
+            {/* Entities owned by this app — the real nodes, newest first. Each
+                row carries its node-level lineage (the exact entity it descended
+                from) via <NodeLineage>, which self-hides when there's no
+                `data.from` ancestry. Capped so a busy app stays calm. */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div className="t-label" style={{ color: 'var(--text3)' }}>
                 {t('network.entities', 'Entities')} · {selEntities.length}
@@ -686,16 +688,30 @@ export default function Network() {
                   {t('network.noEntities', 'no nodes in the graph yet')}
                 </div>
               ) : (
-                Object.entries(selTypeCounts).map(([type, count]) => (
-                  <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-xs)' }}>
-                    <span style={{
-                      flex: '0 0 auto', width: 7, height: 7, borderRadius: 'var(--radius-full)',
-                      background: rgbCss(typeRgb(type)), boxShadow: `0 0 6px ${rgbCss(typeRgb(type))}`,
-                    }} />
-                    <span style={{ color: 'var(--text2)', fontFamily: 'var(--mono)', flex: 1 }}>{type}</span>
-                    <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)' }}>{count}</span>
-                  </div>
-                ))
+                <>
+                  {selEntities.slice(0, ENTITY_ROWS).map(n => (
+                    <div key={n.id} style={{ fontSize: 'var(--text-xs)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', minWidth: 0 }}>
+                        <span style={{
+                          flex: '0 0 auto', width: 7, height: 7, borderRadius: 'var(--radius-full)',
+                          background: rgbCss(typeRgb(n.type)), boxShadow: `0 0 6px ${rgbCss(typeRgb(n.type))}`,
+                        }} />
+                        <span style={{ color: 'var(--text2)', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {n.title}
+                        </span>
+                        <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', flex: '0 0 auto' }}>{n.type}</span>
+                      </div>
+                      <div style={{ paddingLeft: 15 }}>
+                        <NodeLineage nodeId={n.id} />
+                      </div>
+                    </div>
+                  ))}
+                  {selEntities.length > ENTITY_ROWS && (
+                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)', fontFamily: 'var(--mono)', paddingLeft: 15 }}>
+                      + {selEntities.length - ENTITY_ROWS} {t('network.more', 'more')}
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
