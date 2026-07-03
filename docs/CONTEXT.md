@@ -22,13 +22,29 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **EPIC-9 · Node-level lineage (per-artifact ancestry) — ★ CODE-COMPLETE (S1–S3 all shipped
-  2026-07-03).** S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE `f878844`; **S3 SHIPPED `main` 2026-07-03 (this
-  run) — node-lineage is now NAVIGABLE.** No `▶ ACTIVE` epic remains — **Strategist owes: retire EPIC-9 + promote the
-  next epic** (EPIC-7 Android stays device-gated). **Leap achieved:** provenance is node→node — every derived artifact
-  shows *exactly which entity it descended from*, and you can now CLICK any ancestor hop to climb to it. **Target metric
-  (all axes met):** `NODE-LINEAGE` guard in `qa-smoke.mjs` = **1/1, now 5 axes** (rendered/title/persisted/search/**clickable**)
+- **Active epic:** **EPIC-9 · Node-level lineage (per-artifact ancestry) — ★ CODE-COMPLETE + FULLY QA-CONFIRMED (S1–S3
+  all shipped & confirmed LIVE 2026-07-03).** S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE `f878844`; **S3
+  QA-CONFIRMED LIVE 2026-07-03 (green main `0378d8e`) — node-lineage is NAVIGABLE, `NODE-LINEAGE clickable=true` axis
+  reproduced independently.** No `▶ ACTIVE` epic remains — **Strategist owes: retire EPIC-9 + promote the next epic**
+  (EPIC-7 Android stays device-gated). **Leap achieved:** provenance is node→node — every derived artifact shows
+  *exactly which entity it descended from*, and you can now CLICK any ancestor hop to climb to it. **Target metric
+  (all 5 axes met):** `NODE-LINEAGE` guard in `qa-smoke.mjs` = **1/1, 5 axes** (rendered/title/persisted/search/**clickable**)
   + `nodeLineage.test.ts` + `NodeLineage.test.tsx`.
+  - **✅ S3 QA-CONFIRMED LIVE (2026-07-03, green main `0378d8e`, this QA run) — the click layer is real.** First
+    independent QA since S3 landed (last QA `36f33f5` confirmed S2 on `f878844`; S3 feature `0378d8e` landed since).
+    Full headless smoke: **28/28 routes render clean** (0 uncaught JS), **NODE-LINEAGE 1/1 ✅** with the FIFTH axis
+    `clickable=true` (`rendered=true title=true persisted=true search=true clickable=true`) — the seeded parent hop
+    renders as a live `[role="button"]` targeting the parent entity, and the guard clicks it without the handler
+    throwing. vitest **292/292** (+4 `NodeLineage.test.tsx` navigation cases pin the window/focus state change),
+    eslint 0, `metrics.mjs --assert-zero` exit 0. Every other guard green (SHELL-IS-STYLED, REGISTRY-COVERAGE 27,
+    INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 `tagOnly=true`, HOME-ALIVE 1/1, PROVENANCE-PERSISTS
+    3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 81 no-gap). Metrics reproduce the builder's S3 snapshot
+    EXACTLY (apps 27, static 250, vitest 292, bundle 701.4, tokens 0, off-system 0, Δ ±0). **No runtime bug, no
+    contradiction. ★ All three EPIC-9 acceptance axes have now moved (search + clickable on top of S1's headline) →
+    EPIC-9 is DONE.** *Cloud limit (unchanged):* the `/app/search` route renders by URL param not windowStore, so the
+    post-click window swap isn't observable headless — the `clickable` axis carries the live click-path; the state
+    change is unit-pinned. Visually confirmed the Bridge home (`desktop.png` — "Good night" greeting + 4 live stat
+    cards + 24-tile grid) and Search route (`app-search.png` — styled field + "Find anything, anywhere" + ⌘⇧F hint).
   - **✅ S3 SHIPPED 2026-07-03 (`main`, this run) — each ancestry hop climbs to its source entity.** `EntityToken` in
     **`src/components/ui/NodeLineage.tsx:25`** is now a `role="button"` span (tabIndex 0, Enter/Space) calling
     `openEntity(node.meta.app, node.id)` (EPIC-8 rail, `windowStore.ts:126`) → opens the ancestor's owning app + sets
