@@ -1,8 +1,18 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-03T12:44:28.378Z
+**Generated:** 2026-07-03T13:08:18.369Z
 
 **Result:** 28/28 rendered without crash, 0 failed.
+
+## ✅ No runtime bug found — green main `436cebf`
+
+- **QA'd commit:** `436cebf feat(home): The Bridge — the living home screen` (landed since last QA `f1303b6`).
+- **Active epic EPIC-9 S1 (`NODE-LINEAGE`) RE-CONFIRMED still 1/1** (`rendered=true title=true persisted=true`) — The Bridge did **not** regress per-artifact lineage. No new epic stage landed this run (The Bridge is a user-directed pass, not an EPIC-9 stage).
+- **NEW surface confirmed:** The Bridge home screen at `/` — `HOME-ALIVE 1/1 ✅` (`today/tasks/recent/land/ask` all present) + visually verified (`desktop.png`: "Good afternoon" greeting, "Ask Cakra anything…" bar, live TODAY/OPEN TASKS/GOALS/ORGANISM stat cards, app-launcher grid).
+- **Build 🟢** (`tsc -b && vite build`), **vitest 288/288** (276→288, +12 from The Bridge), **eslint clean**, `metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0).
+- **Metrics reproduce the builder's Bridge snapshot exactly:** apps 27, static tests 246 (vitest 288), bundle 700.7 KB gz, Δ ±0.
+- **All 12 guards green:** SHELL-IS-STYLED, REGISTRY-COVERAGE (27, bidirectional), INBOUND-LANDS 3/3, MEDIA-PERSISTS 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 (`tagOnly=true`), NODE-LINEAGE 1/1, HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 80 no-gap.
+- **Env-expected noise only** (not bugs): Weather geocoding CDN + geolocation blocked, Maps carto tiles blocked (net:8), `/api/files` 500 (no Android FS) — all sandbox-expected.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -14,24 +24,24 @@
 | calculator | ✅ | — | — |
 | calendar | ✅ | — | — |
 | clock | ✅ | — | — |
-| weather | ✅ | — | — |
+| weather | ✅ | — | https://geocoding-api.open-meteo.com/v1/search?name=Jakarta&count=1&language=en&format=json (net::ERR_TUNNEL_CONNECTION_FAILED)<br>Permissions policy violation: Geolocation access has been blocked because of a permissions policy applied to the current document. See https://crbug.com/4143482 |
 | grammar | ✅ | — | — |
 | language | ✅ | — | — |
 | music | ✅ | — | — |
 | video | ✅ | — | — |
-| files | ✅ | — | — |
+| files | ✅ | — | /api/files?path=%2Fstorage%2Femulated%2F0 → HTTP 500 |
 | cache | ✅ | — | — |
 | browser | ✅ | — | — |
 | editor | ✅ | — | — |
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
 | learning-tracker | ✅ | — | — |
-| ai-chat | ✅ | — | /api/health (net::ERR_ABORTED) |
+| ai-chat | ✅ | — | — |
 | goals | ✅ | — | — |
 | artifacts | ✅ | — | — |
 | network | ✅ | — | — |

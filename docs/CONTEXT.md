@@ -25,9 +25,16 @@
 - **Active epic:** **▶ EPIC-9 · Node-level lineage (per-artifact ancestry)** — Builder-seeded 2026-07-03 (EPIC-8 went
   CODE-COMPLETE, no `▶ ACTIVE` epic remained; EPIC-7 Android stays device-gated). **Strategist owes ratification of
   EPIC-9's ranking + refinement of S2–S3** (see `docs/EPICS.md` → EPIC-9). **S1 QA-CONFIRMED LIVE 2026-07-03 on green
-  main `fcfa06d` (NODE-LINEAGE 1/1, 28/28 clean, vitest 276 — see the S1 block below).** **Leap:** provenance stops being app→app
+  main `fcfa06d` (NODE-LINEAGE 1/1, 28/28 clean, vitest 276 — see the S1 block below); S1 RE-CONFIRMED still-green 2026-07-03
+  on `436cebf` (NODE-LINEAGE 1/1 held after The Bridge landed).** **Leap:** provenance stops being app→app
   and becomes node→node — every derived artifact shows *exactly which entity it descended from* (real entity chain,
   not app names). **Target metric:** a `NODE-LINEAGE` guard in `qa-smoke.mjs` (`0/1 → 1/1`) + `nodeLineage.test.ts`.
+  - **↪ OFF-EPIC LANDING (user-directed) — `436cebf` The Bridge · living home screen.** The desktop root (`/`) is now
+    **`src/components/Bridge.tsx`** (+ `Recents.tsx`, `AppHost.tsx`; `Window.tsx` deleted): a greeting header, an "Ask
+    Cakra anything…" bar, four live stat cards (TODAY / OPEN TASKS / GOALS / ORGANISM), and the app-launcher grid. Guarded
+    by a new **`HOME-ALIVE`** assertion in `qa-smoke.mjs` (`today/tasks/recent/land/ask` all present). **QA-CONFIRMED LIVE
+    2026-07-03 on `436cebf`: `HOME-ALIVE 1/1 ✅`, renders clean (`desktop.png`), 28/28 routes green, vitest 288, no
+    regression.** Not an epic stage — EPIC-9 remains ACTIVE.
   - **✅ S1 SHIPPED + VERIFIED LIVE (2026-07-03, `main`) — per-artifact ancestry is legible + queryable.** The data
     already existed: the three core intents (`make-task`/`make-note-from`/`add-to-learning`, `sync.ts:120-159`) stamp
     **`data.from = sourceNode.id`** on every node they create AND `link()` the pair, so `empire-core-graph` already
