@@ -10,17 +10,18 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-07-02** (strategist) · Main: 🟢 green (build + vitest 213 static, token-violations 0,
-> off-system 0) · QA: 28/28 routes render, no runtime errors, all guards green. **EPIC-1..6 all DONE**
-> (organism both-ways 9/9 · token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable ·
-> off-system 1076→0, CI-locked · durable provenance `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` +
-> Reader graph-legible). **▶ EPIC-8 · Global cross-app search (the organism becomes queryable) ACTIVE** — the
-> organism now *remembers* and *mirrors* every collection into one Core graph, but you still navigate it one silo at
-> a time; EPIC-8 makes the unified graph **queryable from one lens** (type a word → every matching entity across
-> every app, ranked, grouped by owning app, one click from home). **S1 SHIPPED + QA-confirmed live** (`ac6af7b`):
-> pure `search.ts` spine + the 27th app `Search.tsx` + `GLOBAL-SEARCH` guard **1/1 ✅** (apps 26→27). S2 (land on the
-> exact entity + array/tag corpus gap) → S3 (filters/keyboard/summon) remain. **Android renumbered to EPIC-7
-> (QUEUED)** — device-gated, promote only with on-device QA.
+> Last re-ranked: **2026-07-03** (strategist) · Main: 🟢 green (vitest 292, token-violations 0, off-system 0) ·
+> QA: 28/28 routes render, no runtime errors, all guards green. **EPIC-1..9 all DONE** (organism both-ways 9/9 ·
+> token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable · off-system 1076→0, CI-locked ·
+> durable provenance `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` + Reader graph-legible · `GLOBAL-SEARCH 1/1`
+> queryable organism · `NODE-LINEAGE 1/1` per-artifact ancestry, navigable). **▶ EPIC-10 · The Timeline (the
+> organism's lifestream — a TEMPORAL lens) ACTIVE** — the organism has three lenses over its one Core graph (Network =
+> structural, Search = query, Inbox = tasks) but **no temporal lens**, even though every `CoreNode` has stamped
+> `meta.created` and every `ProvEdge` stamps `at` all along. EPIC-10 is the missing 4th lens: one newest-first,
+> day-grouped stream merging **every entity-birth + every app→app handoff** into the organism's history — each row
+> navigable to its entity, ancestry inline, and (S3) what it spawned (finally surfacing the unused `childrenOf`
+> walker). **Target: `TIMELINE 0/1 → 1/1`** (S1 spine+lens+guard → S2 filters/keyboard → S3 descendants). **Android
+> renumbered to EPIC-7 (QUEUED)** — device-gated, promote only with on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
@@ -101,12 +102,20 @@ now **EPIC-6 S4**:
   store, persistent Network memory panel + all-time "fed by/feeds", reload-durable per-entity source via
   `LineageTrail`, Reader graph-island closed). `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` + `GRAPH-LEGIBLE
   1/1` all QA-confirmed. Retired.
-- **Global cross-app search — the organism becomes queryable.** *(In progress — this IS EPIC-8, ▶ ACTIVE.)* One
-  Search lens over every app's mirrored entities, ranked + grouped by owning app. S1 shipped (`search.ts` spine + the
-  Search app + `GLOBAL-SEARCH 1/1`). Closes when hits land on the exact entity (S2) and Search gains filters/keyboard/
-  summon (S3). **Follow-on (next epic candidate, not yet decomposed):** **node-level lineage** — correlate a `HANDOFF`
-  with the specific entity it created for a true per-artifact ancestry (app-level memory → artifact-level memory);
-  `lineageOf` in `provenance.ts` is the rail.
+- **Global cross-app search — the organism becomes queryable.** ✅ **DONE — this WAS EPIC-8** (S1–S3 shipped: pure
+  `search.ts` spine + the Search app + `openEntity` deep-link + filters/keyboard/⌘⇧F summon; `GLOBAL-SEARCH 1/1`,
+  S1–S2 QA-confirmed). Retired.
+- **Node-level lineage — per-artifact ancestry.** ✅ **DONE — this WAS EPIC-9** (S1–S3 shipped: `nodeLineage.ts`
+  walker + `<NodeLineage>` surface on Inbox/Network/Search + each hop navigable via `openEntity`; `NODE-LINEAGE 1/1`,
+  5 axes, S1–S3 all QA-confirmed LIVE). Retired. *Left one rail dormant:* `childrenOf` (descendants) was
+  built + unit-pinned but never surfaced → picked up by EPIC-10 S3.
+- **The Timeline — a temporal lens over the whole organism.** *(In progress — this IS EPIC-10, ▶ ACTIVE.)* The 4th
+  lens (after Network/Search/Inbox): one newest-first, day-grouped stream of every entity-birth (`meta.created`) +
+  every app→app handoff (`ProvEdge.at`), each row deep-linking to its entity with ancestry inline and (S3) its
+  descendants. Closes when `TIMELINE 1/1` is QA-confirmed. **Follow-on (next epic candidate, not yet decomposed):**
+  **design-system conformance II** — extend the audit past colour to **spacing/radii/type** (ad-hoc px, non-`--mono`
+  code surfaces) with its own `metrics.mjs` row + `--assert-zero` gate, so conformance isn't colour-only (the
+  existing off-system=0 lock is the template).
 - **Android APK validation.** *(QUEUED EPIC-7 — renumbered EPIC-5→6→7.)* Device-gated: an unattended cloud
   builder can't install an APK or run on-device smoke, so its target isn't cloud-verifiable. Promote only when an
   on-device QA path exists; until then it's lower *realizable* gradient than the cloud-executable themes above.

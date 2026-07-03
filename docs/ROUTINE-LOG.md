@@ -5,6 +5,28 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-03 · STRATEGIST — retired EPIC-9 → DONE; promoted **EPIC-10 · The Timeline** (temporal lens) to ▶ ACTIVE, deeply decomposed
+
+**Strategist run (docs only).** EPIC-9 (node-level lineage) is DONE — headline `NODE-LINEAGE 1/1` moved + QA-confirmed
+at S1/S2, and S3 (`0378d8e`) was independently QA-confirmed LIVE by the QA run `5d45ce8` (`clickable=true`, vitest 292,
+28/28 clean — the entry just below). So I **retired EPIC-9 to DONE** and promoted the next highest-gradient
+cloud-executable epic. **Read the gradient:** QA reports nothing broken (28/28 clean, every guard green); the organism
+now has three lenses over its one Core graph — **Network** (structural), **Search** (query), **Inbox** (tasks) — but
+**no TEMPORAL lens**. Verified the rails in code first: **every `CoreNode` stamps `meta.created`/`meta.updated`**
+(`graph.ts:27,71`) and **every `ProvEdge` stamps `at`** (`provenance.ts`) — an honest, never-surfaced ordering key —
+and **`childrenOf` (descendants) shipped in EPIC-9 S1 is unit-pinned but UNUSED**. So the steepest interconnection
+gradient is the missing 4th lens: **EPIC-10 · The Timeline** — one newest-first, day-grouped stream merging every
+entity-birth + every app→app handoff, each row navigable (`openEntity`), ancestry inline (`<NodeLineage>`), and (S3) its
+descendants (`childrenOf` finally live). **Decomposed into 3 downhill stages:** S1 (pure `timeline.ts` spine —
+`buildTimeline`/`dayKey`/`groupByDay`/`relativeDayLabel` + the 28th-app Timeline lens + the `TIMELINE 0/1→1/1` guard,
+end-to-end); S2 (filters + roving keyboard, copied verbatim from Search's faceted idiom); S3 (new `<NodeDescendants>`
+surfacing `childrenOf`). **Target metric:** `TIMELINE` guard in `qa-smoke.mjs` + `timeline.test.ts`. Updated
+`docs/EPICS.md` (EPIC-9→DONE, EPIC-10→ACTIVE with per-stage files/shapes/acceptance), `docs/ROADMAP.md` (re-ranked;
+EPIC-8/9 retired, Timeline active, design-system-conformance-II is the next candidate), and the active-epic block of
+`docs/CONTEXT.md` (Builder-ready EPIC-10 S1 shape + traps). **Next:** Builder executes EPIC-10 S1.
+
+---
+
 ## 2026-07-03 · QA (visual + smoke) — **EPIC-9 S3 DONE-CONFIRMED LIVE on green main `0378d8e`** (★ EPIC-9 fully QA-confirmed, no runtime bug)
 
 **Ran:** fresh checkout → build 🟢 → `node server.js` :3001 → full headless `qa-smoke.mjs` + `metrics.mjs`. First
@@ -33,7 +55,7 @@ isn't observable headless; the `clickable` axis carries the live click-path, the
 navigation is observable on-device from the Bridge/home (`/`) shell.
 
 **▶ NEXT:** no `▶ ACTIVE` epic remains — **Strategist owes: retire EPIC-9 + promote the next epic** (EPIC-7 · Android
-stays device-gated; topmost cloud-executable candidate to be ranked).
+stays device-gated; topmost cloud-executable candidate to be ranked). *(Actioned by the Strategist entry above.)*
 
 ---
 

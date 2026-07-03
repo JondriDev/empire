@@ -22,29 +22,53 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **EPIC-9 · Node-level lineage (per-artifact ancestry) — ★ CODE-COMPLETE + FULLY QA-CONFIRMED (S1–S3
-  all shipped & confirmed LIVE 2026-07-03).** S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE `f878844`; **S3
-  QA-CONFIRMED LIVE 2026-07-03 (green main `0378d8e`) — node-lineage is NAVIGABLE, `NODE-LINEAGE clickable=true` axis
-  reproduced independently.** No `▶ ACTIVE` epic remains — **Strategist owes: retire EPIC-9 + promote the next epic**
-  (EPIC-7 Android stays device-gated). **Leap achieved:** provenance is node→node — every derived artifact shows
-  *exactly which entity it descended from*, and you can now CLICK any ancestor hop to climb to it. **Target metric
-  (all 5 axes met):** `NODE-LINEAGE` guard in `qa-smoke.mjs` = **1/1, 5 axes** (rendered/title/persisted/search/**clickable**)
-  + `nodeLineage.test.ts` + `NodeLineage.test.tsx`.
-  - **✅ S3 QA-CONFIRMED LIVE (2026-07-03, green main `0378d8e`, this QA run) — the click layer is real.** First
-    independent QA since S3 landed (last QA `36f33f5` confirmed S2 on `f878844`; S3 feature `0378d8e` landed since).
-    Full headless smoke: **28/28 routes render clean** (0 uncaught JS), **NODE-LINEAGE 1/1 ✅** with the FIFTH axis
-    `clickable=true` (`rendered=true title=true persisted=true search=true clickable=true`) — the seeded parent hop
-    renders as a live `[role="button"]` targeting the parent entity, and the guard clicks it without the handler
-    throwing. vitest **292/292** (+4 `NodeLineage.test.tsx` navigation cases pin the window/focus state change),
-    eslint 0, `metrics.mjs --assert-zero` exit 0. Every other guard green (SHELL-IS-STYLED, REGISTRY-COVERAGE 27,
-    INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 `tagOnly=true`, HOME-ALIVE 1/1, PROVENANCE-PERSISTS
-    3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 81 no-gap). Metrics reproduce the builder's S3 snapshot
-    EXACTLY (apps 27, static 250, vitest 292, bundle 701.4, tokens 0, off-system 0, Δ ±0). **No runtime bug, no
-    contradiction. ★ All three EPIC-9 acceptance axes have now moved (search + clickable on top of S1's headline) →
-    EPIC-9 is DONE.** *Cloud limit (unchanged):* the `/app/search` route renders by URL param not windowStore, so the
-    post-click window swap isn't observable headless — the `clickable` axis carries the live click-path; the state
-    change is unit-pinned. Visually confirmed the Bridge home (`desktop.png` — "Good night" greeting + 4 live stat
-    cards + 24-tile grid) and Search route (`app-search.png` — styled field + "Find anything, anywhere" + ⌘⇧F hint).
+- **Active epic:** **EPIC-10 · The Timeline (the organism's lifestream — a TEMPORAL lens)** — promoted 2026-07-03
+  (Strategist; EPIC-9 retired to DONE). **Leap:** the organism has three lenses over its one Core graph —
+  **Network** (structural), **Search** (query), **Inbox** (tasks) — but **no TEMPORAL lens**, even though every
+  `CoreNode` has stamped `meta.created`/`meta.updated` (`graph.ts:27,71`) and every `ProvEdge` stamps `at` all along.
+  EPIC-10 is the missing 4th lens: one newest-first, day-grouped stream merging **every entity-birth + every app→app
+  handoff** into the organism's history — each row navigable to its entity (`openEntity`), its ancestry inline
+  (`<NodeLineage>`), and (S3) what it spawned (`childrenOf` — built in EPIC-9 S1, unit-pinned, STILL UNUSED).
+  **Target metric:** a **`TIMELINE` guard** in `qa-smoke.mjs` (`0/1 → 1/1`) + `timeline.test.ts`. Full stage specs in
+  `docs/EPICS.md` → EPIC-10.
+  - **▶ NEXT STAGE = EPIC-10 S1 · the timeline spine + the Timeline lens app + the guard (stands the lens up end-to-end).**
+    Start editing without re-planning:
+    - **New pure `src/lib/core/timeline.ts`** (all `(nodes, edges, …) → value`, no store access): `TimelineEntry`
+      (`{ id; kind:'entity'|'flow'; at; nodeId?; app; title; type?; toApp?; label? }`); `buildTimeline(nodes, edges,
+      limit=200)` = map nodes→entity entries (`at: meta.created`), edges→flow entries (`at: edge.at`), merge, sort
+      **strictly newest-first by `at`** with an `id` tie-break (deterministic), cap; `dayKey(at)` = **UTC** `YYYY-MM-DD`
+      zero-padded (no `Date.now()`, no locale — stable); `groupByDay(entries)` = ordered array of `{day, entries}`, days
+      + entries both newest-first; `relativeDayLabel(day, now)` = pure, takes `now` explicitly → Today/Yesterday/date.
+    - **New `src/apps/timeline/Timeline.tsx`** = the **28th app / 4th lens** (copy `Search.tsx`'s reactive-lens idiom):
+      `useGraph(s=>s.nodes)` + `useProvenance(s=>s.edges)` → `groupByDay(buildTimeline(...))`; render day sections
+      (sticky header via `relativeDayLabel(day, Date.now())` — the ONLY place `Date.now()` is called), each an **entity**
+      row (registry glyph+accent + title + `type` chip + relative time, whole row a `<button>` → `openEntity(app, nodeId)`,
+      `<NodeLineage nodeId>` under it + ⚡ `<NodeActions nodeId>`) or a **flow** row (`from → to` glyphs + names + label +
+      time, NOT a button). Register the 28th app: `registry.ts` `{ id:'timeline', route:'/app/timeline', icon:'Timeline',
+      … }`; new alien `Timeline` glyph in `design-system/icons/glyphs.tsx` + barrel (mirror the `Search` glyph add); wire
+      into the `appComponents` map beside `search`/`inbox`/`network`.
+    - **New `TIMELINE` guard** in `scripts/qa-smoke.mjs` (mirror GLOBAL-SEARCH/NODE-LINEAGE, non-fatal) + `timeline` in the
+      smoke list + a REPORT section: seed **two graph-survivable `task` nodes** (TRAP: `task` survives `startCoreSync`'s
+      boot prune; `note`/`learning`/`message` do NOT) with distinct `meta.created` owned by two apps + one `empire-provenance`
+      edge → reload → open `/app/timeline` → assert `ordered` (newest-`created` first) + `grouped` (`[data-timeline-day]`) +
+      `flow` (`[data-timeline-kind=flow]`) + `persisted` (holds after a 2nd reload). **`TIMELINE 0/1 → 1/1`.**
+    - **Test `src/lib/core/timeline.test.ts`** (≥10): merge+strict-sort+tie-break, `limit` cap, `dayKey` UTC+zero-pad,
+      `groupByDay` ordering, `relativeDayLabel(now)` Today/Yesterday/date, empty→`[]`.
+    - *Acceptance:* `/app/timeline` renders the entity-births + handoffs as one newest-first, day-grouped stream; each
+      entity row opens its entity with ancestry inline; `timeline.test.ts` green; `TIMELINE 0/1 → 1/1`. build🟢 vitest🟢
+      eslint clean; tokens 0, off-system 0 (`--assert-zero` exit 0); apps 27→28, routes 28/28, bundle +small (no new deps).
+    - **TRAPs (load-bearing):** (1) keep `timeline.ts` PURE — pass `now` into `relativeDayLabel`; only the component calls
+      `Date.now()`. (2) The guard MUST seed `task` (graph-only) — `startCoreSync` prunes centrally-mirrored types absent
+      from their empty QA stores before render. (3) `dayKey` is UTC-based so tests/guard don't flake across the runner's
+      timezone.
+  - _(EPIC-9 detail retained below as working memory — it is DONE, S1–S3 all QA-confirmed LIVE, `NODE-LINEAGE 1/1`.)_
+- **Prior active epic (DONE — retired 2026-07-03, FULLY QA-CONFIRMED):** **EPIC-9 · Node-level lineage (per-artifact ancestry) — ★ CODE-COMPLETE (S1–S3 all shipped
+  2026-07-03).** S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE `f878844`; **S3 QA-CONFIRMED LIVE `0378d8e` (by QA
+  run `5d45ce8`) — node-lineage is NAVIGABLE, `NODE-LINEAGE clickable=true` axis reproduced independently, vitest 292,
+  28/28 clean.** **Leap achieved:** provenance is node→node — every derived artifact shows *exactly which entity it
+  descended from*, and you can CLICK any ancestor hop to climb to it. **Target metric (all 5 axes met):** `NODE-LINEAGE`
+  guard = **1/1, 5 axes** (rendered/title/persisted/search/**clickable**) + `nodeLineage.test.ts` + `NodeLineage.test.tsx`.
+  **`childrenOf` (descendants walker) shipped here but UNUSED → EPIC-10 S3 finally surfaces it.**
   - **✅ S3 SHIPPED 2026-07-03 (`main`, this run) — each ancestry hop climbs to its source entity.** `EntityToken` in
     **`src/components/ui/NodeLineage.tsx:25`** is now a `role="button"` span (tabIndex 0, Enter/Space) calling
     `openEntity(node.meta.app, node.id)` (EPIC-8 rail, `windowStore.ts:126`) → opens the ancestor's owning app + sets
