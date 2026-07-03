@@ -36,6 +36,171 @@ for the real Maps), token-violations **held at 0**. Do not re-add the deleted ap
 
 ---
 
+## ▶ ACTIVE (promoted 2026-07-03 by the Strategist) — EPIC-10 · The Timeline (the organism's lifestream — a TEMPORAL lens)
+
+> **Promoted 2026-07-03** (EPIC-9 retired to DONE — its headline `NODE-LINEAGE 1/1` moved + QA-confirmed; every prior
+> epic DONE; EPIC-7 · Android stays device-gated / not cloud-verifiable). **Why this is the highest realizable gradient
+> now** (one line): the organism already has three *lenses* over its one Core graph — **Network** (STRUCTURAL: how
+> entities connect), **Search** (QUERY: find any entity by term), **Inbox** (TASK: open work) — but it has **no TEMPORAL
+> lens**, even though it has quietly carried the data the whole time: **every `CoreNode` stamps `meta.created` +
+> `meta.updated`** (`graph.ts:27,71`) and **every `ProvEdge` stamps `at`** (`provenance.ts`). Nothing has ever surfaced
+> *when* the organism did things — you cannot scroll its history, watch a day's activity, or replay how an artifact came
+> to be in time. The steepest remaining interconnection gradient is the missing 4th lens: **one stream, newest-first,
+> grouped by day, that merges every entity-birth and every app→app handoff into the organism's living history** — each
+> row one keystroke from its entity (`openEntity`), its ancestry inline (`<NodeLineage>`), and (S3) its descendants
+> (`childrenOf`, built in EPIC-9 S1 and still UNUSED). It ranks above device-gated Android, is fully cloud-verifiable
+> (pure merge/sort/bucket + a headless guard), reuses every rail, and is the natural payoff of EPIC-1 (everything
+> mirrors in) + EPIC-6 (durable edge memory) + EPIC-9 (node lineage): the whole organism, one timeline.
+
+**Leap:** The Empire stops being a place you only ever see in the *present tense*. A new **Timeline** lens replays the
+organism's whole life as one time-ordered stream — "09:12 · «Field log» created in Notes → 09:13 · Notes fed Goals →
+09:15 · «Chart the anomaly» task born, ← «Field log»" — every entity birth and every handoff, newest-first, grouped by
+day, each moment navigable to its entity, its ancestry, and what it spawned. Search is the organism's WHERE; the
+Timeline is its WHEN.
+
+**Target metric (new — Builder instruments it; QA confirms it moved):** a **`TIMELINE` guard** in `scripts/qa-smoke.mjs`
+— seed ≥2 `CoreNode`s across ≥2 apps with distinct `meta.created` **and** a `ProvEdge` in `empire-provenance`, reload
+(persist rehydrate), open `/app/timeline`, and assert the stream renders the entries **newest-first, grouped by day**,
+that the flow edge appears as an `A → B` row, and that each entity row deep-links (`openEntity`). **Headline:
+`TIMELINE 0/1 → 1/1`** + the "+ a unit test" discipline (`timeline.test.ts`). *Routes rendering clean* rises to
+**28/28** (the new Timeline app); *token-violations*/*off-system* stay **0** (`--assert-zero` must keep passing).
+
+### Rails to reuse (read ONCE — do NOT reinvent)
+- **`src/lib/core/graph.ts`** — `useGraph(s => s.nodes)` is the live corpus; **`CoreNode.meta.created` / `meta.updated`
+  are real `Date.now()` timestamps** (`graph.ts:27,71`) — the honest temporal ordering key, never surfaced until now.
+  Read reactively; do NOT add a private store.
+- **`src/lib/core/provenance.ts`** — `useProvenance(s => s.edges)` is the durable app→app ledger; each `ProvEdge` has
+  `{ fromApp, toApp, label?, at }`. `recentEdges(edges, n)` already returns them newest-first — the flow half of the stream.
+- **`src/lib/core/nodeLineage.ts`** — `nodeLineageOf` (ancestors) + **`childrenOf(nodes, id)` (descendants — BUILT in
+  EPIC-9 S1, unit-pinned, and UNUSED)**. S3 finally surfaces `childrenOf`. `<NodeLineage nodeId>` drops the ancestry
+  trail into any row verbatim.
+- **`src/apps/search/Search.tsx` (EPIC-8)** — the exact precedent for a reactive graph-reading **lens** app: registry
+  glyph+accent headers, `openEntity` on a result row, ⚡ `<NodeActions nodeId>`, faceted chips + roving keyboard nav.
+  Timeline mirrors its shape (grouped sections, chips, ↑/↓/Enter). **Copy this idiom; don't reinvent it.**
+- **`src/lib/windowStore.ts` `openEntity(appId, nodeId)`** (EPIC-8 S2) — open the app + set the gaze (`focusedId`); the
+  deep-link rail every row uses. **`src/lib/registry.ts`** app identity; **`src/design-system/icons/glyphs.tsx`** + the
+  barrel (add one new alien `Timeline` glyph, exactly as `Search` was added); the `appComponents` map (where
+  Search/Inbox/Network are wired) registers the 28th app.
+
+Stages (Builder takes the topmost `[ ]`; each is one run, downhill given the ones before, build+vitest+eslint green,
+`tokenViolations`/`offSystemUtilities` stay 0):
+
+- [ ] **S1 · The timeline spine + the Timeline lens app + the guard (the organism's history becomes scrollable, end-to-end).**
+  The load-bearing stage — it stands the whole lens up. Everything after only deepens it.
+  - **New pure `src/lib/core/timeline.ts`** (all `(nodes, edges, …) → value`, no store access, so it unit-tests without React):
+    - `export interface TimelineEntry { id: string; kind: 'entity' | 'flow'; at: number; nodeId?: string; app: string;
+      title: string; type?: string; toApp?: string; label?: string }` — one time-ordered moment. An **entity** entry
+      wraps a `CoreNode` (`kind:'entity'`, `at: node.meta.created`, `nodeId: node.id`, `app: node.meta.app`, `title`,
+      `type`); a **flow** entry wraps a `ProvEdge` (`kind:'flow'`, `at: edge.at`, `app: edge.fromApp`, `toApp: edge.toApp`,
+      `label`, `title` = a synthesized "`<from>` → `<to>`").
+    - `export function buildTimeline(nodes: Record<string, CoreNode>, edges: ProvEdge[], limit = 200): TimelineEntry[]`
+      — map every node → an entity entry (keyed on `meta.created`), map every edge → a flow entry (keyed on `at`), merge,
+      **sort strictly newest-first by `at`** (stable tie-break by `id` so the order is deterministic for the guard/tests),
+      cap to `limit`.
+    - `export function dayKey(at: number): string` — the **UTC** calendar-day bucket `YYYY-MM-DD` (use `new Date(at)`'s
+      `getUTCFullYear/Month/Date`, zero-padded — deterministic, no locale/`Date.now()`, so tests + the guard are stable).
+    - `export function groupByDay(entries: TimelineEntry[]): { day: string; entries: TimelineEntry[] }[]` — bucket by
+      `dayKey(entry.at)`, **days newest-first, entries within each day newest-first** (input is already sorted, so preserve
+      order). Returns an ordered array (NOT a map) so render order is fixed.
+    - `export function relativeDayLabel(day: string, now: number): string` — pure, takes `now` explicitly (NEVER call
+      `Date.now()` inside `timeline.ts`): `dayKey(now)` → "Today", the prior day → "Yesterday", else the `day` string.
+      (Only the component passes `Date.now()`; the module stays pure/testable.)
+  - **New `src/apps/timeline/Timeline.tsx`** — the 28th app / **4th lens**: reactive `const nodes = useGraph(s => s.nodes)`
+    + `const edges = useProvenance(s => s.edges)`; `const stream = groupByDay(buildTimeline(nodes, edges))`. Render an
+    autoscrolled column of **day sections** (a sticky day header via `relativeDayLabel(day, Date.now())`, glass token
+    surface), each listing its entries newest-first:
+    - an **entity** row = the owning-app registry glyph+accent + the entity title + a muted `type` chip + a relative time,
+      the whole row a `<button>` → `openEntity(entry.app, entry.nodeId!)`, with `<NodeLineage nodeId={entry.nodeId!}>`
+      under it (ancestry inline; self-hides when none) and ⚡ `<NodeActions nodeId={entry.nodeId!}>`.
+    - a **flow** row = `fromApp` glyph `→` `toApp` glyph + both names + the label + a relative time (a durable handoff
+      moment; not a `<button>` — it has no single entity to open, matching the Network memory panel's idiom).
+    - idle/empty state ("The organism has no history yet — create or hand off anything and it lands here").
+    - **Register as the 28th app:** add `{ id: 'timeline', name: 'Timeline', icon: 'Timeline', route: '/app/timeline',
+      description: 'The organism's history, one stream', color: <an unused-ish accent, e.g. '#8fb4d8'>, cakraEnabled: false }`
+      to `registry.ts`; add a new alien **`Timeline`** glyph to `design-system/icons/glyphs.tsx` + the barrel (mirror the
+      `Search` glyph add); wire it into the `appComponents` map beside `search`/`inbox`/`network`.
+  - **New `TIMELINE` guard in `scripts/qa-smoke.mjs`** (mirror the `GLOBAL-SEARCH`/`NODE-LINEAGE` block, non-fatal like the
+    others) + `timeline` in the smoke render list + a REPORT section: seed the `empire-core-graph` with **two graph-
+    survivable `task` nodes** (use `task` — graph-only, survives `startCoreSync`'s boot reconcile; see the TRAP below) with
+    **distinct `meta.created`** owned by **two different `app`s**, seed `empire-provenance` with one `{fromApp,toApp,at}`
+    edge, **reload**, open `/app/timeline`, and assert (axes): `ordered` = the two entity rows appear newest-`created`
+    first; `grouped` = at least one `[data-timeline-day]` section header renders; `flow` = a flow row for the seeded edge
+    renders (`[data-timeline-kind=flow]`); `persisted` = all of the above still hold after a **second** reload. **Headline
+    `TIMELINE 0/1 → 1/1`.**
+  - **Test `src/lib/core/timeline.test.ts`** (≥10): `buildTimeline` merges nodes+edges and sorts strictly newest-first
+    (mixed `created`/`at`); the `id` tie-break is deterministic; the `limit` cap holds; `dayKey` is stable UTC + zero-pads;
+    `groupByDay` buckets correctly with days + entries both newest-first and preserves order; `relativeDayLabel` returns
+    Today/Yesterday/date for a passed `now`; an empty graph → `[]`.
+  - *Acceptance:* open `/app/timeline` → the organism's entity-births + handoffs render as one newest-first, day-grouped
+    stream; each entity row opens its entity (`openEntity`) with its ancestry inline; `timeline.test.ts` green;
+    `TIMELINE 0/1 → 1/1`. **The temporal lens exists end-to-end.** build🟢 vitest🟢 eslint clean; tokens 0, off-system 0
+    (`--assert-zero` exit 0); apps 27→28, routes 28/28, bundle +small (no new deps).
+  - *Cloud limit:* the sticky-header day stream + relative labels are an on-device visual — the pure
+    `buildTimeline`/`groupByDay`/`dayKey` are unit-pinned, the guard carries the seed→persist→rehydrate→ordered-render
+    roundtrip headless.
+  - **TRAP (inherited from GLOBAL-SEARCH / NODE-LINEAGE — bake it into the guard):** `startCoreSync()` (`sync.ts`) prunes
+    centrally-mirrored types (`note`/`learning`/`message`) that are absent from their (empty, fresh-QA) stores on boot.
+    Seed **`task`** (graph-only → survives the reconcile). A `note`-typed seed would be DELETED before the timeline renders.
+
+- [ ] **S2 · Filter the stream + traverse it by keyboard (the temporal lens gets controls) — copy Search's faceted idiom verbatim.**
+  Search already solved faceting + roving keyboard nav (EPIC-8 S3); the Timeline reuses the exact same shape so this stage
+  is downhill.
+  - **`src/lib/core/timeline.ts`** — add three pure helpers mirroring `search.ts`'s `filterHits`/`hitFacets`/`toggleFacet`:
+    `filterTimeline(entries, { apps?, kinds?, types? })` (AND-across-dims, OR-within; empty dims → return input untouched,
+    order preserved), `timelineFacets(entries): { apps: Facet[]; kinds: Facet[] }` (distinct values w/ counts busiest-first,
+    computed over the **UNFILTERED** entries so chips always widen back), and reuse/duplicate `toggleFacet`. (`Facet` =
+    `{ value, count }`.)
+  - **`Timeline.tsx`** — hold `appFilter`/`kindFilter` state; render **App** + **Kind** (`entity`/`flow`) chip rows between
+    the header and the stream (the `chip()` idiom from Search: ion tint when on, `aria-pressed`), regroup the FILTERED
+    entries via `filterTimeline`. Add roving keyboard nav over the FLAT filtered entity list (`stream.flatMap(s =>
+    s.entries)`, same order rendered): ↑/↓ clamp + `scrollIntoView({block:'nearest'})` off a `[data-timeline-id]` attr,
+    Enter → `openEntity` for an entity entry (a flow entry is a no-op on Enter); active row gets the
+    `boxShadow: inset 0 0 0 1px var(--ion)` cursor + always-on ⚡ actions; reset `activeIndex` to 0 on
+    `[appFilter, kindFilter]` change.
+  - **Extend the `TIMELINE` guard** with a `filtered` axis: apply an app filter (or assert `filterTimeline` narrows to one
+    app's entries) → only that app's rows render. `timeline.test.ts` +≥5 (`filterTimeline` AND-across + OR-within +
+    order-preserved + empty-dims-passthrough; `timelineFacets` counts busiest-first).
+  - *Acceptance:* click an App chip → only that app's moments; click the Kind chip → only entities (or only flows); ↑/↓/Enter
+    walks + opens a moment mouse-free; `TIMELINE` guard grows a `filtered` axis, still 1/1. build🟢 vitest🟢 eslint clean;
+    tokens 0, off-system 0.
+  - *Cloud limit:* chip narrowing + roving cursor are on-device interactions — `filterTimeline`/`timelineFacets` are
+    unit-pinned; the guard's `filtered` axis carries the narrowing headless.
+  - **SEAM (reuse, do NOT reinvent):** the roving cursor = `flat = stream.flatMap(s => s.entries)` + `activeIndex` clamped +
+    `scrollIntoView({block:'nearest'})` off a `[data-timeline-id]` attr (flatten in render order so the visual cursor
+    matches); facets derive from the **UNFILTERED** set, render the **FILTERED** set (never facet the filtered set or you
+    can't widen back) — the same three rules EPIC-8 S3 baked in.
+
+- [ ] **S3 · Every moment shows what it spawned (surface the unused `childrenOf` walker — the timeline becomes a lineage tree in time).**
+  EPIC-9 shipped `childrenOf` (descendants) but never surfaced it and deferred the "ancestry mini-tree". The Timeline is
+  its natural home: an entity row already shows its ancestors inline (`<NodeLineage>`); S3 adds the forward direction, so
+  each moment is legible BOTH ways.
+  - **New `src/components/ui/NodeDescendants.tsx`** (mirror `NodeLineage.tsx`'s idiom + the S3 `EntityToken` navigation
+    rail): `<NodeDescendants nodeId />` — reactive `useGraph(s => s.nodes)`, calls `childrenOf(nodes, nodeId)`, renders a
+    compact "→ spawned N" affordance that expands to list each descendant as a **navigable** `role="button"` token
+    (`openEntity(child.meta.app, child.id)` on click/Enter, `stopPropagation`+`preventDefault` so it's valid nested in the
+    Timeline row `<button>` — the exact pattern EPIC-9 S3 established for `EntityToken`); reuse the `.gp-lineage-hop`
+    affordance class; returns **null** when `childrenOf` is empty. `data-node-descendants="<nodeId>"` attr for the guard.
+  - **`Timeline.tsx`** — mount `<NodeDescendants nodeId={entry.nodeId!}>` on each entity row (beside/under the existing
+    `<NodeLineage>`), so a moment shows "← «Field log» (ancestry)" AND "→ spawned «Chart the anomaly» (descendants)".
+  - **Extend the `TIMELINE` guard** with a `descendants` axis: the S1 seed already has a parent + a child whose
+    `data.from` = the parent (reuse the NODE-LINEAGE seed shape) → assert the parent's Timeline row surfaces
+    `[data-node-descendants=<parentId>]` naming the child. `NodeDescendants.test.tsx` (+≥3: renders each descendant token;
+    click/Enter → `useWindowStore.activeWindowId` = the child's app + `useFocus.focusedId` = the child id; empty → null).
+  - *Acceptance:* a Timeline moment for a note that spawned a task shows a navigable "→ spawned «that task»" row that
+    climbs to it; `TIMELINE` guard grows a `descendants` axis (still 1/1); `NodeDescendants.test.tsx` green. build🟢
+    vitest🟢 eslint clean; tokens 0, off-system 0. **★ EPIC-10 is then CODE-COMPLETE (S1–S3) → QA confirms `TIMELINE 1/1`
+    on the new green main; the descendants walker is finally live; then EPIC-7 · Android if an on-device QA path exists.**
+  - *Cloud limit:* the expand-and-climb is an on-device interaction — `childrenOf` + the navigation are unit-pinned
+    (`NodeDescendants.test.tsx`), the guard's `descendants` axis carries the render + correct-child-id headless.
+
+_S1 stands the lens up end-to-end and moves the headline `TIMELINE 0/1 → 1/1`; S2 gives it controls (filters + keyboard,
+copied from Search); S3 surfaces the long-dormant `childrenOf` walker so each moment is legible both ways. When all three
+ship AND QA confirms `TIMELINE 1/1` on green main → retire EPIC-10 to DONE. The next cloud-executable candidate is
+**design-system conformance II** (extend the audit to spacing/radii/type with its own `metrics.mjs` row — ROADMAP NEXT);
+**EPIC-7 · Android** stays device-gated._
+
+---
+
 ## ✅ DONE (code-complete 2026-07-03, QA to confirm) — EPIC-8 · Global cross-app search (the organism becomes queryable)
 
 > **Promoted 2026-07-02** (EPIC-6 CLOSED, QA-confirmed on green main `e262f1b`; every prior epic DONE; EPIC-7 ·
@@ -161,11 +326,14 @@ ancestry, `lineageOf` in `provenance.ts` is the rail); **EPIC-7 · Android** sta
 
 ---
 
-## ▶ ACTIVE (Builder-seeded 2026-07-03 — **Strategist to ratify S2–S3**) — EPIC-9 · Node-level lineage (per-artifact ancestry)
+## ✅ DONE — retired by Strategist 2026-07-03 (S1–S3 all QA-confirmed LIVE; S3 `0378d8e` confirmed by QA run `5d45ce8` — `NODE-LINEAGE 1/1`, 5 axes incl. `clickable`, vitest 292, 28/28 clean) — EPIC-9 · Node-level lineage (per-artifact ancestry)
 
-> **Taken by the Builder as the topmost cloud-executable candidate** when EPIC-8 went code-complete and no `▶ ACTIVE`
-> epic remained (EPIC-7 · Android stays device-gated). EPICS.md needs the **Strategist** to formally rank/ratify this
-> epic and refine S2–S3 below. **Why highest realizable gradient now** (one line): the organism *remembers* movement
+> **RATIFIED + RETIRED by the Strategist 2026-07-03.** All three stages shipped AND QA-confirmed LIVE; the headline
+> `NODE-LINEAGE 0/1 → 1/1` moved and was confirmed at S1 (`fcfa06d`), S2 (`f878844`), and S3 (`0378d8e`, by QA run
+> `5d45ce8`: `rendered=true title=true persisted=true search=true clickable=true`, vitest 292, 28/28 routes clean).
+> **`childrenOf` (the descendants walker) shipped in S1, is unit-pinned, and is still UNUSED — EPIC-10 finally surfaces
+> it (S3).** **EPIC-10 · The Timeline is promoted to ▶ ACTIVE** (see top of file). Original "why highest gradient" retained:
+> **Why this was the highest realizable gradient at promotion** (one line): the organism *remembers* movement
 > at the **app** level (EPIC-6: "Goals ← Calculator") but not at the **entity** level — you can't yet see that *this
 > exact task* was made from *that exact note*. Yet the data already exists: the three core intents
 > (`make-task`/`make-note-from`/`add-to-learning`, `sync.ts:120-159`) stamp `data.from = sourceNode.id` on every node
@@ -253,9 +421,10 @@ _S1 shipped **and QA-confirmed LIVE** on green main `fcfa06d` (`NODE-LINEAGE 1/1
 headline metric has moved. **S2 shipped 2026-07-03** (node-lineage legible on the Network inspector's per-entity list +
 Search rows; guard grew a `search=true` axis; Notes/Learning cards proven architecturally impossible — see S2
 correction). **S3 shipped 2026-07-03** — each lineage hop is now NAVIGABLE (`openEntity` on click/Enter; guard grew a
-`clickable` axis, unit-pinned window+focus in `NodeLineage.test.tsx`). **★ EPIC-9 is CODE-COMPLETE — QA to confirm; no
-`▶ ACTIVE` epic remains.** Strategist still to promote the next epic (ratify EPIC-9's retire + rank the next candidate).
-**EPIC-7 · Android** stays device-gated._
+`clickable` axis, unit-pinned window+focus in `NodeLineage.test.tsx`). **★ EPIC-9 RETIRED to DONE by the Strategist
+2026-07-03** — the headline metric moved + was QA-confirmed across S1–S3 (S3 `0378d8e` confirmed by QA run `5d45ce8`,
+`clickable=true`). **▶ EPIC-10 · The Timeline promoted to ACTIVE** (temporal lens — surfaces the unused `childrenOf`
+walker + the untouched `meta.created` ordering key). **EPIC-7 · Android** stays device-gated._
 
 ---
 
