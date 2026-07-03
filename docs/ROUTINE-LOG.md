@@ -5,6 +5,31 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-03 · Visual & Smoke QA — **green main `436cebf` (The Bridge): 28/28 clean, `HOME-ALIVE 1/1` NEW, EPIC-9 S1 held (`NODE-LINEAGE 1/1`), vitest 288**
+
+First QA since `f1303b6` (which confirmed EPIC-9 S1 on `fcfa06d`). One commit landed since: **`436cebf feat(home): The
+Bridge — the living home screen`** (user-directed pass, not an EPIC-9 stage). Fresh cloud checkout: `npm install` +
+`npm run build` 🟢 (80 precache entries, no gap), server up on :3001, headless smoke via `--no-save` `playwright@1.56.1`
++ `/opt/pw-browsers/chromium-1194`.
+
+**No runtime bug.** 28/28 routes render clean (desktop + 27 apps, 0 uncaught JS). The Bridge (new `/` root — `Bridge.tsx`
++ `Recents.tsx` + `AppHost.tsx`, `Window.tsx` deleted) renders as designed: "Good afternoon" greeting, "Ask Cakra
+anything…" bar, four live stat cards (TODAY/OPEN TASKS/GOALS/ORGANISM), app-launcher grid (`desktop.png`). Its new
+**`HOME-ALIVE` guard is 1/1 ✅** (`today/tasks/recent/land/ask` all present).
+
+**Active epic EPIC-9 S1 held:** `NODE-LINEAGE 1/1 ✅` (`rendered=true title=true persisted=true`) reproduced
+independently — The Bridge did not regress per-artifact lineage. No new epic stage confirmed this run.
+
+Build 🟢, **vitest 288/288** (276→288, +12 from The Bridge), eslint clean, `metrics.mjs --assert-zero` exit 0 (tokens 0,
+off-system 0). Metrics reproduce the builder's Bridge snapshot exactly: apps 27, static tests 246, bundle 700.7 KB gz,
+Δ ±0. All 12 guards green (SHELL-IS-STYLED, REGISTRY-COVERAGE 27, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1,
+GLOBAL-SEARCH 1/1 `tagOnly=true`, NODE-LINEAGE 1/1, HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3,
+OFFLINE-BOOT 5/5, PRECACHE 80 no-gap). Env-expected noise only (Weather/Maps CDN tiles + geolocation blocked, `/api/files`
+500 — no Android FS). Screenshots overwritten in `docs/screenshots/latest/`. **▶ NEXT = EPIC-9 S2** (mount `<NodeLineage>`
+on Notes/Learning/Network — reuse S1's walker + component; Strategist still owes S2–S3 ratification).
+
+---
+
 ## 2026-07-03 · Visual & Smoke QA — **EPIC-9 S1 QA-CONFIRMED LIVE on green main `fcfa06d` (`NODE-LINEAGE 1/1`, 28/28 clean, vitest 276)**
 
 First independent QA since EPIC-9 S1 landed (last QA `7ef9a5c` confirmed EPIC-8 S2 on `1db665e`; EPIC-8 S3 `4e6a78a` +
