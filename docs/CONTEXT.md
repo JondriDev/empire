@@ -438,6 +438,34 @@
     rehydrate; oversized files stay session-only (`ephemeral`, "session-only" hint). See seam + trap below.
   - EPIC-1 (Organism Completeness) **DONE & QA-confirmed** (both-ways 9/9). EPIC-2 (Design-system
     conformance) **DONE 2026-06-28** — token-violations **501 → 0** across S1–S8 (see below).
+- **🛸 THE BRIDGE LANDED (2026-07-03) — user-directed "living home" pass; do NOT revert.** The home
+  launcher stopped being a mute grid: **The Bridge** renders the organism's real state at home.
+  - **What shipped:** pure selector spine **`src/lib/core/bridge.ts`** (`bridgeSnapshot` = today's events /
+    open tasks / goal stats / recent entities / organism stats / greeting slot + `agoLabel`; `bridge.test.ts`
+    12 cases, the `tasks.ts`/`search.ts` discipline) + **`src/components/Bridge.tsx`** rendered above the app
+    grid inside a new `.empire-home-wrap` (Desktop.tsx): bilingual greeting (EN/ID, time-of-day), a **Cakra
+    ask line** (hands off over the same `empire-ai-clipboard` rail every app uses — no `from`, home is not a
+    registry app, provenance stays honest), **four live widgets** (Today→calendar, Open Tasks→inbox,
+    Goals→goals with avg-progress bar, Organism→network), and a **jump-back-in strip** (5 newest content
+    nodes, exact-landing via `openEntity`). All reads flow from ONE reactive `useGraph` through the pure
+    selectors — no private stores, fully offline.
+  - **CSS:** new BRIDGE section in `window-manager.css`, token-pure (`--card-*`, `--r-*`, `color-mix` on
+    `--app-color`); launcher switched to `justify-content:flex-start` + `margin:auto` wrap (centers short,
+    scrolls tall). **Trap fixed:** the global `input[type="text"]` glass rule out-specifies a single class —
+    the ask input needed `.bridge-ask input.bridge-ask-input` to stay transparent inside its pill.
+  - **Guard:** **`HOME-ALIVE`** in `qa-smoke.mjs` (seed today-`event`/open-`task`/`book` → reload → widgets
+    show counts+entities, strip lists 3 newest-first, row-click lands in Reader, ask line opens Cakra
+    prefilled) + REPORT section. Seed types follow the GLOBAL-SEARCH graph-survivable rule.
+  - **Also:** the last stale brand string — the PWA manifest shortcut "Hermes AI Chat" (vite.config.ts) — is
+    now "Cakra — AI Chat" (`grep -ri hermes` is 0 again).
+  - **🐛 Pre-existing bug found & fixed by the HOME-ALIVE ask leg:** the `ai-chat-open-context` automation
+    rule (automation.ts) consumed **and removed** `empire-ai-clipboard` on `APP_OPENED(ai-chat)` while its
+    "dispatch" is a no-op (`buildDispatch` builds an object nobody receives). Since `emit()` is synchronous
+    and BOTH Cakra surfaces emit `APP_OPENED` in an effect declared *before* their clipboard-read effect,
+    **every handoff payload into Cakra was destroyed before the prefill could read it.** Fix: the rule no
+    longer removes the key (the reading surface consumes-and-clears); AgentSurface also stopped rendering a
+    `From undefined:` prefix when a payload has no `from`. INBOUND-LANDS never caught this because ai-chat
+    was only ever tested as a *sender*; HOME-ALIVE now pins ai-chat as a *receiver*.
 - **🎨 REDESIGN LANDED (2026-06-28) — user-directed "JondriDev pass"; do NOT revert.** A first-principles
   overhaul of The Empire. **Intentional metric deltas — read before "fixing" them:**
   - **apps 27 → 25 is BY DESIGN:** deleted `ai-agent` (Hermes Agent) + `hermes-cc` (Hermes CC) and folded

@@ -52,7 +52,7 @@ export default defineConfig({
           { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
         shortcuts: [
-          { name: 'Hermes AI Chat', short_name: 'AI Chat', url: './?app=ai-chat' },
+          { name: 'Cakra — AI Chat', short_name: 'Cakra', url: './?app=ai-chat' },
           { name: 'Search Apps', short_name: 'Search', url: './?search=true' },
         ],
       },

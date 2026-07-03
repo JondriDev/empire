@@ -36,12 +36,248 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* Top-aligned + `margin:auto` on the child wrap: centers when content is
+     short, scrolls without clipping the greeting when it is tall (the
+     classic `justify-content:center` + overflow trap). */
+  justify-content: flex-start;
   padding: 32px 16px 24px;
   overflow-y: auto;
   pointer-events: none;
 }
 .empire-launcher > * { pointer-events: auto; }
+
+.empire-home-wrap {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: min(94vw, 840px);
+  pointer-events: none;
+}
+.empire-home-wrap > * { pointer-events: auto; }
+
+/* ═══════════════════════════════════════════════
+   THE BRIDGE — the living home (greeting · Cakra
+   line · live telemetry widgets · jump-back-in)
+   ═══════════════════════════════════════════════ */
+.bridge {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.bridge-hero { text-align: center; }
+.bridge-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+.bridge-greeting {
+  font-size: clamp(1.7rem, 4.5vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  background: var(--grad-hero);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── The Cakra line — one input, straight to the AI ── */
+.bridge-ask {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(100%, 560px);
+  margin: 0 auto;
+  padding: 6px 8px 6px 16px;
+  border-radius: var(--r-full);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border-b);
+  border-top-color: var(--card-border-t);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  transition: border-color var(--dur-mid) var(--ease-out), box-shadow var(--dur-mid) var(--ease-out);
+}
+.bridge-ask:focus-within {
+  border-color: color-mix(in srgb, var(--c-cakra) 55%, transparent);
+  box-shadow: var(--card-shadow), 0 0 24px color-mix(in srgb, var(--c-cakra) 25%, transparent);
+}
+.bridge-ask-glyph { display: flex; color: var(--c-cakra); flex-shrink: 0; }
+.bridge-ask input.bridge-ask-input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--text);
+}
+.bridge-ask input.bridge-ask-input:focus { background: transparent; border: none; box-shadow: none; }
+.bridge-ask-input::placeholder { color: var(--text2); }
+.bridge-ask-go {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, var(--c-cakra) 20%, transparent);
+  color: var(--c-cakra);
+  cursor: pointer;
+  transition: background var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
+}
+.bridge-ask-go:hover { background: color-mix(in srgb, var(--c-cakra) 32%, transparent); }
+.bridge-ask-go:active { transform: scale(0.9); }
+
+/* ── Telemetry widgets — four live portals ── */
+.bridge-widgets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.bridge-widget {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 16px 13px;
+  min-height: 96px;
+  text-align: left;
+  border-radius: var(--r-lg);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border-b);
+  border-top-color: var(--card-border-t);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform var(--dur-fast) var(--ease-spring),
+              border-color var(--dur-mid) var(--ease-out),
+              box-shadow var(--dur-mid) var(--ease-out);
+}
+.bridge-widget:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--app-color, var(--signal)) 40%, transparent);
+  box-shadow: var(--card-shadow), 0 0 22px color-mix(in srgb, var(--app-color, var(--signal)) 20%, transparent);
+}
+.bridge-widget:active { transform: scale(0.97); }
+.bridge-widget-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--app-color, var(--signal)) 80%, var(--text2));
+}
+.bridge-widget-value {
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.bridge-widget-sub {
+  font-size: var(--text-xs);
+  color: var(--text2);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bridge-widget-track {
+  width: 100%;
+  height: 3px;
+  margin-top: 4px;
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, var(--app-color, var(--signal)) 15%, transparent);
+  overflow: hidden;
+}
+.bridge-widget-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  background: var(--app-color, var(--signal));
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+/* ── Jump back in — exact-landing recents ── */
+.bridge-continue { width: 100%; }
+.bridge-continue-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin: 0 4px 6px;
+}
+.bridge-continue-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bridge-continue-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.bridge-continue-row:hover {
+  background: var(--holo-bg-h);
+  border-color: color-mix(in srgb, var(--app-color, var(--signal)) 25%, transparent);
+}
+.bridge-continue-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  color: var(--app-color, var(--signal));
+  background: color-mix(in srgb, var(--app-color, var(--signal)) 12%, transparent);
+}
+.bridge-continue-title {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bridge-continue-meta {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text2);
+}
 
 .empire-app-grid {
   display: grid;
@@ -492,8 +728,15 @@
 /* ── TOUCH / RESPONSIVE ── */
 @media (max-width: 720px) {
   .empire-app-grid { grid-template-columns: repeat(5, 76px); padding: 16px; gap: 14px 6px; }
+  .bridge-widgets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 420px) {
   .empire-app-grid { grid-template-columns: repeat(4, 72px); }
   .empire-homebar-date { display: none; }
+  .bridge-continue-meta { display: none; }
+}
+/* Short landscape viewports: keep home usable without burying the grid. */
+@media (max-height: 640px) {
+  .bridge { gap: 12px; }
+  .bridge-widget { min-height: 80px; }
 }

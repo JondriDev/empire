@@ -108,7 +108,11 @@ export default function AgentSurface() {
     if (raw) {
       try {
         const { text, title, from } = JSON.parse(raw)
-        const ctx = `From ${from}${title ? ` (${title})` : ''}:\n\n${text}`
+        // `from` is optional (the home Bridge's ask line sends none) — never
+        // render a "From undefined:" prefix.
+        const ctx = from
+          ? `From ${from}${title ? ` (${title})` : ''}:\n\n${text}`
+          : (title ? `${title}\n\n${text}` : text)
         setInput(ctx)
         sessionStorage.removeItem('empire-ai-clipboard')
       } catch { /* ignore */ }
