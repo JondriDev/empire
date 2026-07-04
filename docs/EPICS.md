@@ -85,8 +85,14 @@ that the flow edge appears as an `A → B` row, and that each entity row deep-li
 Stages (Builder takes the topmost `[ ]`; each is one run, downhill given the ones before, build+vitest+eslint green,
 `tokenViolations`/`offSystemUtilities` stay 0):
 
-- [ ] **S1 · The timeline spine + the Timeline lens app + the guard (the organism's history becomes scrollable, end-to-end).**
-  The load-bearing stage — it stands the whole lens up. Everything after only deepens it.
+- [x] **S1 · The timeline spine + the Timeline lens app + the guard (the organism's history becomes scrollable, end-to-end).**
+  ✅ SHIPPED 2026-07-04 (`main`) — the 4th lens stands up end-to-end. Pure `src/lib/core/timeline.ts`
+  (`buildTimeline`/`dayKey`/`groupByDay`/`relativeDayLabel`, all `(nodes,edges,…)→value`, no `Date.now()`); the 28th app
+  `src/apps/timeline/Timeline.tsx` (reactive `useGraph`+`useProvenance` → `groupByDay(buildTimeline())`, sticky day
+  headers, entity rows → `openEntity`+`<NodeLineage>`+⚡, flow rows `from→to`); alien `Timeline` glyph; new `TIMELINE`
+  guard. **Ran the full smoke LIVE: TIMELINE 1/1 ✅** (`ordered=true grouped=true flow=true persisted=true`), 29/29
+  render clean, every other guard green. build🟢 vitest 292→307🟢 eslint clean; tokens 0, off-system 0; apps 27→28,
+  bundle 701.4→703.5 (+2.1, no new deps). **The load-bearing stage — it stood the whole lens up. Everything after only deepens it.**
   - **New pure `src/lib/core/timeline.ts`** (all `(nodes, edges, …) → value`, no store access, so it unit-tests without React):
     - `export interface TimelineEntry { id: string; kind: 'entity' | 'flow'; at: number; nodeId?: string; app: string;
       title: string; type?: string; toApp?: string; label?: string }` — one time-ordered moment. An **entity** entry

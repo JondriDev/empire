@@ -270,6 +270,20 @@ const Search: AppIcon = (p) => (
   </S>
 )
 
+/** Timeline — the organism's lifestream: a vertical time-spine with three
+ *  orbital nodes (moments) branching off it, newest at the top. */
+const Timeline: AppIcon = (p) => (
+  <S {...p}>
+    <line x1="6" y1="4" x2="6" y2="20" />
+    <Dot cx="6" cy="7" />
+    <line x1="6" y1="7" x2="13" y2="7" />
+    <Dot cx="6" cy="12.5" />
+    <line x1="6" y1="12.5" x2="17" y2="12.5" />
+    <Dot cx="6" cy="18" />
+    <line x1="6" y1="18" x2="11" y2="18" />
+  </S>
+)
+
 /** Fallback — the bare orbital node. */
 const Node: AppIcon = (p) => (
   <S {...p}>
@@ -312,5 +326,6 @@ export {
   Reader,
   Cakra,
   Search,
+  Timeline,
   Node,
 }

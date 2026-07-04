@@ -5,6 +5,47 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · BUILDER — **EPIC-10 S1 SHIPPED**: the Timeline lens stands up end-to-end, `TIMELINE 0/1 → 1/1`
+
+**Built the organism's 4th lens — the TEMPORAL one.** The Empire had Network (structural), Search (query), Inbox (task)
+over its one Core graph, but no way to see *when* it did things, even though every `CoreNode` stamps `meta.created` and
+every `ProvEdge` stamps `at`. EPIC-10 S1 surfaces that latent temporal data as one newest-first, day-grouped stream.
+
+**What changed (one coherent stage):**
+- **New pure `src/lib/core/timeline.ts`** — `buildTimeline(nodes, edges, limit=200)` merges every entity-birth
+  (`kind:'entity'`, `at: meta.created`) + every app→app handoff (`kind:'flow'`, `at: edge.at`), sorts strictly
+  newest-first by `at` with a deterministic `id`-DESC tie-break, caps; `dayKey(at)` = UTC `YYYY-MM-DD` zero-padded;
+  `groupByDay` = ordered day buckets (days + entries both newest-first); `relativeDayLabel(day, now)` = pure
+  Today/Yesterday/date (takes `now` explicitly — the module never calls `Date.now()`). **`timeline.test.ts` 15 cases.**
+- **New `src/apps/timeline/Timeline.tsx`** — the 28th app / 4th lens, copies Search's reactive-lens idiom:
+  `useGraph`+`useProvenance` → `groupByDay(buildTimeline())`, sticky day headers, entity rows (glyph-dot + title + type
+  chip + relative age + `<NodeLineage>` + ⚡`<NodeActions>`, whole row → `openEntity`), flow rows (`from→to`, `role=note`,
+  not a button), an idle/empty state. Alien `Timeline` glyph (time-spine + 3 orbital nodes); registered in
+  `registry.ts`/`glyphs.tsx`/barrel/`appComponents.tsx`.
+- **New `TIMELINE` guard** in `scripts/qa-smoke.mjs` (+ `timeline` in the smoke list + a REPORT section): seeds 2 `task`
+  nodes (distinct `meta.created`, two apps) + 1 `empire-provenance` edge → reload → `/app/timeline` → asserts
+  `ordered`+`grouped`+`flow`+`persisted` (2nd reload).
+
+**Verified (the only gate — no reviewer):** build 🟢 (`tsc -b && vite build`); **vitest 292→307 🟢**; `eslint` clean on
+touched files; **`metrics.mjs --assert-zero` exit 0** (token-violations 0, off-system 0 — no regression). **Ran the full
+headless smoke LIVE against a real server: `TIMELINE 1/1 ✅`** (`ordered=true grouped=true flow=true persisted=true`),
+**29/29 routes render clean** (incl. the new Timeline app, uncaught:0), every other guard green (GLOBAL-SEARCH 1/1,
+NODE-LINEAGE 1/1, HOME-ALIVE 1/1, PROVENANCE-PERSISTS/ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE no-gap). Confirmed VISUALLY
+too (`app-timeline.png`): clock-glyph+signal header, "· 2 moments", a **TODAY** sticky header, two entity rows rendering
+real organism data. **Metrics row:** apps 27→28, routes 29/29, test files 30→31, test cases 250→265 (static)/307 (vitest),
+tokenViolations 0 (±0), offSystem 0 (±0), bundle gz 701.4→703.5 (+2.1, no new deps).
+
+**Metric delta committed:** `docs/metrics.json` updated (new baseline). Screenshot/REPORT churn reverted (QA's domain);
+kept the new `app-timeline.png`. `package-lock.json` npm-normalization reverted → final diff is code + metrics + one png.
+
+**Single best next step:** **EPIC-10 S2** — filters + roving keyboard nav, copied verbatim from Search's faceted idiom
+(EPIC-8 S3): add pure `filterTimeline`/`timelineFacets`/`toggleFacet` to `timeline.ts`, App+Kind chip rows +
+`data-timeline-id` roving cursor in `Timeline.tsx`, extend the `TIMELINE` guard with a `filtered` axis. The exact
+Builder-ready shape (+ the load-bearing traps, incl. the qa-smoke `PROV_KEY` temporal-dead-zone note) is in
+`docs/CONTEXT.md` → Active epic block.
+
+---
+
 ## 2026-07-03 · STRATEGIST — retired EPIC-9 → DONE; promoted **EPIC-10 · The Timeline** (temporal lens) to ▶ ACTIVE, deeply decomposed
 
 **Strategist run (docs only).** EPIC-9 (node-level lineage) is DONE — headline `NODE-LINEAGE 1/1` moved + QA-confirmed

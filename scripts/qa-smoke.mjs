@@ -51,7 +51,7 @@ const apps = [
   'calculator','calendar','clock','weather','grammar','language','music','video',
   'files','cache','browser','editor','notes','photos','datacenter','maps','messages',
   'prompt-generator','token-counter','learning-tracker','ai-chat','goals',
-  'artifacts','network','inbox','reader','search',
+  'artifacts','network','inbox','reader','search','timeline',
 ];
 
 // ── REGISTRY-COVERAGE assertion (the silently-skipped-app trap) ─────────────
@@ -466,6 +466,88 @@ try {
 }
 console.log(`NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
 
+// ── TIMELINE guard (EPIC-10 S1: the organism gets a TEMPORAL lens) ───────────
+// The Empire has three lenses over its one Core graph — Network (STRUCTURAL),
+// Search (QUERY), Inbox (TASK) — but until now no TEMPORAL lens, even though
+// every `CoreNode` stamps `meta.created` and every `ProvEdge` stamps `at`. The
+// new Timeline app merges every entity-birth + every app→app handoff into one
+// newest-first, day-grouped stream via the pure `buildTimeline`/`groupByDay`
+// spine (lib/core/timeline.ts, unit-pinned in timeline.test.ts). jsdom can't
+// drive the graph+ledger→persist→rehydrate→ordered-render roundtrip, so do it
+// for real: seed `empire-core-graph` with two graph-survivable `task` nodes
+// (distinct `meta.created`, owned by TWO apps) + `empire-provenance` with one
+// edge, reload so both persist stores rehydrate, open /app/timeline, and assert
+// (axes): `ordered` = the two entity rows appear newest-`created` first;
+// `grouped` = at least one `[data-timeline-day]` header renders; `flow` = the
+// seeded edge renders as a `[data-timeline-kind=flow]` row; `persisted` = all of
+// it still holds after a SECOND reload. Seed types are `task` (graph-only, no
+// central syncer) so the boot reconcile in startCoreSync() can't prune them —
+// the same trap GLOBAL-SEARCH / NODE-LINEAGE document. Non-fatal like the guards
+// above — a regression shows as ❌.
+const TL_NEWER_TITLE = 'Xenobeacon calibrated';   // newer meta.created → leads
+const TL_OLDER_TITLE = 'Anomaly first sighted';   // older meta.created → trails
+const timelineGraphSeed = {
+  state: {
+    nodes: {
+      'qa-tl-older': {
+        id: 'qa-tl-older', type: 'task', title: TL_OLDER_TITLE,
+        data: { done: false }, links: [],
+        meta: { created: 1000, updated: 1000, app: 'notes' },
+      },
+      'qa-tl-newer': {
+        id: 'qa-tl-newer', type: 'task', title: TL_NEWER_TITLE,
+        data: { done: false }, links: [],
+        meta: { created: 5000, updated: 5000, app: 'goals' },
+      },
+    },
+  },
+  version: 0,
+};
+const timelineProvSeed = {
+  state: { edges: [{ fromApp: 'notes', toApp: 'goals', label: 'seed handoff', at: 3000 }] },
+  version: 0,
+};
+// Read the ordered entity titles in DOM order (newest-first if the sort holds).
+const readTimelineTitles = (page) =>
+  page.$$eval('[data-timeline-kind="entity"]', els => els.map(e => (e.innerText || '').trim()));
+const timeline = { ordered: false, grouped: false, flow: false, persisted: false, pass: false };
+try {
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/app/timeline`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.evaluate(([gk, gv, pk, pv]) => {
+    localStorage.setItem(gk, gv);
+    localStorage.setItem(pk, pv);
+  }, [GRAPH_KEY, JSON.stringify(timelineGraphSeed), 'empire-provenance', JSON.stringify(timelineProvSeed)]);
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(800);
+  const titles = await readTimelineTitles(page);
+  const iNewer = titles.findIndex(t => t.includes(TL_NEWER_TITLE));
+  const iOlder = titles.findIndex(t => t.includes(TL_OLDER_TITLE));
+  timeline.ordered = iNewer !== -1 && iOlder !== -1 && iNewer < iOlder;
+  const dayEls = await page.$$eval('[data-timeline-day]', els => els.length);
+  timeline.grouped = dayEls >= 1;
+  const flowEls = await page.$$eval('[data-timeline-kind="flow"]', els => els.length);
+  timeline.flow = flowEls >= 1;
+  // Reload AGAIN — both the graph and the ledger are persisted, so the whole
+  // stream must survive a fresh load (rehydrated from localStorage).
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(800);
+  const titles2 = await readTimelineTitles(page);
+  const iN2 = titles2.findIndex(t => t.includes(TL_NEWER_TITLE));
+  const iO2 = titles2.findIndex(t => t.includes(TL_OLDER_TITLE));
+  const flow2 = await page.$$eval('[data-timeline-kind="flow"]', els => els.length);
+  timeline.persisted = iN2 !== -1 && iO2 !== -1 && iN2 < iO2 && flow2 >= 1;
+  timeline.pass = timeline.ordered && timeline.grouped && timeline.flow && timeline.persisted;
+  console.log(`TIMELINE  ordered=${timeline.ordered} grouped=${timeline.grouped} flow=${timeline.flow} persisted=${timeline.persisted}`);
+  // Leave both stores clean for later guards.
+  await page.evaluate(([gk, pk]) => { localStorage.removeItem(gk); localStorage.removeItem(pk); }, [GRAPH_KEY, 'empire-provenance']);
+  await page.close();
+} catch (e) {
+  timeline.err = e.message;
+  console.warn(`TIMELINE: guard did not complete — ${e.message}`);
+}
+console.log(`TIMELINE: ${timeline.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
+
 
 // ── HOME-ALIVE guard (The Bridge — the home screen is living telemetry) ──
 // The launcher used to be a mute grid; The Bridge renders the organism's real
@@ -735,6 +817,11 @@ md += ` **S3 makes it NAVIGABLE:** each ancestry hop is a real \`[role="button"]
 md += `| Artifact | Lineage rendered | Parent title shown | Survived reload | Search surface | Hop clickable | Result |\n|---|---|---|---|---|---|---|\n`;
 md += `| task ← ${LINEAGE_PARENT_TITLE} | ${nodeLineage.rendered ? '✅' : '❌'} | ${nodeLineage.title ? '✅' : '❌'} | ${nodeLineage.persisted ? '✅' : '❌'} | ${nodeLineage.search ? '✅' : '❌'} | ${nodeLineage.clickable ? '✅' : '❌'} | ${nodeLineage.pass ? '✅' : '❌'}${nodeLineage.err ? ' (' + nodeLineage.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
+md += `\n## Timeline guard (EPIC-10 S1 — the organism gets a TEMPORAL lens)\n\n`;
+md += `The Empire had three lenses over its one Core graph — Network (STRUCTURAL), Search (QUERY), Inbox (TASK) — but no way to see *when* it did things, even though every \`CoreNode\` stamps \`meta.created\` and every \`ProvEdge\` stamps \`at\`. The new Timeline app merges every entity-birth + every app→app handoff into one newest-first, day-grouped stream via the pure \`buildTimeline\`/\`groupByDay\`/\`dayKey\` spine (unit-pinned in \`timeline.test.ts\`). Two graph-survivable \`task\` nodes (distinct \`meta.created\`, owned by two apps) + one \`empire-provenance\` edge were seeded, then reloaded so BOTH persist stores rehydrated; PASS = the two entity rows render newest-\`created\` first (\`ordered\`), at least one \`[data-timeline-day]\` header renders (\`grouped\`), the seeded edge renders as a \`[data-timeline-kind=flow]\` row (\`flow\`), and all of it still holds after a SECOND reload (\`persisted\`). This carries the graph+ledger→persist→rehydrate→ordered-render roundtrip jsdom cannot; the sticky day headers + relative labels are the on-device visual.\n\n`;
+md += `| Ordered newest-first | Grouped by day | Flow row | Survived reload | Result |\n|---|---|---|---|---|\n`;
+md += `| ${timeline.ordered ? '✅' : '❌'} | ${timeline.grouped ? '✅' : '❌'} | ${timeline.flow ? '✅' : '❌'} | ${timeline.persisted ? '✅' : '❌'} | ${timeline.pass ? '✅' : '❌'}${timeline.err ? ' (' + timeline.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n**TIMELINE: ${timeline.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
 md += `\n## Home-alive guard (The Bridge — the home screen is living telemetry)\n\n`;
 md += `The Core graph was seeded with a today-dated \`event\` (Calendar), an open \`task\` (Goals) and a \`book\` (Reader), then home was reloaded (persist rehydrate). PASS = the Today and Open Tasks widgets show the live count + entity, the jump-back-in strip lists all three newest-first, clicking a row lands in its owning app (the \`openEntity\` rail), and a question typed into the Cakra line opens Cakra prefilled (the \`empire-ai-clipboard\` rail). The pure selectors are unit-pinned in \`bridge.test.ts\`; this carries the rendered-home roundtrip jsdom cannot.\n\n`;
 md += `| Today widget | Tasks widget | Recents strip | Exact landing | Cakra line | Result |\n|---|---|---|---|---|---|\n`;
@@ -770,5 +857,5 @@ if (offline) {
 }
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, nodeLineage, homeAlive, provResults, entityResults, offline }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, nodeLineage, timeline, homeAlive, provResults, entityResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);

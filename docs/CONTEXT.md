@@ -31,36 +31,60 @@
   (`<NodeLineage>`), and (S3) what it spawned (`childrenOf` — built in EPIC-9 S1, unit-pinned, STILL UNUSED).
   **Target metric:** a **`TIMELINE` guard** in `qa-smoke.mjs` (`0/1 → 1/1`) + `timeline.test.ts`. Full stage specs in
   `docs/EPICS.md` → EPIC-10.
-  - **▶ NEXT STAGE = EPIC-10 S1 · the timeline spine + the Timeline lens app + the guard (stands the lens up end-to-end).**
-    Start editing without re-planning:
-    - **New pure `src/lib/core/timeline.ts`** (all `(nodes, edges, …) → value`, no store access): `TimelineEntry`
-      (`{ id; kind:'entity'|'flow'; at; nodeId?; app; title; type?; toApp?; label? }`); `buildTimeline(nodes, edges,
-      limit=200)` = map nodes→entity entries (`at: meta.created`), edges→flow entries (`at: edge.at`), merge, sort
-      **strictly newest-first by `at`** with an `id` tie-break (deterministic), cap; `dayKey(at)` = **UTC** `YYYY-MM-DD`
-      zero-padded (no `Date.now()`, no locale — stable); `groupByDay(entries)` = ordered array of `{day, entries}`, days
-      + entries both newest-first; `relativeDayLabel(day, now)` = pure, takes `now` explicitly → Today/Yesterday/date.
-    - **New `src/apps/timeline/Timeline.tsx`** = the **28th app / 4th lens** (copy `Search.tsx`'s reactive-lens idiom):
-      `useGraph(s=>s.nodes)` + `useProvenance(s=>s.edges)` → `groupByDay(buildTimeline(...))`; render day sections
-      (sticky header via `relativeDayLabel(day, Date.now())` — the ONLY place `Date.now()` is called), each an **entity**
-      row (registry glyph+accent + title + `type` chip + relative time, whole row a `<button>` → `openEntity(app, nodeId)`,
-      `<NodeLineage nodeId>` under it + ⚡ `<NodeActions nodeId>`) or a **flow** row (`from → to` glyphs + names + label +
-      time, NOT a button). Register the 28th app: `registry.ts` `{ id:'timeline', route:'/app/timeline', icon:'Timeline',
-      … }`; new alien `Timeline` glyph in `design-system/icons/glyphs.tsx` + barrel (mirror the `Search` glyph add); wire
-      into the `appComponents` map beside `search`/`inbox`/`network`.
-    - **New `TIMELINE` guard** in `scripts/qa-smoke.mjs` (mirror GLOBAL-SEARCH/NODE-LINEAGE, non-fatal) + `timeline` in the
-      smoke list + a REPORT section: seed **two graph-survivable `task` nodes** (TRAP: `task` survives `startCoreSync`'s
-      boot prune; `note`/`learning`/`message` do NOT) with distinct `meta.created` owned by two apps + one `empire-provenance`
-      edge → reload → open `/app/timeline` → assert `ordered` (newest-`created` first) + `grouped` (`[data-timeline-day]`) +
-      `flow` (`[data-timeline-kind=flow]`) + `persisted` (holds after a 2nd reload). **`TIMELINE 0/1 → 1/1`.**
-    - **Test `src/lib/core/timeline.test.ts`** (≥10): merge+strict-sort+tie-break, `limit` cap, `dayKey` UTC+zero-pad,
-      `groupByDay` ordering, `relativeDayLabel(now)` Today/Yesterday/date, empty→`[]`.
-    - *Acceptance:* `/app/timeline` renders the entity-births + handoffs as one newest-first, day-grouped stream; each
-      entity row opens its entity with ancestry inline; `timeline.test.ts` green; `TIMELINE 0/1 → 1/1`. build🟢 vitest🟢
-      eslint clean; tokens 0, off-system 0 (`--assert-zero` exit 0); apps 27→28, routes 28/28, bundle +small (no new deps).
-    - **TRAPs (load-bearing):** (1) keep `timeline.ts` PURE — pass `now` into `relativeDayLabel`; only the component calls
-      `Date.now()`. (2) The guard MUST seed `task` (graph-only) — `startCoreSync` prunes centrally-mirrored types absent
-      from their empty QA stores before render. (3) `dayKey` is UTC-based so tests/guard don't flake across the runner's
-      timezone.
+  - **✅ S1 SHIPPED 2026-07-04 (`main`, this run) — the 4th lens stands up end-to-end, `TIMELINE 0/1 → 1/1`.** The
+    temporal lens exists. New pure **`src/lib/core/timeline.ts`**: `TimelineEntry` (`{id;kind:'entity'|'flow';at;nodeId?;
+    app;title;type?;toApp?;label?}`); `buildTimeline(nodes,edges,limit=200)` maps nodes→entity (`at:meta.created`, `id:
+    n:<id>`) + edges→flow (`at:edge.at`, `id: e:<from>:<to>:<at>`, synthesized `title`), merges, sorts **strictly
+    newest-first by `at` with an `id` DESC tie-break** (total+deterministic), caps; `dayKey(at)` = UTC `YYYY-MM-DD`
+    zero-padded; `groupByDay(entries)` = ordered `TimelineDay[]` (days + entries both newest-first); `relativeDayLabel
+    (day, now)` = pure, `now` passed in → Today/Yesterday/date. New **`src/apps/timeline/Timeline.tsx`** = 28th app / 4th
+    lens (copies Search's reactive-lens idiom): `useGraph(s=>s.nodes)`+`useProvenance(s=>s.edges)` → `groupByDay(build
+    Timeline())`; sticky day headers via `relativeDayLabel(day, Date.now())` (the ONLY `Date.now()` call — spine stays
+    pure); **entity** row = app glyph-dot + title + `type` chip + `agoLabel` + `<NodeLineage>` + ⚡`<NodeActions>`, whole
+    row a `<button>`→`openEntity`; **flow** row = `from→to` glyphs+names+label+age, `role="note"`, NOT a button. Alien
+    **`Timeline`** glyph (vertical time-spine + 3 orbital nodes) in `glyphs.tsx` + barrel + `alienIcons`; registry 28th
+    app (`icon:'Timeline'`, color `#8fb4d8`, `cakraEnabled:false`); wired into `appComponents`. New **`TIMELINE` guard**
+    (qa-smoke.mjs, non-fatal) + `timeline` in smoke list + REPORT section: seeds 2 `task` nodes (distinct `meta.created`,
+    apps notes/goals) + 1 `empire-provenance` edge → reload → `/app/timeline` → asserts `ordered`+`grouped`+`flow`+
+    `persisted` (2nd reload). **`timeline.test.ts` 15 cases.** **Ran the full smoke LIVE: TIMELINE 1/1 ✅**
+    (`ordered=true grouped=true flow=true persisted=true`), 29/29 render clean, GLOBAL-SEARCH/NODE-LINEAGE/HOME-ALIVE
+    1/1, PROVENANCE 3/3, OFFLINE 5/5, PRECACHE no-gap. build🟢 vitest 292→307🟢 eslint clean; tokens 0, off-system 0
+    (`--assert-zero` exit 0); apps 27→28, routes 29/29, test files 30→31, bundle 701.4→703.5 (+2.1, no new deps).
+    Screenshot confirms VISUALLY (`app-timeline.png`): clock-glyph+signal header, "· 2 moments", a **TODAY** sticky day
+    header, two entity rows (accent dot + title + `dataset` type chip + `now`) — the lens renders real organism data.
+    - **SEAM (reuse for S2/S3):** the pure spine is `buildTimeline`/`groupByDay`/`dayKey`/`relativeDayLabel` — all
+      `(nodes,edges,…)→value`, unit-pinned. Entity rows carry `data-timeline-kind="entity"`; flow rows
+      `data-timeline-kind="flow"`; day sections `data-timeline-day="<key>"`. Timeline mirrors Search's lens idiom exactly,
+      so S2 (facets+roving nav) can copy `search.ts`'s `filterHits`/`hitFacets`/`toggleFacet` + Search's roving cursor
+      verbatim. S3 mounts `<NodeDescendants>` (new, mirrors `<NodeLineage>`) surfacing the long-dormant `childrenOf`.
+    - **TRAPs (confirmed live):** (1) `timeline.ts` stays PURE — `relativeDayLabel` takes `now`; only the component reads
+      `Date.now()`. (2) The guard seeds `task` (graph-only survives `startCoreSync`'s boot prune; note/learning/message do
+      NOT). (3) `dayKey` is UTC so tests/guard don't flake across the runner tz. (4) **In qa-smoke.mjs `PROV_KEY` is
+      declared LATE (~line 643), after the TIMELINE guard — I inlined the literal `'empire-provenance'` in the TIMELINE
+      block to avoid the const temporal-dead-zone ReferenceError.** (5) The tie-break is `id` DESCENDING — entries with
+      equal `at` order by higher `id` first; the tests pin this so don't "fix" it to ascending.
+  - **▶ NEXT STAGE = EPIC-10 S2 · filter the stream + traverse it by keyboard (the temporal lens gets controls).** Downhill —
+    copy Search's faceted idiom (EPIC-8 S3) VERBATIM. Start editing without re-planning:
+    - **`src/lib/core/timeline.ts`** — add three pure helpers mirroring `search.ts`'s `filterHits`/`hitFacets`/`toggleFacet`:
+      `filterTimeline(entries,{apps?,kinds?,types?})` (AND-across-dims, OR-within; empty dims → return input untouched,
+      order preserved), `timelineFacets(entries):{apps:Facet[];kinds:Facet[]}` (distinct values + counts busiest-first,
+      computed over the **UNFILTERED** entries so chips always widen back), and a `toggleFacet` (import from `search.ts` or
+      duplicate). `Facet = {value, count}`.
+    - **`Timeline.tsx`** — hold `appFilter`/`kindFilter` state; render **App** + **Kind** (`entity`/`flow`) chip rows
+      between header and stream (reuse Search's `chip()` idiom: ion tint when on, `aria-pressed`); regroup the FILTERED
+      entries via `filterTimeline`. Add roving keyboard nav over the FLAT filtered list (`days.flatMap(d=>d.entries)`, same
+      render order): ↑/↓ clamp + `scrollIntoView({block:'nearest'})` off a `[data-timeline-id]` attr, Enter → `openEntity`
+      for an entity entry (flow entry = no-op on Enter); active row = `boxShadow: inset 0 0 0 1px var(--ion)` + always-on ⚡;
+      reset `activeIndex` to 0 on `[appFilter,kindFilter]`. **NOTE:** put the keydown on a focusable element — Timeline has
+      no search input like Search does, so add a `tabIndex`/`onKeyDown` to the scroll container (or a hidden focus target).
+    - **Extend the `TIMELINE` guard** with a `filtered` axis (apply an app filter → only that app's rows render; or assert
+      `filterTimeline` narrows). `timeline.test.ts` +≥5 (`filterTimeline` AND-across / OR-within / order-preserved /
+      empty-dims-passthrough; `timelineFacets` counts busiest-first).
+    - *Acceptance:* App chip → only that app's moments; Kind chip → only entities/only flows; ↑/↓/Enter walks+opens
+      mouse-free; `TIMELINE` guard grows `filtered`, still 1/1. build🟢 vitest🟢 eslint clean; tokens 0, off-system 0.
+    - **SEAM/TRAP (from EPIC-8 S3, baked in):** roving cursor = `flat = days.flatMap(d=>d.entries)` + `activeIndex` clamped
+      + `scrollIntoView` off `[data-timeline-id]` (flatten in RENDER order so cursor matches). Facets derive from the
+      **UNFILTERED** set, render the **FILTERED** set — never facet the filtered set or you can't widen back.
   - _(EPIC-9 detail retained below as working memory — it is DONE, S1–S3 all QA-confirmed LIVE, `NODE-LINEAGE 1/1`.)_
 - **Prior active epic (DONE — retired 2026-07-03, FULLY QA-CONFIRMED):** **EPIC-9 · Node-level lineage (per-artifact ancestry) — ★ CODE-COMPLETE (S1–S3 all shipped
   2026-07-03).** S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE `f878844`; **S3 QA-CONFIRMED LIVE `0378d8e` (by QA
