@@ -9,18 +9,20 @@
  * switch; the heavy tools lazy-load on first open.
  */
 import { Suspense, lazy, useEffect, useState, type ReactNode } from 'react'
-import { Sparkles, Wand2, Hash, Code2 } from 'lucide-react'
+import { Sparkles, Puzzle, Wand2, Hash, Code2 } from 'lucide-react'
 import { useCakraTab, type CakraTab } from '../../lib/cakraTab'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 import Cakra from './Cakra'
 
+const SolverPanel = lazy(() => import('./solver/SolverPanel'))
 const PromptGenerator = lazy(() => import('../prompt-generator/PromptGenerator'))
 const TokenCounter = lazy(() => import('../token-counter/TokenCounter'))
 const Editor = lazy(() => import('../editor/Editor'))
 
 const TABS: { id: CakraTab; label: string; Icon: typeof Sparkles }[] = [
   { id: 'chat', label: 'Chat', Icon: Sparkles },
+  { id: 'solver', label: 'Solver', Icon: Puzzle },
   { id: 'prompt', label: 'Prompt', Icon: Wand2 },
   { id: 'tokens', label: 'Tokens', Icon: Hash },
   { id: 'code', label: 'Code', Icon: Code2 },
@@ -83,6 +85,7 @@ export default function CakraShell() {
       {/* Tab panels */}
       <div className="flex-1 min-h-0 relative">
         <Panel visited={visited.has('chat')} active={tab === 'chat'}><Cakra /></Panel>
+        <Panel visited={visited.has('solver')} active={tab === 'solver'}><SolverPanel /></Panel>
         <Panel visited={visited.has('prompt')} active={tab === 'prompt'}><PromptGenerator /></Panel>
         <Panel visited={visited.has('tokens')} active={tab === 'tokens'}><TokenCounter /></Panel>
         <Panel visited={visited.has('code')} active={tab === 'code'}><Editor /></Panel>

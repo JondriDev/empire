@@ -9,7 +9,7 @@
  */
 import { create } from 'zustand'
 
-export type CakraTab = 'chat' | 'prompt' | 'tokens' | 'code'
+export type CakraTab = 'chat' | 'solver' | 'prompt' | 'tokens' | 'code'
 
 interface CakraTabState {
   tab: CakraTab

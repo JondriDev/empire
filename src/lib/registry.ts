@@ -57,6 +57,7 @@ export const apps: AppDefinition[] = [
   { id: 'reader', name: 'Reader', icon: 'Reader', route: '/app/reader', description: 'Read your books · ask Cakra', color: '#f0c94e', cakraEnabled: true },
   { id: 'search', name: 'Search', icon: 'Search', route: '/app/search', description: 'Find anything across every app', color: '#5b8fb9', cakraEnabled: false },
   { id: 'timeline', name: 'Timeline', icon: 'Timeline', route: '/app/timeline', description: 'The organism’s history, one stream', color: '#8fb4d8', cakraEnabled: false },
+  { id: 'solver', name: 'Problem Solver', icon: 'Target', route: '/app/solver', description: 'Cakra solves problems — world to personal', color: '#66d9a0', cakraEnabled: true, hidden: true, aliasOf: { appId: 'ai-chat', tab: 'solver' } },
 ]
 
 /** Apps shown on the home launcher grid (excludes hidden tools + merge aliases). */

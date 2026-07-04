@@ -12,6 +12,10 @@ import './lib/automation'
 import { startCoreSync } from './lib/core/sync'
 startCoreSync()
 
+// ── Cakra Solver: "Make Problem from this" intents + problem/solution mirror ──
+import { registerSolverIntents } from './apps/cakra/solver/solverIntents'
+registerSolverIntents()
+
 // ── Focus: keep a global "current node" pointer for the ⌘K command palette ────
 import { startFocusTracking } from './lib/core/focus'
 startFocusTracking()

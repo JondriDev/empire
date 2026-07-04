@@ -69,6 +69,7 @@ const DICT: Record<string, Entry> = {
   'app.token-counter.name':    { en: 'Token Counter', id: 'Penghitung Token' },
   'app.learning-tracker.name': { en: 'Learning Tracker', id: 'Pelacak Belajar' },
   'app.ai-chat.name':          { en: 'Cakra', id: 'Cakra' },
+  'app.solver.name':           { en: 'Problem Solver', id: 'Pemecah Masalah' },
   'app.artifacts.name':        { en: 'Artifacts', id: 'Artefak' },
   'app.network.name':          { en: 'Network', id: 'Jaringan' },
 }

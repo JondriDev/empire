@@ -897,6 +897,28 @@
   `rgba(...)`, which `scripts/metrics.mjs` greps as a violation even in JS strings. **S6a done:**
   `ProvenanceChip` also renders for Notes cards + Learning items (`LearningItem.from?:string`).
 
+## 🧩 SOLVER LANDED (2026-07-04) — user-directed "AI Problem Solver"; do NOT refactor away
+
+Cakra is now the **Problem Solver**: a Solver tab in CakraShell (`src/apps/cakra/solver/`) where problems
+(world catalog + user-added + ⚡ `make-problem` intent + routine discoveries) decompose into trees and get
+critiqued action plans, plus an auto-queue that works the backlog by severity×tractability under a daily
+AI-call budget (default 100, user-tunable, hard stop button).
+
+- **Seams:** `solver/store.ts` (zustand `empire-solver`, source of truth; self-mirrors `problem`/`solution`
+  nodes via `mirrorCollection` — do NOT add central sync.ts syncers for these types, same rule as Calendar) ·
+  `solver/engine.ts` (4 pure stages — analyze/decompose/solve/critique — over an injected chatFn → lib/ai
+  `chat()`, JSON-extract + one strict retry) · `solver/queue.ts` (`nextStageFor`/`pickNext`/`rollupIds`
+  unit-pinned; 2 engine strikes → `blocked`; transport failure stops the queue) · `solver/solverIntents.ts`
+  (registered from `main.tsx`) · registry id `solver` = hidden alias → `ai-chat` tab `solver` (mapped in
+  appComponents + the qa-smoke list; route-parity green both directions).
+- **World feed:** `public/solver/feed.json` is OWNED by the **World-Solver routine** (routine #8, daily) —
+  it web-researches cited briefs for catalog problems and appends fresh `discovery` problems, then commits
+  here; the app fetches it read-only (`solver/feed.ts`, 404-safe). Builder/Strategist: do not hand-edit or
+  delete `feed.json`; extending the Solver UI/graph wiring in future epics is fair game.
+- **Intentional metric deltas (NOT regressions):** apps 28 → 29 (the alias id), vitest +~20 solver cases
+  (3 new test files), small bundle bump — the eager slice is only store+catalog+intents; engine/queue/UI
+  live in the lazy solver chunk.
+
 ## 🧭 Codebase seams (where the important things live)
 
 - **Organism core (B-backbone / A-bus / C-intents):**

@@ -40,4 +40,5 @@ export const appComponents: AppComponentMap = {
   'reader':             lazy(() => import('../apps/reader/Reader')),
   'search':             lazy(() => import('../apps/search/Search')),
   'timeline':           lazy(() => import('../apps/timeline/Timeline')),
+  'solver':             lazy(() => import('../apps/cakra/solver/SolverPanel')),
 }
