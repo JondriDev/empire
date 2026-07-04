@@ -1,42 +1,8 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-04T03:08:45.385Z
+**Generated:** 2026-07-04T05:21:30.465Z
 
 **Result:** 29/29 rendered without crash, 0 failed.
-
----
-
-## QA verdict — EPIC-10 S1 (the Timeline lens) CONFIRMED LIVE · green main `3cfe846` · 2026-07-04
-
-**No runtime bug found. No contradiction.** First independent QA since the last QA commit `5d45ce8`
-(2026-07-03, EPIC-9 S3). Since then EPIC-9 was retired, EPIC-10 promoted, and **EPIC-10 S1 shipped
-(`3cfe846`)** — this run is its first independent confirmation.
-
-- **EPIC-10 S1 acceptance metric MOVED (reproduced without the builder's tree):** the `TIMELINE` guard is
-  **1/1 ✅** (`ordered=true grouped=true flow=true persisted=true`) — two graph-survivable `task` nodes
-  (distinct `meta.created`, two apps) + one `empire-provenance` edge seeded → reload → `/app/timeline`
-  renders them newest-`created` first, under a `[data-timeline-day]` header, with the seeded edge as a
-  `[data-timeline-kind=flow]` row, and it all survives a SECOND reload. Backed by `timeline.test.ts` (15
-  cases). **★ S1 acceptance confirmed moved → S1 done-confirmed.**
-- **Visually confirmed** (`app-timeline.png`): clock-glyph + "The organism's history, one stream · 2 moments"
-  header, a **TODAY** sticky day group, two entity rows (accent dot + title + `dataset` type chip + `now`) —
-  the 4th lens renders real organism data.
-- **29/29 routes render clean** (desktop shell + 28 apps, 0 uncaught JS). Every other guard green:
-  SHELL-IS-STYLED ✅, REGISTRY-COVERAGE 28 ✅ (bidirectional), INBOUND-LANDS 3/3, MEDIA-PERSISTS 3/3,
-  GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 (`tagOnly=true`), NODE-LINEAGE 1/1 (5 axes), HOME-ALIVE 1/1,
-  PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 82 entries NO GAP.
-- **Suite:** build 🟢 · **vitest 307/307** (33 files) 🟢 · `metrics.mjs --assert-zero` exit 0 (token
-  violations 0, off-system 0).
-
-**Metric deltas** (vs the builder's EPIC-10 S1 snapshot in `metrics.json` — reproduced exactly, Δ ±0):
-apps **28** · routes **29/29 clean** · test cases **265 static / 307 vitest** · test files **31 static / 33
-vitest** · token violations **0** · off-system **0** · bundle gz **703.5 KB**. All Δ ±0 — no regression from
-the S1 snapshot; the last *QA-confirmed* baseline was 27 apps / 701.4 KB / vitest 292 (`0378d8e`, EPIC-9 S3),
-so vs that this run reflects S1's intended +1 app (Timeline), +15 tests, +2.1 KB (no new deps).
-
-**Console/network noise = env-expected, NOT bugs:** Weather geocoding + geolocation blocked (offline sandbox),
-Maps carto tiles ERR_TUNNEL_CONNECTION_FAILED (blocked CDN — map container still renders), Files `/api/files`
-HTTP 500 (Android-only backend). None is a render failure.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -60,7 +26,7 @@ HTTP 500 (Android-only backend). None is a render failure.
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -126,13 +92,13 @@ App-level provenance remembers which app fed which app; node-level lineage answe
 
 **NODE-LINEAGE: 1/1 ✅**
 
-## Timeline guard (EPIC-10 S1 — the organism gets a TEMPORAL lens)
+## Timeline guard (EPIC-10 S1–S2 — the TEMPORAL lens, now with faceted controls)
 
-The Empire had three lenses over its one Core graph — Network (STRUCTURAL), Search (QUERY), Inbox (TASK) — but no way to see *when* it did things, even though every `CoreNode` stamps `meta.created` and every `ProvEdge` stamps `at`. The new Timeline app merges every entity-birth + every app→app handoff into one newest-first, day-grouped stream via the pure `buildTimeline`/`groupByDay`/`dayKey` spine (unit-pinned in `timeline.test.ts`). Two graph-survivable `task` nodes (distinct `meta.created`, owned by two apps) + one `empire-provenance` edge were seeded, then reloaded so BOTH persist stores rehydrated; PASS = the two entity rows render newest-`created` first (`ordered`), at least one `[data-timeline-day]` header renders (`grouped`), the seeded edge renders as a `[data-timeline-kind=flow]` row (`flow`), and all of it still holds after a SECOND reload (`persisted`). This carries the graph+ledger→persist→rehydrate→ordered-render roundtrip jsdom cannot; the sticky day headers + relative labels are the on-device visual.
+The Empire had three lenses over its one Core graph — Network (STRUCTURAL), Search (QUERY), Inbox (TASK) — but no way to see *when* it did things, even though every `CoreNode` stamps `meta.created` and every `ProvEdge` stamps `at`. The Timeline app merges every entity-birth + every app→app handoff into one newest-first, day-grouped stream via the pure `buildTimeline`/`groupByDay`/`dayKey` spine, now filtered by the pure `filterTimeline`/`timelineFacets` helpers (all unit-pinned in `timeline.test.ts`). Two graph-survivable `task` nodes (distinct `meta.created`, owned by two apps) + one `empire-provenance` edge were seeded, then reloaded so BOTH persist stores rehydrated; PASS = the two entity rows render newest-`created` first (`ordered`), at least one `[data-timeline-day]` header renders (`grouped`), the seeded edge renders as a `[data-timeline-kind=flow]` row (`flow`), all of it still holds after a SECOND reload (`persisted`), and clicking the `goals` App chip narrows to ONLY the goals-owned entity — dropping the notes entity + the notes→goals flow (`filtered`). This carries the graph+ledger→persist→rehydrate→ordered-render + faceted-narrow roundtrip jsdom cannot; the sticky day headers, relative labels + chip tints are the on-device visual.
 
-| Ordered newest-first | Grouped by day | Flow row | Survived reload | Result |
-|---|---|---|---|---|
-| ✅ | ✅ | ✅ | ✅ | ✅ |
+| Ordered newest-first | Grouped by day | Flow row | Survived reload | App-chip narrows | Result |
+|---|---|---|---|---|---|
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **TIMELINE: 1/1 ✅**
 
@@ -174,7 +140,7 @@ Distinct from the edge guard above: each S3 receiver was seeded with an inbound 
 
 The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (`setOffline`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.
 
-**Precache:** 82 manifest entries; 47 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
+**Precache:** 83 manifest entries; 48 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
 
 | Route | Renders offline |
 |---|---|

@@ -20,6 +20,7 @@
 
 import type { CoreNode } from './graph'
 import type { ProvEdge } from './provenance'
+import type { Facet } from './search'
 
 /** One time-ordered moment in the organism's life. */
 export interface TimelineEntry {
@@ -140,4 +141,57 @@ export function relativeDayLabel(_day: string, _now: number): string {
   // One UTC day earlier. 86_400_000 ms = 24 h; UTC has no DST discontinuities.
   if (_day === dayKey(_now - 86_400_000)) return 'Yesterday'
   return _day
+}
+
+/**
+ * Which dimensions of the stream the user has narrowed to (empty dim = no
+ * narrowing). Mirrors Search's `HitFilter` so the Timeline gets the same faceted
+ * controls the query lens already has (EPIC-10 S2).
+ */
+export interface TimelineFilter {
+  /** Keep only entries owned by one of these apps (ignored when empty/absent). */
+  apps?: string[]
+  /** Keep only entries of these kinds — `entity` and/or `flow` (ignored when empty). */
+  kinds?: TimelineEntry['kind'][]
+  /** Keep only ENTITY entries of these node types (ignored when empty/absent). */
+  types?: string[]
+}
+
+/**
+ * Pure: narrow the stream to the chosen apps / kinds / entity-types. AND across
+ * dimensions (an app AND a kind filter must both pass), OR within a dimension
+ * (any of the chosen apps). An empty/absent dimension does not filter, so
+ * `filterTimeline(entries, {})` returns the input untouched (order preserved).
+ * A `types` filter matches only entity entries — flows carry no `type`.
+ */
+export function filterTimeline(_entries: TimelineEntry[], _filter: TimelineFilter): TimelineEntry[] {
+  const apps = _filter.apps && _filter.apps.length ? new Set(_filter.apps) : null
+  const kinds = _filter.kinds && _filter.kinds.length ? new Set<string>(_filter.kinds) : null
+  const types = _filter.types && _filter.types.length ? new Set(_filter.types) : null
+  if (!apps && !kinds && !types) return _entries
+  return _entries.filter(e =>
+    (!apps || apps.has(e.app)) &&
+    (!kinds || kinds.has(e.kind)) &&
+    (!types || (e.type !== undefined && types.has(e.type))),
+  )
+}
+
+/**
+ * Pure: the available filter facets — the distinct owning `apps` and `kinds`
+ * present, each with its entry count. Sorted count-desc then value-asc so the
+ * busiest chips lead and the order is deterministic. Computed over the UNFILTERED
+ * stream so the chips always show every way to widen back.
+ */
+export function timelineFacets(_entries: TimelineEntry[]): { apps: Facet[]; kinds: Facet[] } {
+  const byApp = new Map<string, number>()
+  const byKind = new Map<string, number>()
+  for (const e of _entries) {
+    byApp.set(e.app, (byApp.get(e.app) ?? 0) + 1)
+    byKind.set(e.kind, (byKind.get(e.kind) ?? 0) + 1)
+  }
+  const toFacets = (m: Map<string, number>): Facet[] =>
+    [...m.entries()]
+      .map(([value, count]) => ({ value, count }))
+      .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
+  return { apps: toFacets(byApp), kinds: toFacets(byKind) }
 }

@@ -4,6 +4,8 @@ import {
   dayKey,
   groupByDay,
   relativeDayLabel,
+  filterTimeline,
+  timelineFacets,
   type TimelineEntry,
 } from './timeline'
 import type { CoreNode } from './graph'
@@ -140,5 +142,70 @@ describe('relativeDayLabel', () => {
 
   it('falls back to the raw YYYY-MM-DD for older days', () => {
     expect(relativeDayLabel('2026-06-30', NOW)).toBe('2026-06-30')
+  })
+})
+
+// A representative mixed stream: entities from notes(2)/goals(1) + one notes→goals flow.
+const mixed = (): TimelineEntry[] =>
+  buildTimeline(
+    graph(
+      node('a', 400, { app: 'notes', type: 'note' }),
+      node('b', 300, { app: 'goals', type: 'task' }),
+      node('c', 200, { app: 'notes', type: 'note' }),
+    ),
+    [edge('notes', 'goals', 100)],
+  )
+
+describe('filterTimeline', () => {
+  it('empty filter returns the input untouched, order preserved', () => {
+    const stream = mixed()
+    expect(filterTimeline(stream, {})).toBe(stream)
+    expect(filterTimeline(stream, { apps: [], kinds: [] }).map(e => e.id)).toEqual(stream.map(e => e.id))
+  })
+
+  it('an app filter keeps only that app’s entries (OR within the dimension)', () => {
+    const kept = filterTimeline(mixed(), { apps: ['goals'] })
+    // Only the goals entity 'b' — the notes entities + the flow (fromApp notes) drop.
+    expect(kept.map(e => e.id)).toEqual(['n:b'])
+  })
+
+  it('a kind filter keeps only that kind', () => {
+    const flowsOnly = filterTimeline(mixed(), { kinds: ['flow'] })
+    expect(flowsOnly).toHaveLength(1)
+    expect(flowsOnly[0].kind).toBe('flow')
+    const entitiesOnly = filterTimeline(mixed(), { kinds: ['entity'] })
+    expect(entitiesOnly.every(e => e.kind === 'entity')).toBe(true)
+    expect(entitiesOnly).toHaveLength(3)
+  })
+
+  it('ANDs across dimensions (app AND kind must both pass)', () => {
+    // notes + entity → the two notes entities, NOT the notes→goals flow.
+    const kept = filterTimeline(mixed(), { apps: ['notes'], kinds: ['entity'] })
+    expect(kept.map(e => e.id)).toEqual(['n:a', 'n:c'])
+  })
+
+  it('a types filter matches only entity entries (flows carry no type)', () => {
+    const kept = filterTimeline(mixed(), { types: ['note'] })
+    expect(kept.map(e => e.id)).toEqual(['n:a', 'n:c'])
+  })
+})
+
+describe('timelineFacets', () => {
+  it('counts distinct apps + kinds busiest-first, then value-asc', () => {
+    const { apps: appFacets, kinds } = timelineFacets(mixed())
+    // notes = 2 entities + 1 flow = 3; goals = 1 entity. notes leads on count.
+    expect(appFacets).toEqual([
+      { value: 'notes', count: 3 },
+      { value: 'goals', count: 1 },
+    ])
+    // entity = 3, flow = 1.
+    expect(kinds).toEqual([
+      { value: 'entity', count: 3 },
+      { value: 'flow', count: 1 },
+    ])
+  })
+
+  it('is computed over the UNFILTERED stream (empty → empty facets)', () => {
+    expect(timelineFacets([])).toEqual({ apps: [], kinds: [] })
   })
 })

@@ -5,6 +5,48 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · BUILD — **EPIC-10 S2 SHIPPED**: the Timeline lens gets faceted controls + keyboard nav (`TIMELINE 1/1` grew a live `filtered` axis)
+
+**Stage:** EPIC-10 · The Timeline, S2 — filter the stream + traverse it by keyboard, copying Search's faceted
+idiom (EPIC-8 S3) verbatim. Baseline was green (`cf62dab`, S1 QA-confirmed).
+
+**What changed.** Three pure helpers in `src/lib/core/timeline.ts` mirroring `search.ts`: `TimelineFilter`,
+`filterTimeline(entries, filter)` (AND-across-dims, OR-within; empty dims → input untouched, order preserved;
+a `types` filter matches entity entries only), `timelineFacets(entries)` → `{apps, kinds}` (distinct values +
+counts busiest-first then value-asc, computed over the UNFILTERED stream so chips always widen back). Reuses
+`Facet` (type-import) + `toggleFacet` (runtime import) from `search.ts`. `Timeline.tsx` now holds
+`appFilter`/`kindFilter`/`activeIndex`; the outer scroll container is the focus target (`tabIndex`+`onKeyDown`,
+autofocused — no search input like Search) driving ↑/↓ (clamp) + Enter (`openEntity` for an entity row, no-op
+for a flow) + `scrollIntoView` off `[data-timeline-id]`; renders Kind + App chip rows (Search's `chip()` idiom,
+**signal** tint not ion, `aria-pressed`, `data-timeline-facet="<dim>:<value>"`); regroups the FILTERED stream;
+active row = `inset 0 0 0 1px var(--ion)` + always-on ⚡. Subtitle appends `· N shown` when filtered; a distinct
+empty-after-filter state. `qa-smoke.mjs` TIMELINE guard grew a `filtered` axis (click `app:goals` chip → only
+the goals entity, drop the notes entity + the notes→goals flow) + REPORT column. `timeline.test.ts` 15→22 (+7).
+
+**Why.** S1 stood the temporal lens up but it was read-only; the other lenses (Search) already have faceting +
+roving keyboard nav. S2 gives the Timeline the same controls so it's usable at scale, reusing proven rails
+(zero new deps, zero new patterns).
+
+**Verified.** `npm run build` 🟢 (tsc -b && vite build). `npx vitest run` 314/314 🟢 (was 307). `npx eslint`
+clean on all touched files. `node scripts/metrics.mjs --assert-zero` exit 0 — **tokens 0, off-system 0** (no
+regression); static 265→272, test files 31, apps 28, bundle gz 703.5→704.8 (+1.3, no new deps). **Ran the full
+headless smoke LIVE** (global playwright symlinked, removed after; server on :3001): **TIMELINE 1/1 ✅**
+(`ordered=true grouped=true flow=true persisted=true filtered=true`), **29/29 routes render clean** (0 uncaught),
+every other guard green (GLOBAL-SEARCH/NODE-LINEAGE/HOME-ALIVE/GRAPH-LEGIBLE 1/1, INBOUND/MEDIA/PROVENANCE-PERSISTS/
+PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 83 no-gap).
+
+**Metrics row:** apps 28 · static-tests 265→272 · test-files 31 · token-violations 0 · off-system 0 · bundle gz
+703.5→704.8.
+
+**Not verifiable in cloud (on-device confirm):** the chip narrowing + roving cursor are visual/pointer
+interactions — `filterTimeline`/`timelineFacets` are unit-pinned and the guard's `filtered` axis carries the
+app-chip narrow headless; the live keyboard walk (↑/↓/Enter) + chip tints are the on-device visual.
+
+**Single best next step:** EPIC-10 S3 — surface the long-dormant `childrenOf` walker as `<NodeDescendants>` on
+each Timeline entity row ("→ spawned N", navigable), closing EPIC-10. Exact shape in `docs/CONTEXT.md`.
+
+---
+
 ## 2026-07-04 · QA (visual + smoke) — **EPIC-10 S1 CONFIRMED LIVE** on green main `3cfe846`: the Timeline lens is real, `TIMELINE 1/1` reproduced independently
 
 **First independent QA since `5d45ce8` (EPIC-9 S3).** EPIC-9 retired, EPIC-10 promoted, **EPIC-10 S1 shipped
