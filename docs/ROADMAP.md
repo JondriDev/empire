@@ -10,18 +10,20 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-07-03** (strategist) · Main: 🟢 green (vitest 292, token-violations 0, off-system 0) ·
-> QA: 28/28 routes render, no runtime errors, all guards green. **EPIC-1..9 all DONE** (organism both-ways 9/9 ·
+> Last re-ranked: **2026-07-04** (strategist) · Main: 🟢 green (vitest 318, token-violations 0, off-system 0) ·
+> QA: 29/29 routes render, no runtime errors, all guards green. **EPIC-1..10 all DONE** (organism both-ways 9/9 ·
 > token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable · off-system 1076→0, CI-locked ·
 > durable provenance `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` + Reader graph-legible · `GLOBAL-SEARCH 1/1`
-> queryable organism · `NODE-LINEAGE 1/1` per-artifact ancestry, navigable). **▶ EPIC-10 · The Timeline (the
-> organism's lifestream — a TEMPORAL lens) ACTIVE** — the organism has three lenses over its one Core graph (Network =
-> structural, Search = query, Inbox = tasks) but **no temporal lens**, even though every `CoreNode` has stamped
-> `meta.created` and every `ProvEdge` stamps `at` all along. EPIC-10 is the missing 4th lens: one newest-first,
-> day-grouped stream merging **every entity-birth + every app→app handoff** into the organism's history — each row
-> navigable to its entity, ancestry inline, and (S3) what it spawned (finally surfacing the unused `childrenOf`
-> walker). **Target: `TIMELINE 0/1 → 1/1`** (S1 spine+lens+guard → S2 filters/keyboard → S3 descendants). **Android
-> renumbered to EPIC-7 (QUEUED)** — device-gated, promote only with on-device QA.
+> queryable organism · `NODE-LINEAGE 1/1` per-artifact ancestry, navigable · `TIMELINE 1/1` temporal lens, all six axes).
+> **▶ EPIC-11 · Design-system conformance II (the non-colour token axis) ACTIVE — RATIFIED 2026-07-04.** EPIC-5 drove the
+> two *colour* conformance metrics to 0 (`tokenViolations`, `offSystemUtilities`, `--assert-zero`-locked), but "tokens
+> only" was never enforced for the NON-colour scales — app code still hardcodes **radii** (`4px` vs `--radius-sm`),
+> **type** (`13px` vs `--text-sm`), and **easings** (`cubic-bezier(…)` vs `--ease-*`), so the "one radius scale / motion =
+> physics via tokens" design language is only half true. EPIC-11 makes it fully true via the exact EPIC-5 playbook
+> (measure → drive to 0 by descending file mass → lock). **Target: the NEW `offSystemStyle` row in `metrics.mjs`,
+> `56 → 0`** (S1 audit+baseline SHIPPED `56=r12/t42/m2` → S2 type t42→0 → S3 radii r12→0 → S4 motion m2→0 + `--assert-zero`
+> lock). Cross-cutting hotspot `Calculator.tsx` (t9/r3/m1). **Android renumbered to EPIC-7 (QUEUED)** — device-gated,
+> promote only with on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
@@ -109,13 +111,15 @@ now **EPIC-6 S4**:
   walker + `<NodeLineage>` surface on Inbox/Network/Search + each hop navigable via `openEntity`; `NODE-LINEAGE 1/1`,
   5 axes, S1–S3 all QA-confirmed LIVE). Retired. *Left one rail dormant:* `childrenOf` (descendants) was
   built + unit-pinned but never surfaced → picked up by EPIC-10 S3.
-- **The Timeline — a temporal lens over the whole organism.** *(In progress — this IS EPIC-10, ▶ ACTIVE.)* The 4th
-  lens (after Network/Search/Inbox): one newest-first, day-grouped stream of every entity-birth (`meta.created`) +
-  every app→app handoff (`ProvEdge.at`), each row deep-linking to its entity with ancestry inline and (S3) its
-  descendants. Closes when `TIMELINE 1/1` is QA-confirmed. **Follow-on (next epic candidate, not yet decomposed):**
-  **design-system conformance II** — extend the audit past colour to **spacing/radii/type** (ad-hoc px, non-`--mono`
-  code surfaces) with its own `metrics.mjs` row + `--assert-zero` gate, so conformance isn't colour-only (the
-  existing off-system=0 lock is the template).
+- **The Timeline — a temporal lens over the whole organism.** ✅ **DONE — this WAS EPIC-10** (S1–S3 shipped + QA-confirmed
+  LIVE: `TIMELINE 1/1`, all six axes `ordered/grouped/flow/persisted/filtered/descendants`; the 4th lens after
+  Network/Search/Inbox; finally surfaced the dormant `childrenOf` descendants walker). Retired 2026-07-04.
+- **Design-system conformance II — the non-colour token axis.** *(In progress — this IS EPIC-11, ▶ ACTIVE, RATIFIED
+  2026-07-04.)* EPIC-5 zeroed the two **colour** conformance metrics; EPIC-11 does the same for the NON-colour token
+  scales — **radii/type/easing** — via a new `offSystemStyle` `metrics.mjs` row + `--assert-zero` lock, the exact off-system=0
+  template. **Target: `offSystemStyle 56 → 0`** (S1 audit+baseline shipped; S2 type t42→0 → S3 radii r12→0 → S4 motion
+  m2→0 + lock). **Deliberately EXCLUDES raw spacing** (padding/margin/gap px — too many legitimate one-off geometry values,
+  no bounded token-only target; would break driveability). Closes when QA confirms `offSystemStyle 56→0` on green main.
 - **Android APK validation.** *(QUEUED EPIC-7 — renumbered EPIC-5→6→7.)* Device-gated: an unattended cloud
   builder can't install an APK or run on-device smoke, so its target isn't cloud-verifiable. Promote only when an
   on-device QA path exists; until then it's lower *realizable* gradient than the cloud-executable themes above.
