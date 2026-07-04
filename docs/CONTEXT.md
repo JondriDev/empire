@@ -115,29 +115,39 @@
       `kindFilter` is `string[]` state but `filterTimeline` wants `('entity'|'flow')[]` — cast at the call site. (3)
       Autofocusing the container needs `outline:none` or a focus ring paints the whole panel. (4) Chip tint uses
       `var(--signal)` (Timeline's accent), NOT Search's `--ion`; the active-row cursor stays `--ion` per the S2 spec.
-  - **▶ NEXT STAGE = EPIC-10 S3 · every moment shows what it SPAWNED — surface the long-dormant `childrenOf` walker (the
-    timeline becomes a lineage tree in time). ★ closes EPIC-10 (S1–S3).** Start editing without re-planning:
-    - **New `src/components/ui/NodeDescendants.tsx`** — mirror **`NodeLineage.tsx`**'s idiom + the EPIC-9 S3 `EntityToken`
-      navigation rail: `<NodeDescendants nodeId />` = reactive `useGraph(s=>s.nodes)`, calls `childrenOf(nodes, nodeId)`
-      (built EPIC-9 S1, unit-pinned, STILL UNUSED — `nodeLineage.ts`), renders a compact "→ spawned N" affordance listing
-      each descendant as a **navigable** `role="button"` token (`openEntity(child.meta.app, child.id)` on click/Enter, with
-      `stopPropagation`+`preventDefault` so it stays valid nested inside the Timeline row `<button>` — the EXACT pattern
-      `EntityToken` established, `NodeLineage.tsx:25`); reuse the `.gp-lineage-hop` class; return **null** when `childrenOf`
-      is empty; `data-node-descendants="<nodeId>"` attr for the guard.
-    - **`Timeline.tsx`** — mount `<NodeDescendants nodeId={entry.nodeId!}>` on each entity row beside the existing
-      `<NodeLineage>` (in the EntityRow meta line), so a moment reads BOTH ways: `← ancestry` + `→ spawned`.
-    - **Extend the `TIMELINE` guard** with a `descendants` axis: the current S1 seed's two tasks are NOT parent/child — **add
-      `data.from` linking them** (`qa-tl-newer.data.from = 'qa-tl-older'`, reusing the NODE-LINEAGE seed shape) → assert the
-      OLDER entity's row surfaces `[data-node-descendants=qa-tl-older]` naming the newer child. `NodeDescendants.test.tsx`
-      (+≥3: renders each descendant token; click/Enter → `useWindowStore.activeWindowId` = child app + `useFocus.focusedId`
-      = child id; empty → null).
-    - *Acceptance:* a moment for a note that spawned a task shows a navigable "→ spawned «that task»" row that climbs to it;
-      `TIMELINE` guard grows `descendants` (still 1/1); tests green. build🟢 vitest🟢 eslint clean; tokens 0, off-system 0.
-    - **SEAM/TRAP (from EPIC-9 S3, baked in):** a navigable token nested in a clickable row MUST be `role="button"`
-      (span-with-role, NOT `<button>`) + tabIndex + `openEntity` + `stopPropagation`/`preventDefault` — a real `<button>`
-      nested in the row `<button>` is invalid HTML. `childrenOf` returns newest-first live CoreNodes. Real window/focus
-      navigation is observable headless only on the Bridge/home (`/`) shell (windowStore-driven), NOT the `/app/*` route —
-      the guard asserts the token renders + is wired; the state change is unit-pinned in `NodeDescendants.test.tsx`.
+  - **✅ S3 SHIPPED 2026-07-04 (`main`, this run) — every moment now shows what it SPAWNED; the long-dormant `childrenOf`
+    walker is finally live. `TIMELINE 1/1` grew a `descendants` axis. ★ EPIC-10 is CODE-COMPLETE (S1–S3).** New
+    **`src/components/ui/NodeDescendants.tsx`** mirrors `NodeLineage.tsx`'s `EntityToken` VERBATIM: reactive
+    `useGraph(s=>s.nodes)` → `childrenOf(nodes, nodeId)` (EPIC-9 S1 walker, first surface), renders a "→ spawned" label +
+    one navigable `role="button"` span per child (`.gp-lineage-hop`, `openEntity(child.meta.app, child.id)` on click/Enter,
+    `stopPropagation`+`preventDefault` — valid nested in the Timeline row `<button>`), returns **null** when childless,
+    `data-node-descendants="<nodeId>"` attr. `Timeline.tsx` EntityRow mounts it beside `<NodeLineage>` in the meta line
+    (`Timeline.tsx:280` region) so a moment reads BOTH ways: `↖ ancestry` + `→ spawned`. `NodeDescendants.test.tsx` **+4**
+    (renders each token; click/Enter → `activeWindowId`=child app + `focusedId`=child id; empty→null). Guard: linked the
+    two S1 seeds (`qa-tl-newer.data.from='qa-tl-older'`) → older row surfaces `[data-node-descendants=qa-tl-older]` naming
+    the newer child (new `descendants` axis, read on the UNFILTERED stream before the filter click). **Ran full smoke LIVE:
+    TIMELINE 1/1 ✅** (`ordered=true grouped=true flow=true persisted=true filtered=true descendants=true`), 29/29 routes
+    clean (0 uncaught), every guard green (NODE-LINEAGE/GLOBAL-SEARCH/HOME-ALIVE/GRAPH-LEGIBLE 1/1, PROVENANCE 3/3+3/3,
+    OFFLINE, PRECACHE 83 no-gap). build🟢 vitest 314→318🟢 eslint clean; tokens 0, off-system 0 (`--assert-zero` exit 0);
+    static 272→276, test files 32, bundle 704.8→705.3 (+0.5, no new deps).
+    - **⚠️ TRAP (load-bearing — discovered + fixed this run):** the guard's `readTimelineTitles` read the WHOLE entity row's
+      `innerText`. Once S3's seed links the two nodes, the newer row's `<NodeLineage>` embeds the OLDER title and the older
+      row's `<NodeDescendants>` embeds the NEWER title → reading full innerText would cross-contaminate `ordered`/`filtered`
+      (`findIndex(t => t.includes(TL_OLDER_TITLE))` would hit the newer row too). **Fix: added `data-timeline-title` to the
+      entity-row title `<div>` and scoped `readTimelineTitles` to `[data-timeline-kind="entity"] [data-timeline-title]`** —
+      isolates the title from the trail text. If you touch the seed or the row, keep this isolation.
+    - **SEAM/TRAP (from EPIC-9 S3, held):** a navigable token nested in a clickable row MUST be `role="button"`
+      (span-with-role, NOT `<button>`) + tabIndex + `openEntity` + `stopPropagation`/`preventDefault`. `childrenOf` returns
+      newest-first live CoreNodes. Real window/focus navigation is observable headless only on the Bridge/home (`/`) shell,
+      NOT the `/app/*` route — the guard asserts the token renders + names the right child; the state change is unit-pinned
+      in `NodeDescendants.test.tsx`.
+  - **▶ NEXT STAGE = none in an active epic — EPIC-10 is CODE-COMPLETE (S1–S3 all shipped on `main`).** QA to confirm S3
+    done on the new green main: on `/app/timeline`, a moment whose entity spawned another shows a navigable "→ spawned «…»"
+    token that climbs to the child (the smoke's `descendants` axis carries the render + correct-child-id headless;
+    `NodeDescendants.test.tsx` pins the click→open+focus state change). Then the **Strategist promotes the next epic** — the
+    topmost cloud-executable ROADMAP candidate is **design-system conformance II** (extend the token audit to
+    spacing/radii/type with its own `metrics.mjs` row); **EPIC-7 · Android stays device-gated**. If you arrive with no
+    `▶ ACTIVE` epic promoted, take design-system conformance II and flag EPICS needs the Strategist.
   - _(EPIC-9 detail retained below as working memory — it is DONE, S1–S3 all QA-confirmed LIVE, `NODE-LINEAGE 1/1`.)_
 - **Prior active epic (DONE — retired 2026-07-03, FULLY QA-CONFIRMED):** **EPIC-9 · Node-level lineage (per-artifact ancestry) — ★ CODE-COMPLETE (S1–S3 all shipped
   2026-07-03).** S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE `f878844`; **S3 QA-CONFIRMED LIVE `0378d8e` (by QA
