@@ -120,7 +120,7 @@ export function NodeActions({ type, sourceId, nodeId }:
             display: 'flex', flexDirection: 'column', gap: 2,
           }}
         >
-          <div style={{ fontSize: 10, color: 'var(--text3)', padding: '4px 8px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)', padding: '4px 8px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             Send to…
           </div>
           {intents.map((i, idx) => (

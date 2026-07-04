@@ -122,14 +122,14 @@ export default function ChartBuilder() {
         <div className="flex-1 p-8 overflow-auto flex items-center justify-center">
           {type === 'bar' && (
             <svg id="chart-svg" viewBox="0 0 800 500" className="w-full h-full max-w-4xl">
-              <text x="400" y="30" textAnchor="middle" className="fill-fg" style={{ fontSize: 22, fontWeight: 700 }}>{title}</text>
+              <text x="400" y="30" textAnchor="middle" className="fill-fg" style={{ fontSize: 'var(--text-2xl)', fontWeight: 700 }}>{title}</text>
               {/* y axis grid */}
               {[0, 0.25, 0.5, 0.75, 1].map((p, i) => {
                 const y = 380 - p * 320
                 return (
                   <g key={i}>
                     <line x1="60" y1={y} x2="780" y2={y} stroke={tint('xenon', 6)} />
-                    <text x="50" y={y + 4} textAnchor="end" className="fill-faint" style={{ fontSize: 11 }}>{Math.round(max * p)}</text>
+                    <text x="50" y={y + 4} textAnchor="end" className="fill-faint" style={{ fontSize: 'var(--text-xs)' }}>{Math.round(max * p)}</text>
                   </g>
                 )
               })}
@@ -143,8 +143,8 @@ export default function ChartBuilder() {
                     <rect x={x} y={y} width={w} height={h} rx="6" fill={COLORS[i % COLORS.length]} opacity="0.85">
                       <title>{d.label}: {d.value}</title>
                     </rect>
-                    <text x={x + w / 2} y={400} textAnchor="middle" className="fill-muted" style={{ fontSize: 12 }}>{d.label}</text>
-                    <text x={x + w / 2} y={y - 6} textAnchor="middle" className="fill-fg" style={{ fontSize: 11, fontWeight: 600 }}>{d.value}</text>
+                    <text x={x + w / 2} y={400} textAnchor="middle" className="fill-muted" style={{ fontSize: 'var(--text-sm)' }}>{d.label}</text>
+                    <text x={x + w / 2} y={y - 6} textAnchor="middle" className="fill-fg" style={{ fontSize: 'var(--text-xs)', fontWeight: 600 }}>{d.value}</text>
                   </g>
                 )
               })}
@@ -152,7 +152,7 @@ export default function ChartBuilder() {
           )}
           {type === 'line' && (
             <svg id="chart-svg" viewBox="0 0 800 500" className="w-full h-full max-w-4xl">
-              <text x="400" y="30" textAnchor="middle" className="fill-fg" style={{ fontSize: 22, fontWeight: 700 }}>{title}</text>
+              <text x="400" y="30" textAnchor="middle" className="fill-fg" style={{ fontSize: 'var(--text-2xl)', fontWeight: 700 }}>{title}</text>
               <defs>
                 <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={cssVar('signal')} stopOpacity="0.6" />
@@ -164,7 +164,7 @@ export default function ChartBuilder() {
                 return (
                   <g key={i}>
                     <line x1="60" y1={y} x2="780" y2={y} stroke={tint('xenon', 6)} />
-                    <text x="50" y={y + 4} textAnchor="end" className="fill-faint" style={{ fontSize: 11 }}>{Math.round(max * p)}</text>
+                    <text x="50" y={y + 4} textAnchor="end" className="fill-faint" style={{ fontSize: 'var(--text-xs)' }}>{Math.round(max * p)}</text>
                   </g>
                 )
               })}
@@ -182,7 +182,7 @@ export default function ChartBuilder() {
                         <circle cx={p[0]} cy={p[1]} r="5" fill="white" stroke={cssVar('signal')} strokeWidth="2">
                           <title>{data[i].label}: {data[i].value}</title>
                         </circle>
-                        <text x={p[0]} y={400} textAnchor="middle" className="fill-muted" style={{ fontSize: 12 }}>{data[i].label}</text>
+                        <text x={p[0]} y={400} textAnchor="middle" className="fill-muted" style={{ fontSize: 'var(--text-sm)' }}>{data[i].label}</text>
                       </g>
                     ))}
                   </>
@@ -195,7 +195,7 @@ export default function ChartBuilder() {
             const cx = 400, cy = 270, r = 160
             return (
               <svg id="chart-svg" viewBox="0 0 800 500" className="w-full h-full max-w-4xl">
-                <text x="400" y="30" textAnchor="middle" className="fill-fg" style={{ fontSize: 22, fontWeight: 700 }}>{title}</text>
+                <text x="400" y="30" textAnchor="middle" className="fill-fg" style={{ fontSize: 'var(--text-2xl)', fontWeight: 700 }}>{title}</text>
                 {data.map((d, i) => {
                   const start = (acc / total) * Math.PI * 2 - Math.PI / 2
                   acc += d.value
@@ -224,7 +224,7 @@ export default function ChartBuilder() {
                     const lx = cx + (r * 0.6) * Math.cos(mid)
                     const ly = cy + (r * 0.6) * Math.sin(mid)
                     return (
-                      <text key={i} x={lx} y={ly} textAnchor="middle" className="fill-fg" style={{ fontSize: 12, fontWeight: 700 }}>
+                      <text key={i} x={lx} y={ly} textAnchor="middle" className="fill-fg" style={{ fontSize: 'var(--text-sm)', fontWeight: 700 }}>
                         {Math.round((d.value / total) * 100)}%
                       </text>
                     )

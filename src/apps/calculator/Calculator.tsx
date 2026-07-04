@@ -234,7 +234,7 @@ export default function Calculator() {
   const fnStyle = (active: boolean): React.CSSProperties => ({
     ...baseBtn,
     padding: '10px 6px',
-    fontSize: '11px',
+    fontSize: 'var(--text-xs)',
     background: active ? tint('signal', 18) : tint('signal', 8),
     color: 'var(--color-cyan-3)',
     borderColor: active ? tint('signal', 35) : tint('signal', 12),
@@ -292,7 +292,7 @@ export default function Calculator() {
             <div
               style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
+                fontSize: 'var(--text-xs)',
                 color: 'var(--text3)',
                 flex: 1,
                 textAlign: 'right',
@@ -350,7 +350,7 @@ export default function Calculator() {
           <div
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: '32px',
+              fontSize: 'var(--text-3xl)',
               fontWeight: 300,
               letterSpacing: '-0.01em',
               color: justCalculated ? 'var(--color-cyan-3)' : 'var(--text)',
@@ -424,7 +424,7 @@ export default function Calculator() {
         </div>
 
         {memLabel && (
-          <div style={{ fontSize: '10px', color: 'var(--color-cyan-3)', marginTop: '-4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-cyan-3)', marginTop: '-4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--color-cyan-4)', boxShadow: '0 0 6px var(--color-cyan-4)', animation: 'pulse-ring 1.5s ease-in-out infinite' }} />
             Memory {memLabel}: {memStore}
           </div>
@@ -550,7 +550,7 @@ export default function Calculator() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              fontSize: '10px',
+              fontSize: 'var(--text-xs)',
               fontWeight: 700,
               color: 'var(--text3)',
               textTransform: 'uppercase',
@@ -584,7 +584,7 @@ export default function Calculator() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
           {history.length === 0 ? (
-            <div style={{ fontSize: '10px', color: 'var(--text3)', textAlign: 'center', padding: '16px 0', lineHeight: 1.5 }}>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)', textAlign: 'center', padding: '16px 0', lineHeight: 1.5 }}>
               Calculations you complete will appear here
             </div>
           ) : (
@@ -610,10 +610,10 @@ export default function Calculator() {
                 onMouseEnter={(e) => { e.currentTarget.style.background = tint('xenon', 4) }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
               >
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {h.expr}
                 </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: cssVar('ember'), fontWeight: 500 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', color: cssVar('ember'), fontWeight: 500 }}>
                   = {h.result}
                 </div>
               </button>
@@ -622,7 +622,7 @@ export default function Calculator() {
         </div>
 
         {/* Hint */}
-        <div style={{ fontSize: '9px', color: 'var(--text3)', paddingTop: '6px', borderTop: `1px solid ${tint('xenon', 4)}`, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)', paddingTop: '6px', borderTop: `1px solid ${tint('xenon', 4)}`, display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <span>⌨️ Keyboard</span>
           <span style={{ opacity: 0.7 }}>0123456789 + - * / ↵</span>
         </div>

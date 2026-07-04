@@ -216,7 +216,7 @@ export function StatCard({ label, value, delta, deltaDirection = 'neutral', colo
       >
         <span
           style={{
-            fontSize: '10px',
+            fontSize: 'var(--text-xs)',
             fontWeight: 600,
             color: 'var(--text3)',
             textTransform: 'uppercase',
@@ -229,7 +229,7 @@ export function StatCard({ label, value, delta, deltaDirection = 'neutral', colo
       </div>
       <div
         style={{
-          fontSize: '24px',
+          fontSize: 'var(--text-2xl)',
           fontWeight: 700,
           color: 'var(--text)',
           letterSpacing: '-0.02em',
@@ -242,7 +242,7 @@ export function StatCard({ label, value, delta, deltaDirection = 'neutral', colo
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <span
             style={{
-              fontSize: '11px',
+              fontSize: 'var(--text-xs)',
               fontWeight: 500,
               color: deltaColor,
               fontVariantNumeric: 'tabular-nums',

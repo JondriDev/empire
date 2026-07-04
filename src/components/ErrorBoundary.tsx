@@ -32,9 +32,9 @@ export class ErrorBoundary extends Component<Props, State> {
           textAlign: 'center',
           color: 'var(--text)',
         }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚠️</div>
+          <div style={{ fontSize: 'var(--text-4xl)', marginBottom: '0.5rem' }}>⚠️</div>
           <h3 style={{ fontWeight: 700, marginBottom: '0.5rem', color: 'color-mix(in srgb, var(--c-danger) 70%, var(--text))' }}>Something went wrong</h3>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text3)', marginBottom: '1rem' }}>
+          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text3)', marginBottom: '1rem' }}>
             {this.state.error?.message || 'Unknown error'}
           </p>
           <button
@@ -46,7 +46,7 @@ export class ErrorBoundary extends Component<Props, State> {
               padding: '0.5rem 1.5rem',
               color: 'color-mix(in srgb, var(--signal) 70%, var(--text))',
               cursor: 'pointer',
-              fontSize: '0.85rem',
+              fontSize: 'var(--text-sm)',
             }}
           >
             Try again

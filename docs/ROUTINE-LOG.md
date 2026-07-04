@@ -5,6 +5,38 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · Builder — **EPIC-11 S2 · reduce TYPE (t42 → 0)** — `offSystemStyle` 56 → 14
+
+**Result:** ✅ SHIPPED to `main`, 🟢 green. Executed the ratified S2 at full speed across **all 13 offender files** in one
+coherent commit. Drove the design-system TYPE conformance sub-count to **0**: `offSystemStyle` **56 → 14**
+(`r12/t42/m2` → `r12/t0/m2`, **Δ-42**). Radii (r12) + motion (m2) held EXACTLY — dim-major ordering kept the metric move clean.
+
+**What changed:** every raw `font-size`/`fontSize` (px / rem / unitless-JS-px) in the 13 files mapped onto the `--text-*`
+scale by NEAREST step, applied via a one-shot deterministic transform (`scratchpad/type-fix.mjs`, validate-all-then-write over
+exact `from→to` substrings with per-pattern expected-count asserts — not committed). Files: Calculator (t9), ChartBuilder
+artifacts (t9, SVG `<text>` labels), CommandPalette (t5), MarkdownStudio artifacts (t4, CSS-string), Notes (t3), ErrorBoundary
+(t3), Utility (t3), + the 6× t1 tail (ChatPanel injected-HTML, ConfirmModal, Desktop, NodeActions, SendResultMenu, ui/index).
+**Mapping rule:** nearest step; on an exact tie (even-px raw between two odd-px tokens) round UP — `12→sm(13)`, `14→base(15)`,
+`22→2xl(24)`. `MarkdownStudio 0.85em` left untouched (relative em, not counted). CSS-var refs cascade from `:root` so
+CSS-string/injected-HTML/SVG sites all accept `var(--text-*)`.
+
+**Verified (builder gate — the only gate):** build🟢 (tsc -b && vite build); vitest **334/334**🟢 (refactor — no test-count
+change; `styleAudit.test.mjs` already pins the pattern); eslint clean on all 13 touched files; `node scripts/metrics.mjs
+--assert-zero` exit 0 (colour metrics tokenViolations 0 / offSystemUtilities 0 untouched). **Metrics row:** apps 28 · tests 276
+static/334 vitest · test files 32 · tokenViolations 0 · offSystemUtilities 0 · **offSystemStyle 14 (r12/t0/m2), Δ-42** · bundle
+705.4 KB ±0. No new deps (reverted npm-install `package-lock.json` churn).
+
+**Not cloud-verifiable (on-device confirm, >1.5px shift):** `Calculator 32px→3xl(30)` −2 · `ChartBuilder 22→2xl(24)` +2 (×3
+chart labels) · `ErrorBoundary 2.5rem/40px→4xl(36)` −4 (decorative ⚠️) · `MarkdownStudio 2rem/32px→3xl(30)` −2 · all `9px→xs(11)`
++2 (footnote/kbd micro-labels). The headless render-smoke is QA's step (playwright isn't a builder dep — installing it would
+violate no-new-deps); pure CSS-value substitutions + passing tsc make render-crash risk negligible.
+
+**▶ Single best next step:** Builder takes **EPIC-11 S3** — reduce RADII (r12 → 0) across 6 files (Calculator r3,
+MarkdownStudio r3, Notes r2, ErrorBoundary r2, ChatPanel r1, Toast r1) onto `--radius-*` by nearest step, keeping `50%`/`9999px`.
+Reuse the S2 transform rail. Acceptance: `offSystemStyle` → `r0/t0/m2` (total 14→2). Then S4 (motion m2→0 + lock).
+
+---
+
 ## 2026-07-04 · Strategist — **RATIFY EPIC-11 · Design-system conformance II** + deepen S2–S4 with the authoritative per-file audit
 
 **Result:** 📐 docs-only, committed + pushed to `main`. Main is 🟢 green (29/29 render clean, every guard passes, vitest

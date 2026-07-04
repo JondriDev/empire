@@ -82,7 +82,20 @@ adds it to `--assert-zero` so it can't rot — exactly as EPIC-5 S8 locked `offS
   `cubic-bezier(0.16,1,0.3,1)`): `Toast.tsx` `cubic-bezier`→`var(--ease-out)`, motion 3→2, total 57→56. build🟢
   vitest 318→334🟢 (+16, +1 file) eslint clean; tokenViolations 0, offSystemUtilities 0 (`--assert-zero` still exit 0 —
   NOT yet locking the new metric while it's non-zero); bundle 705.4 ±0, no new deps.
-- [ ] **S2 · Reduce TYPE — the heaviest sub-count (t42 → 0) — in ONE run (all 13 files).** Map every raw `font-size`/
+- [x] **S2 · Reduce TYPE — the heaviest sub-count (t42 → 0) — in ONE run (all 13 files).** ✅ SHIPPED 2026-07-04 (`main`,
+  this run) — `offSystemStyle` **56 → 14** (`r12/t42/m2` → `r12/t0/m2`, Δ-42); TYPE sub-count is 0, radii/motion held
+  EXACTLY. All 13 files' raw `font-size`/`fontSize` mapped onto `--text-*` by nearest step via a one-shot deterministic
+  transform (validate-all-then-write). **Mapping rule:** nearest step; on an exact tie (even-px raw between two odd-px
+  tokens) round UP to the larger token — `12px→sm(13)`, `14→base(15)`, `22→2xl(24)`. On-device confirm (>1.5px shift):
+  `Calculator 32px→3xl(30)` −2, `ChartBuilder 22→2xl(24)` +2 (×3 SVG chart labels), `ErrorBoundary 2.5rem/40px→4xl(36)` −4
+  (decorative ⚠️ emoji), `MarkdownStudio 2rem/32px→3xl(30)` −2, and all `9px→xs(11)` +2 (tiny footnote/kbd labels).
+  `MarkdownStudio 0.85em` left untouched (relative em, not counted). CSS-string / injected-HTML / SVG `<text>` sites all
+  take `var(--text-*)` (custom props cascade from `:root`). build🟢 vitest 334🟢 (refactor — no test count change; the
+  `styleAudit.test.mjs` cases already pin the pattern) eslint clean on all 13 touched files; `--assert-zero` exit 0 (colour
+  metrics tokenViolations 0 / offSystemUtilities 0 untouched); bundle 705.4 ±0, no new deps. Headless render-smoke is the
+  independent QA step (playwright is not a builder dep — installing it would violate no-new-deps); pure CSS-value
+  substitutions + passing tsc make runtime render risk negligible. **▶ NEXT = S3 (radii r12→0).** _(original spec below)_
+- [ ] **S2 (orig spec) · Reduce TYPE — the heaviest sub-count (t42 → 0) — in ONE run (all 13 files).** Map every raw `font-size`/
   `fontSize` px/rem/unitless-JS-px onto the `--text-*` scale by NEAREST step (`--text-xs .6875rem/11px`, `-sm .8125rem/
   13px`, `-base .9375rem/15px`, `-lg 1.0625rem/17px`, `-xl 1.25rem/20px`, `-2xl 1.5rem/24px`, `-3xl 1.875rem/30px`,
   `-4xl 2.25rem/36px`, `-5xl 3rem/48px`). **Authoritative offenders (audit re-run 2026-07-04 — this is the FULL t42, drive

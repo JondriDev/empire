@@ -24,7 +24,7 @@ function formatContent(content: string) {
     const formatted = escaped
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, `<code style="background:${tint('ion', 15)};padding:2px 6px;border-radius:4px;font-family:monospace;font-size:12px">$1</code>`)
+      .replace(/`([^`]+)`/g, `<code style="background:${tint('ion', 15)};padding:2px 6px;border-radius:4px;font-family:monospace;font-size:var(--text-sm)">$1</code>`)
 
     return (
       <span

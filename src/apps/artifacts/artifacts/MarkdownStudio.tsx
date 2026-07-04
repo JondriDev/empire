@@ -413,14 +413,14 @@ export default function MarkdownStudio() {
       </div>
 
       <style>{`
-        .md-preview h1.md-h { font-size: 2rem; font-weight: 800; margin: 1.5rem 0 0.75rem; line-height: 1.2; background: linear-gradient(135deg, color-mix(in srgb, var(--ember) 80%, var(--text)), ${cssVar('ember')}); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .md-preview h2.md-h { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: ${cssVar('ember')}; }
-        .md-preview h3.md-h { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; color: color-mix(in srgb, var(--ember) 70%, var(--text)); }
+        .md-preview h1.md-h { font-size: var(--text-3xl); font-weight: 800; margin: 1.5rem 0 0.75rem; line-height: 1.2; background: linear-gradient(135deg, color-mix(in srgb, var(--ember) 80%, var(--text)), ${cssVar('ember')}); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .md-preview h2.md-h { font-size: var(--text-2xl); font-weight: 700; margin: 1.25rem 0 0.5rem; color: ${cssVar('ember')}; }
+        .md-preview h3.md-h { font-size: var(--text-xl); font-weight: 700; margin: 1rem 0 0.5rem; color: color-mix(in srgb, var(--ember) 70%, var(--text)); }
         .md-preview h4.md-h, .md-preview h5.md-h, .md-preview h6.md-h { font-weight: 600; margin: 1rem 0 0.5rem; color: color-mix(in srgb, var(--ember) 45%, var(--text)); }
         .md-preview p.md-p { margin: 0.5rem 0; line-height: 1.7; color: ${cssVar('text')}; }
         .md-preview .md-code-inline { background: ${tint('ember', 15)}; color: ${cssVar('ember')}; padding: 1px 5px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.85em; border: 1px solid ${tint('ember', 20)}; }
         .md-preview pre.md-pre { background: ${tint('void', 40)}; border: 1px solid ${tint('xenon', 10)}; border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
-        .md-preview pre.md-pre code { color: ${cssVar('text')}; font-family: ui-monospace, monospace; font-size: 0.85rem; line-height: 1.6; }
+        .md-preview pre.md-pre code { color: ${cssVar('text')}; font-family: ui-monospace, monospace; font-size: var(--text-sm); line-height: 1.6; }
         .md-preview blockquote.md-quote { border-left: 3px solid ${cssVar('ember')}; padding-left: 1rem; margin: 1rem 0; color: ${cssVar('text2')}; font-style: italic; background: ${tint('ember', 5)}; padding: 0.5rem 1rem; border-radius: 0 8px 8px 0; }
         .md-preview ul.md-ul, .md-preview ol.md-ol, .md-preview ul.md-task-list { padding-left: 1.5rem; margin: 0.5rem 0; color: ${cssVar('text')}; }
         .md-preview ul.md-ul li, .md-preview ol.md-ol li { margin: 0.25rem 0; line-height: 1.6; }
