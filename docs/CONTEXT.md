@@ -61,7 +61,7 @@
       Δ ±0). Every other guard green (SHELL-IS-STYLED, REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1,
       GLOBAL-SEARCH 1/1 `tagOnly`, NODE-LINEAGE 1/1 5-axes, HOME-ALIVE 1/1, PROVENANCE-PERSISTS/ENTITY 3/3, OFFLINE 5/5,
       PRECACHE 82 no-gap). **Visually confirmed** (`app-timeline.png`, above). **No runtime bug, no contradiction.**
-      **▶ NEXT = EPIC-10 S2** (filter + roving keyboard nav — spec below, downhill from Search's faceted idiom).
+      **▶ NEXT = EPIC-10 S3** (S2 filter + roving keyboard nav SHIPPED 2026-07-04 — see S2 block below; S3 spec below).
     - **SEAM (reuse for S2/S3):** the pure spine is `buildTimeline`/`groupByDay`/`dayKey`/`relativeDayLabel` — all
       `(nodes,edges,…)→value`, unit-pinned. Entity rows carry `data-timeline-kind="entity"`; flow rows
       `data-timeline-kind="flow"`; day sections `data-timeline-day="<key>"`. Timeline mirrors Search's lens idiom exactly,
@@ -73,28 +73,58 @@
       declared LATE (~line 643), after the TIMELINE guard — I inlined the literal `'empire-provenance'` in the TIMELINE
       block to avoid the const temporal-dead-zone ReferenceError.** (5) The tie-break is `id` DESCENDING — entries with
       equal `at` order by higher `id` first; the tests pin this so don't "fix" it to ascending.
-  - **▶ NEXT STAGE = EPIC-10 S2 · filter the stream + traverse it by keyboard (the temporal lens gets controls).** Downhill —
-    copy Search's faceted idiom (EPIC-8 S3) VERBATIM. Start editing without re-planning:
-    - **`src/lib/core/timeline.ts`** — add three pure helpers mirroring `search.ts`'s `filterHits`/`hitFacets`/`toggleFacet`:
-      `filterTimeline(entries,{apps?,kinds?,types?})` (AND-across-dims, OR-within; empty dims → return input untouched,
-      order preserved), `timelineFacets(entries):{apps:Facet[];kinds:Facet[]}` (distinct values + counts busiest-first,
-      computed over the **UNFILTERED** entries so chips always widen back), and a `toggleFacet` (import from `search.ts` or
-      duplicate). `Facet = {value, count}`.
-    - **`Timeline.tsx`** — hold `appFilter`/`kindFilter` state; render **App** + **Kind** (`entity`/`flow`) chip rows
-      between header and stream (reuse Search's `chip()` idiom: ion tint when on, `aria-pressed`); regroup the FILTERED
-      entries via `filterTimeline`. Add roving keyboard nav over the FLAT filtered list (`days.flatMap(d=>d.entries)`, same
-      render order): ↑/↓ clamp + `scrollIntoView({block:'nearest'})` off a `[data-timeline-id]` attr, Enter → `openEntity`
-      for an entity entry (flow entry = no-op on Enter); active row = `boxShadow: inset 0 0 0 1px var(--ion)` + always-on ⚡;
-      reset `activeIndex` to 0 on `[appFilter,kindFilter]`. **NOTE:** put the keydown on a focusable element — Timeline has
-      no search input like Search does, so add a `tabIndex`/`onKeyDown` to the scroll container (or a hidden focus target).
-    - **Extend the `TIMELINE` guard** with a `filtered` axis (apply an app filter → only that app's rows render; or assert
-      `filterTimeline` narrows). `timeline.test.ts` +≥5 (`filterTimeline` AND-across / OR-within / order-preserved /
-      empty-dims-passthrough; `timelineFacets` counts busiest-first).
-    - *Acceptance:* App chip → only that app's moments; Kind chip → only entities/only flows; ↑/↓/Enter walks+opens
-      mouse-free; `TIMELINE` guard grows `filtered`, still 1/1. build🟢 vitest🟢 eslint clean; tokens 0, off-system 0.
-    - **SEAM/TRAP (from EPIC-8 S3, baked in):** roving cursor = `flat = days.flatMap(d=>d.entries)` + `activeIndex` clamped
-      + `scrollIntoView` off `[data-timeline-id]` (flatten in RENDER order so cursor matches). Facets derive from the
-      **UNFILTERED** set, render the **FILTERED** set — never facet the filtered set or you can't widen back.
+  - **✅ S2 SHIPPED 2026-07-04 (`main`, this run) — the temporal lens gets faceted controls + keyboard nav, `TIMELINE 1/1`
+    grew a live `filtered` axis.** Three pure helpers in **`timeline.ts`** mirroring `search.ts`: `TimelineFilter`
+    (`{apps?;kinds?:('entity'|'flow')[];types?}`), `filterTimeline(entries,filter)` (AND-across-dims, OR-within; empty dims →
+    returns input untouched, order preserved; a `types` filter matches entity entries only — flows carry no `type`),
+    `timelineFacets(entries):{apps:Facet[];kinds:Facet[]}` (distinct values + counts busiest-first then value-asc, computed
+    over the **UNFILTERED** stream). Reuses `Facet` (type-import from `./search`) + `toggleFacet` (runtime import from
+    `search.ts`). **`Timeline.tsx`** now holds `appFilter`/`kindFilter`/`activeIndex`; the outer scroll container is the
+    focus target (`tabIndex={0}` + `onKeyDown`, autofocused on mount — Timeline has NO search input to host the keydown);
+    renders **Kind** + **App** chip rows between header and stream (Search's `chip()` idiom but **signal** tint not ion — one
+    accent per view; `aria-pressed`; each chip carries `data-timeline-facet="<dim>:<value>"` for the guard); regroups the
+    FILTERED stream; roves the flat filtered list `days.flatMap(d=>d.entries)` via ↑/↓ (clamp) + Enter (`openEntity` for an
+    entity row, no-op for a flow) + `scrollIntoView({block:'nearest'})` off `[data-timeline-id]`; active row = `boxShadow:
+    inset 0 0 0 1px var(--ion)` + always-on ⚡; `activeIndex` resets to 0 on `[appFilter,kindFilter]`. Both rows now carry
+    `data-timeline-id={entry.id}`. Header subtitle appends `· N shown` when filtered; empty-after-filter state says "No
+    moments match these filters · Clear a filter chip". Guard grew a **`filtered`** axis: click the `app:goals` chip → only
+    the goals-owned newer entity renders, the notes entity + the notes→goals flow (flow app = fromApp = notes) both drop.
+    `timeline.test.ts` 15→22 (+7). **Ran full smoke LIVE: TIMELINE 1/1 ✅** (`ordered=true grouped=true flow=true
+    persisted=true filtered=true`), 29/29 routes clean (0 uncaught), every guard green (GLOBAL-SEARCH/NODE-LINEAGE/
+    HOME-ALIVE/GRAPH-LEGIBLE 1/1, PROVENANCE 3/3+3/3, OFFLINE 5/5, PRECACHE 83 no-gap). build🟢 vitest 307→314🟢 eslint
+    clean; tokens 0, off-system 0 (`--assert-zero` exit 0); static 265→272, bundle 703.5→704.8 (+1.3, no new deps).
+    - **SEAM (reuse for S3):** the faceted idiom is now proven in Timeline exactly as in Search — `filterTimeline`/
+      `timelineFacets`/`toggleFacet` + the `chip('dim',current,setDim,value,label,count,color?)` helper (adds
+      `data-timeline-facet`); roving cursor = `flat = days.flatMap(d=>d.entries)` + `activeIndex` clamped + `scrollIntoView`
+      off `[data-timeline-id]`. Facets derive from the **UNFILTERED** stream, render the **FILTERED** stream.
+    - **TRAPs (S2, confirmed live):** (1) the flow entry's `app` is its **fromApp** (`buildTimeline` sets `app:edge.fromApp`)
+      — so an App filter on the source app keeps the flow, on the target app drops it; the guard relies on this. (2)
+      `kindFilter` is `string[]` state but `filterTimeline` wants `('entity'|'flow')[]` — cast at the call site. (3)
+      Autofocusing the container needs `outline:none` or a focus ring paints the whole panel. (4) Chip tint uses
+      `var(--signal)` (Timeline's accent), NOT Search's `--ion`; the active-row cursor stays `--ion` per the S2 spec.
+  - **▶ NEXT STAGE = EPIC-10 S3 · every moment shows what it SPAWNED — surface the long-dormant `childrenOf` walker (the
+    timeline becomes a lineage tree in time). ★ closes EPIC-10 (S1–S3).** Start editing without re-planning:
+    - **New `src/components/ui/NodeDescendants.tsx`** — mirror **`NodeLineage.tsx`**'s idiom + the EPIC-9 S3 `EntityToken`
+      navigation rail: `<NodeDescendants nodeId />` = reactive `useGraph(s=>s.nodes)`, calls `childrenOf(nodes, nodeId)`
+      (built EPIC-9 S1, unit-pinned, STILL UNUSED — `nodeLineage.ts`), renders a compact "→ spawned N" affordance listing
+      each descendant as a **navigable** `role="button"` token (`openEntity(child.meta.app, child.id)` on click/Enter, with
+      `stopPropagation`+`preventDefault` so it stays valid nested inside the Timeline row `<button>` — the EXACT pattern
+      `EntityToken` established, `NodeLineage.tsx:25`); reuse the `.gp-lineage-hop` class; return **null** when `childrenOf`
+      is empty; `data-node-descendants="<nodeId>"` attr for the guard.
+    - **`Timeline.tsx`** — mount `<NodeDescendants nodeId={entry.nodeId!}>` on each entity row beside the existing
+      `<NodeLineage>` (in the EntityRow meta line), so a moment reads BOTH ways: `← ancestry` + `→ spawned`.
+    - **Extend the `TIMELINE` guard** with a `descendants` axis: the current S1 seed's two tasks are NOT parent/child — **add
+      `data.from` linking them** (`qa-tl-newer.data.from = 'qa-tl-older'`, reusing the NODE-LINEAGE seed shape) → assert the
+      OLDER entity's row surfaces `[data-node-descendants=qa-tl-older]` naming the newer child. `NodeDescendants.test.tsx`
+      (+≥3: renders each descendant token; click/Enter → `useWindowStore.activeWindowId` = child app + `useFocus.focusedId`
+      = child id; empty → null).
+    - *Acceptance:* a moment for a note that spawned a task shows a navigable "→ spawned «that task»" row that climbs to it;
+      `TIMELINE` guard grows `descendants` (still 1/1); tests green. build🟢 vitest🟢 eslint clean; tokens 0, off-system 0.
+    - **SEAM/TRAP (from EPIC-9 S3, baked in):** a navigable token nested in a clickable row MUST be `role="button"`
+      (span-with-role, NOT `<button>`) + tabIndex + `openEntity` + `stopPropagation`/`preventDefault` — a real `<button>`
+      nested in the row `<button>` is invalid HTML. `childrenOf` returns newest-first live CoreNodes. Real window/focus
+      navigation is observable headless only on the Bridge/home (`/`) shell (windowStore-driven), NOT the `/app/*` route —
+      the guard asserts the token renders + is wired; the state change is unit-pinned in `NodeDescendants.test.tsx`.
   - _(EPIC-9 detail retained below as working memory — it is DONE, S1–S3 all QA-confirmed LIVE, `NODE-LINEAGE 1/1`.)_
 - **Prior active epic (DONE — retired 2026-07-03, FULLY QA-CONFIRMED):** **EPIC-9 · Node-level lineage (per-artifact ancestry) — ★ CODE-COMPLETE (S1–S3 all shipped
   2026-07-03).** S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE `f878844`; **S3 QA-CONFIRMED LIVE `0378d8e` (by QA

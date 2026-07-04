@@ -16,14 +16,22 @@
  * An entity row opens its entity (`openEntity`) with its ancestry inline
  * (`<NodeLineage>`) and the ⚡ actions bar; a flow row is a durable handoff
  * moment (`from → to`) — not a button, matching the Network memory panel idiom.
+ *
+ * S2 gives the lens controls, copying Search's faceted idiom verbatim: App +
+ * Kind chip rows narrow the stream (facets derived from the UNFILTERED stream so
+ * chips always widen back; the filtered stream is what renders), and ↑/↓/Enter
+ * rove the flat filtered list mouse-free — Enter opens an entity row, a flow row
+ * is a no-op. The scroll container is the focus target (no search field to host
+ * the keydown, unlike Search).
  */
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Clock as TimelineIcon } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { useGraph } from '../../lib/core/graph'
 import { useProvenance } from '../../lib/core/provenance'
-import { buildTimeline, groupByDay, relativeDayLabel } from '../../lib/core/timeline'
+import { buildTimeline, groupByDay, relativeDayLabel, filterTimeline, timelineFacets } from '../../lib/core/timeline'
+import { toggleFacet } from '../../lib/core/search'
 import { agoLabel } from '../../lib/core/bridge'
 import { apps, getAppIcon } from '../../lib/registry'
 import { openEntity } from '../../lib/windowStore'
@@ -35,9 +43,16 @@ import type { TimelineEntry } from '../../lib/core/timeline'
 // One accent per view — the Timeline reads as signal-cyan, the organism's pulse.
 const ACCENT = 'var(--signal)'
 
+// Human labels for the two kinds — the chip surface reads gentler than the raw enum.
+const KIND_LABEL: Record<string, string> = { entity: 'entities', flow: 'flows' }
+
 export default function Timeline() {
   const nodes = useGraph(s => s.nodes)
   const edges = useProvenance(s => s.edges)
+  const [appFilter, setAppFilter] = useState<string[]>([])
+  const [kindFilter, setKindFilter] = useState<string[]>([])
+  const [activeIndex, setActiveIndex] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const appById = useMemo(
     () => Object.fromEntries(apps.map(a => [a.id, a])) as Record<string, AppDefinition>,
@@ -46,15 +61,99 @@ export default function Timeline() {
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'timeline' })
+    // Focus the scroll container so ↑/↓/Enter drive the stream immediately.
+    containerRef.current?.focus()
   }, [])
 
+  // Facets from the UNFILTERED stream (so chips always widen back); render the FILTERED stream.
   const stream = useMemo(() => buildTimeline(nodes, edges), [nodes, edges])
-  const days = useMemo(() => groupByDay(stream), [stream])
+  const facets = useMemo(() => timelineFacets(stream), [stream])
+  const filtered = useMemo(
+    () => filterTimeline(stream, { apps: appFilter, kinds: kindFilter as ('entity' | 'flow')[] }),
+    [stream, appFilter, kindFilter],
+  )
+  const days = useMemo(() => groupByDay(filtered), [filtered])
+  // Flat list in the SAME order the days render — the roving cursor indexes into this.
+  const flat = useMemo(() => days.flatMap(d => d.entries), [days])
+  const indexById = useMemo(() => new Map(flat.map((e, i) => [e.id, i])), [flat])
   // The ONLY place the wall clock is read — the pure spine stays timezone-stable.
   const now = Date.now()
 
+  const hasStream = stream.length > 0
+  const showChips = hasStream && (facets.apps.length > 1 || facets.kinds.length > 1)
+
+  // Reset the cursor to the top whenever the filters narrow the list.
+  useEffect(() => { setActiveIndex(0) }, [appFilter, kindFilter])
+
+  // Bring the active row into view as the cursor moves.
+  useEffect(() => {
+    if (!flat.length) return
+    const id = flat[Math.min(activeIndex, flat.length - 1)]?.id
+    if (!id) return
+    document
+      .querySelector(`[data-timeline-id="${CSS.escape(id)}"]`)
+      ?.scrollIntoView({ block: 'nearest' })
+  }, [activeIndex, flat])
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!flat.length) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setActiveIndex(i => Math.min(i + 1, flat.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setActiveIndex(i => Math.max(i - 1, 0))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      const entry = flat[Math.min(activeIndex, flat.length - 1)]
+      // Only entity rows open; a flow row is a moment, not a destination.
+      if (entry && entry.kind === 'entity' && entry.nodeId) openEntity(entry.app, entry.nodeId)
+    }
+  }
+
+  const chip = (
+    dim: 'app' | 'kind',
+    current: string[],
+    setDim: (v: string[]) => void,
+    value: string,
+    label: string,
+    count: number,
+    color?: string,
+  ) => {
+    const on = current.includes(value)
+    return (
+      <button
+        key={`${dim}-${value}`}
+        data-timeline-facet={`${dim}:${value}`}
+        onClick={() => setDim(toggleFacet(current, value))}
+        aria-pressed={on}
+        className="rounded-full text-xs flex items-center gap-1.5 transition-colors"
+        style={{
+          padding: '4px 10px',
+          fontFamily: 'var(--mono)',
+          transitionDuration: 'var(--dur-fast)',
+          color: on ? 'var(--text)' : 'var(--text2)',
+          background: on ? 'color-mix(in srgb, var(--signal) 22%, transparent)' : 'transparent',
+          border: `1px solid ${on ? 'var(--signal)' : 'var(--hairline, color-mix(in srgb, var(--xenon) 12%, transparent))'}`,
+        }}
+      >
+        {color && (
+          <span aria-hidden="true" className="rounded-full" style={{ width: 6, height: 6, background: color }} />
+        )}
+        <span>{label}</span>
+        <span style={{ color: 'var(--text3)' }}>{count}</span>
+      </button>
+    )
+  }
+
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div
+      ref={containerRef}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+      className="p-6 max-w-2xl mx-auto"
+      style={{ outline: 'none' }}
+    >
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--text)' }}>
@@ -62,17 +161,43 @@ export default function Timeline() {
         </h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text2)' }}>
           The organism’s history, one stream · {stream.length} moment{stream.length === 1 ? '' : 's'}
+          {filtered.length !== stream.length && ` · ${filtered.length} shown`}
         </p>
+
+        {/* Filter chips — derived from the current (unfiltered) stream */}
+        {showChips && (
+          <div className="mt-4 space-y-2">
+            {facets.kinds.length > 1 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="t-label" style={{ color: 'var(--text3)' }}>Kind</span>
+                {facets.kinds.map(f =>
+                  chip('kind', kindFilter, setKindFilter, f.value, KIND_LABEL[f.value] ?? f.value, f.count),
+                )}
+              </div>
+            )}
+            {facets.apps.length > 1 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="t-label" style={{ color: 'var(--text3)' }}>App</span>
+                {facets.apps.map(f =>
+                  chip('app', appFilter, setAppFilter, f.value, appById[f.value]?.name ?? f.value, f.count, appById[f.value]?.color),
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Idle / empty */}
       {days.length === 0 && (
         <div className="gp rounded-2xl text-center" style={{ padding: 'var(--space-6, 28px)' }}>
           <TimelineIcon className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text3)' }} />
-          <p className="text-sm font-medium" style={{ color: 'var(--text2)' }}>No history yet</p>
+          <p className="text-sm font-medium" style={{ color: 'var(--text2)' }}>
+            {hasStream ? 'No moments match these filters' : 'No history yet'}
+          </p>
           <p className="text-xs mt-1.5" style={{ color: 'var(--text3)' }}>
-            Create or hand off anything and it lands here — every entity birth and
-            every app→app transfer, newest-first, grouped by day.
+            {hasStream
+              ? 'Clear a filter chip to widen the stream.'
+              : 'Create or hand off anything and it lands here — every entity birth and every app→app transfer, newest-first, grouped by day.'}
           </p>
         </div>
       )}
@@ -97,9 +222,16 @@ export default function Timeline() {
                   entry={entry}
                   accent={appById[entry.app]?.color}
                   now={now}
+                  active={indexById.get(entry.id) === activeIndex}
                 />
               ) : (
-                <FlowRow key={entry.id} entry={entry} appById={appById} now={now} />
+                <FlowRow
+                  key={entry.id}
+                  entry={entry}
+                  appById={appById}
+                  now={now}
+                  active={indexById.get(entry.id) === activeIndex}
+                />
               ),
             )}
           </div>
@@ -110,13 +242,20 @@ export default function Timeline() {
 }
 
 /** An entity BIRTH — the whole row opens its entity; ancestry + ⚡ inline. */
-function EntityRow({ entry, accent, now }: { entry: TimelineEntry; accent?: string; now: number }) {
+function EntityRow({
+  entry, accent, now, active,
+}: { entry: TimelineEntry; accent?: string; now: number; active: boolean }) {
   const nodeId = entry.nodeId!
   return (
     <div
       data-timeline-kind="entity"
+      data-timeline-id={entry.id}
+      aria-current={active ? 'true' : undefined}
       className="gp gp-interactive group relative rounded-2xl flex items-center gap-3"
-      style={{ padding: 'var(--space-3, 14px)' }}
+      style={{
+        padding: 'var(--space-3, 14px)',
+        boxShadow: active ? 'inset 0 0 0 1px var(--ion)' : undefined,
+      }}
     >
       <span
         aria-hidden="true"
@@ -144,7 +283,7 @@ function EntityRow({ entry, accent, now }: { entry: TimelineEntry; accent?: stri
       </button>
 
       <div
-        className="flex items-center gap-1 transition-opacity opacity-0 group-hover:opacity-100"
+        className={`flex items-center gap-1 transition-opacity ${active ? '' : 'opacity-0 group-hover:opacity-100'}`}
         style={{ transitionDuration: 'var(--dur-fast)' }}
       >
         <NodeActions nodeId={nodeId} />
@@ -155,8 +294,8 @@ function EntityRow({ entry, accent, now }: { entry: TimelineEntry; accent?: stri
 
 /** A durable HANDOFF moment — `from → to` — not a button (no single entity). */
 function FlowRow({
-  entry, appById, now,
-}: { entry: TimelineEntry; appById: Record<string, AppDefinition>; now: number }) {
+  entry, appById, now, active,
+}: { entry: TimelineEntry; appById: Record<string, AppDefinition>; now: number; active: boolean }) {
   const from = appById[entry.app]
   const to = entry.toApp ? appById[entry.toApp] : undefined
   const FromIcon = from ? getAppIcon(from.icon) : null
@@ -164,10 +303,16 @@ function FlowRow({
   return (
     <div
       data-timeline-kind="flow"
+      data-timeline-id={entry.id}
       role="note"
       aria-label={`${from?.name ?? entry.app} fed ${to?.name ?? entry.toApp}`}
       className="gp rounded-2xl flex items-center gap-2 text-xs"
-      style={{ padding: 'var(--space-3, 14px)', color: 'var(--text2)', fontFamily: 'var(--mono)' }}
+      style={{
+        padding: 'var(--space-3, 14px)',
+        color: 'var(--text2)',
+        fontFamily: 'var(--mono)',
+        boxShadow: active ? 'inset 0 0 0 1px var(--ion)' : undefined,
+      }}
     >
       <span className="flex items-center gap-1.5 min-w-0">
         {FromIcon && <FromIcon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: from?.color }} />}
