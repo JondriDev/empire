@@ -320,6 +320,21 @@ showing its "↖ «source entity»" trail.
 `<button>` in Search's ResultRow — a nested real `<button>` is invalid HTML, so lift it out or use role+onClick there.
 
 ---
+## 2026-07-03 · User-directed (in-session) — **docs/routines/ reality-synced: every spec now holds the LIVE prompt + current facts**
+
+Every `docs/routines/<name>.md` "Current prompt" block was stale (still the pre-2026-06-24 PR-era
+text the README flagged for paste-back). All 7 replaced with the **current live direct-to-main
+prompts** plus a fact refresh (re-freshed 2026-07-04 after EPIC-10): **28 apps + The Bridge** living home, QA = **29
+routes + 13-guard suite** (new `HOME-ALIVE`, `NODE-LINEAGE`, `TIMELINE`), counts phrased self-healing, design canon = **Earth-from-Space · Liquid Glass**,
+canonical tokens in the sibling repo `JondriDev/design-system` (Empire vendors 1:1). Per-file
+deltas are in each spec's Changelog. **Also a quality pass on all 7** — headline rule: a rejected
+push now demands a FULL re-verify after the rebase (a conflict-free rebase can still merge
+semantically-colliding changes; observed live 2026-07-03 when two runs inserted different qa-smoke
+guards at the same anchor). Plus: `--assert-zero` in the Builder/QA/Guardian gates, Strategist
+ingests user-directed "do NOT revert" canon, Digest attributes commits per actor, Optimizer checks
+availability/cadence first + spec drift, Deps re-verifies after rebase. **Live configs are NOT yet
+updated — a human pastes each prompt into its routine on claude.ai** (closes the
+PROPOSALS-2026-06-28 paste-back ACTION).
 
 ## 2026-07-03 · Visual & Smoke QA — **green main `436cebf` (The Bridge): 28/28 clean, `HOME-ALIVE 1/1` NEW, EPIC-9 S1 held (`NODE-LINEAGE 1/1`), vitest 288**
 

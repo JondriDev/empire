@@ -14,9 +14,11 @@ in each file is the text to paste into the live routine config on claude.ai.
 > `main`** — its own green build is the only gate. The **Reviewer/Guardian
 > (`trig_01MBY9DbEJ6rM5pmL127wAnH`) is DISABLED**. The Optimizer (meta) commits its
 > proposals directly to `main` too (it still only *proposes*; committing the doc does
-> not apply a live-config change). The per-routine `## Current prompt` bodies below
-> still describe the older `routine/auto-*` / `meta/*` PR flow and need the human to
-> paste back each current live prompt — see `PROPOSALS-2026-06-28.md` (ACTION item).
+> not apply a live-config change). **✅ Synced 2026-07-03:** every per-routine
+> `## Current prompt` below now matches the live config, plus a user-directed reality
+> sync (27 apps + The Bridge, 28-route/12-guard QA, Earth-from-Space · Liquid Glass
+> canon, `JondriDev/design-system` lockstep). To apply, paste each prompt into its live
+> routine on claude.ai.
 
 ## The operating model (redesigned 2026-06-22 — "huge iterations"; direct-to-main since ~06-24)
 
