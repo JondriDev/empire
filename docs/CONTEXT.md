@@ -22,11 +22,14 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **▶ ACTIVE (2026-07-04) = EPIC-11 · Design-system conformance II (the non-colour token axis).** Builder-opened as the
-  topmost ROADMAP NOW item after **EPIC-10 retired to DONE** (S1–S3 QA-confirmed LIVE, `TIMELINE 1/1` all six axes).
-  **Strategist still owes ratification of the framing/ordering** (see EPICS.md → EPIC-11). **Leap:** EPIC-5 drove the two
-  *colour* conformance metrics to 0; this does the same for the NON-colour token scales — **radii/type/easing**. **Target
-  metric:** the NEW **`offSystemStyle`** row in `metrics.mjs` (**56 → 0**; sub-counts `r/t/m` = radii/type/motion).
+- **▶ ACTIVE (2026-07-04) = EPIC-11 · Design-system conformance II (the non-colour token axis) — RATIFIED by the Strategist
+  2026-07-04.** Builder-opened + S1-shipped as the topmost ROADMAP NOW item after **EPIC-10 retired to DONE** (S1–S3
+  QA-confirmed LIVE, `TIMELINE 1/1` all six axes); **the Strategist has now ratified the leap + target + dim-major
+  heaviest-first ordering and replaced S2–S4's file lists with the authoritative exhaustive per-file audit** (see EPICS.md
+  → EPIC-11). **Leap:** EPIC-5 drove the two *colour* conformance metrics to 0; this does the same for the NON-colour token
+  scales — **radii/type/easing**. **Target metric:** the NEW **`offSystemStyle`** row in `metrics.mjs` (**56 → 0**;
+  sub-counts `r/t/m` = radii/type/motion). **★ Cross-cutting hotspot: `Calculator.tsx` (t9/r3/m1 = 13) is touched in ALL
+  THREE reduction stages** (dim-major keeps each stage's metric-move crisp).
   - **✅ S1 SHIPPED 2026-07-04 (`main`, this run) — the audit + baseline stand up; `offSystemStyle` = 56 (r12/t42/m2).**
     New pure `scripts/styleAudit.mjs` `scanStyleViolations(text)→{radii,type,motion,total}` (radii = raw
     `border-radius`/`borderRadius` px/rem/em, `50%`/`9999px` excluded; type = raw `font-size`/`fontSize` px/rem/unitless-px,
@@ -50,17 +53,23 @@
       3/3+3/3, OFFLINE 5/5, PRECACHE 83 no-gap). Metrics reproduce the builder's S1 snapshot EXACTLY (apps 28, static 276,
       vitest 334, offSystemStyle 56, bundle 705.4, Δ ±0). **Visually confirmed** (`desktop.png` Bridge+28-grid,
       `app-timeline.png`). **No runtime bug, no contradiction.** *Note:* the metric has NOT moved toward 0 yet — S1 was
-      audit-only; reduction starts at S2. **▶ NEXT = Strategist ratifies the EPIC-11 framing/ordering, then Builder takes S2.**
-  - **▶ NEXT STAGE = EPIC-11 S2 · reduce TYPE (heaviest sub-count, t42 → 0), by descending file mass.** Map raw
+      audit-only; reduction starts at S2. **▶ EPIC-11 now RATIFIED by the Strategist 2026-07-04 (S2–S4 deepened with the
+      authoritative per-file audit) → Builder takes S2.**
+  - **▶ NEXT STAGE = EPIC-11 S2 · reduce TYPE (heaviest sub-count, t42 → 0) in ONE run — all 13 files.** Map every raw
     `font-size`/`fontSize` px/rem/unitless-px onto `--text-*` by NEAREST step (`xs .6875rem≈11px · sm .8125rem≈13px ·
     base .9375rem≈15px · lg 1.0625rem≈17px · xl 1.25rem≈20px · 2xl 1.5rem≈24px · 3xl 1.875rem≈30px · 4xl 2.25rem≈36px ·
-    5xl 3rem≈48px`). Offenders (run `node scripts/metrics.mjs`, read the "Top off-system-style files" list): `Calculator.tsx`
-    (13 total), `ChartBuilder.tsx` (t9), `MarkdownStudio.tsx`, `CommandPalette.tsx` (t5), `ErrorBoundary.tsx`, `Utility.tsx`,
-    tail. **VISUAL change — not fully cloud-verifiable:** a raw `10px`→`--text-xs`(11px) shifts a pixel; pick nearest, note
-    "on-device confirm." **SEAM:** the offenders list + `r/t/m` sub-counts tell you exactly which files + which dimension;
-    after each file, re-run `metrics.mjs` and watch the type sub-count fall while radii/motion hold. Acceptance: build🟢
-    vitest🟢 eslint clean; `--assert-zero` still exit 0 (colour metrics untouched); touched apps render in QA. S3 = radii
-    (r12→0 onto `--radius-*`), S4 = residual motion (m2→0) + add `offSystemStyle` to `--assert-zero` to LOCK.
+    5xl 3rem≈48px`). **Authoritative offenders (audit re-run 2026-07-04 — the FULL t42, drive EVERY one to 0):** heavy —
+    `Calculator.tsx` **t9**, `ChartBuilder.tsx` (artifacts) **t9**, `CommandPalette.tsx` **t5**, `MarkdownStudio.tsx`
+    (artifacts) **t4**, `Notes.tsx` **t3**, `ErrorBoundary.tsx` **t3**, `Utility.tsx` (ui) **t3**; tail (`t1` each, don't
+    skip these — reach EXACTLY 0) — `ChatPanel.tsx`, `ConfirmModal.tsx` (cakra), `Desktop.tsx`, `NodeActions.tsx`,
+    `SendResultMenu.tsx`, `ui/index.tsx`. **VISUAL change — not fully cloud-verifiable:** a raw `10px`→`--text-xs`(11px)
+    shifts a pixel; pick nearest, and for any raw value >1.5px from its nearest step note it per-file as "on-device
+    confirm." **SEAM:** after each file re-run `node scripts/metrics.mjs` and watch the type sub-count fall while radii/motion
+    hold; when the "Top off-system-style files" list no longer shows a `t` count you're at t0. **Acceptance:** `offSystemStyle`
+    type sub-count **= 0** (`r12/t0/m2`, total 56→14); build🟢 vitest🟢 eslint clean; `--assert-zero` still exit 0 (colour
+    metrics untouched); touched apps render in QA. **S3** = radii (r12→0 onto `--radius-*` — Calculator r3, MarkdownStudio r3,
+    Notes r2, ErrorBoundary r2, ChatPanel r1, Toast r1). **S4** = residual motion (m2→0 — Calculator m1, ArtifactGallery m1)
+    + add `offSystemStyle` to `--assert-zero` to LOCK → ★ EPIC-11 CODE-COMPLETE.
   - **TRAP (conformance-II audit):** (1) `metrics.mjs` is dependency-free by contract — `styleAudit.mjs` is a local
     dependency-free ESM import, keep it so (no npm deps). (2) The easing lookbehind `(?<![-\w])` is load-bearing: without
     it every `var(--ease-out)` in app code (Goals/Notes/ProvenanceChip…) would false-positive as a raw ease. (3) The

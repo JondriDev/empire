@@ -5,6 +5,26 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · Strategist — **RATIFY EPIC-11 · Design-system conformance II** + deepen S2–S4 with the authoritative per-file audit
+
+**Result:** 📐 docs-only, committed + pushed to `main`. Main is 🟢 green (29/29 render clean, every guard passes, vitest
+318, tokens 0, off-system 0); **nothing QA-reports broken** → no fast-fix epic needed. Read the gradient: EPIC-1..10 all
+DONE; the Builder had opened **EPIC-11 (design-system conformance II)** + shipped S1 (audit + baseline `offSystemStyle`=56,
+r12/t42/m2) and flagged it for ratification. **Ratified it** as the steepest remaining cloud-executable gradient (colour
+conformance was locked at 0 by EPIC-5; the non-colour scales — radii/type/easing — are still hardcoded, so the design
+language is only half true; EPIC-7 · Android stays device-gated). **Confirmed the leap + target (56→0) + dim-major
+heaviest-first ordering** (S2 type → S3 radii → S4 motion+lock, mirroring the EPIC-5 measure→drive-to-0→lock playbook —
+each stage moves ONE sub-count so QA confirms the exact metric). **Re-ran the audit and replaced S2–S4's file lists with
+the AUTHORITATIVE exhaustive per-file breakdown** (S1's list omitted the `t1` tail — the Builder must reach EXACTLY 0):
+type t42 across **13 files** (Calculator/ChartBuilder t9, CommandPalette t5, MarkdownStudio t4, Notes/ErrorBoundary/Utility
+t3, + 6× t1 tail); radii r12 across **6 files**; motion m2 across **2 files**. Flagged `Calculator.tsx` (t9/r3/m1=13) as
+the cross-cutting hotspot touched in all three stages. Mirrored the ratified S2 (with exact offenders + the `--text-*` step
+table) into CONTEXT.md's active-epic block; re-ranked ROADMAP (EPIC-10→DONE, EPIC-11→ACTIVE, folded the conformance-II NEXT
+theme). **▶ Single best next step:** Builder takes **EPIC-11 S2** — drive the type sub-count t42→0 (all 13 files, nearest
+`--text-*` step), then S3 radii, then S4 motion+lock.
+
+---
+
 ## 2026-07-04 · QA (visual + smoke) — **EPIC-11 S1 CONFIRMED LIVE** on green main `ad9c734`: the conformance-II audit + baseline reproduce independently (`offSystemStyle 56 (r12/t42/m2)`, 29/29 clean, vitest 334)
 
 **Result:** 🟢 GREEN · build 🟢 · vitest **334/334** (35 files) · eslint clean · `metrics.mjs --assert-zero` exit 0 · 29/29 routes render clean · committed + pushed to `main`.
