@@ -17,6 +17,7 @@
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
+import { scanStyleViolations } from './styleAudit.mjs';
 
 const ROOT = process.cwd();
 const args = new Set(process.argv.slice(2));
@@ -36,6 +37,32 @@ function walk(dir, acc = []) {
 }
 const read = (p) => { try { return fs.readFileSync(p, 'utf8'); } catch { return ''; } };
 const exists = (p) => { try { fs.accessSync(p); return true; } catch { return false; } };
+
+// ---- shared: the "app code" file set the conformance audits walk -----------
+// Design-system infrastructure legitimately defines raw design values: the
+// palette dir plus the bridge/shell stylesheets. `registry.ts` is palette data
+// (the per-app accent IDENTITY manifest). `cakra/lib/providers.ts` is the
+// per-PROVIDER brand-accent identity manifest. `artifacts/…/ColorPalette.tsx`
+// is a colour-theory TOOL whose hexes ARE the content. Reader's render-surface
+// colours are reading conventions mirrored into the EPUB iframe. Everything
+// else (app render code) should consume tokens — those are the actionable
+// violations. Shared by tokenViolations / offSystemUtilities / styleViolations.
+const DS_INFRA = new Set([
+  'src/design-system.css', 'src/window-manager.css', 'src/index.css',
+  'src/lib/registry.ts',
+  'src/apps/cakra/lib/providers.ts',
+  'src/apps/artifacts/artifacts/ColorPalette.tsx',
+  'src/apps/reader/reader.css',
+  'src/apps/reader/lib/render/epub.ts',
+].map((p) => p.split('/').join(path.sep)));
+function appCodeFiles() {
+  return walk(path.join(ROOT, 'src')).filter(
+    (f) => /\.(ts|tsx|css)$/.test(f) &&
+      !f.includes(`${path.sep}design-system${path.sep}`) &&
+      !DS_INFRA.has(path.relative(ROOT, f)) &&
+      !/\.test\.tsx?$/.test(f)
+  );
+}
 
 // ---- metric: app/route count -----------------------------------------------
 function appCount() {
@@ -61,38 +88,7 @@ function testStats() {
 // Hardcoded colors in app code that bypass the design system. The canonical
 // palette lives in src/design-system/**; everything else should consume tokens.
 function tokenViolations() {
-  // Design-system infrastructure legitimately defines raw colors: the palette
-  // dir plus the three bridge/shell stylesheets. `registry.ts` is also palette
-  // data — the per-app accent IDENTITY manifest (the single source consumed
-  // across the shell as `${app.color}` / `rgbOf(app.color)`), not app render
-  // code bypassing the system. Likewise `cakra/lib/providers.ts` is the
-  // per-PROVIDER brand-accent identity manifest (consumed as `p.color` in the
-  // ModelPicker to keep OpenRouter/Google/NVIDIA/etc. visually distinct) —
-  // mapping those external brand colors onto our internal tokens would collapse
-  // distinct providers onto the same accent, so it's data, not a violation.
-  // Likewise `artifacts/artifacts/ColorPalette.tsx` is a colour-theory TOOL —
-  // its hexes ARE the content (seed palettes, WCAG contrast-lab reference
-  // values, user-entered swatches); recolouring them onto internal tokens would
-  // defeat the app's purpose. Registry/providers precedent applies: it's data.
-  // Everything else (app code) should consume tokens — those are the
-  // actionable violations.
-  const DS_INFRA = new Set([
-    'src/design-system.css', 'src/window-manager.css', 'src/index.css',
-    'src/lib/registry.ts',
-    'src/apps/cakra/lib/providers.ts',
-    'src/apps/artifacts/artifacts/ColorPalette.tsx',
-    // Reader render-surface colours are content, not brand: the day/sepia/night
-    // paper & ink values (#fff / #f4ecd8 / #0b1020 …) are reading conventions,
-    // mirrored into the EPUB iframe theme — same precedent as ColorPalette.
-    'src/apps/reader/reader.css',
-    'src/apps/reader/lib/render/epub.ts',
-  ].map((p) => p.split('/').join(path.sep)));
-  const files = walk(path.join(ROOT, 'src')).filter(
-    (f) => /\.(ts|tsx|css)$/.test(f) &&
-      !f.includes(`${path.sep}design-system${path.sep}`) &&
-      !DS_INFRA.has(path.relative(ROOT, f)) &&
-      !/\.test\.tsx?$/.test(f)
-  );
+  const files = appCodeFiles();
   let count = 0;
   const offenders = [];
   for (const f of files) {
@@ -116,23 +112,7 @@ function tokenViolations() {
 // bg-glass, border-hair, text-signal/-danger/…, the .gp/.glass primitives, or
 // cssVar()/tint()). Same infra allowlist as tokenViolations().
 function offSystemUtilities() {
-  const DS_INFRA = new Set([
-    'src/design-system.css', 'src/window-manager.css', 'src/index.css',
-    'src/lib/registry.ts',
-    'src/apps/cakra/lib/providers.ts',
-    'src/apps/artifacts/artifacts/ColorPalette.tsx',
-    // Reader render-surface colours are content, not brand: the day/sepia/night
-    // paper & ink values (#fff / #f4ecd8 / #0b1020 …) are reading conventions,
-    // mirrored into the EPUB iframe theme — same precedent as ColorPalette.
-    'src/apps/reader/reader.css',
-    'src/apps/reader/lib/render/epub.ts',
-  ].map((p) => p.split('/').join(path.sep)));
-  const files = walk(path.join(ROOT, 'src')).filter(
-    (f) => /\.(ts|tsx|css)$/.test(f) &&
-      !f.includes(`${path.sep}design-system${path.sep}`) &&
-      !DS_INFRA.has(path.relative(ROOT, f)) &&
-      !/\.test\.tsx?$/.test(f)
-  );
+  const files = appCodeFiles();
   // Tailwind utility prefixes that take a colour value.
   const PFX = 'bg|text|border|ring|ring-offset|from|to|via|fill|stroke|divide|outline|accent|caret|decoration|placeholder|shadow';
   // Default Tailwind palette scales (the off-system colours).
@@ -153,6 +133,31 @@ function offSystemUtilities() {
   return { count, top: offenders.slice(0, 8) };
 }
 
+// ---- metric: off-system STYLE conformance (lower is better) ----------------
+// Design-system conformance II — the non-colour axis. The two colour audits
+// above catch raw #hex/rgba and Tailwind palette classes; this catches app code
+// that hardcodes RADII / TYPE sizes / EASINGS instead of consuming the
+// `--radius-*` / `--text-*` / `--ease-*` scales. Detection is the pure,
+// unit-pinned `scanStyleViolations` (scripts/styleAudit.mjs); same app-code file
+// set as the colour audits. Raw SPACING is deliberately excluded (see that
+// module's header) — it has no bounded token-only target, so it's not driveable.
+function styleViolations() {
+  const files = appCodeFiles();
+  let count = 0;
+  const dims = { radii: 0, type: 0, motion: 0 };
+  const offenders = [];
+  for (const f of files) {
+    const r = scanStyleViolations(read(f));
+    if (r.total) {
+      count += r.total;
+      dims.radii += r.radii; dims.type += r.type; dims.motion += r.motion;
+      offenders.push([path.relative(ROOT, f), r.total]);
+    }
+  }
+  offenders.sort((a, b) => b[1] - a[1]);
+  return { count, dims, top: offenders.slice(0, 8) };
+}
+
 // ---- metric: shipped bundle size (gzipped) ---------------------------------
 function bundleSize() {
   const dir = path.join(ROOT, 'dist/assets');
@@ -171,6 +176,7 @@ function bundleSize() {
 const t = testStats();
 const tv = tokenViolations();
 const osu = offSystemUtilities();
+const sv = styleViolations();
 const bundle = bundleSize();
 const snapshot = {
   generatedAt: new Date().toISOString(),
@@ -179,12 +185,14 @@ const snapshot = {
   testCases: t.testCases,
   tokenViolations: tv.count,
   offSystemUtilities: osu.count,
+  offSystemStyle: sv.count,
+  offSystemStyleDims: sv.dims,
   bundleGzKB: bundle ? bundle.gzKB : null,
   bundleRawKB: bundle ? bundle.rawKB : null,
 };
 
 if (JSON_ONLY) {
-  console.log(JSON.stringify({ ...snapshot, tokenViolationTop: tv.top, offSystemUtilitiesTop: osu.top }, null, 2));
+  console.log(JSON.stringify({ ...snapshot, tokenViolationTop: tv.top, offSystemUtilitiesTop: osu.top, offSystemStyleTop: sv.top }, null, 2));
   process.exit(0);
 }
 
@@ -214,6 +222,7 @@ const rows = [
   ['Test files', snapshot.testFiles, delta('testFiles'), ''],
   ['Token violations', snapshot.tokenViolations, delta('tokenViolations'), 'LOWER is better (raw hex/rgb literals)'],
   ['Off-system utils', snapshot.offSystemUtilities, delta('offSystemUtilities'), 'LOWER is better (Tailwind palette classes bypassing tokens)'],
+  ['Off-system style', `${snapshot.offSystemStyle} (r${sv.dims.radii}/t${sv.dims.type}/m${sv.dims.motion})`, delta('offSystemStyle'), 'LOWER is better (raw radii/type/easing bypassing --radius-*/--text-*/--ease-*)'],
   ['Bundle gz (KB)', snapshot.bundleGzKB ?? 'n/a (no dist)', delta('bundleGzKB'), 'LOWER is better; build first to measure'],
 ];
 const w = (s, n) => String(s).padEnd(n);
@@ -228,6 +237,10 @@ if (tv.top.length) {
 if (osu.top.length) {
   console.log(`\nTop off-system-utility files:`);
   for (const [f, n] of osu.top) console.log(`  ${n}\t${f}`);
+}
+if (sv.top.length) {
+  console.log(`\nTop off-system-style files (raw radii/type/easing):`);
+  for (const [f, n] of sv.top) console.log(`  ${n}\t${f}`);
 }
 console.log('');
 

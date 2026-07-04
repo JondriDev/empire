@@ -21,7 +21,20 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 | Test files | 32 (metrics, `src/` only) · 34 (vitest, incl. `scripts/precacheAudit.test.mjs` + `scripts/pwaBaseAudit.test.mjs`) | grow with code | ↑ |
 | Design-token violations | **0** | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
 | Off-system utilities | **0** (↓ from 1076 — the redesign batch's `98c61c7` "token-ize Tailwind palette classes across all apps" swept the whole mass; EPIC-5 S8 `c51f79f` LOCKED it with `--assert-zero` CI gate; re-confirmed 0 this run) | 0 | ↓ Tailwind palette classes (`text-gray-400`, `bg-cyan-600`, `bg-white/10`, `text-white`, `text-red-400`…) that bypass the JondriDev tokens — **EPIC-5 TARGET MET (0)** |
+| Off-system style | **56** (r12/t42/m2 — the NEW conformance-II baseline, added 2026-07-04; Toast's byte-identical `cubic-bezier(0.16,1,0.3,1)`→`var(--ease-out)` swap dropped it 57→56 in the same commit) | 0 | ↓ raw radii/type/easing bypassing `--radius-*`/`--text-*`/`--ease-*` |
 | Bundle gz (KB) | 705.4 (±0 vs the builder's EPIC-10 S3 snapshot; +0.5 across EPIC-10 S3 704.8→705.3, no new deps) | hold / shrink | ↓ |
+
+> **Off-system style (added 2026-07-04 — design-system conformance II).** The two colour audits
+> (`tokenViolations` = raw `#hex`/`rgba()`; `offSystemUtilities` = Tailwind palette classes) are both at **0**,
+> but app code still hardcodes the NON-colour design values — **radii, type sizes, easings** — instead of
+> consuming `var(--radius-*)`/`var(--text-*)`/`var(--ease-*)`. `offSystemStyle` measures that second axis. The
+> detector is the pure, unit-pinned `scanStyleViolations` (`scripts/styleAudit.mjs`, 16 cases in
+> `styleAudit.test.mjs`) over the same app-code file set the colour audits walk (DS-infra allowlisted). The row
+> reports `r/t/m` = radii/type/motion sub-counts. **Scope decision (so it's DRIVEABLE):** raw **spacing**
+> (padding/margin/gap px) is deliberately EXCLUDED — unlike the scale-backed radii/type/easing it has too many
+> legitimate one-off geometry values (an 8px status dot) with no bounded token-only target. Reduction is
+> decomposed into follow-on stages by descending file mass (see `docs/EPICS.md`); once at 0 a future stage can
+> add `offSystemStyle` to `--assert-zero` to lock it, exactly as EPIC-5 S8 locked `offSystemUtilities`.
 
 > **Off-system utilities (added 2026-06-29).** `tokenViolations` only ever counted raw `#hex`/`rgba()`
 > *literals*, so it hit 0 while ~1,160 ergonomic-but-off-system Tailwind palette classes still bypassed

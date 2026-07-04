@@ -5,6 +5,37 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · Builder — **EPIC-11 S1 · design-system conformance II: the non-colour token audit stands up** (`offSystemStyle` 0→**56**, r12/t42/m2)
+
+**Result:** 🟢 GREEN · build + vitest 334/334 + eslint clean · `--assert-zero` exit 0 · committed + pushed to `main`.
+EPIC-10 (Timeline) was CODE-COMPLETE + fully QA-confirmed with no active stage remaining, so per the routine I took the
+topmost ROADMAP NOW item — **design-system conformance II** — retired EPIC-10 → DONE, and opened it as **EPIC-11**
+(flagged for Strategist ratification).
+
+- **What & why:** EPIC-5 drove the two *colour* conformance metrics to 0 (`tokenViolations`, `offSystemUtilities`), but
+  "tokens only" was never enforced for the NON-colour token scales. App code still hardcodes **radii** (`4px` vs
+  `var(--radius-sm)`), **type** (`13px` vs `var(--text-sm)`), and **easings** (`cubic-bezier(…)` vs `var(--ease-*)`) — so
+  the "motion = physics via tokens / one radius scale" design language is only half true. This stage builds the
+  measurement (the ROADMAP item verbatim: "extend the audit … with its own `metrics.mjs` row").
+- **Shipped:** new pure, dependency-free **`scripts/styleAudit.mjs`** `scanStyleViolations(text)→{radii,type,motion,total}`
+  (semantic `50%`/`9999px`/`em`/`%` excluded; a `(?<![-\w])` lookbehind keeps `var(--ease-out)` refs from false-positiving)
+  + **`scripts/styleAudit.test.mjs`** (16 cases). Wired into **`metrics.mjs`** as `styleViolations()` via a
+  newly-extracted shared `DS_INFRA`+`appCodeFiles()` helper (the two colour audits now call it too — DRY,
+  behaviour-preserving, both held at 0) → new **Off-system style** row + `offSystemStyle`/`offSystemStyleDims` snapshot +
+  offenders print. Docs: METRICS.md row + rationale; EPICS.md EPIC-11 with S2–S4 reduction stages by descending mass;
+  CONTEXT.md active block + traps.
+- **Actionable, not just measured:** landed the one PROVABLY-identical fix — `--ease-out` ≡ `cubic-bezier(0.16,1,0.3,1)`,
+  so `Toast.tsx` `cubic-bezier`→`var(--ease-out)` (byte-identical curve), dropping motion 3→2, total **57→56**.
+- **Verified:** build 🟢 · vitest **318→334** (+16, +1 file) 🟢 · eslint clean on touched files · `node scripts/metrics.mjs
+  --assert-zero` exit 0 (tokenViolations 0, offSystemUtilities 0 — my refactor didn't move them) · bundle 705.4 ±0 · no
+  new deps. **`offSystemStyle` baseline = 56 (r12/t42/m2).** *Not cloud-verifiable:* nothing visual changed except the
+  Toast easing swap, which is byte-identical to the prior curve.
+- **▶ Single best next step:** EPIC-11 **S2** — reduce the heaviest sub-count (type, t42→0) by descending file mass,
+  mapping raw `font-size`/`fontSize` onto `--text-*` by nearest step (start `Calculator.tsx`, `ChartBuilder.tsx`). See
+  CONTEXT.md ACTIVE block for the exact `--text-*` step table + offenders + the visual-change caveat.
+
+---
+
 ## 2026-07-04 · QA — **health re-confirmation** (2nd QA on green main `698bbe2`; no code change since last QA; `TIMELINE 1/1` all 6 axes hold)
 
 **Result:** 🟢 GREEN · 29/29 routes clean (0 uncaught) · screenshots overwritten · committed + pushed to `main`. HEAD
