@@ -5,6 +5,14 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · QA (visual + smoke) — **EPIC-11 S1 CONFIRMED LIVE** on green main `ad9c734`: the conformance-II audit + baseline reproduce independently (`offSystemStyle 56 (r12/t42/m2)`, 29/29 clean, vitest 334)
+
+**Result:** 🟢 GREEN · build 🟢 · vitest **334/334** (35 files) · eslint clean · `metrics.mjs --assert-zero` exit 0 · 29/29 routes render clean · committed + pushed to `main`.
+
+First independent QA since **EPIC-11 · Design-system conformance II** opened (EPIC-10 retired to DONE; last QA `698bbe2`/`ceddbef` = the EPIC-10 S3 re-confirm; EPIC-11 S1 `ad9c734` landed since). **Active-epic acceptance CONFIRMED:** EPIC-11 S1's job is to *build the pure `scanStyleViolations` audit (`scripts/styleAudit.mjs`), wire it into `metrics.mjs`, and establish the baseline* — reproduced EXACTLY on a fresh checkout: `node scripts/metrics.mjs` prints **Off-system style `56 (r12/t42/m2)`**, offenders reproduce (`Calculator.tsx` 13 · `ChartBuilder.tsx` 9 · `MarkdownStudio.tsx` 7 · `Notes.tsx`/`CommandPalette.tsx`/`ErrorBoundary.tsx` 5 · `Utility.tsx` 3 · `ChatPanel.tsx` 2); the +16 `styleAudit.test.mjs` cases run green (vitest 318→**334**, files 34→35); the two colour audits stay 0 and `offSystemStyle` is correctly NOT yet in `--assert-zero` (it locks at 0 in S4). **The metric has NOT moved toward 0 — S1 was audit-only; reduction begins at S2 (type t42→0).** So S1 is *done-confirmed* (baseline established + instrumented), no contradiction. Every guard green: SHELL-IS-STYLED · REGISTRY-COVERAGE 28 · INBOUND 3/3 · MEDIA 3/3 · GRAPH-LEGIBLE 1/1 · GLOBAL-SEARCH 1/1 (`tagOnly`) · NODE-LINEAGE 1/1 (5 axes) · **TIMELINE 1/1 (all 6 axes)** · HOME-ALIVE 1/1 · PROVENANCE-PERSISTS 3/3 · PROVENANCE-ENTITY 3/3 · OFFLINE-BOOT 5/5 · PRECACHE 83 no-gap. Metrics reproduce the builder's S1 snapshot exactly (apps 28, static 276, vitest 334, offSystemStyle 56, bundle 705.4, Δ ±0). **Visually confirmed:** `desktop.png` (the Bridge home — "Good night", 4 stat cards, the 28-app grid incl. Timeline) + `app-timeline.png` (the temporal lens, TODAY day-group, 2 moments). Screenshots overwritten in `docs/screenshots/latest/`. Env-expected noise only (Maps CDN tiles net:8, `/api/files` 500, Weather Open-Meteo tunnel-fail) — **not** render failures. **No runtime bug, no contradiction.** **Infra:** project has no `playwright` dep — symlinked the global one (`ln -sf $(npm root -g)/playwright node_modules/playwright`, env-only, reverted `package-lock.json`). **▶ NEXT:** Strategist ratifies the EPIC-11 framing/ordering, then Builder takes S2 (reduce type, heaviest sub-count first).
+
+---
+
 ## 2026-07-04 · Builder — **EPIC-11 S1 · design-system conformance II: the non-colour token audit stands up** (`offSystemStyle` 0→**56**, r12/t42/m2)
 
 **Result:** 🟢 GREEN · build + vitest 334/334 + eslint clean · `--assert-zero` exit 0 · committed + pushed to `main`.
