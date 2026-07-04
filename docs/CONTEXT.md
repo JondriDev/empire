@@ -93,6 +93,19 @@
     persisted=true filtered=true`), 29/29 routes clean (0 uncaught), every guard green (GLOBAL-SEARCH/NODE-LINEAGE/
     HOME-ALIVE/GRAPH-LEGIBLE 1/1, PROVENANCE 3/3+3/3, OFFLINE 5/5, PRECACHE 83 no-gap). build🟢 vitest 307→314🟢 eslint
     clean; tokens 0, off-system 0 (`--assert-zero` exit 0); static 265→272, bundle 703.5→704.8 (+1.3, no new deps).
+    - **✅ QA-CONFIRMED LIVE (2026-07-04, green main `a89e87e`) — S2 done-confirmed, the temporal lens is now faceted.**
+      First independent QA since S2 landed (last QA `cf62dab` = S1 confirm on `3cfe846`; S2 `a89e87e` landed since). **The
+      S2 acceptance axis reproduced independently: `TIMELINE 1/1 ✅` grew a fifth axis `filtered=true`** (`ordered=true
+      grouped=true flow=true persisted=true filtered=true`) — clicking the `app:goals` facet chip narrows to ONLY the
+      goals-owned entity, dropping the notes entity + the notes→goals flow, reproduced without the builder's tree. **29/29
+      routes render clean** (0 uncaught JS). vitest **314/314** (33 files), `metrics.mjs --assert-zero` exit 0. Metrics
+      reproduce the builder's S2 snapshot EXACTLY (apps 28, static 272, vitest 314, test files 31/33, bundle 704.8, Δ ±0).
+      Every other guard green (SHELL-IS-STYLED, REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1,
+      GLOBAL-SEARCH 1/1 `tagOnly`, NODE-LINEAGE 1/1 5-axes, HOME-ALIVE 1/1, PROVENANCE-PERSISTS/ENTITY 3/3, OFFLINE 5/5,
+      PRECACHE 83 no-gap). **Visually confirmed** (`app-timeline.png`, the day-grouped stream). **Cloud limit:** the Kind/App
+      facet chip rows render low-contrast against the dark theme with a 2-moment corpus → not prominent in the static shot;
+      the `filtered` guard axis carries the facet-narrow roundtrip headless + the roving cursor is unit-pinned. **No runtime
+      bug, no contradiction. ▶ NEXT = EPIC-10 S3** (spec below).
     - **SEAM (reuse for S3):** the faceted idiom is now proven in Timeline exactly as in Search — `filterTimeline`/
       `timelineFacets`/`toggleFacet` + the `chip('dim',current,setDim,value,label,count,color?)` helper (adds
       `data-timeline-facet`); roving cursor = `flat = days.flatMap(d=>d.entries)` + `activeIndex` clamped + `scrollIntoView`
