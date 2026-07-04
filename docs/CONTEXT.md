@@ -52,6 +52,16 @@
     (`--assert-zero` exit 0); apps 27→28, routes 29/29, test files 30→31, bundle 701.4→703.5 (+2.1, no new deps).
     Screenshot confirms VISUALLY (`app-timeline.png`): clock-glyph+signal header, "· 2 moments", a **TODAY** sticky day
     header, two entity rows (accent dot + title + `dataset` type chip + `now`) — the lens renders real organism data.
+    - **✅ QA-CONFIRMED LIVE (2026-07-04, green main `3cfe846`) — S1 done-confirmed, the temporal lens is real.** First
+      independent QA since S1 landed (last QA `5d45ce8` = EPIC-9 S3; EPIC-9 retired + EPIC-10 promoted + S1 `3cfe846`
+      landed since). **The S1 acceptance axis reproduced independently: `TIMELINE 1/1 ✅`** (`ordered=true grouped=true
+      flow=true persisted=true`) — reproduced without the builder's tree, survives a 2nd reload. **29/29 routes render
+      clean** (desktop + 28 apps, 0 uncaught JS). vitest **307/307** (33 files), `metrics.mjs --assert-zero` exit 0.
+      Metrics reproduce the builder's S1 snapshot EXACTLY (apps 28, static 265, vitest 307, test files 31/33, bundle 703.5,
+      Δ ±0). Every other guard green (SHELL-IS-STYLED, REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1,
+      GLOBAL-SEARCH 1/1 `tagOnly`, NODE-LINEAGE 1/1 5-axes, HOME-ALIVE 1/1, PROVENANCE-PERSISTS/ENTITY 3/3, OFFLINE 5/5,
+      PRECACHE 82 no-gap). **Visually confirmed** (`app-timeline.png`, above). **No runtime bug, no contradiction.**
+      **▶ NEXT = EPIC-10 S2** (filter + roving keyboard nav — spec below, downhill from Search's faceted idiom).
     - **SEAM (reuse for S2/S3):** the pure spine is `buildTimeline`/`groupByDay`/`dayKey`/`relativeDayLabel` — all
       `(nodes,edges,…)→value`, unit-pinned. Entity rows carry `data-timeline-kind="entity"`; flow rows
       `data-timeline-kind="flow"`; day sections `data-timeline-day="<key>"`. Timeline mirrors Search's lens idiom exactly,
