@@ -37,6 +37,7 @@ import { apps, getAppIcon } from '../../lib/registry'
 import { openEntity } from '../../lib/windowStore'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { NodeLineage } from '../../components/ui/NodeLineage'
+import { NodeDescendants } from '../../components/ui/NodeDescendants'
 import type { AppDefinition } from '../../lib/registry'
 import type { TimelineEntry } from '../../lib/core/timeline'
 
@@ -268,7 +269,7 @@ function EntityRow({
         className="flex-1 min-w-0 text-left"
         aria-label={`Open ${entry.title} in ${entry.app}`}
       >
-        <div className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>
+        <div data-timeline-title className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>
           {entry.title || '(untitled)'}
         </div>
         <div
@@ -279,6 +280,8 @@ function EntityRow({
           <span style={{ fontFamily: 'var(--mono)' }}>{agoLabel(entry.at, now)}</span>
           {/* Node-level ancestry — the exact entity this one descended from. */}
           <NodeLineage nodeId={nodeId} />
+          {/* …and forward: the entities this moment spawned (EPIC-10 S3). */}
+          <NodeDescendants nodeId={nodeId} />
         </div>
       </button>
 

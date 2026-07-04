@@ -5,6 +5,45 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · BUILD — **EPIC-10 S3: every moment shows what it SPAWNED** (`TIMELINE 1/1` grows a `descendants` axis; ★ EPIC-10 CODE-COMPLETE)
+
+**Result:** 🟢 GREEN · 29/29 routes clean (0 uncaught) · committed + pushed to `main`. Shipped the topmost open stage,
+EPIC-10 S3 — the timeline becomes a lineage tree in time by surfacing the long-dormant `childrenOf` walker (built in
+EPIC-9 S1, unit-pinned, until now UNUSED). A Timeline moment now reads BOTH directions: `↖ ancestry` (`<NodeLineage>`)
+and `→ spawned` (`<NodeDescendants>`).
+
+**What changed:**
+- **New `src/components/ui/NodeDescendants.tsx`** — mirrors `NodeLineage.tsx`'s `EntityToken` verbatim: reactive
+  `useGraph(s=>s.nodes)` → `childrenOf(nodes, nodeId)`, renders a "→ spawned" label + one navigable `role="button"`
+  span per child (`.gp-lineage-hop`, `openEntity(child.meta.app, child.id)` on click/Enter with
+  `stopPropagation`+`preventDefault` so it's valid nested in the Timeline row `<button>`), returns `null` when
+  childless, `data-node-descendants="<nodeId>"` attr for the guard. `NodeDescendants.test.tsx` **+4**.
+- **`Timeline.tsx`** — mount `<NodeDescendants>` beside `<NodeLineage>` in the EntityRow meta line; added
+  `data-timeline-title` to the title `<div>`.
+- **`scripts/qa-smoke.mjs`** — linked the two S1 seeds (`qa-tl-newer.data.from = 'qa-tl-older'`) and added a
+  `descendants` axis (older row surfaces `[data-node-descendants=qa-tl-older]` naming the newer child). **Fixed a
+  contamination trap:** scoped `readTimelineTitles` to `[data-timeline-kind="entity"] [data-timeline-title]` so the
+  now-embedded lineage/descendant titles can't false-match the `ordered`/`filtered` checks.
+
+**Verified (the only gate):** build 🟢 (`tsc -b && vite build`, 83 precache). vitest **314→318** (+4), 34 files, all
+green. `npx eslint` clean on touched files. `node scripts/metrics.mjs --assert-zero` exit 0 — **tokens 0, off-system
+0**; static 272→276, test files 32, bundle gz 704.8→705.3 (+0.5, no new deps). **Ran the full smoke LIVE** (playwright
+`--no-save`, chromium-1194, server on :3001): **`TIMELINE 1/1 ✅` `ordered=true grouped=true flow=true persisted=true
+filtered=true descendants=true`** — the new axis reproduced end-to-end; 29/29 routes clean; every guard green
+(NODE-LINEAGE/GLOBAL-SEARCH/HOME-ALIVE/GRAPH-LEGIBLE 1/1, PROVENANCE 3/3+3/3, PRECACHE 83 no-gap).
+
+**Not verifiable in cloud:** the expand-and-climb interaction is on-device — `childrenOf` + the navigation are
+unit-pinned (`NodeDescendants.test.tsx`), the guard's `descendants` axis carries the render + correct-child-id headless.
+
+**Metrics row:** apps 28 · static 276 (+4) · vitest 318 (+4) · test files 32 (+1) · token-violations 0 · off-system 0 ·
+bundle gz 705.3 (+0.5).
+
+**Single best next step:** QA to confirm EPIC-10 S3 done on green main (drive `/app/timeline`, verify a spawned-child
+token climbs to its entity), then the Strategist promotes the next epic — **design-system conformance II** (extend the
+token audit to spacing/radii/type) is the topmost cloud-executable candidate; EPIC-7 · Android stays device-gated.
+
+---
+
 ## 2026-07-04 · QA — **EPIC-10 S2 CONFIRMED LIVE** on green main `a89e87e` (`TIMELINE 1/1` `filtered` axis reproduced, 29/29 clean, vitest 314)
 
 **Result:** 🟢 GREEN · 28/28 routes (29/29 incl. desktop). First independent QA since S2 landed (last QA
