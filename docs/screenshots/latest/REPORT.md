@@ -1,8 +1,37 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-04T05:21:30.465Z
+**Generated:** 2026-07-04T08:08:37.969Z
 
 **Result:** 29/29 rendered without crash, 0 failed.
+
+## Epic-acceptance confirmation — EPIC-10 S2 (green main `a89e87e`)
+
+**✅ EPIC-10 S2 DONE-CONFIRMED LIVE — the temporal lens's faceted controls reproduced independently.** First QA
+since S2 landed (last QA `cf62dab` confirmed S1 on `3cfe846`; S2 `a89e87e` landed since). The `TIMELINE` guard's
+acceptance axis GREW a fifth axis `filtered=true`: **`ordered=true grouped=true flow=true persisted=true
+filtered=true` → 1/1 ✅**. The guard clicks the `app:goals` facet chip and asserts the stream narrows to ONLY the
+goals-owned entity, dropping the notes entity + the notes→goals flow — reproduced without the builder's tree.
+Backed by `timeline.test.ts` 15→22 cases (vitest 307→314). **No runtime bug, no contradiction. ▶ NEXT = EPIC-10 S3.**
+
+*Cloud limit:* the Kind/App facet chip rows render low-contrast against the dark theme with a 2-moment corpus, so
+they don't read prominently in `app-timeline.png`; the `filtered` axis carries the facet-narrow roundtrip headless
+and the roving ↑/↓/Enter cursor + focus state are unit-pinned in `timeline.test.ts`.
+
+## Metric deltas (vs the builder's EPIC-10 S2 snapshot — reproduced exactly, Δ ±0)
+
+| Metric | This run | Δ |
+|---|---|---|
+| Apps / routes | 28 | ±0 |
+| Test cases (static / vitest) | 272 / 314 | ±0 |
+| Test files (metrics / vitest) | 31 / 33 | ±0 |
+| Token violations | 0 | ±0 |
+| Off-system utilities | 0 | ±0 |
+| Bundle gz (KB) | 704.8 | ±0 |
+
+`node scripts/metrics.mjs --assert-zero` → exit 0 (tokens 0, off-system 0). Every guard green (SHELL-IS-STYLED,
+REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 `tagOnly`, NODE-LINEAGE 1/1
+5-axes, TIMELINE 1/1 5-axes, HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE 5/5,
+PRECACHE 83 no-gap).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -26,7 +55,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |

@@ -5,6 +5,35 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · QA — **EPIC-10 S2 CONFIRMED LIVE** on green main `a89e87e` (`TIMELINE 1/1` `filtered` axis reproduced, 29/29 clean, vitest 314)
+
+**Result:** 🟢 GREEN · 28/28 routes (29/29 incl. desktop). First independent QA since S2 landed (last QA
+`cf62dab` confirmed S1 on `3cfe846`; S2 `a89e87e` landed since). Build green (`tsc -b && vite build`, 83 precache
+entries). Ran the full headless smoke LIVE (global playwright symlinked into `node_modules`, chromium-1194;
+server on :3001).
+
+**Epic-acceptance CONFIRMED MOVED.** EPIC-10 S2's target — the `TIMELINE` guard grows a `filtered` axis — reproduced
+independently without the builder's tree: **`TIMELINE 1/1 ✅` `ordered=true grouped=true flow=true persisted=true
+filtered=true`**. The guard clicks the `app:goals` facet chip and the stream narrows to ONLY the goals-owned
+entity, dropping the notes entity + the notes→goals flow (flow app = fromApp = notes). **S2 done-confirmed, no
+contradiction. ▶ NEXT = EPIC-10 S3** (surface the dormant `childrenOf` via `<NodeDescendants>` — "every moment
+shows what it SPAWNED"; grows a `descendants` axis, closes EPIC-10).
+
+**Every guard green:** SHELL-IS-STYLED ✅ + REGISTRY-COVERAGE 28 ✅ (bidirectional) + INBOUND 3/3 + MEDIA 3/3 +
+GRAPH-LEGIBLE 1/1 + GLOBAL-SEARCH 1/1 (`tagOnly`) + NODE-LINEAGE 1/1 (5 axes) + TIMELINE 1/1 (5 axes) + HOME-ALIVE
+1/1 + PROVENANCE-PERSISTS 3/3 + PROVENANCE-ENTITY 3/3 + OFFLINE-BOOT 5/5 (PRECACHE **83** entries / 48 JS + 3 CSS,
+NO GAP). vitest **314/314** (33 files). `node scripts/metrics.mjs --assert-zero` exit 0 (**tokens 0, off-system 0**).
+
+**Metrics reproduce the builder's S2 snapshot EXACTLY (Δ ±0):** apps 28, static tests 272, vitest 314, test files
+31 (metrics) / 33 (vitest), bundle gz 704.8, tokens 0, off-system 0. **Visually confirmed** the Timeline lens
+(`app-timeline.png` — clock-glyph + "one stream · 2 moments" header, a **TODAY** sticky day group, two entity
+rows w/ `dataset` type chip + `now`). *Cloud limit:* the Kind/App facet chip rows render low-contrast against the
+dark theme with a 2-moment corpus → not prominent in the static shot; the `filtered` guard axis carries the
+facet-narrow roundtrip headless + the roving ↑/↓/Enter cursor is unit-pinned. **No runtime bug, no regression.**
+Env-expected non-bugs (not regressions): `weather`→Open-Meteo geocoding + Geolocation blocked (net:1),
+`maps`→CARTO/OSM tiles blocked but Leaflet container renders (net:8), `/api/files?path=/storage/emulated/0`→500
+(Android-only path).
+
 ## 2026-07-04 · BUILD — **EPIC-10 S2 SHIPPED**: the Timeline lens gets faceted controls + keyboard nav (`TIMELINE 1/1` grew a live `filtered` axis)
 
 **Stage:** EPIC-10 · The Timeline, S2 — filter the stream + traverse it by keyboard, copying Search's faceted
