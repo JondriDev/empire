@@ -38,6 +38,19 @@
     `cubic-bezier(0.16,1,0.3,1)`): `Toast.tsx` `cubic-bezier`→`var(--ease-out)`, m3→m2, 57→56. build🟢 vitest 318→334🟢
     (+16, +1 file) eslint clean; tokenViolations 0, offSystemUtilities 0, `--assert-zero` exit 0 (NOT locking the new
     metric while non-zero); bundle 705.4 ±0, no new deps.
+    - **✅ QA-CONFIRMED LIVE (2026-07-04, green main `ad9c734`) — S1 done-confirmed, the audit + baseline reproduce
+      independently.** First independent QA since EPIC-11 opened (last QA `698bbe2`/`ceddbef` = EPIC-10 S3 re-confirm;
+      EPIC-10 retired + EPIC-11 S1 `ad9c734` landed since). S1's acceptance is *instrument + baseline*, not *move toward 0*:
+      `node scripts/metrics.mjs` reproduces **Off-system style `56 (r12/t42/m2)`** EXACTLY on a fresh checkout, offenders
+      reproduce (`Calculator.tsx` 13 · `ChartBuilder.tsx` 9 · `MarkdownStudio.tsx` 7 · `Notes.tsx`/`CommandPalette.tsx`/
+      `ErrorBoundary.tsx` 5 · `Utility.tsx` 3 · `ChatPanel.tsx` 2), the +16 `styleAudit.test.mjs` cases run green (vitest
+      **334/334**, 35 files), the two colour audits stay 0, `--assert-zero` exit 0. **29/29 routes render clean** (0
+      uncaught JS); every guard green (SHELL-IS-STYLED, REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1,
+      GLOBAL-SEARCH 1/1 `tagOnly`, NODE-LINEAGE 1/1 5-axes, **TIMELINE 1/1 all 6 axes**, HOME-ALIVE 1/1, PROVENANCE
+      3/3+3/3, OFFLINE 5/5, PRECACHE 83 no-gap). Metrics reproduce the builder's S1 snapshot EXACTLY (apps 28, static 276,
+      vitest 334, offSystemStyle 56, bundle 705.4, Δ ±0). **Visually confirmed** (`desktop.png` Bridge+28-grid,
+      `app-timeline.png`). **No runtime bug, no contradiction.** *Note:* the metric has NOT moved toward 0 yet — S1 was
+      audit-only; reduction starts at S2. **▶ NEXT = Strategist ratifies the EPIC-11 framing/ordering, then Builder takes S2.**
   - **▶ NEXT STAGE = EPIC-11 S2 · reduce TYPE (heaviest sub-count, t42 → 0), by descending file mass.** Map raw
     `font-size`/`fontSize` px/rem/unitless-px onto `--text-*` by NEAREST step (`xs .6875rem≈11px · sm .8125rem≈13px ·
     base .9375rem≈15px · lg 1.0625rem≈17px · xl 1.25rem≈20px · 2xl 1.5rem≈24px · 3xl 1.875rem≈30px · 4xl 2.25rem≈36px ·

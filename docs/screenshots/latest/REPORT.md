@@ -1,50 +1,44 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-04T18:11:56.212Z
+**Generated:** 2026-07-04T23:09:00.420Z
 
 **Result:** 29/29 rendered without crash, 0 failed.
 
 ---
 
-## QA verdict — 2026-07-04 (health re-confirmation on green main `698bbe2`)
+## QA verdict — green main `ad9c734` · EPIC-11 S1 done-confirmed · no runtime bug
 
-**No runtime bug. No contradiction. Main runs clean.**
+**No runtime regression found.** This is the first independent QA since **EPIC-11 · Design-system
+conformance II** opened (EPIC-10 retired to DONE; last QA was `698bbe2`/`ceddbef` = the EPIC-10 S3
+re-confirm). Build 🟢 · vitest **334/334** (35 files) · eslint clean · `metrics.mjs --assert-zero` exit 0.
 
-This run's HEAD (`698bbe2`) is the *previous* QA commit; the last code change was
-`6059284` (EPIC-10 S3) hardened by the `6a1a0b2` docs pass — **no product code has
-landed since the last QA**, so this is an independent health re-confirmation of a
-green, EPIC-10-**code-complete** main, not a new-stage confirmation.
+**Active-epic acceptance (EPIC-11 S1 — build the audit + establish the baseline):** ✅ **CONFIRMED.**
+`node scripts/metrics.mjs` reproduces **Off-system style `56 (r12/t42/m2)`** exactly on a fresh checkout
+— the new pure `scanStyleViolations` audit (`scripts/styleAudit.mjs`) is wired into `metrics.mjs` and its
++16 `styleAudit.test.mjs` cases run green (vitest 318→334). Top offenders reproduce: `Calculator.tsx` 13 ·
+`ChartBuilder.tsx` 9 · `MarkdownStudio.tsx` 7 · `Notes.tsx`/`CommandPalette.tsx`/`ErrorBoundary.tsx` 5.
+The colour audits stay 0 and `offSystemStyle` is (correctly) NOT yet locked into `--assert-zero` — it locks
+at 0 in S4. **S1's acceptance was to instrument + baseline, not to move the metric toward 0** (that starts
+at S2, which the Strategist still owes ratification of) — so S1 is *done-confirmed*, no contradiction.
 
-**Build:** 🟢 `tsc -b && vite build` clean. **vitest:** 🟢 **318/318** (34 files).
-**eslint:** clean. **`metrics.mjs --assert-zero`:** exit 0 (tokens 0, off-system 0).
-
-**Epic-acceptance confirmation (EPIC-10 · The Timeline — the TEMPORAL lens):**
-`TIMELINE 1/1 ✅` reproduced independently with **all six axes green** —
-`ordered=true grouped=true flow=true persisted=true filtered=true descendants=true`.
-S1 (lens stands up), S2 (`filtered`), and S3 (`descendants` — the long-dormant
-`childrenOf` walker) all remain **done-confirmed LIVE**. EPIC-10 is code-complete
-(S1–S3); the acceptance metric holds. Visually confirmed in `app-timeline.png`
-(clock-glyph header, "one stream · 2 moments", a **TODAY** day group, two entity
-rows with `dataset` type chips + `now`).
-
-**Metric deltas vs the builder's EPIC-10 S3 snapshot — all Δ ±0** (main unchanged):
+**Metric deltas vs the builder's EPIC-11 S1 snapshot (all ±0 — S1 was an audit-only change, no runtime code):**
 
 | Metric | Value | Δ |
 |---|---|---|
-| Apps / routes | 28 / 29 clean (desktop + 28 apps) | ±0 |
-| Test cases (static) | 276 | ±0 |
-| vitest | 318/318 | ±0 |
-| Test files | 32 (metrics) / 34 (vitest) | ±0 |
+| Apps / routes | 28 | ±0 |
+| Test cases (static · vitest) | 276 · 334 | ±0 (vitest +16 vs pre-S1 318, all `styleAudit.test.mjs`) |
+| Test files (metrics · vitest) | 32 · 35 | ±0 (vitest +1 `styleAudit.test.mjs`) |
 | Token violations | 0 | ±0 |
-| Off-system utils | 0 | ±0 |
+| Off-system utilities | 0 | ±0 |
+| **Off-system style** | **56 (r12/t42/m2)** | ±0 (the EPIC-11 baseline; drives to 0 over S2–S4) |
 | Bundle gz (KB) | 705.4 | ±0 |
-| Precache entries | 83 (no gap) | ±0 |
 
-**Every guard green:** SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE 28 ✅ ·
-INBOUND-LANDS 3/3 ✅ · MEDIA-PERSISTS 3/3 ✅ · GRAPH-LEGIBLE 1/1 ✅ ·
-GLOBAL-SEARCH 1/1 ✅ (`tagOnly`) · NODE-LINEAGE 1/1 ✅ (5 axes) ·
-**TIMELINE 1/1 ✅ (6 axes)** · HOME-ALIVE 1/1 ✅ · PROVENANCE-PERSISTS 3/3 ✅ ·
-PROVENANCE-ENTITY 3/3 ✅ · OFFLINE-BOOT 5/5 ✅ · PRECACHE 83 no-gap ✅.
+**Every guard green:** SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE 28 ✅ · 29/29 routes render clean (0 uncaught JS) ·
+INBOUND 3/3 · MEDIA 3/3 · GRAPH-LEGIBLE 1/1 · GLOBAL-SEARCH 1/1 (`tagOnly`) · NODE-LINEAGE 1/1 (5 axes) ·
+**TIMELINE 1/1 (all 6 axes)** · HOME-ALIVE 1/1 · PROVENANCE-PERSISTS 3/3 · PROVENANCE-ENTITY 3/3 ·
+OFFLINE-BOOT 5/5 · PRECACHE 83 no-gap. **Visually verified:** `desktop.png` (the Bridge home + 28-app grid)
++ `app-timeline.png` (the temporal lens, TODAY day-group, 2 moments). Env-expected noise only (blocked
+CDN tiles on Maps net:8, `/api/files` HTTP 500, Open-Meteo tunnel-fail on Weather) — **not** render failures.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -68,7 +62,7 @@ PROVENANCE-ENTITY 3/3 ✅ · OFFLINE-BOOT 5/5 ✅ · PRECACHE 83 no-gap ✅.
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
