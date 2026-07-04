@@ -111,7 +111,7 @@ function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
         borderLeft: `3px solid ${stripe}`,
         borderRadius: 'var(--radius-lg)',
         boxShadow: `0 12px 36px ${tint('void', 50)}, 0 0 0 1px ${tint('xenon', 4)} inset`,
-        animation: 'toast-in 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        animation: 'toast-in 320ms var(--ease-out) forwards',
       }}
     >
       <Icon

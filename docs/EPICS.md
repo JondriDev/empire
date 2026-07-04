@@ -36,7 +36,62 @@ for the real Maps), token-violations **held at 0**. Do not re-add the deleted ap
 
 ---
 
-## ▶ ACTIVE (promoted 2026-07-03 by the Strategist) — EPIC-10 · The Timeline (the organism's lifestream — a TEMPORAL lens)
+## ▶ ACTIVE (Builder-opened 2026-07-04; **Strategist must ratify** as a full epic) — EPIC-11 · Design-system conformance II (the non-colour token axis)
+
+> **Opened by the Builder 2026-07-04** as the topmost cloud-executable **ROADMAP NOW** item, after **EPIC-10 · The
+> Timeline retired to DONE** (S1–S3 all shipped + QA-confirmed LIVE — `TIMELINE 1/1`, all six axes; no active stage
+> remained). Per the routine, when no `▶ ACTIVE` epic is promoted the Builder takes the topmost ROADMAP item and flags
+> the Strategist — **so this needs the Strategist to ratify the framing + ordering below.** **Why this is the steepest
+> remaining cloud-executable gradient:** EPIC-5 drove the two *colour* conformance metrics to **0** (`tokenViolations`
+> raw hex/rgba = 0; `offSystemUtilities` Tailwind palette classes = 0, LOCKED via `--assert-zero`). But "tokens only"
+> was only ever enforced for **colour** — app code still hardcodes the other design-token scales: **radii** (raw `4px`
+> instead of `var(--radius-sm)`), **type** (raw `13px` instead of `var(--text-sm)`), and **easings** (raw
+> `cubic-bezier(…)`/`ease-out` instead of `var(--ease-*)`). The design language ("motion = physics via `--ease`/`--dur`
+> tokens; one radius scale") is therefore only *half* true. This epic makes it fully true, is 100% cloud + metric
+> verifiable, reuses the exact EPIC-5 playbook (measure → drive to 0 by descending file mass → lock), and needs no new
+> deps. **EPIC-7 · Android stays device-gated.**
+
+**Leap:** the whole Empire's radii, type sizes, and motion curves re-tune from ONE place (the token scales), the same
+way EPIC-5 made colour re-theme from one place — the visual analogue completed. **Target metric:** the NEW
+`offSystemStyle` row in `scripts/metrics.mjs` (**56 → 0**, sub-counts `r/t/m` = radii/type/motion), then a lock stage
+adds it to `--assert-zero` so it can't rot — exactly as EPIC-5 S8 locked `offSystemUtilities`.
+
+- [x] **S1 · Build the audit + establish the baseline (this run, 2026-07-04 — `main`).** New pure, dependency-free
+  **`scripts/styleAudit.mjs`** `scanStyleViolations(text) → {radii,type,motion,total}`: radii = raw `border-radius`/
+  `borderRadius` px/rem/em (semantic `50%` circles + `9999px` pills excluded); type = raw `font-size`/`fontSize`
+  px/rem/unitless-JS-px (relative `em`/`%` allowed); motion = raw `cubic-bezier(…)` + `ease-in`/`-out`/`-in-out`
+  keywords (a `(?<![-\w])` lookbehind means `var(--ease-out)` token refs are NOT counted). 16 cases in
+  `scripts/styleAudit.test.mjs`. Wired into **`metrics.mjs`** as `styleViolations()` (reusing a newly-extracted shared
+  `DS_INFRA`/`appCodeFiles()` helper the two colour audits now also call — DRY, behaviour-preserving: token/util
+  violations held at 0) → new **Off-system style** table row + `offSystemStyle`/`offSystemStyleDims` snapshot fields +
+  offenders list. **Baseline = 56 (r12/t42/m2).** Also landed the one PROVABLY-identical fix (`--ease-out` ≡
+  `cubic-bezier(0.16,1,0.3,1)`): `Toast.tsx` `cubic-bezier`→`var(--ease-out)`, motion 3→2, total 57→56. build🟢
+  vitest 318→334🟢 (+16, +1 file) eslint clean; tokenViolations 0, offSystemUtilities 0 (`--assert-zero` still exit 0 —
+  NOT yet locking the new metric while it's non-zero); bundle 705.4 ±0, no new deps.
+- [ ] **S2 · Reduce type — the heaviest sub-count (t42 → 0), by descending file mass.** Map raw `font-size`/`fontSize`
+  px/rem/unitless-px onto the `--text-*` scale by nearest step (`--text-xs .6875rem/11px`, `-sm .8125rem/13px`,
+  `-base .9375rem/15px`, `-lg 1.0625rem/17px`, `-xl 1.25rem/20px`, `-2xl 1.5rem/24px`, `-3xl 1.875rem/30px`,
+  `-4xl 2.25rem/36px`, `-5xl 3rem/48px`). Heaviest first (per `metrics.mjs` offenders): `Calculator.tsx` (t9),
+  `ChartBuilder.tsx` (t9), `MarkdownStudio.tsx` (t4), `CommandPalette.tsx` (t5), `ErrorBoundary.tsx` (t3),
+  `Utility.tsx` (t3), then the tail. **This is a VISUAL change** — a raw `10px` → `--text-xs` (11px) shifts a pixel;
+  pick the nearest token and note "not verifiable in cloud — on-device confirm." Acceptance: `offSystemStyle` type
+  sub-count falls; radii/motion unchanged; build🟢 vitest🟢 eslint clean; the touched apps still render in QA.
+- [ ] **S3 · Reduce radii (r12 → 0).** Map raw `border-radius`/`borderRadius` px onto `--radius-*` (`sm/md/lg/xl/2xl`)
+  by nearest step; keep semantic `50%`/`9999px`. Files: `Calculator.tsx` (r3), `MarkdownStudio.tsx` (r3),
+  `Notes.tsx` (r2), `ErrorBoundary.tsx` (r2), `ChatPanel.tsx` (r1), `Toast`-neighbours, then the tail. Same
+  visual-change caveat as S2.
+- [ ] **S4 · Reduce residual motion (m2 → 0) + LOCK.** Swap the last raw easings for `var(--ease-*)`; a symmetric
+  loop that genuinely needs an in-out curve may add exactly ONE `--ease-in-out` token to
+  `src/design-system/colors_and_type.css` (note it). Then, with `offSystemStyle` at 0, add it to the `--assert-zero`
+  gate (mirror EPIC-5 S8) so it can't regress → **★ EPIC-11 CODE-COMPLETE.**
+
+> _Strategist: ratify the leap/ordering above (or re-shape). The audit + baseline are LIVE on `main`. The reduction
+> stages S2–S4 are ordered by descending sub-count/file mass so the heaviest leverage lands first, one Builder run each,
+> mirroring the EPIC-5 playbook. **EPIC-7 · Android** stays device-gated._
+
+---
+
+## ✅ DONE — retired by Builder 2026-07-04 (S1–S3 all QA-confirmed LIVE — `TIMELINE 1/1`, all six axes `ordered/grouped/flow/persisted/filtered/descendants`; last confirm `6a1a0b2`, health re-confirm `698bbe2`) — EPIC-10 · The Timeline (the organism's lifestream — a TEMPORAL lens)
 
 > **Promoted 2026-07-03** (EPIC-9 retired to DONE — its headline `NODE-LINEAGE 1/1` moved + QA-confirmed; every prior
 > epic DONE; EPIC-7 · Android stays device-gated / not cloud-verifiable). **Why this is the highest realizable gradient

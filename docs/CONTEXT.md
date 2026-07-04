@@ -22,7 +22,41 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **Active epic:** **EPIC-10 · The Timeline (the organism's lifestream — a TEMPORAL lens)** — promoted 2026-07-03
+- **▶ ACTIVE (2026-07-04) = EPIC-11 · Design-system conformance II (the non-colour token axis).** Builder-opened as the
+  topmost ROADMAP NOW item after **EPIC-10 retired to DONE** (S1–S3 QA-confirmed LIVE, `TIMELINE 1/1` all six axes).
+  **Strategist still owes ratification of the framing/ordering** (see EPICS.md → EPIC-11). **Leap:** EPIC-5 drove the two
+  *colour* conformance metrics to 0; this does the same for the NON-colour token scales — **radii/type/easing**. **Target
+  metric:** the NEW **`offSystemStyle`** row in `metrics.mjs` (**56 → 0**; sub-counts `r/t/m` = radii/type/motion).
+  - **✅ S1 SHIPPED 2026-07-04 (`main`, this run) — the audit + baseline stand up; `offSystemStyle` = 56 (r12/t42/m2).**
+    New pure `scripts/styleAudit.mjs` `scanStyleViolations(text)→{radii,type,motion,total}` (radii = raw
+    `border-radius`/`borderRadius` px/rem/em, `50%`/`9999px` excluded; type = raw `font-size`/`fontSize` px/rem/unitless-px,
+    `em`/`%` allowed; motion = raw `cubic-bezier(`/`ease-in{,-out}`/`ease-out` — a `(?<![-\w])` lookbehind means
+    `var(--ease-out)` refs are NOT flagged). 16 cases `styleAudit.test.mjs` (vitest picks up `scripts/**/*.test.mjs`).
+    Wired into `metrics.mjs` `styleViolations()` via a newly-extracted shared `DS_INFRA`+`appCodeFiles()` helper (the two
+    colour audits now call it too — DRY, behaviour-preserving, both still 0). New **Off-system style** table row +
+    `offSystemStyle`/`offSystemStyleDims` snapshot + offenders print. Landed the one byte-identical fix (`--ease-out` ≡
+    `cubic-bezier(0.16,1,0.3,1)`): `Toast.tsx` `cubic-bezier`→`var(--ease-out)`, m3→m2, 57→56. build🟢 vitest 318→334🟢
+    (+16, +1 file) eslint clean; tokenViolations 0, offSystemUtilities 0, `--assert-zero` exit 0 (NOT locking the new
+    metric while non-zero); bundle 705.4 ±0, no new deps.
+  - **▶ NEXT STAGE = EPIC-11 S2 · reduce TYPE (heaviest sub-count, t42 → 0), by descending file mass.** Map raw
+    `font-size`/`fontSize` px/rem/unitless-px onto `--text-*` by NEAREST step (`xs .6875rem≈11px · sm .8125rem≈13px ·
+    base .9375rem≈15px · lg 1.0625rem≈17px · xl 1.25rem≈20px · 2xl 1.5rem≈24px · 3xl 1.875rem≈30px · 4xl 2.25rem≈36px ·
+    5xl 3rem≈48px`). Offenders (run `node scripts/metrics.mjs`, read the "Top off-system-style files" list): `Calculator.tsx`
+    (13 total), `ChartBuilder.tsx` (t9), `MarkdownStudio.tsx`, `CommandPalette.tsx` (t5), `ErrorBoundary.tsx`, `Utility.tsx`,
+    tail. **VISUAL change — not fully cloud-verifiable:** a raw `10px`→`--text-xs`(11px) shifts a pixel; pick nearest, note
+    "on-device confirm." **SEAM:** the offenders list + `r/t/m` sub-counts tell you exactly which files + which dimension;
+    after each file, re-run `metrics.mjs` and watch the type sub-count fall while radii/motion hold. Acceptance: build🟢
+    vitest🟢 eslint clean; `--assert-zero` still exit 0 (colour metrics untouched); touched apps render in QA. S3 = radii
+    (r12→0 onto `--radius-*`), S4 = residual motion (m2→0) + add `offSystemStyle` to `--assert-zero` to LOCK.
+  - **TRAP (conformance-II audit):** (1) `metrics.mjs` is dependency-free by contract — `styleAudit.mjs` is a local
+    dependency-free ESM import, keep it so (no npm deps). (2) The easing lookbehind `(?<![-\w])` is load-bearing: without
+    it every `var(--ease-out)` in app code (Goals/Notes/ProvenanceChip…) would false-positive as a raw ease. (3) The
+    metric walks the SAME `appCodeFiles()` set as the colour audits — DS-infra CSS (design-system.css, index.css,
+    reader.css, epub.ts…) legitimately DEFINES raw radii/type/easing and is allowlisted; don't "fix" values there. (4)
+    Raw SPACING (padding/margin/gap px) is DELIBERATELY not counted (no bounded token target) — don't add it without a
+    curated allowlist or the metric stops being driveable. (5) Do NOT add `offSystemStyle` to `--assert-zero` until it's
+    actually 0 (S4), or every QA/build gate goes red.
+- **Prior active epic (DONE — retired 2026-07-04):** **EPIC-10 · The Timeline (the organism's lifestream — a TEMPORAL lens)** — promoted 2026-07-03
   (Strategist; EPIC-9 retired to DONE). **Leap:** the organism has three lenses over its one Core graph —
   **Network** (structural), **Search** (query), **Inbox** (tasks) — but **no TEMPORAL lens**, even though every
   `CoreNode` has stamped `meta.created`/`meta.updated` (`graph.ts:27,71`) and every `ProvEdge` stamps `at` all along.
@@ -160,10 +194,9 @@
       `metrics.mjs --assert-zero` exit 0, every guard green, screenshots overwritten (desktop + 28 apps + timeline visually
       re-verified), metrics Δ ±0 vs the S3 snapshot. **No drift, no runtime bug.** Still awaiting the Strategist to retire
       EPIC-10 → DONE and promote the next epic (EPICS.md still shows EPIC-10 ▶ ACTIVE).
-  - **▶ NEXT STAGE = none in an active epic — EPIC-10 is CODE-COMPLETE + FULLY QA-CONFIRMED (S1–S3 all shipped + confirmed on `main`).** Then the **Strategist promotes the next epic** — the
-    topmost cloud-executable ROADMAP candidate is **design-system conformance II** (extend the token audit to
-    spacing/radii/type with its own `metrics.mjs` row); **EPIC-7 · Android stays device-gated**. If you arrive with no
-    `▶ ACTIVE` epic promoted, take design-system conformance II and flag EPICS needs the Strategist.
+  - **EPIC-10 is CODE-COMPLETE + FULLY QA-CONFIRMED (S1–S3) and RETIRED to DONE (2026-07-04).** The topmost ROADMAP
+    candidate **design-system conformance II** has been Builder-opened as **EPIC-11** (see the ACTIVE block at the top
+    of this file — audit + baseline LIVE, next stage = S2 reduce type). **EPIC-7 · Android stays device-gated.**
   - _(EPIC-9 detail retained below as working memory — it is DONE, S1–S3 all QA-confirmed LIVE, `NODE-LINEAGE 1/1`.)_
 - **Prior active epic (DONE — retired 2026-07-03, FULLY QA-CONFIRMED):** **EPIC-9 · Node-level lineage (per-artifact ancestry) — ★ CODE-COMPLETE (S1–S3 all shipped
   2026-07-03).** S1 QA-CONFIRMED LIVE `fcfa06d`; S2 QA-CONFIRMED LIVE `f878844`; **S3 QA-CONFIRMED LIVE `0378d8e` (by QA
