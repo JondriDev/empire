@@ -55,21 +55,37 @@
       `app-timeline.png`). **No runtime bug, no contradiction.** *Note:* the metric has NOT moved toward 0 yet — S1 was
       audit-only; reduction starts at S2. **▶ EPIC-11 now RATIFIED by the Strategist 2026-07-04 (S2–S4 deepened with the
       authoritative per-file audit) → Builder takes S2.**
-  - **▶ NEXT STAGE = EPIC-11 S2 · reduce TYPE (heaviest sub-count, t42 → 0) in ONE run — all 13 files.** Map every raw
-    `font-size`/`fontSize` px/rem/unitless-px onto `--text-*` by NEAREST step (`xs .6875rem≈11px · sm .8125rem≈13px ·
-    base .9375rem≈15px · lg 1.0625rem≈17px · xl 1.25rem≈20px · 2xl 1.5rem≈24px · 3xl 1.875rem≈30px · 4xl 2.25rem≈36px ·
-    5xl 3rem≈48px`). **Authoritative offenders (audit re-run 2026-07-04 — the FULL t42, drive EVERY one to 0):** heavy —
-    `Calculator.tsx` **t9**, `ChartBuilder.tsx` (artifacts) **t9**, `CommandPalette.tsx` **t5**, `MarkdownStudio.tsx`
-    (artifacts) **t4**, `Notes.tsx` **t3**, `ErrorBoundary.tsx` **t3**, `Utility.tsx` (ui) **t3**; tail (`t1` each, don't
-    skip these — reach EXACTLY 0) — `ChatPanel.tsx`, `ConfirmModal.tsx` (cakra), `Desktop.tsx`, `NodeActions.tsx`,
-    `SendResultMenu.tsx`, `ui/index.tsx`. **VISUAL change — not fully cloud-verifiable:** a raw `10px`→`--text-xs`(11px)
-    shifts a pixel; pick nearest, and for any raw value >1.5px from its nearest step note it per-file as "on-device
-    confirm." **SEAM:** after each file re-run `node scripts/metrics.mjs` and watch the type sub-count fall while radii/motion
-    hold; when the "Top off-system-style files" list no longer shows a `t` count you're at t0. **Acceptance:** `offSystemStyle`
-    type sub-count **= 0** (`r12/t0/m2`, total 56→14); build🟢 vitest🟢 eslint clean; `--assert-zero` still exit 0 (colour
-    metrics untouched); touched apps render in QA. **S3** = radii (r12→0 onto `--radius-*` — Calculator r3, MarkdownStudio r3,
-    Notes r2, ErrorBoundary r2, ChatPanel r1, Toast r1). **S4** = residual motion (m2→0 — Calculator m1, ArtifactGallery m1)
-    + add `offSystemStyle` to `--assert-zero` to LOCK → ★ EPIC-11 CODE-COMPLETE.
+  - **✅ S2 SHIPPED 2026-07-04 (`main`, this run) — TYPE driven to 0. `offSystemStyle` 56 → 14 (`r12/t42/m2` → `r12/t0/m2`,
+    Δ-42).** All 13 files' raw `font-size`/`fontSize` mapped onto `--text-*` by nearest step via a one-shot deterministic
+    transform (validate-all-then-write; `scratchpad/type-fix.mjs`, not committed). Radii (r12) + motion (m2) held EXACTLY —
+    the dim-major ordering kept the move crisp. **Mapping rule baked in:** nearest step; on an exact tie (even-px raw between
+    two odd-px tokens) round UP to the larger token — `12px→sm(13)`, `14→base(15)`, `22→2xl(24)`. CSS-string / injected-HTML
+    (`ChatPanel` code span) / SVG `<text>` (`ChartBuilder` × the 3 chart types) sites all take `var(--text-*)` fine — custom
+    props cascade from `:root`. `MarkdownStudio 0.85em` correctly left (relative em, not counted). build🟢 vitest 334🟢
+    eslint clean (all 13); `--assert-zero` exit 0 (colour metrics 0/0 untouched); bundle 705.4 ±0, no new deps.
+    - **On-device confirm (>1.5px shift — cloud can't verify pixels):** `Calculator 32px→3xl(30)` −2, `ChartBuilder 22→2xl(24)`
+      +2 (×3 SVG labels), `ErrorBoundary 2.5rem/40px→4xl(36)` −4 (decorative ⚠️), `MarkdownStudio 2rem/32px→3xl(30)` −2, and
+      every `9px→xs(11)` +2 (footnote/kbd micro-labels: Calculator, CommandPalette). All other shifts ≤1px.
+    - **SEAM (reuse for S3/S4):** the transform pattern is `scanStyleViolations` (audit) drives the file list; a validate-all-
+      then-write node script over exact `from→to` substrings with per-pattern expected-count asserts is the safe bulk-edit
+      rail (repeated `fontSize: '10px'` etc. collapse via string split/join, no fragile per-line Edits). Re-run
+      `node scripts/metrics.mjs` and watch the target sub-count fall while the others hold. `metrics.mjs` PERSISTS its snapshot
+      to `docs/metrics.json` on every run (so a 2nd run shows Δ±0 — the −42 is vs the committed baseline); commit the updated
+      `metrics.json`. `npm install` churns `package-lock.json` (drops optional-dep `libc` fields) — `git checkout` it before commit.
+    - **⚠️ QA still owes independent confirmation:** the headless render-smoke (`scripts/qa-smoke.mjs`) needs `playwright`, which
+      is NOT in `package.json` (installing it = a new dep, forbidden for the builder) → the smoke is the QA run's step, not the
+      builder's. Runtime render risk is negligible (pure CSS-value substitutions + passing tsc), but QA should still run the
+      full smoke on the new green main to confirm the touched apps (Calculator, ChartBuilder/MarkdownStudio artifacts,
+      CommandPalette, Notes, ErrorBoundary, Utility, ChatPanel, ConfirmModal, Desktop, NodeActions, SendResultMenu) render clean.
+  - **▶ NEXT STAGE = EPIC-11 S3 · reduce RADII (r12 → 0) in ONE run — 6 files.** Map every raw `border-radius`/`borderRadius`
+    px onto `--radius-*` by NEAREST step (`sm≈10px · md≈16px · lg≈22px · xl≈30px · 2xl≈40px`); KEEP semantic `50%` circles +
+    `9999px` pills (the audit already excludes them). **Authoritative offenders (full r12):** `Calculator.tsx` **r3**,
+    `MarkdownStudio.tsx` (artifacts) **r3**, `Notes.tsx` **r2**, `ErrorBoundary.tsx` **r2**, `ChatPanel.tsx` (cakra) **r1**,
+    `Toast.tsx` **r1**. Reuse the S2 transform rail (validate-all-then-write substring script). Note: MarkdownStudio + ChatPanel
+    radii live in CSS-string / injected-HTML (`border-radius: 4px`) — same `var(--radius-*)` substitution works. **Acceptance:**
+    `offSystemStyle` radii sub-count **= 0** (`r0/t0/m2`, total 14→2); type/motion unchanged; build🟢 vitest🟢 eslint clean;
+    `--assert-zero` still exit 0. **S4** = residual motion (m2→0 — Calculator m1, ArtifactGallery m1) + add `offSystemStyle` to
+    `--assert-zero` to LOCK → ★ EPIC-11 CODE-COMPLETE.
   - **TRAP (conformance-II audit):** (1) `metrics.mjs` is dependency-free by contract — `styleAudit.mjs` is a local
     dependency-free ESM import, keep it so (no npm deps). (2) The easing lookbehind `(?<![-\w])` is load-bearing: without
     it every `var(--ease-out)` in app code (Goals/Notes/ProvenanceChip…) would false-positive as a raw ease. (3) The

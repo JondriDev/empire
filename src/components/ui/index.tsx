@@ -281,7 +281,7 @@ export function Badge({ children, variant = 'default', color, className = '' }: 
         background: palette.bg,
         color: palette.fg,
         border: `1px solid ${palette.border}`,
-        fontSize: '10px',
+        fontSize: 'var(--text-xs)',
         fontWeight: 600,
         letterSpacing: '0.02em',
         textTransform: 'uppercase',

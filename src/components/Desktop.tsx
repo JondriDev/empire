@@ -226,7 +226,7 @@ export default function Desktop() {
             <div style={{
               display: 'flex', alignItems: 'center', gap: '14px', padding: '8px 14px',
               borderTop: `1px solid ${tint('xenon', 5)}`, background: tint('void', 15),
-              fontSize: '10px', color: 'var(--text3)',
+              fontSize: 'var(--text-xs)', color: 'var(--text3)',
             }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 <ArrowUp className="w-2.5 h-2.5" /><ArrowDown className="w-2.5 h-2.5" /> navigate

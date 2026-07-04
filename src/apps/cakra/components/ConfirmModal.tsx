@@ -53,7 +53,7 @@ export default function ConfirmModal({ calls, onConfirm, onDeny }: Props) {
                   <span style={{ color: cssVar('ember') }}>⚠️</span>
                   <span style={{ color: cssVar('ember'), fontWeight: 600 }}>{call.name}</span>
                 </div>
-                <div style={{ color: cssVar('text2'), fontSize: '11px' }}>
+                <div style={{ color: cssVar('text2'), fontSize: 'var(--text-xs)' }}>
                   {Object.entries(call.arguments)
                     .map(([k, v]) => `${k}: ${typeof v === 'string' ? v : JSON.stringify(v)}`)
                     .join(' · ')}

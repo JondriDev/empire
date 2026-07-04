@@ -179,7 +179,7 @@ export default function Notes() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
             <Badge variant="info">New</Badge>
-            <span style={{ fontSize: '11px', color: 'var(--text3)' }}>
+            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)' }}>
               Save to your library — Cakra can analyze it later
             </span>
           </div>
@@ -409,7 +409,7 @@ function NoteCard({ note, landed, cardRef, isEditing, onStartEdit, onSaveEdit, o
               marginTop: '12px',
               paddingTop: '10px',
               borderTop: `1px solid ${tint('xenon', 4)}`,
-              fontSize: '10px',
+              fontSize: 'var(--text-xs)',
               color: 'var(--text3)',
               fontVariantNumeric: 'tabular-nums',
             }}
@@ -429,7 +429,7 @@ function NoteCard({ note, landed, cardRef, isEditing, onStartEdit, onSaveEdit, o
                 border: 'none',
                 color: 'var(--color-cyan-3)',
                 cursor: 'pointer',
-                fontSize: '10px',
+                fontSize: 'var(--text-xs)',
                 fontWeight: 500,
                 padding: '2px 4px',
                 borderRadius: '4px',

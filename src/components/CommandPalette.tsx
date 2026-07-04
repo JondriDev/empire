@@ -154,7 +154,7 @@ export default function CommandPalette() {
                 }}>
                   {node.title}
                 </div>
-                <div style={{ fontSize: '10px', color: 'var(--text3)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text3)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                   {node.type}{ownerApp ? ` · ${ownerApp.name}` : ''}
                 </div>
               </>
@@ -199,7 +199,7 @@ export default function CommandPalette() {
             <div className="empire-search-empty">
               <div className="empire-search-empty-icon"><Zap className="w-4 h-4" /></div>
               <div>Nothing in focus yet</div>
-              <div style={{ fontSize: '11px', marginTop: '4px', opacity: 0.7 }}>
+              <div style={{ fontSize: 'var(--text-xs)', marginTop: '4px', opacity: 0.7 }}>
                 Touch a node — create a note, select one in The Network — then ⌘K acts on it.
               </div>
             </div>
@@ -224,7 +224,7 @@ export default function CommandPalette() {
                     style={{
                       width: 28, height: 28, borderRadius: 'var(--radius-md)', flexShrink: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 14, color: 'var(--text2)',
+                      fontSize: 'var(--text-base)', color: 'var(--text2)',
                       background: rgbCss('255,255,255', 0.04), border: `1px solid ${rgbCss('255,255,255', 0.06)}`,
                     }}
                   >
@@ -247,7 +247,7 @@ export default function CommandPalette() {
           style={{
             display: 'flex', alignItems: 'center', gap: '14px',
             padding: '8px 14px', borderTop: `1px solid ${rgbCss('255,255,255', 0.05)}`,
-            background: rgbCss('0,0,0', 0.15), fontSize: '10px', color: 'var(--text3)',
+            background: rgbCss('0,0,0', 0.15), fontSize: 'var(--text-xs)', color: 'var(--text3)',
           }}
         >
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
@@ -257,7 +257,7 @@ export default function CommandPalette() {
             <CornerDownLeft className="w-2.5 h-2.5" />run
           </span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-            <span className="empire-search-kbd" style={{ fontSize: '9px' }}>⌘K</span>toggle
+            <span className="empire-search-kbd" style={{ fontSize: 'var(--text-xs)' }}>⌘K</span>toggle
           </span>
           <span style={{ marginLeft: 'auto' }}>
             {filtered.length} {filtered.length === 1 ? 'action' : 'actions'}
