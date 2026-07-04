@@ -154,6 +154,12 @@
       **No runtime bug, no contradiction.** *Cloud limit:* the 2-seed fresh-checkout corpus makes the `→ spawned` token + facet
       chips low-contrast/absent in the static shot — the `descendants`/`filtered` axes carry them headless. **▶ NEXT = Strategist
       retires EPIC-10 to DONE + promotes the next epic (design-system conformance II — EPIC-7 · Android stays device-gated).**
+    - **✅ RE-CONFIRMED (2026-07-04, 2nd QA — HEAD `698bbe2` = the prior QA commit; no product code landed since `6a1a0b2`).**
+      Independent health re-run on the same green main: build🟢, **29/29 routes clean** (0 uncaught), **`TIMELINE 1/1` all six
+      axes green** (`ordered grouped flow persisted filtered descendants`), vitest **318/318** (34 files), eslint clean,
+      `metrics.mjs --assert-zero` exit 0, every guard green, screenshots overwritten (desktop + 28 apps + timeline visually
+      re-verified), metrics Δ ±0 vs the S3 snapshot. **No drift, no runtime bug.** Still awaiting the Strategist to retire
+      EPIC-10 → DONE and promote the next epic (EPICS.md still shows EPIC-10 ▶ ACTIVE).
   - **▶ NEXT STAGE = none in an active epic — EPIC-10 is CODE-COMPLETE + FULLY QA-CONFIRMED (S1–S3 all shipped + confirmed on `main`).** Then the **Strategist promotes the next epic** — the
     topmost cloud-executable ROADMAP candidate is **design-system conformance II** (extend the token audit to
     spacing/radii/type with its own `metrics.mjs` row); **EPIC-7 · Android stays device-gated**. If you arrive with no
