@@ -36,6 +36,17 @@ for the real Maps), token-violations **held at 0**. Do not re-add the deleted ap
 
 ---
 
+## ⚠️ Builder/Strategist note — SOLVER LANDED 2026-07-04 (user-directed)
+
+Cakra gained the **Problem Solver** (Solver tab, `src/apps/cakra/solver/**` + `public/solver/feed.json` +
+registry alias `solver`) — see CONTEXT.md → "🧩 SOLVER LANDED" for seams and invariants. Treat it as shipped
+capability: don't re-add it as an epic, don't refactor it away, and don't hand-edit `feed.json` (the
+World-Solver routine owns that file). Wiring solutions deeper into Inbox/Bridge is fair game for future epics.
+Note for EPIC-11: the solver views use Tailwind structural classes + `var()`-token inline colours only — they
+audit at 0 on `offSystemStyle`; keep them that way when reducing.
+
+---
+
 ## ▶ ACTIVE — EPIC-11 · Design-system conformance II (the non-colour token axis) — **RATIFIED by the Strategist 2026-07-04**
 
 > **RATIFIED by the Strategist 2026-07-04.** The Builder opened this 2026-07-04 as the topmost cloud-executable **ROADMAP

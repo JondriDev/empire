@@ -145,6 +145,20 @@ confirmation. Fresh cloud checkout, global-playwright symlink + `/opt/pw-browser
 
 ---
 
+## 2026-07-04 · USER-DIRECTED — **SOLVER LANDED** (Cakra becomes the AI Problem Solver) + routine #8 created
+
+**Result:** 🟢 GREEN · shipped from the device (staleness-safe branch off `origin/main` `698bbe2`). Cakra gained a
+**Solver tab** (`src/apps/cakra/solver/` — 12 files): a world-problem catalog (32 seeded), user/⚡-intent problem
+intake, a 4-stage pure engine (analyze → decompose → solve → critique over lib/ai `chat()`), an auto-queue
+(severity×tractability picker, daily AI-call budget, 2-strike block, unit-pinned) and a World-feed reader for
+`public/solver/feed.json`. Registry grew the hidden alias `solver` → `ai-chat` tab `solver` (29 ids; qa-smoke +
+parity updated both ways). `problem`/`solution` nodes self-mirror into the Core graph — Network/Search/Inbox/
+Timeline see solving activity natively. Verified: vitest 344/344 (37 files, +26 cases), route-parity 29/29,
+`metrics.mjs --assert-zero` 0/0, tsc+vite green. **Routine #8 "The Empire - World Solver"
+(`trig_014H3aHQsaRpt8EYzjah4NP8`, daily 14:00 UTC, Tavily-only connectors) now web-researches cited briefs into
+`feed.json` — that file is routine-owned; see `docs/routines/world-solver.md` + CONTEXT "🧩 SOLVER LANDED".**
+Next: first World-Solver fire 2026-07-05T14:00Z fills the first 3 briefs.
+
 ## 2026-07-04 · QA — **EPIC-10 S3 CONFIRMED LIVE** (`TIMELINE 1/1` `descendants=true` reproduced independently; ★ EPIC-10 fully QA-confirmed S1–S3)
 
 **Result:** 🟢 GREEN · 29/29 routes clean (0 uncaught) · committed + pushed to `main`. First independent QA since S3
