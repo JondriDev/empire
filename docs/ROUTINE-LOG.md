@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · QA — **health re-confirmation** (2nd QA on green main `698bbe2`; no code change since last QA; `TIMELINE 1/1` all 6 axes hold)
+
+**Result:** 🟢 GREEN · 29/29 routes clean (0 uncaught) · screenshots overwritten · committed + pushed to `main`. HEAD
+`698bbe2` is the *previous* QA commit — no product code has landed since (last code change `6059284` = EPIC-10 S3, hardened
+by docs pass `6a1a0b2`), so this is an independent health re-run of a green, EPIC-10-code-complete main, not a new-stage
+confirmation. Fresh cloud checkout, global-playwright symlink + `/opt/pw-browsers/chromium-1194`.
+
+- **Build** 🟢 `tsc -b && vite build` · **vitest** 🟢 318/318 (34 files) · **eslint** clean · `metrics.mjs --assert-zero` exit 0.
+- **Smoke:** 29/29 render clean. **TIMELINE 1/1 ✅** all six axes (`ordered grouped flow persisted filtered descendants`).
+  Every guard green: SHELL-IS-STYLED, REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1
+  (`tagOnly`), NODE-LINEAGE 1/1 (5 axes), HOME-ALIVE 1/1, PROVENANCE-PERSISTS/ENTITY 3/3, OFFLINE 5/5, PRECACHE 83 no-gap.
+- **Metrics Δ ±0** vs the EPIC-10 S3 snapshot (apps 28, static 276, vitest 318, bundle 705.4). **Visually re-verified**
+  (`desktop.png` — 28 tiles incl. Timeline; `app-timeline.png` — TODAY day-group + 2 entity rows).
+- **No runtime bug, no contradiction, no drift.** ▶ Next: Strategist to retire EPIC-10 → DONE + promote the next epic
+  (EPICS.md still shows EPIC-10 ▶ ACTIVE; candidate = design-system conformance II).
+
+---
+
 ## 2026-07-04 · QA — **EPIC-10 S3 CONFIRMED LIVE** (`TIMELINE 1/1` `descendants=true` reproduced independently; ★ EPIC-10 fully QA-confirmed S1–S3)
 
 **Result:** 🟢 GREEN · 29/29 routes clean (0 uncaught) · committed + pushed to `main`. First independent QA since S3

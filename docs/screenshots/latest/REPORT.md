@@ -1,37 +1,50 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-04T13:08:27.784Z
+**Generated:** 2026-07-04T18:11:56.212Z
 
 **Result:** 29/29 rendered without crash, 0 failed.
 
 ---
 
-## ▶ QA VERDICT — EPIC-10 S3 CONFIRMED LIVE (no runtime bug)
+## QA verdict — 2026-07-04 (health re-confirmation on green main `698bbe2`)
 
-First independent QA since S3 landed (last QA `b3703ce` confirmed S2 on green main `a89e87e`; S3 `6059284` + the docs
-pass `6a1a0b2` landed since). Reproduced on green main **`6a1a0b2`** from a fresh cloud checkout, without the builder's tree.
+**No runtime bug. No contradiction. Main runs clean.**
 
-- **EPIC-10 S3 acceptance axis reproduced independently: `TIMELINE 1/1 ✅` grew a sixth axis `descendants=true`**
-  (`ordered=true grouped=true flow=true persisted=true filtered=true descendants=true`). The older seed's Timeline row
-  surfaces a `<NodeDescendants>` (`[data-node-descendants=qa-tl-older]`) naming the newer child it spawned — the
-  long-dormant `childrenOf` walker (built EPIC-9 S1, unused until now) is finally live. **★ EPIC-10 is CODE-COMPLETE
-  (S1–S3) and every stage is now QA-confirmed on green main → the Strategist may retire it to DONE.**
-- **29/29 routes render clean** (desktop + 28 apps, 0 uncaught JS). Timeline confirmed **visually** (`app-timeline.png`):
-  clock-glyph header, "· 2 moments", a **TODAY** sticky day header, two entity rows (accent dot + title + `dataset` type
-  chip + `now`) — the temporal lens renders real organism data.
-- **vitest 318/318** (34 files), **eslint clean**, `metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0).
-- Every other guard green: SHELL-IS-STYLED, REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1,
-  GLOBAL-SEARCH 1/1 (`tagOnly`), NODE-LINEAGE 1/1 (5 axes incl. `clickable`), HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3,
-  PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 83 no-gap.
-- **Metric deltas vs the builder's S3 snapshot (Δ ±0 — reproduced exactly):** apps **28**, static test count **276**,
-  test files **32/34**, vitest **318**, token-violations **0**, off-system **0**, bundle gz **~705.4**.
-- **No runtime bug, no contradiction.** Next: Strategist retires EPIC-10 to DONE and promotes the next cloud-executable
-  candidate (**design-system conformance II** — extend the token audit to spacing/radii/type with its own `metrics.mjs`
-  row; **EPIC-7 · Android** stays device-gated).
+This run's HEAD (`698bbe2`) is the *previous* QA commit; the last code change was
+`6059284` (EPIC-10 S3) hardened by the `6a1a0b2` docs pass — **no product code has
+landed since the last QA**, so this is an independent health re-confirmation of a
+green, EPIC-10-**code-complete** main, not a new-stage confirmation.
 
-*Cloud limit:* the fresh-checkout corpus is the 2 QA seeds, so the `→ spawned` descendants token + `↖ ancestry` trail +
-the Kind/App facet chips are low-contrast/absent in the static shot — the `descendants` + `filtered` guard axes carry
-those roundtrips headless, and `NodeDescendants.test.tsx` unit-pins the click→open+focus state change.
+**Build:** 🟢 `tsc -b && vite build` clean. **vitest:** 🟢 **318/318** (34 files).
+**eslint:** clean. **`metrics.mjs --assert-zero`:** exit 0 (tokens 0, off-system 0).
+
+**Epic-acceptance confirmation (EPIC-10 · The Timeline — the TEMPORAL lens):**
+`TIMELINE 1/1 ✅` reproduced independently with **all six axes green** —
+`ordered=true grouped=true flow=true persisted=true filtered=true descendants=true`.
+S1 (lens stands up), S2 (`filtered`), and S3 (`descendants` — the long-dormant
+`childrenOf` walker) all remain **done-confirmed LIVE**. EPIC-10 is code-complete
+(S1–S3); the acceptance metric holds. Visually confirmed in `app-timeline.png`
+(clock-glyph header, "one stream · 2 moments", a **TODAY** day group, two entity
+rows with `dataset` type chips + `now`).
+
+**Metric deltas vs the builder's EPIC-10 S3 snapshot — all Δ ±0** (main unchanged):
+
+| Metric | Value | Δ |
+|---|---|---|
+| Apps / routes | 28 / 29 clean (desktop + 28 apps) | ±0 |
+| Test cases (static) | 276 | ±0 |
+| vitest | 318/318 | ±0 |
+| Test files | 32 (metrics) / 34 (vitest) | ±0 |
+| Token violations | 0 | ±0 |
+| Off-system utils | 0 | ±0 |
+| Bundle gz (KB) | 705.4 | ±0 |
+| Precache entries | 83 (no gap) | ±0 |
+
+**Every guard green:** SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE 28 ✅ ·
+INBOUND-LANDS 3/3 ✅ · MEDIA-PERSISTS 3/3 ✅ · GRAPH-LEGIBLE 1/1 ✅ ·
+GLOBAL-SEARCH 1/1 ✅ (`tagOnly`) · NODE-LINEAGE 1/1 ✅ (5 axes) ·
+**TIMELINE 1/1 ✅ (6 axes)** · HOME-ALIVE 1/1 ✅ · PROVENANCE-PERSISTS 3/3 ✅ ·
+PROVENANCE-ENTITY 3/3 ✅ · OFFLINE-BOOT 5/5 ✅ · PRECACHE 83 no-gap ✅.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -55,7 +68,7 @@ those roundtrips headless, and `NodeDescendants.test.tsx` unit-pins the click→
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
