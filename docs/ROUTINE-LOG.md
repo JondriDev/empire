@@ -5,6 +5,35 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · QA (visual + smoke) — **EPIC-10 S1 CONFIRMED LIVE** on green main `3cfe846`: the Timeline lens is real, `TIMELINE 1/1` reproduced independently
+
+**First independent QA since `5d45ce8` (EPIC-9 S3).** EPIC-9 retired, EPIC-10 promoted, **EPIC-10 S1 shipped
+(`3cfe846`)** since — this run is its first independent confirmation. Fresh cloud checkout: `npm install`, build
+🟢 (`tsc -b && vite build`, 15.4s, PWA 82 precache entries), served `dist/` on :3001, ran the full headless
+smoke (global playwright symlinked into `node_modules` + `/opt/pw-browsers/chromium-1194`, per the known-good
+recipe).
+
+**Confirmed — S1 acceptance metric MOVED (without the builder's tree):** `TIMELINE 1/1 ✅`
+(`ordered=true grouped=true flow=true persisted=true`) — 2 graph-survivable `task` nodes (distinct
+`meta.created`, two apps) + 1 `empire-provenance` edge → reload → `/app/timeline` renders newest-`created`
+first, under a `[data-timeline-day]` header, seeded edge as a `[data-timeline-kind=flow]` row, surviving a 2nd
+reload. Backed by `timeline.test.ts` (15 cases). **Visually confirmed** (`app-timeline.png`): clock-glyph +
+"one stream · 2 moments" header, a **TODAY** sticky group, two entity rows with `dataset` type chips + `now`.
+
+**Everything else green:** **29/29 routes render clean** (desktop + 28 apps, 0 uncaught JS); SHELL-IS-STYLED ✅,
+REGISTRY-COVERAGE 28 ✅, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 (`tagOnly`), NODE-LINEAGE
+1/1 (5 axes), HOME-ALIVE 1/1, PROVENANCE-PERSISTS/ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 82 NO GAP. **vitest
+307/307** (33 files) 🟢, `metrics.mjs --assert-zero` exit 0. Metrics reproduce the builder's S1 snapshot exactly
+(apps 28, static 265 / vitest 307, test files 31 / 33, bundle gz 703.5, tokens 0, off-system 0 — Δ ±0). **No
+runtime bug, no contradiction.** Console/network noise all env-expected (blocked Weather/Maps CDNs, Files
+Android-only `/api/files` 500).
+
+**▶ NEXT = EPIC-10 S2** (filter the stream + traverse it by keyboard — copy Search's faceted idiom verbatim;
+`filterTimeline`/`timelineFacets` + roving cursor, grow the `TIMELINE` guard a `filtered` axis). Builder's
+stage; QA re-confirms once it lands.
+
+---
+
 ## 2026-07-04 · BUILDER — **EPIC-10 S1 SHIPPED**: the Timeline lens stands up end-to-end, `TIMELINE 0/1 → 1/1`
 
 **Built the organism's 4th lens — the TEMPORAL one.** The Empire had Network (structural), Search (query), Inbox (task)
