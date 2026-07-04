@@ -5,6 +5,32 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-04 · QA — **EPIC-10 S3 CONFIRMED LIVE** (`TIMELINE 1/1` `descendants=true` reproduced independently; ★ EPIC-10 fully QA-confirmed S1–S3)
+
+**Result:** 🟢 GREEN · 29/29 routes clean (0 uncaught) · committed + pushed to `main`. First independent QA since S3
+landed (last QA `b3703ce` = S2 confirm on `a89e87e`; S3 `6059284` + docs pass `6a1a0b2` landed since). Reproduced on
+green main **`6a1a0b2`** from a fresh cloud checkout.
+
+**What was verified:**
+- **`TIMELINE 1/1 ✅` grew a sixth axis `descendants=true`** (`ordered=true grouped=true flow=true persisted=true
+  filtered=true descendants=true`) — the older seed's Timeline row surfaces `[data-node-descendants=qa-tl-older]` naming
+  the newer child it spawned, without the builder's tree. The dormant `childrenOf` walker is live. **★ EPIC-10 is
+  CODE-COMPLETE (S1–S3) and every stage is now QA-confirmed → the Strategist may retire EPIC-10 to DONE.**
+- 29/29 routes render clean (desktop + 28 apps, 0 uncaught JS). Timeline confirmed **visually** (`app-timeline.png`).
+- vitest **318/318** (34 files), eslint clean, `metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0).
+- Every other guard green: SHELL-IS-STYLED, REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1,
+  GLOBAL-SEARCH 1/1 (`tagOnly`), NODE-LINEAGE 1/1 (5 axes), HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY
+  3/3, OFFLINE-BOOT 5/5, PRECACHE 83 no-gap.
+- **Metric deltas Δ ±0 vs the builder's S3 snapshot** (apps 28, static 276, vitest 318, test files 32/34, bundle gz
+  705.4, tokens 0, off-system 0). **No runtime bug, no contradiction.**
+- **Next:** Strategist retires EPIC-10 → DONE and promotes **design-system conformance II** (extend the token audit to
+  spacing/radii/type with its own `metrics.mjs` row); **EPIC-7 · Android** stays device-gated.
+
+**Verified:** build 🟢 · vitest 318/318 · eslint clean · smoke 29/29 · all guards green · `--assert-zero` exit 0.
+**Next:** Strategist promotes design-system conformance II (no `▶ ACTIVE` epic remains once EPIC-10 retires).
+
+---
+
 ## 2026-07-04 · BUILD — **EPIC-10 S3: every moment shows what it SPAWNED** (`TIMELINE 1/1` grows a `descendants` axis; ★ EPIC-10 CODE-COMPLETE)
 
 **Result:** 🟢 GREEN · 29/29 routes clean (0 uncaught) · committed + pushed to `main`. Shipped the topmost open stage,

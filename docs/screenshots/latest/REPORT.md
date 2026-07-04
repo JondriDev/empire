@@ -1,37 +1,37 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-04T08:08:37.969Z
+**Generated:** 2026-07-04T13:08:27.784Z
 
 **Result:** 29/29 rendered without crash, 0 failed.
 
-## Epic-acceptance confirmation — EPIC-10 S2 (green main `a89e87e`)
+---
 
-**✅ EPIC-10 S2 DONE-CONFIRMED LIVE — the temporal lens's faceted controls reproduced independently.** First QA
-since S2 landed (last QA `cf62dab` confirmed S1 on `3cfe846`; S2 `a89e87e` landed since). The `TIMELINE` guard's
-acceptance axis GREW a fifth axis `filtered=true`: **`ordered=true grouped=true flow=true persisted=true
-filtered=true` → 1/1 ✅**. The guard clicks the `app:goals` facet chip and asserts the stream narrows to ONLY the
-goals-owned entity, dropping the notes entity + the notes→goals flow — reproduced without the builder's tree.
-Backed by `timeline.test.ts` 15→22 cases (vitest 307→314). **No runtime bug, no contradiction. ▶ NEXT = EPIC-10 S3.**
+## ▶ QA VERDICT — EPIC-10 S3 CONFIRMED LIVE (no runtime bug)
 
-*Cloud limit:* the Kind/App facet chip rows render low-contrast against the dark theme with a 2-moment corpus, so
-they don't read prominently in `app-timeline.png`; the `filtered` axis carries the facet-narrow roundtrip headless
-and the roving ↑/↓/Enter cursor + focus state are unit-pinned in `timeline.test.ts`.
+First independent QA since S3 landed (last QA `b3703ce` confirmed S2 on green main `a89e87e`; S3 `6059284` + the docs
+pass `6a1a0b2` landed since). Reproduced on green main **`6a1a0b2`** from a fresh cloud checkout, without the builder's tree.
 
-## Metric deltas (vs the builder's EPIC-10 S2 snapshot — reproduced exactly, Δ ±0)
+- **EPIC-10 S3 acceptance axis reproduced independently: `TIMELINE 1/1 ✅` grew a sixth axis `descendants=true`**
+  (`ordered=true grouped=true flow=true persisted=true filtered=true descendants=true`). The older seed's Timeline row
+  surfaces a `<NodeDescendants>` (`[data-node-descendants=qa-tl-older]`) naming the newer child it spawned — the
+  long-dormant `childrenOf` walker (built EPIC-9 S1, unused until now) is finally live. **★ EPIC-10 is CODE-COMPLETE
+  (S1–S3) and every stage is now QA-confirmed on green main → the Strategist may retire it to DONE.**
+- **29/29 routes render clean** (desktop + 28 apps, 0 uncaught JS). Timeline confirmed **visually** (`app-timeline.png`):
+  clock-glyph header, "· 2 moments", a **TODAY** sticky day header, two entity rows (accent dot + title + `dataset` type
+  chip + `now`) — the temporal lens renders real organism data.
+- **vitest 318/318** (34 files), **eslint clean**, `metrics.mjs --assert-zero` exit 0 (tokens 0, off-system 0).
+- Every other guard green: SHELL-IS-STYLED, REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1,
+  GLOBAL-SEARCH 1/1 (`tagOnly`), NODE-LINEAGE 1/1 (5 axes incl. `clickable`), HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3,
+  PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE 83 no-gap.
+- **Metric deltas vs the builder's S3 snapshot (Δ ±0 — reproduced exactly):** apps **28**, static test count **276**,
+  test files **32/34**, vitest **318**, token-violations **0**, off-system **0**, bundle gz **~705.4**.
+- **No runtime bug, no contradiction.** Next: Strategist retires EPIC-10 to DONE and promotes the next cloud-executable
+  candidate (**design-system conformance II** — extend the token audit to spacing/radii/type with its own `metrics.mjs`
+  row; **EPIC-7 · Android** stays device-gated).
 
-| Metric | This run | Δ |
-|---|---|---|
-| Apps / routes | 28 | ±0 |
-| Test cases (static / vitest) | 272 / 314 | ±0 |
-| Test files (metrics / vitest) | 31 / 33 | ±0 |
-| Token violations | 0 | ±0 |
-| Off-system utilities | 0 | ±0 |
-| Bundle gz (KB) | 704.8 | ±0 |
-
-`node scripts/metrics.mjs --assert-zero` → exit 0 (tokens 0, off-system 0). Every guard green (SHELL-IS-STYLED,
-REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 `tagOnly`, NODE-LINEAGE 1/1
-5-axes, TIMELINE 1/1 5-axes, HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE 5/5,
-PRECACHE 83 no-gap).
+*Cloud limit:* the fresh-checkout corpus is the 2 QA seeds, so the `→ spawned` descendants token + `↖ ancestry` trail +
+the Kind/App facet chips are low-contrast/absent in the static shot — the `descendants` + `filtered` guard axes carry
+those roundtrips headless, and `NodeDescendants.test.tsx` unit-pins the click→open+focus state change.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -55,7 +55,7 @@ PRECACHE 83 no-gap).
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -121,13 +121,13 @@ App-level provenance remembers which app fed which app; node-level lineage answe
 
 **NODE-LINEAGE: 1/1 ✅**
 
-## Timeline guard (EPIC-10 S1–S2 — the TEMPORAL lens, now with faceted controls)
+## Timeline guard (EPIC-10 S1–S3 — the TEMPORAL lens: faceted, and read BOTH ways)
 
-The Empire had three lenses over its one Core graph — Network (STRUCTURAL), Search (QUERY), Inbox (TASK) — but no way to see *when* it did things, even though every `CoreNode` stamps `meta.created` and every `ProvEdge` stamps `at`. The Timeline app merges every entity-birth + every app→app handoff into one newest-first, day-grouped stream via the pure `buildTimeline`/`groupByDay`/`dayKey` spine, now filtered by the pure `filterTimeline`/`timelineFacets` helpers (all unit-pinned in `timeline.test.ts`). Two graph-survivable `task` nodes (distinct `meta.created`, owned by two apps) + one `empire-provenance` edge were seeded, then reloaded so BOTH persist stores rehydrated; PASS = the two entity rows render newest-`created` first (`ordered`), at least one `[data-timeline-day]` header renders (`grouped`), the seeded edge renders as a `[data-timeline-kind=flow]` row (`flow`), all of it still holds after a SECOND reload (`persisted`), and clicking the `goals` App chip narrows to ONLY the goals-owned entity — dropping the notes entity + the notes→goals flow (`filtered`). This carries the graph+ledger→persist→rehydrate→ordered-render + faceted-narrow roundtrip jsdom cannot; the sticky day headers, relative labels + chip tints are the on-device visual.
+The Empire had three lenses over its one Core graph — Network (STRUCTURAL), Search (QUERY), Inbox (TASK) — but no way to see *when* it did things, even though every `CoreNode` stamps `meta.created` and every `ProvEdge` stamps `at`. The Timeline app merges every entity-birth + every app→app handoff into one newest-first, day-grouped stream via the pure `buildTimeline`/`groupByDay`/`dayKey` spine, now filtered by the pure `filterTimeline`/`timelineFacets` helpers (all unit-pinned in `timeline.test.ts`). Two graph-survivable `task` nodes (distinct `meta.created`, owned by two apps, the newer's `data.from` = the older) + one `empire-provenance` edge were seeded, then reloaded so BOTH persist stores rehydrated; PASS = the two entity rows render newest-`created` first (`ordered`), at least one `[data-timeline-day]` header renders (`grouped`), the seeded edge renders as a `[data-timeline-kind=flow]` row (`flow`), all of it still holds after a SECOND reload (`persisted`), the older entity's row surfaces a `<NodeDescendants>` (`[data-node-descendants=qa-tl-older]`) naming the newer child it spawned (`descendants`), and clicking the `goals` App chip narrows to ONLY the goals-owned entity — dropping the notes entity + the notes→goals flow (`filtered`). **S3** surfaces the long-dormant `childrenOf` walker so a moment reads BOTH ways — `↖ ancestry` (`<NodeLineage>`) and `→ spawned` (`<NodeDescendants>`), each hop a navigable `[role="button"]` (unit-pinned in `NodeDescendants.test.tsx`). This carries the graph+ledger→persist→rehydrate→ordered-render + faceted-narrow + descendants roundtrip jsdom cannot; the sticky day headers, relative labels + chip tints are the on-device visual.
 
-| Ordered newest-first | Grouped by day | Flow row | Survived reload | App-chip narrows | Result |
-|---|---|---|---|---|---|
-| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Ordered newest-first | Grouped by day | Flow row | Survived reload | Spawned-child shown | App-chip narrows | Result |
+|---|---|---|---|---|---|---|
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **TIMELINE: 1/1 ✅**
 

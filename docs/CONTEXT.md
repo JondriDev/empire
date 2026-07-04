@@ -141,10 +141,20 @@
       newest-first live CoreNodes. Real window/focus navigation is observable headless only on the Bridge/home (`/`) shell,
       NOT the `/app/*` route — the guard asserts the token renders + names the right child; the state change is unit-pinned
       in `NodeDescendants.test.tsx`.
-  - **▶ NEXT STAGE = none in an active epic — EPIC-10 is CODE-COMPLETE (S1–S3 all shipped on `main`).** QA to confirm S3
-    done on the new green main: on `/app/timeline`, a moment whose entity spawned another shows a navigable "→ spawned «…»"
-    token that climbs to the child (the smoke's `descendants` axis carries the render + correct-child-id headless;
-    `NodeDescendants.test.tsx` pins the click→open+focus state change). Then the **Strategist promotes the next epic** — the
+    - **✅ QA-CONFIRMED LIVE (2026-07-04, green main `6a1a0b2`) — S3 done-confirmed; ★ EPIC-10 is fully QA-confirmed (S1–S3).**
+      First independent QA since S3 landed (last QA `b3703ce` = S2 confirm on `a89e87e`; S3 `6059284` + docs pass `6a1a0b2`
+      landed since). **The S3 acceptance axis reproduced independently: `TIMELINE 1/1 ✅` grew a sixth axis `descendants=true`**
+      (`ordered=true grouped=true flow=true persisted=true filtered=true descendants=true`) — the older seed's Timeline row
+      surfaces `[data-node-descendants=qa-tl-older]` naming the newer child it spawned, reproduced without the builder's tree;
+      the long-dormant `childrenOf` walker is finally live. **29/29 routes render clean** (0 uncaught JS). vitest **318/318**
+      (34 files), eslint clean, `metrics.mjs --assert-zero` exit 0. Metrics reproduce the builder's S3 snapshot EXACTLY (apps
+      28, static 276, vitest 318, test files 32/34, bundle 705.4, Δ ±0). Every other guard green (SHELL-IS-STYLED,
+      REGISTRY-COVERAGE 28, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 `tagOnly`, NODE-LINEAGE 1/1 5-axes,
+      HOME-ALIVE 1/1, PROVENANCE-PERSISTS/ENTITY 3/3, OFFLINE 5/5, PRECACHE 83 no-gap). **Visually confirmed** (`app-timeline.png`).
+      **No runtime bug, no contradiction.** *Cloud limit:* the 2-seed fresh-checkout corpus makes the `→ spawned` token + facet
+      chips low-contrast/absent in the static shot — the `descendants`/`filtered` axes carry them headless. **▶ NEXT = Strategist
+      retires EPIC-10 to DONE + promotes the next epic (design-system conformance II — EPIC-7 · Android stays device-gated).**
+  - **▶ NEXT STAGE = none in an active epic — EPIC-10 is CODE-COMPLETE + FULLY QA-CONFIRMED (S1–S3 all shipped + confirmed on `main`).** Then the **Strategist promotes the next epic** — the
     topmost cloud-executable ROADMAP candidate is **design-system conformance II** (extend the token audit to
     spacing/radii/type with its own `metrics.mjs` row); **EPIC-7 · Android stays device-gated**. If you arrive with no
     `▶ ACTIVE` epic promoted, take design-system conformance II and flag EPICS needs the Strategist.
