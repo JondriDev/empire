@@ -16,6 +16,25 @@
 
 ---
 
+## 🧹 REPO RESHAPE (2026-07-05, human session) — one-time notice, honor the rules
+
+A professionalization pass reshaped the repo (branch `chore/pro-repo`, landed inside a
+fleet freeze). What changed for routines:
+
+- **Removed for good — do not recreate:** `docs/archive/`, `docs/ITERATION_BACKLOG.md`,
+  `docs/ITERATION_PROTOCOL.md`, `docs/ENHANCEMENTS.md`, the committed `scratchpad/`
+  (now gitignored), and the legacy iteration scripts (`scripts/empire`, `empire-1000.sh`,
+  `empire-auto-loop.sh`, `empire-iteration.sh`, `empire.sh`, `empire_fabric_iterations.py`,
+  `iterate.sh`, `pwa-launch.sh`, `install-homescreen.sh`, `test-crud.mjs`). Still-live
+  backlog ideas were folded into `docs/ROADMAP.md` (tail section).
+- **Moved:** `PACKAGING.md` → `docs/PACKAGING.md`; `empire.desktop` → `scripts/empire.desktop`.
+- **Unchanged and still load-bearing:** CONTEXT/EPICS/ROADMAP/METRICS/ROUTINE-LOG/metrics.json,
+  `docs/routines/**`, `docs/screenshots/latest/REPORT.md`, `docs/digests/`,
+  `public/solver/feed.json`, every `scripts/*.mjs` guard.
+- `docs/README.md` now indexes the documentation — keep it current when docs change.
+
+---
+
 ## ▶ Active epic & exact next-stage shape
 
 > The single most important block. The Strategist keeps this in sync with the
