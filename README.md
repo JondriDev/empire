@@ -195,7 +195,7 @@ needed. Two ready-to-install versions come out of one offline-first codebase:
 - **Android APK** — built by the **Android APK** workflow; download the APK
   artifact and install it (a real launcher icon, fully offline).
 
-👉 **Full step-by-step guide: [PACKAGING.md](./PACKAGING.md)**
+👉 **Full step-by-step guide: [docs/PACKAGING.md](./docs/PACKAGING.md)**
 
 ### PWA Installation (manual / self-hosted)
 
@@ -224,8 +224,8 @@ empire/
 │   ├── App.tsx            # Main router
 │   ├── main.tsx           # Entry point
 │   └── design-system.css  # Theme tokens
-├── docs/                  # Documentation (docs/archive/ = history)
-├── scripts/               # Launchers + dev/iteration tooling
+├── docs/                  # Documentation
+├── scripts/               # Launcher + CI guard scripts
 ├── public/                # Icons, manifest, service worker
 ├── server.js              # Express backend (port 3001)
 ├── dist/                  # Production build (generated)
