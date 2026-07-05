@@ -12,6 +12,7 @@ import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { SendResultMenu } from '../../components/ui/SendResultMenu'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { EmptyState } from '../../components/ui/Utility'
 import { bookNodeData } from './readerGraph'
 import {
   listBooks, getBook, addBook, getBookBlob, updateBook, deleteBook,
@@ -128,20 +129,18 @@ function Library({ books, importing, onOpen, onDelete, onImportClick }: {
       </header>
 
       {books.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center px-8 gap-4">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: `color-mix(in srgb, ${ACCENT} 14%, transparent)` }}>
-            <BookOpen className="w-8 h-8" style={{ color: ACCENT }} />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold mb-1">Your library is empty</h2>
-            <p className="text-sm max-w-sm" style={{ color: 'var(--text3)' }}>
-              Add an EPUB, PDF, Markdown, text, or Word file. While you read, select any passage and ask Cakra about it.
-            </p>
-          </div>
-          <button onClick={onImportClick} className="empire-btn inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background: ACCENT, color: 'var(--void)' }}>
-            <Plus className="w-4 h-4" /> Add your first book
-          </button>
-        </div>
+        <EmptyState
+          className="flex-1"
+          accent={ACCENT}
+          icon={<BookOpen className="w-6 h-6" />}
+          title="Your library is empty"
+          description="Add an EPUB, PDF, Markdown, text, or Word file. While you read, select any passage and ask Cakra about it."
+          action={
+            <button onClick={onImportClick} className="empire-btn inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background: ACCENT, color: 'var(--void)' }}>
+              <Plus className="w-4 h-4" /> Add your first book
+            </button>
+          }
+        />
       ) : (
         <div className="flex-1 overflow-y-auto p-6">
           <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>

@@ -1,9 +1,9 @@
 {
   "current": {
-    "generatedAt": "2026-07-05T19:20:13.397Z",
+    "generatedAt": "2026-07-05T20:18:26.770Z",
     "apps": 29,
-    "testFiles": 35,
-    "testCases": 302,
+    "testFiles": 36,
+    "testCases": 307,
     "tokenViolations": 0,
     "offSystemUtilities": 0,
     "offSystemStyle": 0,
@@ -12,40 +12,10 @@
       "type": 0,
       "motion": 0
     },
-    "bundleGzKB": 716.7,
-    "bundleRawKB": 2435.9
+    "bundleGzKB": 717.4,
+    "bundleRawKB": 2435.5
   },
   "history": [
-    {
-      "generatedAt": "2026-07-03T23:10:53.687Z",
-      "apps": 27,
-      "testFiles": 30,
-      "testCases": 250,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "bundleGzKB": 701.4,
-      "bundleRawKB": 2392.3
-    },
-    {
-      "generatedAt": "2026-07-03T23:10:59.793Z",
-      "apps": 27,
-      "testFiles": 30,
-      "testCases": 250,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "bundleGzKB": 701.4,
-      "bundleRawKB": 2392.3
-    },
-    {
-      "generatedAt": "2026-07-04T00:16:25.539Z",
-      "apps": 28,
-      "testFiles": 31,
-      "testCases": 265,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "bundleGzKB": 703.5,
-      "bundleRawKB": 2398
-    },
     {
       "generatedAt": "2026-07-04T03:08:51.895Z",
       "apps": 28,
@@ -435,6 +405,54 @@
       },
       "bundleGzKB": 716.7,
       "bundleRawKB": 2435.9
+    },
+    {
+      "generatedAt": "2026-07-05T19:20:13.397Z",
+      "apps": 29,
+      "testFiles": 35,
+      "testCases": 302,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "bundleGzKB": 716.7,
+      "bundleRawKB": 2435.9
+    },
+    {
+      "generatedAt": "2026-07-05T20:11:14.234Z",
+      "apps": 29,
+      "testFiles": 35,
+      "testCases": 302,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "bundleGzKB": 716.7,
+      "bundleRawKB": 2435.9
+    },
+    {
+      "generatedAt": "2026-07-05T20:18:26.599Z",
+      "apps": 29,
+      "testFiles": 36,
+      "testCases": 307,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "bundleGzKB": 717.4,
+      "bundleRawKB": 2435.5
     }
   ]
 }

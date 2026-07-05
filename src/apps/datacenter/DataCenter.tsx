@@ -11,6 +11,7 @@ import { Bot, Plus, Trash2, Database, X } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { EmptyState } from '../../components/ui/Utility'
 import {
   STORAGE_KEY, type DCStore, type DCTable, type TableRow,
   deserializeStore, serializeStore, newId,
@@ -190,13 +191,17 @@ export default function DataCenter() {
 
         <div className="flex-1 overflow-auto p-6">
           {!table ? (
-            <div className="text-center py-12">
-              <Database className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text3)' }} />
-              <p className="text-sm" style={{ color: 'var(--text2)' }}>No tables yet.</p>
-              <button onClick={() => setShowNewTable(true)} className="mt-3 text-sm" style={{ color: ACCENT }}>
-                Create your first table
-              </button>
-            </div>
+            <EmptyState
+              accent={ACCENT}
+              icon={<Database className="w-6 h-6" />}
+              title="No tables yet"
+              description="Create a table to store rows locally — every table also becomes a dataset node in The Network."
+              action={
+                <button onClick={() => setShowNewTable(true)} className="text-sm" style={{ color: ACCENT }}>
+                  Create your first table
+                </button>
+              }
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">

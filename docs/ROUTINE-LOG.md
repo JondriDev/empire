@@ -5,6 +5,43 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-05 · POLISH — unify primary empty-states onto the shared `<EmptyState>` primitive (no active epic)
+
+**Context:** EPIC-11 is CODE-COMPLETE **and** QA-CONFIRMED (HEAD `0b7af75` is that QA commit; `offSystemStyle` 0
+LOCKED). No `▶ ACTIVE` epic stage remains, and the ROADMAP NOW items are all DONE/folded → per the routine I took the
+topmost cloud-executable POLISH increment and **flagged EPICS.md needs the Strategist** to promote the next epic.
+
+**Done:** a well-crafted `EmptyState` primitive (`src/components/ui/Utility.tsx`) already existed but **only Notes
+used it** — every other app hand-rolled a bare, inconsistent empty state (mixed `text-faint`/`text-muted`/`var(--text2/3)`,
+ad-hoc structure). Extended `EmptyState` with an optional **`accent?: string`** prop (a CSS colour *token*, e.g.
+`var(--c-pembaca)`) so each app keeps its identity colour while sharing one rhythm; default path is **byte-identical**
+(Notes unaffected). Converted the **5 primary full-panel collection-empty states** onto it:
+**Inbox** (`var(--signal)`), **Reader** (`var(--c-pembaca)`, keeps its "Add your first book" action), **Photos**
+(signal default), **DataCenter** (`var(--c-mesin)`, keeps "Create your first table"), **Messages** (signal default).
+**Adoption: apps using `<EmptyState>` 1 → 6.** New `Utility.test.tsx` (+5) pins the primitive (title / description+action /
+omit-description / both accent paths). **Deliberately skipped** player "no-selection" states (Music/Video) and narrow
+sidebar sub-lists (Maps saved / Language phrases / Browser bookmarks·history) — the 200px centred block is oversized there;
+left for a future targeted pass.
+
+**Verified (the gate):** `npm run build` 🟢 (tsc -b + vite build); `npx vitest run` **365/365** (39 files, +5);
+`npx eslint` clean on all 7 touched/new files; `node scripts/metrics.mjs` **no regression** — apps 29 ±0,
+**offSystemStyle 0 (r0/t0/m0) ±0**, tokenViolations 0 ±0, offSystemUtilities 0 ±0, test cases +5, test files +1,
+bundle 716.7→717.4 gz (+0.7), no new deps; **`--assert-zero` exit 0**. The primitive stays token-only (radii/type via
+`var(--radius-xl)`/`var(--text-*)`; accent chip via `color-mix` on the token) so the metric holds.
+
+**Not verifiable in cloud (visual):** each swap changes an empty panel's exact layout — the centred icon-chip + title +
+description block replaces bare text. tsc/eslint/the reused Notes-proven component give strong confidence, but the pixel
+render (esp. Reader's full-height centring via `className="flex-1"`, and the per-app accent chip tint) is an on-device
+confirm. QA should smoke `/app/inbox`, `/app/reader`, `/app/photos`, `/app/datacenter`, `/app/messages` on an empty
+corpus and confirm each shows the unified EmptyState.
+
+**Next (single best step):** the Strategist promotes the next epic (topmost cloud-executable ROADMAP candidate — a
+natural one: continue this empty/loading/error-state polish as a measured epic with a guard, OR another POLISH theme;
+EPIC-7 Android stays device-gated). A cheap follow-on: extend `<EmptyState>` adoption to the skipped sidebar/selection
+states with a size-appropriate compact variant.
+
+---
+
 ## 2026-07-05 · QA visual + smoke — EPIC-11 QA-CONFIRMED (offSystemStyle 56→0 LOCKED)
 
 **Result:** 🟢 GREEN on `main` `4c643a9`. `npm run build` exits 0; `node scripts/qa-smoke.mjs` → **30/30 routes

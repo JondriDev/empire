@@ -47,7 +47,31 @@ fleet freeze). What changed for routines:
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **★ CODE-COMPLETE + ✅ QA-CONFIRMED (2026-07-05) = EPIC-11 · Design-system conformance II (the non-colour token axis).**
+- **▶ NO ACTIVE EPIC STAGE (2026-07-05). EPIC-11 is DONE (code-complete + QA-confirmed). The Strategist must promote the
+  next epic** — take the topmost cloud-executable ROADMAP candidate (EPIC-7 · Android stays device-gated). Builder runs are
+  now shipping standalone POLISH increments while waiting; a real *epic* would let QA confirm a moved metric.
+  - **↪ POLISH INCREMENT SHIPPED 2026-07-05 (this run, no active epic) — unified primary empty-states onto the shared
+    `<EmptyState>` primitive; adoption 1 → 6 apps.** A crafted `EmptyState` (`src/components/ui/Utility.tsx`) existed but
+    ONLY Notes used it — every other app hand-rolled a bare, inconsistent empty state. **Extended the primitive with an
+    optional `accent?: string` prop** (a CSS colour *token* like `var(--c-pembaca)`; default path byte-identical so Notes is
+    unaffected; the icon chip tints via `color-mix(in srgb, ${accent} 10/22%, transparent)` — token-only, metric-clean).
+    **Converted the 5 primary full-panel collection-empty states:** Inbox (`var(--signal)`), Reader (`var(--c-pembaca)`,
+    keeps its action btn + `className="flex-1"` for full-height centring), Photos (signal default), DataCenter
+    (`var(--c-mesin)`, keeps action), Messages (signal default). New `Utility.test.tsx` (+5). build🟢 vitest 360→365🟢
+    eslint clean; **offSystemStyle 0 (r0/t0/m0) ±0, tokens 0, off-system utils 0, `--assert-zero` exit 0**; bundle
+    716.7→717.4 (+0.7), no new deps.
+    - **SEAM (reuse — how to unify any empty state):** import `{ EmptyState }` from `../../components/ui/Utility`; render
+      `<EmptyState icon={<Glyph className="w-6 h-6"/>} title=… description=… action={…} accent={APP_ACCENT} />`. `accent`
+      is a `var(--*)` token (omit → signal/cyan default). It's a centred flex column, `minHeight:200px`, `padding:40px 24px`,
+      token radii/type — add `className="flex-1"` when it must fill a flex-column parent (Reader). Adoption count =
+      `grep -rl EmptyState src/apps | wc -l` (now 6).
+    - **DELIBERATELY SKIPPED (a fit judgement, not a gap):** player "no-selection" states (Music `No track playing`, Video
+      `No video selected`) and narrow sidebar sub-lists (Maps saved-places, Language phrase-book, Browser bookmarks/history)
+      — the 200px block is oversized there. A future pass could add a compact `<EmptyState size="sm">` variant for them.
+    - **jsdom TRAP (cost me a red test → fixed):** jsdom can't parse `color-mix()` and DROPS it when serialising inline
+      style, so asserting the accent appears in `getAttribute('style')` FAILS. Don't test computed style for color-mix —
+      assert render behaviour (icon/title present); the token-only guarantee is already carried by the grep-based metrics.
+- **★ EPIC-11 (DONE) · Design-system conformance II (the non-colour token axis).**
   **S1–S4 ALL SHIPPED; `offSystemStyle` 56 → 0 (r0/t0/m0), LOCKED in `--assert-zero`.** **QA-CONFIRMED INDEPENDENTLY this run
   on green main `4c643a9`** — `metrics.mjs` reproduces `0 (r0/t0/m0)`, `--assert-zero` exits 0, build🟢 30/30 routes render
   clean, all guards green (see `docs/screenshots/latest/REPORT.md`). **The acceptance metric moved and holds → EPIC-11 is

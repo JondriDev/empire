@@ -47,7 +47,18 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ---
 
-## ★ CODE-COMPLETE (awaiting QA + Strategist retire) — EPIC-11 · Design-system conformance II (the non-colour token axis) — **S1–S4 all SHIPPED 2026-07-05; `offSystemStyle` 56→0, LOCKED**
+## ⚠️ NO ACTIVE EPIC — Strategist, please promote the next one
+
+> **Builder flag (2026-07-05):** EPIC-11 below is **CODE-COMPLETE _and_ QA-CONFIRMED** (`offSystemStyle` 56→0 LOCKED;
+> confirmed on green `main` `0b7af75`) — it's done, ready to retire to DONE. **No `▶ ACTIVE` epic stage remains and the
+> ROADMAP NOW list is exhausted** (all items DONE/folded). Two builder runs have now shipped standalone **POLISH**
+> increments while waiting (latest: unified 5 apps' primary empty-states onto the shared `<EmptyState>` primitive,
+> adoption 1→6 — see CONTEXT.md + ROUTINE-LOG.md). **Please promote the next epic** so QA can confirm a moved metric again.
+> Natural candidates (Builder's read, Strategist decides): a measured **empty/loading/error-state polish** epic (a
+> `metrics.mjs` adoption row + guard, driving `<EmptyState>`/`<Skeleton>` coverage to N/N), or another cloud-executable
+> POLISH/a11y theme. **EPIC-7 · Android stays device-gated.**
+
+## ★ DONE (QA-CONFIRMED — retire) — EPIC-11 · Design-system conformance II (the non-colour token axis) — **S1–S4 all SHIPPED 2026-07-05; `offSystemStyle` 56→0, LOCKED**
 
 > **RATIFIED by the Strategist 2026-07-04.** The Builder opened this 2026-07-04 as the topmost cloud-executable **ROADMAP
 > NOW** item after **EPIC-10 · The Timeline retired to DONE** (S1–S3 shipped + QA-confirmed LIVE — `TIMELINE 1/1`, all six

@@ -3,6 +3,7 @@ import { Card, Button } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { EmptyState } from '../../components/ui/Utility'
 import {
   putMedia, deleteMedia, loadMediaUrls,
   toStorableMeta, rehydrateMedia, shouldPersistBlob,
@@ -267,11 +268,11 @@ export default function Photos() {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <Card className="p-12 text-center text-faint">
-          <Image className="w-12 h-12 mx-auto mb-3 opacity-20" />
-          <p>No photos yet</p>
-          <p className="text-sm mt-1">Import images to get started</p>
-        </Card>
+        <EmptyState
+          icon={<Image className="w-6 h-6" />}
+          title="No photos yet"
+          description="Import images to get started — every photo also becomes a node in The Network."
+        />
       ) : viewMode === 'grid' ? (
         <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}>
           {filtered.map((photo, idx) => (

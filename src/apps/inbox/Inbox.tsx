@@ -19,6 +19,7 @@ import { partitionTasks, isTaskDone } from '../../lib/core/tasks'
 import { apps, getAppIcon } from '../../lib/registry'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { NodeLineage } from '../../components/ui/NodeLineage'
+import { EmptyState } from '../../components/ui/Utility'
 import type { CoreNode } from '../../lib/core/graph'
 
 // One accent per view — the Inbox reads as the CORE teal "signal", since a task
@@ -64,13 +65,12 @@ export default function Inbox() {
       </div>
 
       {empty && (
-        <div className="gp rounded-2xl text-center" style={{ padding: 'var(--space-6, 28px)' }}>
-          <InboxIcon className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text3)' }} />
-          <p className="text-sm font-medium" style={{ color: 'var(--text2)' }}>No tasks yet</p>
-          <p className="text-xs mt-1.5" style={{ color: 'var(--text3)' }}>
-            Use the ⚡ menu on any item — or ⌘K — and pick “Make Task”. It lands here.
-          </p>
-        </div>
+        <EmptyState
+          icon={<InboxIcon className="w-6 h-6" />}
+          title="No tasks yet"
+          description="Use the ⚡ menu on any item — or ⌘K — and pick “Make Task”. It lands here."
+          accent={ACCENT}
+        />
       )}
 
       {/* Open tasks */}

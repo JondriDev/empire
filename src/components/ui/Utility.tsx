@@ -15,10 +15,25 @@ interface EmptyStateProps {
   title: string
   description?: string
   action?: ReactNode
+  /** Optional accent for the icon chip (a CSS colour token, e.g. `var(--c-pembaca)`),
+   *  so each app keeps its own identity while sharing the empty-state rhythm.
+   *  Omit to use the default signal/cyan. */
+  accent?: string
   className?: string
 }
 
-export function EmptyState({ icon, title, description, action, className = '' }: EmptyStateProps) {
+export function EmptyState({ icon, title, description, action, accent, className = '' }: EmptyStateProps) {
+  const chip = accent
+    ? {
+        background: `color-mix(in srgb, ${accent} 10%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${accent} 22%, transparent)`,
+        color: accent,
+      }
+    : {
+        background: tint('signal', 8),
+        border: `1px solid ${tint('signal', 18)}`,
+        color: 'var(--color-cyan-3)',
+      }
   return (
     <div
       className={className}
@@ -42,9 +57,7 @@ export function EmptyState({ icon, title, description, action, className = '' }:
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: tint('signal', 8),
-            border: `1px solid ${tint('signal', 18)}`,
-            color: 'var(--color-cyan-3)',
+            ...chip,
           }}
         >
           {icon}

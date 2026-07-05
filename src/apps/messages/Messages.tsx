@@ -8,6 +8,7 @@ import { Bot, Send } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { EmptyState } from '../../components/ui/Utility'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { LineageTrail } from '../../components/ui/LineageTrail'
@@ -143,13 +144,11 @@ export default function Messages() {
         {(() => {
         const thread = messages.filter(m => m.sender === recipient || m.sender === 'Me')
         if (thread.length === 0) return (
-        <div className="text-center py-12">
-        <div className="w-14 h-14 rounded-2xl bg-signal/10 flex items-center justify-center mx-auto mb-4">
-        <Send className="w-7 h-7 text-signal opacity-50" />
-        </div>
-        <p className="text-muted text-sm font-medium">No messages with {recipient} yet</p>
-        <p className="text-faint text-xs mt-1">Start the conversation below</p>
-        </div>
+        <EmptyState
+        icon={<Send className="w-6 h-6" />}
+        title={`No messages with ${recipient} yet`}
+        description="Start the conversation below."
+        />
         )
         return thread.map(msg => {
         const isMe = msg.sender === 'Me'
