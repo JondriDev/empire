@@ -5,6 +5,30 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-05 · QA visual + smoke — EPIC-11 QA-CONFIRMED (offSystemStyle 56→0 LOCKED)
+
+**Result:** 🟢 GREEN on `main` `4c643a9`. `npm run build` exits 0; `node scripts/qa-smoke.mjs` → **30/30 routes
+render clean, 0 failed**; every guard green (SHELL-IS-STYLED, REGISTRY-COVERAGE 29 apps, INBOUND-LANDS 3/3,
+MEDIA-PERSISTS 3/3, GRAPH-LEGIBLE, GLOBAL-SEARCH, NODE-LINEAGE, TIMELINE, HOME-ALIVE, PROVENANCE-PERSISTS 3/3,
+PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE-AUDIT no gap). Visually inspected desktop + solver shots —
+shell fully styled, Problem Solver renders clean.
+
+**Metrics:** `metrics.mjs` → apps 29, test cases 302, tokenViolations 0, offSystemUtilities 0, **offSystemStyle
+0 (r0/t0/m0)**, bundle 716.7 gz (+1.5 env variance). **`--assert-zero` exits 0** — ratchet holds.
+
+**Epic-acceptance:** **EPIC-11 CONFIRMED LIVE.** Its target metric `offSystemStyle` = 0 (r0/t0/m0) reproduced
+independently and now locked in `--assert-zero` — the full 56→0 leap (S1 baseline → S2 type→0 → S3 radii→0 →
+S4 motion→0 + LOCK) holds. All three sub-counts 0 and gated. **S1–S4 done-confirmed → EPIC-11 ready to retire
+to DONE; next run promotes the next epic (topmost cloud-executable ROADMAP NOW; EPIC-7 Android stays gated).**
+
+**No runtime bugs.** Env-expected noise only (weather geocoding / maps tiles blocked CDNs, files API 500 is
+Android-only). Env note: `playwright` isn't a package.json dep — installed it `--no-save` (browsers pre-installed
+at `/opt/pw-browsers`) to run the harness; reverted the incidental `package-lock.json` touch, committed docs only.
+
+**Next:** Strategist retires EPIC-11 to DONE and promotes the next epic.
+
+---
+
 ## 2026-07-05 · WORLD-SOLVER (routine #8, first fire) — 3 cited briefs + 1 discovery
 
 **Result:** 🟢 GREEN · `public/solver/feed.json` refreshed from empty `{problems:[],briefs:{}}` → 3 briefs +

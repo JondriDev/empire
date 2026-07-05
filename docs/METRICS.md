@@ -14,15 +14,15 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-| Metric | Current (QA 2026-07-05, after **EPIC-11 S2 (type→0) + S3 (radii→0)** confirmed + **Cakra Problem Solver** landed — green main `57262e8`) | Target | Direction |
+| Metric | Current (QA 2026-07-05, after **EPIC-11 S1–S4 all shipped — `offSystemStyle` 56→0 (r0/t0/m0) LOCKED & QA-CONFIRMED** — green main `4c643a9`) | Target | Direction |
 |---|---|---|---|
 | Apps / routes | 29 (**+1** vs the S1 snapshot — the new `solver` alias route, a hidden Cakra tab surfaced at `/app/solver`; not its own launcher tile) | ~26 (steady) | coherence over new surface — not a growth metric |
 | Test cases | 302 (static, `src/` only — **+26** vs S1's 276: the Cakra Problem Solver's `engine`/`catalog`/`queue` test files) · **360** (vitest run, **+26** vs S1's 334) | 60+ | ↑ higher = safer to leap |
 | Test files | 35 (metrics, `src/` only — +3 solver test files) · 38 (vitest, incl. `scripts/precacheAudit.test.mjs` + `scripts/pwaBaseAudit.test.mjs` + `scripts/styleAudit.test.mjs`) | grow with code | ↑ |
 | Design-token violations | **0** | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
 | Off-system utilities | **0** (↓ from 1076 — the redesign batch's `98c61c7` "token-ize Tailwind palette classes across all apps" swept the whole mass; EPIC-5 S8 `c51f79f` LOCKED it with `--assert-zero` CI gate; re-confirmed 0 this run) | 0 | ↓ Tailwind palette classes (`text-gray-400`, `bg-cyan-600`, `bg-white/10`, `text-white`, `text-red-400`…) that bypass the JondriDev tokens — **EPIC-5 TARGET MET (0)** |
-| Off-system style | **2** (r0/t0/m2 — **−54 vs the S1 baseline of 56**; **QA-CONFIRMED independently 2026-07-05 on green main `57262e8`** — `metrics.mjs` reproduces `2 (r0/t0/m2)` exactly. **S2 drove type t42→0, S3 drove radii r12→0** (both sub-counts now 0); the 2 survivors are the S4 motion offenders `ArtifactGallery.tsx` (`ease-out`) + `Calculator.tsx` (`ease-in-out`). Still NOT in `--assert-zero` (locks only at 0, S4). **S2 + S3 done-confirmed — the acceptance metric moved; only S4 (motion m2→0 + LOCK) remains → EPIC-11 CODE-COMPLETE after S4** | 0 | ↓ raw radii/type/easing bypassing `--radius-*`/`--text-*`/`--ease-*` |
-| Bundle gz (KB) | 718.9 (+13.5 vs the S1 snapshot of 705.4 — +12.6 the Cakra solver lazy chunk [declared intentional in the commit], +0.9 build-env gzip variance; the builder's committed snapshot reads 717.4) | hold / shrink | ↓ |
+| Off-system style | **0** (r0/t0/m0 — **the full −56 leap from the S1 baseline of 56; EPIC-11 TARGET MET (0)**; **QA-CONFIRMED independently 2026-07-05 on green main `4c643a9`** — `metrics.mjs` reproduces `0 (r0/t0/m0)` exactly and **`--assert-zero` exits 0**. S2 drove type t42→0, S3 drove radii r12→0, **S4 drove motion m2→0 and LOCKED it in `--assert-zero`** (mirrors the EPIC-5 S8 offSystemUtilities lock). All three sub-counts 0 and gated — cannot regress. **S1–S4 done-confirmed; EPIC-11 CODE-COMPLETE, ready to retire to DONE.** | 0 | ↓ raw radii/type/easing bypassing `--radius-*`/`--text-*`/`--ease-*` |
+| Bundle gz (KB) | 716.7 (+1.5 vs the prior committed snapshot 715.2 — build-env gzip variance; no code/dep change from this QA run) | hold / shrink | ↓ |
 
 > **Off-system style (added 2026-07-04 — design-system conformance II).** The two colour audits
 > (`tokenViolations` = raw `#hex`/`rgba()`; `offSystemUtilities` = Tailwind palette classes) are both at **0**,

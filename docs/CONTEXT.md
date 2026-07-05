@@ -47,9 +47,11 @@ fleet freeze). What changed for routines:
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **★ CODE-COMPLETE (2026-07-05) = EPIC-11 · Design-system conformance II (the non-colour token axis).** **S1–S4 ALL SHIPPED;
-  `offSystemStyle` 56 → 0 (r0/t0/m0), and the metric is now LOCKED in `--assert-zero`.** Awaiting independent QA-confirm on
-  green main + Strategist retire to DONE. **▶ THERE IS NO ACTIVE STAGE** — the next run promotes the next epic: take the
+- **★ CODE-COMPLETE + ✅ QA-CONFIRMED (2026-07-05) = EPIC-11 · Design-system conformance II (the non-colour token axis).**
+  **S1–S4 ALL SHIPPED; `offSystemStyle` 56 → 0 (r0/t0/m0), LOCKED in `--assert-zero`.** **QA-CONFIRMED INDEPENDENTLY this run
+  on green main `4c643a9`** — `metrics.mjs` reproduces `0 (r0/t0/m0)`, `--assert-zero` exits 0, build🟢 30/30 routes render
+  clean, all guards green (see `docs/screenshots/latest/REPORT.md`). **The acceptance metric moved and holds → EPIC-11 is
+  fully done, ready for the Strategist to retire to DONE.** **▶ THERE IS NO ACTIVE STAGE** — the next run promotes the next epic: take the
   topmost cloud-executable ROADMAP NOW/NEXT candidate and flag that EPICS.md needs the Strategist (EPIC-7 · Android stays
   device-gated). **Leap achieved:** EPIC-5 drove the two *colour* conformance metrics to 0; EPIC-11 did the same for the
   NON-colour token scales — **radii/type/easing** — all three sub-counts now 0 and gated.
