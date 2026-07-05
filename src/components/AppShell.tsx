@@ -4,8 +4,8 @@ import { ArrowLeft, Grid3X3, Sun, Moon, Bot } from 'lucide-react'
 import { apps, getAppIcon } from '../lib/registry'
 import { useStore } from '../lib/store'
 import { tint } from '../design-system/tokens'
-import LoadingSpinner from '../components/ui/LoadingSpinner'
-import { ErrorBoundary } from '../components/ErrorBoundary'
+import LoadingSpinner from './ui/LoadingSpinner'
+import { ErrorBoundary } from './ErrorBoundary'
 
 interface AppShellProps {
   appMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>>
