@@ -1,44 +1,59 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-04T23:09:00.420Z
+**Generated:** 2026-07-05T04:20:38.542Z
 
-**Result:** 29/29 rendered without crash, 0 failed.
+**Result:** 30/30 rendered without crash, 0 failed.
 
 ---
 
-## QA verdict — green main `ad9c734` · EPIC-11 S1 done-confirmed · no runtime bug
+## QA verdict — green main `57262e8` · EPIC-11 **S2 + S3 done-confirmed** + Cakra **Problem Solver** renders clean · no runtime bug
 
-**No runtime regression found.** This is the first independent QA since **EPIC-11 · Design-system
-conformance II** opened (EPIC-10 retired to DONE; last QA was `698bbe2`/`ceddbef` = the EPIC-10 S3
-re-confirm). Build 🟢 · vitest **334/334** (35 files) · eslint clean · `metrics.mjs --assert-zero` exit 0.
+**No runtime regression found.** First independent QA since three commits landed on top of the last QA
+(`ca10d0a` = EPIC-11 S1 confirm): **EPIC-11 S2** (`20bc957`, type→0), **EPIC-11 S3** (`4f79ded`, radii→0),
+and the **Cakra Problem Solver** (`57262e8`, new `solver` route + 32-problem world catalog + 4-stage engine).
+Build 🟢 · vitest **360/360** (38 files) · eslint clean (build) · `metrics.mjs --assert-zero` exit 0.
 
-**Active-epic acceptance (EPIC-11 S1 — build the audit + establish the baseline):** ✅ **CONFIRMED.**
-`node scripts/metrics.mjs` reproduces **Off-system style `56 (r12/t42/m2)`** exactly on a fresh checkout
-— the new pure `scanStyleViolations` audit (`scripts/styleAudit.mjs`) is wired into `metrics.mjs` and its
-+16 `styleAudit.test.mjs` cases run green (vitest 318→334). Top offenders reproduce: `Calculator.tsx` 13 ·
-`ChartBuilder.tsx` 9 · `MarkdownStudio.tsx` 7 · `Notes.tsx`/`CommandPalette.tsx`/`ErrorBoundary.tsx` 5.
-The colour audits stay 0 and `offSystemStyle` is (correctly) NOT yet locked into `--assert-zero` — it locks
-at 0 in S4. **S1's acceptance was to instrument + baseline, not to move the metric toward 0** (that starts
-at S2, which the Strategist still owes ratification of) — so S1 is *done-confirmed*, no contradiction.
+**Active-epic acceptance (EPIC-11 · design-system conformance II — S2 reduce TYPE, S3 reduce RADII):**
+✅ **BOTH CONFIRMED — the acceptance metric moved.** `node scripts/metrics.mjs` reproduces **Off-system style
+`2 (r0/t0/m2)`** exactly on a fresh checkout: the **type** sub-count is **0** (S2 drove t42→0) and the **radii**
+sub-count is **0** (S3 drove r12→0). The metric fell **56 → 14 → 2** across the two stages exactly as ratified;
+only the **motion** sub-count (m2) remains, and the two surviving offenders are precisely the S4 targets —
+`ArtifactGallery.tsx` (`ease-out`) and `Calculator.tsx` (`ease-in-out` pulse). The two colour audits stay 0 and
+`offSystemStyle` is (correctly) still NOT locked into `--assert-zero` — it locks at 0 in S4. **S2 + S3 are
+done-confirmed; S4 (motion m2→0 + LOCK) is the only remaining stage → EPIC-11 CODE-COMPLETE after S4.**
 
-**Metric deltas vs the builder's EPIC-11 S1 snapshot (all ±0 — S1 was an audit-only change, no runtime code):**
+**Cakra Problem Solver (new since last QA):** ✅ renders clean at `/app/solver` (deep-link standalone panel) —
+header "Problem Solver · AI", `0 open · 0 solved · today 0/100 AI calls`, the **Import world catalog (32)**
+button, an "Add a problem to solve…" intake, the `daily budget 100` control + **Solve everything** action, and
+the green-puzzle empty state ("The world has problems"). Visually confirmed (`app-solver.png`). Registered as a
+**hidden alias** (`solver` → `ai-chat` tab), so it correctly does NOT appear as its own launcher tile; the smoke
+list ↔ registry cross-check passes at **29 apps** and its 3 unit-test files (`engine`/`catalog`/`queue`) run green.
 
-| Metric | Value | Δ |
+**Metric deltas vs the last QA snapshot (`ca10d0a`, EPIC-11 S1 — apps 28 · offSystemStyle 56 · vitest 334 · bundle 705.4):**
+
+| Metric | Value | Δ vs S1 snapshot |
 |---|---|---|
-| Apps / routes | 28 | ±0 |
-| Test cases (static · vitest) | 276 · 334 | ±0 (vitest +16 vs pre-S1 318, all `styleAudit.test.mjs`) |
-| Test files (metrics · vitest) | 32 · 35 | ±0 (vitest +1 `styleAudit.test.mjs`) |
+| Apps / routes | 29 | **+1** (the `solver` alias route) |
+| Test cases (static · vitest) | 302 · **360** | +26 static / +26 vitest (solver `engine`/`catalog`/`queue`; S2/S3 kept green) |
+| Test files (static · vitest) | 35 · 38 | +3 (solver test files) |
 | Token violations | 0 | ±0 |
 | Off-system utilities | 0 | ±0 |
-| **Off-system style** | **56 (r12/t42/m2)** | ±0 (the EPIC-11 baseline; drives to 0 over S2–S4) |
-| Bundle gz (KB) | 705.4 | ±0 |
+| **Off-system style** | **2 (r0/t0/m2)** | **−54** (type −42 [S2], radii −12 [S3]; only motion m2 left → S4) |
+| Bundle gz (KB) | 718.9 | +13.5 (+12.6 Cakra solver lazy chunk [declared], +0.9 build-env gzip variance) |
 
-**Every guard green:** SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE 28 ✅ · 29/29 routes render clean (0 uncaught JS) ·
+**Every guard green:** SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE 29 ✅ · 30/30 routes render clean (0 uncaught JS) ·
 INBOUND 3/3 · MEDIA 3/3 · GRAPH-LEGIBLE 1/1 · GLOBAL-SEARCH 1/1 (`tagOnly`) · NODE-LINEAGE 1/1 (5 axes) ·
-**TIMELINE 1/1 (all 6 axes)** · HOME-ALIVE 1/1 · PROVENANCE-PERSISTS 3/3 · PROVENANCE-ENTITY 3/3 ·
-OFFLINE-BOOT 5/5 · PRECACHE 83 no-gap. **Visually verified:** `desktop.png` (the Bridge home + 28-app grid)
-+ `app-timeline.png` (the temporal lens, TODAY day-group, 2 moments). Env-expected noise only (blocked
-CDN tiles on Maps net:8, `/api/files` HTTP 500, Open-Meteo tunnel-fail on Weather) — **not** render failures.
+**TIMELINE 1/1 (all 6 axes — `ordered`+`grouped`+`flow`+`persisted`+`filtered`+`descendants`)** · HOME-ALIVE 1/1 ·
+PROVENANCE-PERSISTS 3/3 · PROVENANCE-ENTITY 3/3 · OFFLINE-BOOT 5/5 · PRECACHE 85 no-gap. **Visually verified:**
+`desktop.png` (the Bridge — "Good night", 4 live stat cards, the 25-tile launcher grid through Timeline) +
+`app-solver.png` (the Problem Solver panel). Env-expected noise only (blocked CDN tiles on Maps net:8, Open-Meteo
+tunnel-fail on Weather, `/api/files` HTTP 500) — **not** render failures.
+
+> **Note (observed vs. builder-stated test count):** I observe **vitest 360/360 (38 files)** on a clean checkout;
+> the Cakra commit message stated `344/344 (37 files)`. The +16/+1 delta is a builder measurement-scope difference,
+> not a defect — all 360 pass deterministically, green. Metrics static `testCases` reads **302** (src-only count).
+
+---
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -62,7 +77,7 @@ CDN tiles on Maps net:8, `/api/files` HTTP 500, Open-Meteo tunnel-fail on Weathe
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -75,6 +90,7 @@ CDN tiles on Maps net:8, `/api/files` HTTP 500, Open-Meteo tunnel-fail on Weathe
 | reader | ✅ | — | — |
 | search | ✅ | — | — |
 | timeline | ✅ | — | — |
+| solver | ✅ | — | — |
 
 ## Inbound-lands guard (organism emit↔receive loop)
 
@@ -176,7 +192,7 @@ Distinct from the edge guard above: each S3 receiver was seeded with an inbound 
 
 The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (`setOffline`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.
 
-**Precache:** 83 manifest entries; 48 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
+**Precache:** 85 manifest entries; 49 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
 
 | Route | Renders offline |
 |---|---|

@@ -30,8 +30,10 @@
   scales — **radii/type/easing**. **Target metric:** the NEW **`offSystemStyle`** row in `metrics.mjs` (**56 → 0**;
   sub-counts `r/t/m` = radii/type/motion). **★ Cross-cutting hotspot: `Calculator.tsx` (t9/r3/m1 = 13) is touched in ALL
   THREE reduction stages** (dim-major keeps each stage's metric-move crisp). **PROGRESS: S1 audit+baseline (56), S2 type→0
-  (56→14), S3 radii→0 (14→2) all SHIPPED. Now at `offSystemStyle` = 2 (r0/t0/m2). ▶ ONLY S4 remains: motion m2→0 + LOCK →
-  ★ CODE-COMPLETE** (exact seam in the "▶ NEXT STAGE = EPIC-11 S4" block below).
+  (56→14), S3 radii→0 (14→2) all SHIPPED; **S2 + S3 now QA-CONFIRMED LIVE 2026-07-05 (`57262e8`) — `offSystemStyle 2 (r0/t0/m2)` reproduced independently,
+  type + radii both at 0**. Now at `offSystemStyle` = 2 (r0/t0/m2). ▶ ONLY S4 remains: motion m2→0 + LOCK →
+  ★ CODE-COMPLETE** (exact seam in the "▶ NEXT STAGE = EPIC-11 S4" block below). **Out-of-band: the Cakra Problem Solver
+  (`solver` route) landed `57262e8` + QA-confirmed rendering this run — see the S3-block note below.**
   - **✅ S1 SHIPPED 2026-07-04 (`main`, this run) — the audit + baseline stand up; `offSystemStyle` = 56 (r12/t42/m2).**
     New pure `scripts/styleAudit.mjs` `scanStyleViolations(text)→{radii,type,motion,total}` (radii = raw
     `border-radius`/`borderRadius` px/rem/em, `50%`/`9999px` excluded; type = raw `font-size`/`fontSize` px/rem/unitless-px,
@@ -94,10 +96,22 @@
       Calculator copy/ask icon buttons (24×24, now noticeably rounder) + the inline-code/tag pills (Notes, MarkdownStudio,
       ChatPanel, Toast). 8px→sm(10) = +2px (MarkdownStudio pre + blockquote). ErrorBoundary 1rem→md is exact. If any single
       element reads over-rounded, that's a design-scale question for the Strategist (the scale has no <10px step), NOT a bug.
-  - **⚠️ QA still owes independent confirmation:** the headless render-smoke needs `playwright` (not in `package.json`) → QA's
-    step. Runtime risk negligible (pure CSS-value substitutions, passing tsc), but QA should run the smoke on the new green main,
-    confirm the touched apps render (Calculator, MarkdownStudio/ArtifactGallery, Notes, ErrorBoundary, ChatPanel, Toast), and
-    reproduce `offSystemStyle 2 (r0/t0/m2)`.
+  - **✅ S2 + S3 QA-CONFIRMED LIVE (2026-07-05, green main `57262e8`) — the acceptance metric moved twice, both reproduced
+    independently.** First QA since S1 (last QA `ca10d0a`); S2 `20bc957` + S3 `4f79ded` + the Cakra Problem Solver `57262e8`
+    landed since. `node scripts/metrics.mjs` reproduces **`offSystemStyle 2 (r0/t0/m2)`** EXACTLY on a fresh checkout — type
+    sub-count 0 (S2 t42→0) + radii sub-count 0 (S3 r12→0), the metric fell 56→14→2 as ratified; the 2 survivors are the S4
+    motion offenders (`ArtifactGallery.tsx` `ease-out` · `Calculator.tsx` `ease-in-out`). All touched apps render clean in the
+    smoke (**30/30 routes, 0 uncaught**; every guard green: SHELL-IS-STYLED, REGISTRY-COVERAGE 29, INBOUND 3/3, MEDIA 3/3,
+    GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, **TIMELINE 1/1 all 6 axes**, HOME-ALIVE 1/1, PROVENANCE 3/3+3/3,
+    OFFLINE 5/5, PRECACHE 85 no-gap). vitest **360/360** (38 files); colour audits 0/0, `--assert-zero` exit 0. **No runtime bug,
+    no contradiction → S2 + S3 done-confirmed. ▶ ONLY S4 remains (motion m2→0 + LOCK) → EPIC-11 CODE-COMPLETE.**
+  - **★ OUT-OF-BAND FEATURE (landed `57262e8`, QA-confirmed this run): the Cakra Problem Solver.** A new `solver` route
+    (hidden alias → `ai-chat` tab, `/app/solver` deep-links the standalone panel) — 32-problem world catalog + 4-stage
+    analyze→decompose→solve→critique engine + auto-queue; problem/solution nodes self-mirror into the Core graph (Calendar-style,
+    NOT central `sync.ts`). **QA-confirmed it renders clean** (`app-solver.png`: "Problem Solver · AI", `0 open · 0 solved ·
+    today 0/100 AI calls`, Import world catalog (32), daily budget 100, Solve everything, green-puzzle empty state). apps 28→29,
+    +3 solver test files (`engine`/`catalog`/`queue`), bundle +12.6 (lazy chunk, declared). It correctly does NOT show as its own
+    launcher tile. *Note: `public/solver/feed.json` is owned by routine #8 'World Solver' (daily 14:00 UTC) — not a QA concern.*
   - **▶ NEXT STAGE = EPIC-11 S4 · residual MOTION (m2 → 0) + LOCK → ★ EPIC-11 CODE-COMPLETE.** Swap the last two raw easings
     for `var(--ease-*)`. **⚠️ KEY DISCOVERY (this run — do NOT mis-map): only TWO ease tokens are defined**
     (`colors_and_type.css:104-105`): `--ease-out: cubic-bezier(0.16,1,0.3,1)` and `--ease-spring: cubic-bezier(0.34,1.56,0.64,1)`.

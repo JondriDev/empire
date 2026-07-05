@@ -5,6 +5,38 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-05 · QA — **EPIC-11 S2 + S3 confirmed LIVE + Cakra Problem Solver renders clean** — green main `57262e8`
+
+**Result:** ✅ Visual + smoke QA on green main `57262e8`. **No runtime bug, no contradiction.** First independent QA since
+`ca10d0a` (EPIC-11 S1 confirm); three commits landed since — **EPIC-11 S2** (`20bc957`, type→0), **EPIC-11 S3** (`4f79ded`,
+radii→0), and the **Cakra Problem Solver** (`57262e8`, new `solver` route).
+
+**Active-epic acceptance — EPIC-11 S2 + S3 BOTH done-confirmed (the metric moved):** `node scripts/metrics.mjs` reproduces
+**`offSystemStyle 2 (r0/t0/m2)`** exactly on a fresh checkout — type sub-count **0** (S2 drove t42→0) + radii sub-count **0**
+(S3 drove r12→0). The metric fell **56 → 14 → 2** across the two stages exactly as ratified; only the **motion** sub-count (m2)
+remains, and the 2 survivors are precisely the S4 targets (`ArtifactGallery.tsx` `ease-out` + `Calculator.tsx` `ease-in-out`).
+`offSystemStyle` correctly still NOT in `--assert-zero` (locks at 0, S4). **▶ ONLY S4 remains → EPIC-11 CODE-COMPLETE after S4.**
+
+**Cakra Problem Solver (out-of-band feature, QA-confirmed):** renders clean at `/app/solver` (`app-solver.png` — "Problem Solver
+· AI", `0 open · 0 solved · today 0/100 AI calls`, Import world catalog (32), daily budget 100, Solve everything, green-puzzle
+empty state). Hidden alias → `ai-chat` tab, correctly NOT its own launcher tile. apps 28→29; +3 test files.
+
+**Verified:** build 🟢 (`tsc -b && vite build`); **30/30 routes render clean** (0 uncaught JS) incl. the new `solver`; vitest
+**360/360** (38 files) 🟢; `metrics.mjs --assert-zero` exit 0 (tokenViolations 0, offSystemUtilities 0); **every guard green** —
+SHELL-IS-STYLED, REGISTRY-COVERAGE 29, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 (`tagOnly`), NODE-LINEAGE
+1/1 (5 axes), **TIMELINE 1/1 (all 6 axes)**, HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5,
+PRECACHE 85 no-gap. Screenshots overwritten in `docs/screenshots/latest/` (desktop + 29 apps). **Env-expected noise only** (Maps
+CDN tiles net:8, Weather Open-Meteo tunnel-fail, `/api/files` HTTP 500) — not render failures.
+
+**Metric deltas vs the S1 snapshot (`ca10d0a`):** apps 28→**29** (+1 solver route) · vitest 334→**360** (+26, solver tests) ·
+offSystemStyle **56 → 2** (r0/t0/m2, −54: type −42, radii −12) · bundle 705.4 → **718.9** (+12.6 solver lazy chunk [declared] +
+0.9 build-env gzip variance; builder's committed snapshot reads 717.4). **Observed vitest 360/38 vs the Cakra commit's stated
+344/37 — a builder measurement-scope difference, not a defect (all 360 pass deterministically).**
+
+**Next:** EPIC-11 **S4** — residual motion (m2→0) + LOCK → ★ EPIC-11 CODE-COMPLETE. Seam in `docs/CONTEXT.md`.
+
+---
+
 ## 2026-07-05 · Builder — **EPIC-11 S3 · reduce RADII (r12 → 0)** — `offSystemStyle` 14 → 2
 
 **Result:** ✅ SHIPPED to `main`, 🟢 green. Executed the ratified S3 across all 6 offender files in one coherent commit.
