@@ -17,6 +17,12 @@ to `docs/CONTEXT.md`. **All routine-owned paths untouched** (CONTEXT/EPICS/ROADM
 ROUTINE-LOG/metrics.json, `docs/routines/**`, `docs/screenshots/latest/REPORT.md`,
 `public/solver/feed.json`, `scripts/*.mjs` guards).
 
+**De-bloat:** the 30 tracked QA PNGs (~17.6 MB at HEAD, ~270 MB of history churn) are deleted and
+`docs/screenshots/latest/*.png` is now **gitignored** — QA keeps screenshots local to its run and
+commits `REPORT.md`/`OFFLINE.md`/`PWA-BASE.md` only (spec + live prompt updated). Two curated
+WebP shots live in `docs/media/` for the README. History was rewritten (git-filter-repo) to purge
+PNG blobs; fresh clones drop from ~291 MB to ~20 MB.
+
 **Verified:** vitest 360/360 · eslint 0 · shell-styled ✓ · route-parity 29/29 · conformance 0/0.
 
 ---
