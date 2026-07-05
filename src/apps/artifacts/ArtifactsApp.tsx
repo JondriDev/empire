@@ -51,7 +51,7 @@ export default function ArtifactsApp() {
   if (activeId && ARTIFACT_RENDERERS[activeId]) {
     const { component: Component, title, accent } = ARTIFACT_RENDERERS[activeId]
     return (
-      <div className="h-screen flex flex-col bg-faint text-fg overflow-hidden">
+      <div className="h-full flex flex-col bg-faint text-fg overflow-hidden">
         <div
           className="flex items-center gap-3 px-4 py-2.5 border-b backdrop-blur-sm shrink-0"
           style={{

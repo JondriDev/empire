@@ -1,21 +1,23 @@
 /**
  * CakraShell — the unified Cakra super-app.
  *
- * Cakra absorbed three former apps as tabs: Prompt Generator, Token Counter, and
- * Code Editor — alongside its core Chat (the Agent/AIChat surface). Their legacy
+ * Cakra absorbed former apps as tabs: Prompt Generator, Token Counter, Code
+ * Editor, and Artifacts — alongside its core Chat (the Agent/AIChat surface)
+ * and the Solver. Their legacy
  * ids live on as registry aliases that deep-link straight to the matching tab
  * (see lib/cakraTab + windowStore.openAppById), so handoffs/automations keep
  * working. Visited tabs stay mounted so each tool keeps its state when you
  * switch; the heavy tools lazy-load on first open.
  */
 import { Suspense, lazy, useEffect, useState, type ReactNode } from 'react'
-import { Sparkles, Puzzle, Wand2, Hash, Code2 } from 'lucide-react'
+import { Sparkles, Puzzle, Palette, Wand2, Hash, Code2 } from 'lucide-react'
 import { useCakraTab, type CakraTab } from '../../lib/cakraTab'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 import Cakra from './Cakra'
 
 const SolverPanel = lazy(() => import('./solver/SolverPanel'))
+const Artifacts = lazy(() => import('../artifacts/ArtifactsApp'))
 const PromptGenerator = lazy(() => import('./tabs/PromptGenerator'))
 const TokenCounter = lazy(() => import('./tabs/TokenCounter'))
 const Editor = lazy(() => import('./tabs/Editor'))
@@ -23,6 +25,7 @@ const Editor = lazy(() => import('./tabs/Editor'))
 const TABS: { id: CakraTab; label: string; Icon: typeof Sparkles }[] = [
   { id: 'chat', label: 'Chat', Icon: Sparkles },
   { id: 'solver', label: 'Solver', Icon: Puzzle },
+  { id: 'artifacts', label: 'Artifacts', Icon: Palette },
   { id: 'prompt', label: 'Prompt', Icon: Wand2 },
   { id: 'tokens', label: 'Tokens', Icon: Hash },
   { id: 'code', label: 'Code', Icon: Code2 },
@@ -86,6 +89,7 @@ export default function CakraShell() {
       <div className="flex-1 min-h-0 relative">
         <Panel visited={visited.has('chat')} active={tab === 'chat'}><Cakra /></Panel>
         <Panel visited={visited.has('solver')} active={tab === 'solver'}><SolverPanel /></Panel>
+        <Panel visited={visited.has('artifacts')} active={tab === 'artifacts'}><Artifacts /></Panel>
         <Panel visited={visited.has('prompt')} active={tab === 'prompt'}><PromptGenerator /></Panel>
         <Panel visited={visited.has('tokens')} active={tab === 'tokens'}><TokenCounter /></Panel>
         <Panel visited={visited.has('code')} active={tab === 'code'}><Editor /></Panel>
