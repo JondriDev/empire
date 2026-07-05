@@ -93,7 +93,7 @@ the single source of truth. The launcher grid shows **25**; **Code Editor**,
 | **Styling** | Tailwind CSS 4 + token-based design system |
 | **Routing** | React Router 7 |
 | **State** | Zustand 5 |
-| **Animation** | Motion 12 |
+| **Animation** | CSS spring/ease design tokens (no animation library) |
 | **Maps** | Leaflet 1.9 (+ OpenStreetMap / Nominatim) |
 | **Reader** | pdfjs-dist 6 · epubjs · mammoth (DOCX) |
 | **Icons** | Lucide (controls) + bespoke alien SVG set (app identity) |
@@ -159,7 +159,6 @@ empire/
 │   ├── apps/              # One folder per app
 │   ├── components/        # Shared shell UI (Bridge, AppHost, Recents…)
 │   ├── design-system/     # Earth-from-Space tokens + vendored fonts + alien icons
-│   ├── hooks/             # Custom React hooks
 │   ├── lib/               # Registry, stores, event bus, core graph, AI client
 │   ├── App.tsx            # Router
 │   └── main.tsx           # Entry point
