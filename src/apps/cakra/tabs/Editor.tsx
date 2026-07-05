@@ -5,10 +5,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Code, Copy, Check, Play, Save, FileText, Bot, BarChart2, Trash2 } from 'lucide-react'
-import { emit } from '../../lib/eventBus'
-import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
-import { SendResultMenu } from '../../components/ui/SendResultMenu'
-import { useInboundHandoff } from '../../lib/useInboundHandoff'
+import { emit } from '../../../lib/eventBus'
+import { ProvenanceChip } from '../../../components/ui/ProvenanceChip'
+import { SendResultMenu } from '../../../components/ui/SendResultMenu'
+import { useInboundHandoff } from '../../../lib/useInboundHandoff'
 
 interface EditorStats {
   lines: number

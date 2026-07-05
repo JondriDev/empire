@@ -16,9 +16,9 @@ import { ErrorBoundary } from '../../components/ErrorBoundary'
 import Cakra from './Cakra'
 
 const SolverPanel = lazy(() => import('./solver/SolverPanel'))
-const PromptGenerator = lazy(() => import('../prompt-generator/PromptGenerator'))
-const TokenCounter = lazy(() => import('../token-counter/TokenCounter'))
-const Editor = lazy(() => import('../editor/Editor'))
+const PromptGenerator = lazy(() => import('./tabs/PromptGenerator'))
+const TokenCounter = lazy(() => import('./tabs/TokenCounter'))
+const Editor = lazy(() => import('./tabs/Editor'))
 
 const TABS: { id: CakraTab; label: string; Icon: typeof Sparkles }[] = [
   { id: 'chat', label: 'Chat', Icon: Sparkles },

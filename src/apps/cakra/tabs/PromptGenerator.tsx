@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Card, Button } from '../../components/ui'
-import { emit } from '../../lib/eventBus'
-import { apiUrl } from '../../lib/apiBase'
-import { mirrorCollection } from '../../lib/core/sync'
-import { NodeActions } from '../../components/ui/NodeActions'
-import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
-import { useInboundHandoff } from '../../lib/useInboundHandoff'
+import { Card, Button } from '../../../components/ui'
+import { emit } from '../../../lib/eventBus'
+import { apiUrl } from '../../../lib/apiBase'
+import { mirrorCollection } from '../../../lib/core/sync'
+import { NodeActions } from '../../../components/ui/NodeActions'
+import { ProvenanceChip } from '../../../components/ui/ProvenanceChip'
+import { useInboundHandoff } from '../../../lib/useInboundHandoff'
 import {
   Wand2, Copy, Check, Sparkles, MessageSquare,
   Code, BookOpen, PenTool, Zap, Tag
