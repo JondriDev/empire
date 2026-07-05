@@ -146,7 +146,10 @@ export default function Photos() {
     void deleteMedia(id)
     setPhotos(prev => prev.filter(p => p.id !== id))
     if (selected === id) setSelected(null)
-    if (lightboxIdx >= 0 && photos[lightboxIdx]?.id === id) closeLightbox()
+    // lightboxIdx indexes the *filtered* list (what the lightbox paginates), so
+    // the currently-viewed photo is filtered[lightboxIdx] — comparing against
+    // photos[lightboxIdx] would test the wrong item once a filter/search is on.
+    if (lightboxIdx >= 0 && filtered[lightboxIdx]?.id === id) closeLightbox()
   }
 
   const deleteSelected = () => {

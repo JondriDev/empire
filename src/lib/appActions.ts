@@ -32,6 +32,15 @@ function handoff(fromId: string, toId: string, label: string): void {
   emit({ type: 'HANDOFF', fromId, toId, label })
 }
 
+// Navigate to an in-app route, honouring Vite's deploy base. An absolute path
+// like '/app/ai-chat' ignores the base (`/empire/` on GitHub Pages) and lands
+// outside the app → a hard 404. Prefixing import.meta.env.BASE_URL keeps the
+// link inside the app on every target ('/', '/empire/', the Capacitor APK).
+function openRoute(route: string): void {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+  window.open(`${base}${route}`, '_self')
+}
+
 // ─── Actions available to apps ──────────────────────────────────
 
 export const CROSS_APP_ACTIONS = {
@@ -65,7 +74,7 @@ export const CROSS_APP_ACTIONS = {
         from: data.source,
       }))
       handoff(data.source, 'editor', 'editing')
-      window.open('/app/editor', '_self')
+      openRoute('/app/editor')
       return 'Opened in Code Editor'
     },
   } as const,
@@ -81,7 +90,7 @@ export const CROSS_APP_ACTIONS = {
         from: data.source,
       }))
       handoff(data.source, 'token-counter', 'counting')
-      window.open('/app/token-counter', '_self')
+      openRoute('/app/token-counter')
       return 'Opened in Token Counter'
     },
   } as const,
@@ -97,7 +106,7 @@ export const CROSS_APP_ACTIONS = {
         from: data.source,
       }))
       handoff(data.source, 'prompt-generator', 'prompting')
-      window.open('/app/prompt-generator', '_self')
+      openRoute('/app/prompt-generator')
       return 'Opened in Prompt Generator'
     },
   } as const,
@@ -114,7 +123,7 @@ export const CROSS_APP_ACTIONS = {
         from: data.source,
       }))
       handoff(data.source, 'ai-chat', 'asking')
-      window.open('/app/ai-chat', '_self')
+      openRoute('/app/ai-chat')
       return 'Opening Cakra…'
     },
   } as const,
@@ -157,7 +166,7 @@ export const CROSS_APP_ACTIONS = {
         from: data.source,
       }))
       handoff(data.source, 'calendar', 'scheduling')
-      window.open('/app/calendar', '_self')
+      openRoute('/app/calendar')
       return 'Opened in Calendar'
     },
   } as const,
@@ -174,7 +183,7 @@ export const CROSS_APP_ACTIONS = {
         from: data.source,
       }))
       handoff(data.source, 'goals', 'goal-setting')
-      window.open('/app/goals', '_self')
+      openRoute('/app/goals')
       return 'Opened in Goals'
     },
   } as const,
@@ -191,7 +200,7 @@ export const CROSS_APP_ACTIONS = {
         from: data.source,
       }))
       handoff(data.source, 'messages', 'messaging')
-      window.open('/app/messages', '_self')
+      openRoute('/app/messages')
       return 'Opened in Messages'
     },
   } as const,
@@ -209,7 +218,7 @@ export const CROSS_APP_ACTIONS = {
         action: 'analyze',
       }))
       handoff(data.source, 'ai-chat', 'analyzing')
-      window.open('/app/ai-chat', '_self')
+      openRoute('/app/ai-chat')
       return 'Opening Cakra for analysis…'
     },
   } as const,

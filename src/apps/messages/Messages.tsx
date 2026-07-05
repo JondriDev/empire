@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Bot, Send } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
@@ -16,6 +17,7 @@ import { LineageTrail } from '../../components/ui/LineageTrail'
 const CONTACTS = ['Jondri', 'Work', 'Family', 'Urgent', 'AI Bot']
 
 export default function Messages() {
+  const navigate = useNavigate()
   const { messages, addMessage } = useStore()
  const [draft, setDraft] = useState('')
  const [draftFrom, setDraftFrom] = useState<string | undefined>(undefined)
@@ -59,7 +61,7 @@ export default function Messages() {
       title: `Draft to ${recipient}`,
       from: 'messages',
     }))
-    window.location.href = '/app/ai-chat'
+    navigate('/app/ai-chat')
   }
 
   const askCakraThread = () => {
@@ -69,7 +71,7 @@ export default function Messages() {
       title: 'Message Thread Analysis',
       from: 'messages',
     }))
-    window.location.href = '/app/ai-chat'
+    navigate('/app/ai-chat')
   }
 
   return (

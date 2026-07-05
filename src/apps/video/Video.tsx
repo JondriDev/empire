@@ -79,9 +79,17 @@ export default function Video() {
     try { localStorage.setItem(PLAYLIST_KEY, JSON.stringify(toStorableMeta(videos))) } catch { /* ignore */ }
   }, [videos])
 
+  // Keep the live <video> element in sync with volume, mute and playback rate.
+  // Re-runs on track change so a freshly-mounted element honours the current
+  // settings — the mute toggle previously updated only the icon, never the
+  // element, and a new video ignored the chosen volume until the slider moved.
   useEffect(() => {
-    if (videoRef.current) videoRef.current.volume = volume
-  }, [volume])
+    const video = videoRef.current
+    if (!video) return
+    video.volume = volume
+    video.muted = muted
+    video.playbackRate = playbackRate
+  }, [volume, muted, playbackRate, current])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

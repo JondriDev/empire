@@ -92,10 +92,21 @@ export default function Music() {
     try { localStorage.setItem(PLAYLIST_KEY, JSON.stringify(toStorableMeta(playlist))) } catch { /* ignore */ }
   }, [playlist])
 
+  // Persist the chosen volume for next session.
   useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume
     try { localStorage.setItem('empire-music-volume', String(volume)) } catch { /* ignore */ }
   }, [volume])
+
+  // Keep the live <audio> element in sync with volume + mute. Re-runs on track
+  // change too, so a freshly-mounted element honours the saved volume and the
+  // mute toggle genuinely silences output (toggling `muted` state alone left the
+  // audio element playing at full volume).
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    audio.volume = volume
+    audio.muted = muted
+  }, [volume, muted, current])
 
   useEffect(() => {
     if (!audioRef.current) return
@@ -117,8 +128,10 @@ export default function Music() {
       audio.removeEventListener('play', onPlay)
       audio.removeEventListener('pause', onPause)
     }
+  // playlist is included so `onEnded` always sees the current queue — without it
+  // an auto-advance after adding tracks would fire a stale handleTrackEnd.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, repeat, shuffle])
+  }, [current, repeat, shuffle, playlist])
 
   const handleTrackEnd = useCallback(() => {
     if (repeat === 'one') {

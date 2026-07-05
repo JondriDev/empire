@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Globe, Bookmark, History, Bot, ExternalLink, Trash2, Star, Search } from 'lucide-react'
 import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
@@ -16,6 +17,7 @@ const DEFAULT_BOOKMARKS = [
 ]
 
 export default function Browser() {
+  const routerNavigate = useNavigate()
   const [url, setUrl] = useState('')
   const [activeTab, setActiveTab] = useState<'browse' | 'bookmarks' | 'history'>('browse')
   const [bookmarks, setBookmarks] = useState(DEFAULT_BOOKMARKS)
@@ -68,7 +70,7 @@ export default function Browser() {
       title: `Browser: ${url}`,
       from: 'browser',
     }))
-    window.location.href = '/app/ai-chat'
+    routerNavigate('/app/ai-chat')
   }
 
   const formatTime = (iso: string) => {

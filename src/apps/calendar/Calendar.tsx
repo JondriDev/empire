@@ -148,7 +148,7 @@ export default function Calendar() {
     if (editingEvent) {
       const updated = events.map(e =>
         e.id === editingEvent.id
-          ? { ...e, title: newTitle.trim(), time: newTime, description: newDescription, tags, color: newColor }
+          ? { ...e, title: newTitle.trim(), date: newDate, time: newTime, description: newDescription, tags, color: newColor }
           : e
       )
       setEvents(updated)

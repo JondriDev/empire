@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Bot, Plus, Check, Target, Flag } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
@@ -26,6 +27,7 @@ interface Goal {
 }
 
 export default function Goals() {
+  const navigate = useNavigate()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [deadline, setDeadline] = useState('')
@@ -120,7 +122,7 @@ export default function Goals() {
       title: `Goal: ${goal.title}`,
       from: 'goals',
     }))
-    window.location.href = '/app/ai-chat'
+    navigate('/app/ai-chat')
   }
 
   const askCakraAll = () => {
@@ -132,7 +134,7 @@ export default function Goals() {
       title: 'Goals Progress Review',
       from: 'goals',
     }))
-    window.location.href = '/app/ai-chat'
+    navigate('/app/ai-chat')
   }
 
   const completedCount = goals.filter(g => g.completed).length

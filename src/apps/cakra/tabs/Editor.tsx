@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Code, Copy, Check, Play, Save, FileText, Bot, BarChart2, Trash2 } from 'lucide-react'
 import { emit } from '../../../lib/eventBus'
 import { ProvenanceChip } from '../../../components/ui/ProvenanceChip'
@@ -30,6 +31,7 @@ const LANGUAGE_OPTIONS = [
 ]
 
 export default function Editor() {
+  const navigate = useNavigate()
   const [code, setCode] = useState('')
   const [language, setLanguage] = useState('javascript')
   const [stats, setStats] = useState<EditorStats>({ lines: 0, chars: 0, words: 0, functions: 0, imports: 0, brackets: 0 })
@@ -116,7 +118,7 @@ export default function Editor() {
       title: `Code Analysis — ${language}`,
       from: 'editor',
     }))
-    window.location.href = '/app/ai-chat'
+    navigate('/app/ai-chat')
   }
 
   return (

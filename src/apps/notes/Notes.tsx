@@ -9,6 +9,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Plus, Trash2, Edit2, Check, StickyNote, Sparkles, FileText, MessageSquare } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
@@ -26,6 +27,7 @@ import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 const FROM_PREFIX = 'from-'
 
 export default function Notes() {
+  const navigate = useNavigate()
   const { notes, addNote, updateNote, deleteNote } = useStore()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -131,7 +133,7 @@ export default function Notes() {
       from: 'notes',
     }))
     toast.info('Opening Cakra', `Analyzing "${note.title}"...`)
-    setTimeout(() => { window.location.href = '/app/ai-chat' }, 200)
+    setTimeout(() => { navigate('/app/ai-chat') }, 200)
   }
 
   const totalWords = notes.reduce((acc, n) => acc + (n.content.trim() ? n.content.trim().split(/\s+/).length : 0), 0)

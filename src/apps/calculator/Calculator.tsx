@@ -10,6 +10,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Sparkles, History, Trash2, Copy, Check } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { cssVar, tint } from '../../design-system/tokens'
@@ -18,6 +19,7 @@ import { useToast } from '../../components/ui/Toast'
 type Op = '+' | '-' | '×' | '÷' | '^' | null
 
 export default function Calculator() {
+  const navigate = useNavigate()
   const [display, setDisplay] = useState('0')
   const [expression, setExpression] = useState('')
   const [memory, setMemory] = useState<number | null>(null)
@@ -169,7 +171,7 @@ export default function Calculator() {
       from: 'calculator',
     }))
     toast.info('Opening Cakra', `Analyzing: ${display}`)
-    setTimeout(() => { window.location.href = '/app/ai-chat' }, 200)
+    setTimeout(() => { navigate('/app/ai-chat') }, 200)
   }
 
   const copyResult = useCallback(async () => {

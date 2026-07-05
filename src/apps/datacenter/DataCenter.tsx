@@ -7,6 +7,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Bot, Plus, Trash2, Database, X } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
@@ -26,6 +27,7 @@ function loadStore(): DCStore {
 }
 
 export default function DataCenter() {
+  const navigate = useNavigate()
   const [store, setStore] = useState<DCStore>(() => loadStore())
   const [activeTable, setActiveTable] = useState<string>(() => Object.keys(loadStore())[0] || '')
   const [newRow, setNewRow] = useState<Record<string, string>>({})
@@ -104,7 +106,7 @@ export default function DataCenter() {
       title: `${activeTable} data analysis`,
       from: 'datacenter',
     }))
-    window.location.href = '/app/ai-chat'
+    navigate('/app/ai-chat')
   }
 
   return (

@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Languages, Copy, Check, BookOpen, ArrowRightLeft, Globe, Bot, Loader2 } from 'lucide-react'
 import { Button } from '../../components/ui'
 import { EmptyState } from '../../components/ui/Utility'
@@ -49,6 +50,7 @@ const GREETINGS: Record<string, string> = {
 }
 
 export default function Language() {
+  const navigate = useNavigate()
   const [input, setInput] = useState('')
   const [translation, setTranslation] = useState('')
   const [error, setError] = useState('')
@@ -163,7 +165,7 @@ export default function Language() {
       title: 'Language Translation',
       from: 'language',
     }))
-    window.location.href = '/app/ai-chat'
+    navigate('/app/ai-chat')
   }
 
   const deletePhrase = (id: string) => {

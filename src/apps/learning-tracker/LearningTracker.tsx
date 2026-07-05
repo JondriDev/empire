@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Bot, Plus, Check, BookOpen, Brain } from 'lucide-react'
 import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
@@ -13,6 +14,7 @@ import { EmptyState } from '../../components/ui/Utility'
 import type { LearningItem } from '../../lib/store'
 
 export default function LearningTracker() {
+  const navigate = useNavigate()
   const { learningItems, addLearningItem, updateLearningItem } = useStore()
   const [topic, setTopic] = useState('')
   const [learned, setLearned] = useState('')
@@ -50,7 +52,7 @@ export default function LearningTracker() {
       title: `Learning: ${item.topic}`,
       from: 'learning-tracker',
     }))
-    window.location.href = '/app/ai-chat'
+    navigate('/app/ai-chat')
   }
 
   const askCakraAll = () => {
@@ -62,7 +64,7 @@ export default function LearningTracker() {
       title: 'Learning Progress Review',
       from: 'learning-tracker',
     }))
-    window.location.href = '/app/ai-chat'
+    navigate('/app/ai-chat')
   }
 
   const masteredCount = learningItems.filter(l => l.mastered).length
