@@ -149,7 +149,7 @@ function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
           background: 'transparent',
           border: 'none',
           padding: '2px',
-          borderRadius: '4px',
+          borderRadius: 'var(--radius-sm)',
           color: 'var(--text3)',
           cursor: 'pointer',
           display: 'flex',

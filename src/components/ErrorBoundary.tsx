@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <div style={{
           background: 'var(--gl-bg)',
           border: `1px solid ${tint('c-danger', 30)}`,
-          borderRadius: '1rem',
+          borderRadius: 'var(--radius-md)',
           padding: '2rem',
           textAlign: 'center',
           color: 'var(--text)',
@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
             style={{
               background: tint('signal', 20),
               border: `1px solid ${tint('signal', 40)}`,
-              borderRadius: '0.5rem',
+              borderRadius: 'var(--radius-sm)',
               padding: '0.5rem 1.5rem',
               color: 'color-mix(in srgb, var(--signal) 70%, var(--text))',
               cursor: 'pointer',

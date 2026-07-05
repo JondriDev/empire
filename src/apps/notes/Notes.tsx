@@ -307,7 +307,7 @@ function NoteCard({ note, landed, cardRef, isEditing, onStartEdit, onSaveEdit, o
           left: 0,
           width: 3,
           height: 24,
-          borderRadius: '0 3px 3px 0',
+          borderRadius: '0 var(--radius-sm) var(--radius-sm) 0',
           background: cssVar('c-warn'),
           opacity: 0.7,
         }}
@@ -432,7 +432,7 @@ function NoteCard({ note, landed, cardRef, isEditing, onStartEdit, onSaveEdit, o
                 fontSize: 'var(--text-xs)',
                 fontWeight: 500,
                 padding: '2px 4px',
-                borderRadius: '4px',
+                borderRadius: 'var(--radius-sm)',
                 transition: 'background var(--dur-fast)',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = tint('signal', 8) }}

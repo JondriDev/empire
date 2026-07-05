@@ -310,7 +310,7 @@ export default function Calculator() {
                 title={copied ? 'Copied!' : 'Copy result'}
                 style={{
                   width: '24px', height: '24px',
-                  borderRadius: '5px',
+                  borderRadius: 'var(--radius-sm)',
                   border: 'none',
                   background: 'transparent',
                   color: copied ? cssVar('c-success') : 'var(--text3)',
@@ -329,7 +329,7 @@ export default function Calculator() {
                   title="Ask Cakra about this result"
                   style={{
                     width: '24px', height: '24px',
-                    borderRadius: '5px',
+                    borderRadius: 'var(--radius-sm)',
                     border: 'none',
                     background: 'transparent',
                     color: 'var(--color-cyan-3)',
@@ -566,7 +566,7 @@ export default function Calculator() {
               title="Clear history"
               style={{
                 padding: '3px',
-                borderRadius: '4px',
+                borderRadius: 'var(--radius-sm)',
                 background: 'transparent',
                 border: 'none',
                 color: 'var(--text3)',

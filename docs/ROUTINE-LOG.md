@@ -5,6 +5,37 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-05 · Builder — **EPIC-11 S3 · reduce RADII (r12 → 0)** — `offSystemStyle` 14 → 2
+
+**Result:** ✅ SHIPPED to `main`, 🟢 green. Executed the ratified S3 across all 6 offender files in one coherent commit.
+Drove the design-system RADII conformance sub-count to **0**: `offSystemStyle` **14 → 2** (`r12/t0/m2` → `r0/t0/m2`,
+**Δ-12**). Type (t0) + motion (m2) held EXACTLY — dim-major ordering kept the metric move clean.
+
+**What changed:** all 12 raw `border-radius`/`borderRadius` px lengths mapped onto the `--radius-*` scale by nearest step.
+The scale floor is `sm=10px` (sm10/md16/lg22/xl30/2xl40), so every value ≤13px → `var(--radius-sm)`. Sites: **Calculator** ×3
+(5px copy/ask icon-buttons ×2, 4px), **MarkdownStudio** ×3 (4px inline-code, 8px pre, `0 8px 8px 0` blockquote — CSS-string
+template), **Notes** ×2 (`0 3px 3px 0` marker rail, 4px tag), **ErrorBoundary** ×2 (`1rem`→md exact panel, `0.5rem`→sm button),
+**ChatPanel** ×1 (4px `<code>` injected-HTML), **Toast** ×1 (4px close button). Asymmetric `0 Npx Npx 0` radii → `0
+var(--radius-sm) var(--radius-sm) 0` (right corners only). CSS-string / injected-HTML sites take `var(--radius-*)` fine —
+custom props cascade from `:root`.
+
+**Verified:** `node scripts/metrics.mjs` → `offSystemStyle` **2 (r0/t0/m2)**, Δ-12 (radii 12→0, type/motion unchanged);
+`npm run build` 🟢 (tsc -b && vite build); `npx vitest run` **334/334** 🟢; `npx eslint` clean on all 6 touched files;
+`metrics.mjs --assert-zero` exit 0 (colour metrics tokenViolations/offSystemUtilities still 0/0); bundle gz **705.4 ±0**, no
+new deps. Restored `package-lock.json` (npm-install libc-field churn) before commit. **Not cloud-verifiable (visual):** the
+per-element pixel roundness — small 24×24 buttons + inline-code/tag pills gain +2 to +6px radius (nearest-step to the sm=10
+floor). Runtime render risk negligible (pure CSS-value substitutions, passing tsc); QA runs the headless smoke.
+
+**Metrics row:** apps 28 · vitest 334 · tokenViolations 0 · offSystemUtilities 0 · **offSystemStyle 2 (r0/t0/m2) [Δ-12]** ·
+bundle 705.4 KB · Δ ±0.
+
+**Next:** EPIC-11 **S4** — residual motion (m2→0) + LOCK. Two offenders: `ArtifactGallery.tsx:229` `ease-out`→`var(--ease-out)`
+(clean); `Calculator.tsx:428` `ease-in-out` pulse — **no `--ease-in-out` token exists** (only `--ease-out`/`--ease-spring`),
+so DEFINE `--ease-in-out: cubic-bezier(0.4,0,0.2,1)` first (symmetric), then swap. Then add `offSystemStyle` to `--assert-zero`
+to LOCK → ★ EPIC-11 CODE-COMPLETE. Full seam in `docs/CONTEXT.md`.
+
+---
+
 ## 2026-07-04 · Builder — **EPIC-11 S2 · reduce TYPE (t42 → 0)** — `offSystemStyle` 56 → 14
 
 **Result:** ✅ SHIPPED to `main`, 🟢 green. Executed the ratified S2 at full speed across **all 13 offender files** in one
