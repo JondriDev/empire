@@ -21,6 +21,9 @@ data/
 .env.*
 !.env.example
 
+# Local scratch space — never publish
+scratchpad/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -162,3 +162,23 @@ now **EPIC-6 S4**:
 - **Cakra rebrand** — Hermes → Cakra + multi-model NIM router.
 - **PWA/APK packaging** — staged in PR #2 (open, human-owned; do not auto-merge).
 - **QA green** — 26/26 routes mount, no runtime errors (2026-06-20T18:09Z).
+
+---
+
+## Folded from the legacy iteration backlog (2026-07-05)
+
+`docs/ITERATION_BACKLOG.md` (pre-fleet era) was retired in the repo reshape; its
+still-relevant ideas are parked here for future re-ranking:
+
+- **Network polish** — type-colored nodes from design tokens, legible edge labels,
+  hover-highlight of a node's neighbors; search/filter by node type + title substring.
+- **Consistent empty-states** for every app list (icon + hint).
+- **`prefers-reduced-motion`** honored across all animations.
+- **Command palette** — global "⚡ Send to…" entry surfacing intents for the focused node.
+- **DataCenter** — fetch per-table row counts on `loadTables` so every `dataset` node has a stable count.
+- **Files** — a "pinned"/cross-directory file graph would need a persistent registry
+  (today's reconcile is per-directory).
+- **Prompt Gen** — optional persisted history of un-saved generations.
+- **Intents** — `make-note-from` / `add-to-learning` should round-trip into the
+  Notes/Learning stores (today they create graph-only nodes).
+- **Photos** — persist a data-URL thumbnail so photo nodes can be visual in Network.
