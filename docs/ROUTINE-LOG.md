@@ -5,6 +5,37 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-05 · WORLD-SOLVER (routine #8, first fire) — 3 cited briefs + 1 discovery
+
+**Result:** 🟢 GREEN · `public/solver/feed.json` refreshed from empty `{problems:[],briefs:{}}` → 3 briefs +
+1 discovery, committed direct to `main`. Oriented on green baseline (`npm install` + `npm run build` both exit 0);
+SOLVER LANDED block + feed present. Feed was empty so all 30 catalog briefs were MISSING — picked the 3 highest
+severity×tractability (all 16): **clean-water**, **malaria-tb-hiv**, **air-pollution**.
+
+**Researched (WebSearch, primary/major-NGO sources):**
+- **clean-water** — WHO/UNICEF JMP 2025: 2.1bn (1 in 4) lack safely managed drinking water; coverage 68%→74%
+  (2015–24). Interventions anchored on the U. Chicago/NBER w30835 meta-analysis (chlorination cuts under-5
+  mortality ~24% at ~USD 40/DALY).
+- **malaria-tb-hiv** — WHO 2024: malaria 610k deaths/282M cases; TB 1.23M deaths (leading single-agent killer);
+  HIV co-infection 12× TB risk. Interventions: ITNs (most cost-effective), R21/RTS,S vaccines (>50% yr-1;
+  R21 ~USD 3.90/dose), vaccine+SMC combo (~75%, Lancet Inf Dis phase-3), TB case-finding, integrated HIV/TB.
+- **air-pollution** — ~7M deaths/yr (8.1M in 2021 per UNICEF/HEI); >90% from PM2.5. Interventions: LPG
+  clean-cooking (HAPIN India −93% kitchen PM2.5), household-coal phase-out (PNAS China study, ~500k deaths/yr
+  avertable), WHO IT-1 standard (~300k lives/yr).
+
+**Discovered (+1):** `disc-sudan-famine` (Governance & Rights, sev 5 / tract 2) — world's largest displacement +
+confirmed famine, 2026 UN plan funded <16% of ~$9bn, media-marginalised (OCHA GHO 2026 / Stimson). No feed
+problems pruned.
+
+**Verify:** JSON valid (`node -e JSON.parse` exit 0), shape `{generatedAt,problems,briefs}` matches
+`solver/feed.ts` validator exactly, 9.6 KB (<200 KB), `npm run build` green. Client copies feed problems
+read-only; Pages auto-deploys.
+
+**Done / Verified / Next.** Next research target: **maternal-child-health** (16, high data density, WHO/UNICEF
+JMP + Countdown-to-2030 sources) or **energy-access** — both MISSING and among the top tier.
+
+---
+
 ## 2026-07-05 · Repo reshape (human session) — professionalization pass
 
 **Result:** ✅ SHIPPED via `chore/pro-repo` (landed inside a fleet freeze). Purged the pre-fleet

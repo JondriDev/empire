@@ -1,5 +1,121 @@
 {
-  "generatedAt": "2026-07-04T00:00:00Z",
-  "problems": [],
-  "briefs": {}
+  "generatedAt": "2026-07-05T00:00:00Z",
+  "problems": [
+    {
+      "catalogId": "disc-sudan-famine",
+      "title": "Sudan famine & displacement crisis",
+      "blurb": "Sudan's civil war has produced the world's largest displacement and hunger emergency, with confirmed famine and a 2026 UN response plan funded at under 16% of the ~$9bn needed.",
+      "category": "Governance & Rights",
+      "severity": 5,
+      "tractability": 2,
+      "discoveredFrom": "UN/OCHA Global Humanitarian Overview 2026 and Stimson Center both flag Sudan as the largest yet most under-funded and media-marginalised crisis globally."
+    }
+  ],
+  "briefs": {
+    "clean-water": {
+      "summary": "As of the 2025 WHO/UNICEF Joint Monitoring Programme update, 2.1 billion people — 1 in 4 globally — still lack safely managed drinking water, including 106 million who drink untreated surface water. Progress is real but slow: 961 million people gained safely managed services between 2015 and 2024, lifting global coverage from 68% to 74%, with rural coverage rising from 50% to 60%. The gap is concentrated in low-income countries, fragile/conflict settings, and rural, indigenous and minority communities. The strongest evidence base is for point-of-use water treatment: a meta-analysis of 18 RCTs found chlorination cut all-cause under-5 mortality by roughly 24%, at about USD 40 per DALY averted — on par with the most cost-effective child-health interventions like vaccination.",
+      "interventions": [
+        {
+          "title": "Point-of-use and in-line chlorination",
+          "evidence": "A University of Chicago meta-analysis of 18 RCTs (NBER w30835) found water treatment, driven by chlorination, reduced all-cause child mortality ~24% at roughly USD 40 per DALY averted.",
+          "actor": "Health ministries, water utilities and NGOs (e.g. Evidence Action's Dispensers for Safe Water)"
+        },
+        {
+          "title": "Chlorine dispensers at collection points",
+          "evidence": "The same meta-analysis estimated USD 28–72 per DALY averted for point-of-collection dispensers and free chlorine programs, ~45x below the 1x-GDP cost-effectiveness threshold.",
+          "actor": "Local governments and community water committees"
+        },
+        {
+          "title": "Piped, safely managed supply expansion",
+          "evidence": "WHO/UNICEF JMP 2025 credits the 68%→74% coverage rise partly to expanded managed piped systems, the durable route out of surface-water reliance.",
+          "actor": "National water utilities with World Bank / development-bank finance"
+        },
+        {
+          "title": "WASH investment in fragile and rural contexts",
+          "evidence": "WHO/UNICEF 2025 identify low-income, fragile, rural and indigenous populations as facing the widest disparities, requiring targeted funding.",
+          "actor": "Donors, UN agencies and national governments"
+        }
+      ],
+      "sources": [
+        "https://www.who.int/news/item/26-08-2025-1-in-4-people-globally-still-lack-access-to-safe-drinking-water---who--unicef",
+        "https://www.unicef.org/press-releases/fast-facts-1-4-people-globally-still-lack-access-safe-drinking-water-who-unicef",
+        "https://data.unicef.org/topic/water-and-sanitation/drinking-water/",
+        "https://www.nber.org/papers/w30835",
+        "https://dil.uchicago.edu/working-papers/2022-26-2/"
+      ],
+      "updatedAt": "2026-07-05"
+    },
+    "malaria-tb-hiv": {
+      "summary": "These three treatable diseases still kill well over 2 million people a year, concentrated in low-income countries. Malaria caused an estimated 610,000 deaths and 282 million cases in 2024 (about 9 million more cases than the prior year), with ~95% of deaths in the WHO African Region and 11 countries carrying two-thirds of the burden. Tuberculosis remains the leading single-agent infectious killer, with 1.23 million deaths in 2024 (including 150,000 among people with HIV) and a record 8.2 million people newly diagnosed. People living with HIV are about 12 times more likely to develop TB, making integrated HIV/TB care essential. Proven tools exist and are scaling — since 2000 an estimated 2.3 billion malaria cases and 14 million deaths have been averted — but artemisinin partial resistance is now confirmed or suspected in at least 8 African countries, threatening the gains.",
+      "interventions": [
+        {
+          "title": "Insecticide-treated bed nets (ITNs)",
+          "evidence": "A 2024 cost-effectiveness review (1Day Sooner / MMV) found ITNs the most economical malaria-prevention method in Africa, narrowly ahead of the R21 vaccine.",
+          "actor": "The Global Fund, PMI and national malaria programs"
+        },
+        {
+          "title": "R21/Matrix-M and RTS,S malaria vaccines",
+          "evidence": "Both cut malaria cases >50% in year one; R21 costs ~USD 3.90/dose vs ~USD 10.90 for RTS,S with comparable efficacy, per WHO and Serum Institute data.",
+          "actor": "Gavi, WHO and health ministries in endemic countries"
+        },
+        {
+          "title": "Seasonal malaria chemoprevention combined with vaccination",
+          "evidence": "A Lancet Infectious Diseases phase-3 trial (Burkina Faso/Mali) showed vaccine plus SMC cut clinical malaria, severe disease and deaths ~75% versus either alone.",
+          "actor": "National programs with Global Fund / Unitaid support"
+        },
+        {
+          "title": "TB case-finding, treatment and preventive therapy",
+          "evidence": "WHO's TB fact sheet reports a record 8.2 million people diagnosed in 2023–24; scaling diagnosis and treatment is the main lever against the 1.23 million annual deaths.",
+          "actor": "WHO End TB program and national TB programs"
+        },
+        {
+          "title": "Integrated HIV/TB care and antiretroviral therapy",
+          "evidence": "WHO notes people with HIV are ~12x more likely to develop TB and TB is their leading cause of death; co-management and ART sharply cut mortality.",
+          "actor": "PEPFAR, The Global Fund and national HIV programs"
+        }
+      ],
+      "sources": [
+        "https://www.who.int/teams/global-malaria-programme/reports/world-malaria-report-2024",
+        "https://www.who.int/news-room/fact-sheets/detail/malaria",
+        "https://www.who.int/news-room/fact-sheets/detail/tuberculosis",
+        "https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(23)00368-7/fulltext",
+        "https://www.mmv.org/malaria/about-malaria/malaria-facts-statistics-2025",
+        "https://www.theglobalfund.org/en/results/"
+      ],
+      "updatedAt": "2026-07-05"
+    },
+    "air-pollution": {
+      "summary": "Air pollution is one of the largest environmental health risks, associated with about 7 million premature deaths a year from combined ambient and household exposure; a UNICEF/HEI State of Global Air analysis attributed 8.1 million deaths to air pollution in 2021, making it the second-leading risk factor for death, including for children under five. More than 90% of these deaths trace to fine particulate matter (PM2.5), which penetrates the lungs and bloodstream; roughly 68% of outdoor-pollution deaths are from ischaemic heart disease and stroke. The strongest recent evidence is that household fuel transitions drive large exposure and mortality reductions: switching from biomass to LPG in India cut kitchen PM2.5 ~93% and personal exposure ~78%, and China's shift away from household solid fuels was the dominant factor in its 2005–2015 PM2.5 mortality decline, with clean-fuel switching estimated to avert on the order of half a million deaths a year.",
+      "interventions": [
+        {
+          "title": "Household clean-cooking (LPG) transition",
+          "evidence": "The HAPIN trial in India recorded a sustained ~93% drop in kitchen PM2.5 and ~78% drop in personal exposure among women switching from biomass to LPG.",
+          "actor": "National energy ministries (e.g. India's PMUY) with WHO and clean-cooking funds"
+        },
+        {
+          "title": "Phasing out household and small-scale coal",
+          "evidence": "A PNAS study found household-fuel change dominated China's 2005–2015 PM2.5 exposure and mortality decline; clean-fuel switching could avert ~500,000 deaths/year.",
+          "actor": "City and provincial governments (e.g. Beijing-Tianjin-Hebei coal bans)"
+        },
+        {
+          "title": "Tighter ambient air-quality standards toward WHO guidelines",
+          "evidence": "WHO estimates meeting interim target 1 (35 µg/m³ PM2.5) would save ~300,000 lives a year worldwide.",
+          "actor": "National environment agencies enforcing WHO Air Quality Guidelines"
+        },
+        {
+          "title": "Cleaner transport and industrial emission controls",
+          "evidence": "WHO attributes ~68% of outdoor-pollution deaths to heart disease and stroke driven largely by traffic and industrial PM2.5, targetable via fuel and emission standards.",
+          "actor": "Transport and industry regulators, city clean-air zones"
+        }
+      ],
+      "sources": [
+        "https://www.who.int/news-room/fact-sheets/detail/ambient-(outdoor)-air-quality-and-health",
+        "https://www.unicef.org/press-releases/air-pollution-accounted-81-million-deaths-globally-2021-becoming-second-leading-risk",
+        "https://www.pnas.org/doi/10.1073/pnas.1812955115",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8593210/",
+        "https://ourworldindata.org/data-review-air-pollution-deaths"
+      ],
+      "updatedAt": "2026-07-05"
+    }
+  }
 }
