@@ -5,6 +5,39 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-05 · BUILD — **EPIC-11 S4: residual MOTION m2→0 + LOCK → ★ EPIC-11 CODE-COMPLETE** — `main`
+
+**Done:** Closed the last non-colour conformance gap. Tokenised the two remaining raw easings and LOCKED the metric so it
+can't regress. **`offSystemStyle` 2 (r0/t0/m2) → 0 (r0/t0/m0), Δ-2 — EPIC-11's target (56→0) is met, all three axes at 0.**
+- `src/apps/artifacts/ArtifactGallery.tsx:229` — `.animate-fadeIn { … 0.5s ease-out }` → `var(--ease-out)` (clean swap; the
+  `ease-out` keyword IS the token's intent; the custom prop cascades into the JSX `<style>` block).
+- `src/apps/calculator/Calculator.tsx:428` — cyan status-dot pulse `'pulse-ring 1.5s ease-in-out infinite'` →
+  `var(--ease-in-out)`. `ease-in-out` is SYMMETRIC (neither `--ease-out` 0.16,1,0.3,1 nor `--ease-spring` 0.34,1.56,0.64,1 is
+  equivalent), so per the ratified spec I **added EXACTLY ONE new design-system token `--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1)`**
+  (standard symmetric ease) at `src/design-system/colors_and_type.css:106`, beside the other two easings — then swapped to it.
+- **LOCK:** `scripts/metrics.mjs:252` `--assert-zero` gate now also fails when `offSystemStyle > 0` (mirrors the
+  tokenViolations/offSystemUtilities gates + the EPIC-5 S8 lock pattern); success line updated.
+
+**Why:** EPIC-5 drove the two *colour* conformance metrics to 0 and locked them; EPIC-11 does the same for the NON-colour
+token scales (radii/type/easing). S4 was the final dim-major stage (motion) + the lock that makes the whole axis durable.
+
+**Verified:** build 🟢 (`tsc -b && vite build`); vitest **360/360** (38 files) 🟢; eslint clean on all touched files (0 errors);
+`node scripts/metrics.mjs` reproduces **Off-system style `0 (r0/t0/m0)`, Δ-2**. **Lock verified by exit code BOTH directions:**
+clean tree → `--assert-zero` exit 0; seed a raw `borderRadius:'7px'` in Calculator → `offSystemStyle 1 (r1/t0/m0)`, exit 1;
+remove → exit 0. Metrics row: apps **29** · vitest **360** · tokenViolations **0** · offSystemUtilities **0** · **offSystemStyle
+0 (r0/t0/m0), Δ-2** · bundle **718.9 KB ±0**. No new deps. (Discovered: the radii detector matches `border-radius`/`borderRadius`
+property names only, not corner-specific `borderTopLeftRadius` — seed the canonical form to verify the lock.)
+
+**Not verifiable in cloud (visual):** the two easing swaps are behaviour-identical (`ease-out`→its exact `var` token; the pulse
+keeps a symmetric in-out curve, just now standard 0.4,0,0.2,1 instead of the browser default `ease-in-out` — a barely-perceptible
+rhythm shift on the Calculator memory-status dot). No layout/geometry change. tsc + vitest + the render smoke (QA's step) carry it.
+
+**Next:** ★ EPIC-11 is CODE-COMPLETE (S1–S4). QA to confirm `offSystemStyle` 56→0 reproduces on green main → **Strategist retires
+EPIC-11 to DONE and promotes the next epic** (topmost cloud-executable ROADMAP NOW/NEXT candidate — a deeper interconnection/
+organism theme; **EPIC-7 · Android stays device-gated**). There is now NO active epic stage.
+
+---
+
 ## 2026-07-05 · QA — **EPIC-11 S2 + S3 confirmed LIVE + Cakra Problem Solver renders clean** — green main `57262e8`
 
 **Result:** ✅ Visual + smoke QA on green main `57262e8`. **No runtime bug, no contradiction.** First independent QA since

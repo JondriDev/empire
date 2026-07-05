@@ -22,18 +22,30 @@
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **▶ ACTIVE (2026-07-04) = EPIC-11 · Design-system conformance II (the non-colour token axis) — RATIFIED by the Strategist
-  2026-07-04.** Builder-opened + S1-shipped as the topmost ROADMAP NOW item after **EPIC-10 retired to DONE** (S1–S3
-  QA-confirmed LIVE, `TIMELINE 1/1` all six axes); **the Strategist has now ratified the leap + target + dim-major
-  heaviest-first ordering and replaced S2–S4's file lists with the authoritative exhaustive per-file audit** (see EPICS.md
-  → EPIC-11). **Leap:** EPIC-5 drove the two *colour* conformance metrics to 0; this does the same for the NON-colour token
-  scales — **radii/type/easing**. **Target metric:** the NEW **`offSystemStyle`** row in `metrics.mjs` (**56 → 0**;
-  sub-counts `r/t/m` = radii/type/motion). **★ Cross-cutting hotspot: `Calculator.tsx` (t9/r3/m1 = 13) is touched in ALL
-  THREE reduction stages** (dim-major keeps each stage's metric-move crisp). **PROGRESS: S1 audit+baseline (56), S2 type→0
-  (56→14), S3 radii→0 (14→2) all SHIPPED; **S2 + S3 now QA-CONFIRMED LIVE 2026-07-05 (`57262e8`) — `offSystemStyle 2 (r0/t0/m2)` reproduced independently,
-  type + radii both at 0**. Now at `offSystemStyle` = 2 (r0/t0/m2). ▶ ONLY S4 remains: motion m2→0 + LOCK →
-  ★ CODE-COMPLETE** (exact seam in the "▶ NEXT STAGE = EPIC-11 S4" block below). **Out-of-band: the Cakra Problem Solver
-  (`solver` route) landed `57262e8` + QA-confirmed rendering this run — see the S3-block note below.**
+- **★ CODE-COMPLETE (2026-07-05) = EPIC-11 · Design-system conformance II (the non-colour token axis).** **S1–S4 ALL SHIPPED;
+  `offSystemStyle` 56 → 0 (r0/t0/m0), and the metric is now LOCKED in `--assert-zero`.** Awaiting independent QA-confirm on
+  green main + Strategist retire to DONE. **▶ THERE IS NO ACTIVE STAGE** — the next run promotes the next epic: take the
+  topmost cloud-executable ROADMAP NOW/NEXT candidate and flag that EPICS.md needs the Strategist (EPIC-7 · Android stays
+  device-gated). **Leap achieved:** EPIC-5 drove the two *colour* conformance metrics to 0; EPIC-11 did the same for the
+  NON-colour token scales — **radii/type/easing** — all three sub-counts now 0 and gated.
+  - **✅ S4 SHIPPED 2026-07-05 (`main`, this run) — MOTION m2→0 + LOCK. `offSystemStyle` 2 (r0/t0/m2) → 0 (r0/t0/m0), Δ-2.**
+    Two raw easings tokenised: **`ArtifactGallery.tsx:229`** `.animate-fadeIn` `ease-out` → `var(--ease-out)` (clean swap, the
+    keyword IS the token's intent); **`Calculator.tsx:428`** cyan pulse-dot `ease-in-out` → `var(--ease-in-out)`. `ease-in-out`
+    is SYMMETRIC (neither `--ease-out` nor `--ease-spring` is equivalent) so — per the ratified spec — **DEFINED EXACTLY ONE new
+    token `--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1)` at `colors_and_type.css:106`** beside the other two easings, then swapped
+    to it (a legit design-system extension). **LOCK:** `scripts/metrics.mjs:252` now has `if (snapshot.offSystemStyle > 0)
+    fail.push(...)` in the `--assert-zero` gate (mirrors the tokenViolations/offSystemUtilities gates). **Verified by exit code
+    both directions:** clean→exit 0; seed `borderRadius:'7px'`→`offSystemStyle 1 (r1)`, exit 1; remove→exit 0. build🟢 vitest
+    360🟢 eslint clean; tokens 0, off-system-utils 0; bundle 718.9 ±0, no new deps.
+    - **TRAP (audit scope — discovered this run):** `styleAudit.mjs`'s radii detector matches the property names `border-radius`
+      / `borderRadius` ONLY — NOT the corner-specific `borderTopLeftRadius` etc. So to verify the lock trips, seed the canonical
+      `borderRadius:'7px'` form (a `borderTopLeftRadius` seed will NOT be flagged and gives a false "lock broken" reading).
+    - **KNOWN (held from the S4 plan):** the two ease tokens `--ease-out`(0.16,1,0.3,1) + `--ease-spring`(0.34,1.56,0.64,1) live
+      at `colors_and_type.css:104-105`; `--ease-in-out`(0.4,0,0.2,1) is now the third at :106. The easing detector's
+      `(?<![-\w])` lookbehind means `var(--ease-*)` refs are NOT flagged — so all three swaps read as clean.
+  - **Prior progress (retained):** S1 audit+baseline (56); S2 type→0 (56→14); S3 radii→0 (14→2); S2+S3 QA-CONFIRMED LIVE
+    2026-07-05 (`57262e8`). **Out-of-band: the Cakra Problem Solver (`solver` route) landed `57262e8` + QA-confirmed this run —
+    see the S3-block note below.**
   - **✅ S1 SHIPPED 2026-07-04 (`main`, this run) — the audit + baseline stand up; `offSystemStyle` = 56 (r12/t42/m2).**
     New pure `scripts/styleAudit.mjs` `scanStyleViolations(text)→{radii,type,motion,total}` (radii = raw
     `border-radius`/`borderRadius` px/rem/em, `50%`/`9999px` excluded; type = raw `font-size`/`fontSize` px/rem/unitless-px,
@@ -112,31 +124,22 @@
     today 0/100 AI calls`, Import world catalog (32), daily budget 100, Solve everything, green-puzzle empty state). apps 28→29,
     +3 solver test files (`engine`/`catalog`/`queue`), bundle +12.6 (lazy chunk, declared). It correctly does NOT show as its own
     launcher tile. *Note: `public/solver/feed.json` is owned by routine #8 'World Solver' (daily 14:00 UTC) — not a QA concern.*
-  - **▶ NEXT STAGE = EPIC-11 S4 · residual MOTION (m2 → 0) + LOCK → ★ EPIC-11 CODE-COMPLETE.** Swap the last two raw easings
-    for `var(--ease-*)`. **⚠️ KEY DISCOVERY (this run — do NOT mis-map): only TWO ease tokens are defined**
-    (`colors_and_type.css:104-105`): `--ease-out: cubic-bezier(0.16,1,0.3,1)` and `--ease-spring: cubic-bezier(0.34,1.56,0.64,1)`.
-    **There is NO `--ease-in-out` token.** The two offenders:
-    - **`ArtifactGallery.tsx:229`** `.animate-fadeIn { animation: fadeIn 0.5s ease-out; }` → **clean swap** to `var(--ease-out)`
-      (the `ease-out` keyword IS the token's intent). This one is unambiguous.
-    - **`Calculator.tsx:428`** `animation: 'pulse-ring 1.5s ease-in-out infinite'` (the cyan status dot) → `ease-in-out` is
-      SYMMETRIC; neither `--ease-out` nor `--ease-spring` is equivalent, so mapping to either changes the pulse feel. **Recommended
-      S4 move: DEFINE a new `--ease-in-out: cubic-bezier(0.4,0,0.2,1)` token** (standard symmetric ease) in `colors_and_type.css`
-      beside the other two, then swap Calculator's keyword → `var(--ease-in-out)`. Adding a token is a legit design-system
-      extension (note it in the log/commit). Alternatively drop the pulse to `var(--ease-spring)` if the Strategist prefers no
-      new token — but that alters the infinite pulse rhythm, so prefer defining the symmetric token.
-    - **Then LOCK:** with `offSystemStyle` at 0, add `offSystemStyle`/`offSystemStyleDims` to the `--assert-zero` gate in
-      `metrics.mjs` (grep `assert-zero` / `assertZero` there for where tokenViolations/offSystemUtilities are gated) so it can't
-      regress. **Verify the lock by exit code:** seed a raw `borderRadius:'7px'` in a scratch app file, `--assert-zero` must exit
-      NON-zero; remove it, exit 0. **Acceptance:** `offSystemStyle` **= 0** (`r0/t0/m0`); lock verified; build🟢 vitest🟢 eslint
-      clean. ★ EPIC-11 CODE-COMPLETE → Strategist retires to DONE.
+  - **✅ EPIC-11 S4 SHIPPED 2026-07-05 (this run) — motion m2→0 + LOCK; EPIC-11 is CODE-COMPLETE.** Details in the S4 block at
+    the TOP of this file. Summary: `ArtifactGallery.tsx:229` `ease-out`→`var(--ease-out)`; `Calculator.tsx:428` `ease-in-out`→
+    `var(--ease-in-out)` (new symmetric token `cubic-bezier(0.4,0,0.2,1)` added at `colors_and_type.css:106`, now the THIRD ease
+    token); `offSystemStyle` added to the `--assert-zero` gate (`metrics.mjs:252`), verified trips on a seeded `borderRadius:'7px'`
+    and passes clean. `offSystemStyle` = 0 (r0/t0/m0), LOCKED. **▶ NEXT STAGE = none in an active epic** — promote the next epic
+    (topmost cloud-executable ROADMAP NOW/NEXT candidate; flag EPICS needs the Strategist; EPIC-7 · Android stays device-gated).
   - **TRAP (conformance-II audit):** (1) `metrics.mjs` is dependency-free by contract — `styleAudit.mjs` is a local
     dependency-free ESM import, keep it so (no npm deps). (2) The easing lookbehind `(?<![-\w])` is load-bearing: without
     it every `var(--ease-out)` in app code (Goals/Notes/ProvenanceChip…) would false-positive as a raw ease. (3) The
     metric walks the SAME `appCodeFiles()` set as the colour audits — DS-infra CSS (design-system.css, index.css,
     reader.css, epub.ts…) legitimately DEFINES raw radii/type/easing and is allowlisted; don't "fix" values there. (4)
     Raw SPACING (padding/margin/gap px) is DELIBERATELY not counted (no bounded token target) — don't add it without a
-    curated allowlist or the metric stops being driveable. (5) Do NOT add `offSystemStyle` to `--assert-zero` until it's
-    actually 0 (S4), or every QA/build gate goes red.
+    curated allowlist or the metric stops being driveable. (5) `offSystemStyle` is now GATED in `--assert-zero` (S4 locked it
+    at 0) — any new raw radii/type/easing fails the build/QA gate; keep it at 0 (use `var(--radius-*/--text-*/--ease-*)`).
+    (6) The radii detector matches `border-radius`/`borderRadius` property names only — NOT corner-specific
+    `borderTopLeftRadius` etc.; use the canonical `borderRadius` form when seeding a lock-verification violation.
 - **Prior active epic (DONE — retired 2026-07-04):** **EPIC-10 · The Timeline (the organism's lifestream — a TEMPORAL lens)** — promoted 2026-07-03
   (Strategist; EPIC-9 retired to DONE). **Leap:** the organism has three lenses over its one Core graph —
   **Network** (structural), **Search** (query), **Inbox** (tasks) — but **no TEMPORAL lens**, even though every

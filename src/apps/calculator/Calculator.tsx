@@ -425,7 +425,7 @@ export default function Calculator() {
 
         {memLabel && (
           <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-cyan-3)', marginTop: '-4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--color-cyan-4)', boxShadow: '0 0 6px var(--color-cyan-4)', animation: 'pulse-ring 1.5s ease-in-out infinite' }} />
+            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--color-cyan-4)', boxShadow: '0 0 6px var(--color-cyan-4)', animation: 'pulse-ring 1.5s var(--ease-in-out) infinite' }} />
             Memory {memLabel}: {memStore}
           </div>
         )}
