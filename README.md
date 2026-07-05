@@ -1,58 +1,71 @@
 # The Empire 🏛️
 
-**Your Personal Application Suite — 26 Apps in One Desktop**
+**An offline-first personal web desktop — 29 integrated apps, one living organism, powered by the Cakra AI agent.**
+
+[![Verify build](https://github.com/JondriDev/empire/actions/workflows/verify.yml/badge.svg)](https://github.com/JondriDev/empire/actions/workflows/verify.yml)
+[![Deploy PWA](https://github.com/JondriDev/empire/actions/workflows/pages.yml/badge.svg)](https://github.com/JondriDev/empire/actions/workflows/pages.yml)
+[![Android APK](https://github.com/JondriDev/empire/actions/workflows/android.yml/badge.svg)](https://github.com/JondriDev/empire/actions/workflows/android.yml)
 
 ### ▶️ [Open The Empire](https://jondridev.github.io/empire/)
 
-Runs in any browser — **no Termux, no install required**. On your phone or
-desktop, tap **Install app** / **Add to Home screen** and it opens like a native
-app. Three ways to run it, just like Claude:
+![The Empire — home](./docs/media/home.webp)
+
+Runs in any browser — **no install required**. On your phone or desktop, tap
+**Install app** / **Add to Home screen** and it opens like a native app.
 
 | Version | How to get it |
 |---------|---------------|
 | 🌐 **Web app** | [jondridev.github.io/empire](https://jondridev.github.io/empire/) — open instantly |
 | 🖥️ **Desktop app** | Same link → browser menu → **Install** (installable PWA) |
-| 📱 **Android app** | Download the APK from the [Actions tab](https://github.com/JondriDev/empire/actions/workflows/android.yml) → artifact `the-empire-debug-apk` |
+| 📱 **Android app** | Download the APK from the [Android APK workflow](https://github.com/JondriDev/empire/actions/workflows/android.yml) → artifact `the-empire-debug-apk` |
 
-The Empire is a full-featured, offline-first application suite with a holographic **Liquid Glass** UI — recovered-alien-technology aesthetic: deep-field darkness, glass surfaces, light used sparingly as accent. Built with React 19, TypeScript, and Vite, it packs **26 integrated apps** into a windowless desktop shell, with AI woven throughout by **Cakra** — a multi-model AI agent that can act across your apps.
+The Empire is a full-featured, offline-first application suite with a
+holographic **Liquid Glass** UI — recovered-alien-technology aesthetic:
+deep-field darkness, glass surfaces, light used sparingly as accent. Built with
+React 19, TypeScript, and Vite, it packs **29 integrated apps** into a
+full-screen desktop shell, with AI woven throughout by **Cakra** — a
+multi-model AI agent that can act across your apps.
 
-It's not 26 loose apps: a shared node-graph and event bus interconnect them into one living organism, visible in the **Network** app.
+It's not 29 loose apps: a shared node-graph and event bus interconnect them
+into one living organism, visible in the **Network** app.
+
+![The Network — every app wired into one graph](./docs/media/network.webp)
 
 ---
 
 ## 🚀 Features
 
-### Core Features
-- **26 Integrated Apps** — Cakra, Notes, Calendar, Reader, Artifacts, Network, and more
-- **Cakra AI Integration** — a multi-model AI agent wired into every AI-enabled app
-- **One Living Organism** — a shared node-graph + event bus interconnect the apps (see the **Network** app); handoffs carry provenance between them
-- **PWA Ready** — installable, and cold-boots **fully offline** from a precached shell
-- **Holographic Glass Design** — the JondriDev "Earth-from-Space" palette on one design-token system (zero hardcoded colors, CI-enforced)
-- **Local-First Persistence** — LocalStorage + IndexedDB (durable media blobs); your data stays on your device
+- **29 integrated apps** — Cakra, Notes, Calendar, Reader, Artifacts, Network, and more
+- **Cakra AI** — a multi-model agent wired into every AI-enabled app; Prompt, Tokens, Code, and Problem Solver live inside it as tabs
+- **One living organism** — a shared node-graph + event bus interconnect the apps (see **Network**); handoffs carry provenance between them
+- **Offline-first PWA** — installable, cold-boots fully offline from a precached shell
+- **Holographic glass design** — the "Earth-from-Space" palette on one design-token system (zero hardcoded colors, CI-enforced)
+- **Local-first persistence** — LocalStorage + IndexedDB (durable media blobs); your data stays on your device
 
-### App Inventory
+### App inventory
 
-26 apps live in `src/lib/registry.ts`. The launcher grid shows **23** — **Code Editor**,
-**Prompt Gen** and **Token Counter** were merged into **Cakra** as tabs, so they're hidden
-aliases that still answer their legacy routes/deep-links.
+All 29 apps are declared in [`src/lib/registry.ts`](./src/lib/registry.ts) —
+the single source of truth. The launcher grid shows **25**; **Code Editor**,
+**Prompt Gen**, **Token Counter**, and **Problem Solver** are merged into
+**Cakra** as tabs and answer their legacy routes as hidden aliases.
 
-| App | Description | AI-Enabled |
-|-----|-------------|------------|
-| **Cakra** | Chat that acts — your AI (Chat · Prompt · Tokens · Code tabs) | ✅ |
+| App | Description | AI |
+|-----|-------------|----|
+| **Cakra** | Chat that acts — your AI (Chat · Prompt · Tokens · Code · Solver tabs) | ✅ |
 | **Calculator** | Scientific calculations | ✅ |
 | **Calendar** | Schedule & events | ✅ |
 | **Clock** | Time & alarms, stopwatch, timer, world clocks | ❌ |
-| **Weather** | Forecasts & conditions (Open-Meteo, no key) | ❌ |
+| **Weather** | Forecasts & conditions (Open-Meteo, no key needed) | ❌ |
 | **Grammar Fix** | Fix your writing | ✅ |
 | **Language Lab** | Learn new languages (Cakra translation) | ✅ |
-| **Music** | Play your tracks (durable, IndexedDB blobs) | ❌ |
-| **Video** | Watch videos (durable, IndexedDB blobs) | ❌ |
+| **Music** | Play your tracks (durable IndexedDB blobs) | ❌ |
+| **Video** | Watch videos (durable IndexedDB blobs) | ❌ |
 | **Files** | Browse files | ❌ |
 | **Cache Cleaner** | Free up space | ❌ |
 | **Browser** | Browse the web | ✅ |
 | **Code Editor** _(→ Cakra · Code tab)_ | Write & edit code | ✅ |
 | **Notes** | Write & organize (Markdown + tags) | ✅ |
-| **Photos** | Your gallery (durable, IndexedDB blobs) | ❌ |
+| **Photos** | Your gallery (durable IndexedDB blobs) | ❌ |
 | **Data Center** | Manage data (local-first, offline) | ✅ |
 | **Maps** | Explore locations (Leaflet + OpenStreetMap) | ❌ |
 | **Messages** | Chat over WiFi | ✅ |
@@ -64,282 +77,140 @@ aliases that still answer their legacy routes/deep-links.
 | **Network** | The ecosystem as a live node-graph | ❌ |
 | **Inbox** | Every open task, one home | ❌ |
 | **Reader** | Read your books (EPUB/PDF/MD/TXT/DOCX) · ask Cakra | ✅ |
+| **Search** | Find anything across every app | ❌ |
+| **Timeline** | The organism's history, one stream | ❌ |
+| **Problem Solver** _(→ Cakra · Solver tab)_ | Cakra solves problems — world to personal | ✅ |
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Framework** | React 19.2 |
+| **Framework** | React 19 |
 | **Language** | TypeScript 5.6 |
-| **Bundler** | Vite 5.4 |
-| **Styling** | Tailwind CSS 4.3 + token-based design system |
-| **Routing** | React Router DOM 7.18 |
-| **State** | Zustand 5.0 |
+| **Bundler** | Vite 5 |
+| **Styling** | Tailwind CSS 4 + token-based design system |
+| **Routing** | React Router 7 |
+| **State** | Zustand 5 |
 | **Animation** | Motion 12 |
 | **Maps** | Leaflet 1.9 (+ OpenStreetMap / Nominatim) |
 | **Reader** | pdfjs-dist 6 · epubjs · mammoth (DOCX) |
-| **Icons** | Lucide React 1.22 (controls) + bespoke alien SVG set (app identity) |
-| **PWA** | vite-plugin-pwa 1.3 (Workbox precache) |
+| **Icons** | Lucide (controls) + bespoke alien SVG set (app identity) |
+| **PWA** | vite-plugin-pwa (Workbox precache) |
 | **Android** | Capacitor 8 |
-| **Backend** _(optional)_ | Express 5.2 + ws 8.21 (WebSocket) |
+| **Backend** _(optional)_ | Express 5 + ws (WebSocket) |
 
 ---
 
-## 📦 Installation
+## 📦 Quick start
 
-### Prerequisites
-- Node.js 20+
-- npm
-
-> No Termux, no local server, and no PC are required to *use* The Empire — it
-> runs entirely in the browser (see "Run it without Termux" below). The steps
-> here are for building/developing it locally.
-
-### Quick Start
+Requires **Node.js 20+** (see `.nvmrc`). No local server or PC is required to
+*use* The Empire — it runs entirely in the browser. These steps are for
+building and developing it locally.
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/empire.git
+git clone https://github.com/JondriDev/empire.git
 cd empire
-
-# Install dependencies
 npm install
 
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
+npm run dev       # start the dev server
+npm run build     # production build (tsc + vite)
+npm test          # vitest
 ```
 
-### Backend Server (Optional)
+### Optional local backend
 
-For AI features and WebSocket support:
+The deployed PWA needs no backend. A local Express server (`server.js`) adds
+file access, WebSocket, and an AI proxy for self-hosted setups:
 
 ```bash
-# Install backend dependencies
-npm install
-
-# Set environment variables (optional)
-cp .env.example .env
-# Edit .env with your API keys
-
-# Start backend server
-npm run server
-
-# Backend runs on http://localhost:3001
+cp .env.example .env   # every variable optional; secure defaults apply
+npm run server         # binds 127.0.0.1:3001 by default
 ```
+
+Configuration lives in [`.env.example`](./.env.example) (`EMPIRE_*` variables).
+The server ships hardened defaults: localhost-only bind, CORS allowlist, agent
+shell/code tools disabled, no baked-in secrets — see [SECURITY.md](./SECURITY.md).
 
 ---
 
-## ⚙️ Configuration
+## 🎨 Design system
 
-### Environment Variables
+One token-backed design system — the **"Earth-from-Space"** palette on a
+**Liquid Glass** UI. Every color resolves to a CSS custom property in
+`src/design-system/colors_and_type.css`, so the whole shell re-themes from one
+place; raw hex/rgb literals and off-system utilities are **0, CI-enforced**
+(`node scripts/metrics.mjs --assert-zero`).
 
-Create a `.env` file in the root:
-
-```bash
-# AI Configuration
-OPENROUTER_API_KEY=your-api-key-here
-OPENAI_API_KEY=sk-...
-AI_BASE_URL=https://openrouter.ai/api/v1
-
-# Server Configuration
-PORT=3001
-```
-
-### Weather API (Optional)
-
-1. Get a free API key from [OpenWeatherMap](https://openweathermap.org/api)
-2. Open the Weather app in Empire
-3. Click Settings (gear icon)
-4. Enter your API key and location
-5. Save — live weather data will now load
-
----
-
-## 🎨 Design System
-
-The Empire uses one token-backed design system — the JondriDev **"Earth-from-Space"**
-palette on a **Liquid Glass** UI. Every color resolves to a CSS custom property in
-`src/design-system/colors_and_type.css`, so the whole shell re-themes from one place;
-raw hex/rgb literals and off-system palette classes are **0 and CI-enforced**
-(`scripts/metrics.mjs --assert-zero`).
-
-### Palette
 - **Deep-field near-black space** with overlapping radial washes as the backdrop
 - **Holographic glass** surfaces via the `.gp` primitive (blur + border highlights)
 - **Accents** — signal / aurora / plasma / ion / ember / xenon — used sparingly as *light*, not fill
-
-### Typography
-- **Sans-serif:** Sora (vendored, renders identically offline)
-- **Monospace:** JetBrains Mono (vendored)
-
-### Motion
-- Physics-based spring/ease tokens (`--ease-spring`, `--dur-*`) — things glide, settle, breathe
-- Pulsing AI badges · animated node-graph in the Network app · smooth hover states
-
----
-
-## 📱 Run it without Termux (phone / tablet / desktop)
-
-You can use The Empire on your phone or tablet **without opening Termux &
-Termux-X11**. Everything builds **in the cloud via GitHub Actions** — no PC
-needed. Two ready-to-install versions come out of one offline-first codebase:
-
-- **PWA** (web + Samsung DeX desktop) — auto-deployed to GitHub Pages at
-  `https://jondridev.github.io/empire/`; tap **Install app** / **Add to Home
-  screen**.
-- **Android APK** — built by the **Android APK** workflow; download the APK
-  artifact and install it (a real launcher icon, fully offline).
-
-👉 **Full step-by-step guide: [docs/PACKAGING.md](./docs/PACKAGING.md)**
-
-### PWA Installation (manual / self-hosted)
-
-The Empire is also a standard Progressive Web App:
-
-1. Build for production: `npm run build`
-2. Serve the `dist` folder
-3. In browser: **Add to Home Screen**
-4. App installs with icon and offline support
+- **Type** — Sora + JetBrains Mono, both vendored (renders identically offline)
+- **Motion** — physics-based spring/ease tokens; things glide, settle, breathe
 
 ---
 
 ## 🔌 Architecture
 
-### Project Structure
-
 ```
 empire/
 ├── src/
-│   ├── apps/              # App directories (one folder per app)
-│   ├── components/        # Shared UI components
-│   ├── dashboard/         # Dashboard & AppShell
-│   ├── design-system/     # JondriDev Earth-from-Space palette + Sora / JetBrains Mono fonts
+│   ├── apps/              # One folder per app
+│   ├── components/        # Shared shell UI (Bridge, AppHost, Recents…)
+│   ├── design-system/     # Earth-from-Space tokens + vendored fonts + alien icons
 │   ├── hooks/             # Custom React hooks
-│   ├── lib/               # Utils, registry, store, core graph
-│   ├── App.tsx            # Main router
-│   ├── main.tsx           # Entry point
-│   └── design-system.css  # Theme tokens
-├── docs/                  # Documentation
-├── scripts/               # Launcher + CI guard scripts
-├── public/                # Icons, manifest, service worker
-├── server.js              # Express backend (port 3001)
-├── dist/                  # Production build (generated)
-├── index.html
-├── package.json
-├── vite.config.ts
-└── tsconfig.json
+│   ├── lib/               # Registry, stores, event bus, core graph, AI client
+│   ├── App.tsx            # Router
+│   └── main.tsx           # Entry point
+├── docs/                  # Documentation + the fleet's shared memory (see docs/README.md)
+├── scripts/               # Launcher + CI guard scripts (metrics, parity, PWA audits)
+├── public/                # Icons, manifest, solver feed
+├── android/               # Capacitor Android project
+├── server.js              # Optional Express backend
+└── vite.config.ts
 ```
 
-### Event Bus
+Apps communicate through a central event bus and mirror their entities into a
+shared node-graph — that's what the **Network** app renders. Deep-dive docs:
 
-Apps communicate via a central event bus:
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — stack, modules, API surface
+- [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) — dev guide: scripts, quality gates, adding an app, event bus, WebSocket API
+- [docs/PACKAGING.md](./docs/PACKAGING.md) — PWA install + Android APK builds
+- [docs/README.md](./docs/README.md) — full documentation index
 
-```typescript
-import { emit } from './lib/eventBus'
+### Built by an autonomous fleet
 
-// Emit event
-emit({ type: 'NOTE_CREATED', noteId: '123', title: 'My Note' })
-
-// Listen for events
-eventBus.on('NOTE_CREATED', (data) => {
-  console.log('New note:', data)
-})
-```
+This repo is continuously built and maintained by a fleet of autonomous
+Claude Code routines — they plan epics, ship stages, run visual QA, measure a
+fitness field, and commit directly to `main` around the clock. The fleet's
+shared memory and specs live in [`docs/`](./docs/README.md).
 
 ---
 
-## 🧪 Development
+## 🧪 Quality gates
 
-### Scripts
+Every change — human or fleet — must keep six gates green (enforced by the
+**Verify build** workflow on PRs):
 
 ```bash
-npm run dev        # Start dev server (Vite)
-npm run build      # TypeScript + Vite build
-npm run preview    # Preview production build
-npm run lint       # ESLint check
-npm run server     # Start backend server
-```
-
-### Adding a New App
-
-1. Create app directory in `src/apps/your-app/`
-2. Create `YourApp.tsx` component
-3. Add an entry to the `apps` list in `src/lib/registry.ts`
-4. Map its route → component in `src/lib/appComponents.tsx` (lazy-loaded)
-5. Join the organism (optional, ~3 lines): `mirrorCollection(...)` in a `useEffect`
-   + a `<NodeActions type="…" sourceId={id}/>` bar so its entities appear in the Network
-
-Example:
-```typescript
-// src/apps/my-app/MyApp.tsx
-export default function MyApp() {
-  return <div>My App</div>
-}
-
-// src/lib/registry.ts — `icon` is a key into the alien SVG set (src/design-system/icons),
-// `color` an accent from the Earth-from-Space palette.
-{ id: 'my-app', name: 'My App', icon: 'Star', route: '/app/my-app', description: 'Description', color: '#5b8fb9', cakraEnabled: false }
+npm run build                            # tsc + vite build
+npx vitest run                           # unit + audit tests
+npx eslint .                             # lint
+node scripts/check-shell-styled.mjs      # shell CSS contract
+node scripts/check-route-parity.mjs      # registry ↔ components parity
+node scripts/metrics.mjs --assert-zero   # design-system conformance ratchet
 ```
 
 ---
 
-## 🌐 WebSocket API
+## 🤝 Contributing & security
 
-Connect to real-time updates:
-
-```javascript
-const ws = new WebSocket('ws://localhost:3001/ws')
-
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data)
-  console.log('Received:', data)
-}
-
-ws.send(JSON.stringify({ type: 'SUBSCRIBE', channel: 'all' }))
-```
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — setup, gates, commit conventions, and
+  how to coexist with the autonomous fleet
+- [SECURITY.md](./SECURITY.md) — reporting vulnerabilities, server hardening
+  summary
 
 ---
 
-## 📊 Performance
-
-- **Build:** `tsc -b && vite build` — clean, no warnings
-- **Bundle Size:** code-split; every app is a lazy chunk loaded on demand
-- **Offline:** shell + all app chunks precached (Workbox), cold-boots with the network fully blocked
-- **Lazy Loading:** all apps loaded on demand
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run `npm run build` to verify
-5. Submit a pull request
-
----
-
-## 📄 License
-
-MIT License — see LICENSE file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **Vite** — Fast bundling
-- **React** — UI framework
-- **Tailwind CSS** — Styling
-- **Lucide Icons** — Beautiful icons
-- **Zustand** — State management
-
----
-
-**Built with ❤️ by Jondri**
-
-*The Empire — All your apps, one organism.*
+**© 2026 Jondri (JondriDev)** · *The Empire — all your apps, one organism.*

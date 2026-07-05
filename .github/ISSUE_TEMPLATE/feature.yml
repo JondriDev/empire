@@ -1,0 +1,19 @@
+name: Feature request
+description: An idea for The Empire
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What should The Empire do, and who benefits?
+    validations:
+      required: true
+  - type: textarea
+    id: fit
+    attributes:
+      label: How does it fit the organism?
+      description: >-
+        The Empire is one interconnected graph of apps, not a list of loose
+        tools. Does this extend an existing app, connect apps together, or add
+        a new instrument?

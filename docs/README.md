@@ -5,6 +5,7 @@
 | Doc | What it covers |
 |---|---|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Tech stack, module layout, backend API surface |
+| [DEVELOPMENT.md](./DEVELOPMENT.md) | Dev guide: scripts, the six quality gates, adding an app, event bus |
 | [SPEC.md](./SPEC.md) | The Cakra agent design spec |
 | [PACKAGING.md](./PACKAGING.md) | Shipping the app: PWA install + Android APK (Capacitor + CI) |
 

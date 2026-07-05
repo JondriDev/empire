@@ -1,7 +1,16 @@
 {
   "name": "empire",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "The Empire — an offline-first personal web desktop: 29 integrated apps, one living organism, powered by the Cakra AI agent.",
+  "homepage": "https://jondridev.github.io/empire/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JondriDev/empire.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +19,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "server": "node server.js"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
