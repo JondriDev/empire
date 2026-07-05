@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Card, Button } from '../../components/ui'
-import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
-import { SendResultMenu } from '../../components/ui/SendResultMenu'
-import { useInboundHandoff } from '../../lib/useInboundHandoff'
-import { emit } from '../../lib/eventBus'
+import { Card, Button } from '../../../components/ui'
+import { ProvenanceChip } from '../../../components/ui/ProvenanceChip'
+import { SendResultMenu } from '../../../components/ui/SendResultMenu'
+import { useInboundHandoff } from '../../../lib/useInboundHandoff'
+import { emit } from '../../../lib/eventBus'
 import {
   Hash, Copy, Check, Info, BarChart2, Upload
 } from 'lucide-react'
