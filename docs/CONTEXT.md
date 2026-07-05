@@ -29,7 +29,9 @@
   → EPIC-11). **Leap:** EPIC-5 drove the two *colour* conformance metrics to 0; this does the same for the NON-colour token
   scales — **radii/type/easing**. **Target metric:** the NEW **`offSystemStyle`** row in `metrics.mjs` (**56 → 0**;
   sub-counts `r/t/m` = radii/type/motion). **★ Cross-cutting hotspot: `Calculator.tsx` (t9/r3/m1 = 13) is touched in ALL
-  THREE reduction stages** (dim-major keeps each stage's metric-move crisp).
+  THREE reduction stages** (dim-major keeps each stage's metric-move crisp). **PROGRESS: S1 audit+baseline (56), S2 type→0
+  (56→14), S3 radii→0 (14→2) all SHIPPED. Now at `offSystemStyle` = 2 (r0/t0/m2). ▶ ONLY S4 remains: motion m2→0 + LOCK →
+  ★ CODE-COMPLETE** (exact seam in the "▶ NEXT STAGE = EPIC-11 S4" block below).
   - **✅ S1 SHIPPED 2026-07-04 (`main`, this run) — the audit + baseline stand up; `offSystemStyle` = 56 (r12/t42/m2).**
     New pure `scripts/styleAudit.mjs` `scanStyleViolations(text)→{radii,type,motion,total}` (radii = raw
     `border-radius`/`borderRadius` px/rem/em, `50%`/`9999px` excluded; type = raw `font-size`/`fontSize` px/rem/unitless-px,
@@ -77,15 +79,42 @@
       builder's. Runtime render risk is negligible (pure CSS-value substitutions + passing tsc), but QA should still run the
       full smoke on the new green main to confirm the touched apps (Calculator, ChartBuilder/MarkdownStudio artifacts,
       CommandPalette, Notes, ErrorBoundary, Utility, ChatPanel, ConfirmModal, Desktop, NodeActions, SendResultMenu) render clean.
-  - **▶ NEXT STAGE = EPIC-11 S3 · reduce RADII (r12 → 0) in ONE run — 6 files.** Map every raw `border-radius`/`borderRadius`
-    px onto `--radius-*` by NEAREST step (`sm≈10px · md≈16px · lg≈22px · xl≈30px · 2xl≈40px`); KEEP semantic `50%` circles +
-    `9999px` pills (the audit already excludes them). **Authoritative offenders (full r12):** `Calculator.tsx` **r3**,
-    `MarkdownStudio.tsx` (artifacts) **r3**, `Notes.tsx` **r2**, `ErrorBoundary.tsx` **r2**, `ChatPanel.tsx` (cakra) **r1**,
-    `Toast.tsx` **r1**. Reuse the S2 transform rail (validate-all-then-write substring script). Note: MarkdownStudio + ChatPanel
-    radii live in CSS-string / injected-HTML (`border-radius: 4px`) — same `var(--radius-*)` substitution works. **Acceptance:**
-    `offSystemStyle` radii sub-count **= 0** (`r0/t0/m2`, total 14→2); type/motion unchanged; build🟢 vitest🟢 eslint clean;
-    `--assert-zero` still exit 0. **S4** = residual motion (m2→0 — Calculator m1, ArtifactGallery m1) + add `offSystemStyle` to
-    `--assert-zero` to LOCK → ★ EPIC-11 CODE-COMPLETE.
+  - **✅ S3 SHIPPED 2026-07-05 (`main`, this run) — RADII driven to 0. `offSystemStyle` 14 → 2 (`r12/t0/m2` → `r0/t0/m2`,
+    Δ-12).** All 12 raw `border-radius`/`borderRadius` px across the 6 files mapped onto `--radius-*` by nearest step; type
+    (t0) + motion (m2) held EXACTLY (dim-major ordering kept the move crisp). **Mapping baked in:** `sm=10` is the FLOOR of the
+    scale (sm10/md16/lg22/xl30/2xl40), so EVERY value ≤13px → `sm` — the 4px/5px/8px/0.5rem sites all became `var(--radius-sm)`
+    (a +2 to +6px roundness increase on small chips/kbd/inline-code — the largest visual shift this run); `1rem`(16px) → `md`
+    exact (ErrorBoundary panel); asymmetric `0 Npx Npx 0` (Notes marker rail, MarkdownStudio blockquote) → `0 var(--radius-sm)
+    var(--radius-sm) 0`. CSS-string (MarkdownStudio `.md-*` template) + injected-HTML (ChatPanel `<code>` string) sites take
+    `var(--radius-*)` fine — custom props cascade. **Sites:** Calculator ×3 (5px×2 copy/ask btns L313/332, 4px L569),
+    MarkdownStudio ×3 (4px inline-code, 8px pre, `0 8px 8px 0` blockquote), Notes ×2 (`0 3px 3px 0` marker, 4px tag),
+    ErrorBoundary ×2 (1rem panel, 0.5rem btn), ChatPanel ×1 (4px code), Toast ×1 (4px close btn). build🟢 vitest 334🟢 eslint
+    clean (all 6); `--assert-zero` exit 0 (colour metrics 0/0 untouched); bundle 705.4 ±0, no new deps.
+    - **On-device confirm (>1.5px shift — cloud can't verify pixels):** every 4px/5px→sm(10) is +5/+6px, most visible on the
+      Calculator copy/ask icon buttons (24×24, now noticeably rounder) + the inline-code/tag pills (Notes, MarkdownStudio,
+      ChatPanel, Toast). 8px→sm(10) = +2px (MarkdownStudio pre + blockquote). ErrorBoundary 1rem→md is exact. If any single
+      element reads over-rounded, that's a design-scale question for the Strategist (the scale has no <10px step), NOT a bug.
+  - **⚠️ QA still owes independent confirmation:** the headless render-smoke needs `playwright` (not in `package.json`) → QA's
+    step. Runtime risk negligible (pure CSS-value substitutions, passing tsc), but QA should run the smoke on the new green main,
+    confirm the touched apps render (Calculator, MarkdownStudio/ArtifactGallery, Notes, ErrorBoundary, ChatPanel, Toast), and
+    reproduce `offSystemStyle 2 (r0/t0/m2)`.
+  - **▶ NEXT STAGE = EPIC-11 S4 · residual MOTION (m2 → 0) + LOCK → ★ EPIC-11 CODE-COMPLETE.** Swap the last two raw easings
+    for `var(--ease-*)`. **⚠️ KEY DISCOVERY (this run — do NOT mis-map): only TWO ease tokens are defined**
+    (`colors_and_type.css:104-105`): `--ease-out: cubic-bezier(0.16,1,0.3,1)` and `--ease-spring: cubic-bezier(0.34,1.56,0.64,1)`.
+    **There is NO `--ease-in-out` token.** The two offenders:
+    - **`ArtifactGallery.tsx:229`** `.animate-fadeIn { animation: fadeIn 0.5s ease-out; }` → **clean swap** to `var(--ease-out)`
+      (the `ease-out` keyword IS the token's intent). This one is unambiguous.
+    - **`Calculator.tsx:428`** `animation: 'pulse-ring 1.5s ease-in-out infinite'` (the cyan status dot) → `ease-in-out` is
+      SYMMETRIC; neither `--ease-out` nor `--ease-spring` is equivalent, so mapping to either changes the pulse feel. **Recommended
+      S4 move: DEFINE a new `--ease-in-out: cubic-bezier(0.4,0,0.2,1)` token** (standard symmetric ease) in `colors_and_type.css`
+      beside the other two, then swap Calculator's keyword → `var(--ease-in-out)`. Adding a token is a legit design-system
+      extension (note it in the log/commit). Alternatively drop the pulse to `var(--ease-spring)` if the Strategist prefers no
+      new token — but that alters the infinite pulse rhythm, so prefer defining the symmetric token.
+    - **Then LOCK:** with `offSystemStyle` at 0, add `offSystemStyle`/`offSystemStyleDims` to the `--assert-zero` gate in
+      `metrics.mjs` (grep `assert-zero` / `assertZero` there for where tokenViolations/offSystemUtilities are gated) so it can't
+      regress. **Verify the lock by exit code:** seed a raw `borderRadius:'7px'` in a scratch app file, `--assert-zero` must exit
+      NON-zero; remove it, exit 0. **Acceptance:** `offSystemStyle` **= 0** (`r0/t0/m0`); lock verified; build🟢 vitest🟢 eslint
+      clean. ★ EPIC-11 CODE-COMPLETE → Strategist retires to DONE.
   - **TRAP (conformance-II audit):** (1) `metrics.mjs` is dependency-free by contract — `styleAudit.mjs` is a local
     dependency-free ESM import, keep it so (no npm deps). (2) The easing lookbehind `(?<![-\w])` is load-bearing: without
     it every `var(--ease-out)` in app code (Goals/Notes/ProvenanceChip…) would false-positive as a raw ease. (3) The

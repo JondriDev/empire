@@ -125,7 +125,8 @@ adds it to `--assert-zero` so it can't rot — exactly as EPIC-5 S8 locked `offS
   `node scripts/metrics.mjs` → `offSystemStyle` **type sub-count = 0** (`r12/t0/m2`, total 56→14); radii/motion unchanged;
   build🟢 vitest🟢 eslint clean; `--assert-zero` still exit 0 (colour metrics untouched); every touched app still renders
   in QA (render-smoke catches crashes; pixel shifts are on-device).
-- [ ] **S3 · Reduce RADII (r12 → 0) — in ONE run (6 files).** Map every raw `border-radius`/`borderRadius` px onto
+- [x] **S3 · Reduce RADII (r12 → 0) — SHIPPED 2026-07-05 (`main`).** `offSystemStyle` **14 → 2** (`r12/t0/m2` → `r0/t0/m2`, Δ-12); all 12 raw `border-radius`/`borderRadius` px across the 6 files mapped onto `--radius-*` by nearest step (sm=10 is the floor → every ≤13px value → `sm`; ErrorBoundary `1rem`→`md`; asymmetric `0 Npx Npx 0` → `0 var(--radius-sm) var(--radius-sm) 0`). Type (t0) + motion (m2) held EXACTLY. build🟢 vitest 334🟢 eslint clean; `--assert-zero` exit 0; bundle 705.4 ±0, no new deps. _(original spec below)_
+- [ ] ~~**S3 · Reduce RADII (r12 → 0) — in ONE run (6 files).**~~ Map every raw `border-radius`/`borderRadius` px onto
   `--radius-*` by NEAREST step (`sm≈10px · md≈16px · lg≈22px · xl≈30px · 2xl≈40px`); keep semantic `50%` circles +
   `9999px` pills. **Authoritative offenders (full r12):**
 
