@@ -5,6 +5,22 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-05 · Repo reshape (human session) — professionalization pass
+
+**Result:** ✅ SHIPPED via `chore/pro-repo` (landed inside a fleet freeze). Purged the pre-fleet
+iteration era: `docs/archive/`, `ITERATION_BACKLOG/PROTOCOL`, `ENHANCEMENTS.md`, the committed
+`scratchpad/` (now gitignored), and 10 orphaned scripts (−2,726 lines). Moved `PACKAGING.md` →
+`docs/`, `empire.desktop` → `scripts/` (refreshed stale Hermes-era text). Rewrote `.env.example`
+to the real `EMPIRE_*` server surface. Folded still-live backlog ideas into `docs/ROADMAP.md`
+(tail section). Added `docs/README.md` as the documentation index and a REPO RESHAPE notice block
+to `docs/CONTEXT.md`. **All routine-owned paths untouched** (CONTEXT/EPICS/ROADMAP/METRICS/
+ROUTINE-LOG/metrics.json, `docs/routines/**`, `docs/screenshots/latest/REPORT.md`,
+`public/solver/feed.json`, `scripts/*.mjs` guards).
+
+**Verified:** vitest 360/360 · eslint 0 · shell-styled ✓ · route-parity 29/29 · conformance 0/0.
+
+---
+
 ## 2026-07-05 · BUILD — **EPIC-11 S4: residual MOTION m2→0 + LOCK → ★ EPIC-11 CODE-COMPLETE** — `main`
 
 **Done:** Closed the last non-colour conformance gap. Tokenised the two remaining raw easings and LOCKED the metric so it
