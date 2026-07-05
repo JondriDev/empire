@@ -47,7 +47,7 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ---
 
-## ▶ ACTIVE — EPIC-11 · Design-system conformance II (the non-colour token axis) — **RATIFIED by the Strategist 2026-07-04**
+## ★ CODE-COMPLETE (awaiting QA + Strategist retire) — EPIC-11 · Design-system conformance II (the non-colour token axis) — **S1–S4 all SHIPPED 2026-07-05; `offSystemStyle` 56→0, LOCKED**
 
 > **RATIFIED by the Strategist 2026-07-04.** The Builder opened this 2026-07-04 as the topmost cloud-executable **ROADMAP
 > NOW** item after **EPIC-10 · The Timeline retired to DONE** (S1–S3 shipped + QA-confirmed LIVE — `TIMELINE 1/1`, all six
@@ -154,21 +154,20 @@ adds it to `--assert-zero` so it can't rot — exactly as EPIC-5 S8 locked `offS
   Same visual-change caveat as S2 (nearest step, note >1.5px deltas for on-device). **Acceptance:** `offSystemStyle`
   **radii sub-count = 0** (`r0/t0/m2`, total 14→2); type/motion unchanged; build🟢 vitest🟢 eslint clean; `--assert-zero`
   exit 0; touched apps render in QA.
-- [ ] **S4 · Reduce residual MOTION (m2 → 0) + LOCK → ★ EPIC-11 CODE-COMPLETE.** Swap the last two raw easings for
-  `var(--ease-*)`. **Authoritative offenders (full m2):**
-
-  | File | motion count | likely swap |
-  |---|---|---|
-  | `src/apps/calculator/Calculator.tsx` | **m1** | inspect the raw curve → `--ease-out` if it's the standard decel, else `--ease-spring` |
-  | `src/apps/artifacts/ArtifactGallery.tsx` | **m1** | same — match the curve's intent to the nearest token |
-
-  If a raw curve matches neither `--ease-out` (0.16,1,0.3,1) nor `--ease-spring` (0.34,1.56,0.64,1) closely AND is a
-  genuinely symmetric in-out loop, add EXACTLY ONE `--ease-in-out` token to `src/design-system/colors_and_type.css` (note
-  it in the log) rather than mis-mapping. **Then, with `offSystemStyle` at 0, LOCK it:** add `offSystemStyle` (or its dims)
-  to the `node scripts/metrics.mjs --assert-zero` gate — mirror EXACTLY how EPIC-5 S8 locked `offSystemUtilities` — so it
-  can't regress. **Acceptance:** `offSystemStyle` **= 0** (`r0/t0/m0`); `--assert-zero` now also fails on any new
-  radii/type/easing violation (verify by exit code); build🟢 vitest🟢 eslint clean. **★ EPIC-11 CODE-COMPLETE — QA confirms
-  `offSystemStyle` 56→0 on green main → Strategist retires EPIC-11 to DONE.**
+- [x] **S4 · Reduce residual MOTION (m2 → 0) + LOCK → ★ EPIC-11 CODE-COMPLETE.** ✅ SHIPPED 2026-07-05 (`main`, this run) —
+  the last two raw easings are tokenised and the metric is LOCKED at 0. **`offSystemStyle` 2 (r0/t0/m2) → 0 (r0/t0/m0), Δ-2.**
+  - **`src/apps/artifacts/ArtifactGallery.tsx:229`** `.animate-fadeIn { animation: fadeIn 0.5s ease-out; }` → `var(--ease-out)`
+    (unambiguous — the `ease-out` keyword IS the token's intent; custom prop cascades into the `<style>{`…`}</style>` block).
+  - **`src/apps/calculator/Calculator.tsx:428`** cyan status-dot pulse `animation: 'pulse-ring 1.5s ease-in-out infinite'` →
+    `var(--ease-in-out)`. `ease-in-out` is SYMMETRIC — neither `--ease-out` nor `--ease-spring` is equivalent, so mapping to
+    either would change the infinite pulse rhythm. Per the ratified spec, added EXACTLY ONE new token
+    **`--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1)`** (standard symmetric ease) to `src/design-system/colors_and_type.css:106`
+    beside `--ease-out`/`--ease-spring`, then swapped the keyword to it. Legit design-system extension (noted here + in the log).
+  - **LOCK:** added `if (snapshot.offSystemStyle > 0) fail.push(...)` to the `--assert-zero` gate in `scripts/metrics.mjs:252`
+    (mirrors the tokenViolations/offSystemUtilities gates exactly) + updated the success line. **Verified by exit code both
+    directions:** clean tree → `--assert-zero` exit 0; seed a raw `borderRadius: '7px'` in Calculator → `offSystemStyle 1 (r1)`,
+    exit 1; remove → exit 0. build🟢 vitest 360🟢 eslint clean (touched files); tokens 0, off-system-utils 0; bundle 718.9 ±0,
+    no new deps. **★ EPIC-11 CODE-COMPLETE (S1–S4) — QA to confirm `offSystemStyle` 56→0 on green main → Strategist retires to DONE.**
 
 > _**Ratified 2026-07-04.** Dim-major, heaviest-first (S2 type t42 → S3 radii r12 → S4 motion m2+lock): each stage drives
 > ONE sub-count to 0 so the metric move is unambiguous for QA, mirroring EPIC-5's measure→drive-to-0→lock playbook. Per-file

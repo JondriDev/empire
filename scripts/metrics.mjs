@@ -249,9 +249,10 @@ if (args.has('--assert-zero')) {
   const fail = [];
   if (snapshot.tokenViolations > 0) fail.push(`tokenViolations=${snapshot.tokenViolations}`);
   if (snapshot.offSystemUtilities > 0) fail.push(`offSystemUtilities=${snapshot.offSystemUtilities}`);
+  if (snapshot.offSystemStyle > 0) fail.push(`offSystemStyle=${snapshot.offSystemStyle} (r${sv.dims.radii}/t${sv.dims.type}/m${sv.dims.motion})`);
   if (fail.length) {
     console.error(`✗ design-system conformance assertion FAILED: ${fail.join(', ')}`);
     process.exit(1);
   }
-  console.log('✓ design-system conformance: tokenViolations=0, offSystemUtilities=0');
+  console.log('✓ design-system conformance: tokenViolations=0, offSystemUtilities=0, offSystemStyle=0');
 }

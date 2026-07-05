@@ -226,7 +226,7 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
+        .animate-fadeIn { animation: fadeIn 0.5s var(--ease-out); }
       `}</style>
     </div>
   )
