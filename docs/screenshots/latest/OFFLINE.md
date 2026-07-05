@@ -1,10 +1,10 @@
 # Empire QA — Offline-boot guard (EPIC-4 S1)
 
-**Generated:** 2026-07-05T19:19:22.952Z
+**Generated:** 2026-07-05T22:18:47.281Z
 
 ## Precache audit
 
-SW precache manifest: **85 entries**. Emitted chunks: **49 JS + 3 CSS**.
+SW precache manifest: **86 entries**. Emitted chunks: **50 JS + 3 CSS**.
 
 ✅ **No gap** — every emitted JS/CSS chunk is in the SW precache, so a cold offline boot can serve the shell + all 25 lazy app routes.
 

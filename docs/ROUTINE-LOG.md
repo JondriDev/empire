@@ -5,6 +5,34 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-05 · QA — visual + smoke on green main `6d983b3` (first render-QA of the empty-state refactor)
+
+**Result:** 🟢 GREEN · **30/30 routes render clean, 0 runtime bugs.** Committed REPORT + metric deltas + epic-acceptance
+confirmation direct to `main`.
+
+**Context:** arrived on `4c643a9`; while building, origin advanced +2 — a sibling QA (`0b7af75`, confirmed EPIC-11 on
+`4c643a9`) **and an app-code commit `6d983b3`** ("polish(empty-states): unify 5 apps onto the shared `<EmptyState>`").
+Per the routine, an APP-CODE commit landing mid-run means the report must describe the tree it's pushed onto — so I
+reset to `6d983b3` and **rebuilt + re-smoked** against it (the empty-state refactor updated `metrics.json` but had never
+been render-QA'd headless).
+
+**Verified on `6d983b3`:** build🟢; **30/30 routes render clean** (0 uncaught) incl. the 5 refactored apps
+(`datacenter`/`inbox`/`messages`/`photos`/`reader`); every guard green — SHELL-IS-STYLED, REGISTRY-COVERAGE 29,
+INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1 (5 axes), TIMELINE 1/1 (6 axes),
+HOME-ALIVE 1/1, PROVENANCE 3/3+3/3, OFFLINE 5/5, **PRECACHE 86 no-gap** (+1 chunk from the refactor). Metrics reproduce
+the committed `6d983b3` snapshot EXACTLY: apps 29, test cases 307/36 files, tokens 0, off-system utils 0, **offSystemStyle
+0 (r0/t0/m0)**, bundle 717.4 — all Δ±0; `--assert-zero` exit 0. **Re-verified the EPIC-11 S4 LOCK is live** (seeded
+`borderRadius:'7px'`→`offSystemStyle 1`, gate exit 1; revert→0/exit 0). Visually confirmed (local PNGs, uncommitted): the
+unified `<EmptyState>` on Messages ("No messages with Jondri yet") + DataCenter tables + Bridge home + Timeline lens.
+
+**Epic-acceptance:** EPIC-11 (design-system conformance II) stays **CODE-COMPLETE + QA-confirmed** — the empty-state
+refactor reintroduced no raw radii/type/easing; `offSystemStyle` holds at 0, locked.
+
+**Next:** the Strategist promotes the next epic — no `▶ ACTIVE` stage remains (EPIC-7 · Android stays device-gated).
+Until then, builder POLISH increments continue but a real epic is needed to let QA confirm a *moved* metric.
+
+---
+
 ## 2026-07-05 · POLISH — unify primary empty-states onto the shared `<EmptyState>` primitive (no active epic)
 
 **Context:** EPIC-11 is CODE-COMPLETE **and** QA-CONFIRMED (HEAD `0b7af75` is that QA commit; `offSystemStyle` 0

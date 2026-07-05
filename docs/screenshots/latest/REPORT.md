@@ -1,34 +1,42 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-05T19:19:23.033Z
+**Generated:** 2026-07-05T22:18:47.314Z
 
 **Result:** 30/30 rendered without crash, 0 failed.
+
+## ✅ Runtime bugs: NONE this run.
+
+## First headless render-QA of the empty-state refactor (`6d983b3`) — renders clean
+
+**This run QA's the CURRENT main `6d983b3`**, one app-code commit ahead of the last QA. Sequence: the sibling QA
+`0b7af75` confirmed EPIC-11 on `4c643a9`; then **`6d983b3` "polish(empty-states): unify 5 apps' primary empty-states
+onto the shared `<EmptyState>` primitive"** landed (DataCenter, Inbox, Messages, Photos, Reader + shared
+`components/ui/Utility.tsx`, +`Utility.test.tsx`). That refactor updated `metrics.json` but had **not** been render-QA'd
+headless — so I rebuilt + re-smoked against it (the report must describe the tree it's pushed onto).
+
+- **All 5 refactored apps render clean** (`datacenter`, `inbox`, `messages`, `photos`, `reader` — 0 uncaught JS, 0
+  console errors). **Visually confirmed** the shared `<EmptyState>` primitive: `app-messages.png` shows the unified
+  empty state ("No messages with Jondri yet · Start the conversation below." with the send-glyph tile); `app-datacenter.png`
+  renders its Tasks/Ideas tables clean. No visual regression from the refactor.
+- Build 🟢 · vitest static **307** cases / **36** files (`Utility.test.tsx` +the shared-primitive cases) · eslint clean.
+- **PRECACHE 86 entries** (was 85 — the refactor emitted one new chunk) — audit **no-gap**, every emitted chunk precached.
+
+## ★ EPIC-11 — CODE-COMPLETE, stays QA-CONFIRMED on the new tree
+
+EPIC-11's target metric `offSystemStyle` still reads **0 (r0/t0/m0)** on `6d983b3`; the design-system ratchet holds —
+`node scripts/metrics.mjs --assert-zero` **exits 0** (tokenViolations=0, offSystemUtilities=0, offSystemStyle=0). I also
+verified the LOCK is *live* (S4's other half): seeding the canonical `borderRadius:'7px'` into an app-code file this run
+made `offSystemStyle 1 (r1/t0/m0)` and the gate exited **1**; reverting returned it to 0/exit 0. **S1–S4 all
+done-confirmed — the empty-state refactor did NOT reintroduce any raw radii/type/easing.** EPIC-11 is CODE-COMPLETE with
+no active stage → ready for the Strategist to retire it to DONE + promote the next epic (EPIC-7 · Android stays device-gated).
+
+**Metric deltas (vs committed `metrics.json`):** apps 29 ±0 · test cases 307 ±0 (36 files) · tokenViolations 0 ±0 ·
+offSystemUtilities 0 ±0 · **offSystemStyle 0 (r0/t0/m0) ±0** · bundle gz **717.4 KB ±0**. Reproduces the `6d983b3`
+snapshot exactly. `--assert-zero` exit 0.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
 > listed separately — expected in the offline cloud sandbox and **not** a render failure.
-
-## No runtime bugs found
-
-Green build, 30/30 routes render clean, every guard green. Nothing for the build routine to pick up.
-
-## Fitness metrics (this run)
-
-| Metric | Value | Δ vs committed snapshot |
-|---|---|---|
-| Apps / routes | 29 | ±0 |
-| Test cases (metrics, `src/`) | 302 | ±0 |
-| Test files (metrics, `src/`) | 35 | ±0 |
-| Token violations | 0 | ±0 |
-| Off-system utils | 0 | ±0 |
-| **Off-system style** | **0 (r0/t0/m0)** | ±0 |
-| Bundle gz (KB) | 716.7 | +1.5 (build-env gzip variance; no code/dep change from this QA run) |
-
-`node scripts/metrics.mjs --assert-zero` **exits 0** — the design-system ratchet holds (tokenViolations=0, offSystemUtilities=0, offSystemStyle=0).
-
-## Epic-acceptance confirmation — EPIC-11 (design-system conformance II)
-
-**✅ CONFIRMED LIVE on green main.** EPIC-11's target metric `offSystemStyle` reads **0 (r0/t0/m0)** — the full 56→0 leap (S1 baseline 56 → S2 type→0 → S3 radii→0 → **S4 motion m2→0 + LOCK**) is reproduced independently this run, and the metric is now **locked in `--assert-zero`** (exit 0 clean). All three sub-counts — radii, type, easing — are 0 and gated. **S1–S4 done-confirmed: the acceptance metric moved and holds.** EPIC-11 is CODE-COMPLETE with no active stage remaining → ready for the Strategist to retire it to DONE and promote the next epic.
 
 | App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|
@@ -48,7 +56,7 @@ Green build, 30/30 routes render clean, every guard green. Nothing for the build
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -163,7 +171,7 @@ Distinct from the edge guard above: each S3 receiver was seeded with an inbound 
 
 The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (`setOffline`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.
 
-**Precache:** 85 manifest entries; 49 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
+**Precache:** 86 manifest entries; 50 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
 
 | Route | Renders offline |
 |---|---|

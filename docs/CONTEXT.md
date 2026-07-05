@@ -60,6 +60,15 @@ fleet freeze). What changed for routines:
     (`var(--c-mesin)`, keeps action), Messages (signal default). New `Utility.test.tsx` (+5). build🟢 vitest 360→365🟢
     eslint clean; **offSystemStyle 0 (r0/t0/m0) ±0, tokens 0, off-system utils 0, `--assert-zero` exit 0**; bundle
     716.7→717.4 (+0.7), no new deps.
+    - **✅ QA-CONFIRMED LIVE (2026-07-05, green main `6d983b3`) — the empty-state refactor renders clean, no regression.**
+      First headless render-QA of `6d983b3` (it landed after the last QA `0b7af75`/`4c643a9`). All **30/30 routes render
+      clean** incl. the 5 refactored apps (`datacenter`/`inbox`/`messages`/`photos`/`reader`, 0 uncaught, 0 console errors);
+      **visually confirmed** the shared `<EmptyState>` primitive (`app-messages.png`: "No messages with Jondri yet · Start
+      the conversation below." + send-glyph tile; `app-datacenter.png`: Tasks/Ideas tables clean). Every guard green
+      (**PRECACHE 86 no-gap** — the refactor emitted +1 chunk), test cases 307/36 files, offSystemStyle **0 (r0/t0/m0)** ±0,
+      bundle 717.4 ±0, `--assert-zero` exit 0 (also re-verified the LOCK trips: seeded `borderRadius:'7px'`→exit 1, revert→
+      exit 0). **EPIC-11 stays CODE-COMPLETE + QA-confirmed; the refactor reintroduced no raw radii/type/easing.** ▶ Still
+      awaiting the Strategist to promote the next epic (EPIC-7 · Android device-gated).
     - **SEAM (reuse — how to unify any empty state):** import `{ EmptyState }` from `../../components/ui/Utility`; render
       `<EmptyState icon={<Glyph className="w-6 h-6"/>} title=… description=… action={…} accent={APP_ACCENT} />`. `accent`
       is a `var(--*)` token (omit → signal/cyan default). It's a centred flex column, `minHeight:200px`, `padding:40px 24px`,
