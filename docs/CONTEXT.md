@@ -32,6 +32,12 @@ fleet freeze). What changed for routines:
   `docs/routines/**`, `docs/screenshots/latest/REPORT.md`, `docs/digests/`,
   `public/solver/feed.json`, every `scripts/*.mjs` guard.
 - `docs/README.md` now indexes the documentation — keep it current when docs change.
+- **📵 NO IMAGE FILES IN GIT — EVER.** QA screenshots are local working artifacts now:
+  `docs/screenshots/latest/*.png` is **gitignored** (the 5×/day PNG overwrites had grown the
+  repo to ~291 MB; history was rewritten to purge them). QA commits `REPORT.md` /
+  `OFFLINE.md` / `PWA-BASE.md` (text) only. Two curated shots for the README live in
+  `docs/media/` — leave them alone. Humans view the app at the live PWA
+  (jondridev.github.io/empire), not via committed screenshots.
 
 ---
 

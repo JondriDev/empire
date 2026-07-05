@@ -24,6 +24,10 @@ data/
 # Local scratch space — never publish
 scratchpad/
 
+# QA screenshots are working artifacts, never committed (REPORT.md and other
+# text reports in the same folder ARE committed)
+docs/screenshots/**/*.png
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
