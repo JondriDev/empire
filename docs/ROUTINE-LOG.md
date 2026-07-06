@@ -5,6 +5,22 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-06 · QA (visual + smoke) — health-hold on the Strategist reshape (`7e68e1c`); green, zero drift, EPIC-12 S1 not yet built
+
+**Result:** 🟢 GREEN · build clean, **30/30 routes render clean**, every guard green, every metric Δ ±0. Committed direct to `main`.
+
+First QA since the Strategist reshaped the tree (last QA `67afd26`): EPIC-11 retired to DONE, the deps-audit gate
+(`check-audit.mjs`) + xmldom-override patch landed, and **EPIC-12 · Intent integrity was promoted (S1 pending)**. No
+product code changed on the render surface — this is a health confirmation. `npm run build` 🟢 (PWA precache 86, no gap);
+`qa-smoke.mjs` = **30/30 render clean** (0 uncaught JS), REGISTRY-COVERAGE **29** smoke↔registry exact, all guards green
+(INBOUND 3/3 · MEDIA 3/3 · GRAPH-LEGIBLE 1/1 · GLOBAL-SEARCH 1/1 · NODE-LINEAGE 1/1 · TIMELINE 1/1 all 6 axes · HOME-ALIVE
+1/1 · PROVENANCE 3/3+3/3 · OFFLINE 5/5 · PRECACHE 86 no-gap). `metrics.mjs`: apps 29, test cases 309, offSystemStyle
+**0 (r0/t0/m0)**, bundle 718.3 — all Δ ±0; `--assert-zero` exit 0 (EPIC-11 ratchet holds). Visually re-verified the
+Bridge, Network CORE mesh, and Solver (green-puzzle empty state + live world feed "Sudan famine…"). **EPIC-12 S1 is not
+yet shipped by the Builder** — no `INTENT-ROUNDTRIP` guard exists yet, so there is no acceptance metric to confirm; the
+`make-note-from`/`add-to-learning` phantom-entity bug in `sync.ts` is still present on this tree. No runtime bug, no drift.
+**Next:** Builder takes EPIC-12 S1 (route the two intents through the store; add the `INTENT-ROUNDTRIP` guard).
+
 ## 2026-07-06 · STRATEGIST — retire EPIC-11 (DONE), promote ▶ EPIC-12 · Intent integrity (fix the phantom-entity bug)
 
 **Docs only, committed direct to `main`.** EPIC-11 (design-system conformance II) is QA-confirmed DONE (`offSystemStyle`

@@ -63,7 +63,10 @@ fleet freeze). What changed for routines:
 > be able to start editing **without re-planning**.
 
 - **▶ ACTIVE: EPIC-12 · Intent integrity — S1 is next (2026-07-06, Strategist-promoted). NO re-planning needed; full spec
-  in [`docs/EPICS.md`](./EPICS.md) → EPIC-12.** EPIC-11 is retired to DONE (offSystemStyle 56→0 LOCKED + QA-confirmed). The
+  in [`docs/EPICS.md`](./EPICS.md) → EPIC-12.** EPIC-11 is retired to DONE (offSystemStyle 56→0 LOCKED + QA-confirmed).
+  **↳ QA STATUS (2026-07-06, green main `7e68e1c`): S1 NOT yet shipped — no `INTENT-ROUNDTRIP` guard in `qa-smoke.mjs`
+  yet, so no acceptance metric to confirm; the `sync.ts` phantom-entity bug is still live on this tree. Health-hold QA
+  ran clean anyway: 30/30 routes render, every guard green, every metric Δ ±0, `--assert-zero` exit 0. Builder takes S1.** The
   Strategist audited the organism and found a **latent correctness bug** at the top of the priority bias (fix-broken →
   interconnection): two core intents make **phantom** entities.
   - **THE BUG (code-confirmed, `src/lib/core/sync.ts`):** `make-note-from` (`:139`) + `add-to-learning` (`:153`) call
