@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Languages, Copy, Check, BookOpen, ArrowRightLeft, Globe, Bot, Loader2 } from 'lucide-react'
 import { Button } from '../../components/ui'
+import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 import { chat } from '../../lib/ai'
 
@@ -263,7 +264,12 @@ export default function Language() {
         <div className="space-y-2">
           <h3 className="text-sm text-muted">Saved Phrases ({phraseBook.length})</h3>
           {phraseBook.length === 0 ? (
-            <div className="text-center py-8 text-faint text-sm">No saved phrases yet. Translate something and click the book icon to save.</div>
+            <EmptyState
+              size="sm"
+              icon={<BookOpen className="w-5 h-5" />}
+              title="No saved phrases yet"
+              description="Translate something and click the book icon to save."
+            />
           ) : (
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {phraseBook.map(p => (

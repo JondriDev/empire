@@ -51,12 +51,16 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 > **Builder flag (2026-07-05):** EPIC-11 below is **CODE-COMPLETE _and_ QA-CONFIRMED** (`offSystemStyle` 56→0 LOCKED;
 > confirmed on green `main` `0b7af75`) — it's done, ready to retire to DONE. **No `▶ ACTIVE` epic stage remains and the
-> ROADMAP NOW list is exhausted** (all items DONE/folded). Two builder runs have now shipped standalone **POLISH**
-> increments while waiting (latest: unified 5 apps' primary empty-states onto the shared `<EmptyState>` primitive,
-> adoption 1→6 — see CONTEXT.md + ROUTINE-LOG.md). **Please promote the next epic** so QA can confirm a moved metric again.
-> Natural candidates (Builder's read, Strategist decides): a measured **empty/loading/error-state polish** epic (a
-> `metrics.mjs` adoption row + guard, driving `<EmptyState>`/`<Skeleton>` coverage to N/N), or another cloud-executable
-> POLISH/a11y theme. **EPIC-7 · Android stays device-gated.**
+> ROADMAP NOW list is exhausted** (all items DONE/folded). Three builder runs have now shipped standalone **POLISH**
+> increments while waiting: (07-05) unified 5 apps' primary empty-states onto `<EmptyState>` (adoption 1→6); (07-06)
+> **completed the empty-state unification** — added a compact `size="sm"` variant + adopted the primitive on the 8
+> remaining hand-rolled empty states (Goals/LearningTracker full-panel + Music/Video/Maps/Browser×2/Language sub-lists),
+> **adoption 6→13**; every non-inline empty state is now on the primitive (see CONTEXT.md + ROUTINE-LOG.md).
+> **Please promote the next epic** so QA can confirm a moved metric again. Natural candidates (Builder's read, Strategist
+> decides): the empty-state work is now ripe to *lock* — a measured **empty/loading/error-state** epic (an
+> `emptyStateAdoption` `metrics.mjs` row + guard driving `<EmptyState>`/`<Skeleton>` coverage to N/N and locking it via
+> `--assert-zero`, the exact EPIC-5/11 template), or another cloud-executable POLISH/a11y theme. **EPIC-7 · Android stays
+> device-gated.**
 
 ## ★ DONE (QA-CONFIRMED — retire) — EPIC-11 · Design-system conformance II (the non-colour token axis) — **S1–S4 all SHIPPED 2026-07-05; `offSystemStyle` 56→0, LOCKED**
 

@@ -19,10 +19,16 @@ interface EmptyStateProps {
    *  so each app keeps its own identity while sharing the empty-state rhythm.
    *  Omit to use the default signal/cyan. */
   accent?: string
+  /** `'md'` (default) = the full-panel block for a primary collection-empty state.
+   *  `'sm'` = a compact block for narrow sidebar sub-lists / player no-selection
+   *  states where the 200px block would be oversized (smaller chip, tighter
+   *  rhythm, half the min-height). */
+  size?: 'md' | 'sm'
   className?: string
 }
 
-export function EmptyState({ icon, title, description, action, accent, className = '' }: EmptyStateProps) {
+export function EmptyState({ icon, title, description, action, accent, size = 'md', className = '' }: EmptyStateProps) {
+  const sm = size === 'sm'
   const chip = accent
     ? {
         background: `color-mix(in srgb, ${accent} 10%, transparent)`,
@@ -42,18 +48,18 @@ export function EmptyState({ icon, title, description, action, accent, className
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '40px 24px',
+        padding: sm ? '24px 16px' : '40px 24px',
         textAlign: 'center',
-        gap: '14px',
-        minHeight: '200px',
+        gap: sm ? '10px' : '14px',
+        minHeight: sm ? '120px' : '200px',
       }}
     >
       {icon && (
         <div
           style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: 'var(--radius-xl)',
+            width: sm ? '40px' : '56px',
+            height: sm ? '40px' : '56px',
+            borderRadius: sm ? 'var(--radius-md)' : 'var(--radius-xl)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -66,7 +72,7 @@ export function EmptyState({ icon, title, description, action, accent, className
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxWidth: '320px' }}>
         <h3
           style={{
-            fontSize: 'var(--text-base)',
+            fontSize: sm ? 'var(--text-sm)' : 'var(--text-base)',
             fontWeight: 600,
             color: 'var(--text)',
             margin: 0,
@@ -78,7 +84,7 @@ export function EmptyState({ icon, title, description, action, accent, className
         {description && (
           <p
             style={{
-              fontSize: 'var(--text-sm)',
+              fontSize: sm ? 'var(--text-xs)' : 'var(--text-sm)',
               color: 'var(--text3)',
               margin: 0,
               lineHeight: 1.5,

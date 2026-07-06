@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Card, Button } from '../../components/ui'
+import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 import {
   putMedia, deleteMedia, loadMediaUrls,
@@ -343,11 +344,12 @@ export default function Music() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-12 text-faint">
-            <MusicIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p>No track playing</p>
-            <p className="text-sm mt-1">Add audio files to get started</p>
-          </div>
+          <EmptyState
+            size="sm"
+            icon={<MusicIcon className="w-5 h-5" />}
+            title="No track playing"
+            description="Add audio files to get started"
+          />
         )}
 
         {/* Stats bar */}

@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react'
 import { Globe, Bookmark, History, Bot, ExternalLink, Trash2, Star, Search } from 'lucide-react'
+import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 
 const DEFAULT_BOOKMARKS = [
@@ -166,7 +167,12 @@ export default function Browser() {
             <Bookmark className="w-4 h-4" /> {bookmarks.length} Bookmarks
           </h3>
           {bookmarks.length === 0 ? (
-            <div className="text-center py-12 text-faint text-sm">No bookmarks yet. Navigate to a URL and click the star to save.</div>
+            <EmptyState
+              size="sm"
+              icon={<Bookmark className="w-5 h-5" />}
+              title="No bookmarks yet"
+              description="Navigate to a URL and click the star to save."
+            />
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {bookmarks.map(b => (
@@ -204,7 +210,12 @@ export default function Browser() {
             )}
           </div>
           {history.length === 0 ? (
-            <div className="text-center py-12 text-faint text-sm">No browsing history yet.</div>
+            <EmptyState
+              size="sm"
+              icon={<History className="w-5 h-5" />}
+              title="No browsing history yet"
+              description="Pages you visit will appear here."
+            />
           ) : (
             <div className="space-y-1">
               {history.slice(0, 30).map((h) => (

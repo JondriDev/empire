@@ -5,6 +5,47 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-06 · POLISH — complete the empty-state unification: `size="sm"` variant + 8 remaining spots (no active epic)
+
+**Context:** EPIC-11 is CODE-COMPLETE + QA-CONFIRMED (`offSystemStyle` 0 LOCKED); no `▶ ACTIVE` epic stage remains and the
+ROADMAP NOW list is exhausted. Per the routine I took the topmost cloud-executable POLISH increment and **flag again that
+EPICS.md needs the Strategist** to promote the next epic. The 2026-07-05 run unified the 6 *primary* full-panel empty
+states onto the shared `<EmptyState>` and explicitly named the next step: a compact **`size="sm"`** variant for the
+narrow sub-lists / player no-selection states it deliberately skipped (the 200px block is oversized there). This run
+delivers exactly that AND catches two full-panel primaries the prior run missed.
+
+**Done:**
+- **`EmptyState` grew a `size?: 'md' | 'sm'` prop** (`src/components/ui/Utility.tsx`), default `'md'` → the existing 6
+  adopters are **byte-identical**. `sm` re-tunes the rhythm for narrow contexts: chip 56→40px (`--radius-xl`→`--radius-md`),
+  padding `40/24`→`24/16`, gap 14→10, minHeight **200→120px**, title `--text-base`→`--text-sm`, description
+  `--text-sm`→`--text-xs`. **All values are tokens** (spacing px are not audited) → `offSystemStyle` stays 0.
+- **Adopted `<EmptyState>` on the 8 remaining hand-rolled empty states across 7 apps** (adoption **6 → 13 apps**):
+  - **md (full-panel primaries the prior run missed):** **Goals** `No {filter} goals yet` (icon `Flag`), **LearningTracker**
+    `No {filter} topics yet` (icon `Brain`) — both had a real full-panel collection-empty with an icon; now consistent with
+    the other 6 primaries. Preserved their dynamic filter-aware titles + added a friendly description.
+  - **sm (narrow sub-lists / player no-selection):** **Music** `No track playing` · **Video** `No video selected` (kept its
+    `<Card>` wrapper) · **Maps** `No saved places yet` (saved-places sidebar) · **Browser** `No bookmarks yet` + `No browsing
+    history yet` · **Language** `No saved phrases yet`. Each keeps its own glyph (`MusicIcon`/`Film`/`Star`/`Bookmark`/
+    `History`/`BookOpen` at `w-5 h-5`) + a one-line hint; all default signal accent.
+- **`Utility.test.tsx` +2** (sm renders title/description/icon + `minHeight` 120px; default md stays 200px).
+
+**Verified (the gate):** `npm run build` 🟢 (tsc -b + vite build); `npx vitest run` **367/367** (39 files, +2);
+`npx eslint` clean on all 9 touched files; `node scripts/metrics.mjs --assert-zero` **exit 0, no regression** —
+apps 29 ±0, **offSystemStyle 0 (r0/t0/m0) ±0**, tokenViolations 0 ±0, offSystemUtilities 0 ±0, test cases 307→309 (+2),
+bundle 717.4→717.6 gz (+0.2), no new deps. `package-lock.json` churn reverted before commit.
+
+**Not verifiable in cloud (visual):** each swap re-lays an empty panel. The sm variant is a smaller centred icon-chip +
+title + hint (120px block) — QA should eyeball Music/Video (empty player), Maps saved tab, Browser bookmarks/history tabs,
+Language phrase book; and the two new md primaries (Goals/LearningTracker with an empty filter). No pixel diff is
+cloud-assertable; the render is unit-pinned + the metric-clean guarantee holds.
+
+**Next (single best step):** the Strategist promotes the next epic — every remaining hand-rolled empty state is now on the
+primitive (adoption 13; the few left are inline/italic one-liners in ColorPalette/FormBuilder/Clock/PromptGenerator/Cache
+where a block is wrong by design). A natural measured epic: an `emptyStateAdoption` `metrics.mjs` row + guard driving it to
+N/N and locking it, mirroring the EPIC-5/11 template. **EPIC-7 · Android stays device-gated.**
+
+---
+
 ## 2026-07-05 · QA — visual + smoke on green main `6d983b3` (first render-QA of the empty-state refactor)
 
 **Result:** 🟢 GREEN · **30/30 routes render clean, 0 runtime bugs.** Committed REPORT + metric deltas + epic-acceptance

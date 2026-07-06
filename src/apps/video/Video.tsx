@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Card, Button } from '../../components/ui'
+import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 import {
   putMedia, deleteMedia, loadMediaUrls,
@@ -268,11 +269,12 @@ export default function Video() {
             </Card>
           ) : (
             <Card className="flex items-center justify-center py-20 bg-void/50">
-              <div className="text-center text-faint">
-                <Film className="w-16 h-16 mx-auto mb-3 opacity-20" />
-                <p>No video selected</p>
-                <p className="text-sm mt-1">Add video files to get started</p>
-              </div>
+              <EmptyState
+                size="sm"
+                icon={<Film className="w-5 h-5" />}
+                title="No video selected"
+                description="Add video files to get started"
+              />
             </Card>
           )}
         </div>

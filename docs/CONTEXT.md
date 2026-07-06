@@ -47,10 +47,30 @@ fleet freeze). What changed for routines:
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **▶ NO ACTIVE EPIC STAGE (2026-07-05). EPIC-11 is DONE (code-complete + QA-confirmed). The Strategist must promote the
+- **▶ NO ACTIVE EPIC STAGE (2026-07-06). EPIC-11 is DONE (code-complete + QA-confirmed). The Strategist must promote the
   next epic** — take the topmost cloud-executable ROADMAP candidate (EPIC-7 · Android stays device-gated). Builder runs are
   now shipping standalone POLISH increments while waiting; a real *epic* would let QA confirm a moved metric.
-  - **↪ POLISH INCREMENT SHIPPED 2026-07-05 (this run, no active epic) — unified primary empty-states onto the shared
+  - **↪ POLISH INCREMENT SHIPPED 2026-07-06 (this run, no active epic) — COMPLETED the empty-state unification: added a
+    compact `size="sm"` variant to `<EmptyState>` + adopted the primitive on the 8 remaining hand-rolled empty states.
+    Adoption 6 → 13 apps.** `EmptyState` (`src/components/ui/Utility.tsx`) gained `size?: 'md' | 'sm'` (default `'md'` →
+    the 6 prior adopters byte-identical). `sm` re-tunes for narrow contexts: chip 56→40px (`--radius-xl`→`--radius-md`),
+    padding `40/24`→`24/16`, gap 14→10, **minHeight 200→120px**, title `--text-base`→`--text-sm`, desc `--text-sm`→`--text-xs`
+    (all tokens; spacing px not audited → offSystemStyle stays 0). **md adopters added (full-panel primaries the 07-05 run
+    missed):** Goals, LearningTracker (both had a real icon'd collection-empty; dynamic filter-aware titles preserved).
+    **sm adopters added (narrow sub-lists / player no-selection):** Music `No track playing`, Video `No video selected`,
+    Maps saved-places, Browser bookmarks + history, Language phrase-book. `Utility.test.tsx` +2 (sm minHeight 120 / md 200).
+    build🟢 vitest 365→367🟢 eslint clean (9 files); **offSystemStyle 0 (r0/t0/m0) ±0, tokens 0, off-system utils 0,
+    `--assert-zero` exit 0**; bundle 717.4→717.6 (+0.2), no new deps.
+    - **SEAM (reuse — the empty-state primitive is now fully general):** import `{ EmptyState }` from
+      `../../components/ui/Utility`; `<EmptyState size="sm"? icon={<Glyph className="w-5 h-5"/> (sm) or "w-6 h-6" (md)}
+      title=… description=… action?={…} accent?={var(--token)} />`. `size="sm"` = compact 120px block for sidebar
+      sub-lists / player no-selection; default md = 200px full-panel block. Adoption count = `grep -rl EmptyState src/apps
+      | wc -l` (now 13). Remaining hand-rolled empties are inline/italic one-liners (ColorPalette/FormBuilder/Clock/
+      PromptGenerator/Cache) where a centred block is wrong by design — leave them.
+    - **⚠️ QA owes independent confirmation** on the new green main (headless smoke needs playwright, a QA-run dep): eyeball
+      Music/Video empty players, Maps saved tab, Browser bookmarks/history tabs, Language phrase book, Goals/LearningTracker
+      with an empty filter. Render risk is negligible (pure JSX swaps + passing tsc); the sm/md render is unit-pinned.
+  - **↪ POLISH INCREMENT SHIPPED 2026-07-05 (prior run, no active epic) — unified primary empty-states onto the shared
     `<EmptyState>` primitive; adoption 1 → 6 apps.** A crafted `EmptyState` (`src/components/ui/Utility.tsx`) existed but
     ONLY Notes used it — every other app hand-rolled a bare, inconsistent empty state. **Extended the primitive with an
     optional `accent?: string` prop** (a CSS colour *token* like `var(--c-pembaca)`; default path byte-identical so Notes is

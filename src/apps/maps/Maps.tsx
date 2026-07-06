@@ -11,6 +11,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { emit } from '../../lib/eventBus'
 import { Map as MapIcon, Search, Navigation, MapPin, Locate, Trash2, Star } from 'lucide-react'
+import { EmptyState } from '../../components/ui/Utility'
 
 interface Place {
   id: string
@@ -330,11 +331,12 @@ export default function Maps() {
           {activeTab === 'saved' && (
             <>
               {savedPlaces.length === 0 && (
-                <div className="text-center py-8">
-                  <Star className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--text3)' }} />
-                  <p className="text-sm" style={{ color: 'var(--text3)' }}>No saved places yet</p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--text3)' }}>Search for a place and star it to save</p>
-                </div>
+                <EmptyState
+                  size="sm"
+                  icon={<Star className="w-5 h-5" />}
+                  title="No saved places yet"
+                  description="Search for a place and star it to save"
+                />
               )}
               {savedPlaces.map(place => (
                 <div

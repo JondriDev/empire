@@ -9,6 +9,7 @@ import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { EmptyState } from '../../components/ui/Utility'
 import type { LearningItem } from '../../lib/store'
 
 export default function LearningTracker() {
@@ -144,10 +145,11 @@ export default function LearningTracker() {
       {/* Topic list */}
       <div className="space-y-3">
         {filtered.length === 0 && (
-          <div className="text-center py-12">
-            <Brain className="w-12 h-12 mx-auto mb-3 text-faint" />
-            <p className="text-faint text-sm">No {filter !== 'all' ? filter : ''} topics yet</p>
-          </div>
+          <EmptyState
+            icon={<Brain className="w-6 h-6" />}
+            title={`No ${filter !== 'all' ? filter + ' ' : ''}topics yet`}
+            description="Add a topic to track what you're learning and how far you've come."
+          />
         )}
         {filtered.map(item => (
           <div

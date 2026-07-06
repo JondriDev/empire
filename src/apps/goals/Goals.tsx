@@ -11,6 +11,7 @@ import { NodeActions } from '../../components/ui/NodeActions'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { LineageTrail } from '../../components/ui/LineageTrail'
+import { EmptyState } from '../../components/ui/Utility'
 
 interface Goal {
   id: string
@@ -244,10 +245,11 @@ export default function Goals() {
       {/* Goals list */}
       <div className="space-y-3">
         {filtered.length === 0 && (
-          <div className="text-center py-12">
-            <Flag className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text3)' }} />
-            <p className="text-sm" style={{ color: 'var(--text3)' }}>No {filter !== 'all' ? filter : ''} goals yet</p>
-          </div>
+          <EmptyState
+            icon={<Flag className="w-6 h-6" />}
+            title={`No ${filter !== 'all' ? filter + ' ' : ''}goals yet`}
+            description="Set a goal and Cakra will help you break it into steps."
+          />
         )}
         {filtered.map(goal => (
           <div

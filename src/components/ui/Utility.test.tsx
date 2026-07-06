@@ -39,4 +39,29 @@ describe('EmptyState', () => {
     render(<EmptyState title="App accent" accent="var(--c-pembaca)" icon={<svg data-testid="glyph2" />} />)
     expect(screen.getByTestId('glyph2')).toBeTruthy()
   })
+
+  it('renders the compact sm variant (narrow sub-lists / player no-selection)', () => {
+    const { container } = render(
+      <EmptyState
+        size="sm"
+        title="No track playing"
+        description="Add audio files to get started"
+        icon={<svg data-testid="glyph3" />}
+      />,
+    )
+    // Title + description + icon still render; the size only re-tunes the rhythm.
+    expect(screen.getByText('No track playing')).toBeTruthy()
+    expect(screen.getByText('Add audio files to get started')).toBeTruthy()
+    expect(screen.getByTestId('glyph3')).toBeTruthy()
+    // sm halves the block's min-height (120px vs the default 200px) so it fits a
+    // sidebar sub-list without dominating it.
+    const root = container.firstChild as HTMLElement
+    expect(root.style.minHeight).toBe('120px')
+  })
+
+  it('keeps the default (md) min-height when size is omitted', () => {
+    const { container } = render(<EmptyState title="No goals yet" />)
+    const root = container.firstChild as HTMLElement
+    expect(root.style.minHeight).toBe('200px')
+  })
 })
