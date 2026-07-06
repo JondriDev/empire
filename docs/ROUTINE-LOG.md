@@ -5,6 +5,20 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-06 · STRATEGIST — retire EPIC-11 (DONE), promote ▶ EPIC-12 · Intent integrity (fix the phantom-entity bug)
+
+**Docs only, committed direct to `main`.** EPIC-11 (design-system conformance II) is QA-confirmed DONE (`offSystemStyle`
+56→0 r0/t0/m0 LOCKED) → retired. With every interconnection + conformance epic done and the fleet idling 3 runs on
+empty-state polish, I audited the organism and found a **latent correctness bug at the top of the priority bias**
+(fix-broken → interconnection): `make-note-from` + `add-to-learning` (`src/lib/core/sync.ts:139,153`) create phantom
+`note`/`learning` graph nodes that never write the real store — and `reconcile()` (`:63-65`) prunes any centrally-mirrored
+node with no `data.sourceId`, so both results never reach Notes/Learning AND vanish on the next mutation/reload.
+**Promoted EPIC-12 · Intent integrity:** route the two intents through `useStore.addNote`/`addLearningItem` (the
+synchronous `subscribe(syncAll)` mirror re-materializes them un-prunably), preserving `data.from` for lineage. Target =
+new `INTENT-ROUNDTRIP` guard `0/2 → 2/2` (S1 note round-trip + guard → S2 learning → S3 lock via a reconcile-survival
+invariant). `make-task` stays graph-only by design. Updated EPICS/CONTEXT(active-epic block)/ROADMAP/METRICS. **Next:**
+Builder takes EPIC-12 S1.
+
 ## 2026-07-06 · DEPS+LEVERAGE — patch a HIGH prod vuln via override, safe minor bumps, + a CI dependency-audit gate
 
 **Result:** 🟢 GREEN · build + 367 tests + all guards pass. Committed direct to `main`.

@@ -10,20 +10,24 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-07-04** (strategist) · Main: 🟢 green (vitest 318, token-violations 0, off-system 0) ·
-> QA: 29/29 routes render, no runtime errors, all guards green. **EPIC-1..10 all DONE** (organism both-ways 9/9 ·
+> Last re-ranked: **2026-07-06** (strategist) · Main: 🟢 green (vitest 367, token-violations 0, off-system 0, offSystemStyle 0) ·
+> QA: 30/30 routes render, no runtime errors, all guards green. **EPIC-1..11 all DONE** (organism both-ways 9/9 ·
 > token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable · off-system 1076→0, CI-locked ·
 > durable provenance `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` + Reader graph-legible · `GLOBAL-SEARCH 1/1`
-> queryable organism · `NODE-LINEAGE 1/1` per-artifact ancestry, navigable · `TIMELINE 1/1` temporal lens, all six axes).
-> **▶ EPIC-11 · Design-system conformance II (the non-colour token axis) ACTIVE — RATIFIED 2026-07-04.** EPIC-5 drove the
-> two *colour* conformance metrics to 0 (`tokenViolations`, `offSystemUtilities`, `--assert-zero`-locked), but "tokens
-> only" was never enforced for the NON-colour scales — app code still hardcodes **radii** (`4px` vs `--radius-sm`),
-> **type** (`13px` vs `--text-sm`), and **easings** (`cubic-bezier(…)` vs `--ease-*`), so the "one radius scale / motion =
-> physics via tokens" design language is only half true. EPIC-11 makes it fully true via the exact EPIC-5 playbook
-> (measure → drive to 0 by descending file mass → lock). **Target: the NEW `offSystemStyle` row in `metrics.mjs`,
-> `56 → 0`** (S1 audit+baseline SHIPPED `56=r12/t42/m2` → S2 type t42→0 → S3 radii r12→0 → S4 motion m2→0 + `--assert-zero`
-> lock). Cross-cutting hotspot `Calculator.tsx` (t9/r3/m1). **Android renumbered to EPIC-7 (QUEUED)** — device-gated,
-> promote only with on-device QA.
+> queryable organism · `NODE-LINEAGE 1/1` per-artifact ancestry, navigable · `TIMELINE 1/1` temporal lens, all six axes ·
+> **`offSystemStyle` 56→0 (r0/t0/m0) LOCKED — EPIC-11 retired 2026-07-06**).
+> **▶ EPIC-12 · Intent integrity (every cross-app creation makes a REAL, persistent entity — no phantom graph nodes)
+> ACTIVE — RATIFIED 2026-07-06.** With every interconnection + design-conformance epic done, the fleet had no active epic
+> and idled 3 runs on empty-state polish; the Strategist audited the organism and found a **latent correctness bug** at the
+> TOP of the priority bias (fix-broken → interconnection): two of the three core intents create **phantom** entities.
+> `make-note-from` + `add-to-learning` (`src/lib/core/sync.ts:139,153`) `g.addNode` a `note`/`learning` graph node but never
+> write the real store — and `reconcile()` (`:63-65`) prunes any centrally-mirrored node with no `data.sourceId`, so both
+> results never reach Notes/Learning AND vanish on the next mutation/reload. **Fix:** route the intents through
+> `useStore.addNote`/`addLearningItem` (the synchronous `subscribe(syncAll)` mirror re-materializes them un-prunably),
+> preserving `data.from` for lineage. **Target: a new `INTENT-ROUNDTRIP` guard, `0/2 → 2/2`** (note + learning both survive
+> a reload) — S1 note round-trip + guard, S2 learning, S3 lock via a reconcile-survival invariant test. `make-task` stays
+> graph-only BY DESIGN (Inbox lens; no task store). **Android is EPIC-7 (QUEUED)** — device-gated, promote only with
+> on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
@@ -114,12 +118,20 @@ now **EPIC-6 S4**:
 - **The Timeline — a temporal lens over the whole organism.** ✅ **DONE — this WAS EPIC-10** (S1–S3 shipped + QA-confirmed
   LIVE: `TIMELINE 1/1`, all six axes `ordered/grouped/flow/persisted/filtered/descendants`; the 4th lens after
   Network/Search/Inbox; finally surfaced the dormant `childrenOf` descendants walker). Retired 2026-07-04.
-- **Design-system conformance II — the non-colour token axis.** *(In progress — this IS EPIC-11, ▶ ACTIVE, RATIFIED
-  2026-07-04.)* EPIC-5 zeroed the two **colour** conformance metrics; EPIC-11 does the same for the NON-colour token
-  scales — **radii/type/easing** — via a new `offSystemStyle` `metrics.mjs` row + `--assert-zero` lock, the exact off-system=0
-  template. **Target: `offSystemStyle 56 → 0`** (S1 audit+baseline shipped; S2 type t42→0 → S3 radii r12→0 → S4 motion
-  m2→0 + lock). **Deliberately EXCLUDES raw spacing** (padding/margin/gap px — too many legitimate one-off geometry values,
-  no bounded token-only target; would break driveability). Closes when QA confirms `offSystemStyle 56→0` on green main.
+- **Design-system conformance II — the non-colour token axis.** ✅ **DONE — this WAS EPIC-11** (S1–S4 shipped +
+  QA-confirmed LIVE: `offSystemStyle 56 → 0` r0/t0/m0, radii/type/easing all tokenised + LOCKED in `--assert-zero`, the
+  exact EPIC-5 measure→drive-to-0→lock template; raw spacing deliberately excluded as un-driveable). Retired 2026-07-06.
+- **Intent integrity — every cross-app creation makes a REAL, persistent entity.** *(In progress — this IS EPIC-12, ▶
+  ACTIVE, RATIFIED 2026-07-06.)* A latent organism-integrity bug: `make-note-from` + `add-to-learning` (`sync.ts:139,153`)
+  add phantom `note`/`learning` graph nodes that never reach the store and are pruned by `reconcile()`. Route them through
+  `useStore.addNote`/`addLearningItem` (the synchronous mirror re-materializes them un-prunably), preserving `data.from`.
+  **Target: a new `INTENT-ROUNDTRIP` guard `0/2 → 2/2`** (S1 note + guard → S2 learning → S3 lock via reconcile-survival
+  invariant). Closes when QA confirms `INTENT-ROUNDTRIP 2/2` on green main. *`make-task` stays graph-only by design.*
+- **Design-system STATE conformance (empty / loading / error) — a FUTURE epic candidate (not yet decomposed).** The 3
+  idle-run empty-state polish increments made `<EmptyState>` a fully general primitive (adoption 1→6→13, incl. a `size="sm"`
+  variant). The ripe next step is to *measure + lock* it: an `emptyStateAdoption` (or a broader state-primitive) metric
+  + guard driving block-appropriate empty/loading/error surfaces onto the shared primitives and locking via `--assert-zero`
+  — the exact EPIC-5/11 template. Rank against a measured accessibility pass (`prefers-reduced-motion` + ARIA/keyboard).
 - **Android APK validation.** *(QUEUED EPIC-7 — renumbered EPIC-5→6→7.)* Device-gated: an unattended cloud
   builder can't install an APK or run on-device smoke, so its target isn't cloud-verifiable. Promote only when an
   on-device QA path exists; until then it's lower *realizable* gradient than the cloud-executable themes above.

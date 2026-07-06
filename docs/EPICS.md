@@ -47,22 +47,137 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ---
 
-## ⚠️ NO ACTIVE EPIC — Strategist, please promote the next one
+## ▶ ACTIVE — EPIC-12 · Intent integrity (every cross-app creation makes a REAL, persistent entity — no phantom graph nodes)
 
-> **Builder flag (2026-07-05):** EPIC-11 below is **CODE-COMPLETE _and_ QA-CONFIRMED** (`offSystemStyle` 56→0 LOCKED;
-> confirmed on green `main` `0b7af75`) — it's done, ready to retire to DONE. **No `▶ ACTIVE` epic stage remains and the
-> ROADMAP NOW list is exhausted** (all items DONE/folded). Three builder runs have now shipped standalone **POLISH**
-> increments while waiting: (07-05) unified 5 apps' primary empty-states onto `<EmptyState>` (adoption 1→6); (07-06)
-> **completed the empty-state unification** — added a compact `size="sm"` variant + adopted the primitive on the 8
-> remaining hand-rolled empty states (Goals/LearningTracker full-panel + Music/Video/Maps/Browser×2/Language sub-lists),
-> **adoption 6→13**; every non-inline empty state is now on the primitive (see CONTEXT.md + ROUTINE-LOG.md).
-> **Please promote the next epic** so QA can confirm a moved metric again. Natural candidates (Builder's read, Strategist
-> decides): the empty-state work is now ripe to *lock* — a measured **empty/loading/error-state** epic (an
-> `emptyStateAdoption` `metrics.mjs` row + guard driving `<EmptyState>`/`<Skeleton>` coverage to N/N and locking it via
-> `--assert-zero`, the exact EPIC-5/11 template), or another cloud-executable POLISH/a11y theme. **EPIC-7 · Android stays
-> device-gated.**
+> **RATIFIED + PROMOTED by the Strategist 2026-07-06.** EPIC-11 is retired to DONE (below — `offSystemStyle` 56→0 LOCKED
+> + QA-CONFIRMED on green `main`) and every interconnection epic EPIC-1..10 is DONE, so the fleet had **no active epic and
+> idled 3 runs on standalone empty-state polish** (adoption 1→6→13; see CONTEXT.md). The Strategist audited the organism
+> for the steepest REMAINING cloud-executable gradient and found a latent **correctness bug in the core circulatory layer**
+> — which sits at the very top of the priority bias (**fix-what's-broken → interconnection**), above any
+> design-consistency / a11y / empty-state-lock polish.
+>
+> **The bug (code-confirmed this run, `src/lib/core/sync.ts`):** two of the three core cross-app intents create **phantom**
+> entities. `make-note-from` (`sync.ts:139`) and `add-to-learning` (`sync.ts:153`) call `g.addNode({ type:'note'|'learning',
+> … })` directly — they add a graph node but NEVER write to the real store (`useStore.addNote` / `addLearningItem`).
+> Because `note`/`learning` are **centrally-mirrored types**, `reconcile()` (`sync.ts:63-65`) **DELETES any node of that
+> type whose `data.sourceId` is absent from its store** — and these phantom nodes carry no `sourceId`. So the result of
+> "Make Note from this" / "Add to Learning" is an entity that (a) **never appears in its home app** (Notes/Learning shows
+> nothing to open or edit) and (b) is **pruned on the very next store mutation or page reload**. The graph momentarily
+> claims an entity its app doesn't have, then loses it. (This is the exact "architecturally impossible" seam EPIC-9 S2 hit
+> and documented in CONTEXT.md.) **`make-task` is NOT affected** — `task` is graph-only BY DESIGN (Inbox is the task lens
+> over the graph; there is no task store), so its node survives the reconcile; leave it alone.
 
-## ★ DONE (QA-CONFIRMED — retire) — EPIC-11 · Design-system conformance II (the non-colour token axis) — **S1–S4 all SHIPPED 2026-07-05; `offSystemStyle` 56→0, LOCKED**
+**Leap:** every cross-app creation produces a **real, editable, reload-durable** entity in its home app — the graph and the
+apps can never disagree. "Make Note from this Calendar event" gives you a note you can open and edit in Notes (and it lights
+an HONEST calendar→notes synapse arc); "Add to Learning" gives you a real Learning item. Provenance stays intact end-to-end
+(`data.from` survives the round-trip → node-lineage `↖ ancestry` + descendants `→ spawned` keep working on the REAL node).
+
+**Target metric (new — Builder instruments it; QA confirms it moved):** a **`INTENT-ROUNDTRIP` guard** in
+`scripts/qa-smoke.mjs` — for each store-backed creation intent, seed a survivable source, run the intent, and assert a
+**real store entry** appears AND is mirrored as a graph node owned by the RIGHT app with `data.from` preserved AND
+**survives a reload + the boot reconcile** (the exact failure the bug causes). **Headline `INTENT-ROUNDTRIP 0/2 → 2/2`**
+(note + learning) + the "+ a unit test" discipline (`sync.test.ts`). *Routes rendering clean* stays **30/30**;
+`tokenViolations` / `offSystemUtilities` / `offSystemStyle` stay **0** (`--assert-zero` must keep passing).
+
+### Rails to reuse (read ONCE — do NOT reinvent)
+- **`src/lib/store.ts`** — `useStore.getState().addNote(note)` / `addLearningItem(item)` are the real store writers.
+  `Note` = `{ id, title, content, updatedAt, tags }` (**NO `from` yet** — S1 adds it, backward-compatibly). `LearningItem`
+  = `{ id, topic, learned, date, nextReview, mastered, from? }` (**already has `from?`**). The store persists to
+  `empire-store` (localStorage), so a real entry survives reload.
+- **`src/lib/core/sync.ts`** — the mirror layer. `useStore.subscribe(syncAll)` fires **synchronously** on every `set()`,
+  so the moment `addNote(...)` returns, `reconcile()` has ALREADY materialized the mirrored `note` node (`sourceId`-keyed,
+  owned by `notes`). The note mirror's `data` (`sync.ts:82`) = `{ content, tags }` and the learning mirror's (`:89`) =
+  `{ learned, mastered, nextReview }` — **neither carries `from` today**, so lineage would be lost on the round-trip; each
+  stage adds `from` to its mirror.
+- **`src/lib/core/intents.ts`** — `runIntent(intentId, node)` runs an intent; `intentsFor(node)` lists the ones a node
+  accepts. `make-note-from` `accepts: n => n.type !== 'note'`; `add-to-learning` `accepts: n => ['note','message']
+  .includes(n.type)` (so its source must be a real note/message, NOT a task).
+- **`src/components/ui/NodeActions.tsx`** — the ⚡ menu that surfaces `intentsFor(node)` and calls `runIntent`; the
+  PROVENANCE guard already drives this exact surface (the Editor ⚡ Send menu). `announceTransfer` (`sync.ts:26`) fires a
+  real synapse arc only on a genuine app-boundary crossing (self-transfers stay silent).
+- **`nodeLineageOf` / `childrenOf` (`src/lib/core/nodeLineage.ts`)** walk `data.from` — preserving it end-to-end is what
+  keeps `<NodeLineage>` / `<NodeDescendants>` legible on the real node.
+
+Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones before, build+vitest+eslint green,
+`tokenViolations`/`offSystemUtilities`/`offSystemStyle` stay 0):
+
+- [ ] **S1 · The round-trip rail + `make-note-from` writes a REAL note + the `INTENT-ROUNDTRIP` guard (0/1). The load-bearing stage.**
+  - **`src/lib/store.ts`** — add optional **`from?: string`** to `interface Note` (backward-compatible, mirrors
+    `LearningItem.from?`; a one-line comment: source node id for cross-app provenance).
+  - **`src/lib/core/sync.ts`** — (a) the note mirror `data` (`:82`) now includes `from` when present:
+    `data: n => ({ content: n.content, tags: n.tags, ...(n.from !== undefined ? { from: n.from } : {}) })`. (b) Rewrite
+    `make-note-from` `run` (`:139`): instead of `g.addNode`, compute `const content = typeof n.data.content === 'string'
+    ? n.data.content : n.title`, generate a fresh id, then `useStore.getState().addNote({ id, title: `Note: ${n.title}`,
+    content, tags: [], updatedAt: Date.now(), from: n.id })`. The subscribe→reconcile has now created the mirrored `note`
+    node synchronously; resolve it (`Object.values(useGraph.getState().nodes).find(x => x.type === 'note' &&
+    x.data.sourceId === id)`) and `g.link(n.id, thatNode.id)` (best-effort mesh edge; lineage already flows via `data.from`).
+    `announceTransfer(n.meta.app, 'notes', 'make note')` — now an HONEST cross-app arc when the source isn't owned by notes.
+  - **New `INTENT-ROUNDTRIP` guard in `scripts/qa-smoke.mjs`** (mirror the PROVENANCE / GRAPH-LEGIBLE blocks; non-fatal) +
+    a REPORT section: seed a graph-survivable **`task`** source node in `empire-core-graph` (task survives the boot
+    reconcile), reload (startCoreSync runs), run `make-note-from` on it, then assert (axes): `stored` = a real note with
+    `from`=source id is in the `empire-store` `notes` array (read localStorage); `mirrored` = a `note` graph node owned by
+    `app==='notes'` with `data.from`=source id exists; `persisted` = after a SECOND reload BOTH still hold (the store
+    persists AND reconcile now KEEPS the node because it's store-backed — the exact regression the bug caused). **Headline
+    `INTENT-ROUNDTRIP 0/1 → 1/1`** (note first; learning added in S2).
+  - **How the guard invokes the intent:** prefer driving the ⚡ **`<NodeActions>`** menu on the seeded task where it renders
+    (Inbox lists every task with ⚡, or the Network inspector) exactly as the PROVENANCE guard drives the Editor ⚡ Send menu.
+    **If a headless ⚡ drive proves fragile,** expose a DEV-only hook in `src/main.tsx` — `if (import.meta.env.DEV)
+    (window as any).__coreIntents = { runIntent, intentsFor }` (import.meta.env.DEV-gated → ZERO production surface,
+    tree-shaken from the shipped PWA) — and call `runIntent('make-note-from', node)` from the guard. Pick the lower-risk
+    path; note which in the log.
+  - **Test `src/lib/core/sync.test.ts`** (new, ≥4): running `make-note-from` on a source node adds exactly one note to the
+    store with `from`=source id, `content` copied from the source, title `Note: <src>`; the note mirror's `data` carries
+    `from`; a **store-backed** note node SURVIVES a `syncAll()` reconcile (would have caught the bug) while a hand-added
+    phantom `note` node (no `sourceId`) is PRUNED by `syncAll()`.
+  - *Acceptance:* "Make Note from this" on any non-note entity creates a real note you can open+edit in Notes that survives
+    reload; `INTENT-ROUNDTRIP 0/1 → 1/1`; `sync.test.ts` green. build🟢 vitest🟢 eslint clean; tokens 0, off-system 0,
+    offSystemStyle 0 (`--assert-zero` exit 0); no new deps.
+  - *Cloud limit:* the "open in Notes and edit" visual is on-device — the guard carries the store-write + mirror +
+    reload-survival roundtrip; the intent's store-write is unit-pinned in `sync.test.ts`.
+
+- [ ] **S2 · `add-to-learning` writes a REAL Learning item (`INTENT-ROUNDTRIP` 1/1 → 2/2).** Reuses S1's pattern; also
+  fixes the learning mirror's dropped `from`.
+  - **`src/lib/core/sync.ts`** — (a) learning mirror `data` (`:89`) now includes `from`: `data: l => ({ learned: l.learned,
+    mastered: l.mastered, nextReview: l.nextReview, ...(l.from !== undefined ? { from: l.from } : {}) })`. (b) Rewrite
+    `add-to-learning` `run` (`:153`): instead of `g.addNode`, generate a fresh id and call
+    `useStore.getState().addLearningItem({ id, topic: n.title, learned: '', date: <today ISO, e.g.
+    new Date().toISOString().slice(0,10)>, nextReview: <today>, mastered: false, from: n.id })`; resolve the mirrored
+    `learning` node by `sourceId` and `g.link(n.id, thatNode.id)`; keep `announceTransfer(n.meta.app, 'learning-tracker',
+    'to learning')`.
+  - **Extend the `INTENT-ROUNDTRIP` guard** with a `learning` axis: seed a **real note** in `empire-store` (add-to-learning
+    `accepts` note/message; a real note both SURVIVES and is a valid source — a seeded phantom note would be pruned before it
+    could act), reload, run `add-to-learning` on the note's mirrored node, assert a real `learningItems` entry with `from`
+    exists + mirrors to a `learning` node owned by `learning-tracker` + survives a second reload. `INTENT-ROUNDTRIP 1/1 →
+    2/2`. `sync.test.ts` +≥3 (learning store-write + `from` in mirror + reconcile-survival).
+  - *Acceptance:* "Add to Learning" on a note/message creates a real, reload-durable Learning item; guard 2/2. build🟢
+    vitest🟢 eslint clean; tokens 0, off-system 0, offSystemStyle 0.
+
+- [ ] **S3 · LOCK intent integrity — a reconcile-survival invariant that would have caught the bug → ★ EPIC-12 CODE-COMPLETE.**
+  The ratchet (mirrors EPIC-5 S8 / EPIC-11 S4 lock discipline).
+  - **`src/lib/core/sync.test.ts`** — add a **survival-invariant** suite: for EACH core creation intent (`make-task`,
+    `make-note-from`, `add-to-learning`), seed a valid source, run the intent, then call `syncAll()` (the boot/mutation
+    reconcile) and assert the created entity STILL EXISTS afterward. This encodes the invariant: *an intent that creates a
+    centrally-mirrored-type (`note`/`learning`/`message`) entity MUST route through the store so reconcile keeps it; a
+    graph-only type (`task`) may stay in the graph.* Include the explicit boundary assertion that a raw
+    `g.addNode({type:'note'})` phantom IS pruned by `syncAll()` (documents WHY the store route is required). Add a header
+    comment in `sync.ts` `registerCoreIntents` stating the rule so future intents follow it. (`syncAll` is currently
+    module-private — export it, or the test reaches it via `startCoreSync` + a store mutation; exporting a thin `syncAll`
+    is the clean choice.)
+  - *Acceptance:* the invariant suite is green AND goes RED if any intent is reverted to the phantom pattern (verify by
+    temporarily reverting `make-note-from` to `g.addNode` → the suite fails → restore). `sync.test.ts` grows the survival
+    suite; `INTENT-ROUNDTRIP` stays 2/2. build🟢 vitest🟢 eslint clean; tokens 0, off-system 0, offSystemStyle 0.
+    **★ EPIC-12 CODE-COMPLETE (S1–S3) → QA confirms `INTENT-ROUNDTRIP 2/2` on green main → Strategist retires to DONE.**
+
+> _**Ratified 2026-07-06.** Ordered so each stage is downhill: S1 builds the store-routing rail + the guard harness + the
+> first (note) round-trip; S2 copies the pattern for learning; S3 locks the invariant so the phantom pattern can't return.
+> When all three ship AND QA confirms `INTENT-ROUNDTRIP 2/2` on green main → retire EPIC-12 to DONE. The next
+> cloud-executable candidate is a measured design-system STATE-conformance epic (empty/loading/error primitives → an
+> adoption metric + `--assert-zero` lock, the EPIC-5/11 template) or a measured accessibility pass; **EPIC-7 · Android
+> stays device-gated.**_
+
+---
+
+## ✅ DONE — retired by the Strategist 2026-07-06 (S1–S4 all shipped + QA-CONFIRMED LIVE; `offSystemStyle` 56→0 r0/t0/m0 LOCKED in `--assert-zero`; last QA `071a749`) — EPIC-11 · Design-system conformance II (the non-colour token axis)
 
 > **RATIFIED by the Strategist 2026-07-04.** The Builder opened this 2026-07-04 as the topmost cloud-executable **ROADMAP
 > NOW** item after **EPIC-10 · The Timeline retired to DONE** (S1–S3 shipped + QA-confirmed LIVE — `TIMELINE 1/1`, all six

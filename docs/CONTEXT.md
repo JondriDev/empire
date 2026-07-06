@@ -62,9 +62,36 @@ fleet freeze). What changed for routines:
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **▶ NO ACTIVE EPIC STAGE (2026-07-06). EPIC-11 is DONE (code-complete + QA-confirmed). The Strategist must promote the
-  next epic** — take the topmost cloud-executable ROADMAP candidate (EPIC-7 · Android stays device-gated). Builder runs are
-  now shipping standalone POLISH increments while waiting; a real *epic* would let QA confirm a moved metric.
+- **▶ ACTIVE: EPIC-12 · Intent integrity — S1 is next (2026-07-06, Strategist-promoted). NO re-planning needed; full spec
+  in [`docs/EPICS.md`](./EPICS.md) → EPIC-12.** EPIC-11 is retired to DONE (offSystemStyle 56→0 LOCKED + QA-confirmed). The
+  Strategist audited the organism and found a **latent correctness bug** at the top of the priority bias (fix-broken →
+  interconnection): two core intents make **phantom** entities.
+  - **THE BUG (code-confirmed, `src/lib/core/sync.ts`):** `make-note-from` (`:139`) + `add-to-learning` (`:153`) call
+    `g.addNode({type:'note'|'learning'})` directly — they add a graph node but NEVER write the real store. `note`/`learning`
+    are centrally-mirrored, so `reconcile()` (`:63-65`) **deletes any such node whose `data.sourceId` is absent from its
+    store** — and these phantoms have none. Result: the entity never shows in Notes/Learning AND is pruned on the next store
+    mutation / reload. `make-task` is FINE (task = graph-only by design, no task store; Inbox is its lens — leave it).
+  - **THE FIX (route intents through the store; the mirror re-materializes them un-prunably):** `useStore.subscribe(syncAll)`
+    fires **synchronously** on `set()`, so right after `addNote(...)` the mirrored `note` node exists (sourceId-keyed, owned
+    by `notes`). Preserve lineage by carrying `data.from` end-to-end (add `from?` to `Note`; include `from` in the note +
+    learning mirror `data`). `LearningItem` already has `from?`.
+  - **▶ S1 (LOAD-BEARING) — exact shape:** (1) `store.ts`: add `from?: string` to `interface Note`. (2) `sync.ts`: note
+    mirror `data` (`:82`) → `{ content, tags, ...(n.from!==undefined?{from:n.from}:{}) }`; rewrite `make-note-from` `run`
+    (`:139`) to `useStore.getState().addNote({ id, title:`Note: ${n.title}`, content, tags:[], updatedAt:Date.now(),
+    from:n.id })` (content = `n.data.content` string else `n.title`), then resolve the mirrored node by `sourceId` and
+    `g.link(n.id, node.id)`; `announceTransfer(n.meta.app, 'notes', 'make note')`. (3) New `INTENT-ROUNDTRIP` guard in
+    `qa-smoke.mjs` (mirror PROVENANCE/GRAPH-LEGIBLE): seed a survivable `task` source → reload → run `make-note-from` →
+    assert `stored` (real note w/ `from` in `empire-store`) + `mirrored` (note node owned by `notes`, `data.from`=src) +
+    `persisted` (survives a 2nd reload). Headline `INTENT-ROUNDTRIP 0/1 → 1/1`. (4) New `src/lib/core/sync.test.ts` (≥4):
+    store-write + `from`-in-mirror + store-backed node survives `syncAll()` while a phantom (no sourceId) is pruned.
+  - **GUARD SEAM:** drive the ⚡ `<NodeActions>` menu (as PROVENANCE drives the Editor ⚡ menu); if fragile, expose a
+    DEV-only `if (import.meta.env.DEV) (window as any).__coreIntents = { runIntent, intentsFor }` hook in `main.tsx` (zero
+    prod surface) and call `runIntent('make-note-from', node)`. **Then S2 = add-to-learning (guard 2/2); S3 = lock via a
+    reconcile-survival invariant test → EPIC-12 CODE-COMPLETE.** Every stage: tokens/off-system/offSystemStyle stay 0,
+    `--assert-zero` exit 0, no new deps.
+  - _(History: while there was no active epic, 3 Builder runs shipped standalone empty-state polish — adoption 1→6→13; the
+    `<EmptyState>` primitive is now fully general with a `size="sm"` variant. See ROUTINE-LOG.md. That surface is a
+    candidate FUTURE epic — measure adoption + lock — not this one.)_
   - **↪ POLISH INCREMENT SHIPPED 2026-07-06 (this run, no active epic) — COMPLETED the empty-state unification: added a
     compact `size="sm"` variant to `<EmptyState>` + adopted the primitive on the 8 remaining hand-rolled empty states.
     Adoption 6 → 13 apps.** `EmptyState` (`src/components/ui/Utility.tsx`) gained `size?: 'md' | 'sm'` (default `'md'` →
