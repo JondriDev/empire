@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-06 · ARTISAN — Weather Settings dialog a11y (keyboard + screen-reader) + seed the rotation ledger
+
+**Result:** 🟢 GREEN · build clean, vitest **410/410** (+4), eslint clean, all tracked metrics Δ ±0 (tokens/off-system-utils/**offSystemStyle 0**, `--assert-zero` exit 0), bundle 724.6→724.9 (+0.3, test-only + a11y attrs, no new deps). Committed direct to `main`.
+
+**Metrics row:** `apps 29 ±0 · test cases 352 (+4) · test files 41 (+1) · tokenViolations 0 · offSystemUtilities 0 · offSystemStyle 0 (r0/t0/m0) ±0 · bundle gz 724.9 KB (+0.3)`
+
+**Surface (first Artisan run — `docs/ARTISAN.md` did not exist, so I seeded the rotation ledger from `registry.ts` and started at the top):** **`weather`**. Its loading/error states were already solid, but the **Settings modal had real a11y gaps**: no dialog semantics, no keyboard close, no focus management, icon-only buttons with only `title` (invisible to screen readers), and a `<label>` not associated with its `<input>`.
+
+**What / why:** `src/apps/weather/Weather.tsx` — the Settings modal now: (1) carries `role="dialog"` + `aria-modal="true"` + `aria-labelledby="weather-settings-title"` (named by its heading); (2) closes on **Escape** (`onKeyDown` on the overlay); (3) **autofocuses** the location input on open and **restores focus to the trigger** on close (new `closeSettings` via a `settingsBtnRef` — no lost gaze); (4) the three icon-only header/close buttons gained `aria-label`s (`Refresh weather` / `Weather settings` / `Close settings`) and their decorative glyphs `aria-hidden`; (5) the Location `<label htmlFor>` now targets the `<input id>` (programmatic labelling); (6) **Enter** in the input saves. Matches the established modal idiom (`Notes.tsx:166`). Reduced-motion is already handled globally (`design-system.css` `@media (prefers-reduced-motion: reduce)`), so no per-surface motion work was needed.
+
+**Verified:** `npm run build` 🟢 (`tsc -b && vite build`, PWA precache 89); new **`src/apps/weather/Weather.test.tsx` (4)** locks the a11y contract in jsdom — header buttons carry accessible names; opening yields a `role="dialog"` with `aria-modal=true` + `aria-labelledby` pointing at the heading id + a label-associated Location field (`getByLabelText`) + a named close control; **Escape closes** it; the labelled close button closes it. `npx vitest run` **410/410** (44 files); `npx eslint .` clean; guards SHELL-IS-STYLED / route-parity (29 both ways) / check-audit (5 accepted, no new) all green; `node scripts/metrics.mjs --assert-zero` exit 0 (tokens/off-system-utils/offSystemStyle all 0, Δ ±0). No new deps.
+
+**Not verifiable in cloud:** the on-device *visual* of the focus ring / dialog centring is unobservable headless (I cannot see rendered pixels) — the roles, aria wiring, Escape, and label association are all carried by the vitest cases; the pixel polish is the on-device confirm.
+
+**Next (rotation):** ledger seeded in `docs/ARTISAN.md`; `weather` marked visited. ▶ NEXT surface = **`grammar`** (Grammar Fix), then continue down the registry order. A QA-flagged broken surface would jump the queue (none currently — QA `94ff5f1` is all-green).
+
+---
+
 ## 2026-07-06 · QA — EPIC-12 S1 + S2 confirmed live (`INTENT-ROUNDTRIP` 2/2); fixed a GUARD bug (no product regression)
 
 **Result:** 🟢 GREEN · green main `94ff5f1` · **30/30 routes render clean** (0 uncaught) · **`INTENT-ROUNDTRIP` 2/2 ✅** · all guards green · `--assert-zero` exit 0. Fixed one QA-harness bug, committed direct to `main`.
