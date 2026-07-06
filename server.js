@@ -1383,6 +1383,81 @@ app.get('/api/cakra/cost', authMiddleware, (req, res) => {
 // WEBSOCKET
 // ═══════════════════════════════════════════════════════════════
 
+const EMAIL_PROVIDERS = {
+  himalaya: {
+    name: 'himalaya',
+    configured: !!process.env.HIMALAYA_BIN, // when present, himalaya CLI is callable
+    async listInbox({ limit = 25 } = {}) {
+      // himalaya message list -H - <limit> | tail
+      const { execFile } = await import('node:child_process');
+      return new Promise((resolve, reject) => {
+        if (!this.configured) return resolve({ ok: false, error: 'himalaya not configured' });
+        execFile(process.env.HIMALAYA_BIN, ['envelope', 'list', '-n', String(limit)], { timeout: 10_000 }, (err, stdout) => {
+          if (err) return reject(err);
+          resolve({ ok: true, messages: parseHimalayaList(stdout), provider: 'himalaya' });
+        });
+      });
+    },
+    async send({ to, subject, body }) {
+      const { execFile } = await import('node:child_process');
+      return new Promise((resolve, reject) => {
+        if (!this.configured) return resolve({ ok: false, error: 'himalaya not configured' });
+        const candidates = [process.env.HIMALAYA_BIN, 'himalaya'];
+        const bin = candidates.find(b => { try { require('node:fs').accessSync(b); return true; } catch { return false; } }) || 'himalaya';
+        const composed = `Subject: ${subject}\n\n${body}\n`;
+        execFile('sh', ['-c', `printf %s "$0" | ${bin} template send -- "${to.replace(/"/g,'')}"`, composed], { timeout: 10_000 }, (err) => {
+          if (err) return reject(err);
+          resolve({ ok: true, provider: 'himalaya', bytes: composed.length });
+        });
+      });
+    },
+  },
+  agentmail: {
+    name: 'agentmail',
+    configured: !!process.env.AGENTMAIL_API_KEY,
+    async listInbox() { return { ok: false, error: 'agentmail adapter ships in I3' }; },
+    async send() { return { ok: false, error: 'agentmail adapter ships in I3' }; },
+  },
+};
+
+function parseHimalayaList(stdout) {
+  return stdout.split('\n').map(line => {
+    const m = line.match(/^(\S+)\s+(\S+)\s+(\S+)\s+(\d+:\d+)\s+(.+)$/);
+    if (!m) return null;
+    return { id: m[4], from: m[1], subject: m[5].trim(), date: `${m[2]} ${m[3]}` };
+  }).filter(Boolean);
+}
+
+app.get('/api/integrations/status', authMiddleware, (_req, res) => {
+  const out = {};
+  for (const [id, p] of Object.entries(EMAIL_PROVIDERS)) out[id] = { configured: p.configured };
+  res.json({ ok: true, providers: out });
+});
+
+app.get('/api/integrations/email/inbox', authMiddleware, rateLimit('email-read', 30, 60 * 1000), async (req, res) => {
+  const provider = req.query.provider || 'himalaya';
+  const adapter = EMAIL_PROVIDERS[provider];
+  if (!adapter) return res.status(400).json({ ok: false, error: `Unknown provider: ${provider}` });
+  try {
+    const limit = Math.min(parseInt(req.query.limit || '25', 10), 100);
+    const result = await adapter.listInbox({ limit });
+    res.json(result);
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+app.post('/api/integrations/email/send', authMiddleware, rateLimit('email-send', 10, 60 * 1000), async (req, res) => {
+  const { to, subject, body, provider = 'himalaya' } = req.body || {};
+  if (!to || !subject || !body) return res.status(400).json({ ok: false, error: 'to, subject, body required' });
+  if (typeof to !== 'string' || to.length > 320) return res.status(400).json({ ok: false, error: 'recipient invalid' });
+  if (body.length > 1024 * 1024) return res.status(400).json({ ok: false, error: 'body exceeds 1 MiB cap' });
+  const adapter = EMAIL_PROVIDERS[provider];
+  if (!adapter) return res.status(400).json({ ok: false, error: `Unknown provider: ${provider}` });
+  try {
+    const result = await adapter.send({ to, subject, body });
+    res.json(result);
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
 const peers = new Map();
 wss.on('connection', (ws) => {
   const id = 'peer-' + Math.random().toString(36).substring(2, 8);
