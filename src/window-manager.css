@@ -289,10 +289,12 @@
 
 .empire-app-grid {
   display: grid;
-  grid-template-columns: repeat(8, 90px);
+  /* Fluid tracks: as many 64px+ columns as fit the wrap (~4 at 360px,
+     ~9 at the 840px cap) — no fixed-count media queries needed. */
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  width: 100%;
   gap: 18px 8px;
   justify-content: center;
-  max-width: min(94vw, 840px);
   padding: 22px 26px;
   border-radius: var(--radius-2xl);
   background: var(--gl-bg);
@@ -314,7 +316,9 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  width: 84px;
+  width: 100%;
+  max-width: 84px;
+  justify-self: center;
   position: relative;
   transition: transform var(--dur-fast) var(--ease-spring);
 }
@@ -604,6 +608,8 @@
 .empire-context-menu {
   min-width: 200px;
   max-width: 260px;
+  max-height: calc(100dvh - 16px);
+  overflow-y: auto;
   border-radius: var(--radius-lg);
   background: rgba(13, 18, 36, 0.92);
   backdrop-filter: blur(var(--blur-xl)) saturate(1.5);
@@ -735,11 +741,10 @@
 
 /* ── TOUCH / RESPONSIVE ── */
 @media (max-width: 720px) {
-  .empire-app-grid { grid-template-columns: repeat(5, 76px); padding: 16px; gap: 14px 6px; }
+  .empire-app-grid { padding: 16px; gap: 14px 6px; }
   .bridge-widgets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 420px) {
-  .empire-app-grid { grid-template-columns: repeat(4, 72px); }
   .empire-homebar-date { display: none; }
   .bridge-continue-meta { display: none; }
 }
@@ -747,4 +752,5 @@
 @media (max-height: 640px) {
   .bridge { gap: 12px; }
   .bridge-widget { min-height: 80px; }
+  .empire-launcher { padding-top: 12px; }
 }

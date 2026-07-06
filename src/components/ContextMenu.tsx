@@ -2,7 +2,7 @@
  * Empire Context Menu
  * Right-click / long-press menu for the desktop.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useWindowStore } from '../lib/windowStore'
 import { apps, getAppIcon } from '../lib/registry'
 
@@ -99,9 +99,15 @@ export default function ContextMenu() {
     }
   }, [menu.visible])
 
-  // Clamp menu to viewport
-  const menuX = Math.min(menu.x, window.innerWidth - 220)
-  const menuY = Math.min(menu.y, window.innerHeight - 400)
+  // Clamp menu to viewport using its measured size (offsetWidth/Height ignore
+  // the entrance scale transform), before paint so there is no jump. The menu
+  // itself scrolls if taller than the viewport (short landscape screens).
+  useLayoutEffect(() => {
+    const el = menuRef.current
+    if (!menu.visible || !el) return
+    el.style.left = `${Math.max(8, Math.min(menu.x, window.innerWidth - el.offsetWidth - 8))}px`
+    el.style.top = `${Math.max(8, Math.min(menu.y, window.innerHeight - el.offsetHeight - 8))}px`
+  }, [menu])
 
   if (!menu.visible) return null
 
@@ -111,8 +117,8 @@ export default function ContextMenu() {
       className="empire-context-menu"
       style={{
         position: 'fixed',
-        left: menuX,
-        top: menuY,
+        left: menu.x,
+        top: menu.y,
         zIndex: 'var(--z-context)' as unknown as number,
       }}
     >
