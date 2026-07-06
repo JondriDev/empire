@@ -6,8 +6,15 @@
    ═══════════════════════════════════════════════ */
 
 :root {
-  --homebar-h: 56px;
-  --topbar-h: 48px;
+  /* Notch / gesture-bar insets (0 on notchless devices; requires
+     viewport-fit=cover in the meta tag). Folded into the bar heights so
+     every consumer of the vars inherits the insets for free. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --homebar-h: calc(56px + var(--safe-bottom));
+  --topbar-h: calc(48px + var(--safe-top));
 }
 
 /* ── DESKTOP SHELL ── */
@@ -17,6 +24,7 @@
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 .empire-desktop-bg {
@@ -372,7 +380,7 @@
   gap: 8px;
   height: var(--topbar-h);
   min-height: var(--topbar-h);
-  padding: 0 8px 0 4px;
+  padding: var(--safe-top) max(8px, var(--safe-right)) 0 max(4px, var(--safe-left));
   flex-shrink: 0;
   position: relative;
   background: color-mix(in srgb, var(--abyss) 55%, transparent);
@@ -445,7 +453,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 10px;
+  padding: 0 max(10px, var(--safe-right)) var(--safe-bottom) max(10px, var(--safe-left));
   gap: 8px;
   background: color-mix(in srgb, var(--void) 78%, transparent);
   backdrop-filter: blur(var(--blur-xl)) saturate(1.3);
