@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useGraph, nodesOfType } from './graph'
-import { mirrorCollection } from './sync'
+import { useStore } from '../store'
+import { mirrorCollection, startCoreSync } from './sync'
+import { runIntent } from './intents'
 
 // The graph store is a singleton; reset it before each test for isolation.
 beforeEach(() => {
@@ -120,5 +122,63 @@ describe('mirrorCollection — isolation across types', () => {
     mirror([])
     expect(nodesOfType('widget')).toEqual([])
     expect(nodesOfType('gadget')).toHaveLength(1)
+  })
+})
+
+// EPIC-12 S1: make-note-from must produce a REAL, un-prunable note — routed
+// through the store (useStore.addNote) so subscribe→reconcile materializes a
+// sourceId-keyed mirror — not a phantom graph-only node reconcile() would prune.
+describe('make-note-from — real store round-trip (EPIC-12 S1)', () => {
+  beforeEach(() => {
+    // startCoreSync registers the real C-layer intents + subscribes syncAll to the
+    // store (idempotent — the subscription persists across tests). Reset both stores.
+    startCoreSync()
+    useGraph.setState({ nodes: {} })
+    useStore.setState({ notes: [], learningItems: [], messages: [] })
+  })
+
+  /** Seed a graph-survivable `task` source owned by `app` and return its CoreNode. */
+  function seedSource(app = 'goals', data: Record<string, unknown> = { done: false, content: 'source body' }) {
+    return g().addNode({ type: 'task', title: 'Chart the anomaly', data, app })
+  }
+
+  it('adds exactly one real note to the store with from=source id, copied content and Note: title', async () => {
+    const src = seedSource()
+    await runIntent('make-note-from', src)
+    const notes = useStore.getState().notes
+    expect(notes).toHaveLength(1)
+    expect(notes[0].from).toBe(src.id)
+    expect(notes[0].content).toBe('source body')
+    expect(notes[0].title).toBe('Note: Chart the anomaly')
+  })
+
+  it('falls back to the source title as content when the source has no string data.content', async () => {
+    const src = seedSource('goals', { done: false })
+    await runIntent('make-note-from', src)
+    expect(useStore.getState().notes[0].content).toBe('Chart the anomaly')
+  })
+
+  it('materializes an un-prunable mirror node owned by notes, carrying data.from + sourceId', async () => {
+    const src = seedSource()
+    await runIntent('make-note-from', src)
+    const noteNodes = nodesOfType('note')
+    expect(noteNodes).toHaveLength(1)
+    const node = noteNodes[0]
+    expect(node.meta.app).toBe('notes')
+    expect(node.data.from).toBe(src.id)
+    expect(node.data.sourceId).toBe(useStore.getState().notes[0].id)
+  })
+
+  it('the store-backed mirror survives a reconcile while a phantom (no sourceId) is pruned', () => {
+    // A phantom: a graph-only `note` node with NO sourceId — the exact shape the
+    // pre-S1 intent produced. reconcile() (fired by any store set) must delete it.
+    g().addNode({ type: 'note', title: 'Phantom', data: { content: 'x' }, app: 'notes' })
+    expect(nodesOfType('note')).toHaveLength(1)
+    // A real store write fires subscribe→syncAll→reconcile.
+    useStore.getState().addNote({ id: 'real-1', title: 'Real', content: 'y', tags: [], updatedAt: 1 })
+    const notes = nodesOfType('note')
+    // The phantom is gone; only the store-backed (sourceId-keyed) node remains.
+    expect(notes).toHaveLength(1)
+    expect(notes[0].data.sourceId).toBe('real-1')
   })
 })

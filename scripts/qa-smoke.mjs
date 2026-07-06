@@ -466,6 +466,100 @@ try {
 }
 console.log(`NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
 
+// ── INTENT-ROUNDTRIP guard (EPIC-12 S1: cross-app creation makes REAL entities) ─
+// The core cross-app intents (make-note-from / add-to-learning) must produce a
+// REAL, editable, reload-durable entity in its home app — not a phantom graph
+// node. The bug they had: they called `g.addNode({type:'note'})` directly, adding
+// a graph node with NO store row and NO `data.sourceId`. Because `note`/`learning`
+// are CENTRALLY-mirrored types, `reconcile()` prunes any such node absent from its
+// store — so the "created" entity never showed in Notes AND vanished on the next
+// store mutation / reload. S1 routes make-note-from through the REAL store
+// (`useStore.addNote`), so `useStore.subscribe(syncAll)` materializes an
+// un-prunable, sourceId-keyed mirror synchronously. jsdom can't drive the
+// intent→store→subscribe→reconcile→persist→reload roundtrip, so do it for real:
+// seed a graph-survivable `task` source, drive its ⚡ NodeActions "Make Note from
+// this" menu item on the Inbox (the same production surface a user clicks — and
+// the exact menu the PROVENANCE guard drives), then assert (axes): `stored` = a
+// real note with `from`=source id + copied content is in the `empire-store` `notes`
+// array; `mirrored` = a `note` graph node owned by `app==='notes'` with
+// `data.from`=source id exists; `persisted` = after a SECOND reload BOTH still hold
+// (the store persists AND reconcile KEEPS the store-backed node — the exact
+// regression the bug caused). Seed type is `task` (graph-only, survives the boot
+// reconcile — the same trap GLOBAL-SEARCH / NODE-LINEAGE document). Non-fatal like
+// the guards above — a regression shows as ❌. S2 adds the `add-to-learning` case
+// (headline `INTENT-ROUNDTRIP 0/1 → 1/1` now; → 2/2 at S2).
+const STORE_KEY = 'empire-store';
+const INTENT_SRC_ID = 'qa-intent-src';
+const INTENT_SRC_TITLE = 'Survey the Xenoglyph cache';
+const INTENT_SRC_CONTENT = 'Field notes on the xenoglyph cache anomaly.';
+const intentSeed = {
+  state: {
+    nodes: {
+      [INTENT_SRC_ID]: {
+        id: INTENT_SRC_ID, type: 'task', title: INTENT_SRC_TITLE,
+        data: { done: false, content: INTENT_SRC_CONTENT }, links: [],
+        meta: { created: 1000, updated: 1000, app: 'goals' },
+      },
+    },
+  },
+  version: 0,
+};
+// A real note in `empire-store` whose `from` = the source id, title `Note: <src>`,
+// content copied from the source. Returns the matching note object (or null).
+const readIntentNote = (page) => page.evaluate(([k, from]) => {
+  try {
+    const notes = JSON.parse(localStorage.getItem(k))?.state?.notes || [];
+    return notes.find(n => n?.from === from) || null;
+  } catch { return null; }
+}, [STORE_KEY, INTENT_SRC_ID]);
+// A `note` graph node owned by app==='notes' carrying data.from = the source id.
+const hasIntentMirror = (page) => page.evaluate(([k, from]) => {
+  try {
+    const nodes = JSON.parse(localStorage.getItem(k))?.state?.nodes || {};
+    return Object.values(nodes).some(n => n?.type === 'note' && n?.meta?.app === 'notes' && n?.data?.from === from);
+  } catch { return false; }
+}, [GRAPH_KEY, INTENT_SRC_ID]);
+const intentRoundtrip = { note: { stored: false, mirrored: false, persisted: false, pass: false, err: undefined } };
+try {
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/app/inbox`, { waitUntil: 'networkidle', timeout: 30000 });
+  // Clean slate so a stale store/graph can't mask a regression, then seed the source.
+  await page.evaluate(([gk, gv, sk]) => {
+    localStorage.removeItem(sk);
+    localStorage.setItem(gk, gv);
+  }, [GRAPH_KEY, JSON.stringify(intentSeed), STORE_KEY]);
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(900);
+  // Drive the REAL production surface: hover the seeded task row so its ⚡ menu is
+  // interactive, open it, click "Make Note from this" (label from sync.ts).
+  const row = page.locator('.gp', { hasText: INTENT_SRC_TITLE }).first();
+  await row.hover().catch(() => {});
+  await page.click('button[aria-label="Node actions"]', { timeout: 5000 });
+  await page.waitForTimeout(300);
+  await page.locator('button[role="menuitem"]', { hasText: 'Make Note from this' }).first().click({ timeout: 5000 });
+  await page.waitForTimeout(700);
+  const stored = await readIntentNote(page);
+  intentRoundtrip.note.stored = !!stored && stored.title === `Note: ${INTENT_SRC_TITLE}` && stored.content === INTENT_SRC_CONTENT;
+  intentRoundtrip.note.mirrored = await hasIntentMirror(page);
+  // Reload — the note must survive: the store persists it AND the boot reconcile now
+  // KEEPS the store-backed mirror (sourceId present) instead of pruning it.
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(900);
+  const storedAfter = await readIntentNote(page);
+  intentRoundtrip.note.persisted = !!storedAfter && (await hasIntentMirror(page));
+  intentRoundtrip.note.pass = intentRoundtrip.note.stored && intentRoundtrip.note.mirrored && intentRoundtrip.note.persisted;
+  console.log(`INTENT-ROUNDTRIP  make-note-from  stored=${intentRoundtrip.note.stored} mirrored=${intentRoundtrip.note.mirrored} persisted=${intentRoundtrip.note.persisted}`);
+  // Leave storage clean for later guards.
+  await page.evaluate(([gk, sk]) => { localStorage.removeItem(gk); localStorage.removeItem(sk); }, [GRAPH_KEY, STORE_KEY]);
+  await page.close();
+} catch (e) {
+  intentRoundtrip.note.err = e.message;
+  console.warn(`INTENT-ROUNDTRIP: guard did not complete — ${e.message}`);
+}
+const intentPass = intentRoundtrip.note.pass ? 1 : 0;
+const intentTotal = 1;
+console.log(`INTENT-ROUNDTRIP: ${intentPass}/${intentTotal} ${intentPass === intentTotal ? '✅' : '⚠️'}`);
+
 // ── TIMELINE guard (EPIC-10 S1: the organism gets a TEMPORAL lens) ───────────
 // The Empire has three lenses over its one Core graph — Network (STRUCTURAL),
 // Search (QUERY), Inbox (TASK) — but until now no TEMPORAL lens, even though
@@ -853,6 +947,11 @@ md += ` **S3 makes it NAVIGABLE:** each ancestry hop is a real \`[role="button"]
 md += `| Artifact | Lineage rendered | Parent title shown | Survived reload | Search surface | Hop clickable | Result |\n|---|---|---|---|---|---|---|\n`;
 md += `| task ← ${LINEAGE_PARENT_TITLE} | ${nodeLineage.rendered ? '✅' : '❌'} | ${nodeLineage.title ? '✅' : '❌'} | ${nodeLineage.persisted ? '✅' : '❌'} | ${nodeLineage.search ? '✅' : '❌'} | ${nodeLineage.clickable ? '✅' : '❌'} | ${nodeLineage.pass ? '✅' : '❌'}${nodeLineage.err ? ' (' + nodeLineage.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
+md += `\n## Intent-roundtrip guard (EPIC-12 S1 — cross-app creation makes REAL, durable entities)\n\n`;
+md += `The core cross-app intents must produce a REAL, editable, reload-durable entity in its home app — not a phantom graph node. Before S1, \`make-note-from\` called \`g.addNode({type:'note'})\` directly: a graph node with NO store row and NO \`data.sourceId\`, which \`reconcile()\` PRUNES (\`note\` is a centrally-mirrored type) — so the "created" note never showed in Notes and vanished on the next store mutation / reload. S1 routes the intent through the REAL store (\`useStore.addNote\`); the synchronous \`useStore.subscribe(syncAll)\` then materializes an un-prunable, \`sourceId\`-keyed mirror. A graph-survivable \`task\` source was seeded, then its ⚡ \`<NodeActions>\` "Make Note from this" menu item was driven on the Inbox (the same production surface a user clicks); PASS = a real note with \`from\`=source id + copied content lands in \`empire-store\` (\`stored\`), a \`note\` graph node owned by \`app==='notes'\` with \`data.from\`=source id exists (\`mirrored\`), and BOTH survive a second reload + the boot reconcile (\`persisted\` — the exact regression the phantom bug caused). The pure store-write is unit-pinned in \`sync.test.ts\`; this carries the intent→store→subscribe→reconcile→persist→reload roundtrip jsdom cannot. **S2 adds the \`add-to-learning\` case (→ 2/2).**\n\n`;
+md += `| Intent | Real store entry | Mirrored (owned by notes) | Survived reload | Result |\n|---|---|---|---|---|\n`;
+md += `| make-note-from | ${intentRoundtrip.note.stored ? '✅' : '❌'} | ${intentRoundtrip.note.mirrored ? '✅' : '❌'} | ${intentRoundtrip.note.persisted ? '✅' : '❌'} | ${intentRoundtrip.note.pass ? '✅' : '❌'}${intentRoundtrip.note.err ? ' (' + intentRoundtrip.note.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n**INTENT-ROUNDTRIP: ${intentPass}/${intentTotal} ${intentPass === intentTotal ? '✅' : '⚠️'}**\n`;
 md += `\n## Timeline guard (EPIC-10 S1–S3 — the TEMPORAL lens: faceted, and read BOTH ways)\n\n`;
 md += `The Empire had three lenses over its one Core graph — Network (STRUCTURAL), Search (QUERY), Inbox (TASK) — but no way to see *when* it did things, even though every \`CoreNode\` stamps \`meta.created\` and every \`ProvEdge\` stamps \`at\`. The Timeline app merges every entity-birth + every app→app handoff into one newest-first, day-grouped stream via the pure \`buildTimeline\`/\`groupByDay\`/\`dayKey\` spine, now filtered by the pure \`filterTimeline\`/\`timelineFacets\` helpers (all unit-pinned in \`timeline.test.ts\`). Two graph-survivable \`task\` nodes (distinct \`meta.created\`, owned by two apps, the newer's \`data.from\` = the older) + one \`empire-provenance\` edge were seeded, then reloaded so BOTH persist stores rehydrated; PASS = the two entity rows render newest-\`created\` first (\`ordered\`), at least one \`[data-timeline-day]\` header renders (\`grouped\`), the seeded edge renders as a \`[data-timeline-kind=flow]\` row (\`flow\`), all of it still holds after a SECOND reload (\`persisted\`), the older entity's row surfaces a \`<NodeDescendants>\` (\`[data-node-descendants=qa-tl-older]\`) naming the newer child it spawned (\`descendants\`), and clicking the \`goals\` App chip narrows to ONLY the goals-owned entity — dropping the notes entity + the notes→goals flow (\`filtered\`). **S3** surfaces the long-dormant \`childrenOf\` walker so a moment reads BOTH ways — \`↖ ancestry\` (\`<NodeLineage>\`) and \`→ spawned\` (\`<NodeDescendants>\`), each hop a navigable \`[role="button"]\` (unit-pinned in \`NodeDescendants.test.tsx\`). This carries the graph+ledger→persist→rehydrate→ordered-render + faceted-narrow + descendants roundtrip jsdom cannot; the sticky day headers, relative labels + chip tints are the on-device visual.\n\n`;
 md += `| Ordered newest-first | Grouped by day | Flow row | Survived reload | Spawned-child shown | App-chip narrows | Result |\n|---|---|---|---|---|---|---|\n`;
@@ -893,5 +992,5 @@ if (offline) {
 }
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, nodeLineage, timeline, homeAlive, provResults, entityResults, offline }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, nodeLineage, intentRoundtrip, timeline, homeAlive, provResults, entityResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);

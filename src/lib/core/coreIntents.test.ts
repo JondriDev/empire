@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useGraph } from './graph'
+import { useStore } from '../store'
 import { intentsFor, runIntent } from './intents'
 import { startCoreSync } from './sync'
 import { flowForEvent } from './flow'
@@ -13,6 +14,9 @@ import type { CoreNode } from './graph'
 beforeEach(() => {
   startCoreSync()
   useGraph.setState({ nodes: {} })
+  // make-note-from now writes the REAL store (EPIC-12 S1) — reset it so real notes
+  // don't accumulate across tests (subscribe→reconcile would re-mirror stale rows).
+  useStore.setState({ notes: [], learningItems: [], messages: [] })
   clearHistory()
 })
 
@@ -63,9 +67,24 @@ describe('in-app derivations light no arc', () => {
     expect(arcs(events)).toEqual([])
   })
 
-  it('make-note-from on a message stays in Messages — no arc', async () => {
+})
+
+describe('make-note-from lights an honest arc into Notes (EPIC-12 S1)', () => {
+  // The note is now a REAL store note owned by the `notes` app (not a graph-only
+  // node stamped with the source app), so making a note from any non-notes source
+  // is a genuine boundary crossing → exactly one <source> → notes arc.
+  it('make-note-from on a message lights messages → notes', async () => {
     const msg = source('message', 'messages')
     const events = await runCapturing('make-note-from', msg)
-    expect(arcs(events)).toEqual([])
+    const handoffs = events.filter(e => e.type === 'HANDOFF')
+    expect(handoffs).toHaveLength(1)
+    expect(arcs(events)).toEqual([{ fromId: 'messages', toId: 'notes' }])
+  })
+
+  it('make-note-from on a note stays in Notes — no arc (self-transfer)', async () => {
+    const note = source('note', 'notes')
+    // A note can't spawn a note (accepts n => n.type !== 'note'), so this is a no-op
+    // — but guard the invariant that a notes-owned source never crosses a boundary.
+    expect(intentsFor(note).map(i => i.id)).not.toContain('make-note-from')
   })
 })

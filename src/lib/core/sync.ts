@@ -19,13 +19,20 @@ import type { CoreNode } from './graph'
 /**
  * Announce a directed app→app handoff on the bus so the Network mesh lights an
  * honest synapse arc. Guards self-transfers: an intent that derives a node owned
- * by the SAME app (make-task / make-note-from stay in their source app) is an
- * in-app derivation, not a synapse — so it emits nothing. Only a genuine
- * boundary crossing (e.g. a note → Learning Tracker) lights an arc.
+ * by the SAME app (make-task stays graph-only in its source app; make-note-from
+ * from a note into Notes) is an in-app derivation, not a synapse — so it emits
+ * nothing. Only a genuine boundary crossing (e.g. a Calendar event → Notes, or a
+ * note → Learning Tracker) lights an arc.
  */
 function announceTransfer(_fromApp: string, _toApp: string, _label: string): void {
   if (!_fromApp || !_toApp || _fromApp === _toApp) return
   emit({ type: 'HANDOFF', fromId: _fromApp, toId: _toApp, label: _label })
+}
+
+/** Fresh id for a store entity created by a cross-app intent (mirrors graph.ts newId). */
+function newNoteId(): string {
+  return globalThis.crypto?.randomUUID?.()
+    ?? `note_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
 }
 
 type Snapshot = ReturnType<typeof useStore.getState>
@@ -79,7 +86,7 @@ const syncers: Array<() => void> = [
     items: s => s.notes,
     id: n => n.id,
     title: n => n.title,
-    data: n => ({ content: n.content, tags: n.tags }),
+    data: n => ({ content: n.content, tags: n.tags, ...(n.from !== undefined ? { from: n.from } : {}) }),
   }),
   syncerFor<Snapshot['learningItems'][number]>({
     type: 'learning', app: 'learning-tracker',
@@ -137,11 +144,19 @@ function registerCoreIntents(): void {
     // Any node can spawn a note — except notes themselves (would just clone).
     accepts: n => n.type !== 'note',
     run: n => {
-      const g = useGraph.getState()
+      // Route through the REAL store — NOT g.addNode. `note` is a centrally-mirrored
+      // type, so a graph-only node (no sourceId) is a phantom: it never appears in
+      // Notes and reconcile() prunes it on the next store mutation / reload. Writing
+      // the store fires useStore.subscribe(syncAll) synchronously, so the mirrored
+      // note node exists (sourceId-keyed, owned by `notes`) the moment addNote returns.
       const content = typeof n.data.content === 'string' ? n.data.content : n.title
-      const note = g.addNode({ type: 'note', title: `Note: ${n.title}`, data: { content, tags: [], from: n.id }, app: n.meta.app })
-      g.link(n.id, note.id)
-      announceTransfer(n.meta.app, note.meta.app, 'make note')
+      const id = newNoteId()
+      useStore.getState().addNote({ id, title: `Note: ${n.title}`, content, tags: [], updatedAt: Date.now(), from: n.id })
+      // Best-effort mesh edge source → mirrored note (lineage already flows via data.from).
+      const note = Object.values(useGraph.getState().nodes).find(x => x.type === 'note' && x.data.sourceId === id)
+      if (note) useGraph.getState().link(n.id, note.id)
+      // Honest arc: the note is owned by `notes`, so any non-notes source crosses a boundary.
+      announceTransfer(n.meta.app, 'notes', 'make note')
     },
   })
 

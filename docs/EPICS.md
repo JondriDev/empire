@@ -101,7 +101,18 @@ an HONEST calendar→notes synapse arc); "Add to Learning" gives you a real Lear
 Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones before, build+vitest+eslint green,
 `tokenViolations`/`offSystemUtilities`/`offSystemStyle` stay 0):
 
-- [ ] **S1 · The round-trip rail + `make-note-from` writes a REAL note + the `INTENT-ROUNDTRIP` guard (0/1). The load-bearing stage.**
+- [x] **S1 · The round-trip rail + `make-note-from` writes a REAL note + the `INTENT-ROUNDTRIP` guard (0/1). ✅ SHIPPED 2026-07-06 (`main`).**
+  Done: `store.ts` `Note.from?` added; `sync.ts` note mirror `data` carries `from`; `make-note-from` now routes through
+  `useStore.getState().addNote({ id, title:'Note: …', content, tags:[], updatedAt, from:n.id })` (new `newNoteId()` helper),
+  resolves the synchronously-mirrored node by `sourceId` + `g.link`s it, and fires an HONEST `announceTransfer(n.meta.app,
+  'notes', …)`. New `INTENT-ROUNDTRIP` guard in `qa-smoke.mjs` (+ REPORT section) drives the REAL ⚡ `<NodeActions>` "Make
+  Note from this" menu on the Inbox — NOT a DEV hook. **DEV-hook path REJECTED:** QA serves the **production** `dist/` via
+  `node server.js` (BASE `localhost:3001`), so `import.meta.env.DEV` is `false` there → a DEV-gated `window.__coreIntents`
+  would NOT exist for the guard. The ⚡-menu drive is production-honest and works against `dist`. `sync.test.ts` +4 (store-
+  write w/ from+copied content+title; title-fallback; un-prunable mirror owned by `notes` w/ from+sourceId; phantom pruned
+  while store-backed survives `syncAll()`); `coreIntents.test.ts` updated (make-note-from now lights `messages→notes`).
+  build🟢 vitest 367→372🟢 eslint clean; tokens 0, off-system 0, offSystemStyle 0 (`--assert-zero` exit 0); bundle 718.3→718.5
+  (+0.2), no new deps. **QA owes the `INTENT-ROUNDTRIP 0/1 → 1/1` headless confirm** (builder has no playwright dep).
   - **`src/lib/store.ts`** — add optional **`from?: string`** to `interface Note` (backward-compatible, mirrors
     `LearningItem.from?`; a one-line comment: source node id for cross-app provenance).
   - **`src/lib/core/sync.ts`** — (a) the note mirror `data` (`:82`) now includes `from` when present:

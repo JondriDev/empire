@@ -16,6 +16,8 @@ export interface Note {
   content: string
   updatedAt: number
   tags: string[]
+  /** Source node id when this note arrived via a cross-app intent (EPIC-12). Optional → backward-compatible with stored notes. */
+  from?: string
 }
 
 export interface CalendarEvent {

@@ -5,6 +5,38 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-06 · BUILDER — EPIC-12 S1: `make-note-from` writes a REAL note (fix the phantom-entity bug); `INTENT-ROUNDTRIP` guard
+
+**Result:** 🟢 GREEN · build clean, vitest **367→372**, eslint clean, all metrics Δ ±0 (`--assert-zero` exit 0). Committed direct to `main`.
+
+**What / why:** EPIC-12 S1 — the load-bearing stage. The core cross-app intent `make-note-from` called `g.addNode({type:
+'note'})` directly, making a **phantom**: a graph node with no store row + no `data.sourceId`, which `reconcile()` prunes
+(note is a centrally-mirrored type) — so "Make Note from this" produced a note that never appeared in Notes and vanished on
+the next store mutation / reload. **Fix:** route the intent through the REAL store. `store.ts` gains `Note.from?`; the note
+mirror `data` now carries `from`; `make-note-from run` calls `useStore.getState().addNote({ id, title:'Note: …', content,
+tags:[], updatedAt, from:n.id })` (new `newNoteId()` helper) — the synchronous `useStore.subscribe(syncAll)` then
+materializes an un-prunable, `sourceId`-keyed mirror owned by `notes`; the intent resolves it + `g.link`s the source, and
+fires an HONEST `announceTransfer(n.meta.app, 'notes', …)` (any non-notes source now lights a real synapse arc).
+
+**Verified:** `npm run build` 🟢; `npx vitest run` **372/372** (`sync.test.ts` 9→13 pins store-write w/ `from`+copied
+content+`Note:` title, title-fallback, an un-prunable mirror owned by `notes`, and a phantom-no-sourceId node PRUNED by a
+`syncAll()` reconcile while a store-backed one survives; `coreIntents.test.ts` 4→5 — make-note-from now lights `messages→
+notes`); `npx eslint` clean on all touched files; `node scripts/metrics.mjs`: tokens 0 · off-system utils 0 · **offSystemStyle
+0 (r0/t0/m0)** · bundle 718.3→718.5 (+0.2) — every Δ ±0, `--assert-zero` exit 0. No new deps.
+
+**Guard (for QA):** new `INTENT-ROUNDTRIP` guard in `qa-smoke.mjs` drives the **real production ⚡ `<NodeActions>` "Make Note
+from this" menu** on the Inbox (seed a survivable `task` → open ⚡ → click the item → assert `stored` real note w/ `from` in
+`empire-store` + `mirrored` note node owned by `notes` w/ `data.from` + `persisted` across a 2nd reload). **The CONTEXT spec's
+DEV-hook path was REJECTED:** QA serves the production `dist/` (`node server.js`), where `import.meta.env.DEV` is `false`, so
+a DEV-gated `window.__coreIntents` wouldn't exist — the ⚡-menu drive is production-honest and works against `dist`.
+
+**Not verifiable in cloud:** the builder has no `playwright` dep, so the headless `INTENT-ROUNDTRIP 0/1 → 1/1` confirm + the
+"open in Notes and edit" visual are QA's step; the store-write / mirror / prune LOGIC is fully unit-pinned in `sync.test.ts`.
+
+**Next:** EPIC-12 **S2** — `add-to-learning` writes a REAL Learning item (same rail; `LearningItem.from?` already exists).
+Extend the guard via the two-hop chain (make-note-from a task → add-to-learning on that real note; `add-to-learning` accepts
+`note`/`message` only). Headline `INTENT-ROUNDTRIP 1/1 → 2/2`. Exact shape in `docs/CONTEXT.md` → EPIC-12 S2.
+
 ## 2026-07-06 · QA (visual + smoke) — health-hold on the Strategist reshape (`7e68e1c`); green, zero drift, EPIC-12 S1 not yet built
 
 **Result:** 🟢 GREEN · build clean, **30/30 routes render clean**, every guard green, every metric Δ ±0. Committed direct to `main`.
