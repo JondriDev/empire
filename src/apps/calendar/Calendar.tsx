@@ -189,7 +189,7 @@ export default function Calendar() {
   while (calendarDays.length % 7 !== 0) calendarDays.push(null)
 
   return (
-    <div className="flex h-full" style={{ background: 'var(--bg)' }}>
+    <div className="flex flex-col md:flex-row h-full" style={{ background: 'var(--bg)' }}>
       {/* Calendar Grid */}
       <div className="flex-1 flex flex-col overflow-hidden p-6">
         {/* Header */}
@@ -231,7 +231,7 @@ export default function Calendar() {
         <div className="grid grid-cols-7 gap-px bg-glass rounded-xl overflow-hidden flex-1">
           {calendarDays.map((day, i) => {
             if (day === null) {
-              return <div key={`empty-${i}`} className="bg-void/20 p-2 min-h-[80px]" />
+              return <div key={`empty-${i}`} className="bg-void/20 p-2 min-h-[52px] md:min-h-[80px]" />
             }
             const dateStr = formatDate(year, month, day)
             const isToday = dateStr === today
@@ -242,7 +242,7 @@ export default function Calendar() {
               <div
                 key={day}
                 onClick={() => setSelectedDate(dateStr)}
-                className={`bg-void/30 p-1.5 min-h-[80px] cursor-pointer transition-colors hover:bg-glass ${
+                className={`bg-void/30 p-1.5 min-h-[52px] md:min-h-[80px] cursor-pointer transition-colors hover:bg-glass ${
                   isSelected ? 'ring-1 ring-signal' : ''
                 } ${isToday ? 'bg-signal/10' : ''}`}
               >
@@ -274,7 +274,7 @@ export default function Calendar() {
       </div>
 
       {/* Sidebar */}
-      <div className="w-72 border-l p-4 overflow-y-auto flex flex-col" style={{ borderColor: 'var(--border)' }}>
+      <div className="w-full md:w-72 border-t md:border-t-0 md:border-l p-4 overflow-y-auto flex flex-col" style={{ borderColor: 'var(--border)' }}>
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
           <Clock className="w-4 h-4 text-signal" />
           {selectedDate === today || !selectedDate ? "Today's Events" : `Events for ${selectedDate}`}
@@ -366,7 +366,7 @@ export default function Calendar() {
                   className="w-full bg-glass border-0 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-signal"
                   placeholder="Event title..." autoFocus />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="text-xs text-muted mb-1 block">Date</label>
                   <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)}
