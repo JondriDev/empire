@@ -1,38 +1,34 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-05T22:18:47.314Z
+**Generated:** 2026-07-06T00:28:29.566Z
 
 **Result:** 30/30 rendered without crash, 0 failed.
 
-## ✅ Runtime bugs: NONE this run.
+## QA run summary — 2026-07-06 (first render-QA of green main `071a749`)
 
-## First headless render-QA of the empty-state refactor (`6d983b3`) — renders clean
+**No runtime bug found. No regression. No contradiction.** The Builder landed an APP-CODE commit `071a749`
+("polish(empty-states): complete the unification — `size="sm"` variant + 8 remaining spots, adoption 6→13")
+mid-QA-run; per the routine I reset to it and **re-built + re-smoked the tree actually being pushed** so this
+report describes real `main`, not the stale `97102af` I started on.
 
-**This run QA's the CURRENT main `6d983b3`**, one app-code commit ahead of the last QA. Sequence: the sibling QA
-`0b7af75` confirmed EPIC-11 on `4c643a9`; then **`6d983b3` "polish(empty-states): unify 5 apps' primary empty-states
-onto the shared `<EmptyState>` primitive"** landed (DataCenter, Inbox, Messages, Photos, Reader + shared
-`components/ui/Utility.tsx`, +`Utility.test.tsx`). That refactor updated `metrics.json` but had **not** been render-QA'd
-headless — so I rebuilt + re-smoked against it (the report must describe the tree it's pushed onto).
-
-- **All 5 refactored apps render clean** (`datacenter`, `inbox`, `messages`, `photos`, `reader` — 0 uncaught JS, 0
-  console errors). **Visually confirmed** the shared `<EmptyState>` primitive: `app-messages.png` shows the unified
-  empty state ("No messages with Jondri yet · Start the conversation below." with the send-glyph tile); `app-datacenter.png`
-  renders its Tasks/Ideas tables clean. No visual regression from the refactor.
-- Build 🟢 · vitest static **307** cases / **36** files (`Utility.test.tsx` +the shared-primitive cases) · eslint clean.
-- **PRECACHE 86 entries** (was 85 — the refactor emitted one new chunk) — audit **no-gap**, every emitted chunk precached.
-
-## ★ EPIC-11 — CODE-COMPLETE, stays QA-CONFIRMED on the new tree
-
-EPIC-11's target metric `offSystemStyle` still reads **0 (r0/t0/m0)** on `6d983b3`; the design-system ratchet holds —
-`node scripts/metrics.mjs --assert-zero` **exits 0** (tokenViolations=0, offSystemUtilities=0, offSystemStyle=0). I also
-verified the LOCK is *live* (S4's other half): seeding the canonical `borderRadius:'7px'` into an app-code file this run
-made `offSystemStyle 1 (r1/t0/m0)` and the gate exited **1**; reverting returned it to 0/exit 0. **S1–S4 all
-done-confirmed — the empty-state refactor did NOT reintroduce any raw radii/type/easing.** EPIC-11 is CODE-COMPLETE with
-no active stage → ready for the Strategist to retire it to DONE + promote the next epic (EPIC-7 · Android stays device-gated).
-
-**Metric deltas (vs committed `metrics.json`):** apps 29 ±0 · test cases 307 ±0 (36 files) · tokenViolations 0 ±0 ·
-offSystemUtilities 0 ±0 · **offSystemStyle 0 (r0/t0/m0) ±0** · bundle gz **717.4 KB ±0**. Reproduces the `6d983b3`
-snapshot exactly. `--assert-zero` exit 0.
+- **Build:** 🟢 green (`tsc -b && vite build`; PWA precache 86 entries / 3058.48 KiB).
+- **Smoke:** **30/30 routes render clean** (desktop + 29 registry apps, 0 uncaught JS, 0 error boundaries).
+  Every guard green: SHELL-IS-STYLED ✅ · REGISTRY-COVERAGE ✅ (smoke↔registry exact, **29 apps**) ·
+  INBOUND-LANDS 3/3 · MEDIA-PERSISTS 3/3 · GRAPH-LEGIBLE 1/1 · GLOBAL-SEARCH 1/1 (`tagOnly`) ·
+  NODE-LINEAGE 1/1 (5 axes) · TIMELINE 1/1 (all 6 axes) · HOME-ALIVE 1/1 · PROVENANCE-PERSISTS 3/3 ·
+  PROVENANCE-ENTITY 3/3 · OFFLINE-BOOT 5/5 · PRECACHE 86 **no-gap**.
+- **Metrics (`node scripts/metrics.mjs`, all Δ ±0 vs committed snapshot):** apps/routes **29** · test cases **309** ·
+  test files **36** · token violations **0** · off-system utils **0** · **off-system style `0 (r0/t0/m0)`** ·
+  bundle gz **717.6 KB**. **`--assert-zero` exits 0** — the ratchet holds; the size="sm" polish stayed token-clean.
+- **Active epic / acceptance:** **NO active epic.** EPIC-11 (design-system conformance II) is CODE-COMPLETE +
+  QA-CONFIRMED; `offSystemStyle 0 (r0/t0/m0)` still reproduces exactly and stays LOCKED. No `▶ ACTIVE` stage → no new
+  moved-metric to confirm — only the standing lock, which holds. Awaiting the Strategist to promote the next epic
+  (EPIC-7 · Android device-gated).
+- **Visually confirmed (local shots, not committed):** `app-music.png` — the compact **`size="sm"`** empty state
+  ("No track playing · Add audio files to get started" + music-glyph tile); `app-language.png` / Maps / Browser / Video /
+  Goals / LearningTracker render clean; `desktop.png` — the Bridge home; `app-solver.png` — the Problem Solver World feed.
+- **Env-expected noise (NOT bugs):** Weather geocoding + Maps carto tiles `ERR_TUNNEL_CONNECTION_FAILED` (blocked
+  outbound CDN), Weather Geolocation permissions-policy block, Files `/api/files` HTTP 500 (Android-only backend).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -56,7 +52,7 @@ snapshot exactly. `--assert-zero` exit 0.
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |

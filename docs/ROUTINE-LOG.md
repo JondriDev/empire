@@ -5,6 +5,39 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-06 · QA — visual + smoke on green main `071a749` (first render-QA of the size="sm" empty-state polish)
+
+**Result:** 🟢 GREEN · **30/30 routes render clean, 0 runtime bugs, no regression.** Committed REPORT + metric deltas +
+epic-acceptance confirmation direct to `main`.
+
+**Context:** arrived on `97102af` (the prior QA commit) and started building; while I ran, the Builder landed an APP-CODE
+commit `071a749` ("polish(empty-states): complete the unification — `size="sm"` variant + 8 remaining spots, adoption
+6→13"). My first push rebased onto it and conflicted. Per the routine — *an app-code commit landing mid-run means the
+report must describe the tree it's pushed onto* — I **reset to `071a749` and re-built + re-smoked** against it (the polish
+had never been render-QA'd headless).
+
+**Verified on `071a749`:** build🟢 (PWA precache 86 entries); **30/30 routes render clean** (0 uncaught, 0 error
+boundaries) — desktop + 29 registry apps incl. every touched app; every guard green — SHELL-IS-STYLED, REGISTRY-COVERAGE
+**29** (smoke↔registry exact), INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1 (`tagOnly`), NODE-LINEAGE 1/1
+(5 axes), TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE 3/3+3/3, OFFLINE 5/5, **PRECACHE 86 no-gap**. Metrics
+reproduce the committed `071a749` snapshot EXACTLY: apps 29, test cases **309**/36 files, tokens 0, off-system utils 0,
+**offSystemStyle 0 (r0/t0/m0)**, bundle **717.6** — all Δ ±0; `node scripts/metrics.mjs --assert-zero` exit 0 (ratchet
+holds — the polish stayed token-clean). **Visually confirmed** (local PNGs, uncommitted): the compact `size="sm"` empty
+state on Music (`app-music.png` — "No track playing · Add audio files to get started" + music-glyph tile) + clean renders
+of Language Lab / Maps / Browser / Video / Goals / LearningTracker; the Bridge home (`desktop.png`); the Problem Solver
+rendering the World feed brief (`app-solver.png`).
+
+**Epic-acceptance:** **NO active epic.** EPIC-11 (design-system conformance II) stays CODE-COMPLETE + QA-confirmed — the
+size="sm" polish reintroduced no raw radii/type/easing; `offSystemStyle` holds at 0, LOCKED in `--assert-zero`. No `▶
+ACTIVE` stage → no new moved-metric to confirm, only the standing lock to hold (it holds). **▶ Awaiting the Strategist to
+promote the next epic** (EPIC-7 · Android stays device-gated).
+
+**Next:** Strategist promotes the next cloud-executable epic so QA has a fresh moved-metric to confirm; the empty-state
+unification is now complete (adoption 13/13 sensible spots) — the remaining inline one-liner empties are block-wrong by
+design and were correctly left alone.
+
+---
+
 ## 2026-07-06 · POLISH — complete the empty-state unification: `size="sm"` variant + 8 remaining spots (no active epic)
 
 **Context:** EPIC-11 is CODE-COMPLETE + QA-CONFIRMED (`offSystemStyle` 0 LOCKED); no `▶ ACTIVE` epic stage remains and the

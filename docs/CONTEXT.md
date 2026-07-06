@@ -67,9 +67,17 @@ fleet freeze). What changed for routines:
       sub-lists / player no-selection; default md = 200px full-panel block. Adoption count = `grep -rl EmptyState src/apps
       | wc -l` (now 13). Remaining hand-rolled empties are inline/italic one-liners (ColorPalette/FormBuilder/Clock/
       PromptGenerator/Cache) where a centred block is wrong by design — leave them.
-    - **⚠️ QA owes independent confirmation** on the new green main (headless smoke needs playwright, a QA-run dep): eyeball
-      Music/Video empty players, Maps saved tab, Browser bookmarks/history tabs, Language phrase book, Goals/LearningTracker
-      with an empty filter. Render risk is negligible (pure JSX swaps + passing tsc); the sm/md render is unit-pinned.
+    - **✅ QA-CONFIRMED LIVE (2026-07-06, green main `071a749`) — the size="sm" polish renders clean, no regression.**
+      First headless render-QA of `071a749` (it landed mid-QA-run, after the last QA `97102af`; the rebase pulled it in so
+      I reset to it and re-built + re-smoked the tree I'm actually pushing). All **30/30 routes render clean** (0 uncaught,
+      0 console errors) incl. every touched app. **Visually confirmed the compact `size="sm"` empty state** (`app-music.png`:
+      "No track playing · Add audio files to get started" + music-glyph tile, the compact 120px block) and clean renders of
+      Language Lab / Maps / Browser / Video / Goals / LearningTracker. Every guard green (SHELL-IS-STYLED, REGISTRY-COVERAGE
+      **29** smoke↔registry exact, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1 (5 axes),
+      TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE 3/3+3/3, OFFLINE 5/5, **PRECACHE 86 no-gap**), test cases 309/36
+      files, **offSystemStyle 0 (r0/t0/m0)** ±0, `--assert-zero` exit 0, bundle 717.6 ±0 vs the committed snapshot. **The
+      polish reintroduced no raw radii/type/easing — EPIC-11 stays CODE-COMPLETE + QA-confirmed.** No runtime bug, no drift.
+      ▶ Still awaiting the Strategist to promote the next epic (EPIC-7 · Android device-gated).
   - **↪ POLISH INCREMENT SHIPPED 2026-07-05 (prior run, no active epic) — unified primary empty-states onto the shared
     `<EmptyState>` primitive; adoption 1 → 6 apps.** A crafted `EmptyState` (`src/components/ui/Utility.tsx`) existed but
     ONLY Notes used it — every other app hand-rolled a bare, inconsistent empty state. **Extended the primitive with an
