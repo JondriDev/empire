@@ -12,6 +12,7 @@ import 'leaflet/dist/leaflet.css'
 import { emit } from '../../lib/eventBus'
 import { Map as MapIcon, Search, Navigation, MapPin, Locate, Trash2, Star } from 'lucide-react'
 import { EmptyState } from '../../components/ui/Utility'
+import { TwoPane } from '../../components/ui/TwoPane'
 
 interface Place {
   id: string
@@ -202,12 +203,19 @@ export default function Maps() {
   const center = selectedPlace ?? { lat: 20, lng: 0 }
 
   return (
-    <div className="flex h-full" style={{ background: 'var(--bg)' }}>
+    <>
       {/* Pin icons render as bare SVG, not Leaflet's default white box. */}
       <style>{`.leaflet-div-icon.empire-map-pin{background:transparent;border:none}`}</style>
 
-      {/* Sidebar */}
-      <div className="w-80 border-r flex flex-col" style={{ borderColor: 'var(--border)' }}>
+      <TwoPane
+        style={{ background: 'var(--bg)' }}
+        sideWidth="20rem"
+        showMain={!!selectedPlace}
+        onBack={() => setSelectedPlace(null)}
+        backLabel={selectedPlace?.name}
+        side={
+          <>
+        {/* Sidebar */}
         <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <h1 className="text-lg font-bold flex items-center gap-2">
             <MapIcon className="w-5 h-5" style={{ color: ACCENT }} /> Maps
@@ -384,10 +392,10 @@ export default function Maps() {
             <Locate className="w-4 h-4" /> Use My Location
           </button>
         </div>
-      </div>
-
-      {/* Map */}
-      <div className="flex-1 relative" style={{ minHeight: 0 }}>
+          </>
+        }
+        main={
+          <div className="flex-1 relative" style={{ minHeight: 0 }}>
         <div ref={mapEl} className="absolute inset-0" />
         {selectedPlace && (
           <div
@@ -419,7 +427,9 @@ export default function Maps() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+          </div>
+        }
+      />
+    </>
   )
 }
