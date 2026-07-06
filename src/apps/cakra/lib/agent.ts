@@ -20,6 +20,7 @@ import type {
 import { getProvider } from './providers'
 import { TOOL_LIST, isDangerousTool } from './tools'
 import { executeTool, executeToolsParallel, formatToolResult } from './toolExecutor'
+import { ARTIFACT_SYSTEM_PROMPT } from './artifactProtocol'
 import { buildEmpireContext } from '../../../lib/ai'
 
 // ─── Settings ────────────────────────────────────────────────────────────────
@@ -117,7 +118,7 @@ After I show you the tool result, you can decide the next step — call more too
 
 This is the current state across the user's apps — use it to ground answers about their data and to decide actions:
 
-${buildEmpireContext() || '(no app context captured yet)'}`
+${buildEmpireContext() || '(no app context captured yet)'}${ARTIFACT_SYSTEM_PROMPT}`
 }
 
 // ─── Tool Call Extraction ─────────────────────────────────────────────────────

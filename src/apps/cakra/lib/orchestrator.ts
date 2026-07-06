@@ -16,6 +16,7 @@
 import type { Message, ChatMessage } from './types'
 import type { AgentSettings, AgentCallbacks } from './agent'
 import { runAgentTurn } from './agent'
+import { ARTIFACT_SYSTEM_PROMPT } from './artifactProtocol'
 import { getProvider, pickNimByRole } from './providers'
 
 // A model id that's confirmed-good in this stack — used as the fallback when a
@@ -256,7 +257,7 @@ export async function runOrchestratedTurn(
   const draft = await nimChatSafe({
     apiKey, model: workerId, temperature: settings.temperature, maxTokens,
     messages: [
-      { role: 'system', content: `You are the Worker. Follow this plan to fully answer the user.\n\n=== PLAN ===\n${planText}` },
+      { role: 'system', content: `You are the Worker. Follow this plan to fully answer the user.${ARTIFACT_SYSTEM_PROMPT}\n\n=== PLAN ===\n${planText}` },
       ...convo,
     ],
   })
@@ -284,7 +285,7 @@ export async function runOrchestratedTurn(
       apiKey, model: workerId, temperature: settings.temperature, maxTokens,
       onToken: callbacks.onToken,
       messages: [
-        { role: 'system', content: 'You are the Synthesizer. Produce the final, corrected answer for the user. Apply the verifier feedback. Output only the answer — no meta commentary.' },
+        { role: 'system', content: `You are the Synthesizer. Produce the final, corrected answer for the user. Apply the verifier feedback. Output only the answer — no meta commentary.${ARTIFACT_SYSTEM_PROMPT}` },
         { role: 'user', content: `TASK:\n${task}\n\nDRAFT:\n${draft}\n\nVERIFIER FEEDBACK:\n${verdict}` },
       ],
     })

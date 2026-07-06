@@ -321,6 +321,7 @@ export default function AgentSurface() {
           <ChatPanel
             messages={messages}
             toolList={TOOL_LIST}
+            streaming={loading}
           />
           <div ref={bottomRef} />
         </div>

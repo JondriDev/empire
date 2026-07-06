@@ -8,6 +8,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Bot, Send, Settings, Sparkles, X, Trash2, Copy } from 'lucide-react'
 import { streamChat, buildEmpireContext, saveConfig, getConfig } from '../../lib/ai'
+import { hasArtifacts, ARTIFACT_SYSTEM_PROMPT } from './lib/artifactProtocol'
+import ArtifactMessageContent from './components/ArtifactMessageContent'
 import { emit, getRecent } from '../../lib/eventBus'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { SendResultMenu } from '../../components/ui/SendResultMenu'
@@ -89,7 +91,7 @@ export default function AIChat() {
 You have full context awareness across these apps: ${CONTEXT_APPS.join(', ')}.
 
 ${empireContext ? `CURRENT EMPIRE STATE:\n${empireContext}\n` : ''}
-Be concise, helpful, and slightly playful. When referencing data from other apps, summarize accurately. You can take actions like drafting notes, composing messages, or analyzing code — and explain what you're doing.`
+Be concise, helpful, and slightly playful. When referencing data from other apps, summarize accurately. You can take actions like drafting notes, composing messages, or analyzing code — and explain what you're doing.${ARTIFACT_SYSTEM_PROMPT}`
 
     const historyMessages = messages
       .filter(m => m.id !== 'system-welcome')
@@ -238,7 +240,17 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
                 ? 'bg-signal text-fg rounded-tr-sm'
                 : 'border border-hair rounded-tl-sm'
             }`} style={msg.role === 'assistant' ? { background: 'var(--card-bg)' } : {}}>
-              <div className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content || (msg.role === 'assistant' && loading && msg.id === messages[messages.length - 1]?.id ? '●' : '')}</div>
+              {msg.role === 'assistant' && hasArtifacts(msg.content) ? (
+                <div className="text-sm leading-relaxed">
+                  <ArtifactMessageContent
+                    content={msg.content}
+                    streaming={loading && msg.id === messages[messages.length - 1]?.id}
+                    renderText={text => <span className="block whitespace-pre-wrap">{text}</span>}
+                  />
+                </div>
+              ) : (
+                <div className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content || (msg.role === 'assistant' && loading && msg.id === messages[messages.length - 1]?.id ? '●' : '')}</div>
+              )}
               <div className="flex items-center gap-2 mt-1.5">
                 {msg.role === 'assistant' && (
                   <>

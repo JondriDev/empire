@@ -5,10 +5,14 @@
 import type { Message, Tool } from '../lib/types'
 import { Bot } from 'lucide-react'
 import { cssVar, tint } from '../../../design-system/tokens'
+import { hasArtifacts } from '../lib/artifactProtocol'
+import ArtifactMessageContent from './ArtifactMessageContent'
 
 interface Props {
   messages: Message[]
   toolList: Tool[]
+  /** True while the current assistant turn is still streaming in. */
+  streaming?: boolean
 }
 
 function formatContent(content: string) {
@@ -36,10 +40,11 @@ function formatContent(content: string) {
   })
 }
 
-export default function ChatPanel({ messages, toolList }: Props) {
+export default function ChatPanel({ messages, toolList, streaming = false }: Props) {
   function getTool(name?: string): Tool | undefined {
     return name ? toolList.find(t => t.name === name) : undefined
   }
+  const lastId = messages[messages.length - 1]?.id
 
   return (
     <div className="px-4 py-4 space-y-4">
@@ -114,7 +119,15 @@ export default function ChatPanel({ messages, toolList }: Props) {
                   borderBottomLeftRadius: '6px',
                 }}
               >
-                {formatContent(msg.content)}
+                {hasArtifacts(msg.content) ? (
+                  <ArtifactMessageContent
+                    content={msg.content}
+                    streaming={streaming && msg.id === lastId}
+                    renderText={formatContent}
+                  />
+                ) : (
+                  formatContent(msg.content)
+                )}
                 {msg.content === '' && (
                   <span style={{ color: cssVar('text3') }}>Thinking...</span>
                 )}
