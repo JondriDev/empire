@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import { Check, Copy, Save, X } from 'lucide-react'
 import type { ArtifactSpec } from '../../cakra/lib/artifactProtocol'
 import { cssVar, tint } from '../../../design-system/tokens'
+import { useLang } from '../../../lib/i18n'
 import ArtifactFrame from './ArtifactFrame'
 
 interface Props {
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export default function ArtifactViewer({ artifact, onClose, onSave, saved }: Props) {
+  const { t } = useLang()
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -77,8 +79,8 @@ export default function ArtifactViewer({ artifact, onClose, onSave, saved }: Pro
             onClick={handleCopy}
             className="press p-2 rounded-lg transition-colors"
             style={{ color: copied ? cssVar('c-success') : cssVar('text2'), background: tint('xenon', 7) }}
-            title="Copy source"
-            aria-label="Copy source"
+            title={t('artifacts.copy')}
+            aria-label={t('artifacts.copy')}
           >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           </button>
@@ -92,15 +94,15 @@ export default function ArtifactViewer({ artifact, onClose, onSave, saved }: Pro
                 : { color: cssVar('void'), background: 'var(--c-cakra)' }}
             >
               {saved ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
-              {saved ? 'Saved' : 'Save'}
+              {saved ? t('artifacts.saved') : t('artifacts.save')}
             </button>
           )}
           <button
             onClick={onClose}
             className="press p-2 rounded-lg transition-colors"
             style={{ color: cssVar('text2'), background: tint('xenon', 7) }}
-            title="Close (Esc)"
-            aria-label="Close"
+            title={`${t('artifacts.close')} (Esc)`}
+            aria-label={t('artifacts.close')}
           >
             <X className="w-4 h-4" />
           </button>

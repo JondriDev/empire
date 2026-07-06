@@ -12,6 +12,7 @@ import { AppWindow, ChevronRight, FileText, Loader2, Shapes } from 'lucide-react
 import type { ArtifactSpec, ArtifactType } from '../lib/artifactProtocol'
 import { saveGenerated } from '../../artifacts/lib/artifactStore'
 import { cssVar, tint } from '../../../design-system/tokens'
+import { useLang } from '../../../lib/i18n'
 
 const ArtifactViewer = lazy(() => import('../../artifacts/generated/ArtifactViewer'))
 
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export default function ArtifactCard({ artifact, streaming = false }: Props) {
+  const { t } = useLang()
   const [open, setOpen] = useState(false)
   const [saved, setSaved] = useState(false)
   const building = !artifact.complete && streaming
@@ -35,10 +37,10 @@ export default function ArtifactCard({ artifact, streaming = false }: Props) {
   const Icon = TYPE_ICONS[artifact.type]
 
   const status = building
-    ? 'Building artifact…'
+    ? t('artifacts.building')
     : interrupted
-      ? 'Interrupted — partial content'
-      : `Ready · tap to open · ${artifact.type}`
+      ? t('artifacts.interrupted')
+      : `${t('artifacts.ready')} · ${artifact.type}`
 
   return (
     <>
