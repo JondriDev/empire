@@ -15,8 +15,13 @@ name: Verify build
 # "design-system conformance" gate (scripts/metrics.mjs --assert-zero) that fails
 # if any raw hex/rgb literal (tokenViolations) or off-system Tailwind palette
 # class (offSystemUtilities) re-enters src/ — locking the EPIC-5 1076→0 sweep so
-# the one-palette/themeable win can't silently rot. Cheap; runs on every
-# PR and every push to main.
+# the one-palette/themeable win can't silently rot. Finally runs the "dependency
+# security audit" gate (scripts/check-audit.mjs) that fails if a NEW high/critical
+# npm advisory enters the tree — the deliberately-deferred dev-tooling advisories
+# (vite/vitest/esbuild dev-server-only, need a major bump) are documented in that
+# script's ALLOWLIST with a reason, so only a genuinely new shipped-dependency CVE
+# fails the build, and no human has to re-triage `npm audit` by hand each week.
+# Cheap; runs on every PR and every push to main.
 
 on:
   workflow_dispatch: {}
@@ -67,3 +72,6 @@ jobs:
 
       - name: Guard — design-system conformance (tokenViolations=0, offSystemUtilities=0)
         run: node scripts/metrics.mjs --assert-zero
+
+      - name: Guard — dependency security audit (fails on any NEW high/critical vuln)
+        run: node scripts/check-audit.mjs

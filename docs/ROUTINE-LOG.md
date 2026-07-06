@@ -5,6 +5,47 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-06 · DEPS+LEVERAGE — patch a HIGH prod vuln via override, safe minor bumps, + a CI dependency-audit gate
+
+**Result:** 🟢 GREEN · build + 367 tests + all guards pass. Committed direct to `main`.
+
+**Baseline:** on green `67afd26`; `npm install` → **7 vulns (1 critical / 3 high / 3 moderate)**; `npm run build` green.
+
+**Deps applied (build stayed green throughout):**
+- **Security — fixed both HIGH `@xmldom/xmldom` advisories (production-reachable, via `epubjs`) WITHOUT the risky
+  `epubjs` 0.3→0.4 major.** Root cause: `epubjs@0.3.93` pins `@xmldom/xmldom@^0.7.5` → resolved **0.7.13** (flagged
+  `<=0.8.12`: 5 XML-injection/DoS advisories). npm's suggested "fix" (`epubjs@0.4.2`) is *illusory* — 0.4.2 moves to the
+  ancient **unscoped `xmldom@^0.1.27`**, which is older and differently-vulnerable, and is a breaking major on the Reader.
+  Instead added a scoped **`overrides: { epubjs: { "@xmldom/xmldom": "^0.8.13" } }`** → epubjs's copy is now **0.8.13**
+  (the in-advisory patched line, already what `mammoth` resolves to). epubjs's XML use is `DOMParser.parseFromString`
+  (stable 0.7→0.8) and is `any`-typed in `src/apps/reader/lib/render/epub.ts` → zero API/type risk. **7 → 5 vulns.**
+- **Safe minor/patch bumps (lockfile, within existing ranges):** `tailwindcss`/`@tailwindcss/vite` 4.3.1→4.3.2,
+  `lucide-react` 1.22.0→1.23.0, `react-router-dom` 7.18.0→7.18.1, `typescript-eslint` 8.62.0→8.62.1.
+
+**Deferred (reported, not applied — per guardrail "no major framework upgrades unless provably safe"):** the remaining
+**5 vulns are ALL the vite/vitest/esbuild/launch-editor DEV-TOOLING chain** (1 critical vitest-UI, 1 high vite
+`server.fs.deny`, 3 moderate) — **dev-server-only, none ship in the built PWA.** Fixing needs `vite` 5→8 + `vitest` 2→4
++ `@vitejs/plugin-react` 4→6 (a triple-major cascade under Tailwind-v4/PWA plugins) — too risky to land unattended for a
+zero-production-exposure win. **Left for a human-reviewed framework bump.**
+
+**Leverage (this week) — new `scripts/check-audit.mjs`, wired into `.github/workflows/verify.yml` as a CI guard.**
+Fails the build on any **NEW high/critical npm advisory**, while the 5 deliberately-deferred dev-tooling advisories live
+in the script's `ALLOWLIST` (each with a GHSA url + reason it's safe to defer). **This deletes the recurring weekly cost
+of hand-triaging `npm audit`** — every run used to re-decide "new vs. known-deferred" from scratch; now that judgement is
+encoded, only a genuinely new *shipped-dependency* CVE turns CI red. Fail-open on network/parse errors (supplementary
+gate must never block a merge on a flaky registry); reports stale allowlist entries so the list can't rot. Verified both
+paths: green now (5 known/accepted), and exits 1 when a critical is removed from the allowlist. Small, reversible, no
+app-behavior change.
+
+**Metrics Δ:** apps 29, test cases 309, tokens/off-system-utils/**offSystemStyle 0** — all **±0** (no app-code touched);
+`--assert-zero` exit 0. Bundle gz **717.6 → 718.3 (+0.7)** — from lucide/router/xmldom 0.7→0.8. `npm audit` **7 → 5**
+(both prod-reachable HIGHs gone; 5 remaining all dev-only + allowlisted).
+
+**Next:** a human should schedule the `vite` 5→8 / `vitest` 2→4 framework bump (clears the last 5, all dev-only) — until
+then the audit gate keeps them visible-but-accepted and blocks anything new. Strategist still owes the next active epic.
+
+---
+
 ## 2026-07-06 · QA — visual + smoke on green main `071a749` (first render-QA of the size="sm" empty-state polish)
 
 **Result:** 🟢 GREEN · **30/30 routes render clean, 0 runtime bugs, no regression.** Committed REPORT + metric deltas +

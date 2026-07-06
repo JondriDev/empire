@@ -41,6 +41,21 @@ fleet freeze). What changed for routines:
 
 ---
 
+## 🔒 DEPS SECURITY STATE (2026-07-06) — read before the weekly deps pass
+
+- **`npm audit` = 5 vulns, ALL the vite/vitest/esbuild/launch-editor DEV-TOOLING chain** (dev-server-only, none ship in
+  the built PWA). They are **deliberately deferred** — clearing them needs `vite` 5→8 + `vitest` 2→4 + `@vitejs/plugin-react`
+  4→6 (a triple-major cascade). **Do NOT attempt unattended; leave for a human framework bump.** All 5 are documented in
+  the `ALLOWLIST` of `scripts/check-audit.mjs` (GHSA url + reason each).
+- **NEW GUARD `scripts/check-audit.mjs`** (in `verify.yml`): fails CI on any **NEW** high/critical advisory not on that
+  allowlist → a genuinely new *shipped-dependency* CVE can't drift in green; the known dev-tooling ones stay accepted.
+  When you clear a deferred vuln, **remove its allowlist entry** (the guard also prints stale entries to nudge this).
+- **`epubjs` xmldom trap:** its `@xmldom/xmldom` is pinned to a patched `^0.8.13` via `overrides` in `package.json`.
+  **Do NOT bump `epubjs` to 0.4.x** — that "fix" regresses to the ancient unscoped `xmldom@0.1.x` (older, still vulnerable)
+  and is a breaking Reader major. Keep the override.
+
+---
+
 ## ▶ Active epic & exact next-stage shape
 
 > The single most important block. The Strategist keeps this in sync with the
