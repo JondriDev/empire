@@ -225,6 +225,21 @@ function runMigrations(db) {
         updated_at TEXT DEFAULT (datetime('now')),
         FOREIGN KEY (user_id) REFERENCES users(id)
       )`
+    },
+    {
+      name: '012_req_log',
+      sql: `CREATE TABLE IF NOT EXISTS req_log (
+        id TEXT PRIMARY KEY,
+        user_id TEXT,
+        method TEXT NOT NULL,
+        path TEXT NOT NULL,
+        status INTEGER,
+        created_at TEXT DEFAULT (datetime('now'))
+      )`
+    },
+    {
+      name: '012_req_log_idx',
+      sql: `CREATE INDEX IF NOT EXISTS idx_req_log_user_created ON req_log(user_id, created_at)`
     }
   ];
 
@@ -327,6 +342,25 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json({ limit: '256kb' })); // tighter: was 10mb (allows arbitrary JSON attacks)
+
+// ═══════════════════════════════════════════════════════════════
+// REQUEST LOG — append-only audit trail for sensitive endpoints
+// ═══════════════════════════════════════════════════════════════
+const LOGGABLE_PATH_RE = /^\/api\/(files|file\/download|proxy|tools\/execute|ai\/chat|auth\/login)/;
+app.use((req, res, next) => {
+  if (!LOGGABLE_PATH_RE.test(req.path)) return next();
+  res.on('finish', () => {
+    const uid = req.user?.id || null;
+    const id = uuidv4();
+    try {
+      db.run(
+        'INSERT INTO req_log (id, user_id, method, path, status) VALUES (?, ?, ?, ?, ?)',
+        [id, uid, req.method, req.path, res.statusCode]
+      );
+    } catch (e) { /* swallow — logging must never break a request */ }
+  });
+  next();
+});
 
 // ── Tiny in-memory rate limiter (no extra dep) ──────────────────────
 // Default Empire is localhost-only — this is belt-and-suspenders against accidental
@@ -939,7 +973,7 @@ app.get('/api/hermes/mcps', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 // File listing
-app.get('/api/files', (req, res) => {
+app.get('/api/files', authMiddleware, (req, res) => {
   const dir = safePath(req.query.path);
   try {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -951,7 +985,7 @@ app.get('/api/files', (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/file/download', (req, res) => {
+app.get('/api/file/download', authMiddleware, (req, res) => {
   const filePath = safePath(req.query.path);
   if (!filePath || !fs.existsSync(filePath)) return res.status(404).json({ error: 'Not found' });
   res.sendFile(path.resolve(filePath));
@@ -982,7 +1016,7 @@ function isSafeProxyUrl(raw) {
   return true;
 }
 
-app.get('/api/proxy', async (req, res) => {
+app.get('/api/proxy', authMiddleware, rateLimit('proxy', 60, 60 * 1000), async (req, res) => {
   const url = req.query.url;
   if (!url || typeof url !== 'string') return res.status(400).json({ error: 'URL required' });
   if (!isSafeProxyUrl(url)) return res.status(403).json({ error: 'URL not allowed (private/loopback blocked)' });
@@ -998,7 +1032,7 @@ app.get('/api/proxy', async (req, res) => {
 });
 
 // AI Chat Proxy
-app.post('/api/ai/chat', async (req, res) => {
+app.post('/api/ai/chat', authMiddleware, rateLimit('ai-chat', 120, 60 * 1000), async (req, res) => {
   const { messages, model, temperature, maxTokens, systemPrompt, apiKey, baseUrl } = req.body;
   const finalModel = model || 'deepseek-ai/deepseek-v4-flash';
   const nvidiaKey = process.env.NVIDIA_API_KEY;
@@ -1112,7 +1146,7 @@ app.get('/api/tools/list', (req, res) => {
   res.json({ tools: Object.keys(TOOL_DEFINITIONS) });
 });
 
-app.post('/api/tools/execute', async (req, res) => {
+app.post('/api/tools/execute', authMiddleware, async (req, res) => {
   const { tool, params } = req.body;
   if (!tool) return res.status(400).json({ success: false, error: 'Missing tool name' });
   const def = TOOL_DEFINITIONS[tool];
@@ -1132,6 +1166,8 @@ app.post('/api/tools/execute', async (req, res) => {
       }
       case 'file_write': {
         const { path: fp, content, append = false } = params;
+        if (typeof content !== 'string') return res.json({ success: false, error: 'content must be a string' });
+        if (content.length > 1024 * 1024) return res.json({ success: false, error: 'content exceeds 1 MiB cap' });
         if (append) { fs.appendFileSync(safePath(fp), content, 'utf8'); }
         else { fs.writeFileSync(safePath(fp), content, 'utf8'); }
         res.json({ success: true, output: `Written ${content.length} chars to ${fp}` });
