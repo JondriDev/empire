@@ -1229,6 +1229,157 @@ app.post('/api/tools/execute', authMiddleware, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// CAKRA v2 — Multimodal AI Core (RFC: docs/rfc/cakra-v2.md)
+// ═══════════════════════════════════════════════════════════════
+// Provider adapter registry. Each adapter exposes:
+//   async invoke({ modality, payload, userId, cacheKey }) -> { ok, kind, url?, text?, bytes, costUsd, provider, cached }
+// Adapters may return text OR a data-URL/URL depending on modality.
+// A1 ships a working text pass-through + a deterministic 'placeholder' provider
+// for image preview (no paid API). Real fal/venice adapters land in A2.
+
+const CAKRA_PROVIDERS = {
+  text: {
+    openai_compat: {
+      name: 'openai_compat',
+      async invoke({ payload }) {
+        // Reuses the same upstream as /api/ai/chat but routes through CakraCore
+        // so we get cost ledger + cache for free.
+        const { messages, model, temperature = 0.7, maxTokens = 2048 } = payload || {};
+        if (!Array.isArray(messages)) throw new Error('payload.messages must be an array');
+        const nvidiaKey = process.env.NVIDIA_API_KEY;
+        const orKey = process.env.OPENROUTER_API_KEY;
+        const aiKey = process.env.AI_API_KEY;
+        const useNvidia = !!nvidiaKey;
+        const baseUrl = useNvidia ? 'https://integrate.api.nvidia.com/v1' : 'https://openrouter.ai/api/v1';
+        const apiKey = useNvidia ? nvidiaKey : (orKey || aiKey || '');
+        if (!apiKey) throw new Error('No AI API key configured');
+        const resp = await fetch(`${baseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+          body: JSON.stringify({ model: model || 'deepseek-ai/deepseek-v4-flash', messages, temperature, max_tokens: maxTokens, stream: false }),
+          signal: AbortSignal.timeout(60000),
+        });
+        if (!resp.ok) throw new Error(`AI upstream ${resp.status}`);
+        const json = await resp.json();
+        const text = json.choices?.[0]?.message?.content || '';
+        return { kind: 'text', text, bytes: text.length, costUsd: 0.001, provider: 'openai_compat' };
+      },
+    },
+  },
+  image: {
+    placeholder: {
+      name: 'placeholder',
+      async invoke({ payload }) {
+        // Deterministic SVG data-URL. Used for A1 scaffolding so the Browser hero
+        // can render without a paid provider. A2 swaps this for a real fal call.
+        const prompt = String(payload?.prompt || '');
+        const seed = [...prompt].reduce((a, c) => (a * 33 + c.charCodeAt(0)) >>> 0, 0);
+        const hue = seed % 360;
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='hsl(${hue},70%,20%)'/><stop offset='1' stop-color='hsl(${(hue + 60) % 360},70%,45%)'/></linearGradient></defs><rect width='512' height='512' fill='url(#g)'/><text x='256' y='256' fill='rgba(255,255,255,0.85)' font-family='Sora, system-ui' font-size='22' text-anchor='middle' dominant-baseline='middle'>${prompt.slice(0, 60).replace(/[<>&]/g, '')}</text></svg>`;
+        const b64 = Buffer.from(svg).toString('base64');
+        return { kind: 'image', url: `data:image/svg+xml;base64,${b64}`, bytes: svg.length, costUsd: 0, provider: 'placeholder' };
+      },
+    },
+  },
+};
+
+// In-memory call cache (5-minute TTL)
+const cakraCache = new Map();
+const CAKRA_CACHE_TTL = 5 * 60 * 1000;
+function cakraCacheKey(req) { return JSON.stringify({ p: req.provider || 'auto', m: req.modality, pay: req.payload }); }
+
+async function cakraInvoke(req, userId) {
+  const modality = req.modality;
+  const family = CAKRA_PROVIDERS[modality];
+  if (!family) return { ok: false, error: `Unknown modality: ${modality}` };
+
+  let providerKey = req.provider;
+  if (!providerKey || providerKey === 'auto') {
+    providerKey = Object.keys(family)[0]; // A1: first; A2+ introduces health-aware router
+  }
+  const adapter = family[providerKey];
+  if (!adapter) return { ok: false, error: `No provider "${providerKey}" for modality "${modality}"` };
+
+  const ck = cakraCacheKey({ ...req, provider: providerKey });
+  const cached = cakraCache.get(ck);
+  if (cached && Date.now() - cached.t < CAKRA_CACHE_TTL) {
+    return { ...cached.v, cached: true };
+  }
+
+  const res = await adapter.invoke({ ...req, userId });
+  cakraCache.set(ck, { t: Date.now(), v: res });
+
+  // Ledger row in req_log table — cost usd is appended to req_log output column later.
+  try {
+    db.run(
+      'INSERT INTO cakra_calls (id, user_id, modality, provider, cost_usd, bytes) VALUES (?, ?, ?, ?, ?, ?)',
+      [uuidv4(), userId || null, modality, res.provider || providerKey, res.costUsd || 0, res.bytes || 0]
+    );
+  } catch (_e) { /* table may not exist on first boot */ }
+
+  return { ...res, cached: false };
+}
+
+// === Cakra migration (only adds table; safe if schema is fresh or already migrated) ===
+try {
+  db.run(`CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TEXT DEFAULT (datetime('now')))`);
+} catch (_e) {}
+try {
+  db.run(`CREATE TABLE IF NOT EXISTS cakra_calls (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    modality TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    cost_usd REAL DEFAULT 0,
+    bytes INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+} catch (_e) {}
+try {
+  db.run(`CREATE INDEX IF NOT EXISTS idx_cakra_calls_user ON cakra_calls(user_id, created_at)`);
+} catch (_e) {}
+
+// === Cakra routes ===
+app.post('/api/cakra/invoke', authMiddleware, rateLimit('cakra', 60, 60 * 1000), async (req, res) => {
+  const { modality, provider, payload } = req.body || {};
+  if (!modality) return res.status(400).json({ ok: false, error: 'modality required' });
+  try {
+    const result = await cakraInvoke({ modality, provider, payload }, req.user?.id);
+    res.json({ ok: true, ...result });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+app.get('/api/cakra/health', authMiddleware, (_req, res) => {
+  const providers = {};
+  for (const [modality, family] of Object.entries(CAKRA_PROVIDERS)) {
+    providers[modality] = Object.keys(family);
+  }
+  res.json({ ok: true, providers, env: {
+    nvidia: !!process.env.NVIDIA_API_KEY,
+    openrouter: !!process.env.OPENROUTER_API_KEY,
+    fal: !!process.env.FAL_KEY,
+    venice: !!process.env.VENICE_API_KEY,
+    openai: !!process.env.OPENAI_API_KEY,
+    replicate: !!process.env.REPLICATE_API_TOKEN,
+  }});
+});
+
+app.get('/api/cakra/cost', authMiddleware, (req, res) => {
+  try {
+    const result = db.exec(
+      "SELECT modality, provider, SUM(cost_usd) AS total_usd, COUNT(*) AS calls FROM cakra_calls WHERE user_id = ? AND created_at >= datetime('now', '-30 day') GROUP BY modality, provider",
+      [req.user.id]
+    );
+    const rows = (result[0]?.values || []).map(v => ({ modality: v[0], provider: v[1], total_usd: v[2], calls: v[3] }));
+    res.json({ ok: true, rows });
+  } catch (e) {
+    res.json({ ok: true, rows: [], note: 'cost ledger warming up' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
 // WEBSOCKET
 // ═══════════════════════════════════════════════════════════════
 
