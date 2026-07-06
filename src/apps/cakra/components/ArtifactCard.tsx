@@ -10,6 +10,7 @@
 import { Suspense, lazy, useState } from 'react'
 import { AppWindow, ChevronRight, FileText, Loader2, Shapes } from 'lucide-react'
 import type { ArtifactSpec, ArtifactType } from '../lib/artifactProtocol'
+import { saveGenerated } from '../../artifacts/lib/artifactStore'
 import { cssVar, tint } from '../../../design-system/tokens'
 
 const ArtifactViewer = lazy(() => import('../../artifacts/generated/ArtifactViewer'))
@@ -28,6 +29,7 @@ interface Props {
 
 export default function ArtifactCard({ artifact, streaming = false }: Props) {
   const [open, setOpen] = useState(false)
+  const [saved, setSaved] = useState(false)
   const building = !artifact.complete && streaming
   const interrupted = !artifact.complete && !streaming
   const Icon = TYPE_ICONS[artifact.type]
@@ -73,7 +75,17 @@ export default function ArtifactCard({ artifact, streaming = false }: Props) {
 
       {open && (
         <Suspense fallback={null}>
-          <ArtifactViewer artifact={artifact} onClose={() => setOpen(false)} />
+          <ArtifactViewer
+            artifact={artifact}
+            onClose={() => setOpen(false)}
+            onSave={artifact.complete
+              ? async () => {
+                  await saveGenerated(artifact)
+                  setSaved(true)
+                }
+              : undefined}
+            saved={saved}
+          />
         </Suspense>
       )}
     </>

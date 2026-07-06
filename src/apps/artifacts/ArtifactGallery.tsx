@@ -6,9 +6,12 @@
  * Each card opens its artifact in an immersive fullscreen mode inside the Empire
  * window. Designed to feel like the macOS Launchpad for builders.
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FormInput, BarChart3, Columns, GraduationCap, FileText, Palette, Sparkles, ArrowRight, Star, Zap, Code2 } from 'lucide-react'
 import { cssVar } from '../../design-system/tokens'
+import { on } from '../../lib/eventBus'
+import GeneratedSection from './GeneratedSection'
+import { listGenerated } from './lib/artifactStore'
 
 type IconKey = 'form' | 'chart' | 'kanban' | 'flash' | 'markdown' | 'palette'
 
@@ -101,6 +104,11 @@ const ARTIFACTS: ArtifactMeta[] = [
 
 export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) => void }) {
   const [hovered, setHovered] = useState<string | null>(null)
+  const [generated, setGenerated] = useState(listGenerated)
+
+  // Saving from Cakra chat while this stays mounted (Cakra keeps visited
+  // tabs alive) must show up here — refresh on the bus event.
+  useEffect(() => on('ARTIFACT_CREATED', () => setGenerated(listGenerated())), [])
 
   return (
     <div className="h-full overflow-auto bg-gradient-to-br from-void via-ion/20 to-void text-fg">
@@ -123,12 +131,15 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
             Self-contained mini-apps for makers. Drag, build, ship — every artifact is an entire tool in your pocket.
           </p>
           <div className="mt-4 flex items-center gap-4 text-xs text-faint">
-            <span className="flex items-center gap-1.5"><Zap size={12} className="text-warn" /> 6 artifacts</span>
+            <span className="flex items-center gap-1.5"><Zap size={12} className="text-warn" /> {ARTIFACTS.length + generated.length} artifacts</span>
             <span className="flex items-center gap-1.5"><Code2 size={12} className="text-signal" /> All client-side</span>
             <span className="flex items-center gap-1.5"><Star size={12} className="text-danger" /> 3 highlighted this week</span>
           </div>
         </div>
       </div>
+
+      {/* Saved Cakra-generated artifacts (hidden while empty) */}
+      <GeneratedSection metas={generated} onChange={setGenerated} />
 
       {/* Grid */}
       <div className="px-8 pb-12">

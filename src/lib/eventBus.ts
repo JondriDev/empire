@@ -34,6 +34,8 @@ export type EmpireEvent =
   | { type: 'CAKRA_TOOL_EXECUTED'; toolId: string; toolName: string }
   | { type: 'CAKRA_SKILL_LOADED'; skillName: string }
   | { type: 'CAKRA_MCP_CONNECTED'; mcpName: string; status: string }
+  // A Cakra-generated artifact was saved to the Artifacts gallery.
+  | { type: 'ARTIFACT_CREATED'; artifactId: string; title: string; artifactType: string }
   // A directed cross-app handoff: data sent *from* one app *to* another (e.g.
   // "use as prompt" routes the current selection into Prompt Generator). The
   // Network mesh reads these as honest app→app synapse arcs. `label` is an
