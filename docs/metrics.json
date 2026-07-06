@@ -1,9 +1,9 @@
 {
   "current": {
-    "generatedAt": "2026-07-06T05:22:02.267Z",
+    "generatedAt": "2026-07-06T11:22:28.837Z",
     "apps": 29,
-    "testFiles": 36,
-    "testCases": 314,
+    "testFiles": 37,
+    "testCases": 323,
     "tokenViolations": 0,
     "offSystemUtilities": 0,
     "offSystemStyle": 0,
@@ -12,42 +12,10 @@
       "type": 0,
       "motion": 0
     },
-    "bundleGzKB": 718.5,
-    "bundleRawKB": 2437.7
+    "bundleGzKB": 718.6,
+    "bundleRawKB": 2438.4
   },
   "history": [
-    {
-      "generatedAt": "2026-07-04T23:56:13.298Z",
-      "apps": 28,
-      "testFiles": 32,
-      "testCases": 276,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 14,
-      "offSystemStyleDims": {
-        "radii": 12,
-        "type": 0,
-        "motion": 2
-      },
-      "bundleGzKB": 705.4,
-      "bundleRawKB": 2403.5
-    },
-    {
-      "generatedAt": "2026-07-04T23:56:26.119Z",
-      "apps": 28,
-      "testFiles": 32,
-      "testCases": 276,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 14,
-      "offSystemStyleDims": {
-        "radii": 12,
-        "type": 0,
-        "motion": 2
-      },
-      "bundleGzKB": 705.4,
-      "bundleRawKB": 2403.5
-    },
     {
       "generatedAt": "2026-07-04T23:59:11.444Z",
       "apps": 28,
@@ -495,6 +463,38 @@
       },
       "bundleGzKB": 718.5,
       "bundleRawKB": 2437.7
+    },
+    {
+      "generatedAt": "2026-07-06T05:22:02.267Z",
+      "apps": 29,
+      "testFiles": 36,
+      "testCases": 314,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "bundleGzKB": 718.5,
+      "bundleRawKB": 2437.7
+    },
+    {
+      "generatedAt": "2026-07-06T11:22:28.674Z",
+      "apps": 29,
+      "testFiles": 37,
+      "testCases": 323,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "bundleGzKB": 718.6,
+      "bundleRawKB": 2438.4
     }
   ]
 }

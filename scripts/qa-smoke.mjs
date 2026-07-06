@@ -519,7 +519,10 @@ const hasIntentMirror = (page) => page.evaluate(([k, from]) => {
     return Object.values(nodes).some(n => n?.type === 'note' && n?.meta?.app === 'notes' && n?.data?.from === from);
   } catch { return false; }
 }, [GRAPH_KEY, INTENT_SRC_ID]);
-const intentRoundtrip = { note: { stored: false, mirrored: false, persisted: false, pass: false, err: undefined } };
+const intentRoundtrip = {
+  note: { stored: false, mirrored: false, persisted: false, pass: false, err: undefined },
+  learning: { stored: false, mirrored: false, persisted: false, pass: false, err: undefined },
+};
 try {
   const page = await ctx.newPage();
   await page.goto(`${BASE}/app/inbox`, { waitUntil: 'networkidle', timeout: 30000 });
@@ -554,10 +557,78 @@ try {
   await page.close();
 } catch (e) {
   intentRoundtrip.note.err = e.message;
-  console.warn(`INTENT-ROUNDTRIP: guard did not complete — ${e.message}`);
+  console.warn(`INTENT-ROUNDTRIP (note): guard did not complete — ${e.message}`);
 }
-const intentPass = intentRoundtrip.note.pass ? 1 : 0;
-const intentTotal = 1;
+// ── learning axis (EPIC-12 S2: add-to-learning writes a REAL Learning item) ──
+// `add-to-learning` accepts note/message, so seed a REAL note directly in
+// empire-store: a real note both SURVIVES the boot reconcile (sourceId-keyed) AND
+// is a valid source (a seeded PHANTOM note would be pruned before it could act).
+// Reload → startCoreSync mirrors the note → drive its ⚡ NodeActions "Add to
+// Learning" menu on /app/notes (the real production surface a user clicks), then
+// assert: `stored` = a real learningItems entry with `from`=source id + topic=src
+// title in empire-store; `mirrored` = a `learning` graph node owned by
+// `app==='learning-tracker'` with `data.from`=source id; `persisted` = after a
+// SECOND reload BOTH still hold (the store persists AND reconcile KEEPS the
+// store-backed mirror — the exact regression the phantom bug caused).
+const LEARN_SRC_ID = 'qa-learn-src';
+const LEARN_SRC_TITLE = 'Decode the resonance lattice';
+const LEARN_SRC_CONTENT = 'Field notes on the resonance lattice harmonics.';
+const learnStoreSeed = {
+  state: {
+    notes: [{ id: LEARN_SRC_ID, title: LEARN_SRC_TITLE, content: LEARN_SRC_CONTENT, tags: [], updatedAt: 1000 }],
+    learningItems: [], messages: [], events: [],
+  },
+  version: 0,
+};
+// A real learningItems entry in empire-store whose `from` = the source id.
+const readLearnItem = (page) => page.evaluate(([k, from]) => {
+  try {
+    const items = JSON.parse(localStorage.getItem(k))?.state?.learningItems || [];
+    return items.find(i => i?.from === from) || null;
+  } catch { return null; }
+}, [STORE_KEY, LEARN_SRC_ID]);
+// A `learning` graph node owned by app==='learning-tracker' carrying data.from = source id.
+const hasLearnMirror = (page) => page.evaluate(([k, from]) => {
+  try {
+    const nodes = JSON.parse(localStorage.getItem(k))?.state?.nodes || {};
+    return Object.values(nodes).some(n => n?.type === 'learning' && n?.meta?.app === 'learning-tracker' && n?.data?.from === from);
+  } catch { return false; }
+}, [GRAPH_KEY, LEARN_SRC_ID]);
+try {
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/app/notes`, { waitUntil: 'networkidle', timeout: 30000 });
+  // Clean slate, seed a real note in empire-store, reload so startCoreSync mirrors it.
+  await page.evaluate(([gk, sk, sv]) => {
+    localStorage.removeItem(gk);
+    localStorage.setItem(sk, sv);
+  }, [GRAPH_KEY, STORE_KEY, JSON.stringify(learnStoreSeed)]);
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(900);
+  // Drive the REAL production surface: hover the note card, open its ⚡ menu, click
+  // "Add to Learning" (label from sync.ts). Scope the ⚡ button to the card.
+  const card = page.locator('.gp', { hasText: LEARN_SRC_TITLE }).first();
+  await card.hover().catch(() => {});
+  await card.locator('button[aria-label="Node actions"]').first().click({ timeout: 5000 });
+  await page.waitForTimeout(300);
+  await page.locator('button[role="menuitem"]', { hasText: 'Add to Learning' }).first().click({ timeout: 5000 });
+  await page.waitForTimeout(700);
+  const li = await readLearnItem(page);
+  intentRoundtrip.learning.stored = !!li && li.topic === LEARN_SRC_TITLE && li.from === LEARN_SRC_ID;
+  intentRoundtrip.learning.mirrored = await hasLearnMirror(page);
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(900);
+  const liAfter = await readLearnItem(page);
+  intentRoundtrip.learning.persisted = !!liAfter && (await hasLearnMirror(page));
+  intentRoundtrip.learning.pass = intentRoundtrip.learning.stored && intentRoundtrip.learning.mirrored && intentRoundtrip.learning.persisted;
+  console.log(`INTENT-ROUNDTRIP  add-to-learning  stored=${intentRoundtrip.learning.stored} mirrored=${intentRoundtrip.learning.mirrored} persisted=${intentRoundtrip.learning.persisted}`);
+  await page.evaluate(([gk, sk]) => { localStorage.removeItem(gk); localStorage.removeItem(sk); }, [GRAPH_KEY, STORE_KEY]);
+  await page.close();
+} catch (e) {
+  intentRoundtrip.learning.err = e.message;
+  console.warn(`INTENT-ROUNDTRIP (learning): guard did not complete — ${e.message}`);
+}
+const intentPass = (intentRoundtrip.note.pass ? 1 : 0) + (intentRoundtrip.learning.pass ? 1 : 0);
+const intentTotal = 2;
 console.log(`INTENT-ROUNDTRIP: ${intentPass}/${intentTotal} ${intentPass === intentTotal ? '✅' : '⚠️'}`);
 
 // ── TIMELINE guard (EPIC-10 S1: the organism gets a TEMPORAL lens) ───────────
@@ -947,10 +1018,11 @@ md += ` **S3 makes it NAVIGABLE:** each ancestry hop is a real \`[role="button"]
 md += `| Artifact | Lineage rendered | Parent title shown | Survived reload | Search surface | Hop clickable | Result |\n|---|---|---|---|---|---|---|\n`;
 md += `| task ← ${LINEAGE_PARENT_TITLE} | ${nodeLineage.rendered ? '✅' : '❌'} | ${nodeLineage.title ? '✅' : '❌'} | ${nodeLineage.persisted ? '✅' : '❌'} | ${nodeLineage.search ? '✅' : '❌'} | ${nodeLineage.clickable ? '✅' : '❌'} | ${nodeLineage.pass ? '✅' : '❌'}${nodeLineage.err ? ' (' + nodeLineage.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**NODE-LINEAGE: ${nodeLineage.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
-md += `\n## Intent-roundtrip guard (EPIC-12 S1 — cross-app creation makes REAL, durable entities)\n\n`;
-md += `The core cross-app intents must produce a REAL, editable, reload-durable entity in its home app — not a phantom graph node. Before S1, \`make-note-from\` called \`g.addNode({type:'note'})\` directly: a graph node with NO store row and NO \`data.sourceId\`, which \`reconcile()\` PRUNES (\`note\` is a centrally-mirrored type) — so the "created" note never showed in Notes and vanished on the next store mutation / reload. S1 routes the intent through the REAL store (\`useStore.addNote\`); the synchronous \`useStore.subscribe(syncAll)\` then materializes an un-prunable, \`sourceId\`-keyed mirror. A graph-survivable \`task\` source was seeded, then its ⚡ \`<NodeActions>\` "Make Note from this" menu item was driven on the Inbox (the same production surface a user clicks); PASS = a real note with \`from\`=source id + copied content lands in \`empire-store\` (\`stored\`), a \`note\` graph node owned by \`app==='notes'\` with \`data.from\`=source id exists (\`mirrored\`), and BOTH survive a second reload + the boot reconcile (\`persisted\` — the exact regression the phantom bug caused). The pure store-write is unit-pinned in \`sync.test.ts\`; this carries the intent→store→subscribe→reconcile→persist→reload roundtrip jsdom cannot. **S2 adds the \`add-to-learning\` case (→ 2/2).**\n\n`;
-md += `| Intent | Real store entry | Mirrored (owned by notes) | Survived reload | Result |\n|---|---|---|---|---|\n`;
-md += `| make-note-from | ${intentRoundtrip.note.stored ? '✅' : '❌'} | ${intentRoundtrip.note.mirrored ? '✅' : '❌'} | ${intentRoundtrip.note.persisted ? '✅' : '❌'} | ${intentRoundtrip.note.pass ? '✅' : '❌'}${intentRoundtrip.note.err ? ' (' + intentRoundtrip.note.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n## Intent-roundtrip guard (EPIC-12 S1–S2 — cross-app creation makes REAL, durable entities)\n\n`;
+md += `The core cross-app intents must produce a REAL, editable, reload-durable entity in its home app — not a phantom graph node. Before EPIC-12, \`make-note-from\` / \`add-to-learning\` called \`g.addNode({type:'note'|'learning'})\` directly: a graph node with NO store row and NO \`data.sourceId\`, which \`reconcile()\` PRUNES (\`note\`/\`learning\` are centrally-mirrored types) — so the "created" entity never showed in its app and vanished on the next store mutation / reload. Each stage routes its intent through the REAL store (\`useStore.addNote\` / \`addLearningItem\`); the synchronous \`useStore.subscribe(syncAll)\` then materializes an un-prunable, \`sourceId\`-keyed mirror. **S1 (note):** a graph-survivable \`task\` source is seeded, its ⚡ \`<NodeActions>\` "Make Note from this" menu is driven on the Inbox; PASS = a real note with \`from\`=source id + copied content in \`empire-store\` (\`stored\`), a \`note\` node owned by \`app==='notes'\` with \`data.from\` (\`mirrored\`), both surviving a second reload (\`persisted\`). **S2 (learning):** a REAL note is seeded in \`empire-store\` (a valid \`add-to-learning\` source that itself survives the reconcile), its ⚡ "Add to Learning" menu is driven on /app/notes; PASS = a real \`learningItems\` entry with \`from\`=source id + topic=source title (\`stored\`), a \`learning\` node owned by \`app==='learning-tracker'\` with \`data.from\` (\`mirrored\`), both surviving a second reload (\`persisted\`). The pure store-writes are unit-pinned in \`sync.test.ts\`; this carries the intent→store→subscribe→reconcile→persist→reload roundtrip jsdom cannot.\n\n`;
+md += `| Intent | Real store entry | Mirrored (owned by home app) | Survived reload | Result |\n|---|---|---|---|---|\n`;
+md += `| make-note-from → notes | ${intentRoundtrip.note.stored ? '✅' : '❌'} | ${intentRoundtrip.note.mirrored ? '✅' : '❌'} | ${intentRoundtrip.note.persisted ? '✅' : '❌'} | ${intentRoundtrip.note.pass ? '✅' : '❌'}${intentRoundtrip.note.err ? ' (' + intentRoundtrip.note.err.slice(0, 80) + ')' : ''} |\n`;
+md += `| add-to-learning → learning-tracker | ${intentRoundtrip.learning.stored ? '✅' : '❌'} | ${intentRoundtrip.learning.mirrored ? '✅' : '❌'} | ${intentRoundtrip.learning.persisted ? '✅' : '❌'} | ${intentRoundtrip.learning.pass ? '✅' : '❌'}${intentRoundtrip.learning.err ? ' (' + intentRoundtrip.learning.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**INTENT-ROUNDTRIP: ${intentPass}/${intentTotal} ${intentPass === intentTotal ? '✅' : '⚠️'}**\n`;
 md += `\n## Timeline guard (EPIC-10 S1–S3 — the TEMPORAL lens: faceted, and read BOTH ways)\n\n`;
 md += `The Empire had three lenses over its one Core graph — Network (STRUCTURAL), Search (QUERY), Inbox (TASK) — but no way to see *when* it did things, even though every \`CoreNode\` stamps \`meta.created\` and every \`ProvEdge\` stamps \`at\`. The Timeline app merges every entity-birth + every app→app handoff into one newest-first, day-grouped stream via the pure \`buildTimeline\`/\`groupByDay\`/\`dayKey\` spine, now filtered by the pure \`filterTimeline\`/\`timelineFacets\` helpers (all unit-pinned in \`timeline.test.ts\`). Two graph-survivable \`task\` nodes (distinct \`meta.created\`, owned by two apps, the newer's \`data.from\` = the older) + one \`empire-provenance\` edge were seeded, then reloaded so BOTH persist stores rehydrated; PASS = the two entity rows render newest-\`created\` first (\`ordered\`), at least one \`[data-timeline-day]\` header renders (\`grouped\`), the seeded edge renders as a \`[data-timeline-kind=flow]\` row (\`flow\`), all of it still holds after a SECOND reload (\`persisted\`), the older entity's row surfaces a \`<NodeDescendants>\` (\`[data-node-descendants=qa-tl-older]\`) naming the newer child it spawned (\`descendants\`), and clicking the \`goals\` App chip narrows to ONLY the goals-owned entity — dropping the notes entity + the notes→goals flow (\`filtered\`). **S3** surfaces the long-dormant \`childrenOf\` walker so a moment reads BOTH ways — \`↖ ancestry\` (\`<NodeLineage>\`) and \`→ spawned\` (\`<NodeDescendants>\`), each hop a navigable \`[role="button"]\` (unit-pinned in \`NodeDescendants.test.tsx\`). This carries the graph+ledger→persist→rehydrate→ordered-render + faceted-narrow + descendants roundtrip jsdom cannot; the sticky day headers, relative labels + chip tints are the on-device visual.\n\n`;

@@ -30,9 +30,9 @@ function announceTransfer(_fromApp: string, _toApp: string, _label: string): voi
 }
 
 /** Fresh id for a store entity created by a cross-app intent (mirrors graph.ts newId). */
-function newNoteId(): string {
+function newEntityId(): string {
   return globalThis.crypto?.randomUUID?.()
-    ?? `note_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+    ?? `entity_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
 }
 
 type Snapshot = ReturnType<typeof useStore.getState>
@@ -93,7 +93,7 @@ const syncers: Array<() => void> = [
     items: s => s.learningItems,
     id: l => l.id,
     title: l => l.topic,
-    data: l => ({ learned: l.learned, mastered: l.mastered, nextReview: l.nextReview }),
+    data: l => ({ learned: l.learned, mastered: l.mastered, nextReview: l.nextReview, ...(l.from !== undefined ? { from: l.from } : {}) }),
   }),
   syncerFor<Snapshot['messages'][number]>({
     type: 'message', app: 'messages',
@@ -150,7 +150,7 @@ function registerCoreIntents(): void {
       // the store fires useStore.subscribe(syncAll) synchronously, so the mirrored
       // note node exists (sourceId-keyed, owned by `notes`) the moment addNote returns.
       const content = typeof n.data.content === 'string' ? n.data.content : n.title
-      const id = newNoteId()
+      const id = newEntityId()
       useStore.getState().addNote({ id, title: `Note: ${n.title}`, content, tags: [], updatedAt: Date.now(), from: n.id })
       // Best-effort mesh edge source → mirrored note (lineage already flows via data.from).
       const note = Object.values(useGraph.getState().nodes).find(x => x.type === 'note' && x.data.sourceId === id)
@@ -166,10 +166,20 @@ function registerCoreIntents(): void {
     icon: '🎓',
     accepts: n => ['note', 'message'].includes(n.type),
     run: n => {
-      const g = useGraph.getState()
-      const learning = g.addNode({ type: 'learning', title: n.title, data: { learned: false, mastered: false, from: n.id }, app: 'learning-tracker' })
-      g.link(n.id, learning.id)
-      announceTransfer(n.meta.app, learning.meta.app, 'to learning')
+      // Route through the REAL store — NOT g.addNode (same rail as make-note-from).
+      // `learning` is a centrally-mirrored type, so a graph-only node (no sourceId)
+      // is a phantom reconcile() prunes. addLearningItem fires useStore.subscribe(
+      // syncAll) synchronously, so the sourceId-keyed `learning` mirror (owned by
+      // learning-tracker) exists the moment it returns. `date`/`nextReview` are ISO
+      // day strings; `learned` starts empty; `from` preserves lineage on the mirror.
+      const id = newEntityId()
+      const today = new Date().toISOString().slice(0, 10)
+      useStore.getState().addLearningItem({ id, topic: n.title, learned: '', date: today, nextReview: today, mastered: false, from: n.id })
+      // Best-effort mesh edge source → mirrored learning item (lineage flows via data.from).
+      const learning = Object.values(useGraph.getState().nodes).find(x => x.type === 'learning' && x.data.sourceId === id)
+      if (learning) useGraph.getState().link(n.id, learning.id)
+      // Honest arc: the item is owned by learning-tracker, so a note/message source crosses a boundary.
+      announceTransfer(n.meta.app, 'learning-tracker', 'to learning')
     },
   })
 }

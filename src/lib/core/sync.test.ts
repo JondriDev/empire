@@ -182,3 +182,67 @@ describe('make-note-from — real store round-trip (EPIC-12 S1)', () => {
     expect(notes[0].data.sourceId).toBe('real-1')
   })
 })
+
+// EPIC-12 S2: add-to-learning must produce a REAL, un-prunable Learning item —
+// routed through the store (useStore.addLearningItem) so subscribe→reconcile
+// materializes a sourceId-keyed mirror owned by learning-tracker — not a phantom
+// graph-only node reconcile() would prune. `add-to-learning` accepts note/message,
+// so seed a REAL note first (which itself survives), then learn from its mirror.
+describe('add-to-learning — real store round-trip (EPIC-12 S2)', () => {
+  beforeEach(() => {
+    startCoreSync()
+    useGraph.setState({ nodes: {} })
+    useStore.setState({ notes: [], learningItems: [], messages: [] })
+  })
+
+  /** Seed a REAL note via the store and return its synchronously-mirrored `note` CoreNode. */
+  function seedNoteSource(id = 'src-note') {
+    useStore.getState().addNote({ id, title: 'Resonance lattice', content: 'lattice harmonics', tags: [], updatedAt: 1 })
+    return nodesOfType('note').find(n => n.data.sourceId === id)!
+  }
+
+  it('adds exactly one real learning item to the store with from=source id and topic=source title', async () => {
+    const src = seedNoteSource()
+    await runIntent('add-to-learning', src)
+    const items = useStore.getState().learningItems
+    expect(items).toHaveLength(1)
+    expect(items[0].from).toBe(src.id)
+    expect(items[0].topic).toBe('Resonance lattice')
+    expect(items[0].learned).toBe('')
+    expect(items[0].mastered).toBe(false)
+    // date + nextReview are ISO day strings (YYYY-MM-DD).
+    expect(items[0].date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    expect(items[0].nextReview).toBe(items[0].date)
+  })
+
+  it('materializes an un-prunable learning mirror owned by learning-tracker, carrying data.from + sourceId', async () => {
+    const src = seedNoteSource()
+    await runIntent('add-to-learning', src)
+    const learnNodes = nodesOfType('learning')
+    expect(learnNodes).toHaveLength(1)
+    const node = learnNodes[0]
+    expect(node.meta.app).toBe('learning-tracker')
+    expect(node.data.from).toBe(src.id)
+    expect(node.data.sourceId).toBe(useStore.getState().learningItems[0].id)
+  })
+
+  it('the store-backed learning mirror survives a reconcile while a phantom (no sourceId) is pruned', () => {
+    // A phantom: a graph-only `learning` node with NO sourceId — the exact shape the
+    // pre-S2 intent produced. reconcile() (fired by any store set) must delete it.
+    g().addNode({ type: 'learning', title: 'Phantom', data: { learned: false }, app: 'learning-tracker' })
+    expect(nodesOfType('learning')).toHaveLength(1)
+    // A real store write fires subscribe→syncAll→reconcile.
+    useStore.getState().addLearningItem({ id: 'real-l1', topic: 'Real', learned: '', date: '2026-07-06', nextReview: '2026-07-06', mastered: false })
+    const learn = nodesOfType('learning')
+    // The phantom is gone; only the store-backed (sourceId-keyed) node remains.
+    expect(learn).toHaveLength(1)
+    expect(learn[0].data.sourceId).toBe('real-l1')
+  })
+
+  it('links the source node to the mirrored learning item (mesh edge)', async () => {
+    const src = seedNoteSource()
+    await runIntent('add-to-learning', src)
+    const learnNode = nodesOfType('learning')[0]
+    expect(g().nodes[src.id].links).toContain(learnNode.id)
+  })
+})

@@ -62,10 +62,23 @@ fleet freeze). What changed for routines:
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **▶ ACTIVE: EPIC-12 · Intent integrity — S1 SHIPPED 2026-07-06 (`main`, this run); S2 is next. Full spec in
-  [`docs/EPICS.md`](./EPICS.md) → EPIC-12.** EPIC-11 retired to DONE (offSystemStyle 56→0 LOCKED + QA-confirmed).
-  **↳ QA OWES: the `INTENT-ROUNDTRIP 0/1 → 1/1` headless confirm on the new green main (builder has no playwright dep, so
-  the ⚡-menu drive is unrun in cloud — the store-write/mirror/prune LOGIC is unit-pinned in `sync.test.ts` though).**
+- **▶ ACTIVE: EPIC-12 · Intent integrity — S1 + S2 SHIPPED 2026-07-06 (`main`); S3 (LOCK) is the LAST stage → CODE-COMPLETE.
+  Full spec in [`docs/EPICS.md`](./EPICS.md) → EPIC-12.** EPIC-11 retired to DONE (offSystemStyle 56→0 LOCKED + QA-confirmed).
+  **↳ QA OWES: the `INTENT-ROUNDTRIP 1/1 → 2/2` headless confirm on the new green main (builder has no playwright dep, so
+  the ⚡-menu drive is unrun in cloud — the store-write/mirror/prune LOGIC for BOTH note + learning is unit-pinned in
+  `sync.test.ts`, now 17 cases).**
+  - **✅ S2 DONE (this run) — `add-to-learning` writes a REAL Learning item; both store-backed intents now round-trip.**
+    `sync.ts` learning mirror `data` carries `from`; `add-to-learning` routes through `useStore.getState().addLearningItem(
+    { id, topic:n.title, learned:'', date:<today ISO>, nextReview:<today>, mastered:false, from:n.id })` (renamed the S1
+    helper `newNoteId`→`newEntityId`, now shared by both intents), resolves the synchronously-mirrored `learning` node by
+    `sourceId` + `g.link`s it, fires HONEST `announceTransfer(n.meta.app, 'learning-tracker', …)`. `INTENT-ROUNDTRIP` guard
+    (`qa-smoke.mjs`) grew a `learning` axis: seeds a REAL note in `empire-store`, reloads, drives its ⚡ "Add to Learning"
+    menu on `/app/notes` (card root is `.gp` w/ the title; ⚡ = `button[aria-label="Node actions"]` scoped to the card),
+    asserts `stored`/`mirrored`(owned by `learning-tracker`, `data.from`)/`persisted`. Headline `1/1 → 2/2`. `sync.test.ts`
+    13→17 (learning store-write w/ from+topic+ISO; un-prunable mirror; phantom pruned while store-backed survives; src→mirror
+    link). build🟢 vitest 372→381🟢 eslint clean; tokens/utils/offSystemStyle 0 (`--assert-zero` exit 0); bundle 718.5→718.6
+    (+0.1), no new deps. **I chose the "seed a REAL note in empire-store" path (NOT the two-hop-on-a-task the old CONTEXT
+    suggested) — simpler & matches the EPICS spec; a real note both survives the reconcile AND is a valid `accepts` source.**
   - **✅ S1 DONE (this run) — `make-note-from` writes a REAL note.** `store.ts` `Note.from?` added; `sync.ts` note mirror
     `data` carries `from`; `make-note-from` now routes through `useStore.getState().addNote(...)` (new `newNoteId()` helper
     near the top of `sync.ts`), resolves the synchronously-mirrored node by `sourceId` + `g.link`s it, fires HONEST
@@ -78,23 +91,30 @@ fleet freeze). What changed for routines:
     served bundle. The guard MUST drive the **real production ⚡ `<NodeActions>` menu** (`button[aria-label="Node actions"]` →
     `button[role="menuitem"]` w/ text `Make Note from this`); S1 did exactly this (hover the seeded task row, open ⚡, click
     the item). It's the honest user flow anyway. **Don't add a DEV hook for S2 — reuse the ⚡-menu drive.**
-  - **THE BUG (S1 fixed the note half; `add-to-learning` STILL live):** `add-to-learning` (`sync.ts`, now ~`:170`) still
-    calls `g.addNode({type:'learning'})` directly → phantom (no store row, no sourceId) that `reconcile()` (`:63-65`) prunes.
-    `make-task` is FINE (task = graph-only by design, no task store; Inbox is its lens — leave it).
-  - **▶ S2 (next) — exact shape** (reuses S1's rail exactly): (1) `sync.ts` learning mirror `data` (the `learning` syncer,
-    currently `{ learned, mastered, nextReview }`) → add `...(l.from!==undefined?{from:l.from}:{})`. (2) Rewrite
-    `add-to-learning` `run`: instead of `g.addNode`, gen a fresh id (generalize `newNoteId`→`newEntityId` or add a sibling)
-    and `useStore.getState().addLearningItem({ id, topic:n.title, learned:'', date:<today ISO>, nextReview:<today ISO>,
-    mastered:false, from:n.id })` — **check `LearningItem`/`addLearningItem` in `store.ts`: `learned:string`, `date`+
-    `nextReview` are ISO strings, `from?` ALREADY exists.** Then resolve the mirrored `learning` node by `sourceId` +
-    `g.link`; keep `announceTransfer(n.meta.app, 'learning-tracker', 'to learning')` (already cross-app). (3) Extend the
-    `INTENT-ROUNDTRIP` guard for learning. **TRAP: `add-to-learning` accepts `['note','message']` ONLY, NOT `task`** — a
-    seeded `note`/`message` node is CENTRALLY-mirrored so the boot reconcile PRUNES it (empty store). Cleanest path: drive it
-    in TWO hops on the SAME seeded task — first the S1 `make-note-from` ⚡ item (makes a real note), THEN `add-to-learning`
-    on that real note's ⚡ menu (tests the chain end-to-end). Assert learning `stored`/`mirrored` (owned by `learning-tracker`,
-    `data.from`)/`persisted`. Headline `INTENT-ROUNDTRIP 1/1 → 2/2`. (4) `sync.test.ts` +≥3 mirroring the S1 learning cases.
-    **Then S3 = lock via a reconcile-survival invariant test → EPIC-12 CODE-COMPLETE.** Every stage: tokens/off-system/
-    offSystemStyle stay 0, `--assert-zero` exit 0, no new deps.
+  - **THE BUG — FULLY FIXED (S1 note + S2 learning).** Both `make-note-from` and `add-to-learning` (`sync.ts`) now route
+    through the real store (`addNote`/`addLearningItem`), so subscribe→reconcile materializes an un-prunable, `sourceId`-keyed
+    mirror. `make-task` is FINE and untouched (task = graph-only by design, no task store; Inbox is its lens — leave it).
+    **No phantom-creating intent remains.**
+  - **▶ S3 (next, the LAST stage → EPIC-12 CODE-COMPLETE) — exact shape** (test-only LOCK, no product runtime change, so NO
+    ⚡-menu drive needed): (1) **Export `syncAll` from `sync.ts`** (currently module-private at `sync.ts:~121`) — the clean
+    choice per the spec (`export function syncAll()`); it's the boot/mutation reconcile pass. (2) In `sync.test.ts` add a
+    **survival-invariant** `describe`: for EACH core creation intent (`make-task`, `make-note-from`, `add-to-learning`), seed
+    a VALID source (task→make-task; task→make-note-from; a REAL note via `addNote` → add-to-learning, since it `accepts`
+    note/message only), run the intent, call `syncAll()`, assert the created entity STILL EXISTS (task node survives as
+    graph-only; note/learning survive BECAUSE they're store-backed). (3) Add the explicit BOUNDARY assertion: a raw
+    `g.addNode({type:'note'})` phantom (no sourceId) IS pruned by `syncAll()` — documents WHY the store route is required.
+    (4) Add a header comment in `sync.ts` `registerCoreIntents` stating the rule: *an intent creating a centrally-mirrored
+    type (note/learning/message) MUST route through the store; a graph-only type (task) may stay in the graph.* **Verify the
+    lock BITES: temporarily revert `make-note-from` to `g.addNode({type:'note',…})` → the invariant suite must go RED → then
+    restore.** `INTENT-ROUNDTRIP` stays 2/2. build🟢 vitest🟢 eslint clean; tokens/off-system/offSystemStyle 0, `--assert-zero`
+    exit 0, no new deps. **★ Then EPIC-12 is CODE-COMPLETE (S1–S3) → QA confirms `INTENT-ROUNDTRIP 2/2` on green main →
+    Strategist retires to DONE.** Next cloud candidate = a measured design-system STATE-conformance epic (empty/loading/error
+    primitives) — needs the Strategist to promote it.
+  - **SEAM/TRAP for S3:** `runIntent` (`intents.ts:44`) ENFORCES `accepts` — a task source will NOT run `add-to-learning`
+    (returns silently), so the learning invariant case MUST seed a real note (via `addNote`, which self-mirrors a survivable
+    note node). `g.link` (`graph.ts:107`) is GUARDED (no throw if the source node was pruned) — so the intents' best-effort
+    `g.link(n.id, mirror.id)` is safe even when the source is a phantom that reconcile just deleted. `syncAll` reconciles
+    ALL three central types (note/learning/message) against their (possibly empty) stores every call.
   - _(History: while there was no active epic, 3 Builder runs shipped standalone empty-state polish — adoption 1→6→13; the
     `<EmptyState>` primitive is now fully general with a `size="sm"` variant. See ROUTINE-LOG.md. That surface is a
     candidate FUTURE epic — measure adoption + lock — not this one.)_

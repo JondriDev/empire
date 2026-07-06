@@ -5,6 +5,22 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-06 · BUILDER — EPIC-12 S2: `add-to-learning` writes a REAL Learning item; `INTENT-ROUNDTRIP` 1/1 → 2/2
+
+**Result:** 🟢 GREEN · build clean, vitest **372→381**, eslint clean, all tracked metrics Δ ±0 (tokens/off-system-utils/**offSystemStyle 0**, `--assert-zero` exit 0), bundle 718.5→718.6 (+0.1). Committed direct to `main`.
+
+**Metrics row:** `apps 29 ±0 · test cases 323 (+9) · test files 37 (+1) · tokenViolations 0 · offSystemUtilities 0 · offSystemStyle 0 (r0/t0/m0) · bundle gz 718.6 KB (+0.1)`
+
+**What / why:** EPIC-12 S2 — the second (and last store-backed) cross-app intent. `add-to-learning` still called `g.addNode({type:'learning'})` directly → a **phantom** (no store row, no `data.sourceId`) that `reconcile()` prunes (`learning` is a centrally-mirrored type) — so "Add to Learning" produced an item that never showed in the Learning Tracker and vanished on the next store mutation / reload. **Fix (S1's rail, exactly):** the learning mirror `data` now carries `from`; `add-to-learning run` routes through `useStore.getState().addLearningItem({ id, topic:n.title, learned:'', date:<today ISO>, nextReview:<today>, mastered:false, from:n.id })` (the S1 helper `newNoteId` was generalized → `newEntityId`, now shared by both intents), the synchronous `useStore.subscribe(syncAll)` materializes an un-prunable `sourceId`-keyed `learning` node owned by `learning-tracker`, and the intent resolves + `g.link`s it, firing an HONEST `announceTransfer(n.meta.app, 'learning-tracker', …)`.
+
+**Verified:** `npm run build` 🟢; `npx vitest run` **381/381** (`sync.test.ts` 13→17 pins the learning store-write w/ `from`+`topic`+ISO `date`/`nextReview`, an un-prunable mirror owned by `learning-tracker` w/ `data.from`+`sourceId`, a phantom-no-sourceId `learning` node PRUNED by `syncAll()` while a store-backed one survives, and the source→mirror mesh link; `coreIntents.test.ts` unchanged 5 — the arcs stay `notes→learning-tracker` / `messages→learning-tracker`); `npx eslint` clean on all touched files; `node scripts/metrics.mjs` all Δ ±0 (`--assert-zero` exit 0). No new deps.
+
+**Guard (for QA):** `INTENT-ROUNDTRIP` grew a **`learning` axis** — seed a REAL note in `empire-store` (a valid `add-to-learning` source that itself survives the reconcile), reload, drive its ⚡ `<NodeActions>` "Add to Learning" menu on `/app/notes` (card root `.gp` w/ the title; ⚡ = `button[aria-label="Node actions"]` scoped to the card), assert `stored` real `learningItems` entry w/ `from` + `mirrored` `learning` node owned by `learning-tracker` + `persisted` across a 2nd reload. Headline **`INTENT-ROUNDTRIP 1/1 → 2/2`**. **I chose "seed a REAL note in empire-store" over the two-hop-on-a-task path the old CONTEXT suggested** — simpler, matches the EPICS spec, and a real note both survives the boot reconcile AND is a valid `accepts` source.
+
+**Not verifiable in cloud:** the builder has no `playwright` dep, so the headless `INTENT-ROUNDTRIP 1/1 → 2/2` confirm + the "open in Learning Tracker" visual are QA's step; the store-write / mirror / prune LOGIC for both note + learning is fully unit-pinned in `sync.test.ts` (17 cases).
+
+**Next:** EPIC-12 **S3** (the LAST stage → CODE-COMPLETE) — the intent-integrity LOCK: export `syncAll`, add a reconcile-survival invariant suite in `sync.test.ts` (each core intent's entity survives `syncAll()`; a raw phantom is pruned), verify it goes RED on a reverted intent, add the rule as a `registerCoreIntents` header comment. Test-only, no ⚡ drive. Exact shape in `docs/CONTEXT.md` → EPIC-12 S3.
+
 ## 2026-07-06 · BUILDER — EPIC-12 S1: `make-note-from` writes a REAL note (fix the phantom-entity bug); `INTENT-ROUNDTRIP` guard
 
 **Result:** 🟢 GREEN · build clean, vitest **367→372**, eslint clean, all metrics Δ ±0 (`--assert-zero` exit 0). Committed direct to `main`.

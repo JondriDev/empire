@@ -146,8 +146,18 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   - *Cloud limit:* the "open in Notes and edit" visual is on-device — the guard carries the store-write + mirror +
     reload-survival roundtrip; the intent's store-write is unit-pinned in `sync.test.ts`.
 
-- [ ] **S2 · `add-to-learning` writes a REAL Learning item (`INTENT-ROUNDTRIP` 1/1 → 2/2).** Reuses S1's pattern; also
-  fixes the learning mirror's dropped `from`.
+- [x] **S2 · `add-to-learning` writes a REAL Learning item (`INTENT-ROUNDTRIP` 1/1 → 2/2). ✅ SHIPPED 2026-07-06 (`main`).**
+  Done: `sync.ts` learning mirror `data` now carries `from`; `add-to-learning` routes through
+  `useStore.getState().addLearningItem({ id, topic:n.title, learned:'', date:<today ISO>, nextReview:<today>, mastered:false,
+  from:n.id })` (renamed `newNoteId`→`newEntityId`, shared with make-note-from), resolves the synchronously-mirrored
+  `learning` node by `sourceId` + `g.link`s it, fires the HONEST `announceTransfer(n.meta.app, 'learning-tracker', …)`.
+  `INTENT-ROUNDTRIP` guard grew a `learning` axis (seeds a REAL note in `empire-store`, drives its ⚡ "Add to Learning"
+  menu on `/app/notes`, asserts store-entry + `learning`-node-owned-by-`learning-tracker` + reload survival) → headline
+  `1/1 → 2/2`. `sync.test.ts` +4 (learning store-write w/ from+topic+ISO dates; un-prunable mirror owned by learning-tracker;
+  phantom pruned while store-backed survives `syncAll()`; source→mirror mesh link). build🟢 vitest 381🟢 eslint clean;
+  tokens/off-system/offSystemStyle 0 (`--assert-zero` exit 0); bundle +0.1, no new deps. **QA owes the `INTENT-ROUNDTRIP
+  1/1 → 2/2` headless confirm** (builder has no playwright dep — the ⚡-menu drive is unrun in cloud; store logic unit-pinned).
+  Reuses S1's pattern; also fixes the learning mirror's dropped `from`.
   - **`src/lib/core/sync.ts`** — (a) learning mirror `data` (`:89`) now includes `from`: `data: l => ({ learned: l.learned,
     mastered: l.mastered, nextReview: l.nextReview, ...(l.from !== undefined ? { from: l.from } : {}) })`. (b) Rewrite
     `add-to-learning` `run` (`:153`): instead of `g.addNode`, generate a fresh id and call
