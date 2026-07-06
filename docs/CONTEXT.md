@@ -64,9 +64,16 @@ fleet freeze). What changed for routines:
 
 - **▶ ACTIVE: EPIC-12 · Intent integrity — S1 + S2 SHIPPED 2026-07-06 (`main`); S3 (LOCK) is the LAST stage → CODE-COMPLETE.
   Full spec in [`docs/EPICS.md`](./EPICS.md) → EPIC-12.** EPIC-11 retired to DONE (offSystemStyle 56→0 LOCKED + QA-confirmed).
-  **↳ QA OWES: the `INTENT-ROUNDTRIP 1/1 → 2/2` headless confirm on the new green main (builder has no playwright dep, so
-  the ⚡-menu drive is unrun in cloud — the store-write/mirror/prune LOGIC for BOTH note + learning is unit-pinned in
-  `sync.test.ts`, now 17 cases).**
+  **↳ ✅ QA DONE (2026-07-06, green main `94ff5f1`): `INTENT-ROUNDTRIP 2/2` CONFIRMED headless — both `make-note-from` +
+  `add-to-learning` read `stored=true mirrored=true persisted=true`. S1 + S2 done-confirmed; the acceptance metric reached
+  its target and holds. NO product bug. ⚠️ BUT the `add-to-learning` axis first read `stored=false` due to a GUARD bug I
+  fixed (`scripts/qa-smoke.mjs`): the guard matched the learning item's `from` against the STORE note id, but the intent
+  honestly writes `from`=the note MIRROR's graph-node id (`reconcile()` mints a fresh node id + keeps the store id only in
+  `data.sourceId`; `NodeActions` resolves by `sourceId` → hands the intent the graph node, so `from = n.id` = mirror id).
+  The guard now resolves the note mirror's node id (`note` node w/ `data.sourceId===LEARN_SRC_ID`) and matches against THAT
+  (frozen into item + mirror, holds across reload). Product verified correct by direct probe. `make-note-from` passed as-is
+  because ITS source is a directly-seeded graph node whose own id === the seeded id. TRAP for S3/future: any guard asserting
+  an intent's `from`/lineage against a STORE-backed source must use the source's MIRROR node id, never the store id.**
   - **✅ S2 DONE (this run) — `add-to-learning` writes a REAL Learning item; both store-backed intents now round-trip.**
     `sync.ts` learning mirror `data` carries `from`; `add-to-learning` routes through `useStore.getState().addLearningItem(
     { id, topic:n.title, learned:'', date:<today ISO>, nextReview:<today>, mastered:false, from:n.id })` (renamed the S1

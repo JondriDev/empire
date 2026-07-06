@@ -1,37 +1,54 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-06T03:08:16.565Z
+## ✅ QA VERDICT (2026-07-06, green main `94ff5f1`) — EPIC-12 S2 CONFIRMED; no product bug. Fixed a GUARD bug.
+
+**No runtime regression.** First headless drive of EPIC-12 S2 (`add-to-learning`, HEAD `94ff5f1`;
+the builder had no playwright dep so this axis was never run headless before). The FEATURE WORKS —
+driving the real ⚡ "Add to Learning" menu on `/app/notes` writes a REAL `learningItems` entry
+(`topic="Decode the resonance lattice"`, `learned=""`, ISO `date`/`nextReview`) AND a `learning`
+graph node owned by `learning-tracker`, both surviving a second reload. Verified by direct probe.
+
+**The failure was in the GUARD, not the product** (fixed this run in `scripts/qa-smoke.mjs`, my
+owned harness). The guard asserted the learning item's `from` equals the *store note id*
+(`LEARN_SRC_ID='qa-learn-src'`). But `reconcile()` gives the mirrored note a FRESH graph-node id
+and keeps the store id only in `data.sourceId`; `NodeActions` resolves the node by `sourceId` and
+hands the intent that GRAPH NODE, so `add-to-learning` honestly writes `from = n.id` = the note
+**mirror's graph-node id** (e.g. `dd278a8b…`), never the store id. So `from === LEARN_SRC_ID` was
+guaranteed false → the axis read `stored=false mirrored=false` despite a correct write. **Fix:** the
+guard now resolves the note mirror's graph-node id (the `note` node whose `data.sourceId===LEARN_SRC_ID`)
+and matches `from` against THAT (frozen into the item + its mirror, so it holds across the reload).
+This mirrors the honest production lineage and how the `make-note-from` axis (source = a directly-seeded
+graph node) already passed. After the fix: **`INTENT-ROUNDTRIP 2/2 ✅`** (`make-note-from` +
+`add-to-learning`, each `stored=true mirrored=true persisted=true`). EPIC-12 S2 is **done-confirmed**.
+
+### Metric deltas (vs committed `docs/metrics.json` snapshot)
+| Metric | Value | Δ |
+|---|---|---|
+| Apps / routes | 29 | ±0 |
+| Test cases | 323 | ±0 |
+| Test files | 37 | ±0 |
+| Token violations | 0 | ±0 |
+| Off-system utils | 0 | ±0 |
+| Off-system style | 0 (r0/t0/m0) | ±0 |
+| Bundle gz (KB) | 718.6 | ±0 |
+
+`metrics.mjs --assert-zero` exits **0** (ratchet holds). Build 🟢 (`tsc -b && vite build`),
+PWA precache **86** entries. **29/29 registry routes + desktop = 30/30 render clean** (0 uncaught JS,
+0 error boundaries); every guard green (SHELL-IS-STYLED, REGISTRY-COVERAGE 29 smoke↔registry exact,
+INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, **INTENT-ROUNDTRIP
+2/2**, TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE 3/3+3/3, OFFLINE-BOOT 5/5, PRECACHE 86 no-gap).
+Visually confirmed desktop (styled Bridge + full launcher grid) + learning-tracker (clean, `<EmptyState>`
+primitive). **▶ EPIC-12 S3 (test-only LOCK) is the last stage → then CODE-COMPLETE.**
+
+---
+
+**Generated:** 2026-07-06T11:51:58.810Z
 
 **Result:** 30/30 rendered without crash, 0 failed.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
 > listed separately — expected in the offline cloud sandbox and **not** a render failure.
-
----
-
-## QA verdict (2026-07-06 — green main `7e68e1c`)
-
-**No runtime bug found. No drift. Every guard green.** This is a health-hold QA run on the tree the
-Strategist just reshaped: EPIC-11 retired to DONE, the deps-audit gate (`check-audit.mjs`) landed, the
-HIGH xmldom vuln was patched via override, and **EPIC-12 · Intent integrity was promoted (S1 pending)**.
-
-- **Build:** 🟢 `tsc -b && vite build` clean; PWA precache **86 entries**, no gap (every emitted chunk precached).
-- **Render:** **30/30 routes render clean** (desktop + 29 registry apps) — 0 uncaught JS, 0 error boundaries,
-  0 blank screens. `REGISTRY-COVERAGE` confirms the smoke list ↔ `registry.ts` match exactly (**29 apps**).
-- **Guards (all green):** SHELL-IS-STYLED · REGISTRY-COVERAGE 29 · INBOUND 3/3 · MEDIA 3/3 · GRAPH-LEGIBLE 1/1 ·
-  GLOBAL-SEARCH 1/1 · NODE-LINEAGE 1/1 (5 axes) · TIMELINE 1/1 (6 axes) · HOME-ALIVE 1/1 ·
-  PROVENANCE-PERSISTS 3/3 · PROVENANCE-ENTITY 3/3 · OFFLINE-BOOT 5/5 · PRECACHE 86 no-gap.
-- **Metrics (`metrics.mjs`, Δ vs committed snapshot):** apps **29** ±0 · test cases **309** ±0 · test files **36** ±0 ·
-  token violations **0** ±0 · off-system utils **0** ±0 · **off-system style 0 (r0/t0/m0)** ±0 · bundle gz **718.3 KB** ±0.
-  `--assert-zero` exits **0** — the EPIC-11 conformance ratchet holds (no raw radii/type/easing drifted in).
-- **Epic-acceptance:** **EPIC-12 · Intent integrity — S1 not yet shipped by the Builder** (no `INTENT-ROUNDTRIP`
-  guard present in `qa-smoke.mjs` yet; the `make-note-from`/`add-to-learning` phantom-entity bug in `sync.ts` is
-  still un-fixed on this tree). Nothing to confirm/contradict this run — the acceptance axis appears once S1 lands.
-  EPIC-11's retired acceptance (`offSystemStyle` 0, LOCKED) **re-verified holding** independently.
-- **Visual:** confirmed The Bridge (Good-night greeting, Ask-Cakra line, Today/Tasks/Goals/Organism cards, full
-  25-tile launcher incl. Timeline), Network (CORE radial mesh + node-type legend), Solver (green-puzzle empty
-  state + live world-feed "Sudan famine & displacement crisis · 2026-07-05"). All render as designed.
 
 | App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|
@@ -51,7 +68,7 @@ HIGH xmldom vuln was patched via override, and **EPIC-12 · Intent integrity was
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -117,6 +134,17 @@ App-level provenance remembers which app fed which app; node-level lineage answe
 | task ← Chart the Xenobloom anomaly | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **NODE-LINEAGE: 1/1 ✅**
+
+## Intent-roundtrip guard (EPIC-12 S1–S2 — cross-app creation makes REAL, durable entities)
+
+The core cross-app intents must produce a REAL, editable, reload-durable entity in its home app — not a phantom graph node. Before EPIC-12, `make-note-from` / `add-to-learning` called `g.addNode({type:'note'|'learning'})` directly: a graph node with NO store row and NO `data.sourceId`, which `reconcile()` PRUNES (`note`/`learning` are centrally-mirrored types) — so the "created" entity never showed in its app and vanished on the next store mutation / reload. Each stage routes its intent through the REAL store (`useStore.addNote` / `addLearningItem`); the synchronous `useStore.subscribe(syncAll)` then materializes an un-prunable, `sourceId`-keyed mirror. **S1 (note):** a graph-survivable `task` source is seeded, its ⚡ `<NodeActions>` "Make Note from this" menu is driven on the Inbox; PASS = a real note with `from`=source id + copied content in `empire-store` (`stored`), a `note` node owned by `app==='notes'` with `data.from` (`mirrored`), both surviving a second reload (`persisted`). **S2 (learning):** a REAL note is seeded in `empire-store` (a valid `add-to-learning` source that itself survives the reconcile), its ⚡ "Add to Learning" menu is driven on /app/notes; PASS = a real `learningItems` entry with `from`=source id + topic=source title (`stored`), a `learning` node owned by `app==='learning-tracker'` with `data.from` (`mirrored`), both surviving a second reload (`persisted`). The pure store-writes are unit-pinned in `sync.test.ts`; this carries the intent→store→subscribe→reconcile→persist→reload roundtrip jsdom cannot.
+
+| Intent | Real store entry | Mirrored (owned by home app) | Survived reload | Result |
+|---|---|---|---|---|
+| make-note-from → notes | ✅ | ✅ | ✅ | ✅ |
+| add-to-learning → learning-tracker | ✅ | ✅ | ✅ | ✅ |
+
+**INTENT-ROUNDTRIP: 2/2 ✅**
 
 ## Timeline guard (EPIC-10 S1–S3 — the TEMPORAL lens: faceted, and read BOTH ways)
 

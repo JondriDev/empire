@@ -565,11 +565,13 @@ try {
 // is a valid source (a seeded PHANTOM note would be pruned before it could act).
 // Reload → startCoreSync mirrors the note → drive its ⚡ NodeActions "Add to
 // Learning" menu on /app/notes (the real production surface a user clicks), then
-// assert: `stored` = a real learningItems entry with `from`=source id + topic=src
-// title in empire-store; `mirrored` = a `learning` graph node owned by
-// `app==='learning-tracker'` with `data.from`=source id; `persisted` = after a
-// SECOND reload BOTH still hold (the store persists AND reconcile KEEPS the
-// store-backed mirror — the exact regression the phantom bug caused).
+// assert: `stored` = a real learningItems entry in empire-store with topic=src
+// title and `from`=the NOTE MIRROR's graph-node id (the intent acts on the graph
+// node NodeActions resolves by sourceId, so `from`=n.id — the mirror's own id,
+// NOT the store note id, which reconcile keeps only in data.sourceId); `mirrored`
+// = a `learning` graph node owned by `app==='learning-tracker'` with that same
+// `data.from`; `persisted` = after a SECOND reload BOTH still hold (the store
+// persists AND reconcile KEEPS the store-backed mirror — the phantom-bug regression).
 const LEARN_SRC_ID = 'qa-learn-src';
 const LEARN_SRC_TITLE = 'Decode the resonance lattice';
 const LEARN_SRC_CONTENT = 'Field notes on the resonance lattice harmonics.';
@@ -580,20 +582,32 @@ const learnStoreSeed = {
   },
   version: 0,
 };
-// A real learningItems entry in empire-store whose `from` = the source id.
-const readLearnItem = (page) => page.evaluate(([k, from]) => {
+// The graph-node id of the note MIRROR (NOT the store note id): reconcile() gives
+// the mirror a fresh node id and keeps the store id only in data.sourceId. The ⚡
+// menu (NodeActions resolves by sourceId) hands the intent this GRAPH NODE, so
+// `add-to-learning` writes `from = n.id` = this mirror id — never the store id.
+// The guard must therefore match `from` against THIS, not LEARN_SRC_ID.
+const readNoteMirrorId = (page) => page.evaluate(([k, sid]) => {
+  try {
+    const nodes = JSON.parse(localStorage.getItem(k))?.state?.nodes || {};
+    const n = Object.values(nodes).find(x => x?.type === 'note' && String(x?.data?.sourceId) === sid);
+    return n ? n.id : null;
+  } catch { return null; }
+}, [GRAPH_KEY, LEARN_SRC_ID]);
+// A real learningItems entry in empire-store whose `from` = the note mirror id.
+const readLearnItem = (page, fromId) => page.evaluate(([k, from]) => {
   try {
     const items = JSON.parse(localStorage.getItem(k))?.state?.learningItems || [];
     return items.find(i => i?.from === from) || null;
   } catch { return null; }
-}, [STORE_KEY, LEARN_SRC_ID]);
-// A `learning` graph node owned by app==='learning-tracker' carrying data.from = source id.
-const hasLearnMirror = (page) => page.evaluate(([k, from]) => {
+}, [STORE_KEY, fromId]);
+// A `learning` graph node owned by app==='learning-tracker' carrying data.from = note mirror id.
+const hasLearnMirror = (page, fromId) => page.evaluate(([k, from]) => {
   try {
     const nodes = JSON.parse(localStorage.getItem(k))?.state?.nodes || {};
     return Object.values(nodes).some(n => n?.type === 'learning' && n?.meta?.app === 'learning-tracker' && n?.data?.from === from);
   } catch { return false; }
-}, [GRAPH_KEY, LEARN_SRC_ID]);
+}, [GRAPH_KEY, fromId]);
 try {
   const page = await ctx.newPage();
   await page.goto(`${BASE}/app/notes`, { waitUntil: 'networkidle', timeout: 30000 });
@@ -612,13 +626,17 @@ try {
   await page.waitForTimeout(300);
   await page.locator('button[role="menuitem"]', { hasText: 'Add to Learning' }).first().click({ timeout: 5000 });
   await page.waitForTimeout(700);
-  const li = await readLearnItem(page);
-  intentRoundtrip.learning.stored = !!li && li.topic === LEARN_SRC_TITLE && li.from === LEARN_SRC_ID;
-  intentRoundtrip.learning.mirrored = await hasLearnMirror(page);
+  // Resolve the note mirror's graph-node id — the lineage anchor the intent wrote
+  // `from` to. It is frozen into the learning item + its mirror, so it stays valid
+  // across the reload (even though reconcile re-mints the note mirror's own id).
+  const noteMirrorId = await readNoteMirrorId(page);
+  const li = await readLearnItem(page, noteMirrorId);
+  intentRoundtrip.learning.stored = !!noteMirrorId && !!li && li.topic === LEARN_SRC_TITLE && li.from === noteMirrorId;
+  intentRoundtrip.learning.mirrored = !!noteMirrorId && (await hasLearnMirror(page, noteMirrorId));
   await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
   await page.waitForTimeout(900);
-  const liAfter = await readLearnItem(page);
-  intentRoundtrip.learning.persisted = !!liAfter && (await hasLearnMirror(page));
+  const liAfter = await readLearnItem(page, noteMirrorId);
+  intentRoundtrip.learning.persisted = !!noteMirrorId && !!liAfter && (await hasLearnMirror(page, noteMirrorId));
   intentRoundtrip.learning.pass = intentRoundtrip.learning.stored && intentRoundtrip.learning.mirrored && intentRoundtrip.learning.persisted;
   console.log(`INTENT-ROUNDTRIP  add-to-learning  stored=${intentRoundtrip.learning.stored} mirrored=${intentRoundtrip.learning.mirrored} persisted=${intentRoundtrip.learning.persisted}`);
   await page.evaluate(([gk, sk]) => { localStorage.removeItem(gk); localStorage.removeItem(sk); }, [GRAPH_KEY, STORE_KEY]);

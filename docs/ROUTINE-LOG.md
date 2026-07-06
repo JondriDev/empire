@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-06 · QA — EPIC-12 S1 + S2 confirmed live (`INTENT-ROUNDTRIP` 2/2); fixed a GUARD bug (no product regression)
+
+**Result:** 🟢 GREEN · green main `94ff5f1` · **30/30 routes render clean** (0 uncaught) · **`INTENT-ROUNDTRIP` 2/2 ✅** · all guards green · `--assert-zero` exit 0. Fixed one QA-harness bug, committed direct to `main`.
+
+**Metrics row:** `apps 29 ±0 · test cases 323 ±0 · test files 37 ±0 · tokenViolations 0 · offSystemUtilities 0 · offSystemStyle 0 (r0/t0/m0) ±0 · bundle gz 718.6 KB ±0` (all Δ ±0 vs committed snapshot).
+
+**What / why:** First headless drive of EPIC-12 S1 (`make-note-from` `92380dc`) + S2 (`add-to-learning` `94ff5f1`) — the builder has no `playwright` dep so neither `INTENT-ROUNDTRIP` axis had ever run headless. `make-note-from` passed immediately (`stored/mirrored/persisted` all true). **`add-to-learning` first read `stored=false mirrored=false` — I traced it and it is a GUARD bug, NOT a product regression.** The guard asserted the created `learningItems` entry's `from` equals the *store note id* (`LEARN_SRC_ID`). But `reconcile()` gives the mirrored note a fresh graph-node id and keeps the store id only in `data.sourceId`; `NodeActions` resolves the node by `sourceId` and hands the intent that GRAPH NODE, so `add-to-learning` honestly writes `from = n.id` = the note **mirror's graph-node id** — never the store id. So `from === LEARN_SRC_ID` was structurally impossible → false negative. (The `make-note-from` axis passed only because ITS source is a directly-seeded graph node whose own id equals the seeded id.)
+
+**Verified (direct probe before touching anything):** driving the real ⚡ "Add to Learning" menu on `/app/notes` writes a real `learningItems` entry (`topic="Decode the resonance lattice"`, `learned=""`, ISO `date`/`nextReview`, `from`=note-mirror id) AND a `learning` graph node owned by `learning-tracker` (`data.from`=same, `data.sourceId`=item id), both present in `empire-core-graph` + `empire-store` after the drive and after a reload. **The feature works exactly as EPIC-12 S2 intends.**
+
+**Fix (my harness — `scripts/qa-smoke.mjs`, in the QA-writable set):** the learning axis now resolves the note mirror's graph-node id (the `note` node whose `data.sourceId===LEARN_SRC_ID`) and matches `from`/`data.from` against THAT (frozen into the item + mirror, so it holds across the reload). Header comment updated to state the honest lineage. After the fix the full smoke reads **`INTENT-ROUNDTRIP 2/2 ✅`** (both axes `stored/mirrored/persisted` true). No product code touched.
+
+**Confirmed:** build 🟢 (`tsc -b && vite build`), PWA precache **86**; 30/30 routes clean; guards SHELL-IS-STYLED, REGISTRY-COVERAGE 29 exact, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, **INTENT-ROUNDTRIP 2/2**, TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE 3/3+3/3, OFFLINE-BOOT 5/5, PRECACHE 86 no-gap; `metrics.mjs --assert-zero` exit 0. Visually confirmed desktop (styled Bridge + full launcher grid) + learning-tracker (clean `<EmptyState>`).
+
+**Next:** EPIC-12 S2 is **done-confirmed** — the acceptance metric reached its target (`INTENT-ROUNDTRIP 2/2`) and holds. ▶ Builder takes **S3** (test-only reconcile-survival LOCK; export `syncAll`, survival-invariant `describe` in `sync.test.ts`, boundary phantom-prune assertion) → then EPIC-12 CODE-COMPLETE → QA re-confirms 2/2 → Strategist retires to DONE.
+
+---
+
 ## 2026-07-06 · BUILDER — EPIC-12 S2: `add-to-learning` writes a REAL Learning item; `INTENT-ROUNDTRIP` 1/1 → 2/2
 
 **Result:** 🟢 GREEN · build clean, vitest **372→381**, eslint clean, all tracked metrics Δ ±0 (tokens/off-system-utils/**offSystemStyle 0**, `--assert-zero` exit 0), bundle 718.5→718.6 (+0.1). Committed direct to `main`.
