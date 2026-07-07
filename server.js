@@ -1458,6 +1458,39 @@ app.post('/api/integrations/email/send', authMiddleware, rateLimit('email-send',
   } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// TELEGRAM BRIDGE (I6) — minimal outbound-only bridge
+// Fails CLOSED: requires TELEGRAM_BOT_TOKEN env, returns ok:false otherwise.
+// ═══════════════════════════════════════════════════════════════
+
+app.post('/api/integrations/telegram/send', authMiddleware, rateLimit('tg-send', 20, 60 * 1000), async (req, res) => {
+  const { chatId, text, parseMode = 'HTML' } = req.body || {};
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return res.status(503).json({ ok: false, error: 'telegram not configured' });
+  if (!chatId || !text) return res.status(400).json({ ok: false, error: 'chatId and text required' });
+  if (typeof text !== 'string' || text.length > 4096) return res.status(400).json({ ok: false, error: 'text 1-4096 chars' });
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: parseMode }),
+      signal: AbortSignal.timeout(15000),
+    });
+    const j = await r.json();
+    res.json({ ok: !!j.ok, telegram: j });
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+app.get('/api/integrations/telegram/me', authMiddleware, async (_req, res) => {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return res.json({ ok: true, configured: false });
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/getMe`, { signal: AbortSignal.timeout(10000) });
+    const j = await r.json();
+    res.json({ ok: !!j.ok, configured: !!j.ok, bot: j.result || null });
+  } catch (e) { res.json({ ok: false, configured: true, error: e.message }); }
+});
+
 const peers = new Map();
 wss.on('connection', (ws) => {
   const id = 'peer-' + Math.random().toString(36).substring(2, 8);
