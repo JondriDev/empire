@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   CloudSun, Cloud, CloudRain, CloudSnow, CloudFog, Zap, Sun,
   Settings, RefreshCw, Thermometer, Droplets, Wind, AlertCircle, MapPin,
@@ -59,6 +59,13 @@ export default function Weather() {
   const [weather, setWeather] = useState<WeatherData>({ ...EMPTY, isLoading: true })
   const [showSettings, setShowSettings] = useState(false)
   const [tempLocation, setTempLocation] = useState('')
+  // Return focus to the trigger when the settings dialog closes (a11y — no lost gaze).
+  const settingsBtnRef = useRef<HTMLButtonElement>(null)
+
+  const closeSettings = useCallback(() => {
+    setShowSettings(false)
+    settingsBtnRef.current?.focus()
+  }, [])
 
   const fetchWeather = useCallback(async (cfg: WeatherConfig) => {
     setWeather(prev => ({ ...prev, isLoading: true, error: undefined }))
@@ -123,13 +130,15 @@ export default function Weather() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => fetchWeather(config)} className="p-2 rounded-xl hover:bg-glass transition-colors" title="Refresh">
-            <RefreshCw className={`w-5 h-5 ${weather.isLoading ? 'animate-spin' : ''}`} />
+          <button onClick={() => fetchWeather(config)} className="p-2 rounded-xl hover:bg-glass transition-colors" title="Refresh" aria-label="Refresh weather">
+            <RefreshCw className={`w-5 h-5 ${weather.isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
           </button>
           <button
+            ref={settingsBtnRef}
             onClick={() => { setTempLocation(config.location === 'Auto' ? '' : config.location); setShowSettings(true) }}
             className="p-2 rounded-xl hover:bg-glass transition-colors"
             title="Settings"
+            aria-label="Weather settings"
           >
             <Settings className="w-5 h-5" />
           </button>
@@ -208,23 +217,37 @@ export default function Weather() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-void/60" onClick={() => setShowSettings(false)}>
-          <div className="w-full max-w-md rounded-2xl border border-hair p-6" style={{ background: 'var(--card-bg)' }} onClick={e => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-void/60"
+          onClick={closeSettings}
+          onKeyDown={e => { if (e.key === 'Escape') { e.preventDefault(); closeSettings() } }}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-hair p-6"
+            style={{ background: 'var(--card-bg)' }}
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="weather-settings-title"
+          >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Settings className="w-4 h-4" /> Weather Settings
+              <h2 id="weather-settings-title" className="text-lg font-semibold flex items-center gap-2">
+                <Settings className="w-4 h-4" aria-hidden="true" /> Weather Settings
               </h2>
-              <button onClick={() => setShowSettings(false)} className="text-muted hover:text-fg">
-                <span className="text-xl">×</span>
+              <button onClick={closeSettings} className="text-muted hover:text-fg" aria-label="Close settings">
+                <span className="text-xl" aria-hidden="true">×</span>
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-muted mb-1 block flex items-center gap-1"><MapPin className="w-3 h-3" /> Location</label>
+                <label htmlFor="weather-location" className="text-xs text-muted mb-1 block flex items-center gap-1"><MapPin className="w-3 h-3" aria-hidden="true" /> Location</label>
                 <input
+                  id="weather-location"
+                  autoFocus
                   value={tempLocation}
                   onChange={e => setTempLocation(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSaveConfig() } }}
                   className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ion"
                   style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
                   placeholder="City name (leave empty to use your location)"
@@ -234,7 +257,7 @@ export default function Weather() {
             </div>
 
             <div className="flex gap-2 mt-6">
-              <button onClick={() => setShowSettings(false)} className="flex-1 px-4 py-2 rounded-xl border border-hair text-sm hover:bg-glass transition-colors">
+              <button onClick={closeSettings} className="flex-1 px-4 py-2 rounded-xl border border-hair text-sm hover:bg-glass transition-colors">
                 Cancel
               </button>
               <button onClick={handleSaveConfig} className="flex-1 px-4 py-2 rounded-xl bg-ion text-fg text-sm hover:bg-ion transition-colors">

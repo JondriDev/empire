@@ -56,6 +56,15 @@ fleet freeze). What changed for routines:
 
 ---
 
+## 🎨 APP ARTISAN — rotation ledger + modal-a11y seam (2026-07-06)
+
+- **`docs/ARTISAN.md` now exists** (the Artisan's rotation ledger — seeded 2026-07-06 from `registry.ts`: 24 launcher apps + hidden Cakra-tab tools + The Bridge). Pick the least-recently-visited surface; a QA-flagged broken surface jumps the front. First visit: **`weather`** (2026-07-06). ▶ NEXT = **`grammar`**.
+- **Accessible-modal idiom (reuse when polishing any dialog):** container `role="dialog"` + `aria-modal="true"` + `aria-labelledby=<heading id>`; overlay `onKeyDown` Escape→close; `autoFocus` the first field; **restore focus to the trigger on close** via a `useRef<HTMLButtonElement>` + a `closeSettings()` that calls `ref.current?.focus()`; icon-only buttons get `aria-label` + decorative glyphs `aria-hidden`; inputs get `<label htmlFor>`↔`<input id>`. Live examples: `src/apps/notes/Notes.tsx:166` (Escape/Ctrl+Enter) and `src/apps/weather/Weather.tsx` (full pattern incl. focus-restore).
+- **Reduced motion is GLOBAL already** (`design-system.css` `@media (prefers-reduced-motion: reduce)` zeroes all animation/transition + hides star/nebula layers) — so `animate-spin`/`animate-pulse` etc. are already honored. Only **JS-driven** motion needs a per-surface `matchMedia('(prefers-reduced-motion: reduce)')` guard (precedent: `Network.tsx:138,166`).
+- **Component a11y IS jsdom-testable** (roles, aria attrs, Escape via `fireEvent.keyDown`, label association via `getByLabelText`) — pattern in `src/apps/weather/Weather.test.tsx` (stub `fetch` to reject so the mount effect settles, then drive the dialog). Prefer locking a11y changes with a `*.test.tsx` over leaving them unpinned.
+
+---
+
 ## ▶ Active epic & exact next-stage shape
 
 > The single most important block. The Strategist keeps this in sync with the
