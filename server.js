@@ -1491,6 +1491,29 @@ app.get('/api/integrations/telegram/me', authMiddleware, async (_req, res) => {
   } catch (e) { res.json({ ok: false, configured: true, error: e.message }); }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// DISCORD BRIDGE (I7) — webhook-based outbound (no bot token needed)
+// ═══════════════════════════════════════════════════════════════
+
+app.post('/api/integrations/discord/send', authMiddleware, rateLimit('discord-send', 20, 60 * 1000), async (req, res) => {
+  const { webhookUrl, content, username = 'Empire', embeds } = req.body || {};
+  if (!webhookUrl) return res.status(400).json({ ok: false, error: 'webhookUrl required' });
+  if (typeof webhookUrl !== 'string' || !/^https:\/\/(discord\.com|Discordapp\.com)\/api\/webhooks\//.test(webhookUrl)) {
+    return res.status(400).json({ ok: false, error: 'invalid discord webhook url' });
+  }
+  if (!content && !Array.isArray(embeds)) return res.status(400).json({ ok: false, error: 'content or embeds required' });
+  if (content && content.length > 2000) return res.status(400).json({ ok: false, error: 'content cap 2000' });
+  try {
+    const r = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, content, embeds }),
+      signal: AbortSignal.timeout(15000),
+    });
+    res.json({ ok: r.ok || r.status === 204, status: r.status });
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
 const peers = new Map();
 wss.on('connection', (ws) => {
   const id = 'peer-' + Math.random().toString(36).substring(2, 8);
