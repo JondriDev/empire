@@ -1789,6 +1789,39 @@ app.get('/api/wallet/chains', authMiddleware, (_req, res) => {
   res.json({ ok: true, coins: ['btc', 'eth', 'sol', 'xrp', 'doge'] });
 });
 
+// ═══════════════════════════════════════════════════════════════
+// EMPIRE INTEGRATIONS STATUS (one-stop health view for the launcher)
+// Reports auth/config presence WITHOUT leaking secret material.
+// Used by Inbox & desktop status overlay.
+// ═══════════════════════════════════════════════════════════════
+
+app.get('/api/empire/integrations', authMiddleware, (_req, res) => {
+  res.json({
+    ok: true,
+    integrations: {
+      email: {
+        himalaya: !!process.env.HIMALAYA_BIN,
+        agentmail: !!process.env.AGENTMAIL_API_KEY,
+      },
+      telegram: !!process.env.TELEGRAM_BOT_TOKEN,
+      discord: { configured: true, note: 'webhook-based — no token needed' },
+      slack: { configured: true, note: 'webhook-based — no token needed' },
+      x: { configured: true, note: 'public syndication endpoint' },
+      linear: !!process.env.LINEAR_API_KEY,
+      airtable: !!(process.env.AIRTABLE_PAT && process.env.AIRTABLE_BASE_ID),
+      notion: !!process.env.NOTION_TOKEN,
+      stripe: !!process.env.STRIPE_SECRET_KEY,
+      cakra: {
+        text: !!process.env.OPENROUTER_API_KEY || !!process.env.NVIDIA_API_KEY || !!process.env.AI_API_KEY,
+        image_fal: !!process.env.FAL_KEY,
+      },
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get('/healthz', (_req, res) => res.json({ ok: true, version: 1.1, build: process.env.BUILD_SHA || 'dev' }));
+
 const peers = new Map();
 wss.on('connection', (ws) => {
   const id = 'peer-' + Math.random().toString(36).substring(2, 8);

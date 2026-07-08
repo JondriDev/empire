@@ -75,3 +75,14 @@ jobs:
 
       - name: Guard — dependency security audit (fails on any NEW high/critical vuln)
         run: node scripts/check-audit.mjs
+
+      - name: Smoke — backend server boots + new health endpoints respond
+        run: |
+          node -e "
+            const p = require('child_process').spawn('node', ['server.js'], { env: {...process.env, PORT: '3099', EMPIRE_HOST: '127.0.0.1', EMPIRE_ROOT: '/tmp', JWT_SECRET: 'ci'} });
+            p.stdout.on('data', () => {});
+            p.stderr.on('data', () => {});
+            setTimeout(() => {
+              fetch('http://127.0.0.1:3099/healthz').then(r => r.json()).then(j => { console.log('HEALTHZ', JSON.stringify(j)); p.kill(); process.exit(j.ok ? 0 : 1); }).catch(e => { console.error('HEALTHZ_ERR', e.message); p.kill(); process.exit(1); });
+            }, 1500);
+          "
