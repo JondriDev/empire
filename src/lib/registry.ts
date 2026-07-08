@@ -58,6 +58,8 @@ export const apps: AppDefinition[] = [
   { id: 'search', name: 'Search', icon: 'Search', route: '/app/search', description: 'Find anything across every app', color: '#5b8fb9', cakraEnabled: false },
   { id: 'timeline', name: 'Timeline', icon: 'Timeline', route: '/app/timeline', description: 'The organism’s history, one stream', color: '#8fb4d8', cakraEnabled: false },
   { id: 'solver', name: 'Problem Solver', icon: 'Target', route: '/app/solver', description: 'Cakra solves problems — world to personal', color: '#66d9a0', cakraEnabled: true, hidden: true, aliasOf: { appId: 'ai-chat', tab: 'solver' } },
+  { id: 'mail', name: 'Mail', icon: 'Mail', route: '/app/mail', description: 'Email bridge — Himalaya & AgentMail', color: '#1a8caa', cakraEnabled: true },
+  { id: 'crypto', name: 'Crypto', icon: 'Wallet', route: '/app/crypto', description: 'Wallet balances across BTC, ETH, SOL, XRP, DOGE', color: '#c4a265', cakraEnabled: false },
 ]
 
 /** Apps shown on the home launcher grid (excludes hidden tools + merge aliases). */

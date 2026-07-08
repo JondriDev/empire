@@ -41,4 +41,6 @@ export const appComponents: AppComponentMap = {
   'search':             lazy(() => import('../apps/search/Search')),
   'timeline':           lazy(() => import('../apps/timeline/Timeline')),
   'solver':             lazy(() => import('../apps/cakra/solver/SolverPanel')),
+  'mail':               lazy(() => import('../apps/mail/Mail')),
+  'crypto':             lazy(() => import('../apps/crypto/CryptoApp')),
 }

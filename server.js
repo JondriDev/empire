@@ -1723,6 +1723,72 @@ app.get('/api/integrations/stripe/charges', authMiddleware, rateLimit('stripe-re
   res.json({ ok: r.ok, configured: r.ok, charges: (j.data || []).map(c => ({ id: c.id, amount: c.amount, currency: c.currency, status: c.status, created: c.created })) });
 });
 
+// ═══════════════════════════════════════════════════════════════
+// CRYPTO WALLET (S5) — public-address balance checks via public APIs
+// Reads: chain-only free endpoints (no keys needed). Validates address shapes
+// and caps scans to the 5 supported chains. Never attempts write endpoints.
+// ═══════════════════════════════════════════════════════════════
+
+function isProbablyAddr(coin, addr) {
+  if (!addr) return false;
+  if (typeof addr !== 'string' || addr.length > 128) return false;
+  switch (coin) {
+    case 'btc':  return /^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$/.test(addr);
+    case 'eth':  return /^0x[a-fA-F0-9]{40}$/.test(addr);
+    case 'sol':  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr);
+    case 'xrp':  return /^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(addr);
+    case 'doge': return /^D[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}$/.test(addr) || /^A[1-9A-HJ-NP-Za-km-z]{32}$/.test(addr);
+    default: return false;
+  }
+}
+
+app.post('/api/wallet/check', authMiddleware, rateLimit('wallet', 30, 60 * 1000), async (req, res) => {
+  const { addresses = {} } = req.body || {};
+  const coins = ['btc', 'eth', 'sol', 'xrp', 'doge'];
+  const results = {};
+  for (const coin of coins) {
+    const addr = addresses[coin];
+    if (!addr) continue;
+    if (!isProbablyAddr(coin, addr)) { results[coin] = { error: 'invalid address format' }; continue; }
+    try {
+      // minimal free public endpoints
+      let url = null;
+      if (coin === 'btc')  url = `https://blockstream.info/api/address/${addr}`;
+      if (coin === 'eth')  url = `https://api.ethplorer.io/getAddressInfo/${addr}?apiKey=freekey`;
+      if (coin === 'sol')  url = `https://api.mainnet-beta.solana.com`; // POST RPC
+      if (coin === 'xrp')  url = `https://xrplcluster.com/api/v1/accounts/${addr}`;
+      if (coin === 'doge') url = `https://dogechain.info/api/v1/address/${addr}`;
+      let body = undefined;
+      let headers = { 'User-Agent': 'Mozilla/5.0 (compatible; Empire/1.0)' };
+      if (coin === 'sol') {
+        body = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getBalance', params: [addr] });
+        headers['Content-Type'] = 'application/json';
+      }
+      const r = await fetch(url, { method: body ? 'POST' : 'GET', headers, body, signal: AbortSignal.timeout(15000) });
+      const j = await r.json().catch(() => ({}));
+      if (coin === 'btc') {
+        const funded = (j.chain_stats?.funded_txo_sum || 0) - (j.chain_stats?.spent_txo_sum || 0);
+        results[coin] = { address: addr, sats: funded };
+      } else if (coin === 'eth') {
+        results[coin] = { address: addr, balanceWei: j.ETH?.balance || '0' };
+      } else if (coin === 'sol') {
+        results[coin] = { address: addr, lamports: j.result?.value || 0 };
+      } else if (coin === 'xrp') {
+        results[coin] = { address: addr, balanceXrp: j.account_data?.Balance || '0' };
+      } else if (coin === 'doge') {
+        results[coin] = { address: addr, balance: j.balance || '0' };
+      } else {
+        results[coin] = j;
+      }
+    } catch (e) { results[coin] = { error: e.message }; }
+  }
+  res.json({ ok: true, results });
+});
+
+app.get('/api/wallet/chains', authMiddleware, (_req, res) => {
+  res.json({ ok: true, coins: ['btc', 'eth', 'sol', 'xrp', 'doge'] });
+});
+
 const peers = new Map();
 wss.on('connection', (ws) => {
   const id = 'peer-' + Math.random().toString(36).substring(2, 8);
