@@ -1280,6 +1280,32 @@ const CAKRA_PROVIDERS = {
         return { kind: 'image', url: `data:image/svg+xml;base64,${b64}`, bytes: svg.length, costUsd: 0, provider: 'placeholder' };
       },
     },
+    fal: {
+      name: 'fal',
+      async invoke({ payload }) {
+        // A2: live fal image generation via the fal-ai queue API.
+        // Returns the first image URL from the response.
+        const key = process.env.FAL_KEY;
+        if (!key) throw new Error('FAL_KEY not set');
+        const prompt = String(payload?.prompt || '').slice(0, 4000);
+        if (!prompt) throw new Error('payload.prompt required');
+        const model = payload?.model || 'fal-ai/flux/schnell';
+        const r = await fetch(`https://queue.fal.run/${model}`, {
+          method: 'POST',
+          headers: { 'Authorization': `Key ${key}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, image_size: payload?.imageSize || 'square_hd', num_images: 1 }),
+          signal: AbortSignal.timeout(90_000),
+        });
+        if (!r.ok) {
+          const t = await r.text();
+          throw new Error(`fal ${r.status}: ${t.slice(0, 200)}`);
+        }
+        const j = await r.json();
+        const url = j?.images?.[0]?.url || j?.image?.url;
+        if (!url) throw new Error('fal: no image url in response');
+        return { kind: 'image', url, bytes: 0, costUsd: 0.005, provider: 'fal' };
+      },
+    },
   },
 };
 
