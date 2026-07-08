@@ -1514,6 +1514,50 @@ app.post('/api/integrations/discord/send', authMiddleware, rateLimit('discord-se
   } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// SLACK BRIDGE (I8) — webhook-based outbound
+// ═══════════════════════════════════════════════════════════════
+
+app.post('/api/integrations/slack/send', authMiddleware, rateLimit('slack-send', 20, 60 * 1000), async (req, res) => {
+  const { webhookUrl, text, blocks } = req.body || {};
+  if (!webhookUrl) return res.status(400).json({ ok: false, error: 'webhookUrl required' });
+  if (typeof webhookUrl !== 'string' || !/^https:\/\/hooks\.slack\.com\/services\//.test(webhookUrl)) {
+    return res.status(400).json({ ok: false, error: 'invalid slack webhook url' });
+  }
+  if (!text && !Array.isArray(blocks)) return res.status(400).json({ ok: false, error: 'text or blocks required' });
+  if (text && text.length > 40000) return res.status(400).json({ ok: false, error: 'text cap 40000' });
+  try {
+    const r = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, blocks }),
+      signal: AbortSignal.timeout(15000),
+    });
+    const body = await r.text();
+    res.json({ ok: r.ok && body === 'ok', status: r.status, body });
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// X (TWITTER) BRIDGE (I9) — read-only post lookup via syndication
+// Auth-bearer user-context writes are out of scope for this slice;
+// we expose a public post-fetcher that needs no API key.
+// ═══════════════════════════════════════════════════════════════
+
+app.get('/api/integrations/x/post', authMiddleware, rateLimit('x-read', 30, 60 * 1000), async (req, res) => {
+  const { id } = req.query;
+  if (!id || !/^\d+$/.test(String(id))) return res.status(400).json({ ok: false, error: 'numeric post id required' });
+  try {
+    const r = await fetch(`https://cdn.syndication.twimg.com/tweet-result?id=${id}&lang=en&token=4`, {
+      signal: AbortSignal.timeout(15000),
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Empire/1.0)' },
+    });
+    if (!r.ok) return res.status(r.status).json({ ok: false, error: `upstream ${r.status}` });
+    const j = await r.json();
+    res.json({ ok: true, post: { id, text: j.text, author: j.user?.name, createdAt: j.created_at } });
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
 const peers = new Map();
 wss.on('connection', (ws) => {
   const id = 'peer-' + Math.random().toString(36).substring(2, 8);
