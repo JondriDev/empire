@@ -1558,6 +1558,145 @@ app.get('/api/integrations/x/post', authMiddleware, rateLimit('x-read', 30, 60 *
   } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// LINEAR BRIDGE (I10) — read-only issue/team fetch
+// User-scoped Linear API key in env (LINEAR_API_KEY). No write endpoints
+// until a dedicated read+write RFC lands.
+// ═══════════════════════════════════════════════════════════════
+async function linearGraphQL(query, variables) {
+  const key = process.env.LINEAR_API_KEY;
+  if (!key) return { ok: false, error: 'LINEAR_API_KEY not set' };
+  const r = await fetch('https://api.linear.app/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: key },
+    body: JSON.stringify({ query, variables }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!r.ok) return { ok: false, error: `linear ${r.status}` };
+  const j = await r.json();
+  if (j.errors) return { ok: false, error: j.errors.map(e => e.message).join('; ') };
+  return { ok: true, data: j.data };
+}
+
+app.get('/api/integrations/linear/teams', authMiddleware, rateLimit('linear-read', 30, 60 * 1000), async (_req, res) => {
+  const out = await linearGraphQL('{ teams { nodes { id name key } } }');
+  res.json(out);
+});
+
+app.get('/api/integrations/linear/issues', authMiddleware, rateLimit('linear-read', 30, 60 * 1000), async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit || '25', 10), 100);
+  const teamId = typeof req.query.teamId === 'string' ? req.query.teamId : null;
+  const filter = teamId ? `filter: { team: { id: { eq: \"${teamId}\" } } }` : '';
+  const out = await linearGraphQL(
+    `{ issues(first: ${limit}${filter ? `, ${filter}` : ''}) { nodes { id identifier title state { name } url updatedAt } } }`
+  );
+  res.json(out);
+});
+
+// ═══════════════════════════════════════════════════════════════
+// AIRTABLE BRIDGE (I11) — schema + list records
+// Airtable PAT in env (AIRTABLE_PAT). Records limited to 100 per page.
+// ═══════════════════════════════════════════════════════════════
+async function airtableFetch(path) {
+  const pat = process.env.AIRTABLE_PAT;
+  if (!pat) return { ok: false, error: 'AIRTABLE_PAT not set' };
+  const base = process.env.AIRTABLE_BASE_ID;
+  const r = await fetch(`https://api.airtable.com/v0${path}`, {
+    headers: { Authorization: `Bearer ${pat}` },
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!r.ok) return { ok: false, error: `airtable ${r.status}` };
+  const j = await r.json();
+  return { ok: true, data: j };
+}
+
+app.get('/api/integrations/airtable/whoami', authMiddleware, async (_req, res) => {
+  // Airtable v0 has no /whoami; use Meta API instead
+  const pat = process.env.AIRTABLE_PAT;
+  if (!pat) return res.json({ ok: true, configured: false });
+  const r = await fetch('https://api.airtable.com/v0/meta/bases', { headers: { Authorization: `Bearer ${pat}` }, signal: AbortSignal.timeout(15000) });
+  res.json({ ok: r.ok, status: r.status, configured: r.ok });
+});
+
+app.get('/api/integrations/airtable/records', authMiddleware, rateLimit('airtable-read', 30, 60 * 1000), async (req, res) => {
+  const { tableId, view, pageSize = 25 } = req.query;
+  const base = process.env.AIRTABLE_BASE_ID;
+  if (!process.env.AIRTABLE_PAT || !base) return res.json({ ok: false, error: 'airtable not configured' });
+  if (!tableId || !/^[A-Za-z0-9_]{2,40}$/.test(String(tableId))) return res.status(400).json({ ok: false, error: 'tableId invalid' });
+  const qs = new URLSearchParams();
+  qs.set('pageSize', String(Math.min(parseInt(String(pageSize), 10) || 25, 100)));
+  if (view) qs.set('view', String(view));
+  const r = await fetch(`https://api.airtable.com/v0/${base}/${tableId}?${qs}`, {
+    headers: { Authorization: `Bearer ${process.env.AIRTABLE_PAT}` },
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!r.ok) return res.status(r.status).json({ ok: false, error: `airtable ${r.status}` });
+  const j = await r.json();
+  res.json({ ok: true, records: j.records });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// NOTION BRIDGE (I12) — database query (read-only)
+// Notion integration secret in env (NOTION_TOKEN), databaseId from query.
+// ═══════════════════════════════════════════════════════════════
+
+app.get('/api/integrations/notion/whoami', authMiddleware, async (_req, res) => {
+  const token = process.env.NOTION_TOKEN;
+  if (!token) return res.json({ ok: true, configured: false });
+  const r = await fetch('https://api.notion.com/v1/users/me', {
+    headers: { Authorization: `Bearer ${token}`, 'Notion-Version': '2022-06-28' },
+    signal: AbortSignal.timeout(15000),
+  });
+  const j = await r.json();
+  res.json({ ok: !!j.id, configured: !!j.id, bot: j });
+});
+
+app.post('/api/integrations/notion/query', authMiddleware, rateLimit('notion-read', 30, 60 * 1000), async (req, res) => {
+  const { databaseId, pageSize = 25 } = req.body || {};
+  if (!databaseId || !/^[A-Za-z0-9-]{16,40}$/.test(String(databaseId))) return res.status(400).json({ ok: false, error: 'databaseId invalid' });
+  if (!process.env.NOTION_TOKEN) return res.json({ ok: false, error: 'notion not configured' });
+  const r = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.NOTION_TOKEN}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ page_size: Math.min(parseInt(String(pageSize), 10) || 25, 100) }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!r.ok) return res.status(r.status).json({ ok: false, error: `notion ${r.status}` });
+  const j = await r.json();
+  res.json({ ok: true, results: j.results });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// STRIPE BRIDGE (I13) — read-only balance + recent charges
+// Stripe secret key in env (STRIPE_SECRET_KEY). Webhook ingest for charge
+// events deferred to a future slice.
+// ═══════════════════════════════════════════════════════════════
+
+app.get('/api/integrations/stripe/balance', authMiddleware, rateLimit('stripe-read', 10, 60 * 1000), async (_req, res) => {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return res.json({ ok: true, configured: false });
+  const auth = 'Basic ' + Buffer.from(`${key}:`).toString('base64');
+  const r = await fetch('https://api.stripe.com/v1/balance', {
+    headers: { Authorization: auth },
+    signal: AbortSignal.timeout(15000),
+  });
+  const j = await r.json();
+  res.json({ ok: r.ok, configured: r.ok, balance: j });
+});
+
+app.get('/api/integrations/stripe/charges', authMiddleware, rateLimit('stripe-read', 10, 60 * 1000), async (req, res) => {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return res.json({ ok: true, configured: false });
+  const limit = Math.min(parseInt(req.query.limit || '10', 10), 100);
+  const auth = 'Basic ' + Buffer.from(`${key}:`).toString('base64');
+  const r = await fetch(`https://api.stripe.com/v1/charges?limit=${limit}`, {
+    headers: { Authorization: auth },
+    signal: AbortSignal.timeout(15000),
+  });
+  const j = await r.json();
+  res.json({ ok: r.ok, configured: r.ok, charges: (j.data || []).map(c => ({ id: c.id, amount: c.amount, currency: c.currency, status: c.status, created: c.created })) });
+});
+
 const peers = new Map();
 wss.on('connection', (ws) => {
   const id = 'peer-' + Math.random().toString(36).substring(2, 8);
