@@ -177,20 +177,22 @@ export default function Grammar() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <SpellCheck className="w-6 h-6 text-signal" /> Grammar Fix
+            <SpellCheck className="w-6 h-6 text-signal" aria-hidden="true" /> Grammar Fix
           </h1>
-          <p className="text-sm text-muted mt-1">
+          <p className="text-sm text-muted mt-1" aria-live="polite">
             {stats.words} words · {issues.length} issues found
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2" role="group" aria-label="Analysis mode">
           <Button onClick={() => setMode('check')}
+            aria-pressed={mode === 'check'}
             className={`text-xs px-3 py-1 ${mode === 'check' ? 'bg-signal' : 'bg-glass'}`}>
-            <ListChecks className="w-3 h-3 mr-1" /> Check
+            <ListChecks className="w-3 h-3 mr-1" aria-hidden="true" /> Check
           </Button>
           <Button onClick={() => setMode('fix')}
+            aria-pressed={mode === 'fix'}
             className={`text-xs px-3 py-1 ${mode === 'fix' ? 'bg-signal' : 'bg-glass'}`}>
-            <SpellCheck className="w-3 h-3 mr-1" /> Fix
+            <SpellCheck className="w-3 h-3 mr-1" aria-hidden="true" /> Fix
           </Button>
         </div>
       </div>
@@ -201,6 +203,7 @@ export default function Grammar() {
           value={text}
           onChange={e => setText(e.target.value)}
           placeholder="Paste or type text to check grammar..."
+          aria-label="Text to check for grammar issues"
           className="w-full bg-transparent px-4 py-3 text-sm min-h-[180px] resize-y focus:outline-none focus:ring-1 focus:ring-signal/50 rounded-lg"
           style={{ color: 'var(--text)' }}
         />
@@ -225,7 +228,7 @@ export default function Grammar() {
       {text.trim() && mode === 'check' && issues.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-semibold flex items-center gap-1">
-            <AlertTriangle className="w-4 h-4 text-warn" />
+            <AlertTriangle className="w-4 h-4 text-warn" aria-hidden="true" />
             {issues.length} Issue{issues.length !== 1 ? 's' : ''} Found
           </h3>
           {issues.slice(0, 20).map((issue, i) => (
@@ -246,8 +249,8 @@ export default function Grammar() {
       )}
 
       {text.trim() && mode === 'check' && issues.length === 0 && (
-        <div className="p-4 rounded-xl bg-success/10 border border-success/20 text-success text-sm flex items-center gap-2">
-          <Check className="w-4 h-4" /> No issues found! Your text looks clean.
+        <div className="p-4 rounded-xl bg-success/10 border border-success/20 text-success text-sm flex items-center gap-2" role="status">
+          <Check className="w-4 h-4" aria-hidden="true" /> No issues found! Your text looks clean.
         </div>
       )}
 

@@ -15,10 +15,9 @@
 
 ---
 
-## ▶ NEXT: `grammar` (Grammar Fix)
+## ▶ NEXT: `language` (Language Lab)
 
-(least-recently-visited after the seed; then continue down the registry order,
-wrapping back to the top.)
+(continue down the registry order, wrapping back to the top after The Bridge.)
 
 ---
 
@@ -33,8 +32,8 @@ Newest-visited float to the bottom of the "visited" understanding; unvisited = n
 | calculator | — | — |
 | calendar | — | — |
 | clock | — | — |
-| grammar | — | ◀ NEXT |
-| language | — | — |
+| grammar | 2026-07-09 | a11y pass: `aria-pressed` on the Check/Fix segmented toggle (state was colour-only) + `role="group"`, `aria-label` on the textarea, `aria-live="polite"` on the issue-count subtitle, `role="status"` on the clean-text banner, decorative glyphs `aria-hidden`. +`Grammar.test.tsx` (5). |
+| language | — | ◀ NEXT |
 | music | — | — |
 | video | — | — |
 | files | — | — |
