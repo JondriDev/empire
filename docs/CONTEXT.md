@@ -16,6 +16,26 @@
 
 ---
 
+## ★ EPIC-12 CODE-COMPLETE (2026-07-09) — S3 LOCK shipped; NO ACTIVE STAGE → next run promotes the next epic
+
+**S3 (the LAST stage) shipped this run (build 2026-07-09, green main).** `syncAll` is now **exported** from `sync.ts:~127`;
+`sync.test.ts` grew the **`intent integrity — reconcile-survival invariant (EPIC-12 S3)`** suite (+4 → 21 in-file): each
+core creation intent seeded + run + `syncAll()` → asserts the entity survives (make-task's graph-only task; make-note-from's
++ add-to-learning's store-routed mirrors, sourceId preserved + real store item still present); + the BOUNDARY case (raw
+`g.addNode({type:'note'})` phantom IS pruned by `syncAll()`). A ★ INTENT INTEGRITY INVARIANT header comment now sits atop
+`registerCoreIntents`. **Lock verified BITES** (reverted make-note-from → phantom → 4 RED → restored). build🟢 vitest
+417→421🟢 eslint clean; tokens/off-system-utils/offSystemStyle all 0, `--assert-zero` exit 0; test cases Δ+4; bundle gz
+727.7 ±0, no new deps.
+
+**★ EPIC-12 is CODE-COMPLETE (S1–S3).** ▶ **THERE IS NO ACTIVE STAGE.** The next run promotes the next epic: take the
+topmost cloud-executable ROADMAP NOW/NEXT candidate — the ratified next candidate is a **measured design-system STATE-conformance
+epic** (empty/loading/error primitives → an adoption metric + `--assert-zero` lock, the EPIC-5/11 template) **or a measured
+accessibility pass**; flag that EPICS.md needs the Strategist. **EPIC-7 · Android stays device-gated.** **QA still owes** an
+`INTENT-ROUNDTRIP 2/2` render-confirm on the new green main → then the Strategist retires EPIC-12 to DONE. (QA also still owes
+the `app-mail.png` no-error-boundary re-confirm from the prior fix run.)
+
+---
+
 ## ✅ QA STATE (2026-07-09) — both mail+crypto regressions FIXED by the build routine; green main; awaiting QA render re-confirm
 
 The two regressions QA flagged on `76aa637` are **both fixed and pushed** (build run 2026-07-09). Green main, `--assert-zero`

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useGraph, nodesOfType } from './graph'
 import { useStore } from '../store'
-import { mirrorCollection, startCoreSync } from './sync'
+import { mirrorCollection, startCoreSync, syncAll } from './sync'
 import { runIntent } from './intents'
 
 // The graph store is a singleton; reset it before each test for isolation.
@@ -244,5 +244,74 @@ describe('add-to-learning — real store round-trip (EPIC-12 S2)', () => {
     await runIntent('add-to-learning', src)
     const learnNode = nodesOfType('learning')[0]
     expect(g().nodes[src.id].links).toContain(learnNode.id)
+  })
+})
+
+// EPIC-12 S3: LOCK the intent-integrity invariant. For EACH core creation intent,
+// seed a valid source, run it, then run syncAll() (the boot/mutation reconcile) and
+// assert the entity it created STILL EXISTS. This encodes the rule: an intent that
+// creates a centrally-mirrored-type entity (note/learning/message) MUST route through
+// the store so reconcile keeps it; a graph-only type (task) may stay in the graph.
+// Reverting any mirrored-type intent to the phantom g.addNode pattern turns this red
+// (verified by temporarily reverting make-note-from → the mirrored-type cases fail).
+describe('intent integrity — reconcile-survival invariant (EPIC-12 S3)', () => {
+  beforeEach(() => {
+    startCoreSync()
+    useGraph.setState({ nodes: {} })
+    useStore.setState({ notes: [], learningItems: [], messages: [] })
+  })
+
+  it('make-task: the graph-only task survives a reconcile (task has no store/syncer)', async () => {
+    // A graph-only source of an accepted type (goal is not a mirrored type, so it
+    // also survives). make-task creates a graph-only `task` node (no sourceId).
+    const src = g().addNode({ type: 'goal', title: 'Reach orbit', data: {}, app: 'goals' })
+    await runIntent('make-task', src)
+    const before = nodesOfType('task')
+    expect(before).toHaveLength(1)
+    const taskId = before[0].id
+    syncAll()
+    // task is graph-only by design — no syncer touches it, so it persists.
+    const after = nodesOfType('task')
+    expect(after).toHaveLength(1)
+    expect(after[0].id).toBe(taskId)
+  })
+
+  it('make-note-from: the store-routed note survives a reconcile', async () => {
+    // Source must be non-note; a graph-only task qualifies. make-note-from routes
+    // through addNote, so the note mirror is sourceId-keyed and un-prunable.
+    const src = g().addNode({ type: 'task', title: 'Chart the anomaly', data: { content: 'body' }, app: 'goals' })
+    await runIntent('make-note-from', src)
+    expect(nodesOfType('note')).toHaveLength(1)
+    const sid = nodesOfType('note')[0].data.sourceId
+    syncAll()
+    const after = nodesOfType('note')
+    expect(after).toHaveLength(1)
+    expect(after[0].data.sourceId).toBe(sid)
+    // …and the real store item is still there backing it.
+    expect(useStore.getState().notes).toHaveLength(1)
+  })
+
+  it('add-to-learning: the store-routed learning item survives a reconcile', async () => {
+    // add-to-learning accepts note/message — seed a REAL note (itself store-routed),
+    // then learn from its mirror. The learning mirror is sourceId-keyed, un-prunable.
+    useStore.getState().addNote({ id: 'inv-note', title: 'Resonance', content: 'harmonics', tags: [], updatedAt: 1 })
+    const src = nodesOfType('note').find(n => n.data.sourceId === 'inv-note')!
+    await runIntent('add-to-learning', src)
+    expect(nodesOfType('learning')).toHaveLength(1)
+    const sid = nodesOfType('learning')[0].data.sourceId
+    syncAll()
+    const after = nodesOfType('learning')
+    expect(after).toHaveLength(1)
+    expect(after[0].data.sourceId).toBe(sid)
+    expect(useStore.getState().learningItems).toHaveLength(1)
+  })
+
+  it('BOUNDARY: a raw phantom note (g.addNode, no sourceId) IS pruned by syncAll — this is WHY the store route is required', () => {
+    // The exact shape a pre-EPIC-12 mirrored-type intent produced. It has no
+    // sourceId, so reconcile finds no matching store item and deletes it.
+    g().addNode({ type: 'note', title: 'Phantom', data: { content: 'x' }, app: 'notes' })
+    expect(nodesOfType('note')).toHaveLength(1)
+    syncAll()
+    expect(nodesOfType('note')).toHaveLength(0)
   })
 })

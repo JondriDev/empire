@@ -173,7 +173,8 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   - *Acceptance:* "Add to Learning" on a note/message creates a real, reload-durable Learning item; guard 2/2. build🟢
     vitest🟢 eslint clean; tokens 0, off-system 0, offSystemStyle 0.
 
-- [ ] **S3 · LOCK intent integrity — a reconcile-survival invariant that would have caught the bug → ★ EPIC-12 CODE-COMPLETE.**
+- [x] **S3 · LOCK intent integrity — a reconcile-survival invariant that would have caught the bug → ★ EPIC-12 CODE-COMPLETE. ✅ SHIPPED 2026-07-09 (`main`).**
+  Exported `syncAll` from `sync.ts` + added the survival-invariant suite `intent integrity — reconcile-survival invariant (EPIC-12 S3)` to `sync.test.ts` (+4): make-task's graph-only task survives `syncAll()`; make-note-from's + add-to-learning's store-routed mirrors survive (sourceId preserved + real store item still backing); BOUNDARY case — a raw `g.addNode({type:'note'})` phantom IS pruned by `syncAll()`. Added the ★ INTENT INTEGRITY INVARIANT header comment to `registerCoreIntents`. **Lock verified BITES:** temporarily reverting `make-note-from` to the phantom `g.addNode` pattern turned 4 cases RED; restored → 21/21. build🟢 vitest 417→421🟢 eslint clean; tokens 0, off-system-utils 0, offSystemStyle 0 (r0/t0/m0), `--assert-zero` exit 0; bundle gz 727.7 ±0, no new deps. **★ EPIC-12 is CODE-COMPLETE (S1–S3) → awaiting QA `INTENT-ROUNDTRIP 2/2` on green main → Strategist retires to DONE.**
   The ratchet (mirrors EPIC-5 S8 / EPIC-11 S4 lock discipline).
   - **`src/lib/core/sync.test.ts`** — add a **survival-invariant** suite: for EACH core creation intent (`make-task`,
     `make-note-from`, `add-to-learning`), seed a valid source, run the intent, then call `syncAll()` (the boot/mutation

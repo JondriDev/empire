@@ -118,11 +118,31 @@ export function mirrorCollection<T>(
   reconcile({ type: _type, app: _app, items: () => _items, id: _map.id, title: _map.title, data: _map.data }, _items)
 }
 
-function syncAll(): void {
+/**
+ * The boot/mutation reconcile pass: bring the graph's mirrored-type nodes
+ * (note/learning/message) back into exact agreement with their stores. Runs once
+ * at startup and again on every store mutation (via useStore.subscribe). Exported
+ * so the survival-invariant suite (sync.test.ts, EPIC-12 S3) can assert directly
+ * that a store-routed entity outlives a reconcile while a phantom does not.
+ */
+export function syncAll(): void {
   for (const run of syncers) run()
 }
 
-/** Default cross-app intents (C-layer) for the mirrored types. */
+/**
+ * Default cross-app intents (C-layer) for the mirrored types.
+ *
+ * ★ INTENT INTEGRITY INVARIANT (EPIC-12) — an intent that creates a
+ * centrally-mirrored-type entity (`note` / `learning` / `message`) MUST route
+ * through its store (useStore.addNote / addLearningItem / …). Only a store write
+ * fires subscribe→syncAll→reconcile, which materializes a sourceId-keyed mirror
+ * that SURVIVES the next reconcile. A raw g.addNode() of a mirrored type has no
+ * sourceId, so it is a PHANTOM: it never appears in the owning app and reconcile()
+ * prunes it on the next mutation / reload. A graph-only type (`task`) has no store
+ * and no syncer, so it may stay in the graph. The survival-invariant suite in
+ * sync.test.ts LOCKS this rule — reverting any mirrored-type intent to g.addNode
+ * turns it red.
+ */
 function registerCoreIntents(): void {
   registerIntent({
     id: 'make-task',

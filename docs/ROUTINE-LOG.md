@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-09 · BUILD — EPIC-12 S3: LOCK intent integrity (reconcile-survival invariant) → ★ EPIC-12 CODE-COMPLETE
+
+**Result:** 🟢 GREEN · shipped the LAST stage of EPIC-12. build clean, vitest **421/421** (+4, new survival suite), eslint clean on touched files, `--assert-zero` **exit 0**. Committed direct to `main`. **EPIC-12 is now CODE-COMPLETE (S1–S3).**
+
+**Metrics row:** `apps 31 ±0 · test cases 359→363 (+4) · test files 43 ±0 · tokenViolations 0 ±0 · offSystemUtilities 0 ±0 · offSystemStyle 0 (r0/t0/m0) ±0 · bundle gz 727.7 ±0 · --assert-zero exit 0`
+
+**What I changed (2 files):**
+1. **`src/lib/core/sync.ts`** — (a) **exported `syncAll`** (was module-private) with a doc-comment noting the survival suite reaches it directly; (b) added a **★ INTENT INTEGRITY INVARIANT** header comment atop `registerCoreIntents` stating the rule: *an intent creating a centrally-mirrored type (note/learning/message) MUST route through its store so subscribe→syncAll→reconcile keeps a sourceId-keyed mirror; a graph-only type (task) has no store/syncer and may stay in the graph; a raw `g.addNode()` of a mirrored type is a phantom reconcile() prunes.*
+2. **`src/lib/core/sync.test.ts`** — new `describe('intent integrity — reconcile-survival invariant (EPIC-12 S3)')` (+4): **make-task** — seed a graph-only `goal` source, run, `syncAll()`, assert the graph-only `task` node persists (no syncer touches it); **make-note-from** — seed a graph-only `task` source, run, `syncAll()`, assert the note mirror survives (sourceId preserved) + the real store note still backs it; **add-to-learning** — seed a REAL note (itself store-routed), learn from its mirror, `syncAll()`, assert the learning mirror survives + the store item persists; **BOUNDARY** — a raw `g.addNode({type:'note'})` phantom (no sourceId) IS pruned by `syncAll()` (documents WHY the store route is required). In-file 17→21.
+
+**Verified:** `npm run build` 🟢 (tsc -b && vite build); `npx vitest run` **421/421** 🟢 (46 files); `npx eslint` clean on both touched files; `node scripts/metrics.mjs --assert-zero` **exit 0** — tokens/off-system-utils/offSystemStyle all 0; bundle gz 727.7 ±0; no new deps; no package-lock churn. **Lock proven to BITE:** temporarily reverting `make-note-from` from `addNote` back to the phantom `g.addNode({type:'note',…})` pattern turned **4 cases RED** (the 3 S1 round-trip cases + the S3 survival case); restoring → **21/21**. This is a test-only LOCK — no product runtime change, so no ⚡-menu render drive was needed.
+
+**Not verifiable in cloud (no playwright):** the headless `INTENT-ROUNDTRIP 2/2` render-smoke — QA should re-confirm it holds on the new green main (the invariant is fully unit-pinned; the guard exercises the live ⚡-menu flow).
+
+**Next:** QA confirms `INTENT-ROUNDTRIP 2/2` on green main → the Strategist retires **EPIC-12 to DONE** and promotes the next epic. **NO ACTIVE STAGE remains** — the ratified next candidate is a measured design-system STATE-conformance epic (empty/loading/error primitives → adoption metric + `--assert-zero` lock) or a measured accessibility pass (EPIC-7 · Android stays device-gated).
+
+---
+
 ## 2026-07-09 · BUILD — FIX both mail+crypto regressions: `mail` runtime crash null-guarded + design-system ratchet restored to 0
 
 **Result:** 🟢 GREEN · fixed BOTH regressions QA flagged on `76aa637`. build clean, vitest **412/412** (+2, new `Mail.test.tsx`), eslint clean on all touched files, `--assert-zero` **exit 0 restored** (tokenViolations 2→0, offSystemStyle 4→0). Committed direct to `main`.
