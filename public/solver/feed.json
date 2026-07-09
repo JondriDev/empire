@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-05T00:00:00Z",
+  "generatedAt": "2026-07-09T00:00:00Z",
   "problems": [
     {
       "catalogId": "disc-sudan-famine",
@@ -9,6 +9,15 @@
       "severity": 5,
       "tractability": 2,
       "discoveredFrom": "UN/OCHA Global Humanitarian Overview 2026 and Stimson Center both flag Sudan as the largest yet most under-funded and media-marginalised crisis globally."
+    },
+    {
+      "catalogId": "disc-drc-ebola",
+      "title": "DR Congo Ebola outbreak (2026)",
+      "blurb": "An expanding Ebola outbreak in the Democratic Republic of the Congo had confirmed 1,406 cases and 438 deaths by July 2026, straining treatment capacity even though proven vaccines and monoclonal-antibody therapies exist to contain it.",
+      "category": "Health & Disease",
+      "severity": 4,
+      "tractability": 3,
+      "discoveredFrom": "WHO July 2026 emergency briefings and a 6 July 2026 UNICEF flash update report ~38 new confirmed Ebola cases/day in the DRC with treatment beds ~96% occupied."
     }
   ],
   "briefs": {
@@ -116,6 +125,113 @@
         "https://ourworldindata.org/data-review-air-pollution-deaths"
       ],
       "updatedAt": "2026-07-05"
+    },
+    "maternal-child-health": {
+      "summary": "Most maternal and child deaths remain preventable with cheap, proven care, yet progress has stalled. In 2024 an estimated 4.9 million children died before their fifth birthday — roughly one death every six seconds — with neonatal deaths (first 28 days) accounting for 2.3 million, or 47%; more than four in five under-five deaths occurred in sub-Saharan Africa (2.8 million, 58%) and Southern Asia (1.2 million, 25%). About 260,000 women died in pregnancy and childbirth in 2023; the global maternal mortality ratio fell 40% since 2000 (328→197 per 100,000 live births), but sub-Saharan Africa and Southern Asia account for ~87% of maternal deaths and low-income countries face an MMR of 346 versus 10 in high-income countries. The pace of under-five mortality reduction has slowed by more than 60% since 2015, and if current trends hold more than 27 million children are projected to die between 2025 and 2030 — a trajectory reversible with known interventions that return up to USD 20 per USD 1 invested.",
+      "interventions": [
+        {
+          "title": "Skilled birth attendance and emergency obstetric care",
+          "evidence": "WHO identifies postpartum haemorrhage, sepsis, hypertensive disorders and obstructed labour as the leading, largely avoidable causes of maternal death; skilled attendance plus basic emergency obstetric care (oxytocics, antibiotics, manual placenta removal) is the core response, with a target of 90% of births skilled-attended.",
+          "actor": "Health ministries with WHO, UNFPA and midwifery programs"
+        },
+        {
+          "title": "Oral rehydration salts (ORS) and zinc for childhood diarrhoea",
+          "evidence": "GiveWell and UNICEF rate ORS plus zinc among the most cost-effective interventions for the leading diarrhoeal killer of young children, saving lives at very low cost when scaled.",
+          "actor": "National child-health programs, Clinton Health Access Initiative and community health workers"
+        },
+        {
+          "title": "Childhood vaccination and treatment of severe acute malnutrition",
+          "evidence": "WHO/UNICEF March 2026 note vaccines, nutrition programmes and severe-malnutrition treatment deliver some of the highest returns in global health, with every USD 1 in child survival generating up to USD 20 in benefits.",
+          "actor": "Gavi, WHO, UNICEF and national immunisation programs"
+        },
+        {
+          "title": "Misoprostol / oxytocin for postpartum haemorrhage",
+          "evidence": "Evidence reviewed by the Maternal Health Task Force finds misoprostol can prevent three of four postpartum-haemorrhage cases, and advance community-health-worker distribution is a safe, effective strategy where facility delivery is limited.",
+          "actor": "National maternal-health programs and community health-worker networks"
+        },
+        {
+          "title": "Antenatal care and family planning",
+          "evidence": "A 2025 Lancet Global Health decomposition analysis attributes the 2000–2023 maternal-mortality decline to maternity-care improvement, fertility decline and expanded contraceptive use.",
+          "actor": "Health ministries with UNFPA and reproductive-health NGOs"
+        }
+      ],
+      "sources": [
+        "https://www.who.int/news/item/18-03-2026-progress-in-reducing-child-deaths-slows-as-4.9-million-children-die-before-age-five",
+        "https://www.unicef.org/press-releases/progress-reducing-child-deaths-slows-49-million-children-under-five-die-2024",
+        "https://www.who.int/news-room/fact-sheets/detail/maternal-mortality",
+        "https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(25)00409-7/fulltext",
+        "https://www.givewell.org/international/technical/programs/oral-rehydration-solution-zinc",
+        "https://news.un.org/en/story/2026/03/1167151"
+      ],
+      "updatedAt": "2026-07-09"
+    },
+    "learning-poverty": {
+      "summary": "Learning poverty — the share of 10-year-olds who cannot read and understand a simple, age-appropriate text — stands at about 70% in low- and middle-income countries, up from 57% before the COVID-19 pandemic, a rise of roughly a third that the World Bank calls the worst shock to education in recorded history; the 70% figure was reaffirmed in an October 2025 World Bank literacy report. The problem combines children out of school with poor learning among those enrolled: an analysis of early-grade reading assessments covering more than 500,000 students in 48 countries and 96 languages found that after three years of schooling over 90% still could not reliably name letters, sound them out, or read simple words. The evidence base is unusually clear about what works — the Global Education Evidence Advisory Panel rates a small set of structured, targeted approaches as 'good buys' that raise learning cheaply and at scale.",
+      "interventions": [
+        {
+          "title": "Structured pedagogy",
+          "evidence": "The Global Education Evidence Advisory Panel rates structured pedagogy — coherent packages of daily lesson plans, teacher guides, student materials and instructional coaching — as a 'good buy'; the World Bank's October 2025 report highlights it as the leading proven, cost-effective literacy model.",
+          "actor": "Education ministries with the World Bank Foundational Learning Compact"
+        },
+        {
+          "title": "Teaching at the Right Level (TaRL) / targeted instruction",
+          "evidence": "Grouping children by learning level rather than grade is evidence-backed and has helped millions in South Asia and sub-Saharan Africa master foundational literacy and numeracy, per the What Works Hub for Global Education.",
+          "actor": "Governments with Pratham and J-PAL"
+        },
+        {
+          "title": "Structured early-grade and mother-tongue reading instruction",
+          "evidence": "A 2024 review of structured-pedagogy programmes in sub-Saharan Africa (PMC11422479) documents consistent reading gains when programmes integrate core reading subskills and support teachers in early grades.",
+          "actor": "Curriculum bodies and teacher-training institutions"
+        },
+        {
+          "title": "Foundational-learning targets and measurement",
+          "evidence": "UNICEF's 2025 Foundational Learning Action Tracker and the World Bank/UNESCO/UNICEF RAPID framework show that setting explicit targets and measuring reading drives national prioritisation and resource shifts.",
+          "actor": "World Bank, UNICEF and UNESCO with national statistics offices"
+        }
+      ],
+      "sources": [
+        "https://www.worldbank.org/en/news/press-release/2025/10/30/new-report-offers-evidence-based-solutions-to-address-global-literacy-crisis-among-children",
+        "https://www.worldbank.org/en/topic/education/brief/what-is-learning-poverty",
+        "https://www.worldbank.org/en/topic/education/brief/foundational-learning",
+        "https://www.wwhge.org/resources/core-components-of-teaching-at-the-right-level/",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11422479/",
+        "https://www.unicef.org/media/175231/file/Foundational-learning-action-tracker-2025-Global-report.pdf"
+      ],
+      "updatedAt": "2026-07-09"
+    },
+    "energy-access": {
+      "summary": "The 2025 Tracking SDG7 report (IEA, IRENA, UN Statistics Division, World Bank and WHO, June 2025) finds nearly 92% of the world now has basic electricity access, but more than 666 million people remain without it and the current pace will miss universal access by 2030. The gap has become sharply concentrated: 85% of people without electricity live in sub-Saharan Africa, up from 50% in 2010, even as Central and Southern Asia cut their deficit from 414 million in 2010 to just 27 million in 2023. Clean-cooking access rose from 64% in 2015 to 74% in 2023, yet about 2.1 billion people still rely on polluting fuels; in sub-Saharan Africa four in five families lack clean cooking and the number without it grows by roughly 14 million a year. Distributed renewables are the fastest route for remote areas — mini-grids and off-grid solar delivered 55% of the region's new connections in 2020–2022 — but the report stresses that sustained international finance is essential to close the gap.",
+      "interventions": [
+        {
+          "title": "Distributed renewables — mini-grids and solar home systems",
+          "evidence": "The 2025 Tracking SDG7 report finds mini-grids and off-grid solar provided 55% of new electricity connections in sub-Saharan Africa in 2020–2022, making them the fastest route for remote and fragile areas.",
+          "actor": "ESMAP, GEAPP and private off-grid solar companies"
+        },
+        {
+          "title": "Mission 300 grid and off-grid electrification",
+          "evidence": "The World Bank and African Development Bank's Mission 300 aims to connect 300 million people in sub-Saharan Africa by 2030 — roughly half via grid extension and half via off-grid solutions — backed by a USD 30bn World Bank commitment, with over 50 million people connected by mid-2026.",
+          "actor": "World Bank, African Development Bank and national governments"
+        },
+        {
+          "title": "Decentralised clean-cooking transition",
+          "evidence": "Tracking SDG7 2025 highlights decentralised approaches — small LPG depots, household biogas, electric cooking via mini-grids and flexible financing — to cut the ~2.1 billion-person clean-cooking gap.",
+          "actor": "National energy ministries, WHO and the Clean Cooking Alliance"
+        },
+        {
+          "title": "Concessional finance and results-based grants for last-mile access",
+          "evidence": "The five SDG7 custodian agencies stress that scaled international financial support and results-based grants are needed to reach the hardest-to-serve populations and address widening regional disparities.",
+          "actor": "Multilateral development banks and donor governments"
+        }
+      ],
+      "sources": [
+        "https://www.iea.org/reports/tracking-sdg7-the-energy-progress-report-2025",
+        "https://www.un.org/sustainabledevelopment/blog/2025/06/tracking-sdg7-press-release-june2025/",
+        "https://www.worldbank.org/en/topic/energy/publication/tracking-sdg-7-the-energy-progress-report-2025",
+        "https://www.worldbank.org/ext/en/energizingafrica",
+        "https://www.worldbank.org/en/news/press-release/2026/03/31/mission-300-launches-private-sector-council-to-boost-electricity-access-and-job-creation-in-africa",
+        "https://www.ruralelec.org/tracking-sdg7-report-confirms-progress-energy-access/"
+      ],
+      "updatedAt": "2026-07-09"
     }
   }
 }
