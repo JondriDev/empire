@@ -5,6 +5,18 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-09 · STRATEGIST — retire EPIC-12 → DONE; promote ▶ EPIC-13 · The last two islands join the organism (Mail + Crypto)
+
+**Read the gradient:** `metrics.json` current = green (apps 31, vitest 363/43 files, tokens 0, off-system 0, offSystemStyle 0, `--assert-zero` exit 0). QA (this run's green-main render-confirm, below): `INTENT-ROUNDTRIP 2/2 ✅`, 32/32 routes clean, all 12 guards green, both mail+crypto regressions render-confirmed FIXED. **EPIC-12 · Intent integrity is DONE** — S1–S3 shipped (`1add073` LOCK) + acceptance metric `INTENT-ROUNDTRIP 0/2 → 2/2` QA-confirmed LIVE on green main → retired to DONE.
+
+**Highest-gradient move now (audited this run):** the two brand-new apps `mail` + `crypto` (landed `e28b58c`) are **raw-HTML ISLANDS** — code-confirmed in `Mail.tsx`/`CryptoApp.tsx`: (1) NOT in the Core graph (no `useGraph`/`mirrorCollection` → invisible in Network/Search/Timeline/Inbox; the only remaining graph-islands, re-opening the gap EPIC-6 S4 closed for Reader), (2) no `useInboundHandoff` (can't "Send to Mail"), (3) off the `.gp`/`ui` shell (bare `<button>`/`<select>`/`<input>` + inline layout, no registry glyph header), (4) no alien glyph (`icons/index.ts` `alienIcons` lacks `Mail`/`Wallet` → `Node` fallback). Interconnection ranks ABOVE design-consistency in the priority bias, and two disconnected apps are the sharpest live contradiction of the "ONE interconnected organism" vision — a steeper gradient than the queued STATE-conformance candidate.
+
+**Promoted ▶ EPIC-13** (3 stages, deeply decomposed in EPICS.md): **S1** Crypto graph-legible + shell (`Wallet` glyph + `mirrorCollection('wallet','crypto',…)` → `GRAPH-LEGIBLE 1/1 → 2/2`); **S2** Mail handoff receiver + shell (`Mail` glyph + `useInboundHandoff('empire-mail-clipboard')` + a "Send to Mail" sender → `INBOUND-LANDS 3/3 → 4/4`); **S3** Mail durable drafts become graph-legible + ⚡ emit on both (`draftStore` + `mirrorCollection('draft','mail',…)` → `GRAPH-LEGIBLE 2/2 → 3/3` → EPIC-13 CODE-COMPLETE). Reuses the EPIC-6 `mirrorCollection` + EPIC-1 `useInboundHandoff` rails; no new deps; backend inbox/balance fetches are 401-gated in cloud, so each stage verifies the local-data path.
+
+**Docs updated + committed direct to main:** `docs/EPICS.md` (EPIC-13 ACTIVE, deeply decomposed; EPIC-12 → DONE), `docs/ROADMAP.md` (re-ranked, EPIC-12 done + EPIC-13 added), `docs/CONTEXT.md` (Active-epic block → EPIC-13 S1 exact shape). **Next (Builder):** EPIC-13 S1 — make Crypto graph-legible + shelled.
+
+---
+
 ## 2026-07-09 · QA — visual + smoke on green main: both mail+crypto regressions render-confirmed FIXED; EPIC-12 `INTENT-ROUNDTRIP 2/2` confirmed
 
 **Result:** 🟢 GREEN · clean run, no drift, no runtime bug. Build 🟢 (tsc -b && vite build, PWA 91 precache). Smoke **32/32** routes render clean (desktop + all 31 registry apps, 0 uncaught). All 12 guard suites green. `metrics.mjs --assert-zero` **exit 0**. Committed direct to `main`.
@@ -21,7 +33,7 @@ increment: what changed, why, what's verified, and the single best next step.
 
 **Open (not QA's to close):** the `⚠️ CI still not gating on --assert-zero` note stands — `.github/workflows/verify.yml` should add the ratchet gate so a future regression fails CI, not just this routine's local gate.
 
-**Next:** Strategist retires EPIC-12 → promotes the next epic (NO ACTIVE STAGE — measured design-system STATE-conformance epic or a measured a11y pass; EPIC-7 · Android stays device-gated).
+**Next:** Strategist retires EPIC-12 → promotes the next epic (this run: EPIC-13 · Mail+Crypto join the organism — see the entry above; EPIC-7 · Android stays device-gated).
 
 ---
 

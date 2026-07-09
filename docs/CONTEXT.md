@@ -16,7 +16,7 @@
 
 ---
 
-## ★ EPIC-12 CODE-COMPLETE (2026-07-09) — S3 LOCK shipped; NO ACTIVE STAGE → next run promotes the next epic
+## ★ EPIC-12 RETIRED to DONE (2026-07-09, Strategist) — `INTENT-ROUNDTRIP 2/2` QA-confirmed; ▶ EPIC-13 promoted ACTIVE (Mail + Crypto join the organism — see the "Active epic" block)
 
 **S3 (the LAST stage) shipped this run (build 2026-07-09, green main).** `syncAll` is now **exported** from `sync.ts:~127`;
 `sync.test.ts` grew the **`intent integrity — reconcile-survival invariant (EPIC-12 S3)`** suite (+4 → 21 in-file): each
@@ -27,15 +27,15 @@ core creation intent seeded + run + `syncAll()` → asserts the entity survives 
 417→421🟢 eslint clean; tokens/off-system-utils/offSystemStyle all 0, `--assert-zero` exit 0; test cases Δ+4; bundle gz
 727.7 ±0, no new deps.
 
-**★ EPIC-12 is CODE-COMPLETE (S1–S3).** ▶ **THERE IS NO ACTIVE STAGE.** The next run promotes the next epic: take the
-topmost cloud-executable ROADMAP NOW/NEXT candidate — the ratified next candidate is a **measured design-system STATE-conformance
-epic** (empty/loading/error primitives → an adoption metric + `--assert-zero` lock, the EPIC-5/11 template) **or a measured
-accessibility pass**; flag that EPICS.md needs the Strategist. **EPIC-7 · Android stays device-gated.**
-
-**✅ QA render-confirm DELIVERED 2026-07-09 (green main, post-fix).** Both owed re-confirms are DONE:
-`INTENT-ROUNDTRIP 2/2 ✅` reproduced live on green main (EPIC-12 acceptance holds) **and** the `app-mail.png`
-no-error-boundary re-confirm passed (mail renders "Provider himalaya not configured." graceful, no boundary).
-**▶ The Strategist can now retire EPIC-12 to DONE and promote the next epic.**
+**★ EPIC-12 is DONE (S1–S3 shipped + `INTENT-ROUNDTRIP 2/2` QA-confirmed LIVE on green main).** The 2026-07-09 QA run
+delivered both owed re-confirms — `INTENT-ROUNDTRIP 2/2 ✅` reproduced live (EPIC-12 acceptance holds) AND the `app-mail.png`
+no-error-boundary re-confirm passed (mail renders "Provider himalaya not configured." graceful, no boundary) — so nothing is
+outstanding on the retired epic. ▶ **The Strategist promoted EPIC-13 · The last two islands join the organism (Mail + Crypto)**
+as the ACTIVE epic — the steepest remaining cloud-executable gradient (interconnection, above design-consistency): two
+brand-new raw-HTML apps that are not in the graph, receive no handoffs, and bypass the shell. **Builder: start EPIC-13 S1
+(Crypto graph-legible + shell) — exact shape in the "Active epic" block below + full spec in EPICS.md.** The ratified LATER
+candidate (a measured design-system STATE/shell-adoption epic, or an accessibility pass) is deferred behind EPIC-13.
+**EPIC-7 · Android stays device-gated.**
 
 ---
 
@@ -128,8 +128,39 @@ fleet freeze). What changed for routines:
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **▶ ACTIVE: EPIC-12 · Intent integrity — S1 + S2 SHIPPED 2026-07-06 (`main`); S3 (LOCK) is the LAST stage → CODE-COMPLETE.
-  Full spec in [`docs/EPICS.md`](./EPICS.md) → EPIC-12.** EPIC-11 retired to DONE (offSystemStyle 56→0 LOCKED + QA-confirmed).
+- **▶ ACTIVE: EPIC-13 · The last two islands join the organism (Mail + Crypto become first-class Empire citizens).
+  Full spec in [`docs/EPICS.md`](./EPICS.md) → EPIC-13.** EPIC-12 retired to DONE (`INTENT-ROUNDTRIP 0/2 → 2/2` QA-confirmed
+  LIVE on green main `17d2dd9`; S1–S3 shipped + the reconcile-survival lock BITES). The mail-crash + ratchet regressions
+  EPIC-12's era surfaced are already fixed (`234173e`; `--assert-zero` exit 0, `metrics.json` current all-0).
+  **The gap (code-confirmed this run):** `src/apps/mail/Mail.tsx` + `src/apps/crypto/CryptoApp.tsx` (both landed `e28b58c`)
+  are raw-HTML ISLANDS — (1) NOT in the Core graph (no `useGraph`/`mirrorCollection` → invisible in Network/Search/Timeline/
+  Inbox; the only remaining graph-islands, re-opening the gap EPIC-6 S4 closed for Reader), (2) no `useInboundHandoff` (can't
+  "Send to Mail"), (3) off the shell (bare `<button>`/`<select>`/`<input>`/`<textarea>` + inline layout; no registry glyph
+  header, no `.gp`, none of `src/components/ui`), (4) no alien glyph (`alienIcons` in `icons/index.ts` lacks `Mail`/`Wallet`
+  → both fall back to the `Node` orbital). **Leap:** both become full citizens — shell + graph-legible + receive + emit.
+  **Targets:** `GRAPH-LEGIBLE 1/1 → 2/2 → 3/3` (crypto wallets S1, mail drafts S3) + `INBOUND-LANDS 3/3 → 4/4` (mail S2);
+  routes stay 31/31; tokens/off-system/offSystemStyle stay 0.
+  - **▶ S1 (next — start here, no re-planning) — exact shape:** make **Crypto** graph-legible + shelled.
+    (a) **`src/design-system/icons/glyphs.tsx`** — add a bespoke alien **`Wallet`** glyph (mirror `Datacenter`/`Files`
+    structure) + export it; **`icons/index.ts`** — import it + add `Wallet,` to the `alienIcons` map (registry already sets
+    `icon:'Wallet'` → this kills the `Node` fallback). (b) **New `src/apps/crypto/cryptoGraph.ts`** (mirror
+    `reader/readerGraph.ts`): pure `walletItems(addresses): {id:`wallet:${coin}`,coin,address}[]` (drop empty/whitespace
+    addresses) + `walletNodeData(w)=>({coin,address})`. (c) **`CryptoApp.tsx`** — Empire shell header (`getAppIcon('Wallet')`
+    + accent `#c4a265`, mirror Search/Timeline), raw `<button>`/`<input>` → `ui` `Button`/`Input`, results on `.gp`/`Card`;
+    keep the `crypto-watch-list` hydrate/persist; add `useEffect(() => mirrorCollection('wallet','crypto',
+    walletItems(addresses), {id, title:`${COIN} · ${addr.slice(0,6)}…${addr.slice(-4)}`, data:walletNodeData}), [addresses])`.
+    (d) **`network/nodeColors.ts`** — add a `wallet` type colour. (e) **Extend the `GRAPH-LEGIBLE` guard**
+    (`scripts/qa-smoke.mjs:249`; generalise `readReaderBookNodes`→`readNodes(page,type,app)`): seed
+    `localStorage['crypto-watch-list']={btc:'<addr>',eth:'',…}` BEFORE nav, open `/app/crypto`, assert a `wallet` node owned
+    by `crypto` in `empire-core-graph` + survives reload → **`1/1 → 2/2`**. (f) **`crypto/cryptoGraph.test.ts`** (≥4).
+    *Acceptance:* watched wallet is a `wallet` node in Network/Search/Timeline surviving reload; Crypto on the shell w/ the
+    `Wallet` glyph; `GRAPH-LEGIBLE 2/2`; build🟢 vitest🟢 eslint clean; tokens/off-system/offSystemStyle 0 (`--assert-zero`
+    exit 0); no new deps. *Cloud limit:* `/api/wallet/check` is 401-gated — the watch-list mirror is fully local + verifiable;
+    balances stay on-device. **Then S2 (Mail inbound → `INBOUND-LANDS 4/4`), S3 (Mail drafts graph-legible + ⚡ emit both →
+    `GRAPH-LEGIBLE 3/3` → EPIC-13 CODE-COMPLETE) per EPICS.md.**
+- **↓ EPIC-12 · Intent integrity — RETIRED to DONE 2026-07-09** (`INTENT-ROUNDTRIP 2/2` confirmed; S1–S3 shipped). History +
+  still-load-bearing traps kept below (the note-mirror-id guard trap, the production-`dist` ⚡-menu drive, the `runIntent`
+  `accepts` enforcement) — reuse them; don't relearn.
   **↳ ✅ QA DONE (2026-07-06, green main `94ff5f1`): `INTENT-ROUNDTRIP 2/2` CONFIRMED headless — both `make-note-from` +
   `add-to-learning` read `stored=true mirrored=true persisted=true`. S1 + S2 done-confirmed; the acceptance metric reached
   its target and holds. NO product bug. ⚠️ BUT the `add-to-learning` axis first read `stored=false` due to a GUARD bug I

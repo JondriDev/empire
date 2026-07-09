@@ -47,7 +47,180 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ---
 
-## ▶ ACTIVE — EPIC-12 · Intent integrity (every cross-app creation makes a REAL, persistent entity — no phantom graph nodes)
+## ▶ ACTIVE — EPIC-13 · The last two islands join the organism (Mail + Crypto become first-class Empire citizens)
+
+> **RATIFIED + PROMOTED by the Strategist 2026-07-09.** EPIC-12 is retired to DONE (below — `INTENT-ROUNDTRIP 0/2 → 2/2`
+> QA-CONFIRMED LIVE on green main `17d2dd9`, S1–S3 all shipped + the reconcile-survival lock BITES). Every interconnection
+> epic EPIC-1..12 that predates the mail+crypto apps is DONE. The Strategist audited the organism for the steepest REMAINING
+> cloud-executable gradient and found it at the **top of the priority bias (interconnection, above design-consistency)**:
+> **two brand-new apps shipped as raw-HTML ISLANDS that are not part of the organism at all.**
+>
+> **The gap (code-confirmed this run — `src/apps/mail/Mail.tsx`, `src/apps/crypto/CryptoApp.tsx`):** the **Mail** (email
+> bridge, landed `e28b58c`) and **Crypto** (wallet-watch, landed `e28b58c`) apps are total organism outsiders on FOUR axes:
+> 1. **Not in the Core graph.** Neither imports `useGraph` / `mirrorCollection`. A watched wallet address or an email/draft
+>    is **invisible in The Network, Search, Timeline, and Inbox** — the organism literally cannot see them. Every other
+>    collection-owning app (Reader/book, DataCenter/dataset, Files/file, Photos/photo, …) is graph-legible; these two are the
+>    only remaining graph-islands, re-opening the exact gap EPIC-6 S4 closed for Reader.
+> 2. **No inbound handoffs.** Neither uses `useInboundHandoff`. You can't "Send to Mail" a draft from Notes/Editor — the
+>    receive half of the organism loop that 9 entity-apps already have.
+> 3. **Off the design-system shell.** Both use bare `<button>`/`<select>`/`<input>`/`<textarea>` + inline flex/grid, with
+>    **no registry glyph+accent header, no `.gp` glass surface, and none of the `src/components/ui` primitives**
+>    (`Button`/`Input`/`TextArea`/`Card`). They *audit* at `offSystemStyle` 0 / `tokenViolations` 0 only because the build
+>    routine tokenised their raw values in `234173e` — but they still bypass the component shell, so they read as a different
+>    product bolted on, not "alien technology, one organism."
+> 4. **No bespoke alien glyph.** `src/design-system/icons/index.ts` `alienIcons` has **no `Mail` or `Wallet` key**, so both
+>    apps fall back to the bare orbital `Node` glyph (`getAppIcon` `FallbackIcon`) — they don't even have icons of their own.
+>
+> **Why this is the highest-gradient move now (one line):** the vision is "ONE interconnected organism that feels like alien
+> technology"; two disconnected raw-HTML apps are its sharpest live contradiction, and interconnection ranks ABOVE
+> design-consistency / the queued STATE-conformance candidate in the priority bias. It reuses the exact EPIC-6 `mirrorCollection`
+> + EPIC-1 `useInboundHandoff` rails (no invention), is fully cloud-verifiable on the LOCAL-data paths (the backend inbox/
+> balance fetches are 401-gated in cloud — see each stage's *cloud limit*), and needs no new deps.
+
+**Leap:** Mail and Crypto stop being bolted-on raw-HTML panels and become full Empire citizens — rendered on the shared shell
+(their own alien glyph + accent header + `.gp`/`ui` surfaces), **legible in the graph** (a watched wallet and a saved mail
+draft appear as nodes in Network/Search/Timeline), **able to receive** ("Send to Mail" lands a prefilled draft with a
+"From <source>" chip), and **able to emit** (⚡ `NodeActions` on wallet/draft rows spawn tasks/notes with honest provenance).
+The organism has no islands left.
+
+**Target metrics (Builder instruments them; QA confirms they moved):**
+- **`GRAPH-LEGIBLE 1/1 → 2/2 → 3/3`** — Crypto's watch-list wallets (S1) + Mail's persisted drafts (S3) each become
+  reload-durable graph nodes owned by the right app (the EPIC-6 S4 guard, extended per app).
+- **`INBOUND-LANDS 3/3 → 4/4`** — Mail becomes a handoff receiver (S2), the EPIC-1 receive-loop guard extended.
+- Both apps render on the Empire shell (new `Mail`/`Wallet` alien glyphs + accent header + `.gp`/`ui` components);
+  *Routes rendering clean* stays **31/31** (mail included, now on the shell); `tokenViolations`/`offSystemUtilities`/
+  `offSystemStyle` stay **0** (`--assert-zero` must keep passing).
+
+### Rails to reuse (read ONCE — do NOT reinvent)
+- **`src/lib/core/sync.ts` `mirrorCollection(type, app, items, { id, title, data })`** (`:112`) — the ~3-line rail that
+  mirrors a collection living OUTSIDE the global store (own localStorage / component state) into the Core graph. **Reader is
+  the exact precedent:** `Reader.tsx:45` `useEffect(() => mirrorCollection('book','reader', books, { id, title, data:
+  bookNodeData }), [books])`, with the pure `data` mapper factored into `readerGraph.ts` + unit-pinned. Copy this shape
+  verbatim; put each app's pure mapper in a sibling `*Graph.ts` so it unit-tests without React. Mirrored types created via
+  `mirrorCollection` carry `data.sourceId` (reconcile keeps them) — they are NOT the phantom pattern EPIC-12 fixed.
+- **`src/lib/useInboundHandoff.ts` `useInboundHandoff<T>(sessionKey)`** (`:25`) — the receiver half: reads/clears an
+  `empire-*-clipboard` `sessionStorage` payload on mount, returns `{ payload, source, dismiss }`. **Calendar is the exact
+  precedent:** `Calendar.tsx:81` `const inbound = useInboundHandoff<{text?;title?;from?}>('empire-calendar-clipboard')` +
+  `Calendar.tsx:219` `<ProvenanceChip from={inbound.source} onDismiss={…}/>`.
+- **`src/lib/appActions.ts`** — the SENDER half. Each cross-app action drops `sessionStorage['empire-<target>-clipboard'] =
+  JSON.stringify({ …, from: data.source })` + `emit({type:'HANDOFF', fromId, toId, label})` (`:32`). The
+  `empire-calendar-clipboard` (`:154`) / `empire-messages-clipboard` (`:188`) senders are the exact shape to copy for
+  `empire-mail-clipboard`.
+- **`src/components/ui/index.tsx`** — `Button` (`:94`), `Input` (`:144`), `TextArea` (`:205`), `Card` (`:24`), `Badge`,
+  `Divider`; **`src/components/ui/NodeActions.tsx`** (⚡ menu → `intentsFor(node)`); **`src/components/ui/ProvenanceChip.tsx`**
+  ("From <source>" badge). The **Search / Timeline** apps are the header idiom to mirror (registry glyph + `app.color` accent).
+- **`src/design-system/icons/glyphs.tsx` + `index.ts`** — add a new alien glyph exactly as `Search`/`Timeline` were added
+  (component in `glyphs.tsx`, `Wallet`/`Mail` key into `alienIcons` in `index.ts`; the registry already sets `icon:'Wallet'`
+  / `icon:'Mail'`, today unresolved → `Node` fallback).
+- **`src/apps/network/nodeColors.ts`** — the node-type → colour map for The Network legend; add `wallet` (S1) + `draft` (S3).
+- **`scripts/qa-smoke.mjs`** — the `GRAPH-LEGIBLE` guard (`:249`, `readReaderBookNodes` reads `empire-core-graph` for a
+  `type`+`app` node, drives → reload → asserts persistence) and the `INBOUND-LANDS` guard (`:136`, a `receivers` list seeds
+  `empire-*-clipboard`, reloads, asserts a "From" chip + a prefilled control). Extend both, don't rewrite.
+
+Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones before, build+vitest+eslint green,
+`tokenViolations`/`offSystemUtilities`/`offSystemStyle` stay 0):
+
+- [ ] **S1 · Crypto becomes a graph-legible Empire app — `Wallet` glyph + shell + `wallet` nodes → `GRAPH-LEGIBLE 1/1 → 2/2`.**
+  The watch-list is 100% local (`localStorage['crypto-watch-list']`), so this whole stage is cloud-verifiable; only the
+  balance fetch is backend-gated.
+  - **`src/design-system/icons/glyphs.tsx`** — add a bespoke alien **`Wallet`** glyph component (mirror an existing glyph's
+    `viewBox`/stroke/`currentColor` structure — e.g. `Datacenter`/`Files`); export it. If `AppIcon`'s union is explicit, add it.
+  - **`src/design-system/icons/index.ts`** — `import { … Wallet }`, add `Wallet,` to the `alienIcons` map (registry already
+    uses `icon:'Wallet'`; this removes the `Node` fallback).
+  - **New `src/apps/crypto/cryptoGraph.ts`** (mirror `src/apps/reader/readerGraph.ts`): a pure
+    `export function walletItems(addresses: Record<Coin,string>): { id: string; coin: Coin; address: string }[]` returning
+    ONLY coins whose address is a non-empty trimmed string, each `{ id: `wallet:${coin}`, coin, address }`; plus
+    `export function walletNodeData(w): Record<string,unknown> { return { coin: w.coin, address: w.address } }`. Pure → unit-testable.
+  - **`src/apps/crypto/CryptoApp.tsx`** — (a) **shell:** a header with `getAppIcon('Wallet')` glyph + the `crypto` accent
+    (`#c4a265`) + the name, matching the Search/Timeline header; replace raw `<button>`→`ui` `Button`, raw `<input>`→`ui`
+    `Input`, wrap the results section in a `.gp`/`Card` glass surface. Keep the `crypto-watch-list` hydrate/persist logic
+    untouched. (b) **mirror:** `useEffect(() => mirrorCollection('wallet','crypto', walletItems(addresses), { id: w => w.id,
+    title: w => `${w.coin.toUpperCase()} · ${w.address.slice(0,6)}…${w.address.slice(-4)}`, data: walletNodeData }),
+    [addresses])`.
+  - **`src/apps/network/nodeColors.ts`** — add a `wallet` type colour (an unused-ish accent, e.g. the crypto gold `#c4a265`)
+    so wallets read in the Network legend.
+  - **Extend the `GRAPH-LEGIBLE` guard** (`scripts/qa-smoke.mjs`): generalise `readReaderBookNodes` to a
+    `readNodes(page, type, app)` helper (or add a parallel `readWalletNodes`), then add a **`crypto/wallet`** axis — seed
+    `localStorage['crypto-watch-list']` with a real address (e.g. `{btc:'bc1qxyqa...probe',eth:'',sol:'',xrp:'',doge:''}`)
+    BEFORE navigating, open `/app/crypto` (the hydrate effect fires + mirrors), assert a `wallet` node owned by `app==='crypto'`
+    in `empire-core-graph`, reload, assert it persists. Bump the console + the REPORT section to **`GRAPH-LEGIBLE 1/1 → 2/2`**
+    (table gets a `crypto/wallet` row).
+  - **Test `src/apps/crypto/cryptoGraph.test.ts`** (≥4): `walletItems` drops empty/whitespace addresses, keeps configured
+    ones with correct `id`/`coin`/`address`, order is deterministic (COINS order); `walletNodeData` returns `{coin,address}`.
+  - *Acceptance:* a watched wallet appears as a `wallet` node in Network/Search/Timeline that survives reload; Crypto renders
+    on the Empire shell with the new `Wallet` glyph (no `Node` fallback); **`GRAPH-LEGIBLE 2/2`**; build🟢 vitest🟢 eslint clean;
+    tokens 0, off-system 0, offSystemStyle 0 (`--assert-zero` exit 0); no new deps.
+  - *Cloud limit:* live wallet balances are backend-gated (`/api/wallet/check` → 401 in cloud) — the watch-list mirror is
+    fully local, so graph-legibility is cloud-verified headless; the balance fetch stays an on-device confirm.
+
+- [ ] **S2 · Mail becomes an Empire app + a handoff RECEIVER — `Mail` glyph + shell + inbound → `INBOUND-LANDS 3/3 → 4/4`.**
+  The inbound-receive + prefill is 100% local (a seeded `sessionStorage` payload), so it's cloud-verifiable; only send/inbox
+  are backend-gated. Reuses S1's shell pattern.
+  - **`src/design-system/icons/glyphs.tsx` + `index.ts`** — add a bespoke alien **`Mail`** glyph + the `Mail` key to
+    `alienIcons` (registry already uses `icon:'Mail'` → removes the `Node` fallback).
+  - **`src/lib/appActions.ts`** — add a **"Send to Mail"** sender mirroring the `empire-calendar-clipboard` sender (`:154`):
+    `sessionStorage.setItem('empire-mail-clipboard', JSON.stringify({ subject: data.title, body: data.text, from: data.source }))`
+    + `emit({type:'HANDOFF', fromId, toId:'mail', label:'to mail'})`. Wire it into the same `CROSS_APP_ACTIONS` / send-target
+    list the other receivers use (so Notes/Editor/Grammar/… surface "Send to Mail" via `SendResultMenu`/`NodeActions`).
+  - **`src/apps/mail/Mail.tsx`** — (a) **shell:** `getAppIcon('Mail')` glyph + the `mail` accent (`#1a8caa`) header; raw
+    `<select>`/`<button>`/`<input>`/`<textarea>` → `ui` `Button`/`Input`/`TextArea` (the provider `<select>` may stay native
+    or become a small `ui` control — keep it accessible); message list on a `.gp` surface. (b) **inbound:** `const inbound =
+    useInboundHandoff<{ to?:string; subject?:string; body?:string; from?:string }>('empire-mail-clipboard')`; on a non-null
+    payload, open the compose panel (`setComposeOpen(true)`) + prefill `compose` from `payload.to/subject/body`; render
+    `<ProvenanceChip from={inbound.source} onDismiss={() => inbound.dismiss()} />` in the compose header (mirror `Calendar.tsx:219`).
+  - **Extend the `INBOUND-LANDS` guard** (`scripts/qa-smoke.mjs:136`): add a **`mail`** receiver to the `receivers` list —
+    `{ id:'mail', key:'empire-mail-clipboard', from:'notes', needle:'<seeded body substring>' }` (mirror the `calendar` entry
+    at `:146`): seed the clipboard, reload `/app/mail`, assert a "From <source>" chip renders AND the compose body/subject is
+    prefilled with the needle. Headline **`INBOUND-LANDS 3/3 → 4/4`**; REPORT table gets a `mail | notes` row.
+  - **Tests:** extend `appActions.test.ts` — the "Send to Mail" action writes `empire-mail-clipboard` (with `from`) + emits
+    exactly ONE `HANDOFF` arc to `mail`; extend `src/apps/mail/Mail.test.tsx` — a seeded `empire-mail-clipboard` payload →
+    compose opens + body/subject prefilled + a `ProvenanceChip` renders (the first case goes RED without the hook).
+  - *Acceptance:* "Send to Mail" from Notes/Editor lands a prefilled compose draft with a "From <source>" chip; Mail renders
+    on the Empire shell with the new `Mail` glyph; **`INBOUND-LANDS 4/4`**, mail still renders clean (31/31); build🟢 vitest🟢
+    eslint clean; tokens/off-system/offSystemStyle 0 (`--assert-zero` exit 0); no new deps.
+  - *Cloud limit:* the actual send + inbox fetch are backend-gated (`/api/integrations/email/*` → 401 in cloud) — the
+    inbound-receive + prefill is fully local and cloud-verified; send/inbox stay on-device.
+
+- [ ] **S3 · Mail drafts PERSIST + become graph-legible; both apps EMIT via ⚡ NodeActions → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE.**
+  Today Mail's compose is **ephemeral** (a close/reload loses it) — a real capability gap. A durable local drafts store fixes
+  that AND makes Mail graph-legible via the same rail as Crypto/Reader (fully cloud-verifiable — no backend). This is the
+  capstone: both islands now emit, and Mail persists.
+  - **New `src/apps/mail/lib/draftStore.ts`** — a tiny localStorage store (`empire-mail-drafts`): `Draft = { id: string; to:
+    string; subject: string; body: string; updatedAt: number }`; `listDrafts(): Draft[]`, `saveDraft(d: Omit<Draft,
+    'updatedAt'>): Draft` (upsert by id, stamps `updatedAt`), `deleteDraft(id: string): void`. Pure-ish (localStorage only) →
+    unit-testable.
+  - **New `src/apps/mail/mailGraph.ts`** (mirror `readerGraph.ts`): pure `export function draftNodeData(d: Draft):
+    Record<string,unknown> { return { subject: d.subject, to: d.to } }` (title/body carry the rest via the mirror).
+  - **`src/apps/mail/Mail.tsx`** — add a **"Save draft"** button in compose (persists the current `compose` via `saveDraft`,
+    gives it a fresh id if new) + a **Drafts** list (from `listDrafts()`, each row opens it back into compose, with a delete);
+    `useEffect(() => mirrorCollection('draft','mail', drafts, { id: d => d.id, title: d => d.subject || '(no subject)', data:
+    draftNodeData }), [drafts])`; mount `⚡ <NodeActions nodeId={d.id}>` on each draft row (emit — a draft can spawn a task/note).
+  - **`src/apps/crypto/CryptoApp.tsx`** — mount `⚡ <NodeActions nodeId={`wallet:${coin}`}>` on each configured wallet row
+    (emit — a wallet can spawn a task/note; the node already exists from S1). Mirror Reader's per-card `<NodeActions>` idiom.
+  - **`src/apps/network/nodeColors.ts`** — add a `draft` type colour.
+  - **Extend the `GRAPH-LEGIBLE` guard** with a **`mail/draft`** axis: seed `localStorage['empire-mail-drafts']` with one
+    draft, reload `/app/mail`, assert a `draft` node owned by `app==='mail'` in `empire-core-graph` + survives a 2nd reload.
+    Headline **`GRAPH-LEGIBLE 2/2 → 3/3`**; REPORT table gets a `mail/draft` row.
+  - **Tests:** `src/apps/mail/lib/draftStore.test.ts` (save→list→delete roundtrip; upsert by id; survives a fresh `listDrafts`)
+    + `src/apps/mail/mailGraph.test.ts` (`draftNodeData` shape). ≥5 combined.
+  - *Acceptance:* a saved Mail draft survives reload AND appears as a `draft` node in Network/Search/Timeline; both Crypto
+    wallets and Mail drafts offer ⚡ intents (spawn task/note); **`GRAPH-LEGIBLE 3/3`**; build🟢 vitest🟢 eslint clean;
+    tokens/off-system/offSystemStyle 0 (`--assert-zero` exit 0); no new deps. **★ EPIC-13 CODE-COMPLETE (S1–S3) → QA confirms
+    `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4` on green main → Strategist retires to DONE.**
+  - *Cloud limit:* the drafts store is 100% local → fully cloud-verified; the ⚡ intent-run window/focus change is unit-pinned
+    in `NodeActions`' existing tests (the same on-device caveat every ⚡ surface carries).
+
+> _**Ratified 2026-07-09.** Ordered so each stage is downhill: S1 stands up the shared shell pattern + the graph-mirror rail on
+> the simplest (fully-local) app (Crypto → `GRAPH-LEGIBLE 2/2`); S2 reuses the shell + adds Mail's receive loop
+> (`INBOUND-LANDS 4/4`); S3 gives Mail durable drafts (a real capability) that close the last graph-island
+> (`GRAPH-LEGIBLE 3/3`) and light ⚡ emit on both. When all three ship AND QA confirms `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4`
+> on green main → retire EPIC-13 to DONE. The next cloud-executable candidate is a measured design-system STATE/shell-adoption
+> epic (a `raw-control`/state-primitive audit → `--assert-zero` lock, the EPIC-5/11 template — now that two apps have shown how
+> islands creep back in) or a measured accessibility pass; **EPIC-7 · Android stays device-gated.**_
+
+---
+
+## ✅ DONE — retired by the Strategist 2026-07-09 (S1–S3 all shipped + QA-CONFIRMED LIVE; `INTENT-ROUNDTRIP 0/2 → 2/2` on green main `17d2dd9`; the reconcile-survival lock BITES) — EPIC-12 · Intent integrity (every cross-app creation makes a REAL, persistent entity — no phantom graph nodes)
 
 > **RATIFIED + PROMOTED by the Strategist 2026-07-06.** EPIC-11 is retired to DONE (below — `offSystemStyle` 56→0 LOCKED
 > + QA-CONFIRMED on green `main`) and every interconnection epic EPIC-1..10 is DONE, so the fleet had **no active epic and

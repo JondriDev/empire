@@ -10,24 +10,25 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-07-06** (strategist) · Main: 🟢 green (vitest 367, token-violations 0, off-system 0, offSystemStyle 0) ·
-> QA: 30/30 routes render, no runtime errors, all guards green. **EPIC-1..11 all DONE** (organism both-ways 9/9 ·
-> token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable · off-system 1076→0, CI-locked ·
-> durable provenance `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` + Reader graph-legible · `GLOBAL-SEARCH 1/1`
-> queryable organism · `NODE-LINEAGE 1/1` per-artifact ancestry, navigable · `TIMELINE 1/1` temporal lens, all six axes ·
-> **`offSystemStyle` 56→0 (r0/t0/m0) LOCKED — EPIC-11 retired 2026-07-06**).
-> **▶ EPIC-12 · Intent integrity (every cross-app creation makes a REAL, persistent entity — no phantom graph nodes)
-> ACTIVE — RATIFIED 2026-07-06.** With every interconnection + design-conformance epic done, the fleet had no active epic
-> and idled 3 runs on empty-state polish; the Strategist audited the organism and found a **latent correctness bug** at the
-> TOP of the priority bias (fix-broken → interconnection): two of the three core intents create **phantom** entities.
-> `make-note-from` + `add-to-learning` (`src/lib/core/sync.ts:139,153`) `g.addNode` a `note`/`learning` graph node but never
-> write the real store — and `reconcile()` (`:63-65`) prunes any centrally-mirrored node with no `data.sourceId`, so both
-> results never reach Notes/Learning AND vanish on the next mutation/reload. **Fix:** route the intents through
-> `useStore.addNote`/`addLearningItem` (the synchronous `subscribe(syncAll)` mirror re-materializes them un-prunably),
-> preserving `data.from` for lineage. **Target: a new `INTENT-ROUNDTRIP` guard, `0/2 → 2/2`** (note + learning both survive
-> a reload) — S1 note round-trip + guard, S2 learning, S3 lock via a reconcile-survival invariant test. `make-task` stays
-> graph-only BY DESIGN (Inbox lens; no task store). **Android is EPIC-7 (QUEUED)** — device-gated, promote only with
-> on-device QA.
+> Last re-ranked: **2026-07-09** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 363/43 files,
+> token-violations 0, off-system 0, offSystemStyle 0 r0/t0/m0, `--assert-zero` exit 0, bundle gz 727.7) · QA (2026-07-09,
+> `17d2dd9`): `INTENT-ROUNDTRIP 2/2 ✅`, all 12 guard suites green; the mail-crash + ratchet regressions it flagged are
+> already FIXED (`234173e`). **EPIC-1..12 all DONE** (organism both-ways 9/9 · token-violations 501→0 · shallow instruments
+> 8/8 · PWA offline+base+installable · off-system 1076→0, CI-locked · durable provenance `PROVENANCE-PERSISTS 3/3` +
+> `PROVENANCE-ENTITY 3/3` + Reader graph-legible · `GLOBAL-SEARCH 1/1` queryable organism · `NODE-LINEAGE 1/1` per-artifact
+> ancestry, navigable · `TIMELINE 1/1` temporal lens, all six axes · `offSystemStyle` 56→0 LOCKED — EPIC-11 · **`INTENT-ROUNDTRIP`
+> 0/2→2/2, no phantom intents, reconcile-survival LOCKED — EPIC-12 retired 2026-07-09**).
+> **▶ EPIC-13 · The last two islands join the organism (Mail + Crypto become first-class Empire citizens) ACTIVE — RATIFIED
+> 2026-07-09.** With every pre-existing interconnection epic done, the Strategist audited the organism and found the steepest
+> remaining gradient at the TOP of the priority bias (interconnection, above design-consistency): **two brand-new apps
+> (`mail`, `crypto`, landed `e28b58c`) shipped as raw-HTML ISLANDS.** Neither imports `useGraph`/`mirrorCollection` (invisible
+> in Network/Search/Timeline/Inbox — the only remaining graph-islands), neither uses `useInboundHandoff` (can't "Send to
+> Mail"), both bypass the `.gp`/`ui` shell (bare `<button>`/`<input>` + inline layout, no registry glyph header), and neither
+> has an alien glyph (`icons/index.ts` `alienIcons` lacks `Mail`/`Wallet` → `Node` fallback). **Leap:** both become full
+> citizens — shell + graph-legible + receive + emit. **Targets: `GRAPH-LEGIBLE 1/1 → 2/2 → 3/3`** (crypto wallets S1, mail
+> drafts S3) **+ `INBOUND-LANDS 3/3 → 4/4`** (mail S2), reusing the EPIC-6 `mirrorCollection` + EPIC-1 `useInboundHandoff`
+> rails (no invention); backend inbox/balance fetches are 401-gated in cloud, so each stage verifies the LOCAL-data path.
+> **Android is EPIC-7 (QUEUED)** — device-gated, promote only with on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
@@ -121,12 +122,17 @@ now **EPIC-6 S4**:
 - **Design-system conformance II — the non-colour token axis.** ✅ **DONE — this WAS EPIC-11** (S1–S4 shipped +
   QA-confirmed LIVE: `offSystemStyle 56 → 0` r0/t0/m0, radii/type/easing all tokenised + LOCKED in `--assert-zero`, the
   exact EPIC-5 measure→drive-to-0→lock template; raw spacing deliberately excluded as un-driveable). Retired 2026-07-06.
-- **Intent integrity — every cross-app creation makes a REAL, persistent entity.** *(In progress — this IS EPIC-12, ▶
-  ACTIVE, RATIFIED 2026-07-06.)* A latent organism-integrity bug: `make-note-from` + `add-to-learning` (`sync.ts:139,153`)
-  add phantom `note`/`learning` graph nodes that never reach the store and are pruned by `reconcile()`. Route them through
-  `useStore.addNote`/`addLearningItem` (the synchronous mirror re-materializes them un-prunably), preserving `data.from`.
-  **Target: a new `INTENT-ROUNDTRIP` guard `0/2 → 2/2`** (S1 note + guard → S2 learning → S3 lock via reconcile-survival
-  invariant). Closes when QA confirms `INTENT-ROUNDTRIP 2/2` on green main. *`make-task` stays graph-only by design.*
+- **Intent integrity — every cross-app creation makes a REAL, persistent entity.** ✅ **DONE — this WAS EPIC-12** (S1–S3
+  shipped: `make-note-from` + `add-to-learning` route through `useStore.addNote`/`addLearningItem` so the synchronous mirror
+  re-materializes them un-prunably, `data.from` preserved; a reconcile-survival invariant LOCKS the phantom pattern out).
+  `INTENT-ROUNDTRIP 0/2 → 2/2` QA-confirmed LIVE on green main `17d2dd9`. Retired 2026-07-09. *`make-task` stays graph-only by design.*
+- **The last two islands join the organism — Mail + Crypto become first-class Empire citizens.** *(In progress — this IS
+  EPIC-13, ▶ ACTIVE, RATIFIED 2026-07-09.)* The `mail` + `crypto` apps (landed `e28b58c`) shipped as raw-HTML islands: not in
+  the Core graph, no inbound handoffs, off the `.gp`/`ui` shell, no alien glyph. Route them onto the shared shell + the EPIC-6
+  `mirrorCollection` rail + the EPIC-1 `useInboundHandoff` rail so both become graph-legible, receive, and emit. **Targets:
+  `GRAPH-LEGIBLE 1/1 → 2/2 → 3/3`** (crypto watch-list wallets S1, mail persisted drafts S3) **+ `INBOUND-LANDS 3/3 → 4/4`**
+  (mail S2). Closes when QA confirms `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4` on green main. Backend inbox/balance fetches are
+  401-gated in cloud → each stage verifies the local-data path.
 - **Design-system STATE conformance (empty / loading / error) — a FUTURE epic candidate (not yet decomposed).** The 3
   idle-run empty-state polish increments made `<EmptyState>` a fully general primitive (adoption 1→6→13, incl. a `size="sm"`
   variant). The ripe next step is to *measure + lock* it: an `emptyStateAdoption` (or a broader state-primitive) metric
@@ -191,6 +197,7 @@ still-relevant ideas are parked here for future re-ranking:
 - **Files** — a "pinned"/cross-directory file graph would need a persistent registry
   (today's reconcile is per-directory).
 - **Prompt Gen** — optional persisted history of un-saved generations.
-- **Intents** — `make-note-from` / `add-to-learning` should round-trip into the
-  Notes/Learning stores (today they create graph-only nodes).
+- ~~**Intents** — `make-note-from` / `add-to-learning` should round-trip into the
+  Notes/Learning stores (today they create graph-only nodes).~~ ✅ **DONE — EPIC-12** (both route through the store, mirror
+  un-prunably, reconcile-survival LOCKED; `INTENT-ROUNDTRIP 2/2`). Retired 2026-07-09.
 - **Photos** — persist a data-URL thumbnail so photo nodes can be visual in Network.
