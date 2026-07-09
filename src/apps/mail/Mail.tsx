@@ -58,8 +58,8 @@ export default function MailApp() {
         </select>
         <button onClick={refresh} disabled={loading}>{loading ? 'Loading…' : 'Refresh'}</button>
         <button onClick={() => setComposeOpen(o => !o)}>{composeOpen ? 'Close' : 'Compose'}</button>
-        {status && (
-          <span style={{ marginLeft: 'auto', opacity: 0.7, fontSize: 12 }}>
+        {status?.providers && (
+          <span style={{ marginLeft: 'auto', opacity: 0.7, fontSize: 'var(--text-sm)' }}>
             {Object.entries(status.providers).map(([k, v]) => `${k}=${v.configured ? '✓' : '·'}`).join('  ')}
           </span>
         )}
@@ -71,11 +71,11 @@ export default function MailApp() {
           <textarea placeholder="body" rows={6} value={compose.body} onChange={e => setCompose(c => ({ ...c, body: e.target.value }))} />
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button onClick={send} disabled={!compose.to || !compose.subject || !compose.body}>Send</button>
-            <span style={{ opacity: 0.7, fontSize: 12 }}>{sendStatus}</span>
+            <span style={{ opacity: 0.7, fontSize: 'var(--text-sm)' }}>{sendStatus}</span>
           </div>
         </section>
       )}
-      {err && <p style={{ color: 'crimson', margin: 0 }}>{err}</p>}
+      {err && <p style={{ color: 'var(--c-danger)', margin: 0 }}>{err}</p>}
       <ul style={{ overflow: 'auto', margin: 0, padding: 0, listStyle: 'none' }}>
         {messages.length === 0 && !loading && !err && (
           <li style={{ opacity: 0.7, padding: 12 }}>
@@ -83,9 +83,9 @@ export default function MailApp() {
           </li>
         )}
         {messages.map(m => (
-          <li key={`${m.id}-${m.from}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: 10 }}>
+          <li key={`${m.id}-${m.from}`} style={{ borderBottom: '1px solid var(--border)', padding: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <strong>{m.from}</strong><span style={{ opacity: 0.6, fontSize: 12 }}>{m.date}</span>
+              <strong>{m.from}</strong><span style={{ opacity: 0.6, fontSize: 'var(--text-sm)' }}>{m.date}</span>
             </div>
             <div style={{ opacity: 0.9 }}>{m.subject}</div>
           </li>

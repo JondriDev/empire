@@ -45,7 +45,7 @@ export default function CryptoApp() {
         <h2 style={{ margin: 0 }}>Crypto · Wallet Watch</h2>
         <button onClick={refresh} disabled={loading}>{loading ? 'Loading…' : 'Refresh'}</button>
       </header>
-      {err && <p style={{ color: 'crimson' }}>{err}</p>}
+      {err && <p style={{ color: 'var(--c-danger)' }}>{err}</p>}
       <div style={{ display: 'grid', gap: 8 }}>
         {COINS.map(c => (
           <label key={c} style={{ display: 'grid', gridTemplateColumns: '60px 1fr', alignItems: 'center', gap: 8 }}>
@@ -60,9 +60,9 @@ export default function CryptoApp() {
       </div>
       <section style={{ marginTop: 16 }}>
         {Object.entries(results).map(([k, v]) => (
-          <div key={k} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '8px 0' }}>
+          <div key={k} style={{ borderBottom: '1px solid var(--border)', padding: '8px 0' }}>
             <strong>{k}</strong>
-            <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, opacity: 0.85 }}>{JSON.stringify(v, null, 2)}</pre>
+            <pre style={{ whiteSpace: 'pre-wrap', fontSize: 'var(--text-sm)', opacity: 0.85 }}>{JSON.stringify(v, null, 2)}</pre>
           </div>
         ))}
       </section>

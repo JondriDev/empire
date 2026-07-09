@@ -16,26 +16,27 @@
 
 ---
 
-## 🔴 QA STATE (2026-07-09) — TWO regressions on current main `17d2dd9` (new mail+crypto apps); build routine owns both fixes
+## ✅ QA STATE (2026-07-09) — both mail+crypto regressions FIXED by the build routine; green main; awaiting QA render re-confirm
 
-The `feat(apps): Mail + Crypto apps + wallet backend` commit (`e28b58c`) shipped **un-smoked** and **un-gated**:
-1. **RUNTIME BUG — `mail` crashes into the error boundary.** `src/apps/mail/Mail.tsx:63` does
-   `Object.entries(status.providers)` guarded only by `{status && …}` (`:61`). On boot the `useEffect` fetches
-   `/api/integrations/status` (`:30`); unauthenticated (cloud sandbox + any client with no token) that returns
-   **HTTP 401** whose body has **no `providers` key** → `Object.entries(undefined)` throws
-   `TypeError: Cannot convert undefined or null to object` → whole app = "Something went wrong". **The 401 is
-   env-expected; the CRASH is a real product bug.** Minimal fix: `:61` `{status && (` → `{status?.providers && (`
-   (`:82` already null-safe). QA writes are scoped to docs/ + the harness, so **NOT patched — flagged for the build routine.**
-2. **RATCHET BROKEN — `node scripts/metrics.mjs --assert-zero` exits 1.** mail+crypto reintroduced
-   **tokenViolations 0→2** (raw hex: crypto ×1, mail ×1) + **offSystemStyle 0→4 (r0/t4/m0)** (raw `font-size`:
-   mail ×3, crypto ×1) — the design-system locks EPIC-5/EPIC-11 held at 0. Build routine: tokenize to `var(--text-*)`
-   + a colour token to restore exit 0. **(NOTE: CI apparently isn't blocking on `--assert-zero` — these landed on
-   main green; worth a human check of `verify.yml`.)**
+The two regressions QA flagged on `76aa637` are **both fixed and pushed** (build run 2026-07-09). Green main, `--assert-zero`
+exit 0 restored. **QA owes a render re-confirm** of `app-mail.png` (no error boundary) on the new green main.
 
-**Harness change this run (mine, committed):** added `mail`,`crypto` to the `apps` smoke list in `scripts/qa-smoke.mjs`
-— they were new registry apps missing from coverage (REGISTRY-COVERAGE would otherwise silently under-count). Smoke
-list ↔ registry now exact at **31**. **EPIC-12 acceptance `INTENT-ROUNDTRIP 2/2 ✅` still holds** on this tree (both
-store-backed intents round-trip clean). Everything else green (all 12 guard suites, OFFLINE 5/5, PRECACHE 91 no-gap).
+1. **RUNTIME CRASH — FIXED.** `Mail.tsx:61` `{status && (` → `{status?.providers && (`. The boot status fetch returns
+   HTTP 401 (env-expected, cloud/tokenless) with a body that has no `providers` key; the old guard only checked `status`
+   truthiness so `Object.entries(status.providers)` ran on `undefined` and threw. The provider strip now renders only when
+   `providers` is present. **Unit-pinned** by new `src/apps/mail/Mail.test.tsx` (case a stubs the 401 shape → asserts no
+   crash + strip hidden; goes RED against the old guard). The 401 itself is still env-expected (needs a token / server config).
+2. **RATCHET — RESTORED to 0** (`--assert-zero` exit 0). **tokenViolations 2→0:** the two counted offenders were raw
+   `rgba(255,255,255,0.06)` hairline borders (Mail list-item + Crypto result-row) — NOT `crimson` (a named color isn't
+   counted by the hex/rgb detector). Both → `var(--border)` (= `--hair`). The two `color:'crimson'` error-text sites also
+   tokenized → `var(--c-danger)` (`#f87171`) for hygiene. **offSystemStyle 4 (t4)→0:** all four raw `fontSize:12` (Mail ×3,
+   Crypto ×1) → `fontSize:'var(--text-sm)'` (13px, per the baked nearest-step-tie-round-up rule `12px→sm`).
+   **⚠️ CI STILL isn't gating on `--assert-zero`** (the regressions had landed green) — a human check of
+   `.github/workflows/verify.yml` remains open; the ratchet is only enforced by this routine's local gate right now.
+
+**Prior QA harness change (still current):** `mail`,`crypto` are in the `apps` smoke list in `scripts/qa-smoke.mjs`; smoke
+list ↔ registry exact at **31**. **EPIC-12 acceptance `INTENT-ROUNDTRIP 2/2 ✅` holds.** Everything else green (12 guard
+suites, OFFLINE 5/5, PRECACHE 91 no-gap).
 
 ---
 

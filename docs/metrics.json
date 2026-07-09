@@ -1,85 +1,21 @@
 {
   "current": {
-    "generatedAt": "2026-07-09T18:11:36.985Z",
+    "generatedAt": "2026-07-09T18:43:45.944Z",
     "apps": 31,
-    "testFiles": 41,
-    "testCases": 352,
-    "tokenViolations": 2,
+    "testFiles": 42,
+    "testCases": 354,
+    "tokenViolations": 0,
     "offSystemUtilities": 0,
-    "offSystemStyle": 4,
+    "offSystemStyle": 0,
     "offSystemStyleDims": {
       "radii": 0,
-      "type": 4,
+      "type": 0,
       "motion": 0
     },
     "bundleGzKB": 727.5,
-    "bundleRawKB": 2460
+    "bundleRawKB": 2460.1
   },
   "history": [
-    {
-      "generatedAt": "2026-07-05T04:14:31.899Z",
-      "apps": 29,
-      "testFiles": 35,
-      "testCases": 302,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 2,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 2
-      },
-      "bundleGzKB": 718.9,
-      "bundleRawKB": 2445.3
-    },
-    {
-      "generatedAt": "2026-07-05T05:16:19.967Z",
-      "apps": 29,
-      "testFiles": 35,
-      "testCases": 302,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "bundleGzKB": 718.9,
-      "bundleRawKB": 2445.4
-    },
-    {
-      "generatedAt": "2026-07-05T09:18:33.716Z",
-      "apps": 29,
-      "testFiles": 35,
-      "testCases": 302,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "bundleGzKB": 715.2,
-      "bundleRawKB": 2435.9
-    },
-    {
-      "generatedAt": "2026-07-05T19:20:13.219Z",
-      "apps": 29,
-      "testFiles": 35,
-      "testCases": 302,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "bundleGzKB": 716.7,
-      "bundleRawKB": 2435.9
-    },
     {
       "generatedAt": "2026-07-05T19:20:13.397Z",
       "apps": 29,
@@ -495,6 +431,70 @@
       },
       "bundleGzKB": 727.5,
       "bundleRawKB": 2460
+    },
+    {
+      "generatedAt": "2026-07-09T18:11:36.985Z",
+      "apps": 31,
+      "testFiles": 41,
+      "testCases": 352,
+      "tokenViolations": 2,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 4,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 4,
+        "motion": 0
+      },
+      "bundleGzKB": 727.5,
+      "bundleRawKB": 2460
+    },
+    {
+      "generatedAt": "2026-07-09T18:39:17.464Z",
+      "apps": 31,
+      "testFiles": 41,
+      "testCases": 352,
+      "tokenViolations": 2,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 4,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 4,
+        "motion": 0
+      },
+      "bundleGzKB": 727.5,
+      "bundleRawKB": 2460
+    },
+    {
+      "generatedAt": "2026-07-09T18:39:17.651Z",
+      "apps": 31,
+      "testFiles": 41,
+      "testCases": 352,
+      "tokenViolations": 2,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 4,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 4,
+        "motion": 0
+      },
+      "bundleGzKB": 727.5,
+      "bundleRawKB": 2460
+    },
+    {
+      "generatedAt": "2026-07-09T18:42:45.859Z",
+      "apps": 31,
+      "testFiles": 42,
+      "testCases": 354,
+      "tokenViolations": 2,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "bundleGzKB": 727.5,
+      "bundleRawKB": 2460.1
     }
   ]
 }

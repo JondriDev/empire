@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-09 · BUILD — FIX both mail+crypto regressions: `mail` runtime crash null-guarded + design-system ratchet restored to 0
+
+**Result:** 🟢 GREEN · fixed BOTH regressions QA flagged on `76aa637`. build clean, vitest **412/412** (+2, new `Mail.test.tsx`), eslint clean on all touched files, `--assert-zero` **exit 0 restored** (tokenViolations 2→0, offSystemStyle 4→0). Committed direct to `main`.
+
+**Metrics row:** `apps 31 ±0 · test cases 352→354 (+2) · test files 41→42 (+1) · tokenViolations 2→0 ✅ (−2) · offSystemUtilities 0 ±0 · offSystemStyle 4 (r0/t4/m0)→0 (r0/t0/m0) ✅ (−4) · bundle gz 727.5 ±0 · --assert-zero exit 1→0 ✅`
+
+**What I changed (2 files + 1 test):**
+1. **RUNTIME CRASH FIXED — `mail`.** `Mail.tsx:61` `{status && (` → `{status?.providers && (`. On boot the status fetch returns HTTP 401 (env-expected, cloud/tokenless) with a body that has no `providers` key; the old guard only checked `status` truthiness, so `Object.entries(status.providers)` ran on `undefined` and threw → whole app dropped into the error boundary. Now the provider strip only renders when `providers` is actually present; the rest of the app (compose, refresh, inbox) works regardless.
+2. **RATCHET RESTORED — tokenViolations 2→0.** The two counted offenders were raw `rgba(255,255,255,0.06)` hairline borders (Mail list-item + Crypto result-row), NOT the `crimson` strings. Both → `var(--border)` (= `--hair`, the standard app hairline token). Also tokenized the two `color:'crimson'` error-text sites → `var(--c-danger)` (`#f87171`) for design hygiene while I was in there.
+3. **RATCHET RESTORED — offSystemStyle 4 (t4)→0.** All four raw `fontSize:12` (Mail ×3: provider strip, sendStatus, message date; Crypto ×1: result `<pre>`) → `fontSize:'var(--text-sm)'` (13px) per the baked nearest-step-tie-round-up mapping (`12px→sm`).
+4. **New `src/apps/mail/Mail.test.tsx` (+2 cases)** locks the crash fix: (a) stub fetch to resolve a providers-less body (the 401 shape) → asserts the header renders and the provider strip stays hidden (no crash, no ✓/· glyphs); (b) a providers-bearing body → asserts the strip lights `himalaya=✓ agentmail=·`. The first case goes RED against the pre-fix `{status && …}` guard.
+
+**Verified:** `npm run build` 🟢 (tsc -b && vite build); `npx vitest run` **412/412** 🟢; `npx eslint` clean on the 3 touched files; `node scripts/metrics.mjs --assert-zero` **exit 0** — tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 (r0/t0/m0); bundle gz 727.5 ±0; no new deps; no package-lock churn. **Not verifiable in cloud (no playwright):** the live headless render-smoke of the fixed `mail` route — the crash fix IS unit-pinned (Mail.test.tsx case a), but QA should re-confirm `app-mail.png` renders (no error boundary) on the new green main.
+
+**Next:** QA re-confirms `mail` renders clean (no error boundary) + `--assert-zero` exit 0 on the new green main. Then the Strategist promotes the next epic — EPIC-12 is CODE-COMPLETE (S1–S3) and no active stage remains; topmost cloud-executable ROADMAP NOW candidate (EPIC-7 · Android stays device-gated).
+
+---
+
 ## 2026-07-09 · QA — visual + smoke on green main `17d2dd9`: 🔴 `mail` runtime crash + 🔴 design-system ratchet broken (both new-app regressions)
 
 **Result:** 🔴 **TWO regressions found on current main** (build itself is GREEN). QA committed docs + a harness fix; the two product fixes are flagged for the build routine (QA writes are scoped to docs/ + `qa-smoke.mjs`).
