@@ -1,50 +1,35 @@
 # Empire QA — Visual + Smoke Report
 
-## ✅ QA VERDICT (2026-07-06, green main `94ff5f1`) — EPIC-12 S2 CONFIRMED; no product bug. Fixed a GUARD bug.
-
-**No runtime regression.** First headless drive of EPIC-12 S2 (`add-to-learning`, HEAD `94ff5f1`;
-the builder had no playwright dep so this axis was never run headless before). The FEATURE WORKS —
-driving the real ⚡ "Add to Learning" menu on `/app/notes` writes a REAL `learningItems` entry
-(`topic="Decode the resonance lattice"`, `learned=""`, ISO `date`/`nextReview`) AND a `learning`
-graph node owned by `learning-tracker`, both surviving a second reload. Verified by direct probe.
-
-**The failure was in the GUARD, not the product** (fixed this run in `scripts/qa-smoke.mjs`, my
-owned harness). The guard asserted the learning item's `from` equals the *store note id*
-(`LEARN_SRC_ID='qa-learn-src'`). But `reconcile()` gives the mirrored note a FRESH graph-node id
-and keeps the store id only in `data.sourceId`; `NodeActions` resolves the node by `sourceId` and
-hands the intent that GRAPH NODE, so `add-to-learning` honestly writes `from = n.id` = the note
-**mirror's graph-node id** (e.g. `dd278a8b…`), never the store id. So `from === LEARN_SRC_ID` was
-guaranteed false → the axis read `stored=false mirrored=false` despite a correct write. **Fix:** the
-guard now resolves the note mirror's graph-node id (the `note` node whose `data.sourceId===LEARN_SRC_ID`)
-and matches `from` against THAT (frozen into the item + its mirror, so it holds across the reload).
-This mirrors the honest production lineage and how the `make-note-from` axis (source = a directly-seeded
-graph node) already passed. After the fix: **`INTENT-ROUNDTRIP 2/2 ✅`** (`make-note-from` +
-`add-to-learning`, each `stored=true mirrored=true persisted=true`). EPIC-12 S2 is **done-confirmed**.
-
-### Metric deltas (vs committed `docs/metrics.json` snapshot)
-| Metric | Value | Δ |
-|---|---|---|
-| Apps / routes | 29 | ±0 |
-| Test cases | 323 | ±0 |
-| Test files | 37 | ±0 |
-| Token violations | 0 | ±0 |
-| Off-system utils | 0 | ±0 |
-| Off-system style | 0 (r0/t0/m0) | ±0 |
-| Bundle gz (KB) | 718.6 | ±0 |
-
-`metrics.mjs --assert-zero` exits **0** (ratchet holds). Build 🟢 (`tsc -b && vite build`),
-PWA precache **86** entries. **29/29 registry routes + desktop = 30/30 render clean** (0 uncaught JS,
-0 error boundaries); every guard green (SHELL-IS-STYLED, REGISTRY-COVERAGE 29 smoke↔registry exact,
-INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, **INTENT-ROUNDTRIP
-2/2**, TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE 3/3+3/3, OFFLINE-BOOT 5/5, PRECACHE 86 no-gap).
-Visually confirmed desktop (styled Bridge + full launcher grid) + learning-tracker (clean, `<EmptyState>`
-primitive). **▶ EPIC-12 S3 (test-only LOCK) is the last stage → then CODE-COMPLETE.**
+**Generated:** 2026-07-09T18:09:47.977Z
 
 ---
 
-**Generated:** 2026-07-06T11:51:58.810Z
+> ## 🔴 RUNTIME BUG (build routine, please fix) — `mail` app crashes into the error boundary
+>
+> **`src/apps/mail/Mail.tsx:63`** does `Object.entries(status.providers)` guarded only by `{status && …}`.
+> On a fresh boot the `useEffect` calls `jget('/api/integrations/status')` (`Mail.tsx:30`); in the cloud
+> sandbox (and any unauthenticated client) that endpoint returns **HTTP 401**, whose JSON body has **no
+> `providers` key** → `setStatus({…})` stores a truthy object → the `{status && …}` guard passes →
+> `Object.entries(undefined)` throws **`TypeError: Cannot convert undefined or null to object`** → the whole
+> app renders the "Something went wrong" error boundary (visually confirmed, `app-mail.png`).
+> **The 401 itself is env-expected; the CRASH is a real product bug** — the app must tolerate a status
+> response that lacks `providers`.
+> **Minimal fix:** narrow the header guard to the provider map, e.g. change `Mail.tsx:61` `{status && (` →
+> `{status?.providers && (` (line 82 already uses `status?.providers?.[provider]?.configured`, so only the
+> header chip at line 63 is unguarded). *(Left for the build routine — QA writes are scoped to docs/ + the
+> smoke harness; not patched here.)*
+>
+> ## 🔴 RATCHET BROKEN — `node scripts/metrics.mjs --assert-zero` exits **1** on current main
+>
+> The new **mail + crypto** commit reintroduced design-system violations the CONTEXT records as **LOCKED at 0**:
+> **`tokenViolations` 0 → 2** (raw hex/rgb: `crypto/CryptoApp.tsx` ×1, `mail/Mail.tsx` ×1) and
+> **`offSystemStyle` 0 → 4 (r0/t4/m0)** (raw `font-size`/`fontSize`: `mail/Mail.tsx` ×3, `crypto/CryptoApp.tsx` ×1).
+> These bypass `var(--text-*)` / the colour tokens and should be a red build. **Build routine: tokenize them
+> (`var(--text-*)` + a colour token) to restore `--assert-zero` exit 0.**
 
-**Result:** 30/30 rendered without crash, 0 failed.
+---
+
+**Result:** 31/32 rendered without crash, 1 failed (**mail** — see runtime bug above).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -61,14 +46,14 @@ primitive). **▶ EPIC-12 S3 (test-only LOCK) is the last stage → then CODE-CO
 | language | ✅ | — | — |
 | music | ✅ | — | — |
 | video | ✅ | — | — |
-| files | ✅ | — | /api/files?path=%2Fstorage%2Femulated%2F0 → HTTP 500 |
+| files | ✅ | — | /api/files?path=%2Fstorage%2Femulated%2F0 → HTTP 401 |
 | cache | ✅ | — | — |
 | browser | ✅ | — | — |
 | editor | ✅ | — | — |
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -82,6 +67,11 @@ primitive). **▶ EPIC-12 S3 (test-only LOCK) is the last stage → then CODE-CO
 | search | ✅ | — | — |
 | timeline | ✅ | — | — |
 | solver | ✅ | — | — |
+| mail | ❌ FAIL | Error boundary triggered | /api/integrations/status → HTTP 401<br>TypeError: Cannot convert undefined or null to object
+    at Object.entries (<anonymous>)
+    at A (http://localhost:3001/assets/Mail-DrwKwbPc.js:1:1805)
+    at |
+| crypto | ✅ | — | — |
 
 ## Inbound-lands guard (organism emit↔receive loop)
 
@@ -194,7 +184,7 @@ Distinct from the edge guard above: each S3 receiver was seeded with an inbound 
 
 The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (`setOffline`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.
 
-**Precache:** 86 manifest entries; 50 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
+**Precache:** 91 manifest entries; 55 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
 
 | Route | Renders offline |
 |---|---|
@@ -209,3 +199,25 @@ The built app was served, warm-loaded so the service worker precached, then ALL 
 ## Screenshots
 
 See PNGs in this folder. `desktop.png` is the shell; `app-<id>.png` is each app route.
+
+## Fitness metrics (Δ vs committed baseline `2026-07-06`)
+
+| Metric | Baseline | This run | Δ |
+|---|---|---|---|
+| Apps / routes | 29 | **31** | +2 (mail, crypto) |
+| Test cases | 352 | 352 | ±0 |
+| Test files | 41 | 41 | ±0 |
+| Token violations | 0 | **2** | **+2 🔴** (crypto ×1, mail ×1 — raw hex) |
+| Off-system utils | 0 | 0 | ±0 |
+| Off-system style | 0 (r0/t0/m0) | **4 (r0/t4/m0)** | **+4 🔴** (mail ×3, crypto ×1 — raw type) |
+| Bundle gz (KB) | 724.9 | 727.5 | +2.6 (two new app chunks) |
+
+**`--assert-zero` exit = 1 🔴** — the design-system ratchet CONTEXT records as LOCKED at 0 is BROKEN on current main; the +2 token + +4 style violations are the new mail+crypto apps. See the banner at the top of this report. Build routine owns the src/ fix.
+
+## Epic-acceptance confirmation
+
+- **▶ EPIC-12 · Intent integrity** — acceptance metric **`INTENT-ROUNDTRIP 2/2 ✅` CONFIRMED** on green main this run: both `make-note-from` and `add-to-learning` read `stored=true mirrored=true persisted=true` (real store-backed, reload-durable entities — no phantom graph nodes). The acceptance metric holds. No product contradiction on the intent surface.
+
+## Routes rendering clean
+
+**30/31 registry routes render clean** (desktop + 31 apps = 32 smoke routes; **31/32 pass**). The single failure is **mail** (error boundary — runtime bug above). REGISTRY-COVERAGE now 31 apps (smoke list ↔ registry exact after adding `mail`,`crypto`). All 12 guard suites GREEN: SHELL-IS-STYLED, REGISTRY-COVERAGE, INBOUND-LANDS 3/3, MEDIA-PERSISTS 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE-AUDIT 91 no-gap.

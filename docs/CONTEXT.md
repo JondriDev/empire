@@ -16,6 +16,29 @@
 
 ---
 
+## 🔴 QA STATE (2026-07-09) — TWO regressions on current main `17d2dd9` (new mail+crypto apps); build routine owns both fixes
+
+The `feat(apps): Mail + Crypto apps + wallet backend` commit (`e28b58c`) shipped **un-smoked** and **un-gated**:
+1. **RUNTIME BUG — `mail` crashes into the error boundary.** `src/apps/mail/Mail.tsx:63` does
+   `Object.entries(status.providers)` guarded only by `{status && …}` (`:61`). On boot the `useEffect` fetches
+   `/api/integrations/status` (`:30`); unauthenticated (cloud sandbox + any client with no token) that returns
+   **HTTP 401** whose body has **no `providers` key** → `Object.entries(undefined)` throws
+   `TypeError: Cannot convert undefined or null to object` → whole app = "Something went wrong". **The 401 is
+   env-expected; the CRASH is a real product bug.** Minimal fix: `:61` `{status && (` → `{status?.providers && (`
+   (`:82` already null-safe). QA writes are scoped to docs/ + the harness, so **NOT patched — flagged for the build routine.**
+2. **RATCHET BROKEN — `node scripts/metrics.mjs --assert-zero` exits 1.** mail+crypto reintroduced
+   **tokenViolations 0→2** (raw hex: crypto ×1, mail ×1) + **offSystemStyle 0→4 (r0/t4/m0)** (raw `font-size`:
+   mail ×3, crypto ×1) — the design-system locks EPIC-5/EPIC-11 held at 0. Build routine: tokenize to `var(--text-*)`
+   + a colour token to restore exit 0. **(NOTE: CI apparently isn't blocking on `--assert-zero` — these landed on
+   main green; worth a human check of `verify.yml`.)**
+
+**Harness change this run (mine, committed):** added `mail`,`crypto` to the `apps` smoke list in `scripts/qa-smoke.mjs`
+— they were new registry apps missing from coverage (REGISTRY-COVERAGE would otherwise silently under-count). Smoke
+list ↔ registry now exact at **31**. **EPIC-12 acceptance `INTENT-ROUNDTRIP 2/2 ✅` still holds** on this tree (both
+store-backed intents round-trip clean). Everything else green (all 12 guard suites, OFFLINE 5/5, PRECACHE 91 no-gap).
+
+---
+
 ## 🧹 REPO RESHAPE (2026-07-05, human session) — one-time notice, honor the rules
 
 A professionalization pass reshaped the repo (branch `chore/pro-repo`, landed inside a

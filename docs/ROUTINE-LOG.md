@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-09 · QA — visual + smoke on green main `17d2dd9`: 🔴 `mail` runtime crash + 🔴 design-system ratchet broken (both new-app regressions)
+
+**Result:** 🔴 **TWO regressions found on current main** (build itself is GREEN). QA committed docs + a harness fix; the two product fixes are flagged for the build routine (QA writes are scoped to docs/ + `qa-smoke.mjs`).
+
+**Metrics row:** `apps 29→31 (+2 mail,crypto) · test cases 352 ±0 · test files 41 ±0 · tokenViolations 0→2 🔴 (crypto ×1, mail ×1) · offSystemUtilities 0 ±0 · offSystemStyle 0→4 (r0/t4/m0) 🔴 (mail ×3, crypto ×1) · bundle gz 724.9→727.5 (+2.6) · --assert-zero exit 1 🔴`
+
+**What I found:**
+1. **RUNTIME BUG — `mail` crashes into the error boundary** ("Something went wrong · Cannot convert undefined or null to object", visually confirmed `app-mail.png`). `src/apps/mail/Mail.tsx:63` does `Object.entries(status.providers)` guarded only by `{status && …}`; on boot the `useEffect` fetches `/api/integrations/status` (`:30`) which returns **HTTP 401** unauthenticated (cloud + any tokenless client) with a body that has no `providers` key → `Object.entries(undefined)` throws. The 401 is env-expected; the crash is a real product bug. Minimal fix: `:61` `{status && (` → `{status?.providers && (`.
+2. **RATCHET BROKEN — `metrics.mjs --assert-zero` exit 1.** mail+crypto reintroduced the design-system violations EPIC-5/EPIC-11 locked at 0: tokenViolations 0→2 (raw hex) + offSystemStyle 0→4 (r0/t4/m0, raw `font-size`). Fix: tokenize to `var(--text-*)` + a colour token. (These landed on main green → CI apparently isn't gating on `--assert-zero`; worth a human check of `verify.yml`.)
+
+**What I changed (in scope):** added `mail`,`crypto` to the `apps` smoke list in `scripts/qa-smoke.mjs` — they were shipped un-smoked (REGISTRY-COVERAGE would silently under-count). Smoke list ↔ registry now exact at **31**. Updated REPORT.md (bold banners at top), METRICS.md (routes row + auto-metrics regression banner), CONTEXT.md (QA-state block), metrics.json (new snapshot).
+
+**Verified GREEN despite the two bugs:** build 🟢; 30/31 registry routes render clean (desktop + crypto + 29 others, 0 uncaught); all 12 guard suites pass — SHELL-IS-STYLED, REGISTRY-COVERAGE 31, INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, **INTENT-ROUNDTRIP 2/2** (EPIC-12 acceptance holds), TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE 3/3+3/3, OFFLINE-BOOT 5/5, PRECACHE 91 no-gap.
+
+**Next:** build routine — (1) null-guard the Mail header on missing `providers`; (2) tokenize mail+crypto raw hex/font-size to restore `--assert-zero` exit 0. Then QA re-confirms both on green main.
+
+---
+
 ## 2026-07-06 · ARTISAN — Weather Settings dialog a11y (keyboard + screen-reader) + seed the rotation ledger
 
 **Result:** 🟢 GREEN · build clean, vitest **410/410** (+4), eslint clean, all tracked metrics Δ ±0 (tokens/off-system-utils/**offSystemStyle 0**, `--assert-zero` exit 0), bundle 724.6→724.9 (+0.3, test-only + a11y attrs, no new deps). Committed direct to `main`.
