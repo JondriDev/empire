@@ -30,16 +30,23 @@ core creation intent seeded + run + `syncAll()` → asserts the entity survives 
 **★ EPIC-12 is CODE-COMPLETE (S1–S3).** ▶ **THERE IS NO ACTIVE STAGE.** The next run promotes the next epic: take the
 topmost cloud-executable ROADMAP NOW/NEXT candidate — the ratified next candidate is a **measured design-system STATE-conformance
 epic** (empty/loading/error primitives → an adoption metric + `--assert-zero` lock, the EPIC-5/11 template) **or a measured
-accessibility pass**; flag that EPICS.md needs the Strategist. **EPIC-7 · Android stays device-gated.** **QA still owes** an
-`INTENT-ROUNDTRIP 2/2` render-confirm on the new green main → then the Strategist retires EPIC-12 to DONE. (QA also still owes
-the `app-mail.png` no-error-boundary re-confirm from the prior fix run.)
+accessibility pass**; flag that EPICS.md needs the Strategist. **EPIC-7 · Android stays device-gated.**
+
+**✅ QA render-confirm DELIVERED 2026-07-09 (green main, post-fix).** Both owed re-confirms are DONE:
+`INTENT-ROUNDTRIP 2/2 ✅` reproduced live on green main (EPIC-12 acceptance holds) **and** the `app-mail.png`
+no-error-boundary re-confirm passed (mail renders "Provider himalaya not configured." graceful, no boundary).
+**▶ The Strategist can now retire EPIC-12 to DONE and promote the next epic.**
 
 ---
 
-## ✅ QA STATE (2026-07-09) — both mail+crypto regressions FIXED by the build routine; green main; awaiting QA render re-confirm
+## ✅ QA STATE (2026-07-09) — both mail+crypto regressions FIXED and QA-RENDER-CONFIRMED on green main; clean run, no drift
 
-The two regressions QA flagged on `76aa637` are **both fixed and pushed** (build run 2026-07-09). Green main, `--assert-zero`
-exit 0 restored. **QA owes a render re-confirm** of `app-mail.png` (no error boundary) on the new green main.
+The two regressions QA flagged on `76aa637` were **both fixed and pushed** (build run 2026-07-09) and are now
+**independently QA-render-confirmed on green main** (this run): 32/32 routes render clean (desktop + all 31 apps, 0 uncaught),
+`app-mail.png` shows the graceful "Provider himalaya not configured." with **NO error boundary**, and
+`metrics.mjs --assert-zero` **exits 0** (tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 r0/t0/m0 — all reproduced
+on a fresh checkout). All 12 guard suites green, OFFLINE 5/5, PRECACHE 91 no-gap, `INTENT-ROUNDTRIP 2/2 ✅`. Every metric Δ ±0
+vs the committed snapshot. **The re-confirm QA owed is delivered — nothing outstanding for QA on these two apps.**
 
 1. **RUNTIME CRASH — FIXED.** `Mail.tsx:61` `{status && (` → `{status?.providers && (`. The boot status fetch returns
    HTTP 401 (env-expected, cloud/tokenless) with a body that has no `providers` key; the old guard only checked `status`
@@ -53,6 +60,11 @@ exit 0 restored. **QA owes a render re-confirm** of `app-mail.png` (no error bou
    Crypto ×1) → `fontSize:'var(--text-sm)'` (13px, per the baked nearest-step-tie-round-up rule `12px→sm`).
    **⚠️ CI STILL isn't gating on `--assert-zero`** (the regressions had landed green) — a human check of
    `.github/workflows/verify.yml` remains open; the ratchet is only enforced by this routine's local gate right now.
+
+**⚠️ INFRA GAP (build routine's fix, not QA's — package.json is outside QA scope):** `scripts/qa-smoke.mjs` imports
+`playwright` but it is **NOT declared in `package.json`** — a fresh `npm install` doesn't install it, so the first
+`node scripts/qa-smoke.mjs` fails `ERR_MODULE_NOT_FOUND`. Every routine currently pays a manual `npm install playwright`.
+**Add `playwright` to `devDependencies`** (dev-only — must not ship in the prod bundle; `/opt/pw-browsers/` browsers are fine).
 
 **Prior QA harness change (still current):** `mail`,`crypto` are in the `apps` smoke list in `scripts/qa-smoke.mjs`; smoke
 list ↔ registry exact at **31**. **EPIC-12 acceptance `INTENT-ROUNDTRIP 2/2 ✅` holds.** Everything else green (12 guard

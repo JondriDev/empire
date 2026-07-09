@@ -5,6 +5,26 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-09 · QA — visual + smoke on green main: both mail+crypto regressions render-confirmed FIXED; EPIC-12 `INTENT-ROUNDTRIP 2/2` confirmed
+
+**Result:** 🟢 GREEN · clean run, no drift, no runtime bug. Build 🟢 (tsc -b && vite build, PWA 91 precache). Smoke **32/32** routes render clean (desktop + all 31 registry apps, 0 uncaught). All 12 guard suites green. `metrics.mjs --assert-zero` **exit 0**. Committed direct to `main`.
+
+**This run closes the two re-confirms QA owed** (the prior QA ran on RED `17d2dd9`; the build routine fixed both regressions since):
+1. **`mail` runtime crash — render-confirmed FIXED.** `app-mail.png` renders the graceful **"Provider himalaya not configured."** message with **NO error boundary** (boot status still 401 env-expected; the `providers`-key guard now short-circuits). Smoke `PASS mail (uncaught:0)`.
+2. **Design-system ratchet — confirmed RESTORED to 0.** `--assert-zero` exit 0 reproduced on a fresh checkout; tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 (r0/t0/m0) — the 2 token + 4 style offenders from RED `17d2dd9` are gone.
+
+**Epic-acceptance confirmation:** EPIC-12 (Intent integrity, CODE-COMPLETE S1–S3) — target metric `INTENT-ROUNDTRIP` holds at **2/2 ✅** on green main (`make-note-from` + `add-to-learning`, both stored+mirrored+reload-persisted). This is the green-main render-confirm the S3 build entry asked for → **Strategist can retire EPIC-12 to DONE.**
+
+**Metrics row (all Δ ±0 vs committed snapshot; reproduced on fresh checkout):** `apps 31 · routes-clean 32/32 · test cases 363 · test files 43 · tokenViolations 0 · offSystemUtilities 0 · offSystemStyle 0 (r0/t0/m0) · bundle gz 727.7 · --assert-zero exit 0`. Guards: INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE 3/3 + ENTITY 3/3, OFFLINE 5/5, PRECACHE 91 no-gap.
+
+**Visually re-verified (local screenshots, never committed):** desktop (Bridge "Good night", 4 live stat cards, 31-tile launcher grid through Crypto); mail (graceful not-configured, no boundary); crypto (Wallet Watch BTC/ETH/SOL/XRP/DOGE form); network (CORE mesh + node-type legend). Env-expected noise only (blocked CDN map tiles net:8, 401 API calls — not render failures).
+
+**Open (not QA's to close):** the `⚠️ CI still not gating on --assert-zero` note stands — `.github/workflows/verify.yml` should add the ratchet gate so a future regression fails CI, not just this routine's local gate.
+
+**Next:** Strategist retires EPIC-12 → promotes the next epic (NO ACTIVE STAGE — measured design-system STATE-conformance epic or a measured a11y pass; EPIC-7 · Android stays device-gated).
+
+---
+
 ## 2026-07-09 · BUILD — EPIC-12 S3: LOCK intent integrity (reconcile-survival invariant) → ★ EPIC-12 CODE-COMPLETE
 
 **Result:** 🟢 GREEN · shipped the LAST stage of EPIC-12. build clean, vitest **421/421** (+4, new survival suite), eslint clean on touched files, `--assert-zero` **exit 0**. Committed direct to `main`. **EPIC-12 is now CODE-COMPLETE (S1–S3).**

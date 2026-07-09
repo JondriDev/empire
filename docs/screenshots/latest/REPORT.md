@@ -1,35 +1,53 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-09T18:09:47.977Z
+**Generated:** 2026-07-09T23:08:59.158Z
 
----
+**Result:** 32/32 rendered without crash, 0 failed.
 
-> ## 🔴 RUNTIME BUG (build routine, please fix) — `mail` app crashes into the error boundary
->
-> **`src/apps/mail/Mail.tsx:63`** does `Object.entries(status.providers)` guarded only by `{status && …}`.
-> On a fresh boot the `useEffect` calls `jget('/api/integrations/status')` (`Mail.tsx:30`); in the cloud
-> sandbox (and any unauthenticated client) that endpoint returns **HTTP 401**, whose JSON body has **no
-> `providers` key** → `setStatus({…})` stores a truthy object → the `{status && …}` guard passes →
-> `Object.entries(undefined)` throws **`TypeError: Cannot convert undefined or null to object`** → the whole
-> app renders the "Something went wrong" error boundary (visually confirmed, `app-mail.png`).
-> **The 401 itself is env-expected; the CRASH is a real product bug** — the app must tolerate a status
-> response that lacks `providers`.
-> **Minimal fix:** narrow the header guard to the provider map, e.g. change `Mail.tsx:61` `{status && (` →
-> `{status?.providers && (` (line 82 already uses `status?.providers?.[provider]?.configured`, so only the
-> header chip at line 63 is unguarded). *(Left for the build routine — QA writes are scoped to docs/ + the
-> smoke harness; not patched here.)*
->
-> ## 🔴 RATCHET BROKEN — `node scripts/metrics.mjs --assert-zero` exits **1** on current main
->
-> The new **mail + crypto** commit reintroduced design-system violations the CONTEXT records as **LOCKED at 0**:
-> **`tokenViolations` 0 → 2** (raw hex/rgb: `crypto/CryptoApp.tsx` ×1, `mail/Mail.tsx` ×1) and
-> **`offSystemStyle` 0 → 4 (r0/t4/m0)** (raw `font-size`/`fontSize`: `mail/Mail.tsx` ×3, `crypto/CryptoApp.tsx` ×1).
-> These bypass `var(--text-*)` / the colour tokens and should be a red build. **Build routine: tokenize them
-> (`var(--text-*)` + a colour token) to restore `--assert-zero` exit 0.**
+## ✅ QA VERDICT — NO RUNTIME BUG · green main · both prior regressions confirmed FIXED
 
----
+This run is the independent green-main confirm the prior QA (on RED `17d2dd9`) owed. On the current
+green main **both regressions the prior run flagged are fixed and reproduced-fixed here**:
 
-**Result:** 31/32 rendered without crash, 1 failed (**mail** — see runtime bug above).
+1. **`mail` runtime crash — FIXED & render-confirmed.** `app-mail.png` now renders the graceful
+   **"Provider himalaya not configured."** message with **NO error boundary** (the boot status fetch
+   still returns HTTP 401 — env-expected, tokenless cloud — but the `providers`-key guard now short-circuits
+   instead of calling `Object.entries(undefined)`). Smoke: `PASS mail (uncaught:0)`.
+2. **Design-system ratchet — RESTORED to 0.** `node scripts/metrics.mjs --assert-zero` **exits 0**;
+   tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 (r0/t0/m0). The mail+crypto raw-hex/fontSize
+   offenders the prior run counted (2 token + 4 style) are gone.
+
+**Epic-acceptance confirmation — EPIC-12 (Intent integrity, CODE-COMPLETE S1–S3):** the target metric
+`INTENT-ROUNDTRIP` holds at **2/2 ✅** on green main (`make-note-from` + `add-to-learning`, both stored+mirrored+
+reload-persisted). This is the render-confirm on green main that closes QA's outstanding EPIC-12 owe → the
+Strategist can retire EPIC-12 to DONE and promote the next epic (**EPICS.md has NO active stage** —
+next candidate: a measured design-system STATE-conformance epic or an a11y pass).
+
+**Metric deltas vs the committed snapshot — all ±0** (the build routine already committed metrics for the
+fixed tree; this run reproduces them exactly on a fresh checkout):
+
+| Metric | Value | Δ |
+|---|---|---|
+| Apps / routes | 31 | ±0 |
+| Routes rendering clean | 32 / 32 (desktop + 31 registry apps) | +2 vs prior 30/31 (mail RED) |
+| Test cases | 363 | ±0 |
+| Test files | 43 | ±0 |
+| Token violations | 0 | ±0 (was 2 on RED `17d2dd9`) |
+| Off-system utils | 0 | ±0 |
+| Off-system style | 0 (r0/t0/m0) | ±0 (was 4 t4 on RED `17d2dd9`) |
+| Bundle gz (KB) | 727.7 | ±0 |
+
+All 12 guard suites green · OFFLINE-BOOT 5/5 · PRECACHE 91 no-gap · `--assert-zero` exit 0.
+
+### ⚠️ INFRA GAP (for the build routine — not a runtime bug) — `playwright` is undeclared
+
+`scripts/qa-smoke.mjs` imports `playwright` at the top, but **`playwright` is not in `package.json`** (neither
+`dependencies` nor `devDependencies`). On a fresh cloud checkout `npm install` does NOT install it, so the very
+first `node scripts/qa-smoke.mjs` fails with `ERR_MODULE_NOT_FOUND: Cannot find package 'playwright'` — this QA
+run had to `npm install playwright` by hand before the harness could run. It works, but every routine pays that
+cost and it's fragile. **Fix (build routine's call — package.json is outside QA's write scope):** add
+`playwright` to **devDependencies** (dev-only — it must NOT ship in the production bundle). The pre-installed
+browsers under `/opt/pw-browsers/` are fine; only the npm package is missing.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -53,7 +71,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -67,10 +85,7 @@
 | search | ✅ | — | — |
 | timeline | ✅ | — | — |
 | solver | ✅ | — | — |
-| mail | ❌ FAIL | Error boundary triggered | /api/integrations/status → HTTP 401<br>TypeError: Cannot convert undefined or null to object
-    at Object.entries (<anonymous>)
-    at A (http://localhost:3001/assets/Mail-DrwKwbPc.js:1:1805)
-    at |
+| mail | ✅ | — | /api/integrations/status → HTTP 401 |
 | crypto | ✅ | — | — |
 
 ## Inbound-lands guard (organism emit↔receive loop)
@@ -199,25 +214,3 @@ The built app was served, warm-loaded so the service worker precached, then ALL 
 ## Screenshots
 
 See PNGs in this folder. `desktop.png` is the shell; `app-<id>.png` is each app route.
-
-## Fitness metrics (Δ vs committed baseline `2026-07-06`)
-
-| Metric | Baseline | This run | Δ |
-|---|---|---|---|
-| Apps / routes | 29 | **31** | +2 (mail, crypto) |
-| Test cases | 352 | 352 | ±0 |
-| Test files | 41 | 41 | ±0 |
-| Token violations | 0 | **2** | **+2 🔴** (crypto ×1, mail ×1 — raw hex) |
-| Off-system utils | 0 | 0 | ±0 |
-| Off-system style | 0 (r0/t0/m0) | **4 (r0/t4/m0)** | **+4 🔴** (mail ×3, crypto ×1 — raw type) |
-| Bundle gz (KB) | 724.9 | 727.5 | +2.6 (two new app chunks) |
-
-**`--assert-zero` exit = 1 🔴** — the design-system ratchet CONTEXT records as LOCKED at 0 is BROKEN on current main; the +2 token + +4 style violations are the new mail+crypto apps. See the banner at the top of this report. Build routine owns the src/ fix.
-
-## Epic-acceptance confirmation
-
-- **▶ EPIC-12 · Intent integrity** — acceptance metric **`INTENT-ROUNDTRIP 2/2 ✅` CONFIRMED** on green main this run: both `make-note-from` and `add-to-learning` read `stored=true mirrored=true persisted=true` (real store-backed, reload-durable entities — no phantom graph nodes). The acceptance metric holds. No product contradiction on the intent surface.
-
-## Routes rendering clean
-
-**30/31 registry routes render clean** (desktop + 31 apps = 32 smoke routes; **31/32 pass**). The single failure is **mail** (error boundary — runtime bug above). REGISTRY-COVERAGE now 31 apps (smoke list ↔ registry exact after adding `mail`,`crypto`). All 12 guard suites GREEN: SHELL-IS-STYLED, REGISTRY-COVERAGE, INBOUND-LANDS 3/3, MEDIA-PERSISTS 3/3, GRAPH-LEGIBLE 1/1, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE-AUDIT 91 no-gap.
