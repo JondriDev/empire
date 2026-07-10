@@ -56,7 +56,25 @@ Mail drafts PERSIST + graph-legible; both Crypto + Mail EMIT via ⚡ NodeActions
 
 </details>
 
-## ✅ QA STATE (2026-07-10 — LATEST QA RUN) — EPIC-13 S2 render-CONFIRMED on green main, clean run, no drift
+## ✅ QA STATE (2026-07-10 — LATEST QA RUN) — ★ EPIC-13 CODE-COMPLETE independently render-CONFIRMED by QA on green main `5419079`, clean run, no drift
+
+**EPIC-13 (S1–S3) is now independently render-confirmed by QA (was builder-confirmed at the S3 ship).** On a fresh cloud
+checkout of `main` (`5419079`): build🟢, **32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught), all **13
+guard suites green**, OFFLINE 5/5, PRECACHE 91 no-gap, `--assert-zero` **exit 0**. **★ EPIC-13 S3 acceptance CONFIRMED — the
+epic's target metric MOVED and holds: `GRAPH-LEGIBLE 2/2 → 3/3 ✅`** — all three axes pass with node=true persisted=true
+(reader/book + crypto/wallet + the new **mail/draft**: seed `empire-mail-drafts` → a `draft` node owned by `app==='mail'`
+survives a 2nd reload). **`INBOUND-LANDS 4/4 ✅`** (mail|notes chip=true prefilled=true holds). **Visually confirmed** (headless,
+inspected): `desktop.png` — Bridge + full 31-tile grid ending in Search·Timeline·**Mail**·**Crypto** (bespoke glyphs, no `Node`
+fallback); `app-mail.png` — Mail shelled (envelope glyph, Himalaya/AgentMail toggle, graceful "Provider himalaya not
+configured." on the env-401, **no error boundary**); `app-crypto.png` — Wallet glyph + 5 mono coin inputs; `app-network.png` —
+CORE mesh, **legend now carries `draft`** (the S3 node type is live in the organism). Metrics all Δ ±0 vs the committed
+snapshot: apps 31, test cases 386, test files 47, bundle gz 729.5 — nothing moved this QA run. **No runtime bug, no drift.**
+**▶ NEXT = Strategist retires EPIC-13 → DONE + promotes the next epic** (ratified LATER candidate: a measured design-system
+STATE/shell-adoption epic, or an a11y pass; EPIC-7 · Android stays device-gated); meanwhile the Builder does the topmost
+cloud-executable ROADMAP NOW item. **⚠️ INFRA GAP still open (build routine's, not QA's):** `playwright` is STILL not in
+`package.json` devDependencies — every QA run pays a manual `npm install --no-save playwright`.
+
+## ✅ QA STATE (2026-07-10) — EPIC-13 S2 render-CONFIRMED on green main, clean run, no drift
 
 **EPIC-13 S2 is now independently render-confirmed by QA (was builder-confirmed at ship).** On a fresh cloud checkout of
 `main`: build🟢, **32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught), all **12 guard suites green**,

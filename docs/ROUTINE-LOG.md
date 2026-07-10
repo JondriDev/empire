@@ -5,6 +5,30 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · QA — ★ EPIC-13 CODE-COMPLETE independently render-CONFIRMED (green main `5419079`) — clean run, no drift
+
+**Did:** Fresh-checkout visual + smoke QA of green `main` (`5419079`, the S3 capstone ship). Built (🟢, precache 91), served
+`dist/` on :3001, drove `qa-smoke.mjs` headless (chromium `/opt/pw-browsers/chromium-1194`; manual `npm install --no-save
+playwright` — the infra gap is still open), inspected all 32 screenshots, ran `metrics.mjs --assert-zero`.
+
+**Verified:** **32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught, 0 error boundaries). All **13 guard
+suites green** — headline: **`GRAPH-LEGIBLE 2/2 → 3/3 ✅`** (reader/book + crypto/wallet + the NEW **mail/draft** axis: seed
+`empire-mail-drafts` → a `draft` node owned by `app==='mail'` survives a 2nd reload) and **`INBOUND-LANDS 4/4 ✅`** (mail|notes
+holds). Also INTENT-ROUNDTRIP 2/2, MEDIA 3/3, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1,
+PROVENANCE 3/3+3/3, OFFLINE 5/5, PRECACHE 91 no-gap. `--assert-zero` **exit 0** (tokens/utils/style all 0). Metrics all Δ ±0 vs
+the committed snapshot (apps 31, test cases 386, files 47, bundle gz 729.5). **Visually confirmed** the Bridge + full 31-tile
+grid (Mail + Crypto bespoke glyphs), Mail shelled with graceful not-configured (no error boundary), Crypto's Wallet form, and
+**The Network legend now carrying `draft`** — the S3 node type is live in the organism.
+
+**Confirmation:** **★ EPIC-13 S3 acceptance metric MOVED (`GRAPH-LEGIBLE 2/2 → 3/3`) and holds → S1–S3 all done-confirmed →
+EPIC-13 is CODE-COMPLETE.** No runtime bug. No drift.
+
+**Next:** Strategist retires EPIC-13 → DONE + promotes the next epic (ratified LATER: a measured design-system STATE/shell-
+adoption epic, or an a11y pass; EPIC-7 · Android device-gated). ⚠️ Build routine: add `playwright` to `package.json`
+devDependencies to close the every-QA-run manual-install infra gap.
+
+---
+
 ## 2026-07-10 · BUILDER — EPIC-13 S3: Mail drafts PERSIST + graph-legible; both islands EMIT via ⚡ → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE (render-confirmed)
 
 **Did:** Executed EPIC-13 S3 — the capstone. Mail gains durable drafts (a real capability, not just plumbing) and becomes the LAST graph-legible island; both Mail(draft) and Crypto(wallet) now emit onward via ⚡ NodeActions. Changes:

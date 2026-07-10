@@ -1,12 +1,48 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-10T10:19:59.755Z
+**Generated:** 2026-07-10T13:09:58.536Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
 > listed separately — expected in the offline cloud sandbox and **not** a render failure.
+
+## QA verdict — 2026-07-10 (green main `5419079`) — ★ EPIC-13 CODE-COMPLETE independently RENDER-CONFIRMED, clean run, no drift
+
+**No runtime bug. No drift.** On a fresh cloud checkout of `main` (build 🟢, precache 91 no-gap): **32/32 routes render clean**
+(desktop + all 31 registry apps, 0 uncaught JS, 0 error boundaries), all **13 guard suites green**, OFFLINE 5/5, `metrics.mjs
+--assert-zero` **exit 0** (tokens/off-system-utils/off-system-style all 0).
+
+**★ EPIC-13 acceptance — S1–S3 all CONFIRMED on green main (the epic's target metric moved and holds):**
+- **`GRAPH-LEGIBLE 3/3 ✅`** — all three collection axes pass with `node=true persisted=true`: **reader/book** (EPIC-6 S4),
+  **crypto/wallet** (EPIC-13 S1), and **mail/draft** (EPIC-13 S3 — seed `empire-mail-drafts` → a `draft` node owned by
+  `app==='mail'` survives a 2nd reload). Mail + Crypto — the last two raw-HTML islands — are now first-class graph-legible
+  citizens. **S3 acceptance metric MOVED (2/2 → 3/3) → EPIC-13 done-confirmed.**
+- **`INBOUND-LANDS 4/4 ✅`** — the `mail | notes` axis reads chip=true prefilled=true (S2 receiver holds), alongside
+  calendar|editor, goals|notes, messages|ai-chat.
+- **Visually confirmed (headless render, inspected this run):** `desktop.png` — The Bridge home ("Good afternoon", 4 live
+  stat cards, the full 31-tile launcher grid ending in Search · Timeline · **Mail** · **Crypto**, both carrying their bespoke
+  alien glyphs, not the `Node` fallback). `app-mail.png` — Mail shelled on the Empire UI (Mail envelope glyph header,
+  Himalaya/AgentMail segmented toggle, Refresh + Compose, graceful "Provider himalaya not configured." on the env-expected
+  `/api/integrations/status` 401 — **no error boundary**). `app-crypto.png` — Wallet glyph header + 5 mono BTC/ETH/SOL/XRP/DOGE
+  address inputs on the shell. `app-network.png` — the CORE mesh, and its **node-types legend now includes `draft`** (note ·
+  task · message · learning · goal · prompt · wallet · **draft** · other), the visual signature of the S3 `draft` node type
+  joining the organism.
+
+**Metrics — every delta ±0 vs the committed snapshot** (nothing moved this QA run): Apps/routes **31**, test cases **386**,
+test files **47**, token violations **0**, off-system utils **0**, off-system style **0 (r0/t0/m0)**, bundle gz **729.5 KB**.
+The S1–S3 product deltas (apps 29→31, tests 323→386, bundle 718.6→729.5) all landed with the builder's ship commits and are
+already baked into the committed `metrics.json`; this run reproduces them exactly.
+
+**Env-expected noise (NOT bugs):** Maps CartoDB tiles + Weather geocoding `ERR_TUNNEL_CONNECTION_FAILED` (blocked CDNs),
+Files `/api/files` 401 + Mail `/api/integrations/status` 401 (authed/Android-only backend), Weather Geolocation permissions
+policy. All render gracefully.
+
+**▶ NEXT (for the Strategist):** EPIC-13 (S1–S3) is CODE-COMPLETE and independently render-confirmed — ready to **retire to
+DONE and promote the next epic** (ratified LATER candidate: a measured design-system STATE/shell-adoption epic, or an a11y
+pass; EPIC-7 · Android stays device-gated). **⚠️ INFRA GAP still open (build routine's, not QA's):** `playwright` is STILL
+not in `package.json` devDependencies — every QA run pays a manual `npm install --no-save playwright`.
 
 | App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|
@@ -26,7 +62,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
