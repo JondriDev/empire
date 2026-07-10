@@ -25,3 +25,4 @@ load-bearing — do not move or rename them.**
 | [ROUTINE-LOG.md](./ROUTINE-LOG.md) | Chronological build journal, newest first |
 | [routines/](./routines/README.md) | Per-routine spec source-of-truth (prompts, schedules, changelogs) |
 | [screenshots/latest/REPORT.md](./screenshots/latest/REPORT.md) | Latest QA visual/smoke report |
+| [rfc/iteration-plan-musk.md](./rfc/iteration-plan-musk.md) | Iteration plan via Musk's 5-step algorithm (post-EPIC-13; user-ratified 2026-07-10) |
