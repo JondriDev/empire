@@ -16,7 +16,22 @@
 
 ---
 
-## ★ EPIC-13 S2 SHIPPED + RENDER-CONFIRMED (2026-07-10) — Mail is now an Empire app + handoff RECEIVER; `INBOUND-LANDS 3/3 → 4/4 ✅` render-confirmed on the production dist (mail chip=true prefilled=true from notes; 32/32 routes clean). ▶ NEXT = EPIC-13 S3 (Mail drafts PERSIST + graph-legible + both apps EMIT via ⚡ → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE) — exact shape in the S3 block just below.
+## ★ EPIC-13 S3 SHIPPED + RENDER-CONFIRMED → ★ EPIC-13 CODE-COMPLETE (2026-07-10, green main) — Mail drafts PERSIST + are graph-legible; BOTH Mail(draft) + Crypto(wallet) now EMIT via ⚡. `GRAPH-LEGIBLE 2/2 → 3/3 ✅` + `INBOUND-LANDS 4/4 ✅` render-confirmed on the production dist (32/32 routes clean, uncaught:0). ▶ **NEXT = there is NO active stage — EPIC-13 (S1–S3) is CODE-COMPLETE.** The next run flags the Strategist to RETIRE EPIC-13 to DONE + promote the next epic (ratified LATER candidate = a measured design-system STATE/shell-adoption epic, or an a11y pass; EPIC-7·Android device-gated), and meanwhile does the topmost cloud-executable ROADMAP NOW item.
+
+### ★ EPIC-13 S3 — what shipped this run (2026-07-10, green main)
+Mail persists durable drafts + becomes the LAST graph-legible island; both islands now emit:
+- **New `src/apps/mail/lib/draftStore.ts`** — localStorage `empire-mail-drafts`; `Draft={id,to,subject,body,updatedAt}`; `listDrafts()` (newest-`updatedAt` first, tolerant of missing/corrupt), `saveDraft(Omit<Draft,'updatedAt'>)` (upsert by id, stamps `updatedAt`, returns the record), `deleteDraft(id)`, `newDraftId()` (mirrors graph.ts newId). Unit-pinned by `draftStore.test.ts` (+7).
+- **New `src/apps/mail/mailGraph.ts`** — pure `draftNodeData(d)→{subject,to}` (body rides the store/title, kept small for stable reconcile diff). `mailGraph.test.ts` (+3).
+- **`Mail.tsx`** — `drafts`/`draftId`/`draftStatus` state; load `setDrafts(listDrafts())` on mount; `useEffect(mirrorCollection('draft','mail', drafts, {id, title: d=>d.subject||'(no subject)', data: draftNodeData}), [drafts])`; **Save-draft** Button in compose (`persistDraft`: fresh id if `draftId===null`, else upsert → `setDrafts(listDrafts())`); **Drafts** `<section>` (`.gp` list, each row a click-to-reopen button + per-row `⚡ <NodeActions type="draft" sourceId={d.id}>` + Delete). Send/draft status share one `aria-live` span.
+- **`CryptoApp.tsx`** — the watch-list `<label>` became a `<div>` grid `52px 1fr auto` (label→`htmlFor`/Input→`id` a11y-linked) with a per-coin `⚡ <NodeActions type="wallet" sourceId={\`wallet:${c}\`}>` (renders null until the address is non-blank → a wallet node exists).
+- **`sync.ts`** — `make-task` `accepts` gained `'wallet','draft'` (so ⚡ offers task AND note on both; `make-note-from` already accepts any non-note). No other intent touched.
+- **`nodeColors.ts`** — `draft: '155,247,230'` (pale signal).
+- **`qa-smoke.mjs`** — GRAPH-LEGIBLE grew Axis 3 `mail/draft` (seed `empire-mail-drafts` before mount → reload → assert `draft` node owned by `mail` survives a 2nd reload; reuses `readNodes(page,type,app)`); headline `2/2 → 3/3`; REPORT table + prose updated.
+- **⚠️ TRAP THAT COST THINKING (write this down):** `reconcile` calls `g.addNode()` which mints a FRESH node id; the item id lands in `data.sourceId` (sync.ts:62). So `<NodeActions nodeId={item.id}>` (as the old S3 shape loosely wrote) does NOT resolve a mirrored node — `nodeId` looks up `s.nodes[nodeId]` by the node's OWN id. **Use `type`+`sourceId` (the Reader precedent `<NodeActions type="book" sourceId={b.id}>`) for any mirrored-collection ⚡.** `nodeId` is only for graph-only nodes (e.g. a `task` from make-task).
+- **Verify:** build🟢 vitest 435→445🟢 eslint clean (9 touched); metrics tokens/off-system/offSystemStyle 0 (`--assert-zero` exit 0); bundle gz 728.7→729.5 (+0.8), no new deps. **Render-confirmed via `qa-smoke.mjs` on the production dist (`npm install --no-save playwright`, `node server.js` on :3001):** 32/32 routes clean (uncaught:0), **GRAPH-LEGIBLE 3/3 ✅** (reader/book + crypto/wallet + mail/draft all node=true persisted=true), INBOUND-LANDS 4/4.
+- **⚠️ INFRA GAP STILL OPEN (unchanged):** `playwright` STILL not in `package.json` devDependencies — every render-confirm pays a manual `npm install --no-save playwright`; the smoke server (`node server.js` on :3001) is NOT auto-started by `qa-smoke.mjs`.
+
+<details><summary>★ EPIC-13 S2 — what shipped (2026-07-10) — superseded by S3 above, kept for lineage</summary>
 
 ## ★ EPIC-13 S2 — what shipped this run (2026-07-10, green main)
 Mail joined the organism as a shelled, handoff-receiving citizen:
@@ -37,7 +52,9 @@ Mail drafts PERSIST + graph-legible; both Crypto + Mail EMIT via ⚡ NodeActions
 - **`src/apps/network/nodeColors.ts`** — add a `draft` type colour (mirror the S1 `wallet: '196,162,101'` line).
 - **`qa-smoke.mjs`** — extend GRAPH-LEGIBLE with a `mail/draft` axis: seed `localStorage['empire-mail-drafts']` w/ one draft → reload `/app/mail` → assert a `draft` node owned by `app==='mail'` in `empire-core-graph` survives a 2nd reload. Uses the generalised `readNodes(page,type,app)` helper S1 added. Headline `2/2 → 3/3`.
 - **Tests:** `draftStore.test.ts` (save→list→delete roundtrip; upsert; survives fresh listDrafts) + `mailGraph.test.ts` (`draftNodeData` shape). ≥5 combined.
-- *Acceptance:* saved draft survives reload + appears as a `draft` node in Network/Search/Timeline; both wallets + drafts offer ⚡ intents; `GRAPH-LEGIBLE 3/3`; 31/31; build🟢 vitest🟢 eslint clean; `--assert-zero` exit 0; no new deps. **★ Then EPIC-13 is CODE-COMPLETE (S1–S3) → QA confirms `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4` on green main → Strategist retires to DONE.**
+- *Acceptance:* saved draft survives reload + appears as a `draft` node in Network/Search/Timeline; both wallets + drafts offer ⚡ intents; `GRAPH-LEGIBLE 3/3`; 31/31; build🟢 vitest🟢 eslint clean; `--assert-zero` exit 0; no new deps. **★ Then EPIC-13 is CODE-COMPLETE (S1–S3) → QA confirms `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4` on green main → Strategist retires to DONE.** ✅ **ALL SHIPPED + RENDER-CONFIRMED 2026-07-10 — see the S3 block at the top.**
+
+</details>
 
 ## ✅ QA STATE (2026-07-10 — LATEST QA RUN) — EPIC-13 S2 render-CONFIRMED on green main, clean run, no drift
 

@@ -5,6 +5,28 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · BUILDER — EPIC-13 S3: Mail drafts PERSIST + graph-legible; both islands EMIT via ⚡ → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE (render-confirmed)
+
+**Did:** Executed EPIC-13 S3 — the capstone. Mail gains durable drafts (a real capability, not just plumbing) and becomes the LAST graph-legible island; both Mail(draft) and Crypto(wallet) now emit onward via ⚡ NodeActions. Changes:
+- **New `src/apps/mail/lib/draftStore.ts`** — localStorage `empire-mail-drafts`; `Draft={id,to,subject,body,updatedAt}`; `listDrafts()` (newest-`updatedAt` first, tolerant of missing/corrupt JSON), `saveDraft(Omit<Draft,'updatedAt'>)` (upsert by id, stamps `updatedAt`, returns the record), `deleteDraft(id)`, `newDraftId()` (mirrors `graph.ts` newId).
+- **New `src/apps/mail/mailGraph.ts`** — pure `draftNodeData(d)→{subject,to}` (body rides the store/title; kept small for a stable reconcile diff), mirroring `cryptoGraph.ts`/`readerGraph.ts`.
+- **`src/apps/mail/Mail.tsx`** — `drafts`/`draftId`/`draftStatus` state; loads `listDrafts()` on mount; `useEffect(mirrorCollection('draft','mail', drafts, {id, title: d=>d.subject||'(no subject)', data: draftNodeData}), [drafts])` so a saved draft becomes a `draft` CoreNode owned by `mail`. Added a **Save-draft** `Button` in compose (fresh id if new, upsert if editing) + a **Drafts** `.gp` list (each row click-reopens into the composer, has a Delete, and a per-row `⚡ <NodeActions type="draft" sourceId={d.id}>`).
+- **`src/apps/crypto/CryptoApp.tsx`** — the watch-list row (`<label>`→`<div>` grid `52px 1fr auto`, label/Input a11y-linked via `htmlFor`/`id`) gained a per-coin `⚡ <NodeActions type="wallet" sourceId={\`wallet:${c}\`}>` (renders null until the address is non-blank → a wallet node exists to act on).
+- **`src/lib/core/sync.ts`** — `make-task` `accepts` gained `'wallet','draft'` so both offer Make-Task AND Make-Note (`make-note-from` already accepts any non-note). No other intent touched.
+- **`src/apps/network/nodeColors.ts`** — `draft: '155,247,230'` (pale signal, an outbound cyan).
+- **`scripts/qa-smoke.mjs`** — GRAPH-LEGIBLE grew **Axis 3 `mail/draft`** (seed `empire-mail-drafts` before mount → reload → assert a `draft` node owned by `mail` survives a 2nd reload; reuses the generalised `readNodes(page,type,app)`); headline `2/2 → 3/3`; REPORT table + prose updated.
+- **Tests:** `draftStore.test.ts` (+7: save→list roundtrip, upsert-by-id, distinct-append+ordering, delete-matching, delete-unknown no-op, corrupt-store tolerance, distinct ids) + `mailGraph.test.ts` (+3: payload shape, no body leak, empty verbatim).
+
+**Verified (cloud, green main):** build🟢 (tsc -b && vite build; precache 91). `npx vitest run` **445/445 🟢** (was 435; +10). `npx eslint` clean on all 9 touched files. `node scripts/metrics.mjs --assert-zero` **exit 0** — `| Apps 31 ±0 | Test cases 386 +10 | Test files 47 +2 | Token violations 0 ±0 | Off-system utils 0 ±0 | Off-system style 0 (r0/t0/m0) ±0 | Bundle gz 729.5 +0.8 |`. No new deps. **Render-confirmed** via `qa-smoke.mjs` on the production `dist/` (`npm install --no-save playwright`, `node server.js` on :3001): **32/32 routes render clean** (0 uncaught), **`GRAPH-LEGIBLE 3/3 ✅`** (reader/book + crypto/wallet + **mail/draft** all node=true persisted=true), **`INBOUND-LANDS 4/4 ✅`**. **★ EPIC-13 is CODE-COMPLETE (S1–S3).**
+
+**NOT verifiable in cloud:** the ⚡ intent-run's window/focus change is unit-pinned in NodeActions' existing tests (the on-device caveat every ⚡ surface carries) — not driven visually here. Mail send/inbox stay backend-gated (401 tokenless). The Drafts list layout / Save-draft affordance render correctly in the headless smoke (route clean) but their exact visual polish is on-device-confirm only.
+
+**Trap recorded (CONTEXT + EPICS):** mirrored nodes get a FRESH graph id — the item id lands in `data.sourceId` (`sync.ts:62`), so ⚡ must use `type`+`sourceId` (the Reader precedent), NOT `nodeId` as the S3 shape loosely suggested; `nodeId` only resolves graph-only nodes (e.g. a `task`).
+
+**Single best next step:** the **Strategist** retires EPIC-13 to DONE (S1–S3 shipped + `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4` render-confirmed on green main) and promotes the next epic (ratified LATER candidate: a measured design-system STATE/shell-adoption epic, or an a11y pass; EPIC-7·Android device-gated). **Infra gap still open:** add `playwright` to `devDependencies` so render-confirm doesn't need a manual `--no-save` install each run.
+
+---
+
 ## 2026-07-10 · QA (visual + smoke) — EPIC-13 S2 render-CONFIRMED on green main (`INBOUND-LANDS 4/4 ✅`), clean run, no drift
 
 **Did:** Ran the full visual + smoke + metrics routine against green main (EPIC-13 S2 already landed — Mail app + glyph + tests). On a fresh cloud checkout: `git pull --rebase` (up to date), `npm install`, `npm run build` 🟢, installed `playwright --no-save` (still absent from `package.json` — the standing infra gap), served the built `dist/` via `node server.js` on :3001, ran `scripts/qa-smoke.mjs` + `scripts/metrics.mjs`, and visually inspected the local screenshots (never committed — `docs/screenshots/latest/*.png` is gitignored).

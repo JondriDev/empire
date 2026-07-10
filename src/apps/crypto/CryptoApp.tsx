@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react'
 import { getAppIcon } from '../../design-system/icons'
 import { Button, Input, Card } from '../../components/ui'
+import { NodeActions } from '../../components/ui/NodeActions'
 import { mirrorCollection } from '../../lib/core/sync'
 import { walletItems, walletNodeData, type Coin } from './cryptoGraph'
 
@@ -93,20 +94,25 @@ export default function CryptoApp() {
       {/* Watch-list */}
       <div className="grid gap-3">
         {COINS.map(c => (
-          <label key={c} className="grid items-center gap-3" style={{ gridTemplateColumns: '52px 1fr' }}>
-            <span
+          <div key={c} className="grid items-center gap-3" style={{ gridTemplateColumns: '52px 1fr auto' }}>
+            <label
+              htmlFor={`crypto-addr-${c}`}
               className="text-sm font-semibold uppercase tracking-wide"
               style={{ color: addresses[c].trim() ? ACCENT : 'var(--text3)' }}
             >
               {c}
-            </span>
+            </label>
             <Input
+              id={`crypto-addr-${c}`}
               mono
               value={addresses[c]}
               onChange={v => setAddresses(a => ({ ...a, [c]: v }))}
               placeholder={`${c} address (optional)`}
             />
-          </label>
+            {/* ⚡ emit — a watched wallet can spawn a task/note. Renders null until the
+                address is non-blank (then a `wallet` node exists to act on). */}
+            <NodeActions type="wallet" sourceId={`wallet:${c}`} />
+          </div>
         ))}
       </div>
 

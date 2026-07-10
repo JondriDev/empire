@@ -1,6 +1,6 @@
 # Empire QA — Offline-boot guard (EPIC-4 S1)
 
-**Generated:** 2026-07-10T09:20:24.831Z
+**Generated:** 2026-07-10T10:19:59.726Z
 
 ## Precache audit
 

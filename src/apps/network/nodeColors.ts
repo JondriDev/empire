@@ -16,6 +16,7 @@ export const TYPE_RGB: Record<string, string> = {
   goal: '255,155,107',     // --ember   warm signal
   prompt: '155,247,230',   // pale signal
   wallet: '196,162,101',   // --ember   desert gold (Crypto watch-list)
+  draft: '155,247,230',    // pale signal (Mail drafts — an outbound cyan)
 }
 
 const TYPE_CYCLE = ['52,245,214', '92,240,168', '176,107,255', '77,155,255', '255,155,107', '155,247,230']

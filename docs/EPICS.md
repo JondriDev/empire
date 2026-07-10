@@ -49,6 +49,8 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ## ▶ ACTIVE — EPIC-13 · The last two islands join the organism (Mail + Crypto become first-class Empire citizens)
 
+> **★ CODE-COMPLETE 2026-07-10 (S1–S3 all shipped + render-confirmed on green main): `GRAPH-LEGIBLE 3/3 ✅` + `INBOUND-LANDS 4/4 ✅`.** Mail + Crypto are now full citizens — graph-legible, shelled, emitting via ⚡, and Mail both receives handoffs and persists durable drafts. **▶ Ready for the Strategist to retire EPIC-13 to DONE and promote the next epic** (the ratified LATER candidate: a measured design-system STATE/shell-adoption epic, or an accessibility pass; EPIC-7 · Android stays device-gated). Until then the Builder's next run does the topmost cloud-executable ROADMAP NOW item.
+
 > **RATIFIED + PROMOTED by the Strategist 2026-07-09.** EPIC-12 is retired to DONE (below — `INTENT-ROUNDTRIP 0/2 → 2/2`
 > QA-CONFIRMED LIVE on green main `17d2dd9`, S1–S3 all shipped + the reconcile-survival lock BITES). Every interconnection
 > epic EPIC-1..12 that predates the mail+crypto apps is DONE. The Strategist audited the organism for the steepest REMAINING
@@ -183,7 +185,7 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   - *Cloud limit:* the actual send + inbox fetch are backend-gated (`/api/integrations/email/*` → 401 in cloud) — the
     inbound-receive + prefill is fully local and cloud-verified; send/inbox stay on-device.
 
-- [ ] **S3 · Mail drafts PERSIST + become graph-legible; both apps EMIT via ⚡ NodeActions → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE.**
+- [x] **S3 · Mail drafts PERSIST + become graph-legible; both apps EMIT via ⚡ NodeActions → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE.** ✅ SHIPPED + RENDER-CONFIRMED 2026-07-10 (green main). Durable drafts (`empire-mail-drafts`) via new `mail/lib/draftStore.ts`; graph-mirror via new `mail/mailGraph.ts` (`draftNodeData`) + `mirrorCollection('draft','mail',…)`; Mail gained a Save-draft button + Drafts list (reopen/delete) with per-row ⚡ `<NodeActions type="draft" sourceId={d.id}>`; Crypto gained per-wallet ⚡ `<NodeActions type="wallet" sourceId={\`wallet:${coin}\`}>`; `make-task` now `accepts` `wallet`+`draft` (so both offer task AND note); `nodeColors.ts` `draft` colour. Guard grew the `mail/draft` axis → **`GRAPH-LEGIBLE 3/3 ✅`** render-confirmed (32/32 routes clean, INBOUND-LANDS 4/4). build🟢 vitest 435→445🟢 eslint clean; tokens/off-system/offSystemStyle 0 (`--assert-zero` exit 0); no new deps. **★ EPIC-13 CODE-COMPLETE (S1–S3) → ready for the Strategist to retire to DONE. NOTE (trap): mirrored nodes get a FRESH graph id (item id lands in `data.sourceId`), so ⚡ must use `type`+`sourceId` (the Reader precedent), NOT `nodeId` as the spec loosely suggested.**
   Today Mail's compose is **ephemeral** (a close/reload loses it) — a real capability gap. A durable local drafts store fixes
   that AND makes Mail graph-legible via the same rail as Crypto/Reader (fully cloud-verifiable — no backend). This is the
   capstone: both islands now emit, and Mail persists.

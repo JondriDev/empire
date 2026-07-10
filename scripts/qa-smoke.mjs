@@ -332,8 +332,38 @@ try {
   console.warn(`GRAPH-LEGIBLE crypto/wallet: guard did not complete — ${e.message}`);
 }
 
-const graphLegiblePassed = (graphLegible.pass ? 1 : 0) + (cryptoLegible.pass ? 1 : 0);
-console.log(`GRAPH-LEGIBLE: ${graphLegiblePassed}/2 ${graphLegiblePassed === 2 ? '✅' : '⚠️'}`);
+// ── Axis 3: mail/draft (EPIC-13 S3) ──
+// Mail owns a real collection now (durable drafts in `empire-mail-drafts`) — the
+// last raw-HTML island. S3 wires `mirrorCollection('draft','mail', drafts, …)`, so
+// a saved draft must appear as a `draft` CoreNode owned by app==='mail'. Seed one
+// draft in the page origin BEFORE the app mounts (the load effect reads it → mirror
+// effect fires), then assert the draft node exists and survives a reload.
+const draftLegible = { node: false, persisted: false, pass: false };
+try {
+  const page = await ctx.newPage();
+  // Establish the origin, seed a draft, then reload so a fresh mount reads it.
+  await page.goto(`${BASE}/app/mail`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.evaluate(() => localStorage.setItem('empire-mail-drafts', JSON.stringify([
+    { id: 'draft:qa-probe', to: 'qa@empire.test', subject: 'QAProbe DraftLegible', body: 'graph-legibility probe', updatedAt: 1 },
+  ])));
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(1200);
+  draftLegible.node = (await readNodes(page, 'draft', 'mail')) > 0;
+  // Reload again — the mirrored node lives in the persisted graph, and the
+  // re-mounted Mail must re-mirror the same drafts (not drop it).
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(1200);
+  draftLegible.persisted = (await readNodes(page, 'draft', 'mail')) > 0;
+  draftLegible.pass = draftLegible.node && draftLegible.persisted;
+  console.log(`GRAPH-LEGIBLE  mail/draft  node=${draftLegible.node} persisted=${draftLegible.persisted}`);
+  await page.close();
+} catch (e) {
+  draftLegible.err = e.message;
+  console.warn(`GRAPH-LEGIBLE mail/draft: guard did not complete — ${e.message}`);
+}
+
+const graphLegiblePassed = (graphLegible.pass ? 1 : 0) + (cryptoLegible.pass ? 1 : 0) + (draftLegible.pass ? 1 : 0);
+console.log(`GRAPH-LEGIBLE: ${graphLegiblePassed}/3 ${graphLegiblePassed === 3 ? '✅' : '⚠️'}`);
 
 // ── GLOBAL-SEARCH guard (EPIC-8 S1: the organism becomes queryable) ──────────
 // Every collection-owning app mirrors its real entities into the Core graph;
@@ -1063,12 +1093,13 @@ md += `| App | Added | Survived reload | Result |\n|---|---|---|---|\n`;
 for (const r of mediaResults) {
   md += `| ${r.id} | ${r.added ? '✅' : '❌'} | ${r.survived ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
 }
-md += `\n## Graph-legible guard (EPIC-6 S4 + EPIC-13 S1 — collection-owning apps join the organism)\n\n`;
-md += `Each collection-owning app must mirror its real entities into the Core graph (\`empire-core-graph\`) so they are legible in The Network / Search / Timeline. **reader/book** (EPIC-6 S4): Reader's real file \`<input>\` was driven with a small \`.txt\` book; PASS = a \`book\` node owned by \`app==='reader'\` appeared AND survived a reload. **crypto/wallet** (EPIC-13 S1): the \`crypto-watch-list\` was seeded with a BTC address before Crypto mounted; PASS = a \`wallet\` node owned by \`app==='crypto'\` appeared AND survived a reload (the re-mounted app re-mirrors its watch-list). Crypto was one of the last two raw-HTML islands — S1 makes it graph-legible.\n\n`;
+md += `\n## Graph-legible guard (EPIC-6 S4 + EPIC-13 S1/S3 — collection-owning apps join the organism)\n\n`;
+md += `Each collection-owning app must mirror its real entities into the Core graph (\`empire-core-graph\`) so they are legible in The Network / Search / Timeline. **reader/book** (EPIC-6 S4): Reader's real file \`<input>\` was driven with a small \`.txt\` book; PASS = a \`book\` node owned by \`app==='reader'\` appeared AND survived a reload. **crypto/wallet** (EPIC-13 S1): the \`crypto-watch-list\` was seeded with a BTC address before Crypto mounted; PASS = a \`wallet\` node owned by \`app==='crypto'\` appeared AND survived a reload (the re-mounted app re-mirrors its watch-list). **mail/draft** (EPIC-13 S3): \`empire-mail-drafts\` was seeded with one draft before Mail mounted; PASS = a \`draft\` node owned by \`app==='mail'\` appeared AND survived a reload. Mail + Crypto were the last two raw-HTML islands — S1/S2/S3 make both first-class citizens (graph-legible + emit; Mail also receives handoffs).\n\n`;
 md += `| Collection | Node created | Survived reload | Result |\n|---|---|---|---|\n`;
 md += `| reader/book | ${graphLegible.node ? '✅' : '❌'} | ${graphLegible.persisted ? '✅' : '❌'} | ${graphLegible.pass ? '✅' : '❌'}${graphLegible.err ? ' (' + graphLegible.err.slice(0, 80) + ')' : ''} |\n`;
 md += `| crypto/wallet | ${cryptoLegible.node ? '✅' : '❌'} | ${cryptoLegible.persisted ? '✅' : '❌'} | ${cryptoLegible.pass ? '✅' : '❌'}${cryptoLegible.err ? ' (' + cryptoLegible.err.slice(0, 80) + ')' : ''} |\n`;
-md += `\n**GRAPH-LEGIBLE: ${graphLegiblePassed}/2 ${graphLegiblePassed === 2 ? '✅' : '⚠️'}**\n`;
+md += `| mail/draft | ${draftLegible.node ? '✅' : '❌'} | ${draftLegible.persisted ? '✅' : '❌'} | ${draftLegible.pass ? '✅' : '❌'}${draftLegible.err ? ' (' + draftLegible.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n**GRAPH-LEGIBLE: ${graphLegiblePassed}/3 ${graphLegiblePassed === 3 ? '✅' : '⚠️'}**\n`;
 md += `\n## Global-search guard (EPIC-8 S1 + S2 — the organism becomes queryable)\n\n`;
 md += `The Core graph was seeded with entities sharing a rare term across TWO apps (a \`book\` in Reader, a \`task\` in Goals); after a reload (persist rehydrate) the term was typed into the Search field. PASS = BOTH entities surface, grouped under their own app sections — one lens querying every app's real entities at once. **S2 adds a tag-only match:** a third node carries the term \`${TAG_TERM}\` ONLY in \`data.tags\` (a string array) — it surfaces iff \`nodeBodyText\` now flattens array elements (the S2 corpus gap). The pure ranking spine (\`searchNodes\`) is unit-pinned in \`search.test.ts\`; this carries the graph→input→grouped-render roundtrip jsdom cannot.\n\n`;
 md += `| Query | Book hit | Task hit | Spans 2 apps | Tag-only hit | Result |\n|---|---|---|---|---|---|\n`;

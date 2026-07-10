@@ -1,33 +1,8 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-10T09:20:24.880Z
+**Generated:** 2026-07-10T10:19:59.755Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
-
-## QA verdict — 2026-07-10 (green main, EPIC-13 S2 render-CONFIRMED, clean run, no drift)
-
-**No runtime bug. No regression. No drift.** On a fresh cloud checkout of `main`: build🟢, **32/32 routes render clean**
-(desktop shell + all 31 registry apps, 0 uncaught JS / error boundary / blank), all **12 guard suites green**, OFFLINE 5/5,
-PRECACHE 91 no-gap. `metrics.mjs --assert-zero` **exits 0** (the ratchet holds).
-
-**Active epic = EPIC-13 · The last two islands join the organism (Mail + Crypto).** S1 ✅, S2 ✅, S3 pending.
-- **EPIC-13 S2 acceptance CONFIRMED (holds): `INBOUND-LANDS 4/4 ✅`** — Mail is a handoff receiver; the `mail | notes`
-  axis reads `chip=true prefilled=true`. **Visually confirmed** (`app-mail.png`): Mail is now shelled onto the Empire UI —
-  Mail envelope glyph header in `var(--signal)` cyan, "Email bridge · Himalaya & AgentMail" subtitle, segmented
-  Himalaya/AgentMail provider toggle, Refresh + Compose buttons, and the graceful **"Provider himalaya not configured."**
-  (the env-expected `/api/integrations/status` 401 — **no error boundary**). The desktop grid's Mail tile carries the
-  bespoke envelope glyph, not the `Node` fallback (`desktop.png`).
-- **EPIC-13 S1 acceptance CONFIRMED (holds): `GRAPH-LEGIBLE 2/2 ✅`** — reader/book + crypto/wallet both persist. Crypto
-  tile carries the bespoke Wallet glyph. **S3 not yet shipped → `GRAPH-LEGIBLE` stays 2/2 (expected, not a contradiction);
-  the `mail/draft` axis (→ 3/3) lands with S3.**
-
-**Metric deltas (vs committed `metrics.json` snapshot) — all Δ ±0:** apps **31**, test cases **376**, test files **45**,
-tokenViolations **0**, offSystemUtilities **0**, offSystemStyle **0 (r0/t0/m0)**, bundle gz **728.7 KB**. Nothing changed
-in the tree since the last QA snapshot — this run re-confirms EPIC-13 S2 live on green main.
-
-**Env-expected noise (NOT render failures):** weather geocoding + geolocation (blocked CDN / no permission), maps
-carto basemap tiles (blocked CDN), files `/api/files` 401 (Android-only backend), mail `/api/integrations/status` 401
-(needs a configured provider/token). Every one is a headless-sandbox limitation, not a bug.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -51,7 +26,7 @@ carto basemap tiles (blocked CDN), files `/api/files` 401 (Android-only backend)
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -89,16 +64,17 @@ Each media app's real file `<input>` was driven with a small blob, then the page
 | video | ✅ | ✅ | ✅ |
 | photos | ✅ | ✅ | ✅ |
 
-## Graph-legible guard (EPIC-6 S4 + EPIC-13 S1 — collection-owning apps join the organism)
+## Graph-legible guard (EPIC-6 S4 + EPIC-13 S1/S3 — collection-owning apps join the organism)
 
-Each collection-owning app must mirror its real entities into the Core graph (`empire-core-graph`) so they are legible in The Network / Search / Timeline. **reader/book** (EPIC-6 S4): Reader's real file `<input>` was driven with a small `.txt` book; PASS = a `book` node owned by `app==='reader'` appeared AND survived a reload. **crypto/wallet** (EPIC-13 S1): the `crypto-watch-list` was seeded with a BTC address before Crypto mounted; PASS = a `wallet` node owned by `app==='crypto'` appeared AND survived a reload (the re-mounted app re-mirrors its watch-list). Crypto was one of the last two raw-HTML islands — S1 makes it graph-legible.
+Each collection-owning app must mirror its real entities into the Core graph (`empire-core-graph`) so they are legible in The Network / Search / Timeline. **reader/book** (EPIC-6 S4): Reader's real file `<input>` was driven with a small `.txt` book; PASS = a `book` node owned by `app==='reader'` appeared AND survived a reload. **crypto/wallet** (EPIC-13 S1): the `crypto-watch-list` was seeded with a BTC address before Crypto mounted; PASS = a `wallet` node owned by `app==='crypto'` appeared AND survived a reload (the re-mounted app re-mirrors its watch-list). **mail/draft** (EPIC-13 S3): `empire-mail-drafts` was seeded with one draft before Mail mounted; PASS = a `draft` node owned by `app==='mail'` appeared AND survived a reload. Mail + Crypto were the last two raw-HTML islands — S1/S2/S3 make both first-class citizens (graph-legible + emit; Mail also receives handoffs).
 
 | Collection | Node created | Survived reload | Result |
 |---|---|---|---|
 | reader/book | ✅ | ✅ | ✅ |
 | crypto/wallet | ✅ | ✅ | ✅ |
+| mail/draft | ✅ | ✅ | ✅ |
 
-**GRAPH-LEGIBLE: 2/2 ✅**
+**GRAPH-LEGIBLE: 3/3 ✅**
 
 ## Global-search guard (EPIC-8 S1 + S2 — the organism becomes queryable)
 

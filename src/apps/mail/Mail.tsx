@@ -13,6 +13,10 @@ import { getAppIcon } from '../../design-system/icons'
 import { Button, Input, TextArea, Card } from '../../components/ui'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
+import { NodeActions } from '../../components/ui/NodeActions'
+import { mirrorCollection } from '../../lib/core/sync'
+import { listDrafts, saveDraft, deleteDraft, newDraftId, type Draft } from './lib/draftStore'
+import { draftNodeData } from './mailGraph'
 
 type InboxMessage = { id: string; from: string; subject: string; date: string }
 type Status = { providers: Record<string, { configured: boolean }> }
@@ -46,10 +50,28 @@ export default function MailApp() {
   const [composeOpen, setComposeOpen] = useState(false)
   const [compose, setCompose] = useState({ to: '', subject: '', body: '' })
   const [sendStatus, setSendStatus] = useState<string>('')
+  // Durable drafts (localStorage `empire-mail-drafts`). `draftId` tracks which draft
+  // the composer is editing — null means a brand-new draft (saved gets a fresh id).
+  const [drafts, setDrafts] = useState<Draft[]>([])
+  const [draftId, setDraftId] = useState<string | null>(null)
+  const [draftStatus, setDraftStatus] = useState<string>('')
 
   useEffect(() => {
     jget('/api/integrations/status').then(setStatus).catch(e => setErr(String(e)))
+    setDrafts(listDrafts())
   }, [])
+
+  // Mirror the durable drafts into the Core graph so Mail joins the organism — the
+  // last of the two raw-HTML islands. Each draft becomes a `draft` node owned by
+  // `mail`, legible in The Network / Search / Timeline; deleting a draft prunes its
+  // node on the next reconcile.
+  useEffect(() => {
+    mirrorCollection('draft', 'mail', drafts, {
+      id: d => d.id,
+      title: d => d.subject || '(no subject)',
+      data: draftNodeData,
+    })
+  }, [drafts])
 
   // Inbound: a cross-app HANDOFF ("Send to Mail") drops a subject/body payload
   // into empire-mail-clipboard. Open the composer prefilled + show provenance.
@@ -78,6 +100,31 @@ export default function MailApp() {
       setSendStatus(r.ok ? 'sent ✓' : `failed: ${r.error || ''}`)
       if (r.ok) setCompose({ to: '', subject: '', body: '' })
     } catch (e) { setSendStatus(`error: ${String(e)}`) }
+  }
+
+  // Persist the current composer as a draft (fresh id if new, upsert if editing),
+  // then refresh the list so the graph mirror re-runs.
+  const persistDraft = () => {
+    const id = draftId ?? newDraftId()
+    saveDraft({ id, ...compose })
+    setDraftId(id)
+    setDrafts(listDrafts())
+    setDraftStatus('saved ✓')
+  }
+
+  // Reopen a saved draft back into the composer for editing.
+  const openDraft = (d: Draft) => {
+    setCompose({ to: d.to, subject: d.subject, body: d.body })
+    setDraftId(d.id)
+    setComposeOpen(true)
+    setDraftStatus('')
+    setSendStatus('')
+  }
+
+  const removeDraft = (id: string) => {
+    deleteDraft(id)
+    setDrafts(listDrafts())
+    if (draftId === id) setDraftId(null)
   }
 
   const providerConfigured = status?.providers?.[provider]?.configured
@@ -147,10 +194,57 @@ export default function MailApp() {
               >
                 Send
               </Button>
-              <span className="text-sm" style={{ color: 'var(--text3)' }} aria-live="polite">{sendStatus}</span>
+              <Button
+                onClick={persistDraft}
+                disabled={!compose.to && !compose.subject && !compose.body}
+              >
+                Save draft
+              </Button>
+              <span className="text-sm" style={{ color: 'var(--text3)' }} aria-live="polite">
+                {sendStatus || draftStatus}
+              </span>
             </div>
           </div>
         </Card>
+      )}
+
+      {/* Drafts — durable, graph-legible, and an ⚡ emit source (a draft can spawn
+          a task/note). Reopen a row into the composer; delete removes it. */}
+      {drafts.length > 0 && (
+        <section className="mb-4">
+          <h2 className="text-sm font-semibold mb-2" style={{ color: 'var(--text2)' }}>
+            Drafts <span style={{ color: 'var(--text3)' }}>· {drafts.length}</span>
+          </h2>
+          <div className="gp" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+            {drafts.map((d, i) => (
+              <div
+                key={d.id}
+                className="flex items-center justify-between gap-3"
+                style={{ padding: 12, borderTop: i ? '1px solid var(--border)' : undefined }}
+              >
+                <button
+                  onClick={() => openDraft(d)}
+                  className="flex-1 text-left"
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', minWidth: 0 }}
+                  aria-label={`Open draft ${d.subject || '(no subject)'}`}
+                >
+                  <div className="truncate" style={{ color: 'var(--text)', fontWeight: 600 }}>
+                    {d.subject || '(no subject)'}
+                  </div>
+                  <div className="text-sm truncate" style={{ color: 'var(--text3)' }}>
+                    {d.to || 'no recipient'}
+                  </div>
+                </button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <NodeActions type="draft" sourceId={d.id} />
+                  <Button size="sm" onClick={() => removeDraft(d.id)} aria-label={`Delete draft ${d.subject || '(no subject)'}`}>
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       {err && <p className="text-sm mb-4" style={{ color: 'var(--c-danger)' }} role="alert">{err}</p>}
