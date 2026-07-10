@@ -1,6 +1,6 @@
 {
   "current": {
-    "generatedAt": "2026-07-10T05:15:45.011Z",
+    "generatedAt": "2026-07-10T05:28:01.320Z",
     "apps": 31,
     "testFiles": 45,
     "testCases": 376,
@@ -12,26 +12,10 @@
       "type": 0,
       "motion": 0
     },
-    "bundleGzKB": 728.6,
+    "bundleGzKB": 728.7,
     "bundleRawKB": 2463.8
   },
   "history": [
-    {
-      "generatedAt": "2026-07-06T03:08:21.005Z",
-      "apps": 29,
-      "testFiles": 36,
-      "testCases": 309,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "bundleGzKB": 718.3,
-      "bundleRawKB": 2437.4
-    },
     {
       "generatedAt": "2026-07-06T03:08:21.146Z",
       "apps": 29,
@@ -495,6 +479,22 @@
       },
       "bundleGzKB": 728.2,
       "bundleRawKB": 2462.2
+    },
+    {
+      "generatedAt": "2026-07-10T05:15:45.011Z",
+      "apps": 31,
+      "testFiles": 45,
+      "testCases": 376,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "bundleGzKB": 728.6,
+      "bundleRawKB": 2463.8
     }
   ]
 }

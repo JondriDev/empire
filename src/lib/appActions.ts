@@ -203,7 +203,7 @@ export const CROSS_APP_ACTIONS = {
         from: data.source,
       }))
       handoff(data.source, 'mail', 'to mail')
-      window.open('/app/mail', '_self')
+      openRoute('/app/mail')
       return 'Opened in Mail'
     },
   } as const,
