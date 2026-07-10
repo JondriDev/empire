@@ -154,7 +154,8 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   - *Cloud limit:* live wallet balances are backend-gated (`/api/wallet/check` → 401 in cloud) — the watch-list mirror is
     fully local, so graph-legibility is cloud-verified headless; the balance fetch stays an on-device confirm.
 
-- [ ] **S2 · Mail becomes an Empire app + a handoff RECEIVER — `Mail` glyph + shell + inbound → `INBOUND-LANDS 3/3 → 4/4`.**
+- [x] **S2 · Mail becomes an Empire app + a handoff RECEIVER — `Mail` glyph + shell + inbound → `INBOUND-LANDS 3/3 → 4/4`. ✅ SHIPPED + RENDER-CONFIRMED 2026-07-10 (`main`).**
+  Bespoke alien `Mail` envelope glyph (`glyphs.tsx`+`index.ts`, kills the `Node` fallback); `SEND_TO_MAIL` sender in `appActions.ts` (`empire-mail-clipboard` = `{subject,body,from}` + one `HANDOFF`→mail) wired into `SendResultMenu` `ACTION_TARGET`+`DEFAULT_ACTIONS`; `Mail.tsx` re-shelled (header `getAppIcon('Mail')` + `var(--signal)` accent, provider `<select>`→segmented `ui` `Button` toggle w/ `aria-pressed`, compose on a `Card` w/ `ui` `Input`/`TextArea`, inbox on `.gp`) + `useInboundHandoff('empire-mail-clipboard')` → opens compose prefilled + `<ProvenanceChip>`. `INBOUND-LANDS` guard grew a `mail`/`notes` case → **4/4 render-confirmed** on the production dist (32/32 routes clean, chip=true prefilled=true). build🟢 vitest 432→435🟢 eslint clean; tokens/off-system/offSystemStyle 0 (`--assert-zero` exit 0); bundle gz 728.2→728.6 (+0.4), no new deps.
   The inbound-receive + prefill is 100% local (a seeded `sessionStorage` payload), so it's cloud-verifiable; only send/inbox
   are backend-gated. Reuses S1's shell pattern.
   - **`src/design-system/icons/glyphs.tsx` + `index.ts`** — add a bespoke alien **`Mail`** glyph + the `Mail` key to

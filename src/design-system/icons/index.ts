@@ -41,6 +41,7 @@ import {
   Search,
   Timeline,
   Wallet,
+  Mail,
   Node,
 } from './glyphs'
 import type { AppIcon } from './glyphs'
@@ -79,6 +80,7 @@ export const alienIcons: Record<string, AppIcon> = {
   Search,
   Timeline,
   Wallet,
+  Mail,
 }
 
 /** The bare orbital node, shown when a registry `icon` key has no glyph. */

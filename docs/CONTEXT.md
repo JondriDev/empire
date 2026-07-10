@@ -16,7 +16,28 @@
 
 ---
 
-## ★ EPIC-13 S1 SHIPPED + QA-RENDER-CONFIRMED (2026-07-10) — Crypto is graph-legible + shelled; `GRAPH-LEGIBLE 1/1 → 2/2 ✅` (the owed render-confirm is DELIVERED). ▶ NEXT = EPIC-13 S2 (Mail becomes an app + handoff RECEIVER → `INBOUND-LANDS 4/4`) — exact shape in the "Active epic" block.
+## ★ EPIC-13 S2 SHIPPED + RENDER-CONFIRMED (2026-07-10) — Mail is now an Empire app + handoff RECEIVER; `INBOUND-LANDS 3/3 → 4/4 ✅` render-confirmed on the production dist (mail chip=true prefilled=true from notes; 32/32 routes clean). ▶ NEXT = EPIC-13 S3 (Mail drafts PERSIST + graph-legible + both apps EMIT via ⚡ → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE) — exact shape in the S3 block just below.
+
+## ★ EPIC-13 S2 — what shipped this run (2026-07-10, green main)
+Mail joined the organism as a shelled, handoff-receiving citizen:
+- **Glyph rail:** new bespoke alien **`Mail`** envelope glyph (`glyphs.tsx` — rect panel + folded-flap `<path>` dipping to a `<Dot>` orbital node at the seam) exported + added to `alienIcons` in `icons/index.ts` (registry `icon:'Mail'` now resolves — no more `Node` fallback).
+- **Sender:** `SEND_TO_MAIL` in `appActions.ts` (before `SEND_TO_MESSAGES`) — writes `empire-mail-clipboard` = `{subject:data.title, body:data.text, from:data.source}` + one `handoff(source,'mail','to mail')` HANDOFF, then `window.open('/app/mail','_self')`. Wired into `SendResultMenu.tsx` — `ACTION_TARGET.SEND_TO_MAIL:'mail'` (that record is EXHAUSTIVE — TS errors if you add to CROSS_APP_ACTIONS without adding here) + `'SEND_TO_MAIL'` in `DEFAULT_ACTIONS` (so Notes/Editor/… surface "Send to Mail").
+- **Shell:** `Mail.tsx` fully rewritten onto the Empire UI — `p-6 max-w-2xl mx-auto` root; header `getAppIcon('Mail')` + `ACCENT='var(--signal)'` (the registry mail accent — DON'T write the raw `#1a8caa`, the token detector counts hex even in comments); provider `<select>`→a segmented **`ui` `Button`** toggle w/ `aria-pressed`+`role="group"` (a11y seam) showing per-provider ✓/·; compose on a `Card` w/ `ui` `Input`/`TextArea`; inbox rows on a `.gp` surface.
+- **Receiver:** `useInboundHandoff<{to?,subject?,body?,from?}>('empire-mail-clipboard')` → on a non-null payload `setCompose({to,subject,body})` + `setComposeOpen(true)` + `<ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />`.
+- **Guards/tests:** `qa-smoke.mjs` `inboundCases` grew `{id:'mail',key:'empire-mail-clipboard',from:'notes',needle:'Q3 report',payload:{subject,body,from}}` → **INBOUND-LANDS 4/4 ✅**. `Mail.test.tsx` rewritten (provider-strip format changed to per-button ✓/·; +inbound test: seeded clipboard → compose prefilled + chip, RED without the hook). `appActions.test.ts` +SEND_TO_MAIL (clipboard payload shape + exactly-one HANDOFF→mail) + the it.each HANDOFF row.
+- **Verify:** build🟢 vitest 432→435🟢 eslint clean (touched files); metrics tokens/off-system/offSystemStyle 0 (`--assert-zero` exit 0); bundle gz 728.2→728.6 (+0.4), no new deps. **Render-confirmed via `qa-smoke.mjs` (installed playwright `--no-save`, ran `node server.js` on :3001):** 32/32 routes render clean (uncaught:0), INBOUND-LANDS 4/4, GRAPH-LEGIBLE 2/2, OFFLINE 5/5.
+- **⚠️ INFRA GAP STILL OPEN:** `playwright` is STILL not in `package.json` devDependencies — every render-confirm pays a manual `npm install --no-save playwright` first, and the smoke server (`node server.js` on :3001) is NOT auto-started by `qa-smoke.mjs` (all routes CONNECTION_REFUSED without it).
+
+### ▶ S3 (next — start here, no re-planning) — exact shape
+Mail drafts PERSIST + graph-legible; both Crypto + Mail EMIT via ⚡ NodeActions → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE. Full spec in EPICS.md → EPIC-13 S3. Seams:
+- **New `src/apps/mail/lib/draftStore.ts`** — localStorage `empire-mail-drafts`; `Draft={id,to,subject,body,updatedAt}`; `listDrafts()`, `saveDraft(Omit<Draft,'updatedAt'>)` (upsert by id, stamps updatedAt), `deleteDraft(id)`. Unit-testable.
+- **New `src/apps/mail/mailGraph.ts`** (mirror `src/apps/crypto/cryptoGraph.ts`): pure `draftNodeData(d)→{subject,to}`.
+- **`Mail.tsx`** — a "Save draft" button in compose (persist current `compose` via `saveDraft`, fresh id if new) + a Drafts list (each row reopens into compose + delete); `useEffect(mirrorCollection('draft','mail', drafts, {id, title: d=>d.subject||'(no subject)', data: draftNodeData}), [drafts])`; mount `⚡ <NodeActions nodeId={d.id}>` per draft row.
+- **`CryptoApp.tsx`** — mount `⚡ <NodeActions nodeId={`wallet:${coin}`}>` per configured wallet row (node already exists from S1). Mirror Reader's per-card `<NodeActions>` idiom (`grep -rn NodeActions src/apps/reader`).
+- **`src/apps/network/nodeColors.ts`** — add a `draft` type colour (mirror the S1 `wallet: '196,162,101'` line).
+- **`qa-smoke.mjs`** — extend GRAPH-LEGIBLE with a `mail/draft` axis: seed `localStorage['empire-mail-drafts']` w/ one draft → reload `/app/mail` → assert a `draft` node owned by `app==='mail'` in `empire-core-graph` survives a 2nd reload. Uses the generalised `readNodes(page,type,app)` helper S1 added. Headline `2/2 → 3/3`.
+- **Tests:** `draftStore.test.ts` (save→list→delete roundtrip; upsert; survives fresh listDrafts) + `mailGraph.test.ts` (`draftNodeData` shape). ≥5 combined.
+- *Acceptance:* saved draft survives reload + appears as a `draft` node in Network/Search/Timeline; both wallets + drafts offer ⚡ intents; `GRAPH-LEGIBLE 3/3`; 31/31; build🟢 vitest🟢 eslint clean; `--assert-zero` exit 0; no new deps. **★ Then EPIC-13 is CODE-COMPLETE (S1–S3) → QA confirms `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4` on green main → Strategist retires to DONE.**
 
 ## ✅ QA STATE (2026-07-10, green main `1a8c2f7`) — EPIC-13 S1 done-confirmed, clean run, no drift
 
@@ -188,22 +209,12 @@ fleet freeze). What changed for routines:
     mirrorCollection(type, app, items, {id,title,data}), [deps])` (proven; Reader/Crypto identical). (iv) **GRAPH-LEGIBLE
     guard** now uses a generalised `readNodes(page,type,app)` (was `readReaderBookNodes`) — S3's `mail/draft` axis reuses it;
     seed-before-mount pattern is: `goto(domcontentloaded)` → `page.evaluate(localStorage.setItem(...))` → `reload(networkidle)`.
-  - **▶ S2 (next — start here, no re-planning) — exact shape:** make **Mail** an Empire app + a handoff RECEIVER →
-    `INBOUND-LANDS 3/3 → 4/4`. Full spec in EPICS.md → EPIC-13 S2. (a) **`glyphs.tsx`+`index.ts`** — bespoke alien **`Mail`**
-    glyph + `Mail` key in `alienIcons` (kills the `Node` fallback). (b) **`src/lib/appActions.ts`** — add a **"Send to Mail"**
-    sender mirroring the `empire-calendar-clipboard` sender (~`:154`): `sessionStorage.setItem('empire-mail-clipboard',
-    JSON.stringify({subject:data.title, body:data.text, from:data.source}))` + `emit({type:'HANDOFF', fromId, toId:'mail',
-    label:'to mail'})`; wire into the same `CROSS_APP_ACTIONS`/send-target list the other receivers use. (c) **`Mail.tsx`** —
-    shell (header `getAppIcon('Mail')` + `var(--signal)` accent; raw `<select>`/`<button>`/`<input>`/`<textarea>` → `ui`
-    controls; list on `.gp`) + inbound: `const inbound = useInboundHandoff<{to?,subject?,body?,from?}>('empire-mail-clipboard')`
-    → on payload open compose + prefill + `<ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />` (mirror
-    `Calendar.tsx:219`). (d) **Extend `INBOUND-LANDS` guard** (`qa-smoke.mjs:136`): add `{id:'mail', key:'empire-mail-clipboard',
-    from:'notes', needle:'<seeded body>'}` to `receivers` (mirror the `calendar` entry `:146`) → `3/3 → 4/4`. (e) **Tests:**
-    `appActions.test.ts` (Send-to-Mail writes clipboard w/ `from` + emits exactly ONE `HANDOFF` to mail); `Mail.test.tsx`
-    (seeded clipboard → compose opens + prefilled + ProvenanceChip; goes RED without the hook). *Acceptance:* `INBOUND-LANDS 4/4`,
-    mail on the shell w/ `Mail` glyph, 31/31; build🟢 vitest🟢 eslint clean; `--assert-zero` exit 0; no new deps. *Cloud limit:*
-    send + inbox are 401-gated — inbound-receive/prefill is fully local + cloud-verifiable. **Then S3 (Mail drafts persist +
-    graph-legible + ⚡ emit both → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE) per EPICS.md.**
+  - **✅ S2 DONE (2026-07-10) — Mail is an Empire app + handoff RECEIVER; `INBOUND-LANDS 3/3 → 4/4` render-confirmed.** Full
+    details in the top-of-file "EPIC-13 S2 — what shipped this run" block; the ▶ S3 next-stage shape is the block just below
+    that one. (SEAMS S3 inherits: the shell idiom is now proven on BOTH Crypto (`var(--ember)`) and Mail (`var(--signal)`); the
+    `useInboundHandoff`+`ProvenanceChip` receive rail is live in Mail; the segmented `ui`-Button provider toggle w/ `aria-pressed`
+    is a reusable a11y pattern.) **▶ NEXT = S3 (Mail drafts persist + graph-legible + ⚡ emit both → `GRAPH-LEGIBLE 2/2 → 3/3`
+    → ★ EPIC-13 CODE-COMPLETE) per the S3 block near the top of this file + EPICS.md.**
 - **↓ EPIC-12 · Intent integrity — RETIRED to DONE 2026-07-09** (`INTENT-ROUNDTRIP 2/2` confirmed; S1–S3 shipped). History +
   still-load-bearing traps kept below (the note-mirror-id guard trap, the production-`dist` ⚡-menu drive, the `runIntent`
   `accepts` enforcement) — reuse them; don't relearn.

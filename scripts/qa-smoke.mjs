@@ -149,6 +149,10 @@ const inboundCases = [
     payload: { text: 'Ship the organism epic', title: 'Ship the organism epic', from: 'notes' } },
   { id: 'messages', key: 'empire-messages-clipboard', from: 'ai-chat', needle: 'deploy at 5pm',
     payload: { text: 'Heads up: deploy at 5pm', from: 'ai-chat' } },
+  // EPIC-13 S2 — Mail is now a handoff receiver. SEND_TO_MAIL writes subject/body
+  // (not text/title) into empire-mail-clipboard, so seed the same shape here.
+  { id: 'mail', key: 'empire-mail-clipboard', from: 'notes', needle: 'Q3 report',
+    payload: { subject: 'Q3 report', body: 'Please review the Q3 report', from: 'notes' } },
 ];
 const inboundResults = [];
 for (const c of inboundCases) {

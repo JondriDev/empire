@@ -5,6 +5,25 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · BUILDER — EPIC-13 S2: Mail becomes an Empire app + handoff RECEIVER (`INBOUND-LANDS 3/3 → 4/4`, render-confirmed)
+
+**Did:** Executed EPIC-13 S2 — the second and last raw-HTML island (`mail`) joins the organism as a full, handoff-receiving citizen. Changes:
+- **Bespoke alien `Mail` glyph** — `src/design-system/icons/glyphs.tsx` (a glass envelope panel + a folded-flap `<path>` dipping to an orbital `<Dot>` at the seam, in the monoline family) + exported; `src/design-system/icons/index.ts` imports it + adds the `Mail` key to `alienIcons`. Registry already sets `icon:'Mail'`, so this **kills the `Node` orbital fallback** — Mail now shows its own glyph.
+- **`SEND_TO_MAIL` sender** — `src/lib/appActions.ts` (before `SEND_TO_MESSAGES`): writes `sessionStorage['empire-mail-clipboard'] = {subject:data.title, body:data.text, from:data.source}` + one `handoff(source,'mail','to mail')` HANDOFF, then `window.open('/app/mail','_self')`. Wired into `src/components/ui/SendResultMenu.tsx` — `ACTION_TARGET.SEND_TO_MAIL:'mail'` (exhaustive record) + `'SEND_TO_MAIL'` in `DEFAULT_ACTIONS`, so Notes/Editor/Grammar/… now surface "Send to Mail".
+- **`src/apps/mail/Mail.tsx` fully re-shelled + made a receiver:** `p-6 max-w-2xl mx-auto` root; header `getAppIcon('Mail')` + a `var(--signal)` accent (= the registry mail accent, token-clean); the raw provider `<select>` → a segmented `ui` `Button` toggle with `aria-pressed`/`role="group"` (a11y) showing per-provider ✓/·; compose on a `Card` with `ui` `Input`/`TextArea`; inbox rows on a `.gp` surface. **Inbound:** `useInboundHandoff<{to?,subject?,body?,from?}>('empire-mail-clipboard')` → on a non-null payload prefills `compose` + opens the composer + renders a dismissible `<ProvenanceChip from={inbound.source} />`. Mail-boot 401-resilience preserved (`status?.providers`).
+- **`scripts/qa-smoke.mjs` INBOUND-LANDS guard** grew a `mail` case (`{id:'mail', key:'empire-mail-clipboard', from:'notes', needle:'Q3 report', payload:{subject,body,from}}`) → headline **`3/3 → 4/4`**.
+- **Tests:** `appActions.test.ts` — new `SEND_TO_MAIL` suite (asserts the `empire-mail-clipboard` payload shape via a `setItem` spy + exactly ONE HANDOFF→mail) + the `it.each` HANDOFF row. `Mail.test.tsx` rewritten — mount-resilience updated to the new per-button ✓/· provider format + a new inbound suite (seeded clipboard → compose prefilled + ProvenanceChip; RED without the hook).
+
+**Why:** Interconnection ranks above design-consistency in the standing priority; `mail` was the last app invisible to the organism and unable to receive handoffs. S2 was pre-decomposed and downhill (reuses S1's glyph + shell + guard seams) — executed at full speed.
+
+**Verified (this session, cloud):** `npm run build` 🟢 (tsc -b + vite build, precache 91 no-gap). `npx vitest run` **432 → 435 🟢** (48 files). `npx eslint` clean on all touched files. `node scripts/metrics.mjs --assert-zero` **exit 0** — `| Apps 31 ±0 | Test cases 376 (+2) | Test files 45 ±0 | Token violations 0 ±0 | Off-system utils 0 ±0 | Off-system style 0 (r0/t0/m0) ±0 | Bundle gz 728.6 (+0.4) |`. No new deps. **★ RENDER-CONFIRMED:** installed `playwright --no-save`, served the built `dist/` via `node server.js` on :3001, ran `scripts/qa-smoke.mjs` → **32/32 routes render clean (uncaught:0)**, **`INBOUND-LANDS 4/4 ✅`** (mail: chip=true prefilled=true from notes), GRAPH-LEGIBLE 2/2, OFFLINE-BOOT 5/5.
+
+**NOT verified (honest):** Mail's actual send + inbox fetch stay backend-gated (`/api/integrations/email/*` → 401 in the tokenless cloud; the `net:1` on `/app/mail` is that env-expected status failure, not a render error). Visual shell polish (the new envelope glyph, the signal-cyan accent, the segmented provider toggle, the glass compose Card) needs an on-device look — cloud can't verify pixels.
+
+**Single best next step:** EPIC-13 S3 (the capstone) — Mail drafts PERSIST (`empire-mail-drafts` localStorage store) + become graph-legible via `mirrorCollection('draft','mail',…)`, and BOTH Crypto wallets + Mail drafts EMIT via `⚡ <NodeActions>` → **`GRAPH-LEGIBLE 2/2 → 3/3`** → ★ EPIC-13 CODE-COMPLETE. Exact shape in `docs/CONTEXT.md` (S3 block near top) + EPICS.md → EPIC-13 S3. **Infra gap still open (build routine's / Strategist's call):** add `playwright` to `devDependencies` so render-confirm doesn't need a manual `--no-save` install each run.
+
+---
+
 ## 2026-07-10 · QA (visual + smoke) — EPIC-13 S1 render-confirmed on green main `1a8c2f7` (`GRAPH-LEGIBLE 2/2 ✅`)
 
 **Did:** Ran the full visual + smoke + metrics routine against green main `1a8c2f7` (the EPIC-13 S1 commit) — delivering the headless render-confirm the builder owed (playwright isn't in `package.json`, so the builder could only run build/vitest/eslint/metrics, never the smoke). Installed `playwright` locally (`--no-save`, never committed), served the built `dist/` on :3001, ran `scripts/qa-smoke.mjs` + `scripts/metrics.mjs`, and visually inspected the local screenshots.

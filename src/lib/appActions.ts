@@ -188,6 +188,26 @@ export const CROSS_APP_ACTIONS = {
     },
   } as const,
 
+  SEND_TO_MAIL: {
+    id: 'send-to-mail',
+    label: 'Send to Mail',
+    icon: 'Mail',
+    description: 'Draft an email from this',
+    execute: (data: DataPayload) => {
+      // Mail's compose fields are subject/body — carry them under those keys so
+      // the receiver (useInboundHandoff on empire-mail-clipboard) prefills the
+      // composer directly. `from` becomes the ProvenanceChip source.
+      sessionStorage.setItem('empire-mail-clipboard', JSON.stringify({
+        subject: data.title,
+        body: data.text,
+        from: data.source,
+      }))
+      handoff(data.source, 'mail', 'to mail')
+      window.open('/app/mail', '_self')
+      return 'Opened in Mail'
+    },
+  } as const,
+
   SEND_TO_MESSAGES: {
     id: 'send-to-messages',
     label: 'Draft a Message',

@@ -40,6 +40,7 @@ describe('HANDOFF emission', () => {
     ['SEND_TO_CALENDAR', 'calendar'],
     ['SEND_TO_GOALS', 'goals'],
     ['SEND_TO_MESSAGES', 'messages'],
+    ['SEND_TO_MAIL', 'mail'],
   ] as const
 
   it.each(cases)('%s emits a directed HANDOFF from source to %s', (key, toId) => {
@@ -65,6 +66,28 @@ describe('HANDOFF emission', () => {
     const handoff = events.find(e => e.type === 'HANDOFF')
     expect(handoff && handoff.type === 'HANDOFF' && handoff.toId).toBe('ai-chat')
     expect(handoff && handoff.type === 'HANDOFF' && handoff.fromId).toBe('notes')
+  })
+})
+
+describe('SEND_TO_MAIL', () => {
+  it('writes an empire-mail-clipboard payload (subject/body/from) and emits exactly ONE HANDOFF to mail', () => {
+    const setItem = vi.spyOn(window.sessionStorage, 'setItem')
+    const events: EmpireEvent[] = []
+    const off = onAny(e => events.push(e))
+
+    CROSS_APP_ACTIONS.SEND_TO_MAIL.execute({ text: 'Please review the Q3 report', title: 'Q3 report', source: 'notes' })
+    off()
+
+    // Clipboard carries subject/body (Mail's compose fields) + the source.
+    const call = setItem.mock.calls.find(([k]) => k === 'empire-mail-clipboard')
+    expect(call).toBeDefined()
+    expect(JSON.parse(call![1] as string)).toEqual({ subject: 'Q3 report', body: 'Please review the Q3 report', from: 'notes' })
+
+    // Exactly one directed HANDOFF, notes → mail.
+    const handoffs = events.filter(e => e.type === 'HANDOFF')
+    expect(handoffs).toHaveLength(1)
+    expect(handoffs[0].type === 'HANDOFF' && handoffs[0].toId).toBe('mail')
+    expect(handoffs[0].type === 'HANDOFF' && handoffs[0].fromId).toBe('notes')
   })
 })
 

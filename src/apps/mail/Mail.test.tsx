@@ -3,13 +3,15 @@ import { render, screen, waitFor } from '@testing-library/react'
 import Mail from './Mail'
 
 /**
- * Mail mount resilience. The boot effect fetches `/api/integrations/status`.
- * In the cloud sandbox (and for any unauthenticated client) that endpoint
- * answers HTTP 401 whose JSON body has NO `providers` key. The provider-status
- * strip must guard on `status?.providers`, not merely `status` — otherwise
- * `Object.entries(undefined)` throws and the whole app drops into the error
- * boundary. These tests stub fetch to return a providers-less body and assert
- * the header still renders, then confirm the happy path lights the strip.
+ * Mail mount resilience + inbound handoff (EPIC-13 S2).
+ *
+ * (1) The boot effect fetches `/api/integrations/status`. In the cloud sandbox
+ * (and any unauthenticated client) that endpoint answers HTTP 401 whose JSON
+ * body has NO `providers` key. The provider toggle must guard on
+ * `status?.providers`, not merely `status` — otherwise the ✓/· indicators throw
+ * on `undefined`. (2) Mail is a handoff RECEIVER: a seeded
+ * `empire-mail-clipboard` payload must open the composer prefilled and render a
+ * dismissible ProvenanceChip.
  */
 describe('Mail — mount is resilient to a providers-less status body (401)', () => {
   afterEach(() => {
@@ -30,18 +32,45 @@ describe('Mail — mount is resilient to a providers-less status body (401)', ()
     render(<Mail />)
     // The header controls render regardless of the status response.
     expect(await screen.findByText('Refresh')).toBeTruthy()
-    // Let the mount fetch settle, then confirm the provider strip stayed hidden
-    // (no crash, no ✓/· glyphs) because `status.providers` was undefined.
-    await waitFor(() => expect(screen.queryByText(/=✓|=·/)).toBeNull())
+    // Provider buttons still render (fixed labels)…
+    expect(screen.getByRole('button', { name: /Himalaya/ })).toBeTruthy()
+    // …but with no ✓/· configured indicator, since `status.providers` was absent.
+    await waitFor(() => expect(screen.queryByText('✓')).toBeNull())
   })
 
-  it('renders the provider strip when the status body carries providers', async () => {
+  it('shows a configured indicator on each provider when the status carries providers', async () => {
     stubStatus({ providers: { himalaya: { configured: true }, agentmail: { configured: false } } })
     render(<Mail />)
     await waitFor(() =>
-      expect(
-        screen.getByText((c) => c.includes('himalaya=✓') && c.includes('agentmail=·')),
-      ).toBeTruthy(),
+      expect(screen.getByRole('button', { name: /Himalaya\s*✓/ })).toBeTruthy(),
     )
+    expect(screen.getByRole('button', { name: /AgentMail\s*·/ })).toBeTruthy()
+  })
+})
+
+describe('Mail — inbound handoff opens the composer prefilled (INBOUND-LANDS)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  it('reads empire-mail-clipboard on mount → composer prefilled + ProvenanceChip', async () => {
+    // The status fetch is irrelevant here; stub it so the mount effect settles.
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ json: () => Promise.resolve({}) } as Response)))
+    // setup.ts mocks sessionStorage as a bare vi.fn() (nothing persists), so we
+    // must spy getItem to seed the handoff the way SEND_TO_MAIL would write it.
+    vi.spyOn(window.sessionStorage, 'getItem').mockImplementation((k: string) =>
+      k === 'empire-mail-clipboard'
+        ? JSON.stringify({ subject: 'Q3 report', body: 'Please review the Q3 report', from: 'notes' })
+        : null,
+    )
+
+    render(<Mail />)
+
+    // Composer opens and prefills from the payload (RED without useInboundHandoff).
+    await waitFor(() => expect((screen.getByPlaceholderText('subject') as HTMLInputElement).value).toBe('Q3 report'))
+    expect((screen.getByPlaceholderText('body') as HTMLTextAreaElement).value).toBe('Please review the Q3 report')
+    // Provenance is honest and visible.
+    expect(screen.getByLabelText('Received from Notes')).toBeTruthy()
   })
 })

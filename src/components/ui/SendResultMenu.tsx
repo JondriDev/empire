@@ -28,6 +28,7 @@ const ACTION_TARGET: Record<AppActionKey, string> = {
   SEND_TO_CALENDAR: 'calendar',
   SEND_TO_GOALS: 'goals',
   SEND_TO_MESSAGES: 'messages',
+  SEND_TO_MAIL: 'mail',
   ASK_CAKRA_TO_ANALYZE: 'ai-chat',
 }
 
@@ -40,6 +41,7 @@ const DEFAULT_ACTIONS: AppActionKey[] = [
   'SEND_TO_CALENDAR',
   'SEND_TO_GOALS',
   'SEND_TO_MESSAGES',
+  'SEND_TO_MAIL',
 ]
 
 export function SendResultMenu({

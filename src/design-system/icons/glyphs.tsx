@@ -293,6 +293,16 @@ const Wallet: AppIcon = (p) => (
   </S>
 )
 
+/** Mail — an alien envelope: a glass panel, a folded flap that dips to an
+ *  orbital node at the seam (the recurring dot motif). */
+const Mail: AppIcon = (p) => (
+  <S {...p}>
+    <rect x="3.5" y="6" width="17" height="12" rx="3.2" />
+    <path d="M4.5 8 l6.3 4.1 a2.2 2.2 0 0 0 2.4 0 L19.5 8" />
+    <Dot cx="12" cy="12.4" />
+  </S>
+)
+
 const Node: AppIcon = (p) => (
   <S {...p}>
     <circle cx="12" cy="12" r="6.5" />
@@ -336,5 +346,6 @@ export {
   Search,
   Timeline,
   Wallet,
+  Mail,
   Node,
 }

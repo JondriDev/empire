@@ -1,96 +1,181 @@
-import React, { useEffect, useState } from 'react';
+/**
+ * Mail · Email Bridge — a first-class Empire citizen.
+ *
+ * Bridges Himalaya & AgentMail (backend-gated; the /api/integrations/* calls
+ * answer 401 in the tokenless cloud build). Beyond the bridge, Mail is a handoff
+ * RECEIVER: a cross-app "Send to Mail" drops a subject/body payload into
+ * `empire-mail-clipboard`; on mount the composer opens prefilled and a
+ * dismissible <ProvenanceChip> shows where it came from — the receiver-side
+ * mirror of the arc the Network lights for the same HANDOFF.
+ */
+import { useEffect, useState } from 'react'
+import { getAppIcon } from '../../design-system/icons'
+import { Button, Input, TextArea, Card } from '../../components/ui'
+import { useInboundHandoff } from '../../lib/useInboundHandoff'
+import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 
-type InboxMessage = { id: string; from: string; subject: string; date: string };
-type Status = { providers: Record<string, { configured: boolean }> };
+type InboxMessage = { id: string; from: string; subject: string; date: string }
+type Status = { providers: Record<string, { configured: boolean }> }
+type Provider = 'himalaya' | 'agentmail'
+
+// One accent per view — Mail reads as signal cyan (var(--signal), the registry
+// mail accent), used as light, never fill.
+const ACCENT = 'var(--signal)'
+const MailIcon = getAppIcon('Mail')
+const PROVIDERS: Provider[] = ['himalaya', 'agentmail']
 
 // Local helpers for token + base URL (mirrors what other apps do inline).
 function getHeaders(): Record<string, string> {
-  const token = localStorage.getItem('auth-token') || sessionStorage.getItem('auth-token') || '';
-  const h: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) h['Authorization'] = `Bearer ${token}`;
-  return h;
+  const token = localStorage.getItem('auth-token') || sessionStorage.getItem('auth-token') || ''
+  const h: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token) h['Authorization'] = `Bearer ${token}`
+  return h
 }
-async function jget(path: string) { const r = await fetch(path, { headers: getHeaders() }); return r.json(); }
+async function jget(path: string) { const r = await fetch(path, { headers: getHeaders() }); return r.json() }
 async function jpost(path: string, body: unknown) {
-  const r = await fetch(path, { method: 'POST', headers: getHeaders(), body: JSON.stringify(body) });
-  return r.json();
+  const r = await fetch(path, { method: 'POST', headers: getHeaders(), body: JSON.stringify(body) })
+  return r.json()
 }
 
 export default function MailApp() {
-  const [status, setStatus] = useState<Status | null>(null);
-  const [provider, setProvider] = useState<'himalaya' | 'agentmail'>('himalaya');
-  const [messages, setMessages] = useState<InboxMessage[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string>('');
-  const [composeOpen, setComposeOpen] = useState(false);
-  const [compose, setCompose] = useState({ to: '', subject: '', body: '' });
-  const [sendStatus, setSendStatus] = useState<string>('');
+  const [status, setStatus] = useState<Status | null>(null)
+  const [provider, setProvider] = useState<Provider>('himalaya')
+  const [messages, setMessages] = useState<InboxMessage[]>([])
+  const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState<string>('')
+  const [composeOpen, setComposeOpen] = useState(false)
+  const [compose, setCompose] = useState({ to: '', subject: '', body: '' })
+  const [sendStatus, setSendStatus] = useState<string>('')
 
   useEffect(() => {
-    jget('/api/integrations/status').then(setStatus).catch(e => setErr(String(e)));
-  }, []);
+    jget('/api/integrations/status').then(setStatus).catch(e => setErr(String(e)))
+  }, [])
+
+  // Inbound: a cross-app HANDOFF ("Send to Mail") drops a subject/body payload
+  // into empire-mail-clipboard. Open the composer prefilled + show provenance.
+  const inbound = useInboundHandoff<{ to?: string; subject?: string; body?: string; from?: string }>('empire-mail-clipboard')
+  useEffect(() => {
+    if (!inbound.payload) return
+    const p = inbound.payload
+    setCompose({ to: p.to || '', subject: p.subject || '', body: p.body || '' })
+    setComposeOpen(true)
+  }, [inbound.payload])
 
   const refresh = async () => {
-    setLoading(true); setErr('');
+    setLoading(true); setErr('')
     try {
-      const resp = await jget(`/api/integrations/email/inbox?provider=${provider}&limit=25`);
-      if (resp.ok) setMessages(resp.messages || []);
-      else setErr(resp.error || 'unknown error');
-    } catch (e) { setErr(String(e)); }
-    setLoading(false);
-  };
+      const resp = await jget(`/api/integrations/email/inbox?provider=${provider}&limit=25`)
+      if (resp.ok) setMessages(resp.messages || [])
+      else setErr(resp.error || 'unknown error')
+    } catch (e) { setErr(String(e)) }
+    setLoading(false)
+  }
 
   const send = async () => {
-    setSendStatus('sending…');
+    setSendStatus('sending…')
     try {
-      const r = await jpost('/api/integrations/email/send', { ...compose, provider });
-      setSendStatus(r.ok ? 'sent ✓' : `failed: ${r.error || ''}`);
-      if (r.ok) setCompose({ to: '', subject: '', body: '' });
-    } catch (e) { setSendStatus(`error: ${String(e)}`); }
-  };
+      const r = await jpost('/api/integrations/email/send', { ...compose, provider })
+      setSendStatus(r.ok ? 'sent ✓' : `failed: ${r.error || ''}`)
+      if (r.ok) setCompose({ to: '', subject: '', body: '' })
+    } catch (e) { setSendStatus(`error: ${String(e)}`) }
+  }
+
+  const providerConfigured = status?.providers?.[provider]?.configured
 
   return (
-    <div style={{ padding: 16, display: 'grid', gridTemplateRows: 'auto auto 1fr', height: '100%', gap: 12 }}>
-      <header style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <select value={provider} onChange={e => setProvider(e.target.value as 'himalaya' | 'agentmail')}>
-          <option value="himalaya">Himalaya</option>
-          <option value="agentmail">AgentMail</option>
-        </select>
-        <button onClick={refresh} disabled={loading}>{loading ? 'Loading…' : 'Refresh'}</button>
-        <button onClick={() => setComposeOpen(o => !o)}>{composeOpen ? 'Close' : 'Compose'}</button>
-        {status?.providers && (
-          <span style={{ marginLeft: 'auto', opacity: 0.7, fontSize: 'var(--text-sm)' }}>
-            {Object.entries(status.providers).map(([k, v]) => `${k}=${v.configured ? '✓' : '·'}`).join('  ')}
-          </span>
-        )}
-      </header>
-      {composeOpen && (
-        <section style={{ display: 'grid', gap: 6 }}>
-          <input placeholder="to" value={compose.to} onChange={e => setCompose(c => ({ ...c, to: e.target.value }))} />
-          <input placeholder="subject" value={compose.subject} onChange={e => setCompose(c => ({ ...c, subject: e.target.value }))} />
-          <textarea placeholder="body" rows={6} value={compose.body} onChange={e => setCompose(c => ({ ...c, body: e.target.value }))} />
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button onClick={send} disabled={!compose.to || !compose.subject || !compose.body}>Send</button>
-            <span style={{ opacity: 0.7, fontSize: 'var(--text-sm)' }}>{sendStatus}</span>
-          </div>
-        </section>
+    <div className="p-6 max-w-2xl mx-auto">
+      {/* Header */}
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--text)' }}>
+            <MailIcon className="w-6 h-6" style={{ color: ACCENT }} /> Mail
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text2)' }}>
+            Email bridge · Himalaya &amp; AgentMail · sending stays on the backend
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button onClick={refresh} disabled={loading} style={{ borderColor: ACCENT }}>
+            {loading ? 'Loading…' : 'Refresh'}
+          </Button>
+          <Button onClick={() => setComposeOpen(o => !o)}>{composeOpen ? 'Close' : 'Compose'}</Button>
+        </div>
+      </div>
+
+      {/* Provider selector — a segmented toggle (aria-pressed carries the active
+          state for AT, since it is otherwise shown by accent alone). */}
+      <div role="group" aria-label="Mail provider" className="flex items-center gap-2 mb-4">
+        {PROVIDERS.map(p => {
+          const active = provider === p
+          const configured = status?.providers?.[p]?.configured
+          return (
+            <Button
+              key={p}
+              size="sm"
+              aria-pressed={active}
+              onClick={() => setProvider(p)}
+              style={active ? { borderColor: ACCENT, color: ACCENT } : undefined}
+            >
+              {p === 'himalaya' ? 'Himalaya' : 'AgentMail'}
+              {status?.providers && (
+                <span style={{ marginLeft: 6, opacity: 0.7 }}>{configured ? '✓' : '·'}</span>
+              )}
+            </Button>
+          )
+        })}
+      </div>
+
+      {/* Provenance — where an inbound draft came from. */}
+      {inbound.source && (
+        <div className="mb-4">
+          <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
+        </div>
       )}
-      {err && <p style={{ color: 'var(--c-danger)', margin: 0 }}>{err}</p>}
-      <ul style={{ overflow: 'auto', margin: 0, padding: 0, listStyle: 'none' }}>
-        {messages.length === 0 && !loading && !err && (
-          <li style={{ opacity: 0.7, padding: 12 }}>
-            {status?.providers?.[provider]?.configured ? 'No messages yet.' : `Provider ${provider} not configured.`}
-          </li>
-        )}
-        {messages.map(m => (
-          <li key={`${m.id}-${m.from}`} style={{ borderBottom: '1px solid var(--border)', padding: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <strong>{m.from}</strong><span style={{ opacity: 0.6, fontSize: 'var(--text-sm)' }}>{m.date}</span>
+
+      {/* Compose */}
+      {composeOpen && (
+        <Card padding="md" className="mb-4">
+          <div className="grid gap-3">
+            <Input value={compose.to} onChange={v => setCompose(c => ({ ...c, to: v }))} placeholder="to" />
+            <Input value={compose.subject} onChange={v => setCompose(c => ({ ...c, subject: v }))} placeholder="subject" />
+            <TextArea value={compose.body} onChange={v => setCompose(c => ({ ...c, body: v }))} placeholder="body" rows={6} />
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={send}
+                disabled={!compose.to || !compose.subject || !compose.body}
+                style={{ borderColor: ACCENT }}
+              >
+                Send
+              </Button>
+              <span className="text-sm" style={{ color: 'var(--text3)' }} aria-live="polite">{sendStatus}</span>
             </div>
-            <div style={{ opacity: 0.9 }}>{m.subject}</div>
-          </li>
-        ))}
-      </ul>
+          </div>
+        </Card>
+      )}
+
+      {err && <p className="text-sm mb-4" style={{ color: 'var(--c-danger)' }} role="alert">{err}</p>}
+
+      {/* Inbox */}
+      {messages.length === 0 && !loading && !err ? (
+        <p className="text-sm" style={{ color: 'var(--text3)' }}>
+          {providerConfigured ? 'No messages yet.' : `Provider ${provider} not configured.`}
+        </p>
+      ) : (
+        <div className="gp" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+          {messages.map((m, i) => (
+            <div
+              key={`${m.id}-${m.from}`}
+              style={{ padding: 12, borderTop: i ? '1px solid var(--border)' : undefined }}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <strong style={{ color: 'var(--text)' }}>{m.from}</strong>
+                <span className="text-sm" style={{ color: 'var(--text3)' }}>{m.date}</span>
+              </div>
+              <div className="text-sm mt-1" style={{ color: 'var(--text2)' }}>{m.subject}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  );
+  )
 }
