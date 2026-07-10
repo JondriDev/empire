@@ -47,9 +47,180 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ---
 
-## ▶ ACTIVE — EPIC-13 · The last two islands join the organism (Mail + Crypto become first-class Empire citizens)
+## ▶ ACTIVE — EPIC-14 · Shell conformance — the component shell becomes total (no app renders a bare interactive control)
 
-> **★ CODE-COMPLETE 2026-07-10 (S1–S3 all shipped + render-confirmed on green main): `GRAPH-LEGIBLE 3/3 ✅` + `INBOUND-LANDS 4/4 ✅`.** Mail + Crypto are now full citizens — graph-legible, shelled, emitting via ⚡, and Mail both receives handoffs and persists durable drafts. **▶ Ready for the Strategist to retire EPIC-13 to DONE and promote the next epic** (the ratified LATER candidate: a measured design-system STATE/shell-adoption epic, or an accessibility pass; EPIC-7 · Android stays device-gated). Until then the Builder's next run does the topmost cloud-executable ROADMAP NOW item.
+> **RATIFIED + PROMOTED by the Strategist 2026-07-10.** EPIC-13 is retired to DONE (below — `GRAPH-LEGIBLE 1/1 → 3/3` +
+> `INBOUND-LANDS 3/3 → 4/4` QA-render-CONFIRMED LIVE on green main `a9bec85`; the last two graph-islands closed). Every
+> interconnection epic EPIC-1..13 is DONE — the organism has no islands left, so the priority bias descends one band from
+> **interconnection** to **design-system consistency**, and the Strategist audited that band for the steepest remaining
+> cloud-executable gradient.
+>
+> **The gap (code-confirmed this run — `src/components/ui/index.tsx` + a repo-wide control census):** EPIC-5 locked the
+> *colour* axis (`tokenViolations`=0, `offSystemUtilities`=0) and EPIC-11 locked the *non-colour token* axis (`offSystemStyle`
+> r/t/m = 0). But the **component/control shell** — *are you rendering `ui`'s `Button`/`Input`/`TextArea` or a bare
+> `<button>`/`<input>`/`<select>`/`<textarea>`?* — is the **last unlocked conformance axis, and NOTHING measures it.** A
+> census of app code (the same `appCodeFiles()` set the colour/style audits walk, minus `src/components/ui/`) finds **148 bare
+> interactive controls across 27 files** (`<button>`×127, text `<input>`×~14, `<select>`×5, `<textarea>`×2). **Root cause:** the
+> `ui` primitive set is INCOMPLETE — it ships `Button`/`Input`/`TextArea`/`Card`/`Badge` only. There is **no `Select`, no
+> `IconButton`, no `Segmented`/tab primitive** — so an app that needs a dropdown, an icon-only toggle, or a tab bar has *no
+> shell component to reach for* and drops to bare HTML. That incompleteness is precisely **why Mail + Crypto shipped as
+> raw-HTML islands** (EPIC-13's entire premise: "bare `<button>`/`<select>`/`<input>`/`<textarea>` … none of `src/components/
+> ui`"): the shell had no home for their controls, and no metric caught the regression.
+>
+> **Why this is the highest-gradient move now (one line):** it closes the exact structural gap that created EPIC-13 and
+> **locks it so islands can never creep back** — completing the `ui` primitive set is a real capability leap (every future app
+> has a shell home; "one organism, alien technology" becomes *structurally enforced*, not vibes), it has a natural, honest
+> **0 target** (unlike an adoption-count that only ever "grows"), it is 100 % cloud + metric verifiable (a static audit + the
+> render-smoke; no backend), and it reuses the exact EPIC-5/11 **measure → drive-to-0-by-descending-file-mass → lock**
+> template with no invention and no new deps. It also **folds in the ad-hoc a11y work** the fleet has been doing between epics
+> (language/music aria passes): migrating a bare icon `<button>` → `ui.IconButton` *forces* an `aria-label`, and a tab row →
+> `ui.Segmented` *forces* `aria-pressed`/`role` — a11y comes free with the primitive instead of one-off per app.
+
+**Leap:** the `ui` component layer becomes *complete* (gains `Select`, `IconButton`, `Segmented`) and **every app renders its
+controls through it** — no instrument is a bolted-on raw-HTML panel. The whole Empire's buttons, dropdowns, toggles, and tab
+bars re-tune from ONE place (the primitives), the same way EPIC-5 made colour and EPIC-11 made radii/type/motion re-tune from
+one place — the design-system trilogy completed (colour · tokens · **components**). A new `offShellControls` metric measures
+it; a lock stage adds it to `--assert-zero` so it can't rot.
+
+**Target metric (new — Builder instruments it; QA confirms it moved):** a NEW **`offShellControls`** row in
+`scripts/metrics.mjs` (**≈148 → 0**, sub-counts `b/i/s/t` = button/input/select/textarea). Detector = a new pure, dependency-
+free `scripts/controlAudit.mjs` `scanControlViolations(text) → {button,input,select,textarea,total}`, unit-pinned in
+`scripts/controlAudit.test.mjs`, run over the same `appCodeFiles()` set the colour/style audits already walk (**plus a new
+`src/components/ui/` dir-exclusion** so the primitives may legitimately render the bare elements they wrap). **Scope decision
+(so the number is DRIVEABLE to 0, not noise — mirrors EPIC-11's spacing exclusion):** the `input` sub-count EXCLUDES
+`type="file|checkbox|radio"` (toggle/file-picker controls with no text-field home — a *future* epic may add `ui.Checkbox`/
+`ui.FileButton`); `date`/`time`/`number`/text inputs DO count (they become `ui.Input`, which spreads `type`). *Routes
+rendering clean* stays **31/31**; `tokenViolations`/`offSystemUtilities`/`offSystemStyle` stay **0** (`--assert-zero` must keep
+passing through every stage).
+
+### Rails to reuse (read ONCE — do NOT reinvent)
+- **`src/components/ui/index.tsx`** — the existing primitives to mirror in structure/token-discipline: `Button` (`:94`,
+  `variant`/`size`/`icon`/`fullWidth`, token styles), `Input` (`:144`, `value`/`onChange(string)`/`icon`/`mono`, spreads
+  `...rest` so `type` passes through), `TextArea` (`:205`), `Card` (`:24`), `Badge`. All are **token-clean** (`var(--radius-*)`,
+  `var(--text-*)`, `var(--ease-*)`, token colours) — the three NEW primitives (S1) copy that discipline verbatim so they audit
+  at `tokenViolations`/`offSystemUtilities`/`offSystemStyle` = 0.
+- **`scripts/metrics.mjs`** — `appCodeFiles()` (`:58`, the DS-infra-allowlisted `.ts/.tsx/.css` walk; the `design-system/` dir
+  and the `DS_INFRA` set `:50` are excluded), and the metric-function shape (`styleViolations()` `:143`, `tokenViolations()`
+  `:90`) → snapshot field → table row (`:224`) → offenders list → optional `--assert-zero` gate (`:248`). The new
+  `controlViolations()` slots in exactly as `styleViolations()` did in EPIC-11 S1.
+- **`scripts/styleAudit.mjs` + `styleAudit.test.mjs`** — the exact template for a pure, unit-pinned, dependency-free detector
+  (`scanStyleViolations(text) → {radii,type,motion,total}` + 16 test cases). Copy the module shape for `controlAudit.mjs`
+  (`scanControlViolations(text) → {button,input,select,textarea,total}`).
+- **The MIGRATION MAPPING RULE (shared by every S2–S8 migration stage — apply mechanically, no re-planning):**
+  - bare `<button>` **with a text/label child** → `ui.Button` (pick `variant` by role: primary action = `primary`, else
+    `secondary`/`ghost`; keep existing `onClick`/`disabled`/`aria-*`).
+  - bare `<button>` **icon-only** (single glyph/emoji child, close ✕, nav ‹›, favorite ♥, play/pause, delete) → **`ui.IconButton`**
+    (S1) — it REQUIRES an `aria-label` (supply one from the action; this is the a11y dividend).
+  - a **row of mutually-exclusive toggle buttons** (tabs, grid/list, provider toggle, quick-set chips) → **`ui.Segmented`** (S1)
+    — `items={[{value,label|icon,ariaLabel?}]}` + `value` + `onChange`; renders `role="tablist"`/`radiogroup` with
+    `aria-pressed`/`aria-selected` per item.
+  - bare `<select>` → **`ui.Select`** (S1) — `value`/`onChange(string)`/`options={[{value,label}]}` (native `<select>` under the
+    hood for a11y + keyboard; token-styled chrome). Carries the accessible name the call site already had.
+  - bare `<input>` (text/search/number/date/time…) → `ui.Input` (`type` spreads through `...rest`); bare `<textarea>` →
+    `ui.TextArea`. (`type="file|checkbox|radio"` inputs are OUT of scope this epic — leave them, they don't count.)
+  - **Behaviour-preserving:** keep every handler, `value`, `disabled`, key, and existing `aria-*`; this changes the rendered
+    element + styling, NOT the logic. Because it *is* a DOM/visual change (unlike EPIC-11's pure value swaps), each stage is
+    bounded to a small file group and its acceptance includes the render-smoke.
+
+Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones before, build+vitest+eslint green,
+`tokenViolations`/`offSystemUtilities`/`offSystemStyle` stay 0; `offShellControls` marches toward 0):
+
+- [ ] **S1 · Build the audit + COMPLETE the primitive set + establish the baseline (drive nothing yet).** The additive,
+  fully-downhill foundation — no app migration, zero render risk.
+  - **New `scripts/controlAudit.mjs`** — pure, dependency-free `export function scanControlViolations(text) →
+    {button,input,select,textarea,total}`: count opening tags `<button`, `<select`, `<textarea`, and `<input>` where the tag
+    does NOT carry `type="file|checkbox|radio"` (scan the tag up to its `>` for the `type=` attr). Mirror `styleAudit.mjs`'s
+    module shape (header comment stating the scope decision + the exclusion rationale).
+  - **New `scripts/controlAudit.test.mjs`** (≥8): counts a bare `<button>`; a `<select>`; a `<textarea>`; a text `<input>`;
+    EXCLUDES `type="file"`/`"checkbox"`/`"radio"` inputs; COUNTS a `type="date"`/`"number"` input; a multi-line `<button\n …>`
+    tag; returns 0 for a file that only uses `ui.Button`/`<Input>` (capitalised components are not bare tags).
+  - **`scripts/metrics.mjs`** — add `controlViolations()` (mirror `styleViolations()` `:143`) over `appCodeFiles()`, but add a
+    `src/components/ui/` **dir-exclusion** (alongside the existing `design-system/` one at `:60`) so the primitives' own bare
+    elements aren't counted. Add `offShellControls` (total) + `offShellControlDims {button,input,select,textarea}` to the
+    snapshot; add the table row (`b/i/s/t` breakdown, like the `offSystemStyle` `r/t/m` row at `:224`); add an offenders list.
+    Do **NOT** add it to `--assert-zero` yet (it's non-zero — S9 locks it, exactly as EPIC-5 S8 / EPIC-11 S4 did).
+  - **Complete the `ui` primitive set in `src/components/ui/`** — three new token-clean, a11y-correct primitives (each unit-
+    pinned in a new/extended `src/components/ui/ui.test.tsx`):
+    - **`Select`** — `{ value, onChange:(v:string)=>void, options:{value:string;label:string}[], className?, ariaLabel? }`; a
+      native `<select>` under the hood (keyboard/AT), token-styled (`.gp`/`var(--radius-*)`/`var(--text-*)`), `aria-label` from
+      the prop.
+    - **`IconButton`** — `{ icon:ReactNode, onClick, 'aria-label':string (REQUIRED via typed prop), variant?, size?, disabled? }`;
+      a square/circular token target; TypeScript forces the `aria-label` (the a11y dividend).
+    - **`Segmented`** — `{ value, onChange:(v:string)=>void, items:{value:string;label?:ReactNode;icon?:ReactNode;ariaLabel?:string}[],
+      className? }`; renders a token-styled segmented control (`role="radiogroup"`, each option `aria-pressed`/`aria-checked`);
+      collapses the ubiquitous tab-bar / grid-list / provider-toggle idiom.
+    Export all three from `src/components/ui/index.tsx` (and re-export path the apps already use).
+  - **Baseline:** run `node scripts/metrics.mjs`; record `offShellControls` (expected ≈148, `b127/i≈14/s5/t2` — report the EXACT
+    number the detector yields after the input-type exclusion) into the metrics table + `metrics.json`.
+  - *Acceptance:* `controlAudit.test.mjs` green; `Select`/`IconButton`/`Segmented` exist, exported, unit-pinned, and audit at
+    tokens/off-system/offSystemStyle 0; the `offShellControls` row + snapshot field appear with the real baseline; build🟢
+    vitest🟢 eslint clean; `--assert-zero` STILL exit 0 (colour/style metrics untouched, new metric not yet gated); bundle gz
+    ±0 (dev script + tiny components), no new deps.
+
+- [ ] **S2 · Migrate Reader (16 → 0) — the single heaviest file, alone.** `src/apps/reader/Reader.tsx` — apply the mapping
+  rule to all 16 bare controls (mostly reader-toolbar icon buttons → `IconButton`; any dropdown → `Select`). Keep every handler
+  + the file-`<input>` (`type="file"`, out of scope) as-is. *Acceptance:* `node scripts/metrics.mjs` → `offShellControls`
+  Reader-attributed count = 0 (headline ≈148 → ≈132); Reader renders clean in the smoke (`GRAPH-LEGIBLE reader/book` axis still
+  ✅); build🟢 vitest🟢 eslint clean; tokens/off-system/offSystemStyle 0.
+
+- [ ] **S3 · Migrate Calendar (15 → 0) — alone (complex date-grid; keep keyboard nav intact).** `src/apps/calendar/Calendar.tsx`
+  — mapping rule; the month/nav arrows → `IconButton`, view toggles → `Segmented`, the `useInboundHandoff` receive path +
+  `ProvenanceChip` untouched. *Acceptance:* Calendar count = 0 (≈132 → ≈117); Calendar renders clean + `INBOUND-LANDS
+  calendar/editor` axis still ✅; build🟢 vitest🟢 eslint clean; conformance 0.
+
+- [ ] **S4 · Migrate Clock (13) + Photos (12) = 25 → 0 — the `Segmented`/`IconButton` showcase.**
+  `src/apps/clock/Clock.tsx` (tab row → `Segmented`, quick-set-minute chips → `Segmented`, the `addCityTz` `<select>` `:267` →
+  `Select`, alarm/remove/day-toggle icon buttons → `IconButton`) + `src/apps/photos/Photos.tsx` (grid-size + grid/list +
+  favorites-filter toggles → `Segmented`, tag chips → `Segmented`, lightbox nav/close/favorite/delete → `IconButton`).
+  *Acceptance:* both files' counts = 0 (≈117 → ≈92); both render clean + `MEDIA-PERSISTS photos` axis still ✅; conformance 0.
+
+- [ ] **S5 · Migrate the artifacts family (27 → 0).** `src/apps/artifacts/artifacts/FormBuilder.tsx` (9; incl. `<select>` `:94`
+  → `Select`), `Flashcards.tsx` (9), `Kanban.tsx` (4), `ChartBuilder.tsx` (4), `MarkdownStudio.tsx` (1) — one coherent sub-app
+  family, repetitive control patterns. Mapping rule throughout. *Acceptance:* all five files = 0 (≈92 → ≈65); each artifact
+  renders clean; conformance 0.
+
+- [ ] **S6 · Migrate media + language (27 → 0).** `src/apps/video/Video.tsx` (8), `src/apps/language/Language.tsx` (7; both
+  `<select>`s `:194`/`:207` → `Select` — reconcile with the existing aria-labels the a11y pass added), `src/apps/music/Music.tsx`
+  (6; icon transport → `IconButton`, preserving the a11y names the 2026-07-10 polish added), `src/apps/browser/Browser.tsx` (6).
+  *Acceptance:* all four = 0 (≈65 → ≈38); each renders clean + `MEDIA-PERSISTS music/video` axes still ✅; conformance 0.
+
+- [ ] **S7 · Migrate the utility apps (16 → 0).** `src/apps/files/Files.tsx` (7), `src/apps/weather/Weather.tsx` (4),
+  `src/apps/datacenter/DataCenter.tsx` (3), `src/apps/maps/Maps.tsx` (1), `src/apps/grammar/Grammar.tsx` (1). Mapping rule.
+  *Acceptance:* all five = 0 (≈38 → ≈22); each renders clean (Files/Weather/Maps keep their env-gated-fetch behaviour);
+  conformance 0.
+
+- [ ] **S8 · Migrate the Cakra family + the shell components tail (≈22 → 0) — the LAST offenders.**
+  `src/apps/cakra/tabs/PromptGenerator.tsx` (7; `<select>` `:397` → `Select`), `src/apps/cakra/tabs/Editor.tsx` (7; `<select>`
+  `:142` → `Select`), `src/apps/cakra/tabs/TokenCounter.tsx` (2), `src/apps/cakra/solver/ProblemDetail.tsx` (2),
+  `src/apps/cakra/components/SettingsPanel.tsx` (1), `src/apps/cakra/components/ModelPicker.tsx` (1), `src/apps/cakra/AIChat.tsx`
+  (1), `src/components/AppHost.tsx` (3), `src/components/Bridge.tsx` (1). Re-run the census; drive ANY residual offender the
+  earlier stages missed to 0 too — **do not stop at "mostly."** *Acceptance:* `node scripts/metrics.mjs` → **`offShellControls`
+  = 0 (`b0/i0/s0/t0`)**; all routes render clean (31/31); build🟢 vitest🟢 eslint clean; tokens/off-system/offSystemStyle 0.
+
+- [ ] **S9 · LOCK `offShellControls` in `--assert-zero` → ★ EPIC-14 CODE-COMPLETE.** Add `if (snapshot.offShellControls > 0)
+  fail.push(...)` to the `--assert-zero` block (`scripts/metrics.mjs:248`, beside the existing `tokenViolations`/
+  `offSystemUtilities`/`offSystemStyle` gates) + a `controlAudit` line to the success message. Add a header comment in
+  `src/components/ui/index.tsx` stating the invariant: *app code renders interactive controls through the `ui` primitives —
+  a bare `<button>`/`<select>`/`<textarea>`/text-`<input>` in an app file fails CI.* **Verify the lock BITES:** temporarily
+  re-introduce one bare `<button>` in an app file → `--assert-zero` exits 1 → revert. *Acceptance:* `--assert-zero` gates
+  `offShellControls=0` and goes RED on a single re-introduced bare control; build🟢 vitest🟢 eslint clean; conformance (all
+  four axes) 0. **★ EPIC-14 CODE-COMPLETE (S1–S9) → QA confirms `offShellControls 0` LOCKED on green main → Strategist retires
+  to DONE.**
+
+> _**Ratified 2026-07-10.** Ordered so each stage is downhill: S1 is pure-additive (detector + the three missing primitives +
+> baseline — zero migration risk, and it stands up the shell homes every later stage migrates INTO); S2–S8 sweep the 27
+> offender files heaviest-first (the exact EPIC-5/11 descending-file-mass discipline), each bounded to a small group so the
+> render-smoke fully covers it; S9 locks the metric so islands can never creep back — mirroring EPIC-5 S8 / EPIC-11 S4. When
+> all nine ship AND QA confirms `offShellControls 0` LOCKED on green main → retire EPIC-14 to DONE. The next cloud-executable
+> candidate is a measured **accessibility pass** (`prefers-reduced-motion` honoured across animations + an ARIA/keyboard
+> coverage metric — now largely seeded by the IconButton/Segmented/Select a11y dividend) or the RFC's **`docMass`** doc-mass
+> conformance metric; **EPIC-7 · Android stays device-gated.**_
+
+---
+
+## ✅ DONE — retired by the Strategist 2026-07-10 (S1–S3 all shipped + QA-render-CONFIRMED LIVE; `GRAPH-LEGIBLE 1/1 → 3/3` + `INBOUND-LANDS 3/3 → 4/4` on green main `a9bec85`; the last two graph-islands closed) — EPIC-13 · The last two islands join the organism (Mail + Crypto become first-class Empire citizens)
+
+> **★ CODE-COMPLETE + QA-CONFIRMED 2026-07-10 (S1–S3 all shipped + render-confirmed on green main `a9bec85`): `GRAPH-LEGIBLE 3/3 ✅` + `INBOUND-LANDS 4/4 ✅`.** Mail + Crypto are now full citizens — graph-legible, shelled, emitting via ⚡, and Mail both receives handoffs and persists durable drafts. **Retired to DONE by the Strategist 2026-07-10; EPIC-14 (shell conformance) promoted to ACTIVE above.** *(EPIC-14's own premise — the incomplete `ui` set that forced Mail/Crypto to bare HTML — is the structural lock that keeps this win from regressing.)*
 
 > **RATIFIED + PROMOTED by the Strategist 2026-07-09.** EPIC-12 is retired to DONE (below — `INTENT-ROUNDTRIP 0/2 → 2/2`
 > QA-CONFIRMED LIVE on green main `17d2dd9`, S1–S3 all shipped + the reconcile-survival lock BITES). Every interconnection

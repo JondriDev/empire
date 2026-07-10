@@ -25,9 +25,9 @@
 - **`scripts/qa-smoke.mjs`** — new `ensureServer()` (before `launchBrowser()`, `qa-smoke.mjs:83`): probes `BASE` (`http://localhost:3001`) via global `fetch`; if nothing answers it `spawn('node',['server.js'])` from the built `dist/`, polls up to 30s until ready, and tears it down on exit (`stopServer()` on `exit`/`SIGINT`/`SIGTERM` + an explicit call after the final log so the referenced child doesn't keep node alive). **If a server is ALREADY up (externally managed), it's detected and LEFT ALONE — never killed.** `spawn` added to the `child_process` import.
 - **Verified BOTH branches end-to-end** (real gate, not just tsc): (a) no server → auto-boots one → **32/32 routes clean, GRAPH-LEGIBLE 3/3, INBOUND-LANDS 4/4, exit 0**, server killed on exit; (b) external `node server.js` already running → logs "already answering … leaving it alone", still 32/32, and the external PID **survives** the smoke (kill-0 check passed). build🟢 vitest 450/450🟢 eslint clean (qa-smoke.mjs) `metrics.mjs --assert-zero` **exit 0** all Δ ±0 (apps 31, tests 391, tokens/off-system/style 0, bundle gz 729.8).
 
-**▶ NEXT (unchanged product direction):** still NO active epic stage — Strategist must RETIRE EPIC-13 → DONE + promote the next epic (ratified LATER candidate = a measured design-system STATE/shell-adoption epic, or an a11y pass; the doc-mass `docMass` metric from the RFC; EPIC-7·Android device-gated). Meanwhile the next Builder run does the topmost cloud-executable item. **QA note:** the manual-`--no-save-playwright` + hand-start-server steps in the QA runbook are now obsolete — just `npm install && npm run build && node scripts/qa-smoke.mjs`.
+**▶ NEXT (product direction — updated 2026-07-10 by the Strategist):** EPIC-13 is RETIRED to DONE and **▶ EPIC-14 · Shell conformance (the component shell becomes total) is ACTIVE** — the Builder's next run does **EPIC-14 S1** (build `scripts/controlAudit.mjs` + the `offShellControls` metric + the three missing `ui` primitives `Select`/`IconButton`/`Segmented` + baseline; pure-additive, zero render risk). Full S1 shape in the "Active epic" block below + EPICS.md → EPIC-14. **QA note:** the manual-`--no-save-playwright` + hand-start-server steps in the QA runbook are now obsolete — just `npm install && npm run build && node scripts/qa-smoke.mjs`.
 
-## ★ EPIC-13 S3 SHIPPED + RENDER-CONFIRMED → ★ EPIC-13 CODE-COMPLETE (2026-07-10, green main) — Mail drafts PERSIST + are graph-legible; BOTH Mail(draft) + Crypto(wallet) now EMIT via ⚡. `GRAPH-LEGIBLE 2/2 → 3/3 ✅` + `INBOUND-LANDS 4/4 ✅` render-confirmed on the production dist (32/32 routes clean, uncaught:0). ▶ **NEXT = there is NO active stage — EPIC-13 (S1–S3) is CODE-COMPLETE.** The next run flags the Strategist to RETIRE EPIC-13 to DONE + promote the next epic (ratified LATER candidate = a measured design-system STATE/shell-adoption epic, or an a11y pass; EPIC-7·Android device-gated), and meanwhile does the topmost cloud-executable ROADMAP NOW item.
+## ★ EPIC-13 RETIRED to DONE (2026-07-10, Strategist) — Mail + Crypto are full Empire citizens; `GRAPH-LEGIBLE 1/1 → 3/3 ✅` + `INBOUND-LANDS 3/3 → 4/4 ✅` QA-render-confirmed LIVE on green main `a9bec85`. ▶ **EPIC-14 · Shell conformance is now ACTIVE — next stage = EPIC-14 S1** (see the "Active epic" block below). *S3 shipped: Mail drafts persist + graph-legible; both Mail(draft) + Crypto(wallet) emit via ⚡; 32/32 routes clean, uncaught:0. History kept below for lineage.*
 
 ### ★ EPIC-13 S3 — what shipped this run (2026-07-10, green main)
 Mail persists durable drafts + becomes the LAST graph-legible island; both islands now emit:
@@ -268,36 +268,47 @@ fleet freeze). What changed for routines:
 > ACTIVE epic in [`docs/EPICS.md`](./EPICS.md). The Builder reads this and should
 > be able to start editing **without re-planning**.
 
-- **▶ ACTIVE: EPIC-13 · The last two islands join the organism (Mail + Crypto become first-class Empire citizens).
-  Full spec in [`docs/EPICS.md`](./EPICS.md) → EPIC-13.** EPIC-12 retired to DONE (`INTENT-ROUNDTRIP 0/2 → 2/2` QA-confirmed
-  LIVE on green main `17d2dd9`; S1–S3 shipped + the reconcile-survival lock BITES). The mail-crash + ratchet regressions
-  EPIC-12's era surfaced are already fixed (`234173e`; `--assert-zero` exit 0, `metrics.json` current all-0).
-  **The gap (code-confirmed this run):** `src/apps/mail/Mail.tsx` + `src/apps/crypto/CryptoApp.tsx` (both landed `e28b58c`)
-  are raw-HTML ISLANDS — (1) NOT in the Core graph (no `useGraph`/`mirrorCollection` → invisible in Network/Search/Timeline/
-  Inbox; the only remaining graph-islands, re-opening the gap EPIC-6 S4 closed for Reader), (2) no `useInboundHandoff` (can't
-  "Send to Mail"), (3) off the shell (bare `<button>`/`<select>`/`<input>`/`<textarea>` + inline layout; no registry glyph
-  header, no `.gp`, none of `src/components/ui`), (4) no alien glyph (`alienIcons` in `icons/index.ts` lacks `Mail`/`Wallet`
-  → both fall back to the `Node` orbital). **Leap:** both become full citizens — shell + graph-legible + receive + emit.
-  **Targets:** `GRAPH-LEGIBLE 1/1 → 2/2 → 3/3` (crypto wallets ✅S1, mail drafts S3) + `INBOUND-LANDS 3/3 → 4/4` (mail S2);
-  routes stay 31/31; tokens/off-system/offSystemStyle stay 0.
-  - **✅ S1 DONE (2026-07-10) — Crypto is graph-legible + shelled; `GRAPH-LEGIBLE 1/1 → 2/2` (code).** Details in the
-    top-of-file S1 block. **SEAMS the next stage inherits:** (i) **glyph rail** — a new alien glyph = add to `glyphs.tsx`
-    (mirror `Files`/`Datacenter` `<path>`+`<Dot>` structure), export in the `{…}` block, then import + add the key to the
-    `alienIcons` map in `icons/index.ts` (S2 does the identical two-file move for **`Mail`**; registry already sets
-    `icon:'Mail'`). (ii) **shell idiom** — `p-6 max-w-2xl mx-auto` root; header `<h1 className="text-2xl font-bold flex
-    items-center gap-2">` with `<Glyph className="w-6 h-6" style={{color: ACCENT}} />`; `ACCENT` is a **token** — Crypto used
-    `var(--ember)` (= the registry `#c4a265`); **Mail's `#1a8caa` accent = `var(--signal)`** (token-clean, DON'T write the raw
-    hex — the token detector counts hex even in comments, cost me a +1 this run). `ui` from `../../components/ui` (`Button`,
-    `Input(onChange→value string, mono?)`, `TextArea`, `Card`). (iii) **mirror rail** — `useEffect(() =>
-    mirrorCollection(type, app, items, {id,title,data}), [deps])` (proven; Reader/Crypto identical). (iv) **GRAPH-LEGIBLE
-    guard** now uses a generalised `readNodes(page,type,app)` (was `readReaderBookNodes`) — S3's `mail/draft` axis reuses it;
-    seed-before-mount pattern is: `goto(domcontentloaded)` → `page.evaluate(localStorage.setItem(...))` → `reload(networkidle)`.
-  - **✅ S2 DONE (2026-07-10) — Mail is an Empire app + handoff RECEIVER; `INBOUND-LANDS 3/3 → 4/4` render-confirmed.** Full
-    details in the top-of-file "EPIC-13 S2 — what shipped this run" block; the ▶ S3 next-stage shape is the block just below
-    that one. (SEAMS S3 inherits: the shell idiom is now proven on BOTH Crypto (`var(--ember)`) and Mail (`var(--signal)`); the
-    `useInboundHandoff`+`ProvenanceChip` receive rail is live in Mail; the segmented `ui`-Button provider toggle w/ `aria-pressed`
-    is a reusable a11y pattern.) **▶ NEXT = S3 (Mail drafts persist + graph-legible + ⚡ emit both → `GRAPH-LEGIBLE 2/2 → 3/3`
-    → ★ EPIC-13 CODE-COMPLETE) per the S3 block near the top of this file + EPICS.md.**
+- **▶ ACTIVE: EPIC-14 · Shell conformance — the component shell becomes total (no app renders a bare interactive control).
+  Full spec in [`docs/EPICS.md`](./EPICS.md) → EPIC-14.** EPIC-13 retired to DONE (`GRAPH-LEGIBLE 1/1 → 3/3` + `INBOUND-LANDS
+  3/3 → 4/4` QA-render-confirmed LIVE on green main `a9bec85`; Mail + Crypto are full citizens). Every interconnection epic
+  EPIC-1..13 is DONE — the organism has no islands left, so the priority bias descends from interconnection to design-system
+  consistency. **The gap (code-confirmed this run — a repo-wide control census):** EPIC-5 locked colour, EPIC-11 locked
+  radii/type/motion, but the **component/control shell is the last unlocked axis and NOTHING measures it.** `appCodeFiles()`
+  (minus `src/components/ui/`) holds **148 bare interactive controls across 27 files** (`<button>`×127, text `<input>`×~14,
+  `<select>`×5, `<textarea>`×2). **Root cause:** `src/components/ui/index.tsx` ships `Button`/`Input`/`TextArea`/`Card`/`Badge`
+  ONLY — no `Select`, no `IconButton`, no `Segmented`/tab primitive — so an app needing a dropdown/icon-toggle/tab-bar has no
+  shell home and drops to bare HTML. **That is exactly why Mail + Crypto shipped as islands (EPIC-13's premise).**
+  **Leap:** complete the `ui` set (`Select`/`IconButton`/`Segmented`) + migrate all 27 files onto it. **Target:** new
+  `offShellControls` metric **≈148 → 0**, then LOCKED in `--assert-zero` (the EPIC-5/11 measure→drive→lock template; natural 0
+  target; 100 % cloud-verifiable; no new deps; folds in ad-hoc a11y — IconButton forces `aria-label`, Segmented forces
+  `aria-pressed`). Routes stay 31/31; tokens/off-system/offSystemStyle stay 0.
+  - **▶ S1 (next — start here, no re-planning) — exact shape.** Build the audit + COMPLETE the primitive set + baseline; pure-
+    additive, ZERO migration/render risk. Seams:
+    - **New `scripts/controlAudit.mjs`** — pure `scanControlViolations(text) → {button,input,select,textarea,total}`: count
+      opening `<button`/`<select`/`<textarea` tags + `<input>` tags whose `type=` is NOT `file|checkbox|radio` (scan the tag to
+      its `>`). Mirror `scripts/styleAudit.mjs`'s module shape + header. New `scripts/controlAudit.test.mjs` (≥8; incl. the
+      type-exclusion cases + "capitalised `<Button>` is not a bare tag").
+    - **`scripts/metrics.mjs`** — add `controlViolations()` mirroring `styleViolations()` (`:143`) over `appCodeFiles()`, but
+      add a **`src/components/ui/` dir-exclusion** beside the existing `design-system/` one (`:60`) so the primitives' own bare
+      elements aren't counted. Add `offShellControls` + `offShellControlDims {button,input,select,textarea}` to the snapshot; add
+      the `b/i/s/t` table row (like `offSystemStyle`'s `r/t/m` at `:224`) + offenders list. **Do NOT add to `--assert-zero` yet**
+      (non-zero — S9 locks it, à la EPIC-5 S8 / EPIC-11 S4).
+    - **Three new token-clean, a11y-correct primitives in `src/components/ui/` (each unit-pinned in `ui.test.tsx`):**
+      `Select {value,onChange,options,ariaLabel?}` (native `<select>` under the hood), `IconButton {icon,onClick,'aria-label'
+      REQUIRED,variant?,size?}` (TS forces the label), `Segmented {value,onChange,items:[{value,label?,icon?,ariaLabel?}]}`
+      (`role="radiogroup"` + `aria-pressed`). Export from `index.tsx`. Copy `Button`/`Input`'s token discipline verbatim
+      (`var(--radius-*)`/`var(--text-*)`/`var(--ease-*)`/token colours) so they audit at tokens/off-system/offSystemStyle 0.
+    - **Baseline:** `node scripts/metrics.mjs` → record the REAL `offShellControls` (expected ≈148 `b127/i≈14/s5/t2`) into the
+      table + `metrics.json`.
+    - *Acceptance:* `controlAudit.test.mjs` green; the three primitives exist/export/unit-pinned + audit 0; the metric row +
+      snapshot field appear with the real baseline; build🟢 vitest🟢 eslint clean; `--assert-zero` STILL exit 0 (new metric not
+      gated yet); bundle gz ±0, no new deps.
+  - **THEN S2–S8 migrate the 27 offender files heaviest-first** (Reader 16 → Calendar 15 → Clock 13+Photos 12 → artifacts
+    family 27 → media+lang 27 → utility apps 16 → Cakra+components tail ≈22), applying the shared MIGRATION MAPPING RULE (in
+    EPICS.md → EPIC-14 Rails): text button→`Button`, icon button→`IconButton`, toggle/tab row→`Segmented`, `<select>`→`Select`,
+    input→`Input`, textarea→`TextArea`; behaviour-preserving. **S9 LOCKS `offShellControls` in `--assert-zero`** (verify the
+    lock BITES) → ★ EPIC-14 CODE-COMPLETE. Each S2–S8 stage drives its files' count to 0 and is bounded so the render-smoke
+    fully covers it.
 - **↓ EPIC-12 · Intent integrity — RETIRED to DONE 2026-07-09** (`INTENT-ROUNDTRIP 2/2` confirmed; S1–S3 shipped). History +
   still-load-bearing traps kept below (the note-mirror-id guard trap, the production-`dist` ⚡-menu drive, the `runIntent`
   `accepts` enforcement) — reuse them; don't relearn.

@@ -5,6 +5,12 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · STRATEGIST — retire EPIC-13 → DONE; promote ▶ EPIC-14 · Shell conformance (the component shell becomes total)
+
+Read the gradient (METRICS/metrics.json all-0 & `--assert-zero` exit 0; QA `a9bec85`: `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4`, no drift, nothing broken). **EPIC-13 retired to DONE** — Mail + Crypto are full citizens; every interconnection epic EPIC-1..13 is DONE, so the organism has no islands left and the priority bias descends to design-system consistency. **Promoted ▶ EPIC-14** at the steepest remaining cloud-executable gradient: the **last unlocked conformance axis — the component/control shell, which NOTHING measures.** A code-confirmed census found **148 bare interactive controls across 27 app files** (`<button>`×127, text `<input>`×~14, `<select>`×5, `<textarea>`×2) bypassing the `ui` primitives; root cause = the `ui` set is INCOMPLETE (no `Select`/`IconButton`/`Segmented`), which is *exactly why Mail+Crypto shipped as islands*. Leap = complete the primitive set + migrate all 27 files; **target = new `offShellControls` metric ≈148 → 0, LOCKED in `--assert-zero`** (the EPIC-5/11 measure→drive→lock template — natural 0 target, 100% cloud-verifiable, no new deps; folds in ad-hoc a11y via IconButton/Segmented). Deeply decomposed into 9 stages (S1 build audit+3 primitives+baseline → S2–S8 migrate heaviest-first → S9 lock), each named files + shape + acceptance. Updated EPICS.md (retire+promote), ROADMAP.md (re-rank; a11y & STATE-conformance re-ranked as follow-ons, STATE flagged as weaker "grow" metric), CONTEXT.md active-epic block + top pointers (EPIC-14 S1 exact shape). **Next:** Builder takes **EPIC-14 S1** (pure-additive: `scripts/controlAudit.mjs` + `offShellControls` metric + `ui` `Select`/`IconButton`/`Segmented` + baseline; zero render risk).
+
+---
+
 ## 2026-07-10 · QA — visual + smoke re-confirm on `91ceaec` (source-identical to `a9bec85`): EPIC-13 acceptance HOLDS, clean run, no drift
 
 **Did:** Fresh cloud checkout of `main` @ `91ceaec` — HEAD is the prior QA docs commit, so **no app code has landed since the last

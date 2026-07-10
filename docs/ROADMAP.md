@@ -10,25 +10,28 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-07-09** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 363/43 files,
-> token-violations 0, off-system 0, offSystemStyle 0 r0/t0/m0, `--assert-zero` exit 0, bundle gz 727.7) · QA (2026-07-09,
-> `17d2dd9`): `INTENT-ROUNDTRIP 2/2 ✅`, all 12 guard suites green; the mail-crash + ratchet regressions it flagged are
-> already FIXED (`234173e`). **EPIC-1..12 all DONE** (organism both-ways 9/9 · token-violations 501→0 · shallow instruments
-> 8/8 · PWA offline+base+installable · off-system 1076→0, CI-locked · durable provenance `PROVENANCE-PERSISTS 3/3` +
-> `PROVENANCE-ENTITY 3/3` + Reader graph-legible · `GLOBAL-SEARCH 1/1` queryable organism · `NODE-LINEAGE 1/1` per-artifact
-> ancestry, navigable · `TIMELINE 1/1` temporal lens, all six axes · `offSystemStyle` 56→0 LOCKED — EPIC-11 · **`INTENT-ROUNDTRIP`
-> 0/2→2/2, no phantom intents, reconcile-survival LOCKED — EPIC-12 retired 2026-07-09**).
-> **▶ EPIC-13 · The last two islands join the organism (Mail + Crypto become first-class Empire citizens) ACTIVE — RATIFIED
-> 2026-07-09.** With every pre-existing interconnection epic done, the Strategist audited the organism and found the steepest
-> remaining gradient at the TOP of the priority bias (interconnection, above design-consistency): **two brand-new apps
-> (`mail`, `crypto`, landed `e28b58c`) shipped as raw-HTML ISLANDS.** Neither imports `useGraph`/`mirrorCollection` (invisible
-> in Network/Search/Timeline/Inbox — the only remaining graph-islands), neither uses `useInboundHandoff` (can't "Send to
-> Mail"), both bypass the `.gp`/`ui` shell (bare `<button>`/`<input>` + inline layout, no registry glyph header), and neither
-> has an alien glyph (`icons/index.ts` `alienIcons` lacks `Mail`/`Wallet` → `Node` fallback). **Leap:** both become full
-> citizens — shell + graph-legible + receive + emit. **Targets: `GRAPH-LEGIBLE 1/1 → 2/2 → 3/3`** (crypto wallets S1, mail
-> drafts S3) **+ `INBOUND-LANDS 3/3 → 4/4`** (mail S2), reusing the EPIC-6 `mirrorCollection` + EPIC-1 `useInboundHandoff`
-> rails (no invention); backend inbox/balance fetches are 401-gated in cloud, so each stage verifies the LOCAL-data path.
-> **Android is EPIC-7 (QUEUED)** — device-gated, promote only with on-device QA.
+> Last re-ranked: **2026-07-10** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 391/48 files,
+> token-violations 0, off-system 0, offSystemStyle 0 r0/t0/m0, `--assert-zero` exit 0, bundle gz 729.8) · QA (2026-07-10,
+> `a9bec85`): `GRAPH-LEGIBLE 3/3 ✅` + `INBOUND-LANDS 4/4 ✅`, all 13 guard suites green, no drift. **EPIC-1..13 all DONE**
+> (organism both-ways 9/9 · token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable · off-system
+> 1076→0, CI-locked · durable provenance `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` + Reader graph-legible ·
+> `GLOBAL-SEARCH 1/1` queryable organism · `NODE-LINEAGE 1/1` per-artifact ancestry, navigable · `TIMELINE 1/1` temporal lens,
+> all six axes · `offSystemStyle` 56→0 LOCKED — EPIC-11 · `INTENT-ROUNDTRIP` 0/2→2/2, reconcile-survival LOCKED — EPIC-12 ·
+> **the last two islands (Mail + Crypto) joined the organism, `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4` — EPIC-13 retired
+> 2026-07-10**). **The organism has NO islands left** — interconnection is complete, so the priority bias descends to
+> design-system consistency.
+> **▶ EPIC-14 · Shell conformance — the component shell becomes total (no app renders a bare interactive control) ACTIVE —
+> RATIFIED 2026-07-10.** With every interconnection epic done, the Strategist audited the design-system band and found the
+> steepest remaining gradient at the **last unlocked conformance axis: the component/control shell, which NOTHING measures.**
+> EPIC-5 locked colour, EPIC-11 locked radii/type/motion — but a census finds **148 bare interactive controls across 27 app
+> files** (`<button>`×127, text `<input>`×~14, `<select>`×5, `<textarea>`×2) bypassing the `ui` primitives. **Root cause:** the
+> `ui` set is INCOMPLETE (`Button`/`Input`/`TextArea`/`Card`/`Badge` only — no `Select`/`IconButton`/`Segmented`), so apps with
+> a dropdown/icon-toggle/tab-bar have no shell home and drop to bare HTML — **exactly why Mail + Crypto shipped as islands.**
+> **Leap:** complete the `ui` set (add `Select`/`IconButton`/`Segmented`) + migrate all 27 files onto it. **Target: new
+> `offShellControls` metric ≈148 → 0, then LOCKED in `--assert-zero`** (the EPIC-5/11 measure→drive→lock template; natural 0
+> target, 100 % cloud-verifiable, no new deps; folds in the ad-hoc a11y work — IconButton forces `aria-label`, Segmented forces
+> `aria-pressed`). Closes when QA confirms `offShellControls 0` LOCKED on green main. **Android is EPIC-7 (QUEUED)** —
+> device-gated, promote only with on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
@@ -126,18 +129,27 @@ now **EPIC-6 S4**:
   shipped: `make-note-from` + `add-to-learning` route through `useStore.addNote`/`addLearningItem` so the synchronous mirror
   re-materializes them un-prunably, `data.from` preserved; a reconcile-survival invariant LOCKS the phantom pattern out).
   `INTENT-ROUNDTRIP 0/2 → 2/2` QA-confirmed LIVE on green main `17d2dd9`. Retired 2026-07-09. *`make-task` stays graph-only by design.*
-- **The last two islands join the organism — Mail + Crypto become first-class Empire citizens.** *(In progress — this IS
-  EPIC-13, ▶ ACTIVE, RATIFIED 2026-07-09.)* The `mail` + `crypto` apps (landed `e28b58c`) shipped as raw-HTML islands: not in
-  the Core graph, no inbound handoffs, off the `.gp`/`ui` shell, no alien glyph. Route them onto the shared shell + the EPIC-6
-  `mirrorCollection` rail + the EPIC-1 `useInboundHandoff` rail so both become graph-legible, receive, and emit. **Targets:
-  `GRAPH-LEGIBLE 1/1 → 2/2 → 3/3`** (crypto watch-list wallets S1, mail persisted drafts S3) **+ `INBOUND-LANDS 3/3 → 4/4`**
-  (mail S2). Closes when QA confirms `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4` on green main. Backend inbox/balance fetches are
-  401-gated in cloud → each stage verifies the local-data path.
-- **Design-system STATE conformance (empty / loading / error) — a FUTURE epic candidate (not yet decomposed).** The 3
-  idle-run empty-state polish increments made `<EmptyState>` a fully general primitive (adoption 1→6→13, incl. a `size="sm"`
-  variant). The ripe next step is to *measure + lock* it: an `emptyStateAdoption` (or a broader state-primitive) metric
-  + guard driving block-appropriate empty/loading/error surfaces onto the shared primitives and locking via `--assert-zero`
-  — the exact EPIC-5/11 template. Rank against a measured accessibility pass (`prefers-reduced-motion` + ARIA/keyboard).
+- **The last two islands join the organism — Mail + Crypto become first-class Empire citizens.** ✅ **DONE — this WAS EPIC-13**
+  (S1–S3 shipped + QA-render-confirmed LIVE on green main `a9bec85`): `mail` + `crypto` routed onto the shared shell + the
+  EPIC-6 `mirrorCollection` rail + the EPIC-1 `useInboundHandoff` rail — both graph-legible, receive, and emit. `GRAPH-LEGIBLE
+  1/1 → 3/3` (crypto wallets + mail drafts) + `INBOUND-LANDS 3/3 → 4/4` (mail). Retired 2026-07-10. *The organism has no
+  islands left.*
+- **Shell conformance — the component shell becomes total (no app renders a bare interactive control).** *(In progress — this
+  IS EPIC-14, ▶ ACTIVE, RATIFIED 2026-07-10.)* The last unlocked design-system axis: EPIC-5 locked colour, EPIC-11 locked
+  radii/type/motion, but nothing measures whether apps render `ui.Button`/`Input`/`TextArea` or bare `<button>`/`<select>`/
+  `<input>`/`<textarea>` — a census finds 148 bare controls across 27 files. Root cause: the `ui` set is incomplete (no
+  `Select`/`IconButton`/`Segmented`), so apps drop to bare HTML — exactly why Mail/Crypto were islands. Complete the primitive
+  set + migrate all 27 files + lock a new **`offShellControls` metric (≈148 → 0)** in `--assert-zero`. Closes when QA confirms
+  `offShellControls 0` LOCKED. Folds in the ad-hoc a11y work (IconButton forces `aria-label`, Segmented forces `aria-pressed`).
+- **Measured accessibility pass — a FUTURE epic candidate (largely seeded by EPIC-14's primitive a11y dividend).**
+  `prefers-reduced-motion` honoured across all animations + an ARIA-name / keyboard-reachability coverage metric driven to a
+  target and locked via `--assert-zero` — the EPIC-5/11 template applied to a11y. Captures the ad-hoc per-app aria passes
+  (language/music) into one coherent, measured leap. Rank against the RFC `docMass` metric below.
+- **Design-system STATE conformance (empty / loading / error) — a FUTURE epic candidate (not yet decomposed; NOTE: weaker
+  metric story).** `<EmptyState>` is a fully general primitive (adoption 1→6→13, incl. `size="sm"`). *Caveat surfaced
+  2026-07-10:* an `emptyStateAdoption` count is a **"grow" metric with no natural 0 target** (unlike `offShellControls`), and
+  "which `.map()` needs an empty branch" is hard to detect statically — so this ranks BELOW the shell-conformance and a11y
+  candidates until a crisp, driveable metric definition exists.
 - **The fleet eats its own dog food — doc-mass conformance + the QA infra gap (a FUTURE epic candidate, user-ratified
   direction 2026-07-10).** Full plan in [`docs/rfc/iteration-plan-musk.md`](./rfc/iteration-plan-musk.md) (Musk's 5-step
   algorithm applied to process + product; **sequenced strictly AFTER EPIC-13 retires**). Headline moves: ~~`playwright` →
