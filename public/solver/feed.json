@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-09T00:00:00Z",
+  "generatedAt": "2026-07-10T00:00:00Z",
   "problems": [
     {
       "catalogId": "disc-sudan-famine",
@@ -13,11 +13,29 @@
     {
       "catalogId": "disc-drc-ebola",
       "title": "DR Congo Ebola outbreak (2026)",
-      "blurb": "An expanding Ebola outbreak in the Democratic Republic of the Congo had confirmed 1,406 cases and 438 deaths by July 2026, straining treatment capacity even though proven vaccines and monoclonal-antibody therapies exist to contain it.",
+      "blurb": "A Bundibugyo-species Ebola outbreak in eastern DR Congo had reached 1,792 confirmed cases and 625 deaths by 9 July 2026 and was still intensifying, spreading to new health zones and into Uganda (20 cases), even as proven vaccines and a new therapeutic trial (MBP134 antibody, remdesivir) exist to contain it.",
       "category": "Health & Disease",
       "severity": 4,
       "tractability": 3,
-      "discoveredFrom": "WHO July 2026 emergency briefings and a 6 July 2026 UNICEF flash update report ~38 new confirmed Ebola cases/day in the DRC with treatment beds ~96% occupied."
+      "discoveredFrom": "WHO and UN News (7-10 July 2026) report the death toll passing 600 with the outbreak reaching 34 health zones; WHO says it cannot yet call transmission stabilising."
+    },
+    {
+      "catalogId": "disc-mideast-displacement",
+      "title": "Iran–Lebanon war displacement crisis",
+      "blurb": "Hostilities across Iran and Lebanon since late February 2026 have displaced an estimated 1.3 million people, including more than 562,000 who crossed from Lebanon into Syria, straining a region already hosting large refugee populations.",
+      "category": "Governance & Rights",
+      "severity": 4,
+      "tractability": 2,
+      "discoveredFrom": "UNHCR Middle East Situation Emergency Update, 7 July 2026, records 1.3 million newly displaced and mass onward movement into Syria and Afghanistan."
+    },
+    {
+      "catalogId": "disc-sahel-displacement",
+      "title": "Sahel displacement & humanitarian crisis",
+      "blurb": "The central Sahel is one of the world's fastest-growing displacement emergencies, with more than 2.7 million people internally displaced and about 29 million needing humanitarian assistance amid conflict, jihadist insurgency and climate shocks.",
+      "category": "Governance & Rights",
+      "severity": 4,
+      "tractability": 2,
+      "discoveredFrom": "UNHCR and IRC 2026 emergency reporting rank the Sahel among the top under-funded crises, with 2.7M+ IDPs and 29M in need across Mali, Burkina Faso and Niger."
     }
   ],
   "briefs": {
@@ -232,6 +250,113 @@
         "https://www.ruralelec.org/tracking-sdg7-report-confirms-progress-energy-access/"
       ],
       "updatedAt": "2026-07-09"
+    },
+    "education-access": {
+      "summary": "The 2025 SDG 4 Scorecard from the UNESCO Institute for Statistics and the Global Education Monitoring Report finds about 272 million children and youth out of school — revised up by roughly 21 million from the previous 251 million estimate once updated population data are applied. The burden rises with age: 78 million are of primary-school age (11% out of school), 64 million lower-secondary (15%) and 130 million upper-secondary age (31%); globally there are slightly more boys out of school (140 million) than girls (133 million), though girls face sharper barriers in some regions and conflict settings. Progress has stalled since SDG 4 was adopted: out-of-school numbers fell 33% between 2000 and 2015 but have since dropped less than 1% and actually rose about 3% by 2024. Countries have pledged to cut the total to 107 million by 2030, and the evidence on how is unusually clear — the Global Education Evidence Advisory Panel finds demand-side supports such as cash transfers and school meals reliably raise enrolment and attendance.",
+      "interventions": [
+        {
+          "title": "Cash transfers (conditional and unconditional)",
+          "evidence": "VoxDev's review of the evidence finds conditional cash transfers produce large gains in school participation and, for adolescent girls, also delay marriage and childbearing — among the most consistently effective demand-side tools.",
+          "actor": "National social-protection ministries with World Bank and UNICEF support"
+        },
+        {
+          "title": "School feeding programmes",
+          "evidence": "A randomised trial in northern Burkina Faso found both on-site meals and take-home rations raised enrolment by about 6%, and an RCT in displacement camps in northern Uganda showed school meals increased participation including among previously unenrolled children.",
+          "actor": "The World Food Programme and national education ministries"
+        },
+        {
+          "title": "Information on the returns to schooling",
+          "evidence": "The Global Education Evidence Advisory Panel rates giving families accurate information on the benefits, costs and quality of education as a 'great buy' — very low cost per additional year of schooling.",
+          "actor": "Education ministries and community outreach programmes"
+        },
+        {
+          "title": "Targeted support to keep girls in school",
+          "evidence": "Reviews of girls'-education programming find cash and in-kind transfers tied to schooling are the most consistently successful way to prevent dropout and child marriage among adolescent girls.",
+          "actor": "Governments with UNICEF, UNGEI and education NGOs"
+        },
+        {
+          "title": "Second-chance and accelerated education for conflict-affected children",
+          "evidence": "With conflict and displacement a leading driver of the out-of-school rise, UNESCO highlights accelerated and flexible learning pathways to re-enrol displaced and over-age children.",
+          "actor": "UNHCR and Education Cannot Wait with host-country ministries"
+        }
+      ],
+      "sources": [
+        "https://www.unesco.org/en/articles/251m-children-and-youth-still-out-school-despite-decades-progress-unesco-report",
+        "https://news.un.org/en/story/2024/10/1156366",
+        "https://world-education-blog.org/2025/06/09/the-out-of-school-population-is-higher-than-previously-thought-and-rising/",
+        "https://www.unesco.org/en/articles/countries-commit-reducing-number-out-school-children-165-million",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC4440399/",
+        "https://voxdev.org/topic/education/unintended-consequences-conditional-cash-transfers-educational-outcomes"
+      ],
+      "updatedAt": "2026-07-10"
+    },
+    "sanitation": {
+      "summary": "The 2025 WHO/UNICEF Joint Monitoring Programme report, 'Progress on Household Drinking Water and Sanitation 2000–2024' (released at World Water Week 2025), finds 3.4 billion people still lack safely managed sanitation, including 354 million who practise open defecation. Progress is real but incomplete: between 2015 and 2024 about 1.2 billion people gained safely managed sanitation and global coverage rose from 48% to 58%. The deficit is concentrated among low-income countries, rural and fragile settings, children, and minority and indigenous populations. Inadequate sanitation remains a leading route for diarrhoeal disease; sanitation interventions cut diarrhoea by roughly 20–25% on average, though several large recent rural trials showed mixed or null effects, so gains depend heavily on reaching high community-wide coverage.",
+      "interventions": [
+        {
+          "title": "Community-Led Total Sanitation (CLTS)",
+          "evidence": "Cluster-randomised and quasi-experimental studies in Ghana, Zambia and Ethiopia show CLTS triggers latrine construction and reduces open defecation; a cost-effectiveness study found programme costs of roughly USD 14–82 per household targeted in Ethiopia and Ghana.",
+          "actor": "National sanitation programmes with UNICEF and WaterAid"
+        },
+        {
+          "title": "Sanitation marketing plus targeted subsidies to the poorest",
+          "evidence": "Benefit–cost analyses find CLTS passes a benefit–cost test in many contexts, and combining it with sanitation marketing or subsidies to the poorest households improves latrine uptake where demand-creation alone falls short.",
+          "actor": "Local governments, NGOs and private latrine-supply businesses"
+        },
+        {
+          "title": "Safely managed containment and faecal-sludge management",
+          "evidence": "The JMP 2025 stresses that closing the 'safely managed' gap requires not just toilets but safe containment, emptying, transport and treatment of waste — the step most low-income sanitation still lacks.",
+          "actor": "Municipal utilities and sanitation regulators with development-bank finance"
+        },
+        {
+          "title": "WASH in schools and healthcare facilities",
+          "evidence": "WHO/UNICEF identify institutional sanitation as a priority for disease control and for keeping girls in school; targeted facility WASH investment addresses a documented equity gap.",
+          "actor": "Education and health ministries with UN agencies and donors"
+        }
+      ],
+      "sources": [
+        "https://data.unicef.org/resources/jmp-report-2025/",
+        "https://unric.org/en/billions-still-lack-access-to-safe-water-sanitation-and-hygiene-warns-who-and-unicef-report/",
+        "https://data.unicef.org/topic/water-and-sanitation/sanitation/",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7873587/",
+        "https://www.cambridge.org/core/journals/journal-of-benefit-cost-analysis/article/benefitcost-analysis-of-communityled-total-sanitation-incorporating-results-from-recent-evaluations/1DE9FBD02CE0C5FAFDF17CC784DC1806",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6447111/"
+      ],
+      "updatedAt": "2026-07-10"
+    },
+    "disaster-resilience": {
+      "summary": "The UNDRR Global Assessment Report 2025 and WMO's 2025 update show disaster resilience is achievable and cost-effective, yet unevenly deployed. The number of countries reporting multi-hazard early warning systems (MHEWS) reached a record 119, with comprehensiveness up 45% since 2015, and global disaster mortality per 100,000 people roughly halved — from 1.61 in 2005–2014 to 0.79 in 2014–2023; mortality is nearly six times lower in countries with comprehensive early-warning capacity than in those with limited capacity. But major gaps persist: 48% of least-developed countries and 57% of small island developing states still lack adequate MHEWS. The UN's 'Early Warnings for All' initiative aims to cover everyone by end-2027 for about USD 3.1 billion over five years — roughly 50 cents per person per year — while direct disaster costs have grown to around USD 202 billion a year (and far higher counting cascading effects), even though fewer than 2% of international aid projects target disaster-risk reduction.",
+      "interventions": [
+        {
+          "title": "Multi-hazard early warning systems (Early Warnings for All)",
+          "evidence": "WMO's 2025 review finds disaster mortality nearly six times lower in countries with comprehensive MHEWS, and the UN's Early Warnings for All plan targets universal coverage by 2027 for ~USD 3.1 billion over five years (~USD 0.50 per person per year).",
+          "actor": "WMO, UNDRR and national meteorological and hydrological services"
+        },
+        {
+          "title": "Anticipatory action and forecast-based financing",
+          "evidence": "UNDRR and humanitarian agencies find releasing funds ahead of a forecast hazard lets people prepare, so losses are smaller and recovery faster — a scale-up the GAR 2025 flags as underfunded at under 2% of aid.",
+          "actor": "WFP, IFRC and anticipatory-action funds with national disaster agencies"
+        },
+        {
+          "title": "Resilient building codes and retrofitting",
+          "evidence": "US analyses cited in 2025 find modern building codes save lives and cut damage, with estimated lifetime savings of nearly USD 1.8 billion for single-family homes in California alone.",
+          "actor": "National and local governments setting and enforcing codes"
+        },
+        {
+          "title": "Risk-informed resilient infrastructure investment",
+          "evidence": "UNDRR estimates every USD 1 invested in resilience returns roughly USD 2.30–13.20, and adaptation more broadly over USD 10 per dollar over a decade — the case for lifting DRR above its current <2% share of aid.",
+          "actor": "Multilateral development banks, governments and the Coalition for Disaster Resilient Infrastructure"
+        }
+      ],
+      "sources": [
+        "https://www.undrr.org/gar/gar2025",
+        "https://wmo.int/news/media-centre/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+        "https://www.un.org/en/climatechange/early-warnings-for-all",
+        "https://www.undrr.org/news/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+        "https://www.uschamber.com/security/beyond-the-payoff-how-investments-in-resilience-and-disaster-preparedness-protect-communities",
+        "https://www.unescap.org/blog/beyond-lives-saved-why-early-warning-systems-are-smart-investment"
+      ],
+      "updatedAt": "2026-07-10"
     }
   }
 }
