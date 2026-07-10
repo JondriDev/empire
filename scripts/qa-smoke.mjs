@@ -5,7 +5,7 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { spawnSync } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 
 const BASE = 'http://localhost:3001';
 const OUT = path.resolve('docs/screenshots/latest');
@@ -77,6 +77,62 @@ assertRegistryCoverage();
 
 const sanitize = (s) => s.replace(/[^a-z0-9-]/gi, '-');
 const results = [];
+
+// ── AUTO-SERVER (kills the per-run "start node server.js by hand" tax) ───────
+// Every prior QA/build run had to manually `node server.js &` on :3001 before
+// the smoke, else all 32 routes read ECONNREFUSED and the report was a wall of
+// red that meant nothing. The smoke now boots its OWN server from the built
+// dist/ when BASE isn't already answering, and tears it down on exit. An
+// already-running server (externally managed) is detected and left untouched,
+// so this is safe to run either way. Pairs with `playwright` now being a real
+// devDependency — a fresh `npm install` + `npm run build` + this smoke needs no
+// manual setup at all.
+async function probeServer(url, timeoutMs = 1500) {
+  try {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), timeoutMs);
+    const res = await fetch(url, { signal: ctl.signal });
+    clearTimeout(t);
+    return res.status < 500;
+  } catch { return false; }
+}
+
+let ownedServer = null;
+function stopServer() {
+  if (!ownedServer) return;
+  const s = ownedServer;
+  ownedServer = null;
+  try { s.kill('SIGTERM'); } catch { /* already gone */ }
+}
+process.on('exit', stopServer);
+process.on('SIGINT', () => { stopServer(); process.exit(130); });
+process.on('SIGTERM', () => { stopServer(); process.exit(143); });
+
+async function ensureServer() {
+  if (await probeServer(BASE + '/')) {
+    console.log(`AUTO-SERVER: ✅ a server is already answering on ${BASE} (leaving it alone)`);
+    return;
+  }
+  if (!fs.existsSync(path.resolve('dist/index.html'))) {
+    throw new Error('AUTO-SERVER: no dist/index.html — run `npm run build` before the smoke');
+  }
+  console.log(`AUTO-SERVER: nothing on ${BASE} — starting \`node server.js\`…`);
+  ownedServer = spawn('node', ['server.js'], { stdio: 'ignore', env: process.env });
+  ownedServer.on('exit', (code) => {
+    if (ownedServer) console.warn(`AUTO-SERVER: ⚠️ server.js exited early (code ${code})`);
+  });
+  const deadline = Date.now() + 30000;
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 500));
+    if (!ownedServer) throw new Error('AUTO-SERVER: server.js exited before becoming ready');
+    if (await probeServer(BASE + '/')) {
+      console.log(`AUTO-SERVER: ✅ server.js is up on ${BASE}`);
+      return;
+    }
+  }
+  throw new Error(`AUTO-SERVER: server.js did not become ready on ${BASE} within 30s`);
+}
+await ensureServer();
 
 const browser = await launchBrowser();
 const ctx = await browser.newContext({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
@@ -1159,3 +1215,4 @@ md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
 fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, nodeLineage, intentRoundtrip, timeline, homeAlive, provResults, entityResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);
+stopServer();

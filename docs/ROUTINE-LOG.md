@@ -5,6 +5,34 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · Builder — chore(qa): close the standing infra gap — `playwright` → devDependency + `qa-smoke.mjs` auto-server
+
+**Did:** EPIC-13 is CODE-COMPLETE + QA-render-confirmed and there is NO active epic stage (NOW items 1–3 all DONE/FOLDED), so
+I took the topmost cloud-executable actionable item: the single most-repeated pain in `docs/CONTEXT.md` — flagged "INFRA GAP
+STILL OPEN" in *every* QA/build block for a week and the headline first move of the user-ratified RFC
+`docs/rfc/iteration-plan-musk.md`. **(1)** `package.json`: added `"playwright": "^1.56.0"` to `devDependencies` (resolves
+1.61.1; +2 pkgs, no browser download — reuses the pre-installed `/opt/pw-browsers/chromium-1194` via the existing explicit
+`executablePath`). A fresh `npm install` now installs it — no more per-run manual `npm install --no-save playwright`. Dev-only,
+never imported from `src/`, so it does NOT enter the vite prod bundle. **(2)** `scripts/qa-smoke.mjs`: new `ensureServer()`
+that probes `BASE` and, only if nothing answers, `spawn`s `node server.js` from the built `dist/`, waits up to 30s for ready,
+and tears it down on exit (`stopServer` on `exit`/`SIGINT`/`SIGTERM` + explicit final call). An already-running externally
+managed server is detected and **left alone (never killed)**. Kills the `CONNECTION_REFUSED`/hand-start-server tax.
+
+**Verified (both branches, end-to-end — the real gate):** (a) no server → auto-boots one → **32/32 routes clean,
+GRAPH-LEGIBLE 3/3, INBOUND-LANDS 4/4, exit 0**, server killed on exit; (b) external `node server.js` already up → logs
+"already answering … leaving it alone", still 32/32, external PID survives (kill-0 check). build🟢 (tsc -b && vite build);
+vitest **450/450**🟢 (unchanged — no test touched); eslint clean (qa-smoke.mjs); `metrics.mjs --assert-zero` **exit 0**. Metrics
+row — everything Δ ±0: `Apps 31 | Tests 391 | tokenViolations 0 | offSystemUtilities 0 | offSystemStyle 0 (r0/t0/m0) | bundle
+gz 729.8`. `npm audit` still 5 vulns, all the SAME documented dev-tooling chain (playwright added no new advisory). No product
+`src/` change; no new runtime dep.
+
+**Next:** still NO active epic stage — the Strategist must retire EPIC-13 → DONE and promote the next epic (candidates:
+measured design-system STATE/shell-adoption, an a11y pass, or the RFC's `docMass` doc-conformance metric; EPIC-7·Android
+device-gated). QA runbook simplifies to `npm install && npm run build && node scripts/qa-smoke.mjs` (the manual
+`--no-save playwright` + hand-started server steps are now obsolete).
+
+---
+
 ## 2026-07-10 · App Artisan — polish(music): full a11y + touch pass on the Music player
 
 **Did:** Rotation surface = `music` (least-recently-visited). The player was transport-heavy but every icon-only control

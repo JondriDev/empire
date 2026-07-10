@@ -140,8 +140,9 @@ now **EPIC-6 S4**:
   — the exact EPIC-5/11 template. Rank against a measured accessibility pass (`prefers-reduced-motion` + ARIA/keyboard).
 - **The fleet eats its own dog food — doc-mass conformance + the QA infra gap (a FUTURE epic candidate, user-ratified
   direction 2026-07-10).** Full plan in [`docs/rfc/iteration-plan-musk.md`](./rfc/iteration-plan-musk.md) (Musk's 5-step
-  algorithm applied to process + product; **sequenced strictly AFTER EPIC-13 retires**). Headline moves: `playwright` →
-  devDependencies + `qa-smoke.mjs` auto-server (kills the per-run manual install / CONNECTION_REFUSED traps); prune
+  algorithm applied to process + product; **sequenced strictly AFTER EPIC-13 retires**). Headline moves: ~~`playwright` →
+  devDependencies + `qa-smoke.mjs` auto-server (kills the per-run manual install / CONNECTION_REFUSED traps)~~ **✅ SHIPPED
+  2026-07-10 (Builder, as a standing-infra-gap fix while no epic stage was active — see ROUTINE-LOG)**; prune
   CONTEXT.md/EPICS.md to their own "tight" rule with a new measured `docMass` metrics row, then LOCK it in
   `--assert-zero` — the exact EPIC-5/11 measure→drive→lock template, applied to the fleet itself. Rank against the
   STATE-conformance and accessibility candidates above.
