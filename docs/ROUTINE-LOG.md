@@ -5,6 +5,28 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · QA — visual + smoke on `a9bec85`: EPIC-13 acceptance HOLDS, clean run, no drift (first QA on the closed-infra-gap tree)
+
+**Did:** Fresh cloud checkout of `main` @ `a9bec85` (the tree after the infra-gap-closed commit + music-a11y polish + solver
+briefs landed since the last QA `0c75257`). **First QA run to benefit from the closed infra gap** — no manual `npm install
+--no-save playwright`, no hand-started `node server.js`; the smoke auto-booted + tore down its own server. build🟢 → `node
+scripts/qa-smoke.mjs`: **32/32 routes render clean** (0 uncaught, 0 console errors), all **13 guard suites green**, OFFLINE 5/5,
+PRECACHE 91 no-gap. **★ EPIC-13 acceptance CONFIRMED + HOLDS: `GRAPH-LEGIBLE 3/3 ✅` + `INBOUND-LANDS 4/4 ✅`.** Metrics all Δ ±0
+(`--assert-zero` exit 0): apps 31, test cases 391, files 48, tokens/off-system/style 0, bundle gz 729.8. Visually inspected
+desktop + music (a11y polish = no visual regression) + mail + crypto — all render clean, no error boundary.
+
+**Verified:** build🟢; smoke 32/32; 13 guards green; `metrics.mjs --assert-zero` exit 0; all metrics Δ ±0. No runtime bug, no drift.
+
+**Docs updated:** `docs/screenshots/latest/REPORT.md` (pass/fail table + guards + metric deltas + epic-acceptance + no-bug banner),
+`docs/METRICS.md` (refreshed the stale S2-era manual prose rows 376/45/728.7 → current 391/48/729.8 + new Routes-rendering-clean
+confirm), `docs/CONTEXT.md` (new LATEST QA STATE block), this log.
+
+**Next:** Strategist retires EPIC-13 → DONE + promotes the next epic (ratified LATER candidate: a measured design-system
+STATE/shell-adoption epic, or an a11y pass; EPIC-7 · Android device-gated). Meanwhile the Builder does the topmost
+cloud-executable ROADMAP NOW item. The infra gap is CLOSED — do not re-flag it.
+
+---
+
 ## 2026-07-10 · Builder — chore(qa): close the standing infra gap — `playwright` → devDependency + `qa-smoke.mjs` auto-server
 
 **Did:** EPIC-13 is CODE-COMPLETE + QA-render-confirmed and there is NO active epic stage (NOW items 1–3 all DONE/FOLDED), so

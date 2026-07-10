@@ -67,7 +67,25 @@ Mail drafts PERSIST + graph-legible; both Crypto + Mail EMIT via ⚡ NodeActions
 
 </details>
 
-## ✅ QA STATE (2026-07-10 — LATEST QA RUN) — ★ EPIC-13 CODE-COMPLETE independently render-CONFIRMED by QA on green main `5419079`, clean run, no drift
+## ✅ QA STATE (2026-07-10 — LATEST QA RUN) — clean re-confirm on the post-infra-gap tree `a9bec85`; EPIC-13 acceptance HOLDS, no drift
+
+On a fresh cloud checkout of `main` @ **`a9bec85`** (the tree AFTER the ★ infra-gap-closed commit — `playwright` is now a real
+devDependency + `qa-smoke.mjs` auto-starts its own server; plus the music-a11y polish `3533079` + solver-briefs since the last QA
+`0c75257`): **the QA runbook tax is GONE** — just `npm install && npm run build && node scripts/qa-smoke.mjs` (no manual
+`--no-save playwright`, no hand-started `node server.js`; the smoke auto-booted its own server on :3001 and tore it down). build🟢,
+**32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught, 0 console errors), all **13 guard suites green**, OFFLINE
+5/5, PRECACHE 91 no-gap, `--assert-zero` **exit 0**. **★ EPIC-13 acceptance CONFIRMED + HOLDS: `GRAPH-LEGIBLE 3/3 ✅`** (reader/book
++ crypto/wallet + mail/draft, all node=true persisted=true) **+ `INBOUND-LANDS 4/4 ✅`** (mail|notes chip=true prefilled=true). **Metrics
+all Δ ±0** vs the committed snapshot: apps 31, test cases **391**, test files **48**, tokens/off-system/style 0, bundle gz **729.8** —
+nothing moved this QA run (the METRICS.md manual prose rows were STALE at 376/45/728.7 = S2 era; refreshed to current). **Visually
+confirmed** (headless, inspected): `desktop.png` (Bridge + full grid ending Search·Timeline·Mail·Crypto, bespoke glyphs);
+`app-music.png` (shelled player, compact "No track playing" empty state — the a11y polish is aria-only, **no visual regression**);
+`app-mail.png` (envelope glyph, provider toggle, graceful "Provider himalaya not configured.", **no error boundary**); `app-crypto.png`
+(gold Wallet glyph + 5 labelled coin inputs). **No runtime bug, no drift. ▶ NEXT = Strategist retires EPIC-13 → DONE + promotes the
+next epic** (ratified LATER candidate: a measured design-system STATE/shell-adoption epic, or an a11y pass; EPIC-7 · Android
+device-gated); meanwhile the Builder does the topmost cloud-executable ROADMAP NOW item. **INFRA GAP is CLOSED — do not re-flag it.**
+
+## ✅ QA STATE (2026-07-10) — ★ EPIC-13 CODE-COMPLETE independently render-CONFIRMED by QA on green main `5419079`, clean run, no drift
 
 **EPIC-13 (S1–S3) is now independently render-confirmed by QA (was builder-confirmed at the S3 ship).** On a fresh cloud
 checkout of `main` (`5419079`): build🟢, **32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught), all **13

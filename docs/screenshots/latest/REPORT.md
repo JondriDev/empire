@@ -1,48 +1,26 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-10T13:09:58.536Z
+**Generated:** 2026-07-10T21:13:46.381Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
+
+> ## ✅ NO RUNTIME BUG THIS RUN — clean, no drift (green main `a9bec85`)
+>
+> **QA summary (2026-07-10):** Fresh cloud checkout of `main` @ `a9bec85` (the tree after the playwright-devDep + music-a11y + solver-briefs commits landed since the last QA `0c75257`). `npm install` (playwright now a real devDependency — no manual `--no-save` needed) → `npm run build` **GREEN** (91 precache entries) → `node scripts/qa-smoke.mjs` (auto-started its own `node server.js` on :3001).
+>
+> **Smoke:** **32/32 routes render clean** (desktop + all 31 registry apps), **0 uncaught JS, 0 console errors**. All 13 guard suites green: **INBOUND-LANDS 4/4**, **MEDIA-PERSISTS 3/3**, **GRAPH-LEGIBLE 3/3** (reader/book + crypto/wallet + mail/draft), **GLOBAL-SEARCH 1/1**, **NODE-LINEAGE 1/1**, **INTENT-ROUNDTRIP 2/2**, **TIMELINE 1/1** (all 6 axes), **HOME-ALIVE 1/1**, **PROVENANCE-PERSISTS 3/3**, **PROVENANCE-ENTITY 3/3**, **PRECACHE 91 no-gap**, **OFFLINE-BOOT 5/5**.
+>
+> **Metrics (fitness field) — all Δ ±0 vs the committed `metrics.json` snapshot; `metrics.mjs --assert-zero` exit 0:** Apps/routes **31** · Test cases **391** · Test files **48** · Token violations **0** · Off-system utilities **0** · Off-system style **0 (r0/t0/m0)** · Bundle gz **729.8 KB**.
+>
+> **★ EPIC-13 (Mail + Crypto join the organism) acceptance CONFIRMED — the target metrics MOVED and HOLD:** `GRAPH-LEGIBLE 3/3 ✅` (all three axes node=true persisted=true) + `INBOUND-LANDS 4/4 ✅`. EPIC-13 is CODE-COMPLETE (S1–S3) and independently render-confirmed on this tree. **▶ No active epic STAGE — awaiting the Strategist to retire EPIC-13 → DONE + promote the next epic** (ratified LATER candidate: a measured design-system STATE/shell-adoption epic, or an a11y pass; EPIC-7 · Android stays device-gated).
+>
+> **Visually inspected (local PNGs, never committed):** `desktop.png` — Bridge home ("Good night" + Today/Open-Tasks/Goals/Organism stat cards + full launcher grid ending Search·Timeline·**Mail**·**Crypto** with bespoke alien glyphs, no `Node` fallback). `app-music.png` — Music Player shelled, compact "No track playing · Add audio files to get started" empty state + Add Files (the 2026-07-10 icon-transport a11y polish landed **no visual regression**). `app-mail.png` — Mail shelled (envelope glyph, Himalaya/AgentMail toggle, Refresh + Compose, graceful "Provider himalaya not configured." on the env-401, **NO error boundary**). `app-crypto.png` — gold Wallet glyph + 5 labelled BTC/ETH/SOL/XRP/DOGE address inputs. `app-network.png` — CORE mesh renders clean.
+>
+> **Env-expected noise (NOT bugs):** Maps net:8 (blocked external tiles), Weather net:1 + geolocation permissions-policy block, Files/Mail/Crypto net:1 (authed/Android-only backend calls). All render clean regardless.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
 > listed separately — expected in the offline cloud sandbox and **not** a render failure.
-
-## QA verdict — 2026-07-10 (green main `5419079`) — ★ EPIC-13 CODE-COMPLETE independently RENDER-CONFIRMED, clean run, no drift
-
-**No runtime bug. No drift.** On a fresh cloud checkout of `main` (build 🟢, precache 91 no-gap): **32/32 routes render clean**
-(desktop + all 31 registry apps, 0 uncaught JS, 0 error boundaries), all **13 guard suites green**, OFFLINE 5/5, `metrics.mjs
---assert-zero` **exit 0** (tokens/off-system-utils/off-system-style all 0).
-
-**★ EPIC-13 acceptance — S1–S3 all CONFIRMED on green main (the epic's target metric moved and holds):**
-- **`GRAPH-LEGIBLE 3/3 ✅`** — all three collection axes pass with `node=true persisted=true`: **reader/book** (EPIC-6 S4),
-  **crypto/wallet** (EPIC-13 S1), and **mail/draft** (EPIC-13 S3 — seed `empire-mail-drafts` → a `draft` node owned by
-  `app==='mail'` survives a 2nd reload). Mail + Crypto — the last two raw-HTML islands — are now first-class graph-legible
-  citizens. **S3 acceptance metric MOVED (2/2 → 3/3) → EPIC-13 done-confirmed.**
-- **`INBOUND-LANDS 4/4 ✅`** — the `mail | notes` axis reads chip=true prefilled=true (S2 receiver holds), alongside
-  calendar|editor, goals|notes, messages|ai-chat.
-- **Visually confirmed (headless render, inspected this run):** `desktop.png` — The Bridge home ("Good afternoon", 4 live
-  stat cards, the full 31-tile launcher grid ending in Search · Timeline · **Mail** · **Crypto**, both carrying their bespoke
-  alien glyphs, not the `Node` fallback). `app-mail.png` — Mail shelled on the Empire UI (Mail envelope glyph header,
-  Himalaya/AgentMail segmented toggle, Refresh + Compose, graceful "Provider himalaya not configured." on the env-expected
-  `/api/integrations/status` 401 — **no error boundary**). `app-crypto.png` — Wallet glyph header + 5 mono BTC/ETH/SOL/XRP/DOGE
-  address inputs on the shell. `app-network.png` — the CORE mesh, and its **node-types legend now includes `draft`** (note ·
-  task · message · learning · goal · prompt · wallet · **draft** · other), the visual signature of the S3 `draft` node type
-  joining the organism.
-
-**Metrics — every delta ±0 vs the committed snapshot** (nothing moved this QA run): Apps/routes **31**, test cases **386**,
-test files **47**, token violations **0**, off-system utils **0**, off-system style **0 (r0/t0/m0)**, bundle gz **729.5 KB**.
-The S1–S3 product deltas (apps 29→31, tests 323→386, bundle 718.6→729.5) all landed with the builder's ship commits and are
-already baked into the committed `metrics.json`; this run reproduces them exactly.
-
-**Env-expected noise (NOT bugs):** Maps CartoDB tiles + Weather geocoding `ERR_TUNNEL_CONNECTION_FAILED` (blocked CDNs),
-Files `/api/files` 401 + Mail `/api/integrations/status` 401 (authed/Android-only backend), Weather Geolocation permissions
-policy. All render gracefully.
-
-**▶ NEXT (for the Strategist):** EPIC-13 (S1–S3) is CODE-COMPLETE and independently render-confirmed — ready to **retire to
-DONE and promote the next epic** (ratified LATER candidate: a measured design-system STATE/shell-adoption epic, or an a11y
-pass; EPIC-7 · Android stays device-gated). **⚠️ INFRA GAP still open (build routine's, not QA's):** `playwright` is STILL
-not in `package.json` devDependencies — every QA run pays a manual `npm install --no-save playwright`.
 
 | App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|
@@ -62,7 +40,7 @@ not in `package.json` devDependencies — every QA run pays a manual `npm instal
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
