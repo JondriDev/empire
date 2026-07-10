@@ -14,21 +14,22 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-> **✅ 2026-07-10 (green main `1a8c2f7`, committed `metrics.json` this run) — ratchet HOLDS, all-0.** The mail+crypto
+> **✅ 2026-07-10 (green main, EPIC-13 S2 render-confirmed, `metrics.json` this run) — ratchet HOLDS, all-0.** The mail+crypto
 > design-system regressions the 2026-07-09 run flagged are FIXED and stay fixed: `tokenViolations` **0**,
 > `offSystemUtilities` **0**, `offSystemStyle` **0 (r0/t0/m0)** — `node scripts/metrics.mjs --assert-zero` **exits 0**.
-> Live values this run: **apps 31**, **test cases 369**, **test files 44**, **bundle gz 728** (+0.3 vs the 727.7
-> snapshot — EPIC-13 S1's Wallet glyph + cryptoGraph). The row values below have been refreshed to this snapshot.
+> Live values this run: **apps 31**, **test cases 376**, **test files 45**, **bundle gz 728.7** (Δ ±0 vs the committed
+> snapshot — EPIC-13 S2's Mail app + glyph + tests already landed here; nothing moved this QA run). The row values below
+> reflect this snapshot.
 
-| Metric | Current (QA 2026-07-09, green main — **both mail+crypto regressions confirmed FIXED; `--assert-zero` exit 0 restored; `INTENT-ROUNDTRIP 2/2` render-confirmed**) | Target | Direction |
+| Metric | Current (QA 2026-07-10, green main — **EPIC-13 S2 render-confirmed `INBOUND-LANDS 4/4`; `--assert-zero` exit 0; all Δ ±0, no drift**) | Target | Direction |
 |---|---|---|---|
 | Apps / routes | **31** (metrics.mjs; smoke↔registry exact at 31; 32/32 incl. desktop shell render clean) | ~26 (steady) | coherence over new surface — not a growth metric |
-| Test cases | **369** (metrics.mjs, `src/` static; +6 EPIC-13 S1 `cryptoGraph.test.ts`) · vitest run higher | 60+ | ↑ higher = safer to leap |
-| Test files | **44** (metrics, `src/` static — +1 vs the 07-09 snapshot: `cryptoGraph.test.ts`) | grow with code | ↑ |
+| Test cases | **376** (metrics.mjs, `src/` static; +7 EPIC-13 S2 Mail/appActions tests since the S1 snapshot) · vitest run higher | 60+ | ↑ higher = safer to leap |
+| Test files | **45** (metrics, `src/` static — +1 vs the S1 snapshot: `Mail.test.tsx`) | grow with code | ↑ |
 | Design-token violations | **0** | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
 | Off-system utilities | **0** (↓ from 1076 — the redesign batch's `98c61c7` "token-ize Tailwind palette classes across all apps" swept the whole mass; EPIC-5 S8 `c51f79f` LOCKED it with `--assert-zero` CI gate; re-confirmed 0 this run) | 0 | ↓ Tailwind palette classes (`text-gray-400`, `bg-cyan-600`, `bg-white/10`, `text-white`, `text-red-400`…) that bypass the JondriDev tokens — **EPIC-5 TARGET MET (0)** |
 | Off-system style | **0** (r0/t0/m0 — **the full −56 leap from the S1 baseline of 56; EPIC-11 TARGET MET (0)**; **QA-CONFIRMED independently 2026-07-05 on green main `4c643a9`** — `metrics.mjs` reproduces `0 (r0/t0/m0)` exactly and **`--assert-zero` exits 0**. S2 drove type t42→0, S3 drove radii r12→0, **S4 drove motion m2→0 and LOCKED it in `--assert-zero`** (mirrors the EPIC-5 S8 offSystemUtilities lock). All three sub-counts 0 and gated — cannot regress. **S1–S4 done-confirmed; EPIC-11 CODE-COMPLETE, ready to retire to DONE.** | 0 | ↓ raw radii/type/easing bypassing `--radius-*`/`--text-*`/`--ease-*` |
-| Bundle gz (KB) | **728** (+0.3 vs the 727.7 snapshot — EPIC-13 S1's Wallet glyph + `cryptoGraph.ts`; no new deps) | hold / shrink | ↓ |
+| Bundle gz (KB) | **728.7** (Δ ±0 vs the committed snapshot — EPIC-13 S2's Mail app already landed here; no new deps) | hold / shrink | ↓ |
 
 > **Off-system style (added 2026-07-04 — design-system conformance II).** The two colour audits
 > (`tokenViolations` = raw `#hex`/`rgba()`; `offSystemUtilities` = Tailwind palette classes) are both at **0**,

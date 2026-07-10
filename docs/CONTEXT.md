@@ -39,6 +39,22 @@ Mail drafts PERSIST + graph-legible; both Crypto + Mail EMIT via ⚡ NodeActions
 - **Tests:** `draftStore.test.ts` (save→list→delete roundtrip; upsert; survives fresh listDrafts) + `mailGraph.test.ts` (`draftNodeData` shape). ≥5 combined.
 - *Acceptance:* saved draft survives reload + appears as a `draft` node in Network/Search/Timeline; both wallets + drafts offer ⚡ intents; `GRAPH-LEGIBLE 3/3`; 31/31; build🟢 vitest🟢 eslint clean; `--assert-zero` exit 0; no new deps. **★ Then EPIC-13 is CODE-COMPLETE (S1–S3) → QA confirms `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4` on green main → Strategist retires to DONE.**
 
+## ✅ QA STATE (2026-07-10 — LATEST QA RUN) — EPIC-13 S2 render-CONFIRMED on green main, clean run, no drift
+
+**EPIC-13 S2 is now independently render-confirmed by QA (was builder-confirmed at ship).** On a fresh cloud checkout of
+`main`: build🟢, **32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught), all **12 guard suites green**,
+OFFLINE 5/5, PRECACHE 91 no-gap, `--assert-zero` **exit 0**. **EPIC-13 S2 acceptance CONFIRMED (holds): `INBOUND-LANDS
+4/4 ✅`** — the `mail | notes` axis reads chip=true prefilled=true; **visually confirmed** (`app-mail.png`): Mail is shelled
+onto the Empire UI (Mail envelope glyph header in `var(--signal)`, segmented Himalaya/AgentMail provider toggle, Refresh +
+Compose, graceful "Provider himalaya not configured." on the env-expected `/api/integrations/status` 401 — **no error
+boundary**); the desktop grid's Mail + Crypto tiles carry their bespoke alien glyphs, not the `Node` fallback (`desktop.png`).
+**EPIC-13 S1 acceptance still holds: `GRAPH-LEGIBLE 2/2 ✅`** (reader/book + crypto/wallet). **S3 not yet shipped → `GRAPH-LEGIBLE`
+stays 2/2 (expected — the `mail/draft → 3/3` axis lands with S3, NOT a contradiction).** Metrics all-0 + Δ ±0 vs the committed
+snapshot: apps 31, test cases 376, test files 45, bundle gz 728.7 — nothing moved this QA run. **No runtime bug, no drift.
+▶ NEXT for the Builder = EPIC-13 S3** (Mail drafts persist + graph-legible + ⚡ emit both → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13
+CODE-COMPLETE; exact shape in the S3 block near the top of this file + EPICS.md). **⚠️ INFRA GAP still open (build routine's, not
+QA's):** `playwright` is STILL not in `package.json` devDependencies — every QA run pays a manual `npm install --no-save playwright`.
+
 ## ✅ QA STATE (2026-07-10, green main `1a8c2f7`) — EPIC-13 S1 done-confirmed, clean run, no drift
 
 **The S1 render-confirm the builder owed is delivered.** On a fresh checkout: build🟢, **32/32 routes render clean**

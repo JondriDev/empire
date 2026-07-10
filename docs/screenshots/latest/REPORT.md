@@ -1,35 +1,33 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-10T03:08:35.946Z
+**Generated:** 2026-07-10T09:20:24.880Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
 
-> **No runtime bug found this run.** Green main `1a8c2f7`, no regressions, no contradictions.
+## QA verdict — 2026-07-10 (green main, EPIC-13 S2 render-CONFIRMED, clean run, no drift)
 
-## ★ EPIC-13 S1 acceptance CONFIRMED — the metric MOVED (`GRAPH-LEGIBLE 1/1 → 2/2`)
+**No runtime bug. No regression. No drift.** On a fresh cloud checkout of `main`: build🟢, **32/32 routes render clean**
+(desktop shell + all 31 registry apps, 0 uncaught JS / error boundary / blank), all **12 guard suites green**, OFFLINE 5/5,
+PRECACHE 91 no-gap. `metrics.mjs --assert-zero` **exits 0** (the ratchet holds).
 
-**EPIC-13 · The last two islands join the organism.** S1 (Crypto graph-legible + shelled) landed `1a8c2f7`
-and the builder owed QA the headless render-confirm (playwright isn't in `package.json`, so the builder could
-only run build/vitest/eslint/metrics — never the smoke). **This run delivers it independently on a fresh
-checkout:** the `crypto/wallet` axis of `GRAPH-LEGIBLE` **passes** — seeding `crypto-watch-list` with a BTC
-address before Crypto mounts produces a `wallet` node owned by `app==='crypto'` in `empire-core-graph` that
-**survives a reload** (`node=true persisted=true`). The headline is now **`GRAPH-LEGIBLE 2/2 ✅`** (was 1/1
-= reader/book only). **The acceptance metric moved → EPIC-13 S1 is DONE-CONFIRMED, no contradiction.**
+**Active epic = EPIC-13 · The last two islands join the organism (Mail + Crypto).** S1 ✅, S2 ✅, S3 pending.
+- **EPIC-13 S2 acceptance CONFIRMED (holds): `INBOUND-LANDS 4/4 ✅`** — Mail is a handoff receiver; the `mail | notes`
+  axis reads `chip=true prefilled=true`. **Visually confirmed** (`app-mail.png`): Mail is now shelled onto the Empire UI —
+  Mail envelope glyph header in `var(--signal)` cyan, "Email bridge · Himalaya & AgentMail" subtitle, segmented
+  Himalaya/AgentMail provider toggle, Refresh + Compose buttons, and the graceful **"Provider himalaya not configured."**
+  (the env-expected `/api/integrations/status` 401 — **no error boundary**). The desktop grid's Mail tile carries the
+  bespoke envelope glyph, not the `Node` fallback (`desktop.png`).
+- **EPIC-13 S1 acceptance CONFIRMED (holds): `GRAPH-LEGIBLE 2/2 ✅`** — reader/book + crypto/wallet both persist. Crypto
+  tile carries the bespoke Wallet glyph. **S3 not yet shipped → `GRAPH-LEGIBLE` stays 2/2 (expected, not a contradiction);
+  the `mail/draft` axis (→ 3/3) lands with S3.**
 
-**Visually confirmed** (local screenshots, not committed):
-- `desktop.png` — the Bridge home ("Good night", 4 live stat cards, `ORGANISM 0 links · 0 apps` on a fresh
-  checkout) + the full 31-tile launcher grid now ending in **Mail** and **Crypto** (Crypto's tile carries the
-  bespoke **Wallet** alien glyph, gold-tinted — no longer the `Node` fallback).
-- `app-crypto.png` — Crypto is **now on the shell**: header "Crypto" + Wallet glyph in `var(--ember)` gold,
-  subtitle "Watch wallets across BTC, ETH, SOL, XRP, DOGE · balances stay on-device", `Refresh` button, and
-  the 5 mono address inputs (BTC/ETH/SOL/XRP/DOGE) on the shell `Card`. Clean, token-consistent.
-- `app-mail.png` — Mail renders the graceful **"Provider himalaya not configured."** with **NO error boundary**
-  (the EPIC-12-era crash fix holds). Mail is still a raw-HTML **island pre-S2** (bare `Himalaya ⌄ / Refresh /
-  Compose` controls, no shell `Card`, no `Mail` alien glyph in the header) — exactly as expected; S2 shells it
-  + makes it a handoff receiver (`INBOUND-LANDS 3/3 → 4/4`).
+**Metric deltas (vs committed `metrics.json` snapshot) — all Δ ±0:** apps **31**, test cases **376**, test files **45**,
+tokenViolations **0**, offSystemUtilities **0**, offSystemStyle **0 (r0/t0/m0)**, bundle gz **728.7 KB**. Nothing changed
+in the tree since the last QA snapshot — this run re-confirms EPIC-13 S2 live on green main.
 
-**Ratchet holds:** `metrics.mjs --assert-zero` exits 0 (tokenViolations 0, offSystemUtilities 0, offSystemStyle
-0 r0/t0/m0) — the mail+crypto token/style regressions the 2026-07-09 run flagged stay fixed on green main.
+**Env-expected noise (NOT render failures):** weather geocoding + geolocation (blocked CDN / no permission), maps
+carto basemap tiles (blocked CDN), files `/api/files` 401 (Android-only backend), mail `/api/integrations/status` 401
+(needs a configured provider/token). Every one is a headless-sandbox limitation, not a bug.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -53,7 +51,7 @@ address before Crypto mounts produces a `wallet` node owned by `app==='crypto'` 
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -79,6 +77,7 @@ Each entity receiver was seeded with a cross-app payload + reloaded; PASS = a "R
 | calendar | editor | ✅ | ✅ | ✅ |
 | goals | notes | ✅ | ✅ | ✅ |
 | messages | ai-chat | ✅ | ✅ | ✅ |
+| mail | notes | ✅ | ✅ | ✅ |
 
 ## Media-persists guard (EPIC-3 S2/S3 — IndexedDB blob roundtrip)
 

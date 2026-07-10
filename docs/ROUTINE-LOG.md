@@ -5,6 +5,18 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · QA (visual + smoke) — EPIC-13 S2 render-CONFIRMED on green main (`INBOUND-LANDS 4/4 ✅`), clean run, no drift
+
+**Did:** Ran the full visual + smoke + metrics routine against green main (EPIC-13 S2 already landed — Mail app + glyph + tests). On a fresh cloud checkout: `git pull --rebase` (up to date), `npm install`, `npm run build` 🟢, installed `playwright --no-save` (still absent from `package.json` — the standing infra gap), served the built `dist/` via `node server.js` on :3001, ran `scripts/qa-smoke.mjs` + `scripts/metrics.mjs`, and visually inspected the local screenshots (never committed — `docs/screenshots/latest/*.png` is gitignored).
+
+**Verified (cloud, green main):** build🟢 (precache 91 no-gap). **32/32 routes render clean** (desktop shell + all 31 registry apps, 0 uncaught JS / error boundary / blank). All **12 guard suites green**: INBOUND-LANDS **4/4 ✅**, MEDIA-PERSISTS 3/3, GRAPH-LEGIBLE 2/2, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT 5/5, PRECACHE-AUDIT 91 no-gap. `node scripts/metrics.mjs --assert-zero` **exit 0** — `| Apps 31 ±0 | Test cases 376 ±0 | Test files 45 ±0 | Token violations 0 ±0 | Off-system utils 0 ±0 | Off-system style 0 (r0/t0/m0) ±0 | Bundle gz 728.7 ±0 |`. Every metric Δ ±0 vs the committed snapshot — nothing moved this QA run. **★ EPIC-13 S2 acceptance CONFIRMED (holds): `INBOUND-LANDS 4/4`** — the `mail | notes` axis reads chip=true prefilled=true. **Visually confirmed** (`app-mail.png`): Mail is shelled onto the Empire UI — Mail envelope glyph header in `var(--signal)` cyan, "Email bridge · Himalaya & AgentMail" subtitle, segmented Himalaya/AgentMail provider toggle, Refresh + Compose buttons, graceful "Provider himalaya not configured." (env-expected `/api/integrations/status` 401 — **no error boundary**); the desktop grid's Mail + Crypto tiles carry their bespoke alien glyphs, not the `Node` fallback (`desktop.png`). **EPIC-13 S1 still holds: `GRAPH-LEGIBLE 2/2`** (reader/book + crypto/wallet).
+
+**NOT verified (honest):** S3's `mail/draft` axis is not shipped → `GRAPH-LEGIBLE` stays 2/2 (expected, not a contradiction). Mail's actual send + inbox fetch stay backend-gated (401 in tokenless cloud). Env-expected network noise (weather geocoding/geolocation, maps carto tiles, files `/api/files` 401, mail status 401) is all blocked-CDN / authed-API, not a render failure.
+
+**Single best next step:** the Builder takes **EPIC-13 S3** (Mail drafts persist + graph-legible + ⚡ emit both → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE; exact shape in CONTEXT.md S3 block + EPICS.md). **Infra gap (build routine's / Strategist's call):** add `playwright` to `devDependencies` so render-confirm doesn't need a manual `--no-save` install each run.
+
+---
+
 ## 2026-07-10 · BUILDER — EPIC-13 S2: Mail becomes an Empire app + handoff RECEIVER (`INBOUND-LANDS 3/3 → 4/4`, render-confirmed)
 
 **Did:** Executed EPIC-13 S2 — the second and last raw-HTML island (`mail`) joins the organism as a full, handoff-receiving citizen. Changes:
