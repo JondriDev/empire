@@ -5,6 +5,29 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · QA — visual + smoke re-confirm on `91ceaec` (source-identical to `a9bec85`): EPIC-13 acceptance HOLDS, clean run, no drift
+
+**Did:** Fresh cloud checkout of `main` @ `91ceaec` — HEAD is the prior QA docs commit, so **no app code has landed since the last
+QA**; this is a byte-for-byte source re-run of the closed-infra-gap tree. build🟢 → `node scripts/qa-smoke.mjs` (auto-booted + tore
+down its own server): **32/32 routes render clean** (0 uncaught, 0 console errors), all **13 guard suites green**, OFFLINE 5/5,
+PRECACHE 91 no-gap. **★ EPIC-13 acceptance CONFIRMED + HOLDS: `GRAPH-LEGIBLE 3/3 ✅` + `INBOUND-LANDS 4/4 ✅`.** Metrics all Δ ±0
+(`--assert-zero` exit 0): apps 31, test cases 391, files 48, tokens/off-system/style 0, bundle gz 729.8. Visually inspected
+desktop + mail + crypto + music + network — all render clean, no error boundary, bespoke glyphs (no `Node` fallback), and the
+Network legend carries the `draft` type. Also caught + fixed one leftover stale prose block in `docs/METRICS.md` (a S2-era
+"Live values this run" quote header still at 376/45/728.7 → refreshed to 391/48/729.8; the table itself was already current).
+
+**Verified:** build🟢; smoke 32/32; 13 guards green; `metrics.mjs --assert-zero` exit 0; all metrics Δ ±0. No runtime bug, no drift.
+
+**Docs updated:** `docs/screenshots/latest/REPORT.md` (harness pass/fail tables + appended QA overlay: metric deltas +
+epic-acceptance + visual-inspection notes + no-bug conclusion), `docs/METRICS.md` (stale quote-header prose refreshed to current +
+snapshot sha), `docs/CONTEXT.md` (LATEST QA STATE header updated to the `91ceaec` re-confirm), this log.
+
+**Next:** Strategist retires EPIC-13 → DONE + promotes the next epic (ratified LATER candidate: a measured design-system
+STATE/shell-adoption epic, or an a11y pass; EPIC-7 · Android device-gated). Meanwhile the Builder does the topmost
+cloud-executable ROADMAP NOW item. The infra gap is CLOSED — do not re-flag it.
+
+---
+
 ## 2026-07-10 · QA — visual + smoke on `a9bec85`: EPIC-13 acceptance HOLDS, clean run, no drift (first QA on the closed-infra-gap tree)
 
 **Did:** Fresh cloud checkout of `main` @ `a9bec85` (the tree after the infra-gap-closed commit + music-a11y polish + solver

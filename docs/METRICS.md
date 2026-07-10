@@ -14,11 +14,11 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 
 ## Auto metrics (from `scripts/metrics.mjs`)
 
-> **✅ 2026-07-10 (green main, EPIC-13 S2 render-confirmed, `metrics.json` this run) — ratchet HOLDS, all-0.** The mail+crypto
+> **✅ 2026-07-10 (green main `91ceaec`, EPIC-13 CODE-COMPLETE re-confirm, `metrics.json` this run) — ratchet HOLDS, all-0.** The mail+crypto
 > design-system regressions the 2026-07-09 run flagged are FIXED and stay fixed: `tokenViolations` **0**,
 > `offSystemUtilities` **0**, `offSystemStyle` **0 (r0/t0/m0)** — `node scripts/metrics.mjs --assert-zero` **exits 0**.
-> Live values this run: **apps 31**, **test cases 376**, **test files 45**, **bundle gz 728.7** (Δ ±0 vs the committed
-> snapshot — EPIC-13 S2's Mail app + glyph + tests already landed here; nothing moved this QA run). The row values below
+> Live values this run: **apps 31**, **test cases 391**, **test files 48**, **bundle gz 729.8** (Δ ±0 vs the committed
+> snapshot — HEAD is the prior QA commit, so no app code landed since; nothing moved this QA run). The row values below
 > reflect this snapshot.
 
 | Metric | Current (QA 2026-07-10, green main `a9bec85` — **EPIC-13 CODE-COMPLETE render-CONFIRMED `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4`; `--assert-zero` exit 0; all Δ ±0, no drift**) | Target | Direction |

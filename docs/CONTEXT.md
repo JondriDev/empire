@@ -67,11 +67,12 @@ Mail drafts PERSIST + graph-legible; both Crypto + Mail EMIT via ⚡ NodeActions
 
 </details>
 
-## ✅ QA STATE (2026-07-10 — LATEST QA RUN) — clean re-confirm on the post-infra-gap tree `a9bec85`; EPIC-13 acceptance HOLDS, no drift
+## ✅ QA STATE (2026-07-10 — LATEST QA RUN) — clean re-confirm on `91ceaec` (source-identical to `a9bec85`); EPIC-13 acceptance HOLDS, no drift
 
-On a fresh cloud checkout of `main` @ **`a9bec85`** (the tree AFTER the ★ infra-gap-closed commit — `playwright` is now a real
-devDependency + `qa-smoke.mjs` auto-starts its own server; plus the music-a11y polish `3533079` + solver-briefs since the last QA
-`0c75257`): **the QA runbook tax is GONE** — just `npm install && npm run build && node scripts/qa-smoke.mjs` (no manual
+Re-confirmed on a fresh cloud checkout of `main` @ **`91ceaec`** (HEAD is the prior QA docs commit — **no app code has landed
+since**, so this is a byte-for-byte source re-run of the tree AFTER the ★ infra-gap-closed commit `a9bec85`: `playwright` is a real
+devDependency + `qa-smoke.mjs` auto-starts its own server; music-a11y polish `3533079` + solver-briefs are in): **the QA runbook tax is
+GONE** — just `npm install && npm run build && node scripts/qa-smoke.mjs` (no manual
 `--no-save playwright`, no hand-started `node server.js`; the smoke auto-booted its own server on :3001 and tore it down). build🟢,
 **32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught, 0 console errors), all **13 guard suites green**, OFFLINE
 5/5, PRECACHE 91 no-gap, `--assert-zero` **exit 0**. **★ EPIC-13 acceptance CONFIRMED + HOLDS: `GRAPH-LEGIBLE 3/3 ✅`** (reader/book
