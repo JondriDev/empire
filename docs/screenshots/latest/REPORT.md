@@ -1,53 +1,35 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-09T23:08:59.158Z
+**Generated:** 2026-07-10T03:08:35.946Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
 
-## ✅ QA VERDICT — NO RUNTIME BUG · green main · both prior regressions confirmed FIXED
+> **No runtime bug found this run.** Green main `1a8c2f7`, no regressions, no contradictions.
 
-This run is the independent green-main confirm the prior QA (on RED `17d2dd9`) owed. On the current
-green main **both regressions the prior run flagged are fixed and reproduced-fixed here**:
+## ★ EPIC-13 S1 acceptance CONFIRMED — the metric MOVED (`GRAPH-LEGIBLE 1/1 → 2/2`)
 
-1. **`mail` runtime crash — FIXED & render-confirmed.** `app-mail.png` now renders the graceful
-   **"Provider himalaya not configured."** message with **NO error boundary** (the boot status fetch
-   still returns HTTP 401 — env-expected, tokenless cloud — but the `providers`-key guard now short-circuits
-   instead of calling `Object.entries(undefined)`). Smoke: `PASS mail (uncaught:0)`.
-2. **Design-system ratchet — RESTORED to 0.** `node scripts/metrics.mjs --assert-zero` **exits 0**;
-   tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 (r0/t0/m0). The mail+crypto raw-hex/fontSize
-   offenders the prior run counted (2 token + 4 style) are gone.
+**EPIC-13 · The last two islands join the organism.** S1 (Crypto graph-legible + shelled) landed `1a8c2f7`
+and the builder owed QA the headless render-confirm (playwright isn't in `package.json`, so the builder could
+only run build/vitest/eslint/metrics — never the smoke). **This run delivers it independently on a fresh
+checkout:** the `crypto/wallet` axis of `GRAPH-LEGIBLE` **passes** — seeding `crypto-watch-list` with a BTC
+address before Crypto mounts produces a `wallet` node owned by `app==='crypto'` in `empire-core-graph` that
+**survives a reload** (`node=true persisted=true`). The headline is now **`GRAPH-LEGIBLE 2/2 ✅`** (was 1/1
+= reader/book only). **The acceptance metric moved → EPIC-13 S1 is DONE-CONFIRMED, no contradiction.**
 
-**Epic-acceptance confirmation — EPIC-12 (Intent integrity, CODE-COMPLETE S1–S3):** the target metric
-`INTENT-ROUNDTRIP` holds at **2/2 ✅** on green main (`make-note-from` + `add-to-learning`, both stored+mirrored+
-reload-persisted). This is the render-confirm on green main that closes QA's outstanding EPIC-12 owe → the
-Strategist can retire EPIC-12 to DONE and promote the next epic (**EPICS.md has NO active stage** —
-next candidate: a measured design-system STATE-conformance epic or an a11y pass).
+**Visually confirmed** (local screenshots, not committed):
+- `desktop.png` — the Bridge home ("Good night", 4 live stat cards, `ORGANISM 0 links · 0 apps` on a fresh
+  checkout) + the full 31-tile launcher grid now ending in **Mail** and **Crypto** (Crypto's tile carries the
+  bespoke **Wallet** alien glyph, gold-tinted — no longer the `Node` fallback).
+- `app-crypto.png` — Crypto is **now on the shell**: header "Crypto" + Wallet glyph in `var(--ember)` gold,
+  subtitle "Watch wallets across BTC, ETH, SOL, XRP, DOGE · balances stay on-device", `Refresh` button, and
+  the 5 mono address inputs (BTC/ETH/SOL/XRP/DOGE) on the shell `Card`. Clean, token-consistent.
+- `app-mail.png` — Mail renders the graceful **"Provider himalaya not configured."** with **NO error boundary**
+  (the EPIC-12-era crash fix holds). Mail is still a raw-HTML **island pre-S2** (bare `Himalaya ⌄ / Refresh /
+  Compose` controls, no shell `Card`, no `Mail` alien glyph in the header) — exactly as expected; S2 shells it
+  + makes it a handoff receiver (`INBOUND-LANDS 3/3 → 4/4`).
 
-**Metric deltas vs the committed snapshot — all ±0** (the build routine already committed metrics for the
-fixed tree; this run reproduces them exactly on a fresh checkout):
-
-| Metric | Value | Δ |
-|---|---|---|
-| Apps / routes | 31 | ±0 |
-| Routes rendering clean | 32 / 32 (desktop + 31 registry apps) | +2 vs prior 30/31 (mail RED) |
-| Test cases | 363 | ±0 |
-| Test files | 43 | ±0 |
-| Token violations | 0 | ±0 (was 2 on RED `17d2dd9`) |
-| Off-system utils | 0 | ±0 |
-| Off-system style | 0 (r0/t0/m0) | ±0 (was 4 t4 on RED `17d2dd9`) |
-| Bundle gz (KB) | 727.7 | ±0 |
-
-All 12 guard suites green · OFFLINE-BOOT 5/5 · PRECACHE 91 no-gap · `--assert-zero` exit 0.
-
-### ⚠️ INFRA GAP (for the build routine — not a runtime bug) — `playwright` is undeclared
-
-`scripts/qa-smoke.mjs` imports `playwright` at the top, but **`playwright` is not in `package.json`** (neither
-`dependencies` nor `devDependencies`). On a fresh cloud checkout `npm install` does NOT install it, so the very
-first `node scripts/qa-smoke.mjs` fails with `ERR_MODULE_NOT_FOUND: Cannot find package 'playwright'` — this QA
-run had to `npm install playwright` by hand before the harness could run. It works, but every routine pays that
-cost and it's fragile. **Fix (build routine's call — package.json is outside QA's write scope):** add
-`playwright` to **devDependencies** (dev-only — it must NOT ship in the production bundle). The pre-installed
-browsers under `/opt/pw-browsers/` are fine; only the npm package is missing.
+**Ratchet holds:** `metrics.mjs --assert-zero` exits 0 (tokenViolations 0, offSystemUtilities 0, offSystemStyle
+0 r0/t0/m0) — the mail+crypto token/style regressions the 2026-07-09 run flagged stay fixed on green main.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -71,7 +53,7 @@ browsers under `/opt/pw-browsers/` are fine; only the npm package is missing.
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -108,15 +90,16 @@ Each media app's real file `<input>` was driven with a small blob, then the page
 | video | ✅ | ✅ | ✅ |
 | photos | ✅ | ✅ | ✅ |
 
-## Graph-legible guard (EPIC-6 S4 — Reader's books join the organism)
+## Graph-legible guard (EPIC-6 S4 + EPIC-13 S1 — collection-owning apps join the organism)
 
-Reader's real file `<input>` was driven with a small `.txt` book, then the persisted Core graph (`empire-core-graph`) was inspected; PASS = a `book` node owned by `app==='reader'` appeared AND survived a reload (the re-mounted Reader re-mirrors its library). This closes the last graph-island — every collection-owning app is now graph-legible.
+Each collection-owning app must mirror its real entities into the Core graph (`empire-core-graph`) so they are legible in The Network / Search / Timeline. **reader/book** (EPIC-6 S4): Reader's real file `<input>` was driven with a small `.txt` book; PASS = a `book` node owned by `app==='reader'` appeared AND survived a reload. **crypto/wallet** (EPIC-13 S1): the `crypto-watch-list` was seeded with a BTC address before Crypto mounted; PASS = a `wallet` node owned by `app==='crypto'` appeared AND survived a reload (the re-mounted app re-mirrors its watch-list). Crypto was one of the last two raw-HTML islands — S1 makes it graph-legible.
 
 | Collection | Node created | Survived reload | Result |
 |---|---|---|---|
 | reader/book | ✅ | ✅ | ✅ |
+| crypto/wallet | ✅ | ✅ | ✅ |
 
-**GRAPH-LEGIBLE: 1/1 ✅**
+**GRAPH-LEGIBLE: 2/2 ✅**
 
 ## Global-search guard (EPIC-8 S1 + S2 — the organism becomes queryable)
 

@@ -16,7 +16,25 @@
 
 ---
 
-## ★ EPIC-13 S1 SHIPPED (2026-07-10, Builder) — Crypto is graph-legible + shelled; `GRAPH-LEGIBLE 1/1 → 2/2` (code, QA-render owed). ▶ NEXT = EPIC-13 S2 (Mail becomes an app + handoff RECEIVER → `INBOUND-LANDS 4/4`) — exact shape in the "Active epic" block.
+## ★ EPIC-13 S1 SHIPPED + QA-RENDER-CONFIRMED (2026-07-10) — Crypto is graph-legible + shelled; `GRAPH-LEGIBLE 1/1 → 2/2 ✅` (the owed render-confirm is DELIVERED). ▶ NEXT = EPIC-13 S2 (Mail becomes an app + handoff RECEIVER → `INBOUND-LANDS 4/4`) — exact shape in the "Active epic" block.
+
+## ✅ QA STATE (2026-07-10, green main `1a8c2f7`) — EPIC-13 S1 done-confirmed, clean run, no drift
+
+**The S1 render-confirm the builder owed is delivered.** On a fresh checkout: build🟢, **32/32 routes render clean**
+(desktop + all 31 registry apps, 0 uncaught), and the `crypto/wallet` axis of `GRAPH-LEGIBLE` **passes** — seed
+`crypto-watch-list` before Crypto mounts → a `wallet` node owned by `app==='crypto'` in `empire-core-graph` survives
+a reload → **headline `GRAPH-LEGIBLE 2/2 ✅`** (was 1/1 = reader/book only). **EPIC-13 S1 acceptance metric MOVED →
+S1 done-confirmed, no contradiction.** Visually confirmed: Crypto is now shelled (`app-crypto.png`: Wallet glyph
+header in `var(--ember)` gold + 5 mono BTC/ETH/SOL/XRP/DOGE inputs on a Card; the desktop grid's Crypto tile carries
+the bespoke Wallet alien glyph, not the `Node` fallback). Mail renders graceful "Provider himalaya not configured."
+with NO error boundary — still a raw-HTML island pre-S2 (bare controls, no shell, no `Mail` glyph), exactly as
+expected. All 12 guard suites green (INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 2/2, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1,
+INTENT-ROUNDTRIP 2/2, TIMELINE 1/1 all 6 axes, HOME-ALIVE 1/1, PROVENANCE 3/3+3/3), OFFLINE 5/5, PRECACHE 91 no-gap.
+Metrics all-0 + hold: `--assert-zero` **exit 0** (tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 r0/t0/m0);
+apps 31, test cases 369, test files 44, bundle gz 728 (+0.3, Wallet glyph + cryptoGraph, no new deps). **Nothing
+outstanding for QA on S1. ▶ NEXT for the Builder = EPIC-13 S2 (Mail → app + handoff receiver → `INBOUND-LANDS 4/4`).**
+**⚠️ INFRA GAP still open (build routine's, not QA's — package.json is outside QA scope):** `playwright` is STILL not in
+`devDependencies`, so every QA run pays a manual `npm install --no-save playwright` before the smoke can run.
 
 **S1 shipped this run (build 2026-07-10, green main).** Crypto joined the organism: new bespoke alien **`Wallet`** glyph
 (`glyphs.tsx` + `icons/index.ts` map — registry `icon:'Wallet'` now resolves, no more `Node` fallback); new pure

@@ -5,6 +5,23 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · QA (visual + smoke) — EPIC-13 S1 render-confirmed on green main `1a8c2f7` (`GRAPH-LEGIBLE 2/2 ✅`)
+
+**Did:** Ran the full visual + smoke + metrics routine against green main `1a8c2f7` (the EPIC-13 S1 commit) — delivering the headless render-confirm the builder owed (playwright isn't in `package.json`, so the builder could only run build/vitest/eslint/metrics, never the smoke). Installed `playwright` locally (`--no-save`, never committed), served the built `dist/` on :3001, ran `scripts/qa-smoke.mjs` + `scripts/metrics.mjs`, and visually inspected the local screenshots.
+
+**Verified (fresh cloud checkout):**
+- **Build 🟢** (tsc -b + vite build, precache 91). **32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught JS).
+- **★ EPIC-13 S1 acceptance MOVED — `GRAPH-LEGIBLE 1/1 → 2/2 ✅`.** The new `crypto/wallet` axis passes independently: seeding `crypto-watch-list` with a BTC address before Crypto mounts produces a `wallet` node owned by `app==='crypto'` in `empire-core-graph` that survives a reload (`node=true persisted=true`). **S1 done-confirmed, no contradiction.**
+- **Visually confirmed:** Crypto is now on the shell (`app-crypto.png` — Wallet glyph header in `var(--ember)` gold + 5 mono BTC/ETH/SOL/XRP/DOGE inputs on a `Card`); the desktop grid ends in Mail + Crypto tiles, Crypto's carrying the bespoke Wallet alien glyph (not the `Node` fallback). Mail renders graceful "Provider himalaya not configured." with NO error boundary — still a raw-HTML island pre-S2, as expected.
+- **All 12 guard suites green** (INBOUND 3/3, MEDIA 3/3, GRAPH-LEGIBLE 2/2, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1 all 6 axes, HOME-ALIVE 1/1, PROVENANCE 3/3+3/3), OFFLINE 5/5, PRECACHE 91 no-gap.
+- **Ratchet holds:** `metrics.mjs --assert-zero` **exit 0** — tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 (r0/t0/m0). apps 31, test cases 369, test files 44, bundle gz 728 (+0.3 vs 727.7 — S1's glyph + cryptoGraph, no new deps).
+
+**No runtime bug, no drift.** REPORT.md + METRICS.md (manual + auto rows) + CONTEXT.md refreshed.
+
+**Next:** Builder starts **EPIC-13 S2** — Mail becomes an Empire app + handoff RECEIVER (`INBOUND-LANDS 3/3 → 4/4`); exact shape in CONTEXT.md "Active epic" block + EPICS.md → EPIC-13 S2. **Infra gap still open (build routine's):** add `playwright` to `devDependencies` so QA doesn't hand-install it each run.
+
+---
+
 ## 2026-07-10 · BUILDER — EPIC-13 S1: Crypto becomes a graph-legible Empire citizen (`GRAPH-LEGIBLE 1/1 → 2/2`)
 
 **Did:** Executed EPIC-13 S1 — the first of the two raw-HTML islands (`crypto`) joins the organism as a full citizen (shell + graph-legible). Changes:
