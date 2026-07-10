@@ -274,12 +274,12 @@ export default function Music() {
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <ListMusic className="w-5 h-5" />
+            <ListMusic className="w-5 h-5" aria-hidden="true" />
             Music Player
           </h1>
           <div className="flex gap-2">
             <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-signal hover:bg-signal">
-              <Plus className="w-4 h-4 mr-1" /> Add Files
+              <Plus className="w-4 h-4 mr-1" aria-hidden="true" /> Add Files
             </Button>
             <input
               ref={fileInputRef}
@@ -287,6 +287,8 @@ export default function Music() {
               accept="audio/*"
               multiple
               className="hidden"
+              aria-hidden="true"
+              tabIndex={-1}
               onChange={handleFileSelect}
             />
           </div>
@@ -297,9 +299,9 @@ export default function Music() {
           <div className="bg-glass rounded-xl p-4 mb-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-ion to-danger flex items-center justify-center flex-shrink-0">
-                <MusicIcon className="w-8 h-8 text-fg" />
+                <MusicIcon className="w-8 h-8 text-fg" aria-hidden="true" />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0" role="status" aria-live="polite">
                 <p className="font-bold text-lg truncate">{current.title}</p>
                 <p className="text-muted text-sm truncate">{current.artist}</p>
               </div>
@@ -313,6 +315,8 @@ export default function Music() {
                 max={duration || 100}
                 value={currentTime}
                 onChange={seek}
+                aria-label="Seek"
+                aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
                 className="w-full h-1 accent-signal cursor-pointer"
               />
               <div className="flex justify-between text-xs text-faint mt-1">
@@ -323,27 +327,27 @@ export default function Music() {
 
             {/* Controls */}
             <div className="flex items-center justify-center gap-4 mt-3">
-              <button onClick={() => setShuffle(s => !s)} className={`p-2 rounded-full transition ${shuffle ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
-                <Shuffle className="w-4 h-4" />
+              <button onClick={() => setShuffle(s => !s)} aria-label="Shuffle" aria-pressed={shuffle} className={`p-2 rounded-full transition ${shuffle ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
+                <Shuffle className="w-4 h-4" aria-hidden="true" />
               </button>
-              <button onClick={prevTrack} className="p-2 text-muted hover:text-fg transition">
-                <SkipBack className="w-5 h-5" />
+              <button onClick={prevTrack} aria-label="Previous track" className="p-2 text-muted hover:text-fg transition">
+                <SkipBack className="w-5 h-5" aria-hidden="true" />
               </button>
-              <button onClick={playPause} className="p-4 bg-glass text-void rounded-full hover:bg-glass transition shadow-lg">
-                {playing ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
+              <button onClick={playPause} aria-label={playing ? 'Pause' : 'Play'} className="p-4 bg-glass text-void rounded-full hover:bg-glass transition shadow-lg">
+                {playing ? <Pause className="w-6 h-6" aria-hidden="true" /> : <Play className="w-6 h-6 ml-0.5" aria-hidden="true" />}
               </button>
-              <button onClick={nextTrack} className="p-2 text-muted hover:text-fg transition">
-                <SkipForward className="w-5 h-5" />
+              <button onClick={nextTrack} aria-label="Next track" className="p-2 text-muted hover:text-fg transition">
+                <SkipForward className="w-5 h-5" aria-hidden="true" />
               </button>
-              <button onClick={() => setRepeat(r => r === 'none' ? 'all' : r === 'all' ? 'one' : 'none')} className={`p-2 rounded-full transition ${repeat !== 'none' ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
-                <Repeat className={`w-4 h-4 ${repeat === 'one' ? 'text-xs' : ''}`} />
+              <button onClick={() => setRepeat(r => r === 'none' ? 'all' : r === 'all' ? 'one' : 'none')} aria-label={`Repeat: ${repeat === 'none' ? 'off' : repeat}`} aria-pressed={repeat !== 'none'} className={`p-2 rounded-full transition ${repeat !== 'none' ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
+                <Repeat className={`w-4 h-4 ${repeat === 'one' ? 'text-xs' : ''}`} aria-hidden="true" />
               </button>
             </div>
 
             {/* Volume */}
             <div className="flex items-center gap-2 mt-3">
-              <button onClick={() => setMuted(m => !m)} className="text-faint hover:text-fg">
-                {muted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              <button onClick={() => setMuted(m => !m)} aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'} aria-pressed={muted} className="text-faint hover:text-fg">
+                {muted || volume === 0 ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume2 className="w-4 h-4" aria-hidden="true" />}
               </button>
               <input
                 type="range"
@@ -352,6 +356,7 @@ export default function Music() {
                 step={0.01}
                 value={muted ? 0 : volume}
                 onChange={e => { setVolume(parseFloat(e.target.value)); setMuted(false) }}
+                aria-label="Volume"
                 className="flex-1 h-1 accent-signal cursor-pointer"
               />
             </div>
@@ -378,10 +383,10 @@ export default function Music() {
         <Card className="p-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-bold flex items-center gap-2">
-              <ListMusic className="w-4 h-4" /> Playlist
+              <ListMusic className="w-4 h-4" aria-hidden="true" /> Playlist
             </h2>
-            <Button onClick={clearPlaylist} className="text-xs bg-danger/30 hover:bg-danger/50 text-danger">
-              <Trash2 className="w-3 h-3 mr-1" /> Clear
+            <Button onClick={clearPlaylist} aria-label="Clear playlist" className="text-xs bg-danger/30 hover:bg-danger/50 text-danger">
+              <Trash2 className="w-3 h-3 mr-1" aria-hidden="true" /> Clear
             </Button>
           </div>
           <div className="space-y-1 max-h-[40vh] overflow-y-auto">
@@ -411,7 +416,7 @@ export default function Music() {
                 }}
               >
                 <span className="w-6 text-center text-xs text-faint">{i + 1}</span>
-                <MusicIcon className="w-4 h-4 text-faint flex-shrink-0" />
+                <MusicIcon className="w-4 h-4 text-faint flex-shrink-0" aria-hidden="true" />
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm truncate ${current?.id === track.id ? 'text-signal font-bold' : ''}`}>{track.title}</p>
                   <p className="text-xs text-faint truncate">{track.artist}</p>
@@ -422,9 +427,10 @@ export default function Music() {
                 <span className="text-xs text-faint">{track.duration ? formatTime(track.duration) : '—'}</span>
                 <button
                   onClick={e => { e.stopPropagation(); removeTrack(track.id) }}
-                  className="opacity-0 group-hover:opacity-100 text-faint hover:text-danger transition p-1"
+                  aria-label={`Remove ${track.title}`}
+                  className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100 text-faint hover:text-danger transition p-1"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3 h-3" aria-hidden="true" />
                 </button>
               </div>
             ))}

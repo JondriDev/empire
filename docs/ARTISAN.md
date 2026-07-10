@@ -15,7 +15,7 @@
 
 ---
 
-## ▶ NEXT: `music`
+## ▶ NEXT: `video`
 
 (continue down the registry order, wrapping back to the top after The Bridge.)
 
@@ -34,8 +34,8 @@ Newest-visited float to the bottom of the "visited" understanding; unvisited = n
 | clock | — | — |
 | grammar | 2026-07-09 | a11y pass: `aria-pressed` on the Check/Fix segmented toggle (state was colour-only) + `role="group"`, `aria-label` on the textarea, `aria-live="polite"` on the issue-count subtitle, `role="status"` on the clean-text banner, decorative glyphs `aria-hidden`. +`Grammar.test.tsx` (5). |
 | language | 2026-07-10 | a11y + honest-state pass: `aria-label`s on the from/to `<select>`s, swap button, textarea, copy/save/delete icon buttons; `aria-pressed` on the Phrases toggle (was colour-only); decorative glyphs `aria-hidden`; `role="status"` on the loading line + `aria-live="polite"` on the result. **UX bug fixed:** translation failures were rendered inside the green `border-success` box — now a distinct `role="alert"` red channel (separate `error` state). +`Language.test.tsx` (5). |
-| music | — | ◀ NEXT |
-| video | — | — |
+| music | 2026-07-10 | a11y + touch pass: accessible names on every icon-only transport control (play/pause, prev, next, shuffle, repeat, mute) + the seek/volume sliders; `aria-pressed` on shuffle/repeat/mute (state was colour-only) + Repeat's label names its mode (off/all/one); Now Playing wrapped `role="status" aria-live="polite"` so track changes announce; decorative glyphs `aria-hidden`. **Touch bug fixed:** the per-track remove ✕ was `opacity-0 group-hover:opacity-100` — invisible/unreachable on a phone (no hover); now `opacity-60` base + hover/focus emphasis. +`Music.test.tsx` (5). |
+| video | — | ◀ NEXT |
 | files | — | — |
 | cache | — | — |
 | browser | — | — |

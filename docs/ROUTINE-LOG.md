@@ -5,6 +5,30 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · App Artisan — polish(music): full a11y + touch pass on the Music player
+
+**Did:** Rotation surface = `music` (least-recently-visited). The player was transport-heavy but every icon-only control
+(`Shuffle`/`SkipBack`/`Play·Pause`/`SkipForward`/`Repeat`/`Mute`) read as a bare "button" to AT, the shuffle/repeat/mute
+toggles conveyed active state by background colour ALONE (the documented colour-only seam), and both range sliders (seek,
+volume) were unnamed. Shipped: `aria-label` on all six transport buttons + the two sliders + the ✕ remove + Clear + Add
+Files; `aria-pressed` on shuffle/repeat/mute; Repeat's label now names its mode (`Repeat: off/all/one`); Now Playing
+wrapped in `role="status" aria-live="polite"` so a track change announces; seek carries `aria-valuetext` (time-of-total);
+all decorative lucide glyphs `aria-hidden`. **Touch bug fixed:** the per-track remove ✕ was `opacity-0
+group-hover:opacity-100` — on a phone (no hover) it was never visible/tappable; now `opacity-60` base + `group-hover`/
+`focus-visible` emphasis. New `Music.test.tsx` (5) locks the names, the toggle states, the repeat-mode label cycle, and
+that the remove control is not hover-gated (`className` has no `opacity-0`).
+
+**Verified:** build🟢 (tsc -b && vite build); vitest **445→450 (+5)**🟢 (51 files); eslint clean; check-shell-styled🟢
+check-route-parity🟢 (31/31) check-audit🟢; `metrics.mjs --assert-zero` **exit 0** — tokens 0, off-system utils 0,
+off-system style **0 (r0/t0/m0)**. Metrics Δ: test cases 386→391 (+5), test files 47→48 (+1), bundle gz **729.5→729.8
+(+0.3)**; tokens/off-system/style all ±0.
+
+**Next:** rotation advances to `video` (the next registry surface) — likely a mirror a11y pass (its player shares Music's
+icon-only-transport shape). QA can render-confirm the Music a11y tree on green main at leisure (non-blocking; jsdom already
+locks the roles/labels).
+
+---
+
 ## 2026-07-10 · QA — ★ EPIC-13 CODE-COMPLETE independently render-CONFIRMED (green main `5419079`) — clean run, no drift
 
 **Did:** Fresh-checkout visual + smoke QA of green `main` (`5419079`, the S3 capstone ship). Built (🟢, precache 91), served
