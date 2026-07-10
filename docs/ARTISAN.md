@@ -15,7 +15,7 @@
 
 ---
 
-## ▶ NEXT: `language` (Language Lab)
+## ▶ NEXT: `music`
 
 (continue down the registry order, wrapping back to the top after The Bridge.)
 
@@ -33,8 +33,8 @@ Newest-visited float to the bottom of the "visited" understanding; unvisited = n
 | calendar | — | — |
 | clock | — | — |
 | grammar | 2026-07-09 | a11y pass: `aria-pressed` on the Check/Fix segmented toggle (state was colour-only) + `role="group"`, `aria-label` on the textarea, `aria-live="polite"` on the issue-count subtitle, `role="status"` on the clean-text banner, decorative glyphs `aria-hidden`. +`Grammar.test.tsx` (5). |
-| language | — | ◀ NEXT |
-| music | — | — |
+| language | 2026-07-10 | a11y + honest-state pass: `aria-label`s on the from/to `<select>`s, swap button, textarea, copy/save/delete icon buttons; `aria-pressed` on the Phrases toggle (was colour-only); decorative glyphs `aria-hidden`; `role="status"` on the loading line + `aria-live="polite"` on the result. **UX bug fixed:** translation failures were rendered inside the green `border-success` box — now a distinct `role="alert"` red channel (separate `error` state). +`Language.test.tsx` (5). |
+| music | — | ◀ NEXT |
 | video | — | — |
 | files | — | — |
 | cache | — | — |

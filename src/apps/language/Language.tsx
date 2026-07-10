@@ -51,6 +51,7 @@ const GREETINGS: Record<string, string> = {
 export default function Language() {
   const [input, setInput] = useState('')
   const [translation, setTranslation] = useState('')
+  const [error, setError] = useState('')
   const [fromLang, setFromLang] = useState('en')
   const [toLang, setToLang] = useState('es')
   const [detectedLang, setDetectedLang] = useState('')
@@ -94,7 +95,7 @@ export default function Language() {
 
   const translate = useCallback(async () => {
     const text = input.trim()
-    if (!text) { setTranslation(''); setLoading(false); return }
+    if (!text) { setTranslation(''); setError(''); setLoading(false); return }
 
     const target = LANGUAGES.find(l => l.code === toLang)?.name || toLang
     const myId = ++reqIdRef.current
@@ -107,9 +108,12 @@ export default function Language() {
       ])
       if (myId !== reqIdRef.current) return // a newer request superseded this one
       setTranslation((result || '').trim())
+      setError('')
     } catch (err: unknown) {
       if (myId !== reqIdRef.current) return
-      setTranslation(`⚠️ ${err instanceof Error ? err.message : 'Translation failed'}`)
+      // Keep failures in a distinct error channel — never in the "success" box.
+      setError(err instanceof Error ? err.message : 'Translation failed')
+      setTranslation('')
     } finally {
       if (myId === reqIdRef.current) setLoading(false)
     }
@@ -173,16 +177,20 @@ export default function Language() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Languages className="w-6 h-6 text-signal" /> Language Lab
+          <Languages className="w-6 h-6 text-signal" aria-hidden="true" /> Language Lab
         </h1>
-        <Button onClick={() => setShowPhraseBook(!showPhraseBook)} className={`text-xs px-3 py-1 ${showPhraseBook ? 'bg-signal' : 'bg-glass'}`}>
-          <BookOpen className="w-3 h-3 mr-1" /> Phrases ({phraseBook.length})
+        <Button
+          onClick={() => setShowPhraseBook(!showPhraseBook)}
+          aria-pressed={showPhraseBook}
+          className={`text-xs px-3 py-1 ${showPhraseBook ? 'bg-signal' : 'bg-glass'}`}>
+          <BookOpen className="w-3 h-3 mr-1" aria-hidden="true" /> Phrases ({phraseBook.length})
         </Button>
       </div>
 
       {/* Language selector */}
       <div className="flex items-center gap-2">
         <select value={fromLang} onChange={e => setFromLang(e.target.value)}
+          aria-label="Translate from"
           className="flex-1 bg-glass border-0 rounded-xl px-3 py-2.5 text-sm text-fg">
           <option value="auto" className="bg-faint">🌐 Auto Detect</option>
           {LANGUAGES.map(l => (
@@ -190,10 +198,12 @@ export default function Language() {
           ))}
         </select>
         <button onClick={swapLanguages}
+          aria-label="Swap languages"
           className="p-2.5 rounded-xl hover:bg-glass text-signal transition-colors">
-          <ArrowRightLeft className="w-5 h-5" />
+          <ArrowRightLeft className="w-5 h-5" aria-hidden="true" />
         </button>
         <select value={toLang} onChange={e => setToLang(e.target.value)}
+          aria-label="Translate to"
           className="flex-1 bg-glass border-0 rounded-xl px-3 py-2.5 text-sm text-fg">
           {LANGUAGES.map(l => (
             <option key={l.code} value={l.code} className="bg-faint">{l.name}</option>
@@ -203,7 +213,7 @@ export default function Language() {
 
       {detectedLang && fromLang === 'auto' && (
         <div className="text-xs text-faint flex items-center gap-1">
-          <Globe className="w-3 h-3" /> Detected: {LANGUAGES.find(l => l.code === detectedLang)?.name || 'Unknown'}
+          <Globe className="w-3 h-3" aria-hidden="true" /> Detected: {LANGUAGES.find(l => l.code === detectedLang)?.name || 'Unknown'}
         </div>
       )}
 
@@ -228,13 +238,21 @@ export default function Language() {
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Type text to translate..."
+          aria-label="Text to translate"
           className="w-full bg-transparent px-4 py-3 text-sm min-h-[120px] resize-y focus:outline-none"
           style={{ color: 'var(--text)' }}
         />
       </div>
 
       {loading && (
-        <div className="flex items-center gap-2 text-xs text-signal"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Translating…</div>
+        <div role="status" className="flex items-center gap-2 text-xs text-signal"><Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" /> Translating…</div>
+      )}
+
+      {/* Translation failure — a distinct, assertive channel, never the success box */}
+      {error && !loading && (
+        <div role="alert" className="rounded-2xl border border-danger/30 px-4 py-3 text-sm text-danger flex items-start gap-2" style={{ background: 'var(--card-bg)' }}>
+          <span aria-hidden="true">⚠️</span> {error}
+        </div>
       )}
 
       {/* Translation */}
@@ -244,16 +262,18 @@ export default function Language() {
             <span className="text-xs text-faint">{LANGUAGES.find(l => l.code === toLang)?.name}</span>
             <div className="flex gap-1">
               <button onClick={copyTranslation}
+                aria-label={copied ? 'Copied' : 'Copy translation'}
                 className="p-1 rounded hover:bg-glass text-muted transition-colors">
-                {copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-success" aria-hidden="true" /> : <Copy className="w-3.5 h-3.5" aria-hidden="true" />}
               </button>
               <button onClick={saveToPhraseBook}
+                aria-label="Save to phrase book"
                 className="p-1 rounded hover:bg-warn/20 text-warn transition-colors" title="Save to phrase book">
-                <BookOpen className="w-3.5 h-3.5" />
+                <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
             </div>
           </div>
-          <div className="p-4 text-sm whitespace-pre-wrap" style={{ color: 'var(--text)' }}>
+          <div className="p-4 text-sm whitespace-pre-wrap" aria-live="polite" style={{ color: 'var(--text)' }}>
             {translation}
           </div>
         </div>
@@ -283,7 +303,8 @@ export default function Language() {
                       <p className="text-sm text-success mt-0.5">{p.translated}</p>
                     </div>
                     <button onClick={() => deletePhrase(p.id)}
-                      className="text-faint hover:text-danger text-xs p-1">✕</button>
+                      aria-label="Delete saved phrase"
+                      className="text-faint hover:text-danger text-xs p-1"><span aria-hidden="true">✕</span></button>
                   </div>
                 </div>
               ))}
@@ -295,7 +316,7 @@ export default function Language() {
       {/* Cakra */}
       <div className="flex gap-2">
         <Button onClick={askCakra} className="text-xs bg-signal hover:bg-signal">
-          <Bot className="w-3 h-3 mr-1" /> Ask Cakra
+          <Bot className="w-3 h-3 mr-1" aria-hidden="true" /> Ask Cakra
         </Button>
       </div>
     </div>
