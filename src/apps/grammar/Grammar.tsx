@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { SpellCheck, Copy, Check, RefreshCw, ListChecks, AlertTriangle, Info } from 'lucide-react'
 import { Button } from '../../components/ui'
+import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 
 interface GrammarIssue {
@@ -208,6 +209,15 @@ export default function Grammar() {
           style={{ color: 'var(--text)' }}
         />
       </div>
+
+      {/* Idle empty-state — befriend the user before there's anything to analyze */}
+      {!text.trim() && (
+        <EmptyState
+          icon={<SpellCheck className="w-6 h-6" aria-hidden="true" />}
+          title="Check your writing"
+          description="Paste or type text above and Grammar Fix flags spelling, grammar, style, and readability issues as you go — then switch to Fix to auto-correct."
+        />
+      )}
 
       {/* Stats bar */}
       {text.trim() && (

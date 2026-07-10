@@ -36,6 +36,16 @@ describe('Grammar Fix — a11y + analysis', () => {
     expect(screen.getByRole('group', { name: 'Analysis mode' })).toBeTruthy()
   })
 
+  it('shows a getting-started empty state while idle, and clears it once text is entered', () => {
+    render(<Grammar />)
+    // Idle: the shared empty-state invites the user to start.
+    expect(screen.getByText('Check your writing')).toBeTruthy()
+    const input = screen.getByLabelText('Text to check for grammar issues')
+    fireEvent.change(input, { target: { value: 'Some text.' } })
+    // Once there's something to analyze the empty state gives way to the stats/results.
+    expect(screen.queryByText('Check your writing')).toBeNull()
+  })
+
   it('surfaces detected issues after the debounced analysis', async () => {
     render(<Grammar />)
     const input = screen.getByLabelText('Text to check for grammar issues')
