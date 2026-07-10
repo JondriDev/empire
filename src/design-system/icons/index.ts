@@ -40,6 +40,7 @@ import {
   Cakra,
   Search,
   Timeline,
+  Wallet,
   Node,
 } from './glyphs'
 import type { AppIcon } from './glyphs'
@@ -77,6 +78,7 @@ export const alienIcons: Record<string, AppIcon> = {
   cakra: Cakra,
   Search,
   Timeline,
+  Wallet,
 }
 
 /** The bare orbital node, shown when a registry `icon` key has no glyph. */

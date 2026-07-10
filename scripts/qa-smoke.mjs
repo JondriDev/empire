@@ -257,14 +257,19 @@ console.log(`MEDIA-PERSISTS: ${mediaPass}/${mediaResults.length} ${mediaPass ===
 // graph, then reload and assert the re-mounted Reader re-mirrors it (idempotent,
 // not dropped). Non-fatal like the guards above — a regression shows as ❌.
 const GRAPH_KEY = 'empire-core-graph';
-const readReaderBookNodes = (page) => page.evaluate((k) => {
+// Generalised graph reader (EPIC-13 S1): count persisted CoreNodes of a given
+// `type` owned by a given `app`. Was `readReaderBookNodes` (book/reader only);
+// now serves both the reader/book and crypto/wallet axes.
+const readNodes = (page, type, app) => page.evaluate(({ k, type, app }) => {
   try {
     const raw = localStorage.getItem(k);
     if (!raw) return 0;
     const nodes = JSON.parse(raw)?.state?.nodes || {};
-    return Object.values(nodes).filter(n => n?.type === 'book' && n?.meta?.app === 'reader').length;
+    return Object.values(nodes).filter(n => n?.type === type && n?.meta?.app === app).length;
   } catch { return 0; }
-}, GRAPH_KEY);
+}, { k: GRAPH_KEY, type, app });
+
+// ── Axis 1: reader/book (EPIC-6 S4) ──
 const readerTmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'empire-qa-reader-'));
 const txtBookPath = path.join(readerTmpDir, 'QAProbe BookLegible.txt');
 fs.writeFileSync(txtBookPath, 'QA graph-legibility probe — a small book so Reader mirrors a book node into the organism graph.');
@@ -277,21 +282,54 @@ try {
   await page.waitForTimeout(1500);
   const bodyAfterAdd = await page.evaluate(() => document.body.innerText || '');
   graphLegible.added = bodyAfterAdd.includes('QAProbe BookLegible');
-  graphLegible.node = (await readReaderBookNodes(page)) > 0;
+  graphLegible.node = (await readNodes(page, 'book', 'reader')) > 0;
   // Reload — the mirrored node lives in the persisted graph, and the re-mounted
   // Reader must re-mirror the same library (idempotent reconcile), not drop it.
   await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
   await page.waitForTimeout(1500);
-  graphLegible.persisted = (await readReaderBookNodes(page)) > 0;
+  graphLegible.persisted = (await readNodes(page, 'book', 'reader')) > 0;
   graphLegible.pass = graphLegible.node && graphLegible.persisted;
   console.log(`GRAPH-LEGIBLE  reader/book  added=${graphLegible.added} node=${graphLegible.node} persisted=${graphLegible.persisted}`);
   await page.close();
 } catch (e) {
   graphLegible.err = e.message;
-  console.warn(`GRAPH-LEGIBLE: guard did not complete — ${e.message}`);
+  console.warn(`GRAPH-LEGIBLE reader/book: guard did not complete — ${e.message}`);
 }
 try { fs.rmSync(readerTmpDir, { recursive: true, force: true }); } catch { /* ignore */ }
-console.log(`GRAPH-LEGIBLE: ${graphLegible.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
+
+// ── Axis 2: crypto/wallet (EPIC-13 S1) ──
+// Crypto owns a real collection (the watched wallet addresses) but landed as a
+// raw-HTML island. S1 wires `mirrorCollection('wallet','crypto', walletItems(…))`,
+// so a watched address must now appear as a `wallet` CoreNode owned by
+// app==='crypto'. Seed `crypto-watch-list` in the page origin BEFORE the app
+// mounts (so the hydrate effect reads it → mirror effect fires), then assert the
+// wallet node exists and survives a reload (idempotent reconcile).
+const WALLET_ADDR = 'bc1qQAprobewalletlegible00000000000000';
+const cryptoLegible = { node: false, persisted: false, pass: false };
+try {
+  const page = await ctx.newPage();
+  // Establish the origin, seed the watch-list, then reload so a fresh mount hydrates it.
+  await page.goto(`${BASE}/app/crypto`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.evaluate((addr) => localStorage.setItem('crypto-watch-list',
+    JSON.stringify({ btc: addr, eth: '', sol: '', xrp: '', doge: '' })), WALLET_ADDR);
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(1200);
+  cryptoLegible.node = (await readNodes(page, 'wallet', 'crypto')) > 0;
+  // Reload again — the mirrored node lives in the persisted graph, and the
+  // re-mounted Crypto must re-mirror the same watch-list (not drop it).
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(1200);
+  cryptoLegible.persisted = (await readNodes(page, 'wallet', 'crypto')) > 0;
+  cryptoLegible.pass = cryptoLegible.node && cryptoLegible.persisted;
+  console.log(`GRAPH-LEGIBLE  crypto/wallet  node=${cryptoLegible.node} persisted=${cryptoLegible.persisted}`);
+  await page.close();
+} catch (e) {
+  cryptoLegible.err = e.message;
+  console.warn(`GRAPH-LEGIBLE crypto/wallet: guard did not complete — ${e.message}`);
+}
+
+const graphLegiblePassed = (graphLegible.pass ? 1 : 0) + (cryptoLegible.pass ? 1 : 0);
+console.log(`GRAPH-LEGIBLE: ${graphLegiblePassed}/2 ${graphLegiblePassed === 2 ? '✅' : '⚠️'}`);
 
 // ── GLOBAL-SEARCH guard (EPIC-8 S1: the organism becomes queryable) ──────────
 // Every collection-owning app mirrors its real entities into the Core graph;
@@ -1021,11 +1059,12 @@ md += `| App | Added | Survived reload | Result |\n|---|---|---|---|\n`;
 for (const r of mediaResults) {
   md += `| ${r.id} | ${r.added ? '✅' : '❌'} | ${r.survived ? '✅' : '❌'} | ${r.pass ? '✅' : '❌'}${r.err ? ' (' + r.err.slice(0, 80) + ')' : ''} |\n`;
 }
-md += `\n## Graph-legible guard (EPIC-6 S4 — Reader's books join the organism)\n\n`;
-md += `Reader's real file \`<input>\` was driven with a small \`.txt\` book, then the persisted Core graph (\`empire-core-graph\`) was inspected; PASS = a \`book\` node owned by \`app==='reader'\` appeared AND survived a reload (the re-mounted Reader re-mirrors its library). This closes the last graph-island — every collection-owning app is now graph-legible.\n\n`;
+md += `\n## Graph-legible guard (EPIC-6 S4 + EPIC-13 S1 — collection-owning apps join the organism)\n\n`;
+md += `Each collection-owning app must mirror its real entities into the Core graph (\`empire-core-graph\`) so they are legible in The Network / Search / Timeline. **reader/book** (EPIC-6 S4): Reader's real file \`<input>\` was driven with a small \`.txt\` book; PASS = a \`book\` node owned by \`app==='reader'\` appeared AND survived a reload. **crypto/wallet** (EPIC-13 S1): the \`crypto-watch-list\` was seeded with a BTC address before Crypto mounted; PASS = a \`wallet\` node owned by \`app==='crypto'\` appeared AND survived a reload (the re-mounted app re-mirrors its watch-list). Crypto was one of the last two raw-HTML islands — S1 makes it graph-legible.\n\n`;
 md += `| Collection | Node created | Survived reload | Result |\n|---|---|---|---|\n`;
 md += `| reader/book | ${graphLegible.node ? '✅' : '❌'} | ${graphLegible.persisted ? '✅' : '❌'} | ${graphLegible.pass ? '✅' : '❌'}${graphLegible.err ? ' (' + graphLegible.err.slice(0, 80) + ')' : ''} |\n`;
-md += `\n**GRAPH-LEGIBLE: ${graphLegible.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
+md += `| crypto/wallet | ${cryptoLegible.node ? '✅' : '❌'} | ${cryptoLegible.persisted ? '✅' : '❌'} | ${cryptoLegible.pass ? '✅' : '❌'}${cryptoLegible.err ? ' (' + cryptoLegible.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n**GRAPH-LEGIBLE: ${graphLegiblePassed}/2 ${graphLegiblePassed === 2 ? '✅' : '⚠️'}**\n`;
 md += `\n## Global-search guard (EPIC-8 S1 + S2 — the organism becomes queryable)\n\n`;
 md += `The Core graph was seeded with entities sharing a rare term across TWO apps (a \`book\` in Reader, a \`task\` in Goals); after a reload (persist rehydrate) the term was typed into the Search field. PASS = BOTH entities surface, grouped under their own app sections — one lens querying every app's real entities at once. **S2 adds a tag-only match:** a third node carries the term \`${TAG_TERM}\` ONLY in \`data.tags\` (a string array) — it surfaces iff \`nodeBodyText\` now flattens array elements (the S2 corpus gap). The pure ranking spine (\`searchNodes\`) is unit-pinned in \`search.test.ts\`; this carries the graph→input→grouped-render roundtrip jsdom cannot.\n\n`;
 md += `| Query | Book hit | Task hit | Spans 2 apps | Tag-only hit | Result |\n|---|---|---|---|---|---|\n`;

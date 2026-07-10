@@ -285,6 +285,14 @@ const Timeline: AppIcon = (p) => (
 )
 
 /** Fallback — the bare orbital node. */
+const Wallet: AppIcon = (p) => (
+  <S {...p}>
+    <path d="M4 8 a2 2 0 0 1 2 -2 h11 a2 2 0 0 1 2 2 v9 a2 2 0 0 1 -2 2 H6 a2 2 0 0 1 -2 -2 Z" />
+    <path d="M20 11 h-3.2 a1.8 1.8 0 0 0 0 3.6 H20" />
+    <Dot cx="17" cy="12.8" />
+  </S>
+)
+
 const Node: AppIcon = (p) => (
   <S {...p}>
     <circle cx="12" cy="12" r="6.5" />
@@ -327,5 +335,6 @@ export {
   Cakra,
   Search,
   Timeline,
+  Wallet,
   Node,
 }

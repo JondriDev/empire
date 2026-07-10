@@ -16,7 +16,22 @@
 
 ---
 
-## ★ EPIC-12 RETIRED to DONE (2026-07-09, Strategist) — `INTENT-ROUNDTRIP 2/2` QA-confirmed; ▶ EPIC-13 promoted ACTIVE (Mail + Crypto join the organism — see the "Active epic" block)
+## ★ EPIC-13 S1 SHIPPED (2026-07-10, Builder) — Crypto is graph-legible + shelled; `GRAPH-LEGIBLE 1/1 → 2/2` (code, QA-render owed). ▶ NEXT = EPIC-13 S2 (Mail becomes an app + handoff RECEIVER → `INBOUND-LANDS 4/4`) — exact shape in the "Active epic" block.
+
+**S1 shipped this run (build 2026-07-10, green main).** Crypto joined the organism: new bespoke alien **`Wallet`** glyph
+(`glyphs.tsx` + `icons/index.ts` map — registry `icon:'Wallet'` now resolves, no more `Node` fallback); new pure
+`src/apps/crypto/cryptoGraph.ts` — `walletItems(addresses)` drops blank/whitespace, stable `wallet:${coin}` ids;
+`walletNodeData`→`{coin,address}`; unit-pinned by `cryptoGraph.test.ts` (+6). `CryptoApp.tsx` re-shelled onto the Empire UI
+(header `getAppIcon('Wallet')` + `var(--ember)` accent = the registry `#c4a265` crypto gold, token-clean; `ui` `Button`/`Input`
+(mono); balances on `Card`/`.gp`) + `useEffect(mirrorCollection('wallet','crypto', walletItems(addresses), …), [addresses])`
+(watch-list hydrate/persist preserved). `nodeColors.ts` `wallet: '196,162,101'`. GRAPH-LEGIBLE guard generalised
+(`readReaderBookNodes`→`readNodes(page,type,app)`) + a **`crypto/wallet`** axis (seed `crypto-watch-list` before mount → assert
+`wallet` node owned by `crypto` → survives reload) → `1/1 → 2/2` headline + REPORT row. build🟢 vitest 421→427🟢 eslint clean;
+tokens/off-system/offSystemStyle 0 (`--assert-zero` exit 0); bundle gz 728 ±0, no new deps. **⚠️ QA owes the `2/2` render-confirm:**
+`playwright` is STILL not in package.json so the builder can't run the headless smoke — the graph-legibility axis is fully local
++ cloud-verifiable in principle, but the actual 2/2 render was NOT run this session (only build/vitest/eslint/metrics). QA routine: run the smoke on green main.
+
+## ★ EPIC-12 RETIRED to DONE (2026-07-09, Strategist) — `INTENT-ROUNDTRIP 2/2` QA-confirmed; ▶ EPIC-13 ACTIVE (Mail + Crypto join the organism — see the "Active epic" block)
 
 **S3 (the LAST stage) shipped this run (build 2026-07-09, green main).** `syncAll` is now **exported** from `sync.ts:~127`;
 `sync.test.ts` grew the **`intent integrity — reconcile-survival invariant (EPIC-12 S3)`** suite (+4 → 21 in-file): each
@@ -138,26 +153,36 @@ fleet freeze). What changed for routines:
   "Send to Mail"), (3) off the shell (bare `<button>`/`<select>`/`<input>`/`<textarea>` + inline layout; no registry glyph
   header, no `.gp`, none of `src/components/ui`), (4) no alien glyph (`alienIcons` in `icons/index.ts` lacks `Mail`/`Wallet`
   → both fall back to the `Node` orbital). **Leap:** both become full citizens — shell + graph-legible + receive + emit.
-  **Targets:** `GRAPH-LEGIBLE 1/1 → 2/2 → 3/3` (crypto wallets S1, mail drafts S3) + `INBOUND-LANDS 3/3 → 4/4` (mail S2);
+  **Targets:** `GRAPH-LEGIBLE 1/1 → 2/2 → 3/3` (crypto wallets ✅S1, mail drafts S3) + `INBOUND-LANDS 3/3 → 4/4` (mail S2);
   routes stay 31/31; tokens/off-system/offSystemStyle stay 0.
-  - **▶ S1 (next — start here, no re-planning) — exact shape:** make **Crypto** graph-legible + shelled.
-    (a) **`src/design-system/icons/glyphs.tsx`** — add a bespoke alien **`Wallet`** glyph (mirror `Datacenter`/`Files`
-    structure) + export it; **`icons/index.ts`** — import it + add `Wallet,` to the `alienIcons` map (registry already sets
-    `icon:'Wallet'` → this kills the `Node` fallback). (b) **New `src/apps/crypto/cryptoGraph.ts`** (mirror
-    `reader/readerGraph.ts`): pure `walletItems(addresses): {id:`wallet:${coin}`,coin,address}[]` (drop empty/whitespace
-    addresses) + `walletNodeData(w)=>({coin,address})`. (c) **`CryptoApp.tsx`** — Empire shell header (`getAppIcon('Wallet')`
-    + accent `#c4a265`, mirror Search/Timeline), raw `<button>`/`<input>` → `ui` `Button`/`Input`, results on `.gp`/`Card`;
-    keep the `crypto-watch-list` hydrate/persist; add `useEffect(() => mirrorCollection('wallet','crypto',
-    walletItems(addresses), {id, title:`${COIN} · ${addr.slice(0,6)}…${addr.slice(-4)}`, data:walletNodeData}), [addresses])`.
-    (d) **`network/nodeColors.ts`** — add a `wallet` type colour. (e) **Extend the `GRAPH-LEGIBLE` guard**
-    (`scripts/qa-smoke.mjs:249`; generalise `readReaderBookNodes`→`readNodes(page,type,app)`): seed
-    `localStorage['crypto-watch-list']={btc:'<addr>',eth:'',…}` BEFORE nav, open `/app/crypto`, assert a `wallet` node owned
-    by `crypto` in `empire-core-graph` + survives reload → **`1/1 → 2/2`**. (f) **`crypto/cryptoGraph.test.ts`** (≥4).
-    *Acceptance:* watched wallet is a `wallet` node in Network/Search/Timeline surviving reload; Crypto on the shell w/ the
-    `Wallet` glyph; `GRAPH-LEGIBLE 2/2`; build🟢 vitest🟢 eslint clean; tokens/off-system/offSystemStyle 0 (`--assert-zero`
-    exit 0); no new deps. *Cloud limit:* `/api/wallet/check` is 401-gated — the watch-list mirror is fully local + verifiable;
-    balances stay on-device. **Then S2 (Mail inbound → `INBOUND-LANDS 4/4`), S3 (Mail drafts graph-legible + ⚡ emit both →
-    `GRAPH-LEGIBLE 3/3` → EPIC-13 CODE-COMPLETE) per EPICS.md.**
+  - **✅ S1 DONE (2026-07-10) — Crypto is graph-legible + shelled; `GRAPH-LEGIBLE 1/1 → 2/2` (code).** Details in the
+    top-of-file S1 block. **SEAMS the next stage inherits:** (i) **glyph rail** — a new alien glyph = add to `glyphs.tsx`
+    (mirror `Files`/`Datacenter` `<path>`+`<Dot>` structure), export in the `{…}` block, then import + add the key to the
+    `alienIcons` map in `icons/index.ts` (S2 does the identical two-file move for **`Mail`**; registry already sets
+    `icon:'Mail'`). (ii) **shell idiom** — `p-6 max-w-2xl mx-auto` root; header `<h1 className="text-2xl font-bold flex
+    items-center gap-2">` with `<Glyph className="w-6 h-6" style={{color: ACCENT}} />`; `ACCENT` is a **token** — Crypto used
+    `var(--ember)` (= the registry `#c4a265`); **Mail's `#1a8caa` accent = `var(--signal)`** (token-clean, DON'T write the raw
+    hex — the token detector counts hex even in comments, cost me a +1 this run). `ui` from `../../components/ui` (`Button`,
+    `Input(onChange→value string, mono?)`, `TextArea`, `Card`). (iii) **mirror rail** — `useEffect(() =>
+    mirrorCollection(type, app, items, {id,title,data}), [deps])` (proven; Reader/Crypto identical). (iv) **GRAPH-LEGIBLE
+    guard** now uses a generalised `readNodes(page,type,app)` (was `readReaderBookNodes`) — S3's `mail/draft` axis reuses it;
+    seed-before-mount pattern is: `goto(domcontentloaded)` → `page.evaluate(localStorage.setItem(...))` → `reload(networkidle)`.
+  - **▶ S2 (next — start here, no re-planning) — exact shape:** make **Mail** an Empire app + a handoff RECEIVER →
+    `INBOUND-LANDS 3/3 → 4/4`. Full spec in EPICS.md → EPIC-13 S2. (a) **`glyphs.tsx`+`index.ts`** — bespoke alien **`Mail`**
+    glyph + `Mail` key in `alienIcons` (kills the `Node` fallback). (b) **`src/lib/appActions.ts`** — add a **"Send to Mail"**
+    sender mirroring the `empire-calendar-clipboard` sender (~`:154`): `sessionStorage.setItem('empire-mail-clipboard',
+    JSON.stringify({subject:data.title, body:data.text, from:data.source}))` + `emit({type:'HANDOFF', fromId, toId:'mail',
+    label:'to mail'})`; wire into the same `CROSS_APP_ACTIONS`/send-target list the other receivers use. (c) **`Mail.tsx`** —
+    shell (header `getAppIcon('Mail')` + `var(--signal)` accent; raw `<select>`/`<button>`/`<input>`/`<textarea>` → `ui`
+    controls; list on `.gp`) + inbound: `const inbound = useInboundHandoff<{to?,subject?,body?,from?}>('empire-mail-clipboard')`
+    → on payload open compose + prefill + `<ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />` (mirror
+    `Calendar.tsx:219`). (d) **Extend `INBOUND-LANDS` guard** (`qa-smoke.mjs:136`): add `{id:'mail', key:'empire-mail-clipboard',
+    from:'notes', needle:'<seeded body>'}` to `receivers` (mirror the `calendar` entry `:146`) → `3/3 → 4/4`. (e) **Tests:**
+    `appActions.test.ts` (Send-to-Mail writes clipboard w/ `from` + emits exactly ONE `HANDOFF` to mail); `Mail.test.tsx`
+    (seeded clipboard → compose opens + prefilled + ProvenanceChip; goes RED without the hook). *Acceptance:* `INBOUND-LANDS 4/4`,
+    mail on the shell w/ `Mail` glyph, 31/31; build🟢 vitest🟢 eslint clean; `--assert-zero` exit 0; no new deps. *Cloud limit:*
+    send + inbox are 401-gated — inbound-receive/prefill is fully local + cloud-verifiable. **Then S3 (Mail drafts persist +
+    graph-legible + ⚡ emit both → `GRAPH-LEGIBLE 2/2 → 3/3` → ★ EPIC-13 CODE-COMPLETE) per EPICS.md.**
 - **↓ EPIC-12 · Intent integrity — RETIRED to DONE 2026-07-09** (`INTENT-ROUNDTRIP 2/2` confirmed; S1–S3 shipped). History +
   still-load-bearing traps kept below (the note-mirror-id guard trap, the production-`dist` ⚡-menu drive, the `runIntent`
   `accepts` enforcement) — reuse them; don't relearn.

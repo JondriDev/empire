@@ -5,6 +5,25 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-10 · BUILDER — EPIC-13 S1: Crypto becomes a graph-legible Empire citizen (`GRAPH-LEGIBLE 1/1 → 2/2`)
+
+**Did:** Executed EPIC-13 S1 — the first of the two raw-HTML islands (`crypto`) joins the organism as a full citizen (shell + graph-legible). Changes:
+- **Bespoke alien `Wallet` glyph** — `src/design-system/icons/glyphs.tsx` (wallet body + card-slot clasp holding a coin `<Dot>`, mirroring the `Files`/`Datacenter` `<path>` idiom) + exported; `src/design-system/icons/index.ts` imports it + adds the `Wallet` key to `alienIcons`. Registry already sets `icon:'Wallet'` for crypto, so this **kills the `Node` orbital fallback** — Crypto now shows its own glyph.
+- **New pure `src/apps/crypto/cryptoGraph.ts`** (mirrors `reader/readerGraph.ts`): `walletItems(addresses)` derives one item per non-blank/trimmed address with a stable `wallet:${coin}` id; `walletNodeData(w) → {coin,address}` (durable metadata only — live balances never enter the graph). Unit-pinned by new `cryptoGraph.test.ts` (**+6 cases**: drops blank/whitespace, trims, deterministic COINS order, distinct stable ids, payload shape).
+- **`src/apps/crypto/CryptoApp.tsx` re-shelled** onto the Empire UI: header uses `getAppIcon('Wallet')` + a `var(--ember)` accent (= the registry `#c4a265` crypto gold, token-clean); raw `<button>`/`<input>` → `ui` `Button`/`Input` (mono); balances render on `Card`/`.gp` glass. Watch-list hydrate/persist (`crypto-watch-list`) preserved. Added `useEffect(() => mirrorCollection('wallet','crypto', walletItems(addresses), {id, title:'${COIN} · ${addr.slice(0,6)}…${addr.slice(-4)}', data: walletNodeData}), [addresses])` — watched wallets now mirror into the Core graph.
+- **`src/apps/network/nodeColors.ts`** — `wallet: '196,162,101'` (ember gold triplet) so wallets read in the Network legend.
+- **`scripts/qa-smoke.mjs` GRAPH-LEGIBLE guard** generalised (`readReaderBookNodes` → `readNodes(page,type,app)`) + a new **`crypto/wallet`** axis (seed `crypto-watch-list` in the page origin before mount → assert a `wallet` node owned by `crypto` in `empire-core-graph` → survives reload). Headline **`1/1 → 2/2`**; REPORT table gains a `crypto/wallet` row.
+
+**Why:** Interconnection ranks above design-consistency in the standing priority; `crypto` was one of only two apps still invisible to Network/Search/Timeline. S1 was pre-decomposed and downhill — executed at full speed.
+
+**Verified (this session, cloud):** `npm run build` 🟢 (tsc -b + vite build, precache 91). `npx vitest run` **421 → 427 🟢** (47 files). `npx eslint` clean on all touched files. `node scripts/metrics.mjs --assert-zero` **exit 0** — `| Apps 31 ±0 | Test cases 369 (+6) | Test files 44 (+1) | Token violations 0 ±0 | Off-system utils 0 ±0 | Off-system style 0 (r0/t0/m0) ±0 | Bundle gz 728 ±0 |`. No new deps.
+
+**NOT verified (honest):** the `GRAPH-LEGIBLE 2/2` **headless render-confirm was NOT run** — `playwright` is still absent from `package.json` and installing it = a new dep (forbidden for the builder), so the smoke is the QA routine's step. The graph-legibility axis is fully local + cloud-verifiable in principle; the mirror rail is the same one Reader proves. The `/api/wallet/check` balance fetch stays a 401-gated on-device confirm. Visual shell polish (glyph, ember accent, glass cards) needs an on-device look.
+
+**Single best next step:** EPIC-13 S2 — Mail becomes an Empire app + a handoff RECEIVER (`Mail` glyph + shell + `useInboundHandoff('empire-mail-clipboard')` + a "Send to Mail" sender → `INBOUND-LANDS 3/3 → 4/4`). Exact shape in `docs/CONTEXT.md` Active-epic block + EPICS.md → EPIC-13 S2. Reuses S1's glyph + shell + guard seams (documented in CONTEXT).
+
+---
+
 ## 2026-07-09 · STRATEGIST — retire EPIC-12 → DONE; promote ▶ EPIC-13 · The last two islands join the organism (Mail + Crypto)
 
 **Read the gradient:** `metrics.json` current = green (apps 31, vitest 363/43 files, tokens 0, off-system 0, offSystemStyle 0, `--assert-zero` exit 0). QA (this run's green-main render-confirm, below): `INTENT-ROUNDTRIP 2/2 ✅`, 32/32 routes clean, all 12 guards green, both mail+crypto regressions render-confirmed FIXED. **EPIC-12 · Intent integrity is DONE** — S1–S3 shipped (`1add073` LOCK) + acceptance metric `INTENT-ROUNDTRIP 0/2 → 2/2` QA-confirmed LIVE on green main → retired to DONE.
