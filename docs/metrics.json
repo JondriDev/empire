@@ -1,9 +1,9 @@
 {
   "current": {
-    "generatedAt": "2026-07-11T16:32:32.661Z",
+    "generatedAt": "2026-07-11T17:15:57.544Z",
     "apps": 31,
-    "testFiles": 54,
-    "testCases": 419,
+    "testFiles": 55,
+    "testCases": 425,
     "tokenViolations": 0,
     "offSystemUtilities": 0,
     "offSystemStyle": 0,
@@ -19,26 +19,10 @@
       "select": 5,
       "textarea": 14
     },
-    "bundleGzKB": 731,
-    "bundleRawKB": 2469.7
+    "bundleGzKB": 731.3,
+    "bundleRawKB": 2470.6
   },
   "history": [
-    {
-      "generatedAt": "2026-07-10T05:15:45.011Z",
-      "apps": 31,
-      "testFiles": 45,
-      "testCases": 376,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "bundleGzKB": 728.6,
-      "bundleRawKB": 2463.8
-    },
     {
       "generatedAt": "2026-07-10T05:28:01.320Z",
       "apps": 31,
@@ -614,6 +598,29 @@
       },
       "bundleGzKB": 730.2,
       "bundleRawKB": 2467.2
+    },
+    {
+      "generatedAt": "2026-07-11T16:32:32.661Z",
+      "apps": 31,
+      "testFiles": 54,
+      "testCases": 419,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 284,
+      "offShellControlDims": {
+        "button": 226,
+        "input": 39,
+        "select": 5,
+        "textarea": 14
+      },
+      "bundleGzKB": 731,
+      "bundleRawKB": 2469.7
     }
   ]
 }

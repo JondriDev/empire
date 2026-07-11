@@ -157,6 +157,7 @@ export default function Files() {
   const filtered = entries.filter(e =>
     !searchQuery || e.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
+  const atHome = path === '/storage/emulated/0'
 
   return (
     <div className="space-y-3">
@@ -164,36 +165,40 @@ export default function Files() {
       <Card className="p-3">
         <div className="flex items-center gap-2 mb-2">
           <h1 className="text-lg font-bold flex items-center gap-2">
-            <Folder className="w-5 h-5" /> File Browser
+            <Folder className="w-5 h-5" aria-hidden="true" /> File Browser
           </h1>
-          <Button onClick={() => loadDirectory(path)} className="text-sm bg-glass hover:bg-glass ml-auto">
-            <RefreshCw className="w-4 h-4" />
+          <Button onClick={() => loadDirectory(path)} aria-label="Refresh directory" className="text-sm bg-glass hover:bg-glass ml-auto">
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
           </Button>
-          <Button onClick={navigateUp} className={`text-sm bg-glass hover:bg-glass ${path === '/storage/emulated/0' ? 'opacity-30 cursor-not-allowed' : ''}`}>
-            ↑ Up
+          <Button onClick={navigateUp} disabled={atHome} aria-label="Go up one folder" className="text-sm bg-glass hover:bg-glass">
+            <span aria-hidden="true">↑</span> Up
           </Button>
-          <button onClick={() => navigateTo('/storage/emulated/0')} className="text-sm text-faint hover:text-fg">
-            <Home className="w-5 h-5" />
+          <button onClick={() => navigateTo('/storage/emulated/0')} aria-label="Go to internal storage" className="text-sm text-faint hover:text-fg">
+            <Home className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1 text-sm text-muted mb-2 overflow-x-auto">
+        <nav aria-label="Folder path" className="flex items-center gap-1 text-sm text-muted mb-2 overflow-x-auto">
           <button onClick={() => navigateTo('/storage/emulated/0')} className="hover:text-fg flex-shrink-0">storage</button>
           {breadcrumb.map((part, i) => (
             <span key={i} className="flex items-center gap-1 flex-shrink-0">
-              <ChevronRight className="w-3 h-3" />
-              <button onClick={() => navigateTo('/' + breadcrumb.slice(0, i + 1).join('/'))} className="hover:text-fg">
+              <ChevronRight className="w-3 h-3" aria-hidden="true" />
+              <button
+                onClick={() => navigateTo('/' + breadcrumb.slice(0, i + 1).join('/'))}
+                aria-current={i === breadcrumb.length - 1 ? 'page' : undefined}
+                className="hover:text-fg"
+              >
                 {part}
               </button>
             </span>
           ))}
-        </div>
+        </nav>
 
         {/* Quick paths */}
         <div className="flex gap-1 flex-wrap mb-2">
           {QUICK_PATHS.map(qp => (
-            <button key={qp.path} onClick={() => navigateTo(qp.path)} className={`text-xs px-2 py-1 rounded ${path === qp.path ? 'bg-signal/40 text-signal' : 'bg-glass text-muted hover:bg-glass'}`}>
+            <button key={qp.path} onClick={() => navigateTo(qp.path)} aria-pressed={path === qp.path} className={`text-xs px-2 py-1 rounded ${path === qp.path ? 'bg-signal/40 text-signal' : 'bg-glass text-muted hover:bg-glass'}`}>
               {qp.label}
             </button>
           ))}
@@ -203,6 +208,7 @@ export default function Files() {
         <input
           type="text"
           placeholder="Search files..."
+          aria-label="Search files in this folder"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           className="w-full bg-glass border-0 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-signal/50"
@@ -214,20 +220,20 @@ export default function Files() {
 
       {/* Content */}
       {loading ? (
-      <Card className="p-8 text-center text-faint">
-      <div className="animate-spin w-6 h-6 border-2 border-hair border-t-white/60 rounded-full mx-auto mb-3" />
+      <Card className="p-8 text-center text-faint" role="status">
+      <div className="animate-spin w-6 h-6 border-2 border-hair border-t-white/60 rounded-full mx-auto mb-3" aria-hidden="true" />
       <p className="text-sm">Scanning directory…</p>
       </Card>
       ) : error ? (
-        <Card className="p-6 text-center">
+        <Card className="p-6 text-center" role="alert">
           <p className="text-danger mb-2">Failed to load directory</p>
           <p className="text-sm text-faint">{error}</p>
           <Button onClick={() => loadDirectory(path)} className="mt-3 text-sm bg-glass hover:bg-glass">Retry</Button>
         </Card>
       ) : filtered.length === 0 ? (
         <Card className="p-8 text-center text-faint">
-          <Folder className="w-12 h-12 mx-auto mb-2 opacity-20" />
-          <p>Empty or no matches</p>
+          <Folder className="w-12 h-12 mx-auto mb-2 opacity-20" aria-hidden="true" />
+          <p>{searchQuery ? 'No files match your search' : 'This folder is empty'}</p>
         </Card>
       ) : viewMode === 'list' ? (
         <Card className="p-2">
@@ -238,8 +244,13 @@ export default function Files() {
               className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer group transition ${selected === entry.name ? 'bg-signal/20' : 'hover:bg-glass'}`}
             >
               {entry.isDirectory ? (
-                <button onClick={e => { e.stopPropagation(); toggleDir(entry.path) }} className="text-faint hover:text-fg">
-                  {expandedDirs.has(entry.path) ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                <button
+                  onClick={e => { e.stopPropagation(); toggleDir(entry.path) }}
+                  aria-label={expandedDirs.has(entry.path) ? `Collapse ${entry.name}` : `Expand ${entry.name}`}
+                  aria-expanded={expandedDirs.has(entry.path)}
+                  className="text-faint hover:text-fg"
+                >
+                  {expandedDirs.has(entry.path) ? <ChevronDown className="w-3 h-3" aria-hidden="true" /> : <ChevronRight className="w-3 h-3" aria-hidden="true" />}
                 </button>
               ) : <span className="w-3" />}
               {getIcon(entry, expandedDirs.has(entry.path))}
@@ -250,13 +261,13 @@ export default function Files() {
                 </p>
               </div>
               {!entry.isDirectory && (
-                <div className="flex gap-1 items-center opacity-0 group-hover:opacity-100" onClick={e => e.stopPropagation()}>
+                <div className="flex gap-1 items-center opacity-60 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                   <NodeActions type="file" sourceId={entry.path} />
-                  <button onClick={e => { e.stopPropagation(); downloadFile(entry) }} className="p-1.5 text-faint hover:text-fg">
-                    <Download className="w-3.5 h-3.5" />
+                  <button onClick={e => { e.stopPropagation(); downloadFile(entry) }} aria-label={`Download ${entry.name}`} className="p-1.5 text-faint hover:text-fg">
+                    <Download className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
-                  <button onClick={e => { e.stopPropagation(); setPreviewContent(null); openFile(entry) }} className="p-1.5 text-faint hover:text-fg">
-                    <Eye className="w-3.5 h-3.5" />
+                  <button onClick={e => { e.stopPropagation(); setPreviewContent(null); openFile(entry) }} aria-label={`Preview ${entry.name}`} className="p-1.5 text-faint hover:text-fg">
+                    <Eye className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 </div>
               )}
@@ -280,13 +291,13 @@ export default function Files() {
 
       {/* Preview */}
       {previewContent && (
-        <Card className="p-4">
+        <Card className="p-4" role="region" aria-label={`Preview of ${previewContent.name}`}>
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-bold text-sm flex items-center gap-2">
-              <FileText className="w-4 h-4" /> {previewContent.name}
+              <FileText className="w-4 h-4" aria-hidden="true" /> {previewContent.name}
             </h3>
-            <Button onClick={() => setPreviewContent(null)} className="text-xs bg-glass hover:bg-glass">
-              <X className="w-3 h-3" /> Close
+            <Button onClick={() => setPreviewContent(null)} aria-label="Close preview" className="text-xs bg-glass hover:bg-glass">
+              <X className="w-3 h-3" aria-hidden="true" /> Close
             </Button>
           </div>
           <pre className="text-xs bg-void/30 rounded p-3 overflow-x-auto max-h-64 whitespace-pre-wrap font-mono text-muted">

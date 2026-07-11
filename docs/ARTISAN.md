@@ -15,7 +15,7 @@
 
 ---
 
-## ▶ NEXT: `files`
+## ▶ NEXT: `cache`
 
 (continue down the registry order, wrapping back to the top after The Bridge.)
 
@@ -36,8 +36,8 @@ Newest-visited float to the bottom of the "visited" understanding; unvisited = n
 | language | 2026-07-10 | a11y + honest-state pass: `aria-label`s on the from/to `<select>`s, swap button, textarea, copy/save/delete icon buttons; `aria-pressed` on the Phrases toggle (was colour-only); decorative glyphs `aria-hidden`; `role="status"` on the loading line + `aria-live="polite"` on the result. **UX bug fixed:** translation failures were rendered inside the green `border-success` box — now a distinct `role="alert"` red channel (separate `error` state). +`Language.test.tsx` (5). |
 | music | 2026-07-10 | a11y + touch pass: accessible names on every icon-only transport control (play/pause, prev, next, shuffle, repeat, mute) + the seek/volume sliders; `aria-pressed` on shuffle/repeat/mute (state was colour-only) + Repeat's label names its mode (off/all/one); Now Playing wrapped `role="status" aria-live="polite"` so track changes announce; decorative glyphs `aria-hidden`. **Touch bug fixed:** the per-track remove ✕ was `opacity-0 group-hover:opacity-100` — invisible/unreachable on a phone (no hover); now `opacity-60` base + hover/focus emphasis. +`Music.test.tsx` (5). |
 | video | 2026-07-11 | a11y + touch pass (mirrors Music): accessible names on every icon-only transport control (play/pause, back/forward 10s, mute, fullscreen) + the playlist-toggle + seek/volume sliders; `aria-pressed` on mute + the active playback-speed + the playlist toggle (state was colour-only) + `role="group"` on the speed strip; `aria-valuetext` (human time) on the seek slider; Now Playing title wrapped `role="status" aria-live="polite"`; decorative glyphs `aria-hidden`. **Touch bug fixed:** the per-item remove ✕ was `opacity-0 group-hover:opacity-100` — invisible/unreachable on a phone (no hover); now `opacity-60` base + hover/focus emphasis. +`Video.test.tsx` (5). |
-| files | — | ◀ NEXT |
-| cache | — | — |
+| files | 2026-07-11 | a11y + touch pass: `aria-label`s on the icon-only refresh/up/home + per-file download/preview + dir-expand controls (`aria-expanded`); `aria-label` on the search box; `aria-pressed` on the quick-path chips (active was colour-only); `<nav aria-label>` + `aria-current="page"` on the breadcrumb; `role="status"` loading + `role="alert"` load-failure; decorative glyphs `aria-hidden`. **Touch bug fixed:** per-file action row was `opacity-0 group-hover:opacity-100` — invisible/unreachable on a phone (no hover); now `opacity-60` base + hover/focus emphasis (mirrors Music/Video). **Honest-state:** Up now truly `disabled` at internal-storage root (visual said disabled, behaviour still navigated up); empty-state copy splits empty-folder vs no-search-match. +`Files.test.tsx` (6). |
+| cache | — | ◀ NEXT |
 | browser | — | — |
 | notes | — | — |
 | photos | — | — |
