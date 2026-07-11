@@ -5,6 +5,16 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-11 · QA — Visual + Smoke: EPIC-14 S4 acceptance CONFIRMED (offShellControls 307→284, −23)
+
+**Did:** First QA on a fresh cloud checkout since EPIC-14 S4 shipped. Fresh `npm install` + `npm run build` (🟢 GREEN, 91 precache entries). Ran `node scripts/qa-smoke.mjs` (**32/32 passed, 0 failed**) + `node scripts/metrics.mjs` (+`--assert-zero`). Captured 8 local screenshots (desktop + clock/photos/reader/calendar/artifacts/network/maps, ≤1600px, 0 page errors) and visually inspected them. Two app-code commits landed after S4 (`2367196` Files a11y/touch, `2ffe2a0` solver briefs) — neither touches `offShellControls`; the report describes the tree actually pushed.
+
+**Verified:** `offShellControls = 284 (b226/i39/s5/t14)`, **Δ ±0** vs committed snapshot → **EPIC-14 S4 acceptance CONFIRMED** (Clock+Photos 307→284, −23; both off the offenders list — now FormBuilder 16, Calculator 14, DataCenter 14, AIChat 13, Maps 12, Goals 10). `--assert-zero` **exit 0** (token/util/style all 0). All 13 guards green (INBOUND 4/4, MEDIA 3/3 incl. photos survives S4, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH, NODE-LINEAGE, INTENT-ROUNDTRIP 2/2, TIMELINE, HOME-ALIVE, PROVENANCE 3/3+3/3, PRECACHE 91 no-gap, OFFLINE 5/5). Auto-metrics: apps 31, test cases 425 (+14), files 55 (+3), bundle gz 731.3 (+1.1). Visual: Clock's Segmented mode tabs + 12H toggle + "Add city…" Input + world-clock `×` removes render clean; Photos' Import Button + grid/view/All·Favorites Segmented + "No photos yet" empty state clean; desktop Bridge + Network CORE mesh clean. Env-noise only (maps CARTO tiles, weather geocode/geolocation, files/mail 401 — all graceful).
+
+**No runtime bug, no drift.** ▶ **Next:** EPIC-14 S5 (artifacts family 27→0; FormBuilder #1 at 16). Report: `docs/screenshots/latest/REPORT.md`.
+
+---
+
 ## 2026-07-11 · BUILDER — EPIC-14 S4: Clock + Photos migrated onto the `ui` shell (23 → 0)
 
 **Did:** Executed EPIC-14 S4 — drove `src/apps/clock/Clock.tsx` (11) and `src/apps/photos/Photos.tsx` (12) from **23** off-shell controls to **0** (`offShellControls 307 → 284`, −23; `b243/i44/s6/t14 → b226/i39/s5/t14`). Both files dropped off the top-offenders list (now FormBuilder 16, Calculator 14, DataCenter 14, AIChat 13, Maps 12, Goals 10, Flashcards 9, Editor 9). These are the first real consumers of the `Segmented`/`Select` primitives S1 added — the showcase.

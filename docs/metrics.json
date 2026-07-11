@@ -1,6 +1,6 @@
 {
   "current": {
-    "generatedAt": "2026-07-11T17:15:57.544Z",
+    "generatedAt": "2026-07-11T18:07:49.245Z",
     "apps": 31,
     "testFiles": 55,
     "testCases": 425,
@@ -23,38 +23,6 @@
     "bundleRawKB": 2470.6
   },
   "history": [
-    {
-      "generatedAt": "2026-07-10T05:28:01.320Z",
-      "apps": 31,
-      "testFiles": 45,
-      "testCases": 376,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "bundleGzKB": 728.7,
-      "bundleRawKB": 2463.8
-    },
-    {
-      "generatedAt": "2026-07-10T09:20:40.324Z",
-      "apps": 31,
-      "testFiles": 45,
-      "testCases": 376,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "bundleGzKB": 728.7,
-      "bundleRawKB": 2463.8
-    },
     {
       "generatedAt": "2026-07-10T09:20:40.507Z",
       "apps": 31,
@@ -621,6 +589,52 @@
       },
       "bundleGzKB": 731,
       "bundleRawKB": 2469.7
+    },
+    {
+      "generatedAt": "2026-07-11T17:15:57.544Z",
+      "apps": 31,
+      "testFiles": 55,
+      "testCases": 425,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 284,
+      "offShellControlDims": {
+        "button": 226,
+        "input": 39,
+        "select": 5,
+        "textarea": 14
+      },
+      "bundleGzKB": 731.3,
+      "bundleRawKB": 2470.6
+    },
+    {
+      "generatedAt": "2026-07-11T18:07:38.893Z",
+      "apps": 31,
+      "testFiles": 55,
+      "testCases": 425,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 284,
+      "offShellControlDims": {
+        "button": 226,
+        "input": 39,
+        "select": 5,
+        "textarea": 14
+      },
+      "bundleGzKB": 731.3,
+      "bundleRawKB": 2470.6
     }
   ]
 }
