@@ -1,8 +1,48 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-10T23:08:12.408Z
+**Generated:** 2026-07-11T03:08:41.264Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
+
+---
+
+## QA verdict — 2026-07-11 (clean run, NO runtime bug)
+
+**Tree:** green `main` HEAD `5e37d8d` (EPIC-14 S1 · "measure the control-shell axis + complete the ui primitive set"). First INDEPENDENT QA since S1 landed. Build 🟢 (`tsc -b && vite build`, 18.2s). **32/32 routes render clean, 0 uncaught JS / error boundaries / blank screens.** All 14 guards green. `node scripts/metrics.mjs --assert-zero` → **exit 0 (ratchet HOLDS).** Screenshots captured + spot-inspected (desktop, mail, crypto, maps) — all styled + shelled, 0 page errors across every render.
+
+### Metric deltas
+
+| Metric | Value | Δ vs S1 snapshot | Δ vs last QA (EPIC-13, 2026-07-10) |
+|---|---|---|---|
+| Apps / routes | 31 | ±0 | ±0 |
+| Routes rendering clean | **32/32** (desktop + 31 registry apps) | ±0 | ±0 |
+| Test cases | 399 | ±0 | +8 (S1 tests) |
+| Test files | 49 | ±0 | +1 (`ui.test.tsx`) |
+| Token violations | **0** | ±0 | ±0 |
+| Off-system utilities | **0** | ±0 | ±0 |
+| Off-system style | **0** (r0/t0/m0) | ±0 | ±0 |
+| **Off-shell controls** | **341** (b271/i48/s6/t16) | ±0 | NEW row (born this epic) |
+| Bundle gz (KB) | 729.8 | ±0 | ±0 |
+
+This QA run adds no app code, so every auto-metric reproduces the committed S1 snapshot exactly (Δ ±0).
+
+### Epic-acceptance — EPIC-14 · Shell conformance (S1 CONFIRMED)
+
+**S1 acceptance = "build the audit + complete the primitive set + establish the baseline (drive nothing yet)."** Independently CONFIRMED this run:
+- `metrics.mjs` reproduces the baseline **exactly**: `offShellControls = 341 (b271/i48/s6/t16)` — the control-shell axis is now MEASURED where nothing measured it before.
+- The three colour/style axes stay locked at **0** through the new primitive additions (`--assert-zero` exit 0) — the new `ui` `Select`/`IconButton`/`Segmented` audit token-clean, as S1 required.
+- Top offenders reproduce heaviest-first: Reader 19, FormBuilder 16, Calendar 15, Calculator 14, DataCenter 14, AIChat 13, Maps 12, Photos 12 — the S2 target order is intact.
+
+**S1 is done-confirmed. `offShellControls` holding at 341 is CORRECT, not a regression** — S1 drives nothing; the number only moves when the first migration stage lands. **▶ NEXT for the Builder = EPIC-14 S2 (migrate Reader 19→0).**
+
+### Env-expected non-bugs (NOT regressions)
+
+- `mail` → `net:1` (`/api/integrations/status` 401): Himalaya mail backend not configured in cloud (UI shows honest "Provider himalaya not configured", renders clean).
+- `maps` → OSM/CARTO tiles grey: tile-CDN egress-blocked; Leaflet container, zoom, search, attribution all render.
+- `weather` → Open-Meteo geocoding + Geolocation blocked in cloud.
+- `files` → `/api/files` 401 (Android-only device-FS path, absent in cloud).
+
+---
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -26,7 +66,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -172,46 +212,3 @@ The built app was served, warm-loaded so the service worker precached, then ALL 
 ## Screenshots
 
 See PNGs in this folder. `desktop.png` is the shell; `app-<id>.png` is each app route.
-
----
-
-## QA overlay — 2026-07-10 (green main `91ceaec`) · clean re-confirm, **no runtime bug**
-
-> HEAD is the prior QA commit itself (`91ceaec`) — **no app code landed since the last QA run**. This is a clean
-> re-confirm of the EPIC-13 CODE-COMPLETE tree; every metric Δ ±0, nothing drifted.
-
-**Build:** 🟢 `tsc -b && vite build` clean; PWA precache 91 entries (3113 KiB).
-**Smoke:** **32/32 passed, 0 failed** (auto-started its own server on :3001), 0 uncaught, 0 console errors. All 13 guard suites green.
-
-### Metrics (all Δ ±0 vs committed snapshot) — `metrics.mjs --assert-zero` **exit 0**
-
-| Metric | Value | Δ |
-|---|---|---|
-| Apps / routes | 31 | ±0 |
-| Test cases | 391 | ±0 |
-| Test files | 48 | ±0 |
-| Token violations | 0 | ±0 |
-| Off-system utils | 0 | ±0 |
-| Off-system style | 0 (r0/t0/m0) | ±0 |
-| Bundle gz (KB) | 729.8 | ±0 |
-
-### Epic-acceptance confirmation
-
-**EPIC-13 (▶ ACTIVE — Mail + Crypto join the organism): CODE-COMPLETE, acceptance HOLDS.** Its target metric
-`GRAPH-LEGIBLE` reads **3/3 ✅** this run (reader/book + crypto/wallet + mail/draft, each a typed node owned by its app
-in `empire-core-graph`, surviving a double reload); `INBOUND-LANDS 4/4 ✅`. No contradiction. **▶ Still awaiting the
-Strategist to retire EPIC-13 → DONE and promote the next epic** (ratified LATER candidate: a measured design-system
-STATE/shell-adoption epic, or an a11y pass; EPIC-7 · Android stays device-gated).
-
-### Screenshots visually inspected (local only — never committed)
-
-- `desktop.png` — Bridge "Good night" + Today/Open-Tasks/Goals/Organism stat cards + full 31-tile launcher grid
-  ending Search·Timeline·Mail·Crypto; both bespoke glyphs render (Mail envelope, Crypto wallet — **no `Node` fallback**).
-- `app-mail.png` — envelope glyph, Himalaya/AgentMail provider toggle, Refresh + Compose; graceful
-  "Provider himalaya not configured." on the 401, **NO error boundary**.
-- `app-crypto.png` — gold Wallet glyph + 5 labelled BTC/ETH/SOL/XRP/DOGE address inputs + Refresh.
-- `app-music.png` — shelled Music Player, "No track playing · Add audio files to get started" + Add Files
-  (the 2026-07-10 a11y polish landed **no visual regression**).
-- `app-network.png` — CORE mesh; the NODE TYPES legend includes **`draft`** (the EPIC-13 S3 node type is in the organism).
-
-**Conclusion:** main RUNS. 32/32 clean, all guards green, ratchet holds, EPIC-13 acceptance confirmed, zero drift. No runtime bug.

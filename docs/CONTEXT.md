@@ -16,6 +16,8 @@
 
 ---
 
+## ★ EPIC-14 S1 QA-CONFIRMED (2026-07-11, green main `5e37d8d`) — first independent QA since S1. `metrics.mjs` reproduces the baseline EXACTLY: `offShellControls = 341 (b271/i48/s6/t16)`; `--assert-zero` exit 0 (colour/style axes all held at 0 through the new `Select`/`IconButton`/`Segmented` primitives — they audit token-clean, as required). 32/32 routes render clean (0 uncaught, 0 page errors across all screenshots), all 14 guards green (INBOUND 4/4, MEDIA 3/3, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1, HOME-ALIVE 1/1, PROVENANCE 3/3+3/3, PRECACHE 91 no-gap, OFFLINE 5/5). Top offenders reproduce heaviest-first (Reader 19, FormBuilder 16, Calendar 15, Calculator 14, DataCenter 14, AIChat 13). **S1 done-confirmed — baseline is measured; 341 holding is CORRECT (S1 drives nothing).** No runtime bug, no drift. ▶ NEXT = **EPIC-14 S2** (Reader 19→0), the first mover.
+
 ## ★ EPIC-14 S1 SHIPPED (2026-07-11, green main) — the control-shell axis is now MEASURED. `offShellControls = 341 (b271/i48/s6/t16) across 54 files` is the new baseline; the `ui` primitive set is COMPLETE (gained `Select`/`IconButton`/`Segmented`). ▶ NEXT = **EPIC-14 S2** (migrate Reader 19→0). Full shape in the "Active epic" block below (search "▶ S2"). Metric is NOT yet in `--assert-zero` (S9 locks it). build🟢 vitest 471🟢 eslint clean; colour/style 0 Δ±0; bundle gz 729.8 ±0; no new deps.
 
 ## ★ INFRA GAP CLOSED (2026-07-10, green main) — `playwright` is now a real devDependency + `qa-smoke.mjs` AUTO-STARTS its own server. Every routine's manual `npm install --no-save playwright` + hand-started `node server.js` tax is GONE.
