@@ -183,10 +183,18 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   out of offenders); build🟢 vitest 476→479🟢 eslint clean; tokens/off-system/offSystemStyle **0** (`--assert-zero` exit 0); bundle gz
   729.8→730.1 (+0.3, primitives now mounted); no new deps. Render-confirm via `qa-smoke.mjs`. ▶ NEXT = **S3 (Calendar 15 → 0)**.
 
-- [ ] **S3 · Migrate Calendar (15 → 0) — alone (complex date-grid; keep keyboard nav intact).** `src/apps/calendar/Calendar.tsx`
-  — mapping rule; the month/nav arrows → `IconButton`, view toggles → `Segmented`, the `useInboundHandoff` receive path +
-  `ProvenanceChip` untouched. *Acceptance:* Calendar count = 0 (≈132 → ≈117); Calendar renders clean + `INBOUND-LANDS
-  calendar/editor` axis still ✅; build🟢 vitest🟢 eslint clean; conformance 0.
+- [x] **S3 · Migrate Calendar (15 → 0) — alone (complex date-grid). ✅ SHIPPED 2026-07-11 (`main`).** `src/apps/calendar/Calendar.tsx`
+  driven from **15** off-shell controls to **0** (`offShellControls 322 → 307 (−15)`, `b253/i48/t15 → b243/i44/t14`). Mapping applied:
+  month prev/next + per-day add + modal close → `IconButton` (each gained an `aria-label`); Today + Add-Event + Delete/Cancel/Create
+  → `Button` (danger/secondary/primary variants); Title/Date/Time/Tags → `Input` (date/time via `type=` passthrough — the Input
+  wrapper hosts native date pickers); Description → `TextArea`. **The 8 colour swatches (2 map to duplicate colour values, so
+  `Segmented`'s value-key would collide) → `IconButton` keyed by name, `aria-pressed` = selected, the colour dot as the icon
+  child** — a `Segmented` radiogroup was rejected here (duplicate values). The `useInboundHandoff` receive path + `ProvenanceChip`
+  + `LineageTrail` + the `mirrorCollection('event','calendar',…)` self-mirror all UNTOUCHED. `Calendar.test.tsx` (+4) locks the
+  migrated a11y. *Verified:* build🟢 vitest 479→483🟢 eslint clean; `--assert-zero` exit 0 (tokens/off-system/offSystemStyle 0);
+  bundle gz 730.1→730.2 (+0.1); no new deps. **Render-confirmed via `qa-smoke.mjs`:** 32/32 clean, Calendar uncaught:0,
+  **`INBOUND-LANDS calendar/editor` still ✅** (chip=true prefilled=true), `PROV-ENTITY notes→calendar` persisted, GRAPH-LEGIBLE
+  3/3, OFFLINE 5/5. ▶ NEXT = **S4 (Clock 13 + Photos 12 → 0)**.
 
 - [ ] **S4 · Migrate Clock (13) + Photos (12) = 25 → 0 — the `Segmented`/`IconButton` showcase.**
   `src/apps/clock/Clock.tsx` (tab row → `Segmented`, quick-set-minute chips → `Segmented`, the `addCityTz` `<select>` `:267` →

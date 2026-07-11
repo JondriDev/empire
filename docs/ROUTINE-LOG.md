@@ -5,6 +5,27 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-11 · BUILDER — EPIC-14 S3: Calendar migrated onto the `ui` shell (15 → 0)
+
+**Did:** Executed EPIC-14 S3 — drove `src/apps/calendar/Calendar.tsx` from **15** off-shell controls to **0** (`offShellControls 322 → 307`, −15; `b253/i48/t15 → b243/i44/t14`, `s6` unchanged). Applied the migration mapping rule mechanically:
+- **Icon-only → `IconButton`** (each gained a required `aria-label`): month `Previous`/`Next`, the per-day `Add event on <date>`, and the modal `Close`.
+- **Text/accent → `Button`:** header `Today` (sm), sidebar `Add Event` (primary, fullWidth), modal `Delete` (danger), `Cancel` (secondary), `Create/Update` (primary).
+- **Text `<input>` → `Input`; `<textarea>` → `TextArea`:** Title, Date (`type="date"`), Time (`type="time"`), Tags, Description. Date/time work via the `Input` primitive's `{...rest}` `type=` passthrough — the native picker renders inside the glass wrapper, so no `Select` or bespoke picker was needed. Each field is now `<label htmlFor>`↔`id`-linked.
+- **Colour swatches → `IconButton`** (NOT `Segmented`): the 8 `EVENT_COLORS` are a mutually-exclusive SET (the textbook `Segmented` case) BUT two pairs share a `value` (Purple+Teal=`bg-signal`, Red+Pink=`bg-danger`) and `Segmented` keys by `it.value` → collision. Used `IconButton` keyed by the unique `c.name`, `aria-pressed={newColor===c.value}`, the colour dot as the icon child, wrapped in `role="group" aria-label="Event color"`. The stored `color` value format (`bg-signal` …) is preserved verbatim — localStorage schema untouched.
+- **Hover-reveal fix:** the per-day add button switched from a self-`hover:opacity-100` on a bare `<button>` to a WRAPPING `<span className="opacity-0 group-hover:opacity-100 focus-within:opacity-100">` + `group` on the day cell — because `IconButton` sets `opacity:1` INLINE, which would have beaten a Tailwind `opacity-0` class placed on the button. This also reveals the add-affordance on cell-hover (more discoverable), matching the file's own sidebar-`NodeActions` idiom.
+
+The organism wiring is untouched: `useInboundHandoff('empire-calendar-clipboard')` receive path, `ProvenanceChip`, `LineageTrail`, and the `mirrorCollection('event','calendar',…)` self-mirror all render exactly as before. Added `src/apps/calendar/Calendar.test.tsx` (+4) locking the migrated a11y (named month-nav controls, modal opens from the shelled CTA, colour-swatch toggle state, create-through-Input-and-primary-Button).
+
+**Why:** S3 is the third migration stage of EPIC-14 (shell conformance) and the second to touch a render path. Calendar was the heaviest remaining offender (15) and a live handoff receiver + provenance node, so it's the strongest test that the mapping rule preserves cross-app behaviour while folding in a11y (7 icon/colour controls gained names).
+
+**Verified:** build🟢 (tsc -b && vite build); `npx vitest run` **483/483🟢** (56 files; +4 from Calendar.test.tsx, 479→483); `npx eslint` clean on both touched files; `node scripts/metrics.mjs --assert-zero` **exit 0** — `offShellControls 322 → 307 (b243/i44/s6/t14)`, tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 (r0/t0/m0) all **Δ ±0**; bundle gz 730.1→**730.2** (+0.1); no new deps. **Render-confirmed via `qa-smoke.mjs`** (auto-started its own server): **32/32 routes clean** (Calendar uncaught:0 net:0), **`INBOUND-LANDS calendar/editor` ✅** (chip=true prefilled=true from editor), **`PROV-ENTITY notes→calendar` persisted**, INBOUND-LANDS 4/4, GRAPH-LEGIBLE 3/3, OFFLINE 5/5. **Not visually inspected on-device** (headless cloud): the Delete button is now the solid `danger` gradient (was translucent `bg-danger/20`) and `Today` is a secondary-glass pill (was a signal-tinted pill) — small, on-system visual shifts to confirm on-device; no behaviour change.
+
+**Metrics row:** `apps 31 · tests 483 · tokenViolations 0 · offSystemUtilities 0 · offSystemStyle 0 (r0/t0/m0) · offShellControls 307 (b243/i44/s6/t14) · bundle gz 730.2`
+
+**Next:** EPIC-14 **S4** — migrate Clock (13) + Photos (12) = 25 → 0 (`offShellControls 307 → ~282`). Exact shape (incl. the `Segmented`-value-uniqueness check and the Photos media-store-preservation guard) is in `docs/CONTEXT.md` → "Active epic" ▶ S4.
+
+---
+
 ## 2026-07-11 · BUILDER — EPIC-14 S2: Reader migrated onto the `ui` shell (19 → 0) + a latent shared-primitive style bug fixed
 
 **Did:** Executed EPIC-14 S2 — drove `src/apps/reader/Reader.tsx` from **19** off-shell controls to **0**, alone (the heaviest file). The real count was 19 (18 `<button>` + 1 `<textarea>`), not the ≈16 estimate; the sole remaining bare element is the `<input type="file">` importer (exempt — no text-field primitive home). Applied the mapping rule mechanically:

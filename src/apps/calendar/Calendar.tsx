@@ -8,6 +8,7 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Trash2, X, C
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { Button, IconButton, Input, TextArea } from '../../components/ui'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { LineageTrail } from '../../components/ui/LineageTrail'
@@ -199,18 +200,11 @@ export default function Calendar() {
           </h1>
           <div className="flex items-center gap-2">
             <span className="text-base font-semibold">{MONTHS[month]} {year}</span>
-            <button onClick={() => navigate(-1)}
-              className="p-1.5 rounded-lg hover:bg-glass text-muted transition-colors">
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button onClick={() => setCurrentDate(new Date())}
-              className="px-2 py-1 rounded-lg bg-signal/20 text-signal text-xs hover:bg-signal/30 transition-colors">
-              Today
-            </button>
-            <button onClick={() => navigate(1)}
-              className="p-1.5 rounded-lg hover:bg-glass text-muted transition-colors">
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            <IconButton size="sm" aria-label="Previous month" onClick={() => navigate(-1)}
+              icon={<ChevronLeft className="w-4 h-4" />} />
+            <Button size="sm" onClick={() => setCurrentDate(new Date())}>Today</Button>
+            <IconButton size="sm" aria-label="Next month" onClick={() => navigate(1)}
+              icon={<ChevronRight className="w-4 h-4" />} />
           </div>
         </div>
 
@@ -242,7 +236,7 @@ export default function Calendar() {
               <div
                 key={day}
                 onClick={() => setSelectedDate(dateStr)}
-                className={`bg-void/30 p-1.5 min-h-[80px] cursor-pointer transition-colors hover:bg-glass ${
+                className={`group bg-void/30 p-1.5 min-h-[80px] cursor-pointer transition-colors hover:bg-glass ${
                   isSelected ? 'ring-1 ring-signal' : ''
                 } ${isToday ? 'bg-signal/10' : ''}`}
               >
@@ -250,10 +244,12 @@ export default function Calendar() {
                   <span className={`text-xs font-medium ${isToday ? 'text-signal' : 'text-muted'}`}>
                     {day}
                   </span>
-                  <button onClick={e => { e.stopPropagation(); openAddForm(day) }}
-                    className="p-0.5 rounded hover:bg-glass opacity-0 hover:opacity-100 transition-opacity">
-                    <Plus className="w-3 h-3 text-signal" />
-                  </button>
+                  <span className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                    <IconButton size="sm" aria-label={`Add event on ${dateStr}`}
+                      onClick={e => { e.stopPropagation(); openAddForm(day) }}
+                      style={{ width: 22, height: 22 }}
+                      icon={<Plus className="w-3 h-3 text-signal" />} />
+                  </span>
                 </div>
                 <div className="space-y-0.5">
                   {dayEvents.slice(0, 3).map(e => (
@@ -330,21 +326,22 @@ export default function Calendar() {
         </div>
 
         {/* Quick add */}
-        <button onClick={() => {
-          const todayStr = today
-          setNewDate(todayStr)
-          setNewTitle('')
-          setNewTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }))
-          setNewDescription('')
-          setNewTags('')
-          setNewColor('bg-signal')
-          setEditingEvent(null)
-          setSelectedDate(todayStr)
-          setShowForm(true)
-          setDraftFrom(undefined)
-        }} className="mt-3 flex items-center justify-center gap-1 px-4 py-2 rounded-xl bg-signal hover:bg-signal text-fg text-sm transition-colors">
-          <Plus className="w-4 h-4" /> Add Event
-        </button>
+        <Button variant="primary" fullWidth className="mt-3" icon={<Plus className="w-4 h-4" />}
+          onClick={() => {
+            const todayStr = today
+            setNewDate(todayStr)
+            setNewTitle('')
+            setNewTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }))
+            setNewDescription('')
+            setNewTags('')
+            setNewColor('bg-signal')
+            setEditingEvent(null)
+            setSelectedDate(todayStr)
+            setShowForm(true)
+            setDraftFrom(undefined)
+          }}>
+          Add Event
+        </Button>
       </div>
 
       {/* Modal */}
@@ -355,48 +352,46 @@ export default function Calendar() {
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <CalendarIcon className="w-4 h-4" /> {editingEvent ? 'Edit Event' : 'New Event'}
               </h2>
-              <button onClick={() => { setShowForm(false); setEditingEvent(null) }}
-                className="text-muted hover:text-fg"><X className="w-4 h-4" /></button>
+              <IconButton size="sm" variant="ghost" aria-label="Close"
+                onClick={() => { setShowForm(false); setEditingEvent(null) }}
+                icon={<X className="w-4 h-4" />} />
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-muted mb-1 block">Title</label>
-                <input value={newTitle} onChange={e => setNewTitle(e.target.value)}
-                  className="w-full bg-glass border-0 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-signal"
+                <label htmlFor="cal-title" className="text-xs text-muted mb-1 block">Title</label>
+                <Input value={newTitle} onChange={setNewTitle} id="cal-title"
                   placeholder="Event title..." autoFocus />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs text-muted mb-1 block">Date</label>
-                  <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)}
-                    className="w-full bg-glass border-0 rounded-lg px-3 py-2 text-sm text-fg focus:outline-none focus:ring-1 focus:ring-signal" />
+                  <label htmlFor="cal-date" className="text-xs text-muted mb-1 block">Date</label>
+                  <Input type="date" value={newDate} onChange={setNewDate} id="cal-date" />
                 </div>
                 <div>
-                  <label className="text-xs text-muted mb-1 block">Time</label>
-                  <input type="time" value={newTime} onChange={e => setNewTime(e.target.value)}
-                    className="w-full bg-glass border-0 rounded-lg px-3 py-2 text-sm text-fg focus:outline-none focus:ring-1 focus:ring-signal" />
+                  <label htmlFor="cal-time" className="text-xs text-muted mb-1 block">Time</label>
+                  <Input type="time" value={newTime} onChange={setNewTime} id="cal-time" />
                 </div>
               </div>
               <div>
-                <label className="text-xs text-muted mb-1 block">Description</label>
-                <textarea value={newDescription} onChange={e => setNewDescription(e.target.value)}
-                  className="w-full bg-glass border-0 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-signal"
-                  rows={2} placeholder="Event description..." />
+                <label htmlFor="cal-desc" className="text-xs text-muted mb-1 block">Description</label>
+                <TextArea value={newDescription} onChange={setNewDescription} id="cal-desc"
+                  rows={2} placeholder="Event description..." style={{ minHeight: '60px' }} />
               </div>
               <div>
-                <label className="text-xs text-muted mb-1 block">Tags (comma separated)</label>
-                <input value={newTags} onChange={e => setNewTags(e.target.value)}
-                  className="w-full bg-glass border-0 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-signal"
+                <label htmlFor="cal-tags" className="text-xs text-muted mb-1 block">Tags (comma separated)</label>
+                <Input value={newTags} onChange={setNewTags} id="cal-tags"
                   placeholder="work, personal, etc." />
               </div>
               <div>
-                <label className="text-xs text-muted mb-1 block">Color</label>
-                <div className="flex gap-2">
+                <span className="text-xs text-muted mb-1 block">Color</span>
+                <div className="flex gap-2" role="group" aria-label="Event color">
                   {EVENT_COLORS.map(c => (
-                    <button key={c.name} onClick={() => setNewColor(c.value)}
-                      className={`w-6 h-6 rounded-full ${c.value} ${newColor === c.value ? 'ring-2 ring-signal ring-offset-2 ring-offset-void' : ''}`}
-                      title={c.name} />
+                    <IconButton key={c.name} size="sm" aria-label={c.name}
+                      aria-pressed={newColor === c.value}
+                      onClick={() => setNewColor(c.value)}
+                      style={{ width: 24, height: 24, background: 'transparent', border: 'none', padding: 0 }}
+                      icon={<span className={`block w-6 h-6 rounded-full ${c.value} ${newColor === c.value ? 'ring-2 ring-signal ring-offset-2 ring-offset-void' : ''}`} />} />
                   ))}
                 </div>
               </div>
@@ -404,19 +399,19 @@ export default function Calendar() {
 
             <div className="flex gap-2 mt-6">
               {editingEvent && (
-                <button onClick={() => deleteEvent(editingEvent.id)}
-                  className="px-4 py-2 rounded-xl bg-danger/20 hover:bg-danger/30 text-danger text-sm flex items-center gap-1 transition-colors">
-                  <Trash2 className="w-4 h-4" /> Delete
-                </button>
+                <Button variant="danger" onClick={() => deleteEvent(editingEvent.id)}
+                  icon={<Trash2 className="w-4 h-4" />}>
+                  Delete
+                </Button>
               )}
-              <button onClick={() => { setShowForm(false); setEditingEvent(null) }}
-                className="flex-1 px-4 py-2 rounded-xl border border-hair text-sm hover:bg-glass transition-colors">
+              <Button variant="secondary" className="flex-1"
+                onClick={() => { setShowForm(false); setEditingEvent(null) }}>
                 Cancel
-              </button>
-              <button onClick={saveEvent}
-                className="flex-1 px-4 py-2 rounded-xl bg-signal hover:bg-signal text-fg text-sm flex items-center gap-1 justify-center transition-colors">
-                <Check className="w-4 h-4" /> {editingEvent ? 'Update' : 'Create'}
-              </button>
+              </Button>
+              <Button variant="primary" className="flex-1" onClick={saveEvent}
+                icon={<Check className="w-4 h-4" />}>
+                {editingEvent ? 'Update' : 'Create'}
+              </Button>
             </div>
           </div>
         </div>
