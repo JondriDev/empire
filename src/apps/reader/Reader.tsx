@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
+import { Button, IconButton, TextArea, Card } from '../../components/ui'
 import { SendResultMenu } from '../../components/ui/SendResultMenu'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { EmptyState } from '../../components/ui/Utility'
@@ -117,15 +118,14 @@ function Library({ books, importing, onOpen, onDelete, onImportClick }: {
             <p className="text-xs" style={{ color: 'var(--text3)' }}>Your books · ask Cakra as you read</p>
           </div>
         </div>
-        <button
+        <Button
           onClick={onImportClick}
           disabled={importing}
-          className="empire-btn inline-flex items-center gap-2 text-sm font-medium px-3.5 py-2 rounded-xl disabled:opacity-60"
-          style={{ background: ACCENT, color: 'var(--void)' }}
+          icon={importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+          style={{ background: ACCENT, color: 'var(--void)', border: 'none' }}
         >
-          {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
           {importing ? 'Importing…' : 'Add book'}
-        </button>
+        </Button>
       </header>
 
       {books.length === 0 ? (
@@ -136,41 +136,53 @@ function Library({ books, importing, onOpen, onDelete, onImportClick }: {
           title="Your library is empty"
           description="Add an EPUB, PDF, Markdown, text, or Word file. While you read, select any passage and ask Cakra about it."
           action={
-            <button onClick={onImportClick} className="empire-btn inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl" style={{ background: ACCENT, color: 'var(--void)' }}>
-              <Plus className="w-4 h-4" /> Add your first book
-            </button>
+            <Button onClick={onImportClick} icon={<Plus className="w-4 h-4" />} style={{ background: ACCENT, color: 'var(--void)', border: 'none' }}>
+              Add your first book
+            </Button>
           }
         />
       ) : (
         <div className="flex-1 overflow-y-auto p-6">
           <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
             {books.map(b => (
-              <div key={b.id} className="gp gp-interactive rounded-2xl overflow-hidden flex flex-col group" style={{ ['--app-color' as string]: ACCENT }}>
-                <button onClick={() => onOpen(b.id)} className="text-left">
-                  <div className="aspect-[3/4] flex items-center justify-center relative" style={{ background: b.cover ? undefined : `color-mix(in srgb, ${ACCENT} 12%, var(--card-bg))` }}>
-                    {b.cover
-                      ? <img src={b.cover} alt="" className="w-full h-full object-cover" />
-                      : <BookOpen className="w-10 h-10" style={{ color: ACCENT, opacity: 0.7 }} />}
-                    <span className="absolute top-2 left-2 text-[9px] font-bold tracking-wide px-1.5 py-0.5 rounded" style={{ background: 'color-mix(in srgb, var(--void) 60%, transparent)', color: 'var(--xenon)' }}>
-                      {FORMAT_LABEL[b.format]}
-                    </span>
-                  </div>
-                  <div className="p-3">
-                    <div className="text-sm font-semibold line-clamp-2 leading-snug">{b.title}</div>
-                    {b.author && <div className="text-xs mt-0.5 line-clamp-1" style={{ color: 'var(--text3)' }}>{b.author}</div>}
-                  </div>
-                </button>
-                <div className="px-3 pb-3 mt-auto flex items-center gap-2">
+              <Card
+                key={b.id}
+                interactive
+                padding="none"
+                onClick={() => onOpen(b.id)}
+                aria-label={`Open ${b.title}`}
+                className="rounded-2xl overflow-hidden flex flex-col group text-left"
+                style={{ ['--app-color' as string]: ACCENT }}
+              >
+                <div className="aspect-[3/4] flex items-center justify-center relative" style={{ background: b.cover ? undefined : `color-mix(in srgb, ${ACCENT} 12%, var(--card-bg))` }}>
+                  {b.cover
+                    ? <img src={b.cover} alt="" className="w-full h-full object-cover" />
+                    : <BookOpen className="w-10 h-10" style={{ color: ACCENT, opacity: 0.7 }} />}
+                  <span className="absolute top-2 left-2 text-[9px] font-bold tracking-wide px-1.5 py-0.5 rounded" style={{ background: 'color-mix(in srgb, var(--void) 60%, transparent)', color: 'var(--xenon)' }}>
+                    {FORMAT_LABEL[b.format]}
+                  </span>
+                </div>
+                <div className="p-3">
+                  <div className="text-sm font-semibold line-clamp-2 leading-snug">{b.title}</div>
+                  {b.author && <div className="text-xs mt-0.5 line-clamp-1" style={{ color: 'var(--text3)' }}>{b.author}</div>}
+                </div>
+                {/* Footer actions must not trigger the card-wide open. */}
+                <div className="px-3 pb-3 mt-auto flex items-center gap-2" onClick={e => e.stopPropagation()}>
                   <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: 'var(--holo-bg-h)' }}>
                     <div className="h-full rounded-full" style={{ width: `${Math.round((b.progress || 0) * 100)}%`, background: ACCENT }} />
                   </div>
                   <span className="text-[10px] tabular-nums" style={{ color: 'var(--text3)' }}>{Math.round((b.progress || 0) * 100)}%</span>
                   <NodeActions type="book" sourceId={b.id} />
-                  <button onClick={() => onDelete(b.id)} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded" aria-label="Delete" style={{ color: 'var(--text3)' }}>
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <IconButton
+                    onClick={() => onDelete(b.id)}
+                    aria-label={`Delete ${b.title}`}
+                    size="sm"
+                    icon={<Trash2 className="w-3.5 h-3.5" />}
+                    className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                    style={{ color: 'var(--text3)' }}
+                  />
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
@@ -244,26 +256,27 @@ function ReadingView({ book, onBack, onChanged }: { book: BookMeta; onBack: () =
     <div className="flex-1 flex flex-col min-h-0">
       {/* Reading toolbar */}
       <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
-        <button onClick={onBack} className="empire-topbar-btn" aria-label="Back to library"><ArrowLeft className="w-4 h-4" /></button>
+        <IconButton onClick={onBack} aria-label="Back to library" icon={<ArrowLeft className="w-4 h-4" />} />
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold truncate">{book.title}</div>
           {book.author && <div className="text-[11px] truncate" style={{ color: 'var(--text3)' }}>{book.author}</div>}
         </div>
         {paginated && (
           <>
-            <button onClick={() => handleRef.current?.prev()} className="empire-topbar-btn" aria-label="Previous"><ChevronLeft className="w-4 h-4" /></button>
-            <button onClick={() => handleRef.current?.next()} className="empire-topbar-btn" aria-label="Next"><ChevronRight className="w-4 h-4" /></button>
+            <IconButton onClick={() => handleRef.current?.prev()} aria-label="Previous" icon={<ChevronLeft className="w-4 h-4" />} />
+            <IconButton onClick={() => handleRef.current?.next()} aria-label="Next" icon={<ChevronRight className="w-4 h-4" />} />
           </>
         )}
         <FontControl scale={fontScale} setScale={setFontScale} />
         <ThemeControl theme={theme} setTheme={setTheme} />
-        <button
+        <Button
           onClick={() => { setAskPassage(undefined); setAskOpen(o => !o) }}
-          className="empire-btn inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg"
-          style={{ background: `color-mix(in srgb, var(--c-cakra) 22%, transparent)`, color: 'var(--c-cakra)' }}
+          size="sm"
+          icon={<Sparkles className="w-3.5 h-3.5" />}
+          style={{ background: `color-mix(in srgb, var(--c-cakra) 22%, transparent)`, color: 'var(--c-cakra)', border: 'none' }}
         >
-          <Sparkles className="w-3.5 h-3.5" /> Cakra
-        </button>
+          Cakra
+        </Button>
       </div>
 
       {/* Body: surface + ask panel */}
@@ -280,13 +293,13 @@ function ReadingView({ book, onBack, onChanged }: { book: BookMeta; onBack: () =
         {/* Selection action bar */}
         {selection.trim() && !askOpen && (
           <div className="absolute left-1/2 -translate-x-1/2 bottom-5 flex items-center gap-1.5 px-1.5 py-1.5 rounded-full animate-fade-in-up gp" style={{ zIndex: 5 }}>
-            <button onClick={askAboutSelection} className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: 'var(--c-cakra)', color: 'var(--xenon)' }}>
-              <Sparkles className="w-3.5 h-3.5" /> Ask Cakra
-            </button>
-            <button onClick={highlightSelection} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full" style={{ color: 'var(--text2)' }}>
-              <Highlighter className="w-3.5 h-3.5" /> Highlight
-            </button>
-            <button onClick={() => { setSelection(''); window.getSelection()?.removeAllRanges() }} className="p-1.5 rounded-full" style={{ color: 'var(--text3)' }} aria-label="Dismiss"><X className="w-3.5 h-3.5" /></button>
+            <Button onClick={askAboutSelection} size="sm" icon={<Sparkles className="w-3.5 h-3.5" />} style={{ background: 'var(--c-cakra)', color: 'var(--xenon)', border: 'none', borderRadius: 'var(--radius-full)' }}>
+              Ask Cakra
+            </Button>
+            <Button onClick={highlightSelection} variant="ghost" size="sm" icon={<Highlighter className="w-3.5 h-3.5" />} style={{ color: 'var(--text2)', borderRadius: 'var(--radius-full)' }}>
+              Highlight
+            </Button>
+            <IconButton onClick={() => { setSelection(''); window.getSelection()?.removeAllRanges() }} size="sm" aria-label="Dismiss" icon={<X className="w-3.5 h-3.5" />} style={{ color: 'var(--text3)', borderRadius: 'var(--radius-full)' }} />
           </div>
         )}
 
@@ -306,8 +319,8 @@ function ReadingView({ book, onBack, onChanged }: { book: BookMeta; onBack: () =
 function FontControl({ scale, setScale }: { scale: number; setScale: (n: number) => void }) {
   return (
     <div className="flex items-center gap-0.5">
-      <button onClick={() => setScale(Math.max(0.8, +(scale - 0.1).toFixed(2)))} className="empire-topbar-btn" aria-label="Smaller text" style={{ width: 32, height: 32 }}><Type className="w-3 h-3" /></button>
-      <button onClick={() => setScale(Math.min(1.8, +(scale + 0.1).toFixed(2)))} className="empire-topbar-btn" aria-label="Larger text" style={{ width: 32, height: 32 }}><Type className="w-4 h-4" /></button>
+      <IconButton onClick={() => setScale(Math.max(0.8, +(scale - 0.1).toFixed(2)))} size="sm" aria-label="Smaller text" icon={<Type className="w-3 h-3" />} />
+      <IconButton onClick={() => setScale(Math.min(1.8, +(scale + 0.1).toFixed(2)))} size="sm" aria-label="Larger text" icon={<Type className="w-4 h-4" />} />
     </div>
   )
 }
@@ -316,9 +329,12 @@ function ThemeControl({ theme, setTheme }: { theme: ReadingTheme; setTheme: (t: 
   const order: ReadingTheme[] = ['day', 'sepia', 'night']
   const next = () => setTheme(order[(order.indexOf(theme) + 1) % order.length])
   return (
-    <button onClick={next} className="empire-topbar-btn" aria-label={`Reading theme: ${theme}`} title={`Theme: ${theme}`} style={{ width: 34, height: 34 }}>
-      <Sun className="w-4 h-4" style={{ color: theme === 'day' ? 'var(--c-warn)' : theme === 'sepia' ? 'var(--ember)' : 'var(--text3)' }} />
-    </button>
+    <IconButton
+      onClick={next}
+      aria-label={`Reading theme: ${theme}`}
+      title={`Theme: ${theme}`}
+      icon={<Sun className="w-4 h-4" style={{ color: theme === 'day' ? 'var(--c-warn)' : theme === 'sepia' ? 'var(--ember)' : 'var(--text3)' }} />}
+    />
   )
 }
 
@@ -359,7 +375,7 @@ function AskPanel({ book, passage, onClose, onChanged }: { book: BookMeta; passa
           <Sparkles className="w-4 h-4" style={{ color: 'var(--c-cakra)' }} />
           <span className="text-sm font-semibold">Ask Cakra</span>
         </div>
-        <button onClick={onClose} className="empire-topbar-btn" style={{ width: 32, height: 32 }} aria-label="Close"><X className="w-4 h-4" /></button>
+        <IconButton onClick={onClose} size="sm" aria-label="Close" icon={<X className="w-4 h-4" />} />
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
@@ -378,7 +394,7 @@ function AskPanel({ book, passage, onClose, onChanged }: { book: BookMeta; passa
                 ? ['Explain this passage', 'Define the hard words', 'Why does this matter?']
                 : ['Summarize so far', 'Who are the key figures?', 'Explain the main idea']
               ).map(s => (
-                <button key={s} onClick={() => submit(s)} className="text-xs px-3 py-1.5 rounded-full" style={{ border: '1px solid var(--border)', color: 'var(--text2)' }}>{s}</button>
+                <Button key={s} onClick={() => submit(s)} variant="secondary" size="sm" style={{ borderColor: 'var(--border)', color: 'var(--text2)', borderRadius: 'var(--radius-full)' }}>{s}</Button>
               ))}
             </div>
           </div>
@@ -407,7 +423,7 @@ function AskPanel({ book, passage, onClose, onChanged }: { book: BookMeta; passa
             <div key={h.id} className="text-xs flex items-start gap-2 py-1 group">
               <Highlighter className="w-3 h-3 mt-0.5 flex-shrink-0" style={{ color: ACCENT }} />
               <span className="flex-1 line-clamp-2" style={{ color: 'var(--text2)' }}>{h.text}</span>
-              <button onClick={() => { removeHighlight(book.id, h.id); onChanged() }} className="opacity-0 group-hover:opacity-100" style={{ color: 'var(--text3)' }} aria-label="Remove"><X className="w-3 h-3" /></button>
+              <IconButton onClick={() => { removeHighlight(book.id, h.id); onChanged() }} size="sm" aria-label="Remove highlight" icon={<X className="w-3 h-3" />} className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100" style={{ color: 'var(--text3)' }} />
             </div>
           ))}
         </div>
@@ -415,18 +431,24 @@ function AskPanel({ book, passage, onClose, onChanged }: { book: BookMeta; passa
 
       <form onSubmit={e => { e.preventDefault(); submit(input) }} className="p-3 border-t" style={{ borderColor: 'var(--border)' }}>
         <div className="relative">
-          <textarea
+          <TextArea
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={setInput}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(input) } }}
             placeholder={passage ? 'Ask about this passage…' : 'Ask about this book…'}
             rows={1}
-            className="empire-textarea w-full resize-none rounded-xl px-3 py-2.5 pr-11 text-sm focus:outline-none"
-            style={{ background: 'var(--input-bg)', color: 'var(--text)', minHeight: 46, maxHeight: 120 }}
+            aria-label="Ask a question"
+            style={{ minHeight: 46, maxHeight: 120, resize: 'none', padding: '10px 44px 10px 12px' }}
           />
-          <button type="submit" disabled={!input.trim() || streaming} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30" style={{ background: 'var(--c-cakra)' }}>
-            {streaming ? <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "var(--xenon)" }} /> : <Send className="w-3.5 h-3.5" style={{ color: "var(--xenon)" }} />}
-          </button>
+          <IconButton
+            onClick={() => submit(input)}
+            disabled={!input.trim() || streaming}
+            aria-label="Send"
+            size="sm"
+            className="absolute right-2 top-1/2 -translate-y-1/2"
+            style={{ background: 'var(--c-cakra)', border: 'none' }}
+            icon={streaming ? <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: 'var(--xenon)' }} /> : <Send className="w-3.5 h-3.5" style={{ color: 'var(--xenon)' }} />}
+          />
         </div>
       </form>
     </div>

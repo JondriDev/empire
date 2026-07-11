@@ -100,6 +100,7 @@ export function Button({
   fullWidth,
   className = '',
   disabled,
+  style,
   ...rest
 }: ButtonProps) {
   return (
@@ -121,6 +122,9 @@ export function Button({
         transition: 'all var(--dur-fast) var(--ease-spring)',
         flexShrink: 0,
         whiteSpace: 'nowrap',
+        // Per-instance overrides (e.g. an app accent) compose on top of the
+        // variant/size base rather than replacing the whole style object.
+        ...style,
       }}
       {...rest}
     >
@@ -264,6 +268,7 @@ export function IconButton({
   size = 'md',
   className = '',
   disabled,
+  style,
   ...rest
 }: IconButtonProps) {
   return (
@@ -282,6 +287,8 @@ export function IconButton({
         transition: 'all var(--dur-fast) var(--ease-spring)',
         flexShrink: 0,
         padding: 0,
+        // Per-instance overrides compose on top of the variant/size base.
+        ...style,
       }}
       {...rest}
     >

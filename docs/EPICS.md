@@ -168,11 +168,20 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
     ±0 (dev script + tiny components), no new deps.
   </details>
 
-- [ ] **S2 · Migrate Reader (16 → 0) — the single heaviest file, alone.** `src/apps/reader/Reader.tsx` — apply the mapping
-  rule to all 16 bare controls (mostly reader-toolbar icon buttons → `IconButton`; any dropdown → `Select`). Keep every handler
-  + the file-`<input>` (`type="file"`, out of scope) as-is. *Acceptance:* `node scripts/metrics.mjs` → `offShellControls`
-  Reader-attributed count = 0 (headline ≈148 → ≈132); Reader renders clean in the smoke (`GRAPH-LEGIBLE reader/book` axis still
-  ✅); build🟢 vitest🟢 eslint clean; tokens/off-system/offSystemStyle 0.
+- [x] **S2 · Migrate Reader (19 → 0) — the single heaviest file, alone. ✅ SHIPPED 2026-07-11 (`main`).** `src/apps/reader/Reader.tsx`
+  — all **19** bare controls (real count, not the ≈16 estimate) migrated: 18 `<button>` + 1 `<textarea>`; the `<input type="file">`
+  importer stays bare (exempt). Mapping applied: header/empty-state CTAs + Cakra toggle + "Ask Cakra"/"Highlight"/suggestion chips →
+  `Button`; all icon-only toolbar/action controls (back/prev/next/font ±/theme/close/dismiss/delete/remove-highlight/send) →
+  `IconButton` (each now carries an `aria-label` — the a11y dividend); the compose `<textarea>` → `TextArea`; the book-grid tile
+  became a single clickable `Card` (role=button, `aria-label="Open <title>"`) with a `stopPropagation` footer so the delete/⚡ actions
+  don't fire the card open. Every existing handler reused verbatim (send-button switched from `type=submit` to `onClick={submit}` since
+  `IconButton` is always `type=button`). Delete + remove-highlight also fixed the touch-reachability trap (`opacity-0 group-hover` →
+  `opacity-60 group-hover/focus-visible:opacity-100`). **Shared-primitive fix (blast radius: all apps):** `Button`/`IconButton` now
+  MERGE a caller's `style` on top of the variant/size base instead of `{...rest}` REPLACING it — repairs a latent degradation where
+  Mail/Crypto's `style={{borderColor:ACCENT}}` buttons had been losing all variant styling. New `Reader.test.tsx` (+3) locks the
+  migrated Library a11y. *Acceptance MET:* `offShellControls 341 → 322 (−19, b271→b253/t16→t15)`; Reader-attributed count 0 (dropped
+  out of offenders); build🟢 vitest 476→479🟢 eslint clean; tokens/off-system/offSystemStyle **0** (`--assert-zero` exit 0); bundle gz
+  729.8→730.1 (+0.3, primitives now mounted); no new deps. Render-confirm via `qa-smoke.mjs`. ▶ NEXT = **S3 (Calendar 15 → 0)**.
 
 - [ ] **S3 · Migrate Calendar (15 → 0) — alone (complex date-grid; keep keyboard nav intact).** `src/apps/calendar/Calendar.tsx`
   — mapping rule; the month/nav arrows → `IconButton`, view toggles → `Segmented`, the `useInboundHandoff` receive path +

@@ -5,6 +5,27 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-11 · BUILDER — EPIC-14 S2: Reader migrated onto the `ui` shell (19 → 0) + a latent shared-primitive style bug fixed
+
+**Did:** Executed EPIC-14 S2 — drove `src/apps/reader/Reader.tsx` from **19** off-shell controls to **0**, alone (the heaviest file). The real count was 19 (18 `<button>` + 1 `<textarea>`), not the ≈16 estimate; the sole remaining bare element is the `<input type="file">` importer (exempt — no text-field primitive home). Applied the mapping rule mechanically:
+- **Text/accent buttons → `Button`:** header "Add book" + empty-state "Add your first book" (pembaca `var(--c-pembaca)` fill), the toolbar "Cakra" toggle + selection-bar "Ask Cakra"/"Highlight" (cakra accent), and the AskPanel suggestion chips. Accent is carried via a per-instance `style` override.
+- **Icon-only buttons → `IconButton`** (each gains a required `aria-label` — the a11y dividend): back / prev / next / font−/font+ / theme-cycle / close / dismiss-selection / delete-book / remove-highlight / send. The send control switched from `type=submit` to `onClick={() => submit(input)}` since `IconButton` is always `type=button`; the compose `<form onSubmit>` still wraps it harmlessly.
+- **Compose `<textarea>` → `TextArea`** (value/onChange/onKeyDown/placeholder/rows preserved; padding-right kept for the overlaid send button).
+- **Book-grid tile → a single clickable `Card`** (`interactive`, `padding="none"`, `role=button`, `aria-label="Open <title>"`) replacing the outer `.gp` div + inner open-`<button>`. The footer (progress bar + ⚡ `<NodeActions>` + delete) is wrapped in a `stopPropagation` handler so its actions never fire the card-wide open.
+- **Touch-reachability trap fixed** on delete + remove-highlight: `opacity-0 group-hover` → `opacity-60 group-hover/focus-visible:opacity-100` (phone-reachable; the CONTEXT trap idiom).
+
+**Shared-primitive fix (blast radius: every app that uses `Button`/`IconButton`):** these primitives spread `{...rest}` AFTER their own `style={{…}}`, so a caller's `style` prop had been REPLACING the entire composed variant/size style instead of merging. This was a latent degradation — Mail + Crypto's `<Button style={{borderColor: ACCENT}}>` were silently losing all variant styling (padding/gradient/radius), keeping only the border colour. Fixed by destructuring `style` out of `rest` and spreading `...style` LAST inside the composed style object (both `Button` and `IconButton`). Behaviour-identical for callers that pass no `style`; Mail/Crypto now render their intended secondary-glass-with-accent-border look. Primitives are excluded from `appCodeFiles()`, so this touches no conformance metric.
+
+**Why:** S2 is the first migration stage — it proves the mapping rule end-to-end on the heaviest file and is the first stage to touch a render path. Reader's toolbar was a dense field of bare icon buttons (nameless to AT); the migration both drives the metric AND folds in real a11y (11 icon controls gained names) with zero behaviour change.
+
+**New test:** `src/apps/reader/Reader.test.tsx` (+3) locks the migrated Library a11y — empty-state CTA clickable, header "Add book" present, and a book tile whose delete control has an accessible name ("Delete <title>") and fires `deleteBook` (mocks bookStore/render/eventBus/sync/NodeActions).
+
+**Verified (the only gate):** `npm run build` 🟢 (tsc -b + vite); `npx vitest run` **479/479** 🟢 (was 476; +3 Reader); `npx eslint` clean on both touched source files + the test. **Metrics row (Δ vs prior snapshot):** apps 31 ±0 · tokenViolations **0 ±0** · offSystemUtilities **0 ±0** · offSystemStyle **0 (r0/t0/m0) ±0** · **offShellControls 341 → 322 (−19; b271→b253, t16→t15)** · bundle gz **729.8 → 730.1 (+0.3**, primitives now mounted in the Reader path) · `--assert-zero` **exit 0** · no new deps. Reader dropped out of the offenders list. **Render-confirmed via `qa-smoke.mjs`** on the production `dist` (auto-started server, exit 0): **32/32 routes render clean** (`PASS reader uncaught:0 net:0` — the migrated shell mounts without error), **`GRAPH-LEGIBLE reader/book` = added=true node=true persisted=true → 3/3 ✅** (Reader stays graph-legible through the migration), INBOUND-LANDS 4/4, OFFLINE 5/5, PRECACHE 91 no-gap. No runtime regression from the shell migration.
+
+**Single best next step:** EPIC-14 **S3** — migrate `src/apps/calendar/Calendar.tsx` (15 → 0, alone): month/nav arrows → `IconButton`, view toggles → `Segmented`, keep the `useInboundHandoff` receive path + `ProvenanceChip` untouched; render-confirm `/app/calendar` + the `INBOUND-LANDS calendar/editor` axis. Exact shape in CONTEXT.md → Active epic → "▶ S3".
+
+---
+
 ## 2026-07-11 · BUILDER — EPIC-14 S1: the control-shell axis becomes MEASURED + the `ui` primitive set becomes COMPLETE
 
 **Did:** Executed EPIC-14 S1 (pure-additive foundation, zero migration/render risk) directly on green main. Three parts:
