@@ -1,9 +1,9 @@
 {
   "current": {
-    "generatedAt": "2026-07-11T03:09:14.503Z",
+    "generatedAt": "2026-07-11T04:08:58.669Z",
     "apps": 31,
-    "testFiles": 49,
-    "testCases": 399,
+    "testFiles": 50,
+    "testCases": 404,
     "tokenViolations": 0,
     "offSystemUtilities": 0,
     "offSystemStyle": 0,
@@ -19,42 +19,10 @@
       "select": 6,
       "textarea": 16
     },
-    "bundleGzKB": 729.8,
-    "bundleRawKB": 2467.1
+    "bundleGzKB": 729.9,
+    "bundleRawKB": 2467.9
   },
   "history": [
-    {
-      "generatedAt": "2026-07-09T18:39:17.651Z",
-      "apps": 31,
-      "testFiles": 41,
-      "testCases": 352,
-      "tokenViolations": 2,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 4,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 4,
-        "motion": 0
-      },
-      "bundleGzKB": 727.5,
-      "bundleRawKB": 2460
-    },
-    {
-      "generatedAt": "2026-07-09T18:42:45.859Z",
-      "apps": 31,
-      "testFiles": 42,
-      "testCases": 354,
-      "tokenViolations": 2,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "bundleGzKB": 727.5,
-      "bundleRawKB": 2460.1
-    },
     {
       "generatedAt": "2026-07-09T18:43:45.944Z",
       "apps": 31,
@@ -516,6 +484,52 @@
       },
       "bundleGzKB": 729.8,
       "bundleRawKB": 2467.1
+    },
+    {
+      "generatedAt": "2026-07-11T03:09:14.503Z",
+      "apps": 31,
+      "testFiles": 49,
+      "testCases": 399,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 341,
+      "offShellControlDims": {
+        "button": 271,
+        "input": 48,
+        "select": 6,
+        "textarea": 16
+      },
+      "bundleGzKB": 729.8,
+      "bundleRawKB": 2467.1
+    },
+    {
+      "generatedAt": "2026-07-11T04:08:54.448Z",
+      "apps": 31,
+      "testFiles": 50,
+      "testCases": 404,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 341,
+      "offShellControlDims": {
+        "button": 271,
+        "input": 48,
+        "select": 6,
+        "textarea": 16
+      },
+      "bundleGzKB": 729.9,
+      "bundleRawKB": 2467.9
     }
   ]
 }

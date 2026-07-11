@@ -194,14 +194,19 @@ export default function Video() {
       <Card className="p-3">
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-bold flex items-center gap-2">
-            <Film className="w-5 h-5" /> Video Player
+            <Film className="w-5 h-5" aria-hidden="true" /> Video Player
           </h1>
           <Button onClick={() => fileInputRef.current?.click()} className="text-sm bg-signal hover:bg-signal ml-auto">
-            <Plus className="w-4 h-4 mr-1" /> Add Video
+            <Plus className="w-4 h-4 mr-1" aria-hidden="true" /> Add Video
           </Button>
           <input ref={fileInputRef} type="file" accept="video/*" multiple className="hidden" onChange={handleFileSelect} />
-          <Button onClick={() => setShowPlaylist(p => !p)} className="text-sm bg-glass hover:bg-glass">
-            <ListVideo className="w-4 h-4" />
+          <Button
+            onClick={() => setShowPlaylist(p => !p)}
+            className="text-sm bg-glass hover:bg-glass"
+            aria-label={showPlaylist ? 'Hide playlist' : 'Show playlist'}
+            aria-pressed={showPlaylist}
+          >
+            <ListVideo className="w-4 h-4" aria-hidden="true" />
           </Button>
         </div>
       </Card>
@@ -237,20 +242,22 @@ export default function Video() {
                   value={currentTime}
                   onChange={seek}
                   className="w-full h-1 accent-signal cursor-pointer"
+                  aria-label="Seek"
+                  aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
                 />
                 <div className="flex items-center gap-3 flex-wrap">
-                  <button onClick={togglePlay} className="p-2 bg-glass text-void rounded-full hover:bg-glass">
-                    {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                  <button onClick={togglePlay} className="p-2 bg-glass text-void rounded-full hover:bg-glass" aria-label={playing ? 'Pause' : 'Play'}>
+                    {playing ? <Pause className="w-5 h-5" aria-hidden="true" /> : <Play className="w-5 h-5" aria-hidden="true" />}
                   </button>
-                  <button onClick={() => skip(-10)} className="p-1.5 text-muted hover:text-fg">
-                    <SkipBack className="w-4 h-4" /> <span className="text-xs ml-0.5">10</span>
+                  <button onClick={() => skip(-10)} className="p-1.5 text-muted hover:text-fg" aria-label="Back 10 seconds">
+                    <SkipBack className="w-4 h-4" aria-hidden="true" /> <span className="text-xs ml-0.5" aria-hidden="true">10</span>
                   </button>
-                  <button onClick={() => skip(10)} className="p-1.5 text-muted hover:text-fg">
-                    <SkipForward className="w-4 h-4" /> <span className="text-xs ml-0.5">10</span>
+                  <button onClick={() => skip(10)} className="p-1.5 text-muted hover:text-fg" aria-label="Forward 10 seconds">
+                    <SkipForward className="w-4 h-4" aria-hidden="true" /> <span className="text-xs ml-0.5" aria-hidden="true">10</span>
                   </button>
                   <div className="flex items-center gap-1 flex-1">
-                    <button onClick={() => setMuted(m => !m)} className="p-1 text-muted hover:text-fg">
-                      {muted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume1 className="w-4 h-4" />}
+                    <button onClick={() => setMuted(m => !m)} className="p-1 text-muted hover:text-fg" aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'} aria-pressed={muted}>
+                      {muted || volume === 0 ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume1 className="w-4 h-4" aria-hidden="true" />}
                     </button>
                     <input
                       type="range"
@@ -258,21 +265,22 @@ export default function Video() {
                       value={muted ? 0 : volume}
                       onChange={e => { setVolume(parseFloat(e.target.value)); setMuted(false) }}
                       className="w-20 h-1 accent-signal cursor-pointer"
+                      aria-label="Volume"
                     />
                   </div>
                   <span className="text-xs text-muted">{formatTime(currentTime)} / {formatTime(duration)}</span>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1" role="group" aria-label="Playback speed">
                     {([0.5, 1, 1.5, 2] as const).map(rate => (
-                      <button key={rate} onClick={() => changeRate(rate)} className={`text-xs px-1.5 py-0.5 rounded ${playbackRate === rate ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
+                      <button key={rate} onClick={() => changeRate(rate)} aria-label={`Playback speed ${rate}×`} aria-pressed={playbackRate === rate} className={`text-xs px-1.5 py-0.5 rounded ${playbackRate === rate ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
                         {rate}×
                       </button>
                     ))}
                   </div>
-                  <button onClick={toggleFullscreen} className="p-1.5 text-muted hover:text-fg">
-                    <Maximize className="w-4 h-4" />
+                  <button onClick={toggleFullscreen} className="p-1.5 text-muted hover:text-fg" aria-label="Fullscreen">
+                    <Maximize className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
-                <p className="text-sm text-fg truncate">{current.title}</p>
+                <p className="text-sm text-fg truncate" role="status" aria-live="polite">{current.title}</p>
               </div>
             </Card>
           ) : (
@@ -291,7 +299,7 @@ export default function Video() {
         {showPlaylist && videos.length > 0 && (
           <Card className="w-64 p-3 flex-shrink-0">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-bold flex items-center gap-1"><ListVideo className="w-4 h-4" /> Playlist</h2>
+              <h2 className="text-sm font-bold flex items-center gap-1"><ListVideo className="w-4 h-4" aria-hidden="true" /> Playlist</h2>
               <span className="text-xs text-faint">{videos.length}</span>
             </div>
             <div className="space-y-1 max-h-[60vh] overflow-y-auto">
@@ -307,8 +315,8 @@ export default function Video() {
                     {video.duration > 0 && <p className="text-xs text-faint">{formatTime(video.duration)}</p>}
                     {video.ephemeral && <p className="text-[10px] text-warn/70" title="Too large to save — won't survive a reload">session-only</p>}
                   </div>
-                  <button onClick={e => { e.stopPropagation(); removeVideo(video.id) }} className="opacity-0 group-hover:opacity-100 text-faint hover:text-danger p-1">
-                    <X className="w-3 h-3" />
+                  <button onClick={e => { e.stopPropagation(); removeVideo(video.id) }} aria-label={`Remove ${video.title}`} className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100 text-faint hover:text-danger p-1">
+                    <X className="w-3 h-3" aria-hidden="true" />
                   </button>
                 </div>
               ))}
