@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-10T00:00:00Z",
+  "generatedAt": "2026-07-11T00:00:00Z",
   "problems": [
     {
       "catalogId": "disc-sudan-famine",
@@ -36,6 +36,24 @@
       "severity": 4,
       "tractability": 2,
       "discoveredFrom": "UNHCR and IRC 2026 emergency reporting rank the Sahel among the top under-funded crises, with 2.7M+ IDPs and 29M in need across Mali, Burkina Faso and Niger."
+    },
+    {
+      "catalogId": "disc-afghanistan-drought-hunger",
+      "title": "Afghanistan drought & hunger crisis (2026)",
+      "blurb": "A multi-year drought has failed nearly 80% of rainfed wheat crops in several regions, helping push 17.4 million Afghans into acute food insecurity in 2026 — including 4.7 million in IPC Phase 4 emergency — as the UN seeks $1.7 billion to reach nearly 18 million people in need.",
+      "category": "Food & Water",
+      "severity": 5,
+      "tractability": 2,
+      "discoveredFrom": "UN News (Dec 2025) and OCHA's Afghanistan Humanitarian Needs and Response Plan 2026 report 21.9M people (45% of the population) needing aid, 80% rainfed-wheat failure and a doubling of IPC-4 emergency hunger."
+    },
+    {
+      "catalogId": "disc-haiti-collapse",
+      "title": "Haiti gang violence, displacement & cholera",
+      "blurb": "Armed-group control of much of Port-au-Prince has driven more than 1.3 million Haitians from their homes and left roughly half the population acutely food insecure, while cholera has resurged through crowded displacement camps — a WASH-and-vaccine-tractable disease spreading fastest among children.",
+      "category": "Governance & Rights",
+      "severity": 5,
+      "tractability": 2,
+      "discoveredFrom": "2026 humanitarian watchlists (IRC, UNICEF, Concern) and the Global Humanitarian Overview 2026 flag Haiti's compounding violence, mass displacement, near-famine food insecurity and cholera outbreak as severe and underfunded."
     }
   ],
   "briefs": {
@@ -357,6 +375,110 @@
         "https://www.unescap.org/blog/beyond-lives-saved-why-early-warning-systems-are-smart-investment"
       ],
       "updatedAt": "2026-07-10"
+    },
+    "food-insecurity": {
+      "summary": "The UN's State of Food Security and Nutrition in the World (SOFI) 2025, released July 2025, estimates that about 673 million people (range 638–720 million, or 8.2% of humanity) faced chronic hunger in 2024 — down 15 million from 2023 and 22 million from 2022, but still far above pre-pandemic levels. Progress is deeply uneven: hunger keeps falling in Asia and Latin America but is rising in Africa, where 307 million people (over 20% of the population) are undernourished, and in western Asia. A broader 2.3 billion people (28%) experienced moderate or severe food insecurity in 2024 — 335 million more than in 2019. On current trends SOFI projects 512 million people still chronically undernourished in 2030, nearly 60% of them in Africa, missing the Zero Hunger goal. The drivers are conflict, climate extremes and economic shocks, but the tools to reverse it are proven and costed.",
+      "interventions": [
+        {
+          "title": "National school feeding programmes",
+          "evidence": "SOFI 2025 and WFP cite school meals as a 'bedrock of long-term resilience'; programmes reaching ~418 million children raise attendance and nutrition, and are credited as part of China's declared end to absolute poverty.",
+          "actor": "Education & agriculture ministries with WFP support (home-grown school feeding)"
+        },
+        {
+          "title": "Mandatory staple-food fortification",
+          "evidence": "A 2025 systematic review of economic evaluations across 63 countries (medRxiv) found staple fortification with iron, folic acid, vitamin A and iodine among the most cost-effective ways to cut micronutrient 'hidden hunger'.",
+          "actor": "National food-safety regulators mandating millers to fortify flour, oil and salt"
+        },
+        {
+          "title": "Cash and food transfers for acute food insecurity",
+          "evidence": "SOFI 2025 and the Global Alliance Against Hunger and Poverty identify cash transfers and food aid as interventions with a proven track record for affordability and shielding the poorest from price and climate shocks.",
+          "actor": "Social-protection agencies and humanitarian agencies (WFP, national safety nets)"
+        },
+        {
+          "title": "Climate-resilient crops and agroecology",
+          "evidence": "SOFI 2025 and 2025 food-security research highlight climate-resilient grains (millets, sorghum, quinoa), water management and agroecological systems that raise smallholder yields and stabilise local supply against shocks.",
+          "actor": "Agricultural research systems (CGIAR) and national extension services for smallholders"
+        },
+        {
+          "title": "Smallholder nutrition-sensitive agriculture training",
+          "evidence": "Field programmes such as Tanzania's Sustainable Nutrition Project trained smallholders to grow iron- and vitamin-rich indigenous vegetables, reducing anemia and vitamin deficiencies among children and pregnant women.",
+          "actor": "NGOs and national extension services working with farmer cooperatives"
+        }
+      ],
+      "sources": [
+        "https://www.who.int/news/item/28-07-2025-global-hunger-declines-but-rises-in-africa-and-western-asia-un-report",
+        "https://data.unicef.org/resources/sofi-2025/",
+        "https://sdg.iisd.org/news/sofi-2025-reveals-regional-disparities-in-fighting-hunger/",
+        "https://www.medrxiv.org/content/10.1101/2025.06.12.25329169.full.pdf",
+        "https://globalallianceagainsthungerandpoverty.org/new/global-hunger-declines-but-disparities-persist-warns-un-report/"
+      ],
+      "updatedAt": "2026-07-11"
+    },
+    "extreme-poverty": {
+      "summary": "In June–September 2025 the World Bank adopted a new international poverty line of $3.00/day (2021 PPP), replacing the $2.15 line. Under the new measure about 838 million people lived in extreme poverty in 2022, and an estimated 808 million — 9.9%, or roughly 1 in 10 people — in 2025. The re-basing revised the count upward by about 125 million versus the old definition, with the largest increase (about 111 million more) in Sub-Saharan Africa, where poverty is now most concentrated. Progress has stalled since roughly 2019: conflict, debt distress, climate shocks and the COVID-era reversal have flattened what had been decades of decline. The evidence base for what moves the needle is unusually strong — over 300 randomized trials on cash transfers alone — so the constraint is financing and delivery, not knowledge of what works.",
+      "interventions": [
+        {
+          "title": "Cash transfers (conditional and unconditional)",
+          "evidence": "Over 300 RCTs and a meta-analysis of 115 studies find transfers raise consumption, income, labour supply, school enrolment and child health while cutting skipped meals and domestic violence; unconditional transfers can more than double incomes.",
+          "actor": "National social-protection agencies, with World Bank / donor financing"
+        },
+        {
+          "title": "Graduation ('big push') programmes for the ultra-poor",
+          "evidence": "Multi-country RCTs of BRAC-style graduation programmes (asset transfer + coaching + savings) show lasting gains in consumption and assets years after the support ends, moving households out of extreme poverty.",
+          "actor": "NGOs (e.g. BRAC) and governments integrating graduation into safety nets"
+        },
+        {
+          "title": "School feeding tied to human-capital investment",
+          "evidence": "The World Bank notes China ended absolute poverty roughly a decade after rolling out a comprehensive school health and nutrition programme as part of a broader human-capital investment.",
+          "actor": "Education ministries with WFP and development-bank support"
+        },
+        {
+          "title": "Pooled global cash-transfer financing",
+          "evidence": "Analysts (Lawson & Stewart, Project Syndicate 2024) and the Global Alliance Against Hunger and Poverty argue a pooled global fund could scale proven cash transfers to close the extreme-poverty gap affordably.",
+          "actor": "Multilateral development banks, donor governments and philanthropies"
+        }
+      ],
+      "sources": [
+        "https://www.worldbank.org/en/news/factsheet/2025/06/05/june-2025-update-to-global-poverty-lines",
+        "https://blogs.worldbank.org/en/opendata/september-2025-global-poverty-update-from-the-world-bank--new-da",
+        "https://ourworldindata.org/new-international-poverty-line-3-dollars-per-day",
+        "https://voxdev.org/topic/social-protection/what-broad-lessons-have-we-learned-115-studies-unconditional-cash-transfers",
+        "https://globalallianceagainsthungerandpoverty.org/new/countries-organizations-development-banks-announce-strongest-ever-collective-effort-to-eradicate-hunger-and-reduce-poverty-through-public-policies/"
+      ],
+      "updatedAt": "2026-07-11"
+    },
+    "climate-mitigation": {
+      "summary": "The Global Carbon Budget 2025 (published November 2025, 20th edition) projects fossil-fuel and cement CO₂ emissions at a record 38.1 billion tonnes in 2025, up about 1.1% on 2024, with all fuels rising (coal +0.8%, oil +1.0%, gas +1.3%). Because land-use-change emissions fell to about 4.1 Gt, total CO₂ is projected roughly flat year-on-year — but 'flat at a record high' still pushes atmospheric CO₂ to 425.7 ppm, 52% above pre-industrial levels. There is a genuine bright spot: total emissions growth has flattened to 0.3%/yr over 2014–2025, versus 1.9%/yr the prior decade, as clean energy scales. The gap now is speed — emissions must fall sharply, not merely plateau, to keep 1.5–2°C in reach, and the cheapest large near-term win is cutting methane.",
+      "interventions": [
+        {
+          "title": "Scale solar PV and wind deployment",
+          "evidence": "IEA data show ~800 GW of renewable capacity added in 2025 (+16%), a 23rd consecutive record year — solar PV alone surpassed 600 GW and wind additions jumped ~40% to ~160 GW, displacing fossil generation.",
+          "actor": "Governments (auctions, permitting reform, grids) and utilities/developers"
+        },
+        {
+          "title": "Methane abatement in oil, gas, coal and waste",
+          "evidence": "The 2025 Global Methane Status Report finds over 80% of the 2030 methane-reduction potential is achievable at low cost via leak detection and repair, plugging abandoned wells and waste treatment — avoiding ~0.2°C of warming by 2050.",
+          "actor": "Energy regulators, fossil-fuel operators and waste/agriculture ministries"
+        },
+        {
+          "title": "Grid, storage and permitting build-out",
+          "evidence": "IEA reporting identifies grid connection delays and permitting as the binding constraints on the renewable build-out; expanding transmission and storage is required to keep additions on a tripling-by-2030 path.",
+          "actor": "System operators and governments (transmission planning, storage incentives)"
+        },
+        {
+          "title": "Halt and reverse land-use-change emissions",
+          "evidence": "Global Carbon Budget 2025 attributes the flat total-CO₂ projection partly to land-use emissions falling to ~4.1 Gt; protecting and restoring forests both cuts emissions and strengthens the land carbon sink.",
+          "actor": "Forest-nation governments with results-based finance (e.g. REDD+, forest funds)"
+        }
+      ],
+      "sources": [
+        "https://globalcarbonbudget.org/fossil-fuel-co2-emissions-hit-record-high-in-2025/",
+        "https://www.carbonbrief.org/analysis-fossil-fuel-co2-emissions-to-set-new-record-in-2025-as-land-sink-recovers/",
+        "https://www.iea.org/reports/renewables-2025/renewable-electricity",
+        "https://www.ccacoalition.org/content/global-methane-status-report-2025",
+        "https://www.unep.org/news-and-stories/press-release/ministers-urge-decisive-methane-action-global-report-shows-progress"
+      ],
+      "updatedAt": "2026-07-11"
     }
   }
 }
