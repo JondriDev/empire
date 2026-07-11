@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { Card, Button } from '../../components/ui'
+import { Card, Button, IconButton, Segmented, Select, Input } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
-import { Clock as ClockIcon, Globe, Timer, AlarmClock, Hourglass, Play, Pause, RotateCcw, Trash2, Plus, X } from 'lucide-react'
+import { Clock as ClockIcon, Globe, Timer, AlarmClock, Hourglass, Play, Pause, RotateCcw, Trash2, Plus, X, Bell, BellOff } from 'lucide-react'
 import {
   DAYS,
   CITY_OPTIONS,
@@ -221,19 +221,18 @@ export default function Clock() {
   return (
     <div className="space-y-4 max-w-2xl mx-auto">
       {/* Tab bar */}
-      <div className="flex gap-2 p-1 bg-void/20 rounded-xl">
-        {(['clock', 'timer', 'stopwatch', 'alarm'] as const).map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${activeTab === tab
-              ? 'bg-signal text-fg shadow-lg'
-              : 'text-muted hover:text-fg hover:bg-glass'}`}>
-            {tab === 'clock' && <ClockIcon className="inline w-4 h-4 mr-1" />}
-            {tab === 'timer' && <Hourglass className="inline w-4 h-4 mr-1" />}
-            {tab === 'stopwatch' && <Timer className="inline w-4 h-4 mr-1" />}
-            {tab === 'alarm' && <AlarmClock className="inline w-4 h-4 mr-1" />}
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
-        ))}
+      <div className="flex justify-center">
+        <Segmented
+          ariaLabel="Clock mode"
+          value={activeTab}
+          onChange={v => setActiveTab(v as typeof activeTab)}
+          items={[
+            { value: 'clock', label: 'Clock', icon: <ClockIcon className="w-4 h-4" /> },
+            { value: 'timer', label: 'Timer', icon: <Hourglass className="w-4 h-4" /> },
+            { value: 'stopwatch', label: 'Stopwatch', icon: <Timer className="w-4 h-4" /> },
+            { value: 'alarm', label: 'Alarm', icon: <AlarmClock className="w-4 h-4" /> },
+          ]}
+        />
       </div>
 
       {/* ── Clock Tab ── */}
@@ -264,14 +263,18 @@ export default function Clock() {
               </h2>
               {availableCities.length > 0 && (
                 <div className="flex items-center gap-2">
-                  <select value={addCityTz} onChange={e => setAddCityTz(e.target.value)}
-                    className="bg-void/30 border border-hair rounded-lg px-2 py-1 text-sm text-fg focus:border-signal focus:outline-none">
-                    <option value="">Add city…</option>
-                    {availableCities.map(c => <option key={c.timezone} value={c.timezone}>{c.city}</option>)}
-                  </select>
-                  <Button onClick={addWorldClock} className="text-xs px-2 py-1" disabled={!addCityTz}>
-                    <Plus className="w-3 h-3" />
-                  </Button>
+                  <div className="w-40">
+                    <Select
+                      ariaLabel="Add a city"
+                      value={addCityTz}
+                      onChange={setAddCityTz}
+                      options={[
+                        { value: '', label: 'Add city…' },
+                        ...availableCities.map(c => ({ value: c.timezone, label: c.city })),
+                      ]}
+                    />
+                  </div>
+                  <IconButton onClick={addWorldClock} aria-label="Add world clock" icon={<Plus className="w-4 h-4" />} disabled={!addCityTz} />
                 </div>
               )}
             </div>
@@ -281,11 +284,11 @@ export default function Clock() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {worldClocks.map(clock => (
                   <div key={clock.timezone} className="group relative p-3 bg-void/20 rounded-lg border border-hair">
-                    <button onClick={() => removeWorldClock(clock.timezone)}
-                      className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 text-faint hover:text-danger transition"
-                      aria-label={`Remove ${clock.city}`}>
-                      <X className="w-3 h-3" />
-                    </button>
+                    <IconButton onClick={() => removeWorldClock(clock.timezone)}
+                      size="sm"
+                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                      aria-label={`Remove ${clock.city}`}
+                      icon={<X className="w-3 h-3" />} />
                     <div className="text-xs text-muted mb-1">{clock.city}</div>
                     <div className="text-xl font-mono font-semibold">{worldTime(clock.timezone)}</div>
                     <div className="text-xs text-faint">{clock.timezone.split('/').pop()?.replace('_', ' ')}</div>
@@ -317,30 +320,31 @@ export default function Clock() {
             </div>
 
             {/* Presets */}
-            <div className="flex justify-center gap-2 mb-4 flex-wrap">
-              {TIMER_PRESETS.map(min => (
-                <button key={min} onClick={() => setTimerTo(min * 60_000)}
-                  className={`text-sm px-3 py-1.5 rounded-lg transition ${timerDuration === min * 60_000 && !timerRunning
-                    ? 'bg-signal text-fg' : 'bg-glass text-muted hover:text-fg hover:bg-glass'}`}>
-                  {min}m
-                </button>
-              ))}
+            <div className="flex justify-center mb-4">
+              <Segmented
+                ariaLabel="Timer presets"
+                value={!timerRunning ? String(timerDuration) : ''}
+                onChange={v => setTimerTo(Number(v))}
+                items={TIMER_PRESETS.map(min => ({ value: String(min * 60_000), label: `${min}m` }))}
+              />
             </div>
 
             {/* Custom duration */}
             <div className="flex items-end justify-center gap-2 mb-5">
               <div>
-                <label className="text-xs text-muted block mb-1">Min</label>
-                <input type="number" min={0} max={999} value={customMin}
-                  onChange={e => setCustomMin(parseInt(e.target.value) || 0)}
-                  className="w-16 bg-void/30 border border-hair rounded-lg px-2 py-1.5 text-fg text-center font-mono focus:border-signal focus:outline-none" />
+                <label htmlFor="timer-min" className="text-xs text-muted block mb-1">Min</label>
+                <Input id="timer-min" className="w-20" mono type="number" min={0} max={999}
+                  aria-label="Minutes"
+                  value={String(customMin)}
+                  onChange={v => setCustomMin(parseInt(v) || 0)} />
               </div>
               <span className="text-faint pb-2">:</span>
               <div>
-                <label className="text-xs text-muted block mb-1">Sec</label>
-                <input type="number" min={0} max={59} value={customSec}
-                  onChange={e => setCustomSec(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
-                  className="w-16 bg-void/30 border border-hair rounded-lg px-2 py-1.5 text-fg text-center font-mono focus:border-signal focus:outline-none" />
+                <label htmlFor="timer-sec" className="text-xs text-muted block mb-1">Sec</label>
+                <Input id="timer-sec" className="w-20" mono type="number" min={0} max={59}
+                  aria-label="Seconds"
+                  value={String(customSec)}
+                  onChange={v => setCustomSec(Math.max(0, Math.min(59, parseInt(v) || 0)))} />
               </div>
               <Button onClick={applyCustomTimer} className="text-xs px-3 py-2">Set</Button>
             </div>
@@ -423,15 +427,14 @@ export default function Clock() {
             </h2>
             <div className="flex gap-2 items-end">
               <div className="flex-1">
-                <label className="text-xs text-muted block mb-1">Time</label>
-                <input type="time" value={newAlarmTime} onChange={e => setNewAlarmTime(e.target.value)}
-                  className="w-full bg-void/30 border border-hair rounded-lg px-3 py-2 text-fg font-mono focus:border-signal focus:outline-none" />
+                <label htmlFor="alarm-time" className="text-xs text-muted block mb-1">Time</label>
+                <Input id="alarm-time" className="w-full" mono type="time" aria-label="Alarm time"
+                  value={newAlarmTime} onChange={setNewAlarmTime} />
               </div>
               <div className="flex-1">
-                <label className="text-xs text-muted block mb-1">Label</label>
-                <input type="text" value={newAlarmLabel} onChange={e => setNewAlarmLabel(e.target.value)}
-                  placeholder="Alarm label"
-                  className="w-full bg-void/30 border border-hair rounded-lg px-3 py-2 text-fg focus:border-signal focus:outline-none" />
+                <label htmlFor="alarm-label" className="text-xs text-muted block mb-1">Label</label>
+                <Input id="alarm-label" className="w-full" placeholder="Alarm label" aria-label="Alarm label"
+                  value={newAlarmLabel} onChange={setNewAlarmLabel} />
               </div>
               <Button onClick={addAlarm} className="px-4 py-2">Add</Button>
             </div>
@@ -456,21 +459,24 @@ export default function Clock() {
                     <span className="text-sm text-muted">{alarm.label}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => toggleAlarm(alarm.id)}
-                      className={`w-10 h-6 rounded-full transition-all ${alarm.enabled ? 'bg-signal' : 'bg-faint'}`}>
-                      <div className={`w-4 h-4 bg-glass rounded-full transition-transform ${alarm.enabled ? 'translate-x-5' : 'translate-x-1'}`} />
-                    </button>
-                    <button onClick={() => removeAlarm(alarm.id)} className="text-faint hover:text-danger transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <IconButton onClick={() => toggleAlarm(alarm.id)}
+                      aria-label={alarm.enabled ? `Disable ${alarm.label}` : `Enable ${alarm.label}`}
+                      aria-pressed={alarm.enabled}
+                      variant={alarm.enabled ? 'primary' : 'ghost'}
+                      icon={alarm.enabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />} />
+                    <IconButton onClick={() => removeAlarm(alarm.id)}
+                      aria-label={`Remove ${alarm.label}`}
+                      icon={<Trash2 className="w-4 h-4" />} />
                   </div>
                 </div>
-                <div className="flex gap-1 flex-wrap">
+                <div className="flex gap-1 flex-wrap" role="group" aria-label="Repeat days">
                   {DAYS.map(day => (
-                    <button key={day} onClick={() => toggleDay(alarm.id, day)}
-                      className={`text-xs px-2 py-1 rounded transition-all ${alarm.days.includes(day) ? 'bg-signal text-fg' : 'bg-glass text-faint'}`}>
+                    <Button key={day} size="sm" onClick={() => toggleDay(alarm.id, day)}
+                      aria-pressed={alarm.days.includes(day)}
+                      variant={alarm.days.includes(day) ? 'primary' : 'ghost'}
+                      className="text-xs">
                       {day}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>

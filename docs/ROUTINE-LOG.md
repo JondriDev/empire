@@ -5,6 +5,25 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-11 · BUILDER — EPIC-14 S4: Clock + Photos migrated onto the `ui` shell (23 → 0)
+
+**Did:** Executed EPIC-14 S4 — drove `src/apps/clock/Clock.tsx` (11) and `src/apps/photos/Photos.tsx` (12) from **23** off-shell controls to **0** (`offShellControls 307 → 284`, −23; `b243/i44/s6/t14 → b226/i39/s5/t14`). Both files dropped off the top-offenders list (now FormBuilder 16, Calculator 14, DataCenter 14, AIChat 13, Maps 12, Goals 10, Flashcards 9, Editor 9). These are the first real consumers of the `Segmented`/`Select` primitives S1 added — the showcase.
+
+- **Clock:** mode-tab bar + timer-preset chips → `Segmented` (single-select radiogroups); `addCityTz` `<select>` → `Select` (wrapped in `<div className="w-40">` because the `Select` primitive hardcodes `width:100%` on its wrapper via inline style, so `className` widths on it are ignored); world-clock add + world-clock remove + alarm remove → `IconButton` (each named); custom min/sec (`type=number`) + alarm time (`type=time`)/label (`type=text`) → `Input` (`String(n)` value ↔ `parseInt` back; native pickers via the `{...rest}` `type=` passthrough); **the alarm enable pill-switch → `IconButton` Bell/BellOff + `aria-pressed`** — a small visual change (styled switch → icon toggle), behaviour identical; day-repeat chips → `Button size="sm"` + `aria-pressed` (a MULTI-select set, so NOT `Segmented`), wrapped in `role="group"`.
+- **Photos:** grid-columns + view-mode + favourites-filter + tag chips → `Segmented`; the favourites filter was a single on/off `<button>` → a 2-item `Segmented` (All / Favorites) since it reads cleaner as a radiogroup; search `<input>` → `Input` (Search icon); the list-row favourite + all 6 lightbox controls (favourite, delete, close, prev, next) → `IconButton` (nav prev/next = `variant="secondary" size="lg"` + `style={{borderRadius:'var(--radius-full)'}}` for the round glass look — token-clean, no style violation). The `<input type=file>` importer + 2 `type=checkbox` inputs stay bare (exempt types). Also upgraded the list-row action group from `opacity-0 group-hover` to `opacity-60 group-hover:opacity-100 focus-within:opacity-100` (touch-reachability, per the noted phone-first trap).
+- **`mediaStore`/IndexedDB persistence path deliberately UNTOUCHED** — `MEDIA-PERSISTS photos` must stay green.
+- **Tests:** new `Clock.test.tsx` (+4, eventBus mocked) and `Photos.test.tsx` (+4, mediaStore mocked like Video) lock the migrated a11y — Segmented tabs assert `getByRole('radio',{name})`+`aria-checked` (NOT `aria-pressed`), icon actions assert accessible names + pressed state, lightbox controls all named.
+
+**Verified:** build 🟢 (`tsc -b && vite build`); `npx vitest run` **491/491** (483→491, +8); `npx eslint` clean on all 4 touched files; `node scripts/metrics.mjs --assert-zero` **exit 0** — offShellControls 307→284 (−23), tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 (r0/t0/m0), all Δ ±0; bundle gz 730.2→731 (+0.8); no new deps. **Render-confirmed via `qa-smoke.mjs` (exit 0):** 32/32 routes clean (clock + photos uncaught:0, net:0), **`MEDIA-PERSISTS photos` still ✅ (3/3)** — Photos' IDB path survives the migration — GRAPH-LEGIBLE 3/3, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, OFFLINE-BOOT `/app/clock` renders=true.
+
+**Not verifiable in cloud (visual):** I can't see the rendered UI. Two intentional visual changes to confirm on-device: (1) Clock's mode tabs + timer presets are now a compact centred segmented control with a light-signal *wash* on the active segment (was a solid `bg-signal` fill); (2) each alarm's enable toggle is now a Bell/BellOff icon button (was a pill-and-knob switch). Photos' toolbar toggles are likewise segmented washes; the lightbox nav arrows remain round glass buttons.
+
+**Next:** EPIC-14 **S5** — migrate the artifacts family (27 → 0): FormBuilder (now #1 at 16, incl. a `<select>`), Flashcards (9), Kanban (4), ChartBuilder (4), MarkdownStudio (1). Same mapping rule; add a `.test.tsx` per touched file. Full shape in `docs/CONTEXT.md` (search "▶ S5").
+
+**Docs:** `docs/CONTEXT.md` (new S4-SHIPPED headline + Active-epic S4→done / S5-next shape), `docs/EPICS.md` (S4 checked `[x]`), `docs/metrics.json` (snapshot 284), this log.
+
+---
+
 ## 2026-07-11 · QA — Visual + smoke: EPIC-14 S2+S3 render-CONFIRMED (green main `2622813`)
 
 **Did:** Fresh-checkout QA on green main `2622813` (first QA since both S2 Reader and S3 Calendar shipped; last QA was at S1=341). Build 🟢 (`tsc -b && vite build`, bundle gz 730.2, precache 91). `qa-smoke.mjs` → **32/32 routes render clean** (0 uncaught, 0 console errors), all 13 guards green (INBOUND 4/4, MEDIA 3/3, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1, HOME-ALIVE 1/1, PROVENANCE 3/3+3/3, PRECACHE 91 no-gap, OFFLINE 5/5). `metrics.mjs --assert-zero` **exit 0** (tokens/off-system/off-system-style all 0, Δ ±0).

@@ -196,11 +196,18 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   **`INBOUND-LANDS calendar/editor` still ✅** (chip=true prefilled=true), `PROV-ENTITY notes→calendar` persisted, GRAPH-LEGIBLE
   3/3, OFFLINE 5/5. ▶ NEXT = **S4 (Clock 13 + Photos 12 → 0)**.
 
-- [ ] **S4 · Migrate Clock (13) + Photos (12) = 25 → 0 — the `Segmented`/`IconButton` showcase.**
-  `src/apps/clock/Clock.tsx` (tab row → `Segmented`, quick-set-minute chips → `Segmented`, the `addCityTz` `<select>` `:267` →
-  `Select`, alarm/remove/day-toggle icon buttons → `IconButton`) + `src/apps/photos/Photos.tsx` (grid-size + grid/list +
-  favorites-filter toggles → `Segmented`, tag chips → `Segmented`, lightbox nav/close/favorite/delete → `IconButton`).
-  *Acceptance:* both files' counts = 0 (≈117 → ≈92); both render clean + `MEDIA-PERSISTS photos` axis still ✅; conformance 0.
+- [x] **S4 · Migrate Clock (11) + Photos (12) = 23 → 0 — the `Segmented`/`IconButton`/`Select` showcase.** ✅ SHIPPED
+  2026-07-11 (`main`, this run) — `offShellControls 307 → 284 (−23)`, both files off the offenders list. Clock: mode tabs +
+  timer presets → `Segmented`, `addCityTz` `<select>` → `Select` (wrapped `w-40` since the primitive is width:100%),
+  world-clock remove + world-clock add + alarm remove → `IconButton`, custom-min/sec + alarm time/label → `Input`, the alarm
+  enable **switch** → `IconButton` Bell/BellOff (aria-pressed) [visual change: pill switch → icon toggle], day-repeat chips →
+  `Button` size sm (aria-pressed). Photos: grid-cols + view-mode + favourites-filter + tag chips → `Segmented`, search
+  `<input>` → `Input` (Search icon), list-fav + all 6 lightbox controls → `IconButton` (nav = `secondary`/`lg` +
+  `borderRadius:var(--radius-full)`). **`mediaStore`/IDB path untouched.** `Clock.test.tsx` (+4) & `Photos.test.tsx` (+4) lock
+  the migrated a11y. *Verified:* build🟢 vitest 483→491🟢 eslint clean; `--assert-zero` exit 0 (tokens/util/style 0); bundle
+  gz 730.2→731 (+0.8); no new deps. **Render-confirmed via `qa-smoke.mjs` (exit 0):** 32/32 clean (clock+photos uncaught:0),
+  **`MEDIA-PERSISTS photos` still ✅ (3/3)**, GRAPH-LEGIBLE 3/3, PROVENANCE 3/3+3/3, OFFLINE-BOOT `/app/clock` renders=true.
+  ▶ NEXT = **S5 (the artifacts family 27 → 0)**.
 
 - [ ] **S5 · Migrate the artifacts family (27 → 0).** `src/apps/artifacts/artifacts/FormBuilder.tsx` (9; incl. `<select>` `:94`
   → `Select`), `Flashcards.tsx` (9), `Kanban.tsx` (4), `ChartBuilder.tsx` (4), `MarkdownStudio.tsx` (1) — one coherent sub-app

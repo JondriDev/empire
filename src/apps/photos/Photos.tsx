@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Card, Button } from '../../components/ui'
+import { Card, Button, IconButton, Segmented, Input } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
@@ -12,7 +12,7 @@ import {
 import {
  Image, Upload, Trash2, ChevronLeft,
  ChevronRight, X, Heart, Download,
- Maximize2, LayoutGrid, List
+ Maximize2, LayoutGrid, List, Search
 } from 'lucide-react'
 
 interface Photo extends MediaRecord {
@@ -204,28 +204,34 @@ export default function Photos() {
           <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => addFiles(e.target.files)} />
 
           <div className="h-6 w-px bg-glass mx-1" />
-          <div className="flex gap-1">
-                  {GRID_SIZES.map(size => (
-                          <button key={size} onClick={() => setGridSize(size)} className={`px-2 py-1 text-xs rounded ${gridSize === size ? 'bg-glass text-fg' : 'text-faint hover:text-fg'}`}>
-                                  {size}
-                          </button>
-                  ))}
-          </div>
+          <Segmented
+            ariaLabel="Grid columns"
+            value={String(gridSize)}
+            onChange={v => setGridSize(Number(v))}
+            items={GRID_SIZES.map(size => ({ value: String(size), label: String(size) }))}
+          />
 
           <div className="h-6 w-px bg-glass mx-1" />
-          <div className="flex gap-1">
-                  <button onClick={() => setViewMode('grid')} className={`p-1 rounded ${viewMode === 'grid' ? 'bg-glass text-fg' : 'text-faint hover:text-fg'}`}>
-                          <LayoutGrid className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={() => setViewMode('list')} className={`p-1 rounded ${viewMode === 'list' ? 'bg-glass text-fg' : 'text-faint hover:text-fg'}`}>
-                          <List className="w-3.5 h-3.5" />
-                  </button>
-          </div>
+          <Segmented
+            ariaLabel="View mode"
+            value={viewMode}
+            onChange={v => setViewMode(v as 'grid' | 'list')}
+            items={[
+              { value: 'grid', icon: <LayoutGrid className="w-3.5 h-3.5" />, ariaLabel: 'Grid view' },
+              { value: 'list', icon: <List className="w-3.5 h-3.5" />, ariaLabel: 'List view' },
+            ]}
+          />
 
           <div className="h-6 w-px bg-glass mx-1" />
-          <button onClick={() => setFilter(f => f === 'all' ? 'favorites' : 'all')} className={`text-xs px-2 py-1 rounded ${filter === 'favorites' ? 'bg-danger/30 text-danger' : 'text-faint hover:text-fg'}`}>
-            <Heart className="w-3 h-3 inline mr-1" /> Favorites
-          </button>
+          <Segmented
+            ariaLabel="Filter"
+            value={filter}
+            onChange={v => setFilter(v as 'all' | 'favorites')}
+            items={[
+              { value: 'all', label: 'All' },
+              { value: 'favorites', label: 'Favorites', icon: <Heart className="w-3 h-3" /> },
+            ]}
+          />
 
           <div className="flex-1" />
           <span className="text-xs text-faint">{photos.length} photo{photos.length !== 1 ? 's' : ''}</span>
@@ -234,20 +240,22 @@ export default function Photos() {
         {/* Search + Tags */}
         {(allTags.length > 0 || searchTag) && (
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <input
-              type="text"
+            <Input
+              className="flex-1 min-w-[150px]"
+              aria-label="Search photos"
               placeholder="Search photos..."
+              icon={<Search className="w-4 h-4" />}
               value={searchTag}
-              onChange={e => setSearchTag(e.target.value)}
-              className="text-sm bg-glass border-0 rounded px-2 py-1 flex-1 min-w-[150px]"
+              onChange={setSearchTag}
             />
-            <div className="flex gap-1 flex-wrap">
-              {allTags.slice(0, 8).map(tag => (
-                <button key={tag} onClick={() => setSearchTag(tag)} className={`text-xs px-1.5 py-0.5 rounded ${searchTag === tag ? 'bg-signal text-fg' : 'bg-glass text-muted hover:bg-glass'}`}>
-                  #{tag}
-                </button>
-              ))}
-            </div>
+            {allTags.length > 0 && (
+              <Segmented
+                ariaLabel="Filter by tag"
+                value={searchTag}
+                onChange={setSearchTag}
+                items={allTags.slice(0, 8).map(tag => ({ value: tag, label: `#${tag}` }))}
+              />
+            )}
           </div>
         )}
       </Card>
@@ -325,11 +333,13 @@ export default function Photos() {
                   </p>
                   <p className="text-xs text-faint">{formatBytes(photo.size)} · {formatDate(new Date(photo.date))}</p>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 focus-within:opacity-100" onClick={e => e.stopPropagation()}>
                   <NodeActions type="photo" sourceId={photo.id} />
-                  <button onClick={e => { e.stopPropagation(); toggleFavorite(photo.id) }}>
-                    <Heart className={`w-4 h-4 ${photo.favorite ? 'text-danger fill-danger' : 'text-faint'}`} />
-                  </button>
+                  <IconButton size="sm" variant="ghost"
+                    onClick={e => { e.stopPropagation(); toggleFavorite(photo.id) }}
+                    aria-label={photo.favorite ? `Unfavorite ${photo.name}` : `Favorite ${photo.name}`}
+                    aria-pressed={photo.favorite}
+                    icon={<Heart className={`w-4 h-4 ${photo.favorite ? 'text-danger fill-danger' : 'text-faint'}`} />} />
                 </div>
               </div>
             ))}
@@ -347,29 +357,36 @@ export default function Photos() {
               <span className="text-faint text-sm">{lightboxIdx + 1} / {filtered.length}</span>
             </div>
             <div className="flex gap-2">
-              <button onClick={e => { e.stopPropagation(); toggleFavorite(currentLightboxPhoto.id) }} className="p-2 text-muted hover:text-fg">
-                <Heart className={`w-5 h-5 ${currentLightboxPhoto.favorite ? 'text-danger fill-danger' : ''}`} />
-              </button>
-              <a href={currentLightboxPhoto.src} download={currentLightboxPhoto.name} onClick={e => e.stopPropagation()} className="p-2 text-muted hover:text-fg">
+              <IconButton onClick={e => { e.stopPropagation(); toggleFavorite(currentLightboxPhoto.id) }}
+                aria-label={currentLightboxPhoto.favorite ? 'Unfavorite' : 'Favorite'}
+                aria-pressed={currentLightboxPhoto.favorite}
+                icon={<Heart className={`w-5 h-5 ${currentLightboxPhoto.favorite ? 'text-danger fill-danger' : ''}`} />} />
+              <a href={currentLightboxPhoto.src} download={currentLightboxPhoto.name} onClick={e => e.stopPropagation()} className="p-2 text-muted hover:text-fg" aria-label="Download">
                 <Download className="w-5 h-5" />
               </a>
-              <button onClick={e => { e.stopPropagation(); deletePhoto(currentLightboxPhoto.id) }} className="p-2 text-muted hover:text-danger">
-                <Trash2 className="w-5 h-5" />
-              </button>
-              <button onClick={closeLightbox} className="p-2 text-muted hover:text-fg ml-2">
-                <X className="w-5 h-5" />
-              </button>
+              <IconButton onClick={e => { e.stopPropagation(); deletePhoto(currentLightboxPhoto.id) }}
+                aria-label="Delete photo"
+                icon={<Trash2 className="w-5 h-5" />} />
+              <IconButton onClick={closeLightbox} className="ml-2"
+                aria-label="Close"
+                icon={<X className="w-5 h-5" />} />
             </div>
           </div>
           {/* Image */}
           <div className="flex-1 flex items-center justify-center relative" onClick={e => e.stopPropagation()}>
-            <button onClick={e => { e.stopPropagation(); lightboxPrev() }} className="absolute left-4 p-3 bg-glass rounded-full hover:bg-glass text-fg">
-              <ChevronLeft className="w-6 h-6" />
-            </button>
+            <IconButton onClick={e => { e.stopPropagation(); lightboxPrev() }}
+              variant="secondary" size="lg"
+              className="absolute left-4"
+              style={{ borderRadius: 'var(--radius-full)' }}
+              aria-label="Previous photo"
+              icon={<ChevronLeft className="w-6 h-6" />} />
             <img src={currentLightboxPhoto.src} alt={currentLightboxPhoto.name} className="max-h-[80vh] max-w-[90vw] object-contain" />
-            <button onClick={e => { e.stopPropagation(); lightboxNext() }} className="absolute right-4 p-3 bg-glass rounded-full hover:bg-glass text-fg">
-              <ChevronRight className="w-6 h-6" />
-            </button>
+            <IconButton onClick={e => { e.stopPropagation(); lightboxNext() }}
+              variant="secondary" size="lg"
+              className="absolute right-4"
+              style={{ borderRadius: 'var(--radius-full)' }}
+              aria-label="Next photo"
+              icon={<ChevronRight className="w-6 h-6" />} />
           </div>
           {/* Footer */}
           <div className="p-4 flex justify-between text-sm text-faint">
