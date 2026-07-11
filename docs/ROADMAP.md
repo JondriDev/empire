@@ -10,9 +10,11 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-07-10** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 391/48 files,
-> token-violations 0, off-system 0, offSystemStyle 0 r0/t0/m0, `--assert-zero` exit 0, bundle gz 729.8) · QA (2026-07-10,
-> `a9bec85`): `GRAPH-LEGIBLE 3/3 ✅` + `INBOUND-LANDS 4/4 ✅`, all 13 guard suites green, no drift. **EPIC-1..13 all DONE**
+> Last re-ranked: **2026-07-11** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 436/60 files,
+> token-violations 0, off-system 0, offSystemStyle 0 r0/t0/m0, `--assert-zero` exit 0, `offShellControls` **238 (b193/i29/s4/t12)**
+> after EPIC-14 S1–S5, bundle gz 731) · QA (2026-07-11, first QA since S4): 32/32 render clean, all 13 guard suites green, no
+> drift. **EPIC-14 S1–S5 shipped (341 → 238); stages S6–S12 re-decomposed this run from the live census — the old S6–S8 estimate
+> covered only ~65 of the real 238 controls.** **EPIC-1..13 all DONE**
 > (organism both-ways 9/9 · token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable · off-system
 > 1076→0, CI-locked · durable provenance `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` + Reader graph-legible ·
 > `GLOBAL-SEARCH 1/1` queryable organism · `NODE-LINEAGE 1/1` per-artifact ancestry, navigable · `TIMELINE 1/1` temporal lens,
@@ -137,10 +139,12 @@ now **EPIC-6 S4**:
 - **Shell conformance — the component shell becomes total (no app renders a bare interactive control).** *(In progress — this
   IS EPIC-14, ▶ ACTIVE, RATIFIED 2026-07-10.)* The last unlocked design-system axis: EPIC-5 locked colour, EPIC-11 locked
   radii/type/motion, but nothing measures whether apps render `ui.Button`/`Input`/`TextArea` or bare `<button>`/`<select>`/
-  `<input>`/`<textarea>` — a census finds 148 bare controls across 27 files. Root cause: the `ui` set is incomplete (no
-  `Select`/`IconButton`/`Segmented`), so apps drop to bare HTML — exactly why Mail/Crypto were islands. Complete the primitive
-  set + migrate all 27 files + lock a new **`offShellControls` metric (≈148 → 0)** in `--assert-zero`. Closes when QA confirms
-  `offShellControls 0` LOCKED. Folds in the ad-hoc a11y work (IconButton forces `aria-label`, Segmented forces `aria-pressed`).
+  `<input>`/`<textarea>`. Root cause: the `ui` set is incomplete (no `Select`/`IconButton`/`Segmented`), so apps drop to bare
+  HTML — exactly why Mail/Crypto were islands. Complete the primitive set (S1 ✅) + migrate every offender file + lock a new
+  **`offShellControls` metric** in `--assert-zero`. **Real baseline was 341 (b271/i48/s6/t16), not the ≈148 subset estimate;
+  S1–S5 drove it 341 → 238; S6–S12 (re-decomposed 2026-07-11 from the live census across the remaining 43 files) drive it
+  238 → 0.** Closes when QA confirms `offShellControls 0` LOCKED. Folds in the ad-hoc a11y work (IconButton forces `aria-label`,
+  Segmented forces `aria-pressed`).
 - **Measured accessibility pass — a FUTURE epic candidate (largely seeded by EPIC-14's primitive a11y dividend).**
   `prefers-reduced-motion` honoured across all animations + an ARIA-name / keyboard-reachability coverage metric driven to a
   target and locked via `--assert-zero` — the EPIC-5/11 template applied to a11y. Captures the ad-hoc per-app aria passes

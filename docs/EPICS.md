@@ -228,42 +228,101 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   GRAPH-LEGIBLE 3/3, OFFLINE 5/5, PRECACHE 91 no-gap. ▶ NEXT = **S6** (media + language: Video 8 + Language 7 + Music 6 +
   Browser 6 → 0).
 
-- [ ] **S6 · Migrate media + language (27 → 0).** `src/apps/video/Video.tsx` (8), `src/apps/language/Language.tsx` (7; both
-  `<select>`s `:194`/`:207` → `Select` — reconcile with the existing aria-labels the a11y pass added), `src/apps/music/Music.tsx`
-  (6; icon transport → `IconButton`, preserving the a11y names the 2026-07-10 polish added), `src/apps/browser/Browser.tsx` (6).
-  *Acceptance:* all four = 0 (≈65 → ≈38); each renders clean + `MEDIA-PERSISTS music/video` axes still ✅; conformance 0.
+> **⚠️ STAGES S6–S12 RE-DECOMPOSED by the Strategist 2026-07-11 (post-S5).** The original S6–S8 (ratified 2026-07-10 off the
+> ≈148 subset estimate) planned to cover only ~65 controls, but the LIVE census after S5 shows **238 counted controls across
+> 43 files** — far more, and far more spread out, than the estimate. Two offenders the old plan under-counted by an order of
+> magnitude: **DataCenter (real 14, old plan said 3)** and **Maps (real 12, old plan said 1)**; and the old plan never named
+> Calculator (14), AIChat (13), Goals (10), AgentSurface (8), SolverPanel (8), Desktop (8), AppShell (6) at all. Had the
+> Builder followed it, S9 (LOCK) would have FAILED with ~173 controls still bare. **The stages below are re-grouped from the
+> exact live per-file census (`node scripts/metrics.mjs`, `controlAudit.mjs`), heaviest-cluster-first, each a meaty ~34–48-
+> control PR (comparable to S5's 46) that sums cleanly to 238 → 0** before the lock. Verify each stage's counts with
+> `node scripts/metrics.mjs` before starting (counts shift as siblings migrate; the FILE LIST per stage is the contract, the
+> numbers are the current census).
 
-- [ ] **S7 · Migrate the utility apps (16 → 0).** `src/apps/files/Files.tsx` (7), `src/apps/weather/Weather.tsx` (4),
-  `src/apps/datacenter/DataCenter.tsx` (3), `src/apps/maps/Maps.tsx` (1), `src/apps/grammar/Grammar.tsx` (1). Mapping rule.
-  *Acceptance:* all five = 0 (≈38 → ≈22); each renders clean (Files/Weather/Maps keep their env-gated-fetch behaviour);
-  conformance 0.
+- [ ] **S6 · Migrate media + language (34 → 0).** The four media/language instruments, all with real transport/format controls.
+  `src/apps/music/Music.tsx` (**9** `b7/i2`; icon transport play/pause/prev/next/shuffle/repeat → `IconButton` — **PRESERVE the
+  accessible names the 2026-07-10 music a11y polish added**; seek/volume `<input>` → `Input`), `src/apps/video/Video.tsx`
+  (**9** `b7/i2`; same transport idiom → `IconButton`; sliders → `Input`), `src/apps/browser/Browser.tsx` (**8** `b7/i1`;
+  back/fwd/reload/go nav → `IconButton`, URL bar → `Input`), `src/apps/language/Language.tsx` (**8** `b5/s2/t1`; **both
+  `<select>`s → `Select`** — reconcile with the existing `aria-label`s a prior a11y pass added, don't double-label; swap/speak →
+  `IconButton`, the text panes → `TextArea`). Apply the shared MIGRATION MAPPING RULE. **★ mediaStore/IDB paths in Video+Music
+  are UNTOUCHED — migrate only the controls.** Add/extend a `.test.tsx` per touched file locking migrated a11y (Segmented →
+  `getByRole('radio')`+`aria-checked`). *Acceptance:* all four = 0 (`offShellControls 238 → 204`, −34); each renders clean +
+  **`MEDIA-PERSISTS music/video` axes still ✅**; build🟢 vitest🟢 eslint clean; tokens/off-system/offSystemStyle 0.
 
-- [ ] **S8 · Migrate the Cakra family + the shell components tail (≈22 → 0) — the LAST offenders.**
-  `src/apps/cakra/tabs/PromptGenerator.tsx` (7; `<select>` `:397` → `Select`), `src/apps/cakra/tabs/Editor.tsx` (7; `<select>`
-  `:142` → `Select`), `src/apps/cakra/tabs/TokenCounter.tsx` (2), `src/apps/cakra/solver/ProblemDetail.tsx` (2),
-  `src/apps/cakra/components/SettingsPanel.tsx` (1), `src/apps/cakra/components/ModelPicker.tsx` (1), `src/apps/cakra/AIChat.tsx`
-  (1), `src/components/AppHost.tsx` (3), `src/components/Bridge.tsx` (1). Re-run the census; drive ANY residual offender the
-  earlier stages missed to 0 too — **do not stop at "mostly."** *Acceptance:* `node scripts/metrics.mjs` → **`offShellControls`
-  = 0 (`b0/i0/s0/t0`)**; all routes render clean (31/31); build🟢 vitest🟢 eslint clean; tokens/off-system/offSystemStyle 0.
+- [ ] **S7 · Migrate the utility apps (42 → 0) — DataCenter + Maps anchor this (far heavier than the old estimate).**
+  `src/apps/datacenter/DataCenter.tsx` (**14** `b10/i4`; table/query/import controls → `Button`/`Input`; **keep the
+  `mirrorCollection('dataset',…)` graph-mirror + per-table row-count logic UNTOUCHED**), `src/apps/maps/Maps.tsx` (**12**
+  `b11/i1`; search/zoom/layer controls → `IconButton`/`Input`; **keep the Leaflet container + env-gated tile/geocode fetch
+  behaviour**), `src/apps/files/Files.tsx` (**8** `b7/i1`; breadcrumb/action controls → `Button`/`IconButton`; **keep the
+  `filesGraph` session-union mirror**), `src/apps/weather/Weather.tsx` (**6** `b6`; city search/unit toggle → `Input` +
+  `Segmented`; **keep the Open-Meteo env-gated fetch**), `src/apps/grammar/Grammar.tsx` (**2** `b1/t1`; check/copy → `Button`,
+  textarea → `TextArea`). Mapping rule. *Acceptance:* all five = 0 (`offShellControls 204 → 162`, −42); each renders clean
+  (Files/Weather/Maps keep their env-gated-fetch + graph-mirror behaviour); build🟢 vitest🟢 eslint clean; conformance 0.
 
-- [ ] **S9 · LOCK `offShellControls` in `--assert-zero` → ★ EPIC-14 CODE-COMPLETE.** Add `if (snapshot.offShellControls > 0)
-  fail.push(...)` to the `--assert-zero` block (`scripts/metrics.mjs:248`, beside the existing `tokenViolations`/
+- [ ] **S8 · Migrate the standalone tool + entity apps (40 → 0).** `src/apps/calculator/Calculator.tsx` (**14** `b14`; the whole
+  keypad + operator buttons → `Button` — pick `secondary`/`ghost` by role; the EPIC-11-tokenised pulse motion stays),
+  `src/apps/goals/Goals.tsx` (**10** `b6/i3/t1`; add/complete/delete → `Button`/`IconButton`, title/target `<input>` → `Input`,
+  note `<textarea>` → `TextArea` — **keep `useInboundHandoff('empire-goals-clipboard')` + `ProvenanceChip` + the graph-mirror
+  UNTOUCHED**), `src/apps/learning-tracker/LearningTracker.tsx` (**7** `b5/i1/t1`; add/status controls → `Button`/`IconButton` —
+  **keep the `add-to-learning` INTENT-ROUNDTRIP receive path**), `src/apps/messages/Messages.tsx` (**5** `b4/t1`; send/thread
+  controls → `IconButton`, compose `<textarea>` → `TextArea` — **keep `useInboundHandoff('empire-messages-clipboard')`**),
+  `src/apps/notes/Notes.tsx` (**2** `b2`), `src/apps/mail/Mail.tsx` (**1** `b1`; the residual bare control the EPIC-13 shell left),
+  `src/apps/inbox/Inbox.tsx` (**1** `b1`). Mapping rule. *Acceptance:* all seven = 0 (`offShellControls 162 → 122`, −40);
+  **`INBOUND-LANDS goals/messages` + `INTENT-ROUNDTRIP add-to-learning` + `GRAPH-LEGIBLE mail/draft` guards still ✅**; each
+  renders clean; build🟢 vitest🟢 eslint clean; conformance 0.
+
+- [ ] **S9 · Migrate the Cakra family, part 1 — the tabs + chat surface (39 → 0).** `src/apps/cakra/AIChat.tsx` (**13** `b9/i2/t2`;
+  send/model/attach controls → `IconButton`/`Button`, prompt `<textarea>` → `TextArea` — keep the chat/handoff wiring),
+  `src/apps/cakra/tabs/Editor.tsx` (**9** `b7/s1/t1`; **`<select>` → `Select`**, run/format/copy → `Button`, editor `<textarea>`
+  → `TextArea`), `src/apps/cakra/tabs/PromptGenerator.tsx` (**9** `b6/i1/s1/t1`; **`<select>` → `Select`**),
+  `src/apps/cakra/tabs/TokenCounter.tsx` (**3** `b1/t2`; textareas → `TextArea`), `src/apps/cakra/components/WorkspacePanel.tsx`
+  (**3** `b3`), `src/apps/cakra/CakraShell.tsx` (**1** `b1`), `src/apps/cakra/components/ArtifactCard.tsx` (**1** `b1`).
+  Mapping rule. *Acceptance:* all seven = 0 (`offShellControls 122 → 83`, −39); Cakra tabs render clean; build🟢 vitest🟢
+  eslint clean; conformance 0.
+
+- [ ] **S10 · Migrate the Cakra family, part 2 — agent + solver + settings (35 → 0).** `src/apps/cakra/AgentSurface.tsx` (**8**
+  `b7/t1`), `src/apps/cakra/solver/SolverPanel.tsx` (**8** `b6/i2`; **keep the World-Solver `feed.json` read path UNTOUCHED — do
+  NOT edit `feed.json`**), `src/apps/cakra/components/SettingsPanel.tsx` (**7** `b3/i4`; setting inputs → `Input`, toggles →
+  `Segmented`/`IconButton`), `src/apps/cakra/solver/ProblemDetail.tsx` (**6** `b6`), `src/apps/cakra/components/ModelPicker.tsx`
+  (**4** `b4`; model list → `Segmented` or `Button` rows), `src/apps/cakra/components/ConfirmModal.tsx` (**2** `b2`). Mapping
+  rule. *Acceptance:* all six = 0 (`offShellControls 83 → 48`, −35); solver + settings render clean, **the solver feed still
+  loads**; build🟢 vitest🟢 eslint clean; conformance 0.
+
+- [ ] **S11 · Migrate the shell components + artifacts wrappers (48 → 0) — the LAST offenders.** The desktop chrome + the four
+  organism lenses + the artifacts wrappers. `src/components/Desktop.tsx` (**8** `b7/i1`), `src/components/AppShell.tsx` (**6**
+  `b6`), `src/apps/network/Network.tsx` (**4** `b4`; **keep the mesh/legend + inspector**), `src/apps/search/Search.tsx` (**4**
+  `b3/i1`; **keep `GLOBAL-SEARCH` + `openEntity`**), `src/components/Bridge.tsx` (**4** `b3/i1`; **keep `HOME-ALIVE` widgets + the
+  Cakra line**), `src/components/AppHost.tsx` (**3** `b3`), `src/components/ContextMenu.tsx` (**3** `b3`),
+  `src/apps/artifacts/GeneratedSection.tsx` (**3**), `src/apps/artifacts/generated/ArtifactViewer.tsx` (**3**),
+  `src/components/CommandPalette.tsx` (**2** `b1/i1`; **keep the ⌘K palette + `intentsFor` wiring**), `src/components/Recents.tsx`
+  (**2** `b2`), `src/apps/timeline/Timeline.tsx` (**2** `b2`; **keep `TIMELINE` facets**), `src/apps/artifacts/ArtifactsApp.tsx`
+  (**2**), `src/components/ErrorBoundary.tsx` (**1** `b1`), `src/apps/artifacts/ArtifactGallery.tsx` (**1**). **Re-run the FULL
+  census; drive ANY residual offender any earlier stage missed to 0 too — do not stop at "mostly."** *Acceptance:*
+  `node scripts/metrics.mjs` → **`offShellControls = 0 (b0/i0/s0/t0)`**; all 32 routes render clean + **all 13 guards green**
+  (HOME-ALIVE, GLOBAL-SEARCH, TIMELINE, INBOUND, GRAPH-LEGIBLE, PROVENANCE, OFFLINE …); build🟢 vitest🟢 eslint clean;
+  tokens/off-system/offSystemStyle 0.
+
+- [ ] **S12 · LOCK `offShellControls` in `--assert-zero` → ★ EPIC-14 CODE-COMPLETE.** Add `if (snapshot.offShellControls > 0)
+  fail.push(...)` to the `--assert-zero` block (`scripts/metrics.mjs`, beside the existing `tokenViolations`/
   `offSystemUtilities`/`offSystemStyle` gates) + a `controlAudit` line to the success message. Add a header comment in
   `src/components/ui/index.tsx` stating the invariant: *app code renders interactive controls through the `ui` primitives —
   a bare `<button>`/`<select>`/`<textarea>`/text-`<input>` in an app file fails CI.* **Verify the lock BITES:** temporarily
   re-introduce one bare `<button>` in an app file → `--assert-zero` exits 1 → revert. *Acceptance:* `--assert-zero` gates
   `offShellControls=0` and goes RED on a single re-introduced bare control; build🟢 vitest🟢 eslint clean; conformance (all
-  four axes) 0. **★ EPIC-14 CODE-COMPLETE (S1–S9) → QA confirms `offShellControls 0` LOCKED on green main → Strategist retires
+  four axes) 0. **★ EPIC-14 CODE-COMPLETE (S1–S12) → QA confirms `offShellControls 0` LOCKED on green main → Strategist retires
   to DONE.**
 
-> _**Ratified 2026-07-10.** Ordered so each stage is downhill: S1 is pure-additive (detector + the three missing primitives +
-> baseline — zero migration risk, and it stands up the shell homes every later stage migrates INTO); S2–S8 sweep the 27
-> offender files heaviest-first (the exact EPIC-5/11 descending-file-mass discipline), each bounded to a small group so the
-> render-smoke fully covers it; S9 locks the metric so islands can never creep back — mirroring EPIC-5 S8 / EPIC-11 S4. When
-> all nine ship AND QA confirms `offShellControls 0` LOCKED on green main → retire EPIC-14 to DONE. The next cloud-executable
-> candidate is a measured **accessibility pass** (`prefers-reduced-motion` honoured across animations + an ARIA/keyboard
-> coverage metric — now largely seeded by the IconButton/Segmented/Select a11y dividend) or the RFC's **`docMass`** doc-mass
-> conformance metric; **EPIC-7 · Android stays device-gated.**_
+> _**Ratified 2026-07-10; stages S6–S12 re-decomposed from the live census 2026-07-11 (post-S5).** Ordered so each stage is
+> downhill: S1 is pure-additive (detector + the three missing primitives + baseline — zero migration risk, and it stands up the
+> shell homes every later stage migrates INTO); S2–S5 already swept Reader/Calendar/Clock/Photos/artifacts (341 → 238); S6–S11
+> sweep the remaining 43 offender files heaviest-cluster-first (media+lang → utility → standalone → Cakra ×2 → shell+artifacts),
+> each a meaty ~34–48-control PR bounded so the render-smoke fully covers it, summing exactly to 238 → 0; S12 locks the metric
+> so islands can never creep back — mirroring EPIC-5 S8 / EPIC-11 S4. When all ship AND QA confirms `offShellControls 0` LOCKED
+> on green main → retire EPIC-14 to DONE. The next cloud-executable candidate is a measured **accessibility pass**
+> (`prefers-reduced-motion` honoured across animations + an ARIA/keyboard coverage metric — now largely seeded by the
+> IconButton/Segmented/Select a11y dividend) or the RFC's **`docMass`** doc-mass conformance metric; **EPIC-7 · Android stays
+> device-gated.**_
 
 ---
 

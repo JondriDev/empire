@@ -13,7 +13,17 @@ increment: what changed, why, what's verified, and the single best next step.
 
 **Visually inspected (headless, 0 console errors each):** `desktop.png` (Bridge + full launcher), `artifacts.png` (gallery, all 6 tiles no boundary), + the three S5 migrations drilled in — `formbuilder.png` (Input/Button/IconButton palette, teal Export), `chartbuilder.png` (**Segmented** bar/line/pie + Randomize/SVG + Input rows, live chart), `markdownstudio.png` (**Segmented** edit/split/preview + Reset/Copy/Download + borderless TextArea). Env noise only (maps CARTO tiles, weather geo, files/mail 401 — all graceful).
 
-**Verified / Next:** No runtime bug, no drift. ▶ NEXT = **EPIC-14 S6** (Video 8 + Language 7 + Music 6 + Browser 6 → 0).
+**Verified / Next:** No runtime bug, no drift. ▶ NEXT = **EPIC-14 S6** (media + language). *(Note — this QA's "Video 8 + Language 7 + Music 6 + Browser 6" is the STALE pre-census estimate; the Strategist entry directly below re-decomposed S6–S12 from the live census: S6 is really Music 9 + Video 9 + Browser 8 + Language 8 = 34 → 0.)*
+
+---
+
+## 2026-07-11 · STRATEGIST — EPIC-14 stays ACTIVE; S6–S12 re-decomposed from the live census (the old S6–S8 covered only ~65 of the real 238)
+
+**Did:** Read the gradient (metrics.json `offShellControls 238` post-S5, QA REPORT 32/32 clean + all 13 guards green + no runtime findings, git log). Ran `node scripts/metrics.mjs` + a full `controlAudit.mjs` per-file census and found the active epic's downstream stages were badly stale: the original S6–S8 (ratified off the ≈148 subset estimate) named only ~65 controls, but the live census is **238 across 43 files** — DataCenter is really **14** (old plan: 3), Maps **12** (old: 1), and Calculator 14 / AIChat 13 / Goals 10 / AgentSurface 8 / SolverPanel 8 / Desktop 8 / AppShell 6 weren't named at all. Following it, S-lock would have failed with ~173 controls still bare. **Re-decomposed S6→S12 from the exact census, heaviest-cluster-first, each a meaty ~34–48-control PR summing cleanly to 238 → 0** (S6 media+lang 34 → S7 utility 42 → S8 standalone 40 → S9 Cakra tabs/chat 39 → S10 Cakra agent/solver 35 → S11 shell+artifacts 48 → S12 LOCK). Every stage names its files with live counts + the guard each touched file must keep green. Mirrored the corrected S6 shape into CONTEXT.md's active-epic block; refreshed ROADMAP header snapshot + the EPIC-14 theme (real baseline 341, not ≈148). No code touched.
+
+**Verified:** census sums audited (34+42+40+39+35+48 = 238); each stage's file list cross-checked against `controlAudit.mjs` output. EPICS.md one ACTIVE epic (EPIC-14), deeply decomposed; CONTEXT + ROADMAP mirror it.
+
+**▶ Next (single best step):** Builder runs **EPIC-14 S6** (media + language: Music 9 + Video 9 + Browser 8 + Language 8 → 0; `offShellControls 238 → 204`; keep `MEDIA-PERSISTS music/video` ✅). Exact shape in CONTEXT.md ("▶ S6") + EPICS.md → EPIC-14 S6.
 
 ---
 
