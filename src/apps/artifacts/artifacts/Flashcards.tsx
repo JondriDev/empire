@@ -5,6 +5,7 @@
  */
 import { useState, useEffect } from 'react'
 import { Plus, RotateCcw, ChevronLeft, ChevronRight, Trash2, Check, X as XIcon, Sparkles, ListChecks } from 'lucide-react'
+import { Button, IconButton } from '../../../components/ui'
 
 interface Card { id: string; front: string; back: string; known?: boolean }
 interface Deck { id: string; name: string; emoji: string; cards: Card[] }
@@ -98,9 +99,7 @@ export default function Flashcards() {
           <h1 className="text-2xl font-bold">Flashcards</h1>
           <p className="text-xs text-faint mt-0.5">{totalCards} cards · {totalKnown} mastered ({Math.round(totalCards ? (totalKnown / totalCards) * 100 : 0)}%)</p>
         </div>
-        <button onClick={newDeck} className="px-3 py-1.5 rounded-lg bg-ion/20 text-ion border border-ion/30 text-sm flex items-center gap-2 hover:bg-ion/30">
-          <Plus size={14} /> New Deck
-        </button>
+        <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={newDeck}>New Deck</Button>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
@@ -119,7 +118,14 @@ export default function Flashcards() {
                     <div className="text-sm font-medium truncate">{d.name}</div>
                     <div className="text-[10px] text-faint">{d.cards.length} cards · {pct}% mastered</div>
                   </div>
-                  <button onClick={e => { e.stopPropagation(); removeDeck(d.id) }} className="opacity-0 group-hover:opacity-100 text-faint hover:text-danger"><Trash2 size={12} /></button>
+                  <IconButton
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Delete deck ${d.name}`}
+                    className="opacity-0 group-hover:opacity-100"
+                    onClick={e => { e.stopPropagation(); removeDeck(d.id) }}
+                    icon={<Trash2 size={12} />}
+                  />
                 </div>
               )
             })}
@@ -137,7 +143,7 @@ export default function Flashcards() {
             <div className="text-center text-faint">
               <Sparkles size={48} className="mx-auto mb-3 opacity-30" />
               <p className="mb-3">This deck is empty.</p>
-              <button onClick={addCard} className="px-4 py-2 rounded-lg bg-ion/20 text-ion border border-ion/30">Add first card</button>
+              <Button variant="primary" onClick={addCard}>Add first card</Button>
             </div>
           ) : (
             <div className="w-full max-w-2xl">
@@ -172,18 +178,14 @@ export default function Flashcards() {
               {/* Controls */}
               <div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <button onClick={prev} className="p-2 rounded-lg bg-glass hover:bg-glass"><ChevronLeft size={16} /></button>
-                  <button onClick={() => setFlipped(!flipped)} className="p-2 rounded-lg bg-glass hover:bg-glass"><RotateCcw size={16} /></button>
-                  <button onClick={next} className="p-2 rounded-lg bg-glass hover:bg-glass"><ChevronRight size={16} /></button>
+                  <IconButton variant="secondary" aria-label="Previous card" onClick={prev} icon={<ChevronLeft size={16} />} />
+                  <IconButton variant="secondary" aria-label="Flip card" onClick={() => setFlipped(!flipped)} icon={<RotateCcw size={16} />} />
+                  <IconButton variant="secondary" aria-label="Next card" onClick={next} icon={<ChevronRight size={16} />} />
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={addCard} className="p-2 rounded-lg bg-glass hover:bg-glass text-muted" title="Add card"><Plus size={16} /></button>
-                  <button onClick={() => markKnown(false)} className="px-4 py-2 rounded-lg bg-danger/20 text-danger border border-danger/30 text-sm flex items-center gap-1.5 hover:bg-danger/30">
-                    <XIcon size={14} /> Don't know
-                  </button>
-                  <button onClick={() => markKnown(true)} className="px-4 py-2 rounded-lg bg-success/20 text-success border border-success/30 text-sm flex items-center gap-1.5 hover:bg-success/30">
-                    <Check size={14} /> Got it
-                  </button>
+                  <IconButton variant="secondary" aria-label="Add card" onClick={addCard} icon={<Plus size={16} />} />
+                  <Button variant="danger" size="sm" icon={<XIcon size={14} />} onClick={() => markKnown(false)}>Don't know</Button>
+                  <Button variant="primary" size="sm" icon={<Check size={14} />} onClick={() => markKnown(true)}>Got it</Button>
                 </div>
               </div>
             </div>

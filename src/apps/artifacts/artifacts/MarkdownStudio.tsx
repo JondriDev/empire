@@ -5,6 +5,7 @@
  */
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { Eye, Edit3, Download, Copy, Check, RotateCcw, FileText, Sparkles } from 'lucide-react'
+import { Button, TextArea, Segmented } from '../../../components/ui'
 import { cssVar, tint } from '../../../design-system/tokens'
 
 const SAMPLE = `# Hello, Markdown ✨
@@ -304,50 +305,32 @@ export default function MarkdownStudio() {
         </div>
 
         <div className="flex-1 flex justify-center">
-          <div className="inline-flex rounded-lg border border-hair bg-glass p-0.5">
-            {(['edit', 'split', 'preview'] as const).map(m => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`px-3 py-1 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
-                  mode === m ? 'bg-warn text-fg shadow' : 'text-muted hover:text-fg'
-                }`}
-              >
-                {m === 'edit' && <Edit3 size={11} />}
-                {m === 'split' && <span className="font-bold">⫶</span>}
-                {m === 'preview' && <Eye size={11} />}
-                {m[0].toUpperCase() + m.slice(1)}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            value={mode}
+            onChange={m => setMode(m as 'split' | 'edit' | 'preview')}
+            ariaLabel="Editor mode"
+            items={[
+              { value: 'edit', label: 'Edit', icon: <Edit3 size={11} /> },
+              { value: 'split', label: 'Split', icon: <span aria-hidden="true" className="font-bold">⫶</span> },
+              { value: 'preview', label: 'Preview', icon: <Eye size={11} /> },
+            ]}
+          />
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={handleClear}
-            title="Clear"
-            className="px-2.5 py-1.5 rounded-md bg-glass hover:bg-glass border border-hair text-muted text-xs flex items-center gap-1.5"
-          >
-            <RotateCcw size={12} />
-            Reset
-          </button>
-          <button
-            onClick={handleCopy}
-            title="Copy markdown"
-            className="px-2.5 py-1.5 rounded-md bg-glass hover:bg-glass border border-hair text-muted text-xs flex items-center gap-1.5"
-          >
-            {copied ? <Check size={12} className="text-success" /> : <Copy size={12} />}
+          <Button variant="secondary" size="sm" icon={<RotateCcw size={12} />} onClick={handleClear}>Reset</Button>
+          <Button variant="secondary" size="sm" icon={copied ? <Check size={12} className="text-success" /> : <Copy size={12} />} onClick={handleCopy}>
             {copied ? 'Copied' : 'Copy'}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={<Download size={12} />}
             onClick={handleDownload}
-            title="Download .md"
-            className="px-2.5 py-1.5 rounded-md text-xs flex items-center gap-1.5 text-fg shadow"
-            style={{ background: `linear-gradient(135deg, ${cssVar('ember')}, color-mix(in srgb, var(--ember) 70%, var(--void)))`, boxShadow: `0 4px 12px ${tint('ember', 19)}` }}
+            style={{ background: `linear-gradient(135deg, ${cssVar('ember')}, color-mix(in srgb, var(--ember) 70%, var(--void)))`, border: `1px solid ${tint('ember', 40)}`, boxShadow: `0 4px 12px ${tint('ember', 19)}` }}
           >
-            <Download size={12} />
             Download .md
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -361,12 +344,14 @@ export default function MarkdownStudio() {
             <div className="px-4 py-1.5 text-[10px] uppercase tracking-wider text-faint bg-void/20 border-b border-hair">
               Markdown
             </div>
-            <textarea
+            <TextArea
               value={content}
-              onChange={e => setContent(e.target.value)}
+              onChange={setContent}
               spellCheck={false}
-              className="flex-1 w-full bg-transparent p-4 font-mono text-sm text-fg resize-none focus:outline-none leading-relaxed"
+              mono
+              className="flex-1"
               placeholder="# Start typing..."
+              style={{ background: 'transparent', border: 'none', resize: 'none', minHeight: 0, padding: '16px', lineHeight: 1.625 }}
             />
           </div>
         )}

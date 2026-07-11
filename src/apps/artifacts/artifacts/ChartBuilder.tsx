@@ -4,6 +4,7 @@
  */
 import { useState, useMemo } from 'react'
 import { BarChart3, LineChart as LineIcon, PieChart as PieIcon, Plus, Trash2, Shuffle, Download } from 'lucide-react'
+import { Button, IconButton, Input, Segmented } from '../../../components/ui'
 import { CATEGORICAL, cssVar, tint } from '../../../design-system/tokens'
 
 type ChartType = 'bar' | 'line' | 'pie'
@@ -53,32 +54,25 @@ export default function ChartBuilder() {
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-void via-signal/20 to-void text-fg overflow-hidden">
       <div className="px-6 py-4 border-b border-hair flex items-center justify-between bg-void/20 backdrop-blur">
-        <input
+        <Input
           value={title}
-          onChange={e => setTitle(e.target.value)}
-          className="bg-transparent text-2xl font-bold outline-none focus:bg-glass px-2 py-1 rounded"
+          onChange={setTitle}
+          aria-label="Chart title"
+          className="max-w-xs"
         />
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 bg-glass rounded-lg p-1 border border-hair">
-            {(['bar', 'line', 'pie'] as ChartType[]).map(t => {
-              const Icon = t === 'bar' ? BarChart3 : t === 'line' ? LineIcon : PieIcon
-              return (
-                <button
-                  key={t}
-                  onClick={() => setType(t)}
-                  className={`px-3 py-1.5 rounded-md text-sm flex items-center gap-1.5 transition ${type === t ? 'bg-ion/30 text-ion' : 'text-muted hover:text-fg'}`}
-                >
-                  <Icon size={14} /> {t}
-                </button>
-              )
-            })}
-          </div>
-          <button onClick={randomize} className="px-3 py-1.5 rounded-lg bg-glass hover:bg-glass border border-hair text-sm flex items-center gap-2">
-            <Shuffle size={14} /> Randomize
-          </button>
-          <button onClick={exportSVG} className="px-3 py-1.5 rounded-lg bg-success/20 text-success border border-success/30 text-sm flex items-center gap-2 hover:bg-success/30">
-            <Download size={14} /> SVG
-          </button>
+          <Segmented
+            value={type}
+            onChange={t => setType(t as ChartType)}
+            ariaLabel="Chart type"
+            items={[
+              { value: 'bar', label: 'bar', icon: <BarChart3 size={14} /> },
+              { value: 'line', label: 'line', icon: <LineIcon size={14} /> },
+              { value: 'pie', label: 'pie', icon: <PieIcon size={14} /> },
+            ]}
+          />
+          <Button variant="secondary" size="sm" icon={<Shuffle size={14} />} onClick={randomize}>Randomize</Button>
+          <Button variant="primary" size="sm" icon={<Download size={14} />} onClick={exportSVG}>SVG</Button>
         </div>
       </div>
 
@@ -87,26 +81,26 @@ export default function ChartBuilder() {
         <div className="w-72 border-r border-hair bg-void/20 p-4 overflow-auto">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs uppercase tracking-wider text-faint font-semibold">Data Points</h3>
-            <button onClick={addRow} className="text-ion hover:text-ion"><Plus size={14} /></button>
+            <IconButton variant="ghost" size="sm" aria-label="Add data point" onClick={addRow} icon={<Plus size={14} />} />
           </div>
           <div className="space-y-2">
             {data.map((d, i) => (
               <div key={i} className="flex items-center gap-2 group">
-                <div className="w-3 h-3 rounded-sm" style={{ background: COLORS[i % COLORS.length] }} />
-                <input
+                <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
+                <Input
                   value={d.label}
-                  onChange={e => update(i, { label: e.target.value })}
-                  className="bg-glass px-2 py-1 rounded text-sm flex-1 outline-none focus:bg-glass"
+                  onChange={v => update(i, { label: v })}
+                  className="flex-1"
+                  aria-label={`Data point ${i + 1} label`}
                 />
-                <input
+                <Input
                   type="number"
-                  value={d.value}
-                  onChange={e => update(i, { value: Number(e.target.value) || 0 })}
-                  className="bg-glass px-2 py-1 rounded text-sm w-16 outline-none focus:bg-glass"
+                  value={String(d.value)}
+                  onChange={v => update(i, { value: Number(v) || 0 })}
+                  className="w-20"
+                  aria-label={`Data point ${i + 1} value`}
                 />
-                <button onClick={() => removeRow(i)} className="text-danger/50 hover:text-danger opacity-0 group-hover:opacity-100 transition">
-                  <Trash2 size={12} />
-                </button>
+                <IconButton variant="ghost" size="sm" aria-label={`Remove data point ${i + 1}`} className="opacity-0 group-hover:opacity-100" onClick={() => removeRow(i)} icon={<Trash2 size={12} />} />
               </div>
             ))}
           </div>

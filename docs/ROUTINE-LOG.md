@@ -5,6 +5,26 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-11 · BUILDER — EPIC-14 S5: the artifacts family migrated onto the `ui` shell (46 → 0)
+
+**Did:** Executed EPIC-14 S5 — drove the whole artifacts sub-app family from **46** off-shell controls to **0** (`offShellControls 284 → 238`, −46; `b226/i39/s5/t14 → b193/i29/s4/t12`). All five *counted* files dropped off the offenders list: `FormBuilder.tsx` (16, the #1 offender), `Flashcards.tsx` (9), `Kanban.tsx` (8), `ChartBuilder.tsx` (8), `MarkdownStudio.tsx` (5). Metric row: `offShellControls 238 (b193/i29/s4/t12)` · tokens 0 · off-system-utils 0 · off-system-style 0 (r0/t0/m0) · bundle gz 731 · tests 508.
+
+- **FormBuilder:** header title + field label/placeholder/option + live-preview default `<input>` → `Input`; preview `<select>` → `Select` (options incl. a `''`/Choose… head); preview `<textarea>` → `TextArea`; 9 field-type palette rows + preview/export/submit/add-option → `Button`; move-up/down (↑/↓ text swapped for `ChevronUp`/`ChevronDown` icons) + remove-field + remove-option → `IconButton`. The `type=checkbox`/`type=radio` inputs (required toggle + preview options) stay bare (exempt).
+- **Flashcards:** New Deck / Add-first-card / Got-it (primary) / Don't-know (danger) → `Button`; delete-deck + prev/flip/next/add-card → `IconButton` (each named).
+- **Kanban:** Reset-to-demo / Add / empty-column drop-zone → `Button`; per-column add + cancel + per-card remove → `IconButton`; new-task title/tag → `Input`. `mirrorCollection('kanban',…)` + `NodeActions` UNTOUCHED.
+- **ChartBuilder:** the **bar/line/pie chart-type toggle → `Segmented`** (unique values → proper radiogroup); Randomize/SVG → `Button`; add/remove data-point → `IconButton`; title + per-row label/value(`type=number`) → `Input`.
+- **MarkdownStudio:** the **edit/split/preview mode toggle → `Segmented`**; Reset/Copy/Download (ember gradient preserved via per-instance `style`) → `Button`; the editor `<textarea>` → `TextArea` (`flex-1 mono`, transparent/borderless/`resize:none` via `style` — deliberately no `borderRadius:0` since styleAudit counts raw `0`/`0px` as a radius violation).
+- **ColorPalette deliberately NOT migrated** — it's in the `DS_INFRA` audit-exempt set (`metrics.mjs:52`), a colour-theory TOOL whose hex swatches ARE the content; its ~13 bare controls never counted, so touching it would be pointless and semantically wrong.
+- **Tests:** 5 new `.test.tsx` (+11 cases) lock the migrated a11y — Segmented toggles assert `getByRole('radio',{name})`+`aria-checked` (NOT `aria-pressed`); every icon-only action asserts its accessible name; inputs assert `getByLabelText`.
+
+**Verified:** build 🟢 (`tsc -b && vite build`); `npx vitest run` **508/508** (497→508, +11); `npx eslint` clean on all 10 touched files; `node scripts/metrics.mjs --assert-zero` **exit 0** — offShellControls 284→238 (−46), tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 (r0/t0/m0), all colour/style Δ ±0; bundle gz 731.3→731 (−0.3); no new deps. **Render-confirmed via `qa-smoke.mjs` (exit 0):** **32/32 routes clean**, all 13 guards green (GRAPH-LEGIBLE 3/3, INBOUND 4/4, MEDIA 3/3, INTENT-ROUNDTRIP 2/2, PROVENANCE 3/3+3/3, TIMELINE, HOME-ALIVE, GLOBAL-SEARCH, NODE-LINEAGE, PRECACHE 91 no-gap, OFFLINE 5/5).
+
+**Not verifiable in cloud (visual):** I can't see the rendered UI. Intentional visual changes to confirm on-device: (1) ChartBuilder's chart-type picker and MarkdownStudio's mode picker are now compact segmented controls with a light-signal *wash* on the active segment (were bespoke fills); (2) FormBuilder's palette rows, Flashcards' study CTAs, and Kanban's add/reset are now the shell's glass/gradient Button variants (accent-tinted → variant gradients — e.g. "Got it" is the primary signal gradient, "Don't know" the danger gradient); (3) the FormBuilder header title and ChartBuilder title, previously inline transparent headings, are now glass Input fields. Behaviour and persistence are unchanged.
+
+**▶ Next (single best step):** EPIC-14 S6 — media + language (Video 8 + Language 7 + Music 6 + Browser 6 → 0; `offShellControls ~238 → ~211`). Both Language `<select>`s → `Select` (reconcile existing aria-labels); Music icon transport → `IconButton` preserving the 2026-07-10 a11y names; keep `MEDIA-PERSISTS music/video` ✅ (mediaStore paths untouched). Exact shape in `docs/CONTEXT.md` (search "▶ S6") + EPICS.md → EPIC-14 S6.
+
+---
+
 ## 2026-07-11 · QA — Visual + Smoke: EPIC-14 S4 acceptance CONFIRMED (offShellControls 307→284, −23)
 
 **Did:** First QA on a fresh cloud checkout since EPIC-14 S4 shipped. Fresh `npm install` + `npm run build` (🟢 GREEN, 91 precache entries). Ran `node scripts/qa-smoke.mjs` (**32/32 passed, 0 failed**) + `node scripts/metrics.mjs` (+`--assert-zero`). Captured 8 local screenshots (desktop + clock/photos/reader/calendar/artifacts/network/maps, ≤1600px, 0 page errors) and visually inspected them. Two app-code commits landed after S4 (`2367196` Files a11y/touch, `2ffe2a0` solver briefs) — neither touches `offShellControls`; the report describes the tree actually pushed.

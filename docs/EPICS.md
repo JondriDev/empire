@@ -209,10 +209,24 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   **`MEDIA-PERSISTS photos` still ✅ (3/3)**, GRAPH-LEGIBLE 3/3, PROVENANCE 3/3+3/3, OFFLINE-BOOT `/app/clock` renders=true.
   ▶ NEXT = **S5 (the artifacts family 27 → 0)**.
 
-- [ ] **S5 · Migrate the artifacts family (27 → 0).** `src/apps/artifacts/artifacts/FormBuilder.tsx` (9; incl. `<select>` `:94`
-  → `Select`), `Flashcards.tsx` (9), `Kanban.tsx` (4), `ChartBuilder.tsx` (4), `MarkdownStudio.tsx` (1) — one coherent sub-app
-  family, repetitive control patterns. Mapping rule throughout. *Acceptance:* all five files = 0 (≈92 → ≈65); each artifact
-  renders clean; conformance 0.
+- [x] **S5 · Migrate the artifacts family (46 → 0).** — **Shipped 2026-07-11 (`main`, this run).** `offShellControls 284 → 238
+  (−46)`; all five counted artifacts files off the offenders list. FormBuilder (16 `b9/i5/s1/t1`): header title + field
+  label/placeholder/option + live-preview default → `Input`, preview `<select>` → `Select`, preview `<textarea>` → `TextArea`,
+  9 field-type palette rows + preview/export/submit/add-option → `Button` (palette rows use `style={{justifyContent:'flex-start',
+  borderLeft:…}}` to keep the accent left-border, since Button centres by default), move-up/down (↑/↓ text → `ChevronUp`/
+  `ChevronDown` icons) + remove-field + remove-option → `IconButton`. Flashcards (9): New Deck/Add-first-card/Got-it(primary)/
+  Don't-know(danger) → `Button`, delete-deck + prev/flip/next/add-card → `IconButton`. Kanban (8): Reset-to-demo/Add/empty-drop
+  → `Button`, per-column add + cancel + remove-card → `IconButton`, new-task title/tag → `Input`. ChartBuilder (8): **chart-type
+  bar/line/pie → `Segmented`** (unique values), Randomize/SVG → `Button`, add/remove data-point → `IconButton`, title + data
+  label/value → `Input`. MarkdownStudio (5): **edit/split/preview → `Segmented`**, Reset/Copy/Download(ember gradient via `style`)
+  → `Button`, editor `<textarea>` → `TextArea` (transparent/borderless/`resize:none` via `style`, `flex-1`, `mono`). **★
+  ColorPalette is NOT migrated — it is in the `DS_INFRA` audit-exempt set (a colour-theory TOOL whose hexes/swatch buttons are
+  the content), so it never counted; touching it would be wrong.** Mapping rule throughout; no `<select>` value-collision (S3
+  trap avoided — chart/mode values all unique). 5 `.test.tsx` (+11) lock the migrated a11y (Segmented → `getByRole('radio')`
+  + `aria-checked`). *Verified:* build🟢 vitest 497→508🟢 eslint clean; `--assert-zero` exit 0 (tokens/util/style 0 Δ±0); bundle
+  gz 731.3→731 (−0.3); no new deps. **Render-confirmed via `qa-smoke.mjs` (exit 0):** 32/32 clean, all 13 guards green,
+  GRAPH-LEGIBLE 3/3, OFFLINE 5/5, PRECACHE 91 no-gap. ▶ NEXT = **S6** (media + language: Video 8 + Language 7 + Music 6 +
+  Browser 6 → 0).
 
 - [ ] **S6 · Migrate media + language (27 → 0).** `src/apps/video/Video.tsx` (8), `src/apps/language/Language.tsx` (7; both
   `<select>`s `:194`/`:207` → `Select` — reconcile with the existing aria-labels the a11y pass added), `src/apps/music/Music.tsx`

@@ -4,8 +4,9 @@
  * Build a form by adding fields, configure them, preview, and export JSON.
  */
 import { useState } from 'react'
-import { Plus, Trash2, GripVertical, Eye, Download, Type, AlignLeft, CheckSquare, Circle, ListChecks, Hash, Mail, Phone, Calendar as CalIcon } from 'lucide-react'
+import { Plus, Trash2, GripVertical, Eye, Download, Type, AlignLeft, CheckSquare, Circle, ListChecks, Hash, Mail, Phone, Calendar as CalIcon, ChevronUp, ChevronDown } from 'lucide-react'
 import { CATEGORICAL } from '../../../design-system/tokens'
+import { Button, IconButton, Input, TextArea, Select } from '../../../components/ui'
 
 type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'date' | 'select' | 'checkbox' | 'radio'
 
@@ -87,14 +88,16 @@ export default function FormBuilder() {
   }
 
   const renderPreviewInput = (f: Field) => {
-    const base = "w-full px-3 py-2 rounded-lg bg-void/30 border border-hair text-fg placeholder-faint focus:outline-none focus:border-ion transition"
+    const val = typeof responses[f.id] === 'string' ? responses[f.id] : ''
     switch (f.type) {
-      case 'textarea': return <textarea placeholder={f.placeholder} className={base + ' min-h-[80px]'} onChange={e => setResponses({ ...responses, [f.id]: e.target.value })} />
+      case 'textarea': return <TextArea value={val} placeholder={f.placeholder} onChange={v => setResponses({ ...responses, [f.id]: v })} />
       case 'select': return (
-        <select className={base} onChange={e => setResponses({ ...responses, [f.id]: e.target.value })}>
-          <option value="">Choose...</option>
-          {f.options?.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
+        <Select
+          value={val}
+          ariaLabel={f.label}
+          onChange={v => setResponses({ ...responses, [f.id]: v })}
+          options={[{ value: '', label: 'Choose...' }, ...(f.options ?? []).map(o => ({ value: o, label: o }))]}
+        />
       )
       case 'checkbox': return (
         <div className="flex flex-wrap gap-2">
@@ -116,7 +119,7 @@ export default function FormBuilder() {
           ))}
         </div>
       )
-      default: return <input type={f.type} placeholder={f.placeholder} className={base} onChange={e => setResponses({ ...responses, [f.id]: e.target.value })} />
+      default: return <Input type={f.type} value={val} placeholder={f.placeholder} onChange={v => setResponses({ ...responses, [f.id]: v })} />
     }
   }
 
@@ -125,23 +128,21 @@ export default function FormBuilder() {
       {/* Header */}
       <div className="px-6 py-4 border-b border-hair flex items-center justify-between bg-void/20 backdrop-blur">
         <div className="flex items-center gap-3 flex-1 max-w-md">
-          <input
+          <Input
             value={title}
-            onChange={e => setTitle(e.target.value)}
-            className="bg-transparent text-2xl font-bold outline-none focus:bg-glass px-2 py-1 rounded w-full"
+            onChange={setTitle}
+            className="flex-1"
+            aria-label="Form title"
             placeholder="Form title..."
           />
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setPreview(!preview)}
-            className="px-3 py-1.5 rounded-lg bg-ion/20 text-ion border border-ion/30 text-sm flex items-center gap-2 hover:bg-ion/30 transition"
-          >
-            <Eye size={14} /> {preview ? 'Edit' : 'Preview'}
-          </button>
-          <button onClick={exportJSON} className="px-3 py-1.5 rounded-lg bg-success/20 text-success border border-success/30 text-sm flex items-center gap-2 hover:bg-success/30 transition">
-            <Download size={14} /> Export
-          </button>
+          <Button variant="secondary" size="sm" icon={<Eye size={14} />} onClick={() => setPreview(!preview)}>
+            {preview ? 'Edit' : 'Preview'}
+          </Button>
+          <Button variant="primary" size="sm" icon={<Download size={14} />} onClick={exportJSON}>
+            Export
+          </Button>
         </div>
       </div>
 
@@ -161,12 +162,9 @@ export default function FormBuilder() {
                   </div>
                 ))}
                 {fields.length > 0 && (
-                  <button
-                    onClick={handleSubmit}
-                    className="mt-4 px-5 py-2.5 rounded-lg bg-gradient-to-r from-ion to-ion hover:from-ion hover:to-ion font-medium transition shadow-lg shadow-ion/20"
-                  >
+                  <Button variant="primary" size="lg" className="mt-4" onClick={handleSubmit}>
                     Submit
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -180,16 +178,18 @@ export default function FormBuilder() {
                 {PALETTE.map(p => {
                   const Icon = p.icon
                   return (
-                    <button
+                    <Button
                       key={p.type}
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
                       onClick={() => addField(p.type)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-glass hover:bg-glass border border-hair text-fg text-sm transition group"
-                      style={{ borderLeftColor: p.color, borderLeftWidth: 3 } as any}
+                      icon={<Icon size={14} style={{ color: p.color }} />}
+                      iconRight={<Plus size={12} style={{ opacity: 0.5 }} />}
+                      style={{ justifyContent: 'flex-start', borderLeft: `3px solid ${p.color}` }}
                     >
-                      <Icon size={14} style={{ color: p.color }} />
-                      <span className="flex-1 text-left">{p.label}</span>
-                      <Plus size={12} className="opacity-0 group-hover:opacity-100 transition" />
-                    </button>
+                      <span style={{ flex: 1, textAlign: 'left' }}>{p.label}</span>
+                    </Button>
                   )
                 })}
               </div>
@@ -217,19 +217,20 @@ export default function FormBuilder() {
                       <GripVertical size={16} className="text-faint group-hover:text-muted cursor-grab mt-2" />
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-2">
-                          <input
+                          <Input
                             value={f.label}
-                            onChange={e => updateField(f.id, { label: e.target.value })}
-                            className="bg-transparent font-medium text-fg outline-none focus:bg-glass px-1 rounded flex-1"
+                            onChange={v => updateField(f.id, { label: v })}
+                            className="flex-1"
+                            aria-label="Field label"
                           />
                           <span className="text-xs uppercase tracking-wider text-faint px-2 py-0.5 bg-glass rounded">{f.type}</span>
                         </div>
                         {f.type !== 'select' && f.type !== 'radio' && f.type !== 'checkbox' && (
-                          <input
+                          <Input
                             value={f.placeholder ?? ''}
-                            onChange={e => updateField(f.id, { placeholder: e.target.value })}
+                            onChange={v => updateField(f.id, { placeholder: v })}
                             placeholder="Placeholder..."
-                            className="w-full bg-transparent text-sm text-muted outline-none focus:bg-glass px-1 rounded"
+                            aria-label="Field placeholder"
                           />
                         )}
                         {['select', 'radio', 'checkbox'].includes(f.type) && (
@@ -237,25 +238,31 @@ export default function FormBuilder() {
                             {f.options?.map((opt, i) => (
                               <div key={i} className="flex items-center gap-2">
                                 <span className="text-faint text-sm">•</span>
-                                <input
+                                <Input
                                   value={opt}
-                                  onChange={e => {
+                                  onChange={v => {
                                     const next = [...(f.options || [])]
-                                    next[i] = e.target.value
+                                    next[i] = v
                                     updateField(f.id, { options: next })
                                   }}
-                                  className="bg-transparent text-sm text-muted outline-none focus:bg-glass px-1 rounded flex-1"
+                                  className="flex-1"
+                                  aria-label={`Option ${i + 1}`}
                                 />
-                                <button
+                                <IconButton
+                                  variant="ghost"
+                                  size="sm"
+                                  aria-label={`Remove option ${i + 1}`}
                                   onClick={() => updateField(f.id, { options: f.options?.filter((_, j) => j !== i) })}
-                                  className="opacity-50 hover:opacity-100 text-danger"
-                                ><Trash2 size={12} /></button>
+                                  icon={<Trash2 size={12} />}
+                                />
                               </div>
                             ))}
-                            <button
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              icon={<Plus size={12} />}
                               onClick={() => updateField(f.id, { options: [...(f.options || []), 'New option'] })}
-                              className="text-xs text-ion hover:text-ion flex items-center gap-1 mt-1"
-                            ><Plus size={12} /> Add option</button>
+                            >Add option</Button>
                           </div>
                         )}
                         <label className="flex items-center gap-2 text-xs text-muted pt-1">
@@ -269,9 +276,9 @@ export default function FormBuilder() {
                         </label>
                       </div>
                       <div className="flex flex-col gap-1">
-                        <button onClick={() => moveField(idx, idx - 1)} className="text-faint hover:text-fg text-xs">↑</button>
-                        <button onClick={() => moveField(idx, idx + 1)} className="text-faint hover:text-fg text-xs">↓</button>
-                        <button onClick={() => removeField(f.id)} className="text-danger/60 hover:text-danger mt-1"><Trash2 size={14} /></button>
+                        <IconButton variant="ghost" size="sm" aria-label="Move field up" onClick={() => moveField(idx, idx - 1)} icon={<ChevronUp size={14} />} />
+                        <IconButton variant="ghost" size="sm" aria-label="Move field down" onClick={() => moveField(idx, idx + 1)} icon={<ChevronDown size={14} />} />
+                        <IconButton variant="ghost" size="sm" aria-label="Remove field" onClick={() => removeField(f.id)} icon={<Trash2 size={14} />} />
                       </div>
                     </div>
                   </div>

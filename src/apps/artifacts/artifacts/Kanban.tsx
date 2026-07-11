@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2, X, GripVertical } from 'lucide-react'
 import { mirrorCollection } from '../../../lib/core/sync'
 import { NodeActions } from '../../../components/ui/NodeActions'
+import { Button, IconButton, Input } from '../../../components/ui'
 import { CATEGORICAL, cssVar } from '../../../design-system/tokens'
 
 type ColumnId = 'todo' | 'doing' | 'done'
@@ -89,12 +90,13 @@ export default function Kanban() {
           <h1 className="text-2xl font-bold">Kanban Board</h1>
           <p className="text-xs text-faint mt-0.5">{tasks.length} tasks across {COLUMNS.length} columns · auto-saved</p>
         </div>
-        <button
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={() => { if (confirm('Clear all tasks?')) setTasks(seed()) }}
-          className="px-3 py-1.5 rounded-lg bg-glass hover:bg-glass border border-hair text-xs text-muted"
         >
           Reset to demo
-        </button>
+        </Button>
       </div>
 
       <div className="flex-1 overflow-x-auto p-6">
@@ -116,30 +118,30 @@ export default function Kanban() {
                     <h2 className="font-semibold">{col.title}</h2>
                     <span className="text-xs text-faint bg-glass px-1.5 py-0.5 rounded-full">{colTasks.length}</span>
                   </div>
-                  <button onClick={() => setNewTaskCol(col.id)} className="text-muted hover:text-fg"><Plus size={14} /></button>
+                  <IconButton variant="ghost" size="sm" aria-label={`Add task to ${col.title}`} onClick={() => setNewTaskCol(col.id)} icon={<Plus size={14} />} />
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-2 space-y-2">
                   {newTaskCol === col.id && (
-                    <div className="bg-void/40 border border-ion/40 rounded-lg p-2">
-                      <input
+                    <div className="bg-void/40 border border-ion/40 rounded-lg p-2 space-y-1.5">
+                      <Input
                         autoFocus
                         value={newTitle}
-                        onChange={e => setNewTitle(e.target.value)}
+                        onChange={setNewTitle}
                         onKeyDown={e => { if (e.key === 'Enter') addTask(col.id); if (e.key === 'Escape') setNewTaskCol(null) }}
                         placeholder="Task title..."
-                        className="w-full bg-transparent text-sm outline-none mb-1.5"
+                        aria-label="Task title"
                       />
-                      <input
+                      <Input
                         value={newTag}
-                        onChange={e => setNewTag(e.target.value)}
+                        onChange={setNewTag}
                         onKeyDown={e => { if (e.key === 'Enter') addTask(col.id) }}
                         placeholder="Tag (optional)"
-                        className="w-full bg-void/30 text-xs px-2 py-1 rounded outline-none mb-1.5"
+                        aria-label="Task tag"
                       />
                       <div className="flex gap-1.5">
-                        <button onClick={() => addTask(col.id)} className="flex-1 bg-ion text-fg text-xs py-1 rounded">Add</button>
-                        <button onClick={() => setNewTaskCol(null)} className="px-2 text-muted hover:text-fg"><X size={12} /></button>
+                        <Button variant="primary" size="sm" fullWidth onClick={() => addTask(col.id)}>Add</Button>
+                        <IconButton variant="ghost" size="sm" aria-label="Cancel new task" onClick={() => setNewTaskCol(null)} icon={<X size={12} />} />
                       </div>
                     </div>
                   )}
@@ -155,7 +157,7 @@ export default function Kanban() {
                         <GripVertical size={14} className="text-faint mt-0.5" />
                         <p className="flex-1 text-sm text-fg">{t.title}</p>
                         <NodeActions type="kanban" sourceId={t.id} />
-                        <button onClick={() => remove(t.id)} className="text-faint hover:text-danger opacity-0 group-hover:opacity-100 transition"><Trash2 size={12} /></button>
+                        <IconButton variant="ghost" size="sm" aria-label={`Remove task ${t.title}`} className="opacity-0 group-hover:opacity-100" onClick={() => remove(t.id)} icon={<Trash2 size={12} />} />
                       </div>
                       {t.tag && (
                         <div className="mt-2 flex items-center gap-1.5">
@@ -165,12 +167,14 @@ export default function Kanban() {
                     </div>
                   ))}
                   {colTasks.length === 0 && newTaskCol !== col.id && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      fullWidth
                       onClick={() => setNewTaskCol(col.id)}
-                      className="w-full py-8 border-2 border-dashed border-hair rounded-lg text-faint text-sm hover:border-hair hover:text-muted transition"
+                      style={{ padding: '32px 0', border: '2px dashed var(--gl-border-b)' }}
                     >
                       Drop here or + to add
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
