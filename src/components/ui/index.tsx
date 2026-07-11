@@ -1,4 +1,4 @@
-import type { ReactNode, ButtonHTMLAttributes, InputHTMLAttributes, TextareaHTMLAttributes, CSSProperties, HTMLAttributes } from 'react'
+import type { ReactNode, ButtonHTMLAttributes, InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes, CSSProperties, HTMLAttributes } from 'react'
 import { cssVar, tint } from '../../design-system/tokens'
 
 /* ═══════════════════════════════════════════════
@@ -240,6 +240,194 @@ export function TextArea({ value, onChange, placeholder, className = '', mono, .
         rest.onBlur?.(e)
       }}
     />
+  )
+}
+
+/* ── ICON BUTTON ── icon-only button; the TS type REQUIRES `aria-label` so an
+   icon-only control can never ship unlabelled (folds a11y into the primitive). */
+interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type'> {
+  icon: ReactNode
+  'aria-label': string
+  variant?: ButtonVariant
+  size?: ButtonSize
+}
+
+const iconSizeStyles: Record<ButtonSize, React.CSSProperties> = {
+  sm: { width: '28px', height: '28px', borderRadius: 'var(--radius-md)' },
+  md: { width: '34px', height: '34px', borderRadius: 'var(--radius-md)' },
+  lg: { width: '42px', height: '42px', borderRadius: 'var(--radius-lg)' },
+}
+
+export function IconButton({
+  icon,
+  variant = 'ghost',
+  size = 'md',
+  className = '',
+  disabled,
+  ...rest
+}: IconButtonProps) {
+  return (
+    <button
+      type="button"
+      className={`empire-icon-btn ${className}`}
+      disabled={disabled}
+      style={{
+        ...variantStyles[variant],
+        ...iconSizeStyles[size],
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.45 : 1,
+        transition: 'all var(--dur-fast) var(--ease-spring)',
+        flexShrink: 0,
+        padding: 0,
+      }}
+      {...rest}
+    >
+      <span aria-hidden="true" style={{ display: 'inline-flex' }}>{icon}</span>
+    </button>
+  )
+}
+
+/* ── SELECT ── native <select> on the Empire glass surface (token-clean), with a
+   custom chevron. The native element keeps keyboard + platform a11y for free. */
+interface SelectOption { value: string; label: string; disabled?: boolean }
+
+interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onChange' | 'value'> {
+  value: string
+  onChange: (value: string) => void
+  options: SelectOption[]
+  ariaLabel?: string
+  className?: string
+}
+
+export function Select({ value, onChange, options, ariaLabel, className = '', ...rest }: SelectProps) {
+  return (
+    <div
+      className={`empire-select-wrap ${className}`}
+      style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', width: '100%' }}
+    >
+      <select
+        {...rest}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        aria-label={ariaLabel}
+        className="empire-select-field"
+        style={{
+          appearance: 'none',
+          WebkitAppearance: 'none',
+          MozAppearance: 'none',
+          width: '100%',
+          height: '38px',
+          padding: '0 32px 0 12px',
+          background: 'var(--input-bg)',
+          border: '1px solid var(--input-border-b)',
+          borderTopColor: 'var(--input-border-t)',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--text)',
+          fontFamily: 'var(--font-sans)',
+          fontSize: 'var(--text-sm)',
+          cursor: 'pointer',
+          outline: 'none',
+          transition: 'background var(--dur-fast), border-color var(--dur-fast), box-shadow var(--dur-fast)',
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.background = 'var(--input-bg-focus)'
+          e.currentTarget.style.borderColor = tint('signal', 50)
+          e.currentTarget.style.boxShadow = 'var(--input-shadow-focus)'
+          rest.onFocus?.(e)
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.background = 'var(--input-bg)'
+          e.currentTarget.style.borderColor = 'var(--input-border-b)'
+          e.currentTarget.style.boxShadow = 'none'
+          rest.onBlur?.(e)
+        }}
+      >
+        {options.map(o => (
+          <option key={o.value} value={o.value} disabled={o.disabled}>{o.label}</option>
+        ))}
+      </select>
+      <span
+        aria-hidden="true"
+        style={{ position: 'absolute', right: '10px', display: 'inline-flex', color: 'var(--text3)', pointerEvents: 'none' }}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+      </span>
+    </div>
+  )
+}
+
+/* ── SEGMENTED ── a segmented toggle / tab row. Proper radiogroup semantics:
+   container role="radiogroup", each item role="radio" + aria-checked reflects the
+   selection (the accessible equivalent of the aria-pressed idiom, correct for a
+   single-select group) — so a tab row can never ship without a selected-state cue
+   for AT. Active segment is a light signal wash, not a fill (alien-tech restraint). */
+interface SegmentedItem {
+  value: string
+  label?: string
+  icon?: ReactNode
+  ariaLabel?: string
+}
+
+interface SegmentedProps {
+  value: string
+  onChange: (value: string) => void
+  items: SegmentedItem[]
+  className?: string
+  ariaLabel?: string
+}
+
+export function Segmented({ value, onChange, items, className = '', ariaLabel }: SegmentedProps) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label={ariaLabel}
+      className={`empire-segmented ${className}`}
+      style={{
+        display: 'inline-flex',
+        gap: '2px',
+        padding: '2px',
+        background: 'var(--gl-bg)',
+        border: '1px solid var(--gl-border-b)',
+        borderRadius: 'var(--radius-md)',
+      }}
+    >
+      {items.map((it) => {
+        const active = it.value === value
+        return (
+          <button
+            key={it.value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            aria-label={it.ariaLabel ?? it.label}
+            onClick={() => onChange(it.value)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: it.label ? '5px 12px' : '5px 8px',
+              border: 'none',
+              borderRadius: 'var(--radius-sm)',
+              background: active ? tint('signal', 18) : 'transparent',
+              color: active ? cssVar('signal') : 'var(--text2)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all var(--dur-fast) var(--ease-spring)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {it.icon && <span aria-hidden="true" style={{ display: 'inline-flex' }}>{it.icon}</span>}
+            {it.label && <span>{it.label}</span>}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 

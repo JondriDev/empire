@@ -18,6 +18,7 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 import { scanStyleViolations } from './styleAudit.mjs';
+import { scanControlViolations } from './controlAudit.mjs';
 
 const ROOT = process.cwd();
 const args = new Set(process.argv.slice(2));
@@ -59,6 +60,12 @@ function appCodeFiles() {
   return walk(path.join(ROOT, 'src')).filter(
     (f) => /\.(ts|tsx|css)$/.test(f) &&
       !f.includes(`${path.sep}design-system${path.sep}`) &&
+      // The `ui` primitive layer is shell infrastructure: it legitimately defines
+      // raw design values AND renders the bare interactive elements it wraps
+      // (Button→<button>, Input→<input>, …), so it is excluded from the app-code
+      // conformance set just like design-system/. (Currently contributes 0 to the
+      // colour/style audits, so those metrics are unchanged.)
+      !f.includes(`${path.sep}components${path.sep}ui${path.sep}`) &&
       !DS_INFRA.has(path.relative(ROOT, f)) &&
       !/\.test\.tsx?$/.test(f)
   );
@@ -158,6 +165,36 @@ function styleViolations() {
   return { count, dims, top: offenders.slice(0, 8) };
 }
 
+// ---- metric: off-shell CONTROL conformance (lower is better) ---------------
+// Design-system conformance III — the component-shell axis. The colour + style
+// audits above catch raw values; this catches app code that renders a BARE
+// interactive control (`<button>`/`<input>`/`<select>`/`<textarea>`) instead of
+// reaching for the `ui` primitive layer (`Button`/`IconButton`/`Input`/`TextArea`
+// /`Select`/`Segmented`). A bare control bypasses the shell's glass surface, focus
+// ring, spring motion, and a11y affordances — the exact drift that made Mail +
+// Crypto raw-HTML islands. Detection is the pure, unit-pinned `scanControlViolations`
+// (scripts/controlAudit.mjs); same app-code file set as the colour/style audits,
+// minus src/components/ui/ (excluded in appCodeFiles — the primitives legitimately
+// render the bare elements they wrap). type=file|checkbox|radio inputs are exempt
+// (no text-field primitive home). Baseline is non-zero; EPIC-14 drives it to 0.
+function controlViolations() {
+  const files = appCodeFiles();
+  let count = 0;
+  const dims = { button: 0, input: 0, select: 0, textarea: 0 };
+  const offenders = [];
+  for (const f of files) {
+    const r = scanControlViolations(read(f));
+    if (r.total) {
+      count += r.total;
+      dims.button += r.button; dims.input += r.input;
+      dims.select += r.select; dims.textarea += r.textarea;
+      offenders.push([path.relative(ROOT, f), r.total]);
+    }
+  }
+  offenders.sort((a, b) => b[1] - a[1]);
+  return { count, dims, top: offenders.slice(0, 8) };
+}
+
 // ---- metric: shipped bundle size (gzipped) ---------------------------------
 function bundleSize() {
   const dir = path.join(ROOT, 'dist/assets');
@@ -177,6 +214,7 @@ const t = testStats();
 const tv = tokenViolations();
 const osu = offSystemUtilities();
 const sv = styleViolations();
+const cv = controlViolations();
 const bundle = bundleSize();
 const snapshot = {
   generatedAt: new Date().toISOString(),
@@ -187,12 +225,14 @@ const snapshot = {
   offSystemUtilities: osu.count,
   offSystemStyle: sv.count,
   offSystemStyleDims: sv.dims,
+  offShellControls: cv.count,
+  offShellControlDims: cv.dims,
   bundleGzKB: bundle ? bundle.gzKB : null,
   bundleRawKB: bundle ? bundle.rawKB : null,
 };
 
 if (JSON_ONLY) {
-  console.log(JSON.stringify({ ...snapshot, tokenViolationTop: tv.top, offSystemUtilitiesTop: osu.top, offSystemStyleTop: sv.top }, null, 2));
+  console.log(JSON.stringify({ ...snapshot, tokenViolationTop: tv.top, offSystemUtilitiesTop: osu.top, offSystemStyleTop: sv.top, offShellControlsTop: cv.top }, null, 2));
   process.exit(0);
 }
 
@@ -223,6 +263,7 @@ const rows = [
   ['Token violations', snapshot.tokenViolations, delta('tokenViolations'), 'LOWER is better (raw hex/rgb literals)'],
   ['Off-system utils', snapshot.offSystemUtilities, delta('offSystemUtilities'), 'LOWER is better (Tailwind palette classes bypassing tokens)'],
   ['Off-system style', `${snapshot.offSystemStyle} (r${sv.dims.radii}/t${sv.dims.type}/m${sv.dims.motion})`, delta('offSystemStyle'), 'LOWER is better (raw radii/type/easing bypassing --radius-*/--text-*/--ease-*)'],
+  ['Off-shell controls', `${snapshot.offShellControls} (b${cv.dims.button}/i${cv.dims.input}/s${cv.dims.select}/t${cv.dims.textarea})`, delta('offShellControls'), 'LOWER is better (bare <button>/<input>/<select>/<textarea> bypassing the ui primitive layer)'],
   ['Bundle gz (KB)', snapshot.bundleGzKB ?? 'n/a (no dist)', delta('bundleGzKB'), 'LOWER is better; build first to measure'],
 ];
 const w = (s, n) => String(s).padEnd(n);
@@ -241,6 +282,10 @@ if (osu.top.length) {
 if (sv.top.length) {
   console.log(`\nTop off-system-style files (raw radii/type/easing):`);
   for (const [f, n] of sv.top) console.log(`  ${n}\t${f}`);
+}
+if (cv.top.length) {
+  console.log(`\nTop off-shell-control files (bare <button>/<input>/<select>/<textarea>):`);
+  for (const [f, n] of cv.top) console.log(`  ${n}\t${f}`);
 }
 console.log('');
 

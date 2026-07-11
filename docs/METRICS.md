@@ -29,7 +29,21 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 | Design-token violations | **0** | 0 | ↓ raw hex/rgb in app code that bypasses the design system |
 | Off-system utilities | **0** (↓ from 1076 — the redesign batch's `98c61c7` "token-ize Tailwind palette classes across all apps" swept the whole mass; EPIC-5 S8 `c51f79f` LOCKED it with `--assert-zero` CI gate; re-confirmed 0 this run) | 0 | ↓ Tailwind palette classes (`text-gray-400`, `bg-cyan-600`, `bg-white/10`, `text-white`, `text-red-400`…) that bypass the JondriDev tokens — **EPIC-5 TARGET MET (0)** |
 | Off-system style | **0** (r0/t0/m0 — **the full −56 leap from the S1 baseline of 56; EPIC-11 TARGET MET (0)**; **QA-CONFIRMED independently 2026-07-05 on green main `4c643a9`** — `metrics.mjs` reproduces `0 (r0/t0/m0)` exactly and **`--assert-zero` exits 0**. S2 drove type t42→0, S3 drove radii r12→0, **S4 drove motion m2→0 and LOCKED it in `--assert-zero`** (mirrors the EPIC-5 S8 offSystemUtilities lock). All three sub-counts 0 and gated — cannot regress. **S1–S4 done-confirmed; EPIC-11 CODE-COMPLETE, ready to retire to DONE.** | 0 | ↓ raw radii/type/easing bypassing `--radius-*`/`--text-*`/`--ease-*` |
+| Off-shell controls | **341** (b271/i48/s6/t16 — **NEW baseline, EPIC-14 S1 2026-07-11**; bare `<button>`/`<input>`/`<select>`/`<textarea>` in app code bypassing the `ui` primitive layer, over the same `appCodeFiles()` set minus `src/components/ui/`; `type=file/checkbox/radio` inputs exempt). Detector = pure `scanControlViolations` (`scripts/controlAudit.mjs`, 13 cases). **NOT yet in `--assert-zero`** — EPIC-14 S2–S8 drive it to 0 heaviest-first, S9 locks it. | 0 (then LOCK) | ↓ bare controls bypassing `ui` `Button`/`IconButton`/`Input`/`TextArea`/`Select`/`Segmented` |
 | Bundle gz (KB) | **729.8** (Δ ±0 vs the committed snapshot — EPIC-13 S3 + playwright devDep already landed here; playwright is dev-only, never enters the prod bundle; no new shipped deps) | hold / shrink | ↓ |
+
+> **Off-shell controls (added 2026-07-11 — design-system conformance III).** The colour audits
+> (`tokenViolations`/`offSystemUtilities`) and the style audit (`offSystemStyle`) all sit at **0**, but nothing
+> measured the **component-shell axis**: whether an app renders its interactive controls through the `ui` primitive
+> layer or drops to a bare `<button>`/`<input>`/`<select>`/`<textarea>` (which bypasses the shell's glass surface,
+> focus ring, spring motion, and a11y affordances — the exact drift that made Mail+Crypto raw-HTML islands).
+> `offShellControls` measures that third axis. Detector = the pure, unit-pinned `scanControlViolations`
+> (`scripts/controlAudit.mjs`, 13 cases in `controlAudit.test.mjs`) over the same app-code file set the colour/style
+> audits walk, minus `src/components/ui/` (its primitives legitimately render the bare elements they wrap). The row
+> reports `b/i/s/t` = button/input/select/textarea sub-counts. **`type=file|checkbox|radio` inputs are exempt** (no
+> text-field primitive home). EPIC-14 completed the `ui` set (`Select`/`IconButton`/`Segmented`) so every control now
+> has a shell home; S2–S8 migrate the 54 offender files by descending mass, S9 adds `offShellControls` to
+> `--assert-zero` to lock it at 0 — exactly as EPIC-5 S8 locked `offSystemUtilities` and EPIC-11 S4 locked `offSystemStyle`.
 
 > **Off-system style (added 2026-07-04 — design-system conformance II).** The two colour audits
 > (`tokenViolations` = raw `#hex`/`rgba()`; `offSystemUtilities` = Tailwind palette classes) are both at **0**,

@@ -1,9 +1,9 @@
 {
   "current": {
-    "generatedAt": "2026-07-10T23:08:55.894Z",
+    "generatedAt": "2026-07-11T00:18:12.989Z",
     "apps": 31,
-    "testFiles": 48,
-    "testCases": 391,
+    "testFiles": 49,
+    "testCases": 399,
     "tokenViolations": 0,
     "offSystemUtilities": 0,
     "offSystemStyle": 0,
@@ -12,42 +12,17 @@
       "type": 0,
       "motion": 0
     },
+    "offShellControls": 341,
+    "offShellControlDims": {
+      "button": 271,
+      "input": 48,
+      "select": 6,
+      "textarea": 16
+    },
     "bundleGzKB": 729.8,
     "bundleRawKB": 2467.1
   },
   "history": [
-    {
-      "generatedAt": "2026-07-09T18:11:23.119Z",
-      "apps": 31,
-      "testFiles": 41,
-      "testCases": 352,
-      "tokenViolations": 2,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 4,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 4,
-        "motion": 0
-      },
-      "bundleGzKB": 727.5,
-      "bundleRawKB": 2460
-    },
-    {
-      "generatedAt": "2026-07-09T18:11:23.271Z",
-      "apps": 31,
-      "testFiles": 41,
-      "testCases": 352,
-      "tokenViolations": 2,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 4,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 4,
-        "motion": 0
-      },
-      "bundleGzKB": 727.5,
-      "bundleRawKB": 2460
-    },
     {
       "generatedAt": "2026-07-09T18:11:36.985Z",
       "apps": 31,
@@ -482,6 +457,38 @@
     },
     {
       "generatedAt": "2026-07-10T23:08:53.400Z",
+      "apps": 31,
+      "testFiles": 48,
+      "testCases": 391,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "bundleGzKB": 729.8,
+      "bundleRawKB": 2467.1
+    },
+    {
+      "generatedAt": "2026-07-10T23:08:55.894Z",
+      "apps": 31,
+      "testFiles": 48,
+      "testCases": 391,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "bundleGzKB": 729.8,
+      "bundleRawKB": 2467.1
+    },
+    {
+      "generatedAt": "2026-07-11T00:12:08.740Z",
       "apps": 31,
       "testFiles": 48,
       "testCases": 391,

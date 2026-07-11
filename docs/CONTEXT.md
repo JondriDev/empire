@@ -16,6 +16,8 @@
 
 ---
 
+## ★ EPIC-14 S1 SHIPPED (2026-07-11, green main) — the control-shell axis is now MEASURED. `offShellControls = 341 (b271/i48/s6/t16) across 54 files` is the new baseline; the `ui` primitive set is COMPLETE (gained `Select`/`IconButton`/`Segmented`). ▶ NEXT = **EPIC-14 S2** (migrate Reader 19→0). Full shape in the "Active epic" block below (search "▶ S2"). Metric is NOT yet in `--assert-zero` (S9 locks it). build🟢 vitest 471🟢 eslint clean; colour/style 0 Δ±0; bundle gz 729.8 ±0; no new deps.
+
 ## ★ INFRA GAP CLOSED (2026-07-10, green main) — `playwright` is now a real devDependency + `qa-smoke.mjs` AUTO-STARTS its own server. Every routine's manual `npm install --no-save playwright` + hand-started `node server.js` tax is GONE.
 
 **Why this run:** EPIC-13 is CODE-COMPLETE + QA-render-confirmed and there is NO active epic stage; the NOW items (1–3) are all DONE/FOLDED. So per the routine I did the topmost cloud-executable actionable item — the single most-repeated pain in this whole file (flagged "INFRA GAP STILL OPEN" in *every* QA/build block for a week): it's the headline first move of the user-ratified RFC `docs/rfc/iteration-plan-musk.md`. Pure infra, moves zero product metric.
@@ -282,28 +284,14 @@ fleet freeze). What changed for routines:
   `offShellControls` metric **≈148 → 0**, then LOCKED in `--assert-zero` (the EPIC-5/11 measure→drive→lock template; natural 0
   target; 100 % cloud-verifiable; no new deps; folds in ad-hoc a11y — IconButton forces `aria-label`, Segmented forces
   `aria-pressed`). Routes stay 31/31; tokens/off-system/offSystemStyle stay 0.
-  - **▶ S1 (next — start here, no re-planning) — exact shape.** Build the audit + COMPLETE the primitive set + baseline; pure-
-    additive, ZERO migration/render risk. Seams:
-    - **New `scripts/controlAudit.mjs`** — pure `scanControlViolations(text) → {button,input,select,textarea,total}`: count
-      opening `<button`/`<select`/`<textarea` tags + `<input>` tags whose `type=` is NOT `file|checkbox|radio` (scan the tag to
-      its `>`). Mirror `scripts/styleAudit.mjs`'s module shape + header. New `scripts/controlAudit.test.mjs` (≥8; incl. the
-      type-exclusion cases + "capitalised `<Button>` is not a bare tag").
-    - **`scripts/metrics.mjs`** — add `controlViolations()` mirroring `styleViolations()` (`:143`) over `appCodeFiles()`, but
-      add a **`src/components/ui/` dir-exclusion** beside the existing `design-system/` one (`:60`) so the primitives' own bare
-      elements aren't counted. Add `offShellControls` + `offShellControlDims {button,input,select,textarea}` to the snapshot; add
-      the `b/i/s/t` table row (like `offSystemStyle`'s `r/t/m` at `:224`) + offenders list. **Do NOT add to `--assert-zero` yet**
-      (non-zero — S9 locks it, à la EPIC-5 S8 / EPIC-11 S4).
-    - **Three new token-clean, a11y-correct primitives in `src/components/ui/` (each unit-pinned in `ui.test.tsx`):**
-      `Select {value,onChange,options,ariaLabel?}` (native `<select>` under the hood), `IconButton {icon,onClick,'aria-label'
-      REQUIRED,variant?,size?}` (TS forces the label), `Segmented {value,onChange,items:[{value,label?,icon?,ariaLabel?}]}`
-      (`role="radiogroup"` + `aria-pressed`). Export from `index.tsx`. Copy `Button`/`Input`'s token discipline verbatim
-      (`var(--radius-*)`/`var(--text-*)`/`var(--ease-*)`/token colours) so they audit at tokens/off-system/offSystemStyle 0.
-    - **Baseline:** `node scripts/metrics.mjs` → record the REAL `offShellControls` (expected ≈148 `b127/i≈14/s5/t2`) into the
-      table + `metrics.json`.
-    - *Acceptance:* `controlAudit.test.mjs` green; the three primitives exist/export/unit-pinned + audit 0; the metric row +
-      snapshot field appear with the real baseline; build🟢 vitest🟢 eslint clean; `--assert-zero` STILL exit 0 (new metric not
-      gated yet); bundle gz ±0, no new deps.
-  - **THEN S2–S8 migrate the 27 offender files heaviest-first** (Reader 16 → Calendar 15 → Clock 13+Photos 12 → artifacts
+  - **✅ S1 SHIPPED 2026-07-11 (green main) — audit + 3 primitives + baseline. Real baseline `offShellControls = 341 (b271/i48/s6/t16) across 54 files`** (the ratified ≈148/b127 was a subset estimate; the detector's honest comprehensive count over the full `appCodeFiles()` set is higher — only makes S2–S8 more valuable). What shipped:
+    - **`scripts/controlAudit.mjs`** — pure `scanControlViolations(text) → {button,input,select,textarea,total}`. `countTag()` is case-sensitive (`<button` never matches `<Button`, so primitives aren't counted; closing `</button>` isn't matched either). `inputTags()` scans each `<input` to its real `>`, skipping `>` inside `{…}` JSX exprs AND the `>` of a `=>` arrow (both ubiquitous in `onChange`) — so `type=` is read correctly on multi-line inputs. `type=file|checkbox|radio` exempt. `controlAudit.test.mjs` (13 tests).
+    - **`scripts/metrics.mjs`** — `controlViolations()` added; `offShellControls` + `offShellControlDims` in snapshot; `b/i/s/t` row + offenders list. **`src/components/ui/` dir-exclusion added to `appCodeFiles()`** (~`:60`) so primitives' own bare elements aren't counted — colour/style metrics verified **Δ ±0** (ui contributes 0 to those). NOT in `--assert-zero` yet (S9 locks it).
+    - **Three primitives in `src/components/ui/index.tsx`** (exported; unit-pinned by new `ui.test.tsx`, 8 tests): `IconButton {icon, 'aria-label' REQUIRED, variant?, size?}` (TS forces the label; reuses `variantStyles` + a square `iconSizeStyles`), `Select {value, onChange:(v)=>void, options:{value,label,disabled?}[], ariaLabel?}` (native `<select>` `appearance:none` + token glass + custom chevron), `Segmented {value, onChange:(v)=>void, items:{value,label?,icon?,ariaLabel?}[], ariaLabel?}` (container `role="radiogroup"`, each item `role="radio"` + **`aria-checked`** — the accessible single-select equivalent of the spec's aria-pressed; active = a light `tint('signal',18)` wash, not a fill).
+    - **Verify:** build🟢 vitest 450→471🟢 eslint clean; tokens/off-system/offSystemStyle **0 Δ ±0** (`--assert-zero` exit 0); bundle gz **729.8 ±0** (primitives tree-shaken until S2 mounts them), no new deps.
+    - **⚠️ TRAP for S2+ migrations:** a `<Segmented>` item renders a `role="radio"` button, NOT `aria-pressed` — if a migration test asserts `aria-pressed` on a Segmented tab it'll fail; assert `getByRole('radio',{name})` + `aria-checked`. The old grammar/music idiom used plain `role="group"`+`aria-pressed` buttons; `Segmented` is the radiogroup upgrade. For an ON/OFF single toggle (mute, shuffle) that is NOT a group, keep a plain `IconButton`/`Button` with `aria-pressed` — Segmented is for mutually-exclusive SETS only.
+  - **▶ S2 (next — start here, no re-planning) — migrate Reader (`src/apps/reader/Reader.tsx`) 19→0, alone (heaviest file).** Apply the MIGRATION MAPPING RULE (EPICS.md → EPIC-14 Rails): text button→`Button`, **icon-only button→`IconButton`** (supply `aria-label` from the action — the a11y dividend), toggle/tab row→`Segmented`, `<select>`→`Select`, text `<input>`→`Input`, `<textarea>`→`TextArea`. **KEEP** the file-`<input type="file">` bare (out of scope — no primitive home). Behaviour-preserving: reuse each existing handler verbatim. Seam: `grep -nE '<button|<input|<select|<textarea' src/apps/reader/Reader.tsx` to enumerate; import `{ Button, IconButton, Input, Select, Segmented }` from `../../components/ui` (or the existing `../../components/ui/index` path Reader already uses). *Acceptance:* `node scripts/metrics.mjs` → Reader drops out of the offenders list, `offShellControls 341 → ~322` (Reader's 19 gone minus any exempt file-input); build🟢 vitest🟢 eslint clean; `--assert-zero` exit 0; colour/style 0; bundle gz ±~0. **Render-confirm via `qa-smoke.mjs` that `/app/reader` still renders clean (S2 is the first stage that touches a render path — drive it).**
+  - **THEN S3–S8 migrate the remaining offender files heaviest-first** (Calendar 15 → Calculator 14 + DataCenter 14 → artifacts
     family 27 → media+lang 27 → utility apps 16 → Cakra+components tail ≈22), applying the shared MIGRATION MAPPING RULE (in
     EPICS.md → EPIC-14 Rails): text button→`Button`, icon button→`IconButton`, toggle/tab row→`Segmented`, `<select>`→`Select`,
     input→`Input`, textarea→`TextArea`; behaviour-preserving. **S9 LOCKS `offShellControls` in `--assert-zero`** (verify the

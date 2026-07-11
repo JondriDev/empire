@@ -125,8 +125,18 @@ passing through every stage).
 Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones before, build+vitest+eslint green,
 `tokenViolations`/`offSystemUtilities`/`offSystemStyle` stay 0; `offShellControls` marches toward 0):
 
-- [ ] **S1 · Build the audit + COMPLETE the primitive set + establish the baseline (drive nothing yet).** The additive,
-  fully-downhill foundation — no app migration, zero render risk.
+- [x] **S1 · Build the audit + COMPLETE the primitive set + establish the baseline (drive nothing yet). ✅ SHIPPED 2026-07-11 (`main`).**
+  Real baseline **`offShellControls` = 341 (b271/i48/s6/t16) across 54 files** — the honest comprehensive count over the full
+  `appCodeFiles()` set (the ratified ≈148/b127 estimate was a subset census; the detector's true number is higher, which only
+  makes S2–S8 more valuable). `scripts/controlAudit.mjs` + `controlAudit.test.mjs` (13 tests) shipped; `metrics.mjs` gained
+  `controlViolations()` + the `offShellControls`/`offShellControlDims` snapshot fields + `b/i/s/t` row + offenders list + a
+  `src/components/ui/` dir-exclusion in `appCodeFiles()` (colour/style metrics verified Δ ±0). The three primitives
+  `Select`/`IconButton`/`Segmented` shipped in `src/components/ui/index.tsx` (exported), unit-pinned by new `ui.test.tsx`
+  (8 tests). build🟢 vitest 450→471🟢 eslint clean; tokens/off-system/offSystemStyle 0 (`--assert-zero` STILL exit 0 — new
+  metric ungated); bundle gz 729.8 ±0 (primitives tree-shaken until S2 mounts them), no new deps. ▶ NEXT = **S2 (migrate Reader
+  16→0)**. *Top offenders: Reader 19, FormBuilder 16, Calendar 15, Calculator 14, DataCenter 14, AIChat 13, Maps 12, Photos 12.*
+  <details><summary>original S1 spec</summary>
+  The additive, fully-downhill foundation — no app migration, zero render risk.
   - **New `scripts/controlAudit.mjs`** — pure, dependency-free `export function scanControlViolations(text) →
     {button,input,select,textarea,total}`: count opening tags `<button`, `<select`, `<textarea`, and `<input>` where the tag
     does NOT carry `type="file|checkbox|radio"` (scan the tag up to its `>` for the `type=` attr). Mirror `styleAudit.mjs`'s
@@ -156,6 +166,7 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
     tokens/off-system/offSystemStyle 0; the `offShellControls` row + snapshot field appear with the real baseline; build🟢
     vitest🟢 eslint clean; `--assert-zero` STILL exit 0 (colour/style metrics untouched, new metric not yet gated); bundle gz
     ±0 (dev script + tiny components), no new deps.
+  </details>
 
 - [ ] **S2 · Migrate Reader (16 → 0) — the single heaviest file, alone.** `src/apps/reader/Reader.tsx` — apply the mapping
   rule to all 16 bare controls (mostly reader-toolbar icon buttons → `IconButton`; any dropdown → `Select`). Keep every handler
