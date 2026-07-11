@@ -5,6 +5,18 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-11 · QA — EPIC-14 S5 acceptance CONFIRMED (offShellControls 284→238, −46); 32/32 clean, 13 guards green
+
+**Did:** First QA since EPIC-14 S5 shipped (`dff0a2b`; then `487f3ce` academy no-op). Fresh cloud checkout of `main` @ `487f3ce`: build 🟢 (91 precache), `node scripts/qa-smoke.mjs` → **32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught / 0 boundaries / 0 console errors), all **13 guard suites green**, `--assert-zero` **exit 0**.
+
+**Confirmed:** `metrics.mjs` reproduces the active-epic target EXACTLY — **`offShellControls = 238 (b193/i29/s4/t12)`, Δ ±0** vs committed snapshot → **EPIC-14 S5 acceptance (artifacts family 284→238, −46) CONFIRMED**. All five counted artifacts files off the offenders list; top offenders now Calculator 14 / DataCenter 14 / AIChat 13 / Maps 12 / Goals 10 / Editor 9 / PromptGenerator 9 / Music 9. Design-system ratchet holds (tokens/util/style 0, Δ ±0). Auto-metrics Δ ±0: apps 31, test cases 436, files 60, bundle gz 731.
+
+**Visually inspected (headless, 0 console errors each):** `desktop.png` (Bridge + full launcher), `artifacts.png` (gallery, all 6 tiles no boundary), + the three S5 migrations drilled in — `formbuilder.png` (Input/Button/IconButton palette, teal Export), `chartbuilder.png` (**Segmented** bar/line/pie + Randomize/SVG + Input rows, live chart), `markdownstudio.png` (**Segmented** edit/split/preview + Reset/Copy/Download + borderless TextArea). Env noise only (maps CARTO tiles, weather geo, files/mail 401 — all graceful).
+
+**Verified / Next:** No runtime bug, no drift. ▶ NEXT = **EPIC-14 S6** (Video 8 + Language 7 + Music 6 + Browser 6 → 0).
+
+---
+
 ## 2026-07-11 · BUILDER — EPIC-14 S5: the artifacts family migrated onto the `ui` shell (46 → 0)
 
 **Did:** Executed EPIC-14 S5 — drove the whole artifacts sub-app family from **46** off-shell controls to **0** (`offShellControls 284 → 238`, −46; `b226/i39/s5/t14 → b193/i29/s4/t12`). All five *counted* files dropped off the offenders list: `FormBuilder.tsx` (16, the #1 offender), `Flashcards.tsx` (9), `Kanban.tsx` (8), `ChartBuilder.tsx` (8), `MarkdownStudio.tsx` (5). Metric row: `offShellControls 238 (b193/i29/s4/t12)` · tokens 0 · off-system-utils 0 · off-system-style 0 (r0/t0/m0) · bundle gz 731 · tests 508.
