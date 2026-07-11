@@ -5,6 +5,22 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-11 · QA — Visual + smoke: EPIC-14 S2+S3 render-CONFIRMED (green main `2622813`)
+
+**Did:** Fresh-checkout QA on green main `2622813` (first QA since both S2 Reader and S3 Calendar shipped; last QA was at S1=341). Build 🟢 (`tsc -b && vite build`, bundle gz 730.2, precache 91). `qa-smoke.mjs` → **32/32 routes render clean** (0 uncaught, 0 console errors), all 13 guards green (INBOUND 4/4, MEDIA 3/3, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1, HOME-ALIVE 1/1, PROVENANCE 3/3+3/3, PRECACHE 91 no-gap, OFFLINE 5/5). `metrics.mjs --assert-zero` **exit 0** (tokens/off-system/off-system-style all 0, Δ ±0).
+
+**Epic-acceptance confirmation:** EPIC-14's target metric `offShellControls` reproduced EXACTLY at **307 (b243/i44/s6/t14)**, Δ ±0 vs the committed snapshot → **both S2 (Reader 341→322, −19) and S3 (Calendar 322→307, −15) acceptances CONFIRMED, net −34.** Reader + Calendar both dropped off the top-offenders list (now FormBuilder 16, Calculator 14, DataCenter 14, AIChat 13, Maps 12, Photos 12, Clock 11, Goals 10). Visually inspected the two migrations: `app-reader.png` (shelled amber "Add book" + "+ Add your first book" primary Buttons, clean empty-state, no error boundary) and `app-calendar.png` (shelled "Today" pill Button, month chevron IconButtons, solid teal "+ Add Event" primary Button, Today's-Events sidebar, no error boundary). Also confirmed `desktop.png` (Bridge + full 32-tile launcher), `app-mail.png` (graceful not-configured 401), `app-maps.png` (real Leaflet, tiles env-blocked).
+
+**Env noise (NOT bugs):** mail `/api/integrations/status` 401 → graceful "Provider himalaya not configured."; maps CARTO tiles blocked; weather geocode + Geolocation permissions-policy blocked; files `/api/files` 401 (Android-only). All render fine.
+
+**Verified:** build green · 32/32 clean · all guards green · `--assert-zero` exit 0 · offShellControls 307 Δ ±0 · no runtime bug, no drift.
+
+**Next:** EPIC-14 **S4** (Clock 13 + Photos 12 → 0) — the `Segmented`/`IconButton` showcase.
+
+**Docs:** `docs/screenshots/latest/REPORT.md` (QA summary prepended), `docs/METRICS.md` (Routes-rendering-clean row), `docs/CONTEXT.md` (new QA-confirmed block). No image files committed (gitignored).
+
+---
+
 ## 2026-07-11 · BUILDER — EPIC-14 S3: Calendar migrated onto the `ui` shell (15 → 0)
 
 **Did:** Executed EPIC-14 S3 — drove `src/apps/calendar/Calendar.tsx` from **15** off-shell controls to **0** (`offShellControls 322 → 307`, −15; `b253/i48/t15 → b243/i44/t14`, `s6` unchanged). Applied the migration mapping rule mechanically:

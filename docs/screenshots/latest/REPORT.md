@@ -1,46 +1,41 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-11T03:08:41.264Z
+**Generated:** 2026-07-11T11:44:40.566Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
 
 ---
 
-## QA verdict — 2026-07-11 (clean run, NO runtime bug)
+## QA verdict — 2026-07-11 (green main `2622813`)
 
-**Tree:** green `main` HEAD `5e37d8d` (EPIC-14 S1 · "measure the control-shell axis + complete the ui primitive set"). First INDEPENDENT QA since S1 landed. Build 🟢 (`tsc -b && vite build`, 18.2s). **32/32 routes render clean, 0 uncaught JS / error boundaries / blank screens.** All 14 guards green. `node scripts/metrics.mjs --assert-zero` → **exit 0 (ratchet HOLDS).** Screenshots captured + spot-inspected (desktop, mail, crypto, maps) — all styled + shelled, 0 page errors across every render.
+**No runtime bug found.** Build 🟢, 32/32 routes render clean, all guards green, `metrics.mjs --assert-zero` **exit 0** (all four conformance axes 0, Δ ±0).
 
-### Metric deltas
+### Active epic — EPIC-14 · Shell conformance → target metric `offShellControls` MOVED and holds
+This run independently reproduces the current baseline EXACTLY: **`offShellControls = 307 (b243/i44/s6/t14)` — Δ ±0** vs committed snapshot.
 
-| Metric | Value | Δ vs S1 snapshot | Δ vs last QA (EPIC-13, 2026-07-10) |
-|---|---|---|---|
-| Apps / routes | 31 | ±0 | ±0 |
-| Routes rendering clean | **32/32** (desktop + 31 registry apps) | ±0 | ±0 |
-| Test cases | 399 | ±0 | +8 (S1 tests) |
-| Test files | 49 | ±0 | +1 (`ui.test.tsx`) |
-| Token violations | **0** | ±0 | ±0 |
-| Off-system utilities | **0** | ±0 | ±0 |
-| Off-system style | **0** (r0/t0/m0) | ±0 | ±0 |
-| **Off-shell controls** | **341** (b271/i48/s6/t16) | ±0 | NEW row (born this epic) |
-| Bundle gz (KB) | 729.8 | ±0 | ±0 |
+- **S2 (Reader 19→0) acceptance CONFIRMED** — Reader migration dropped the metric 341→322; Reader-attributed bare-control count is now 0 (dropped off the top-offenders list). Visually confirmed `app-reader.png`: shelled amber "Add book" + "+ Add your first book" primary Buttons, clean empty-state, no error boundary.
+- **S3 (Calendar 15→0) acceptance CONFIRMED** — Calendar migration dropped the metric 322→307 (−15, `b253/i48/t15 → b243/i44/t14`, s6 unchanged); reproduced on the nose this run. Calendar dropped off the top-offenders list. Visually confirmed `app-calendar.png`: shelled "Today" pill Button, month prev/next chevron IconButtons, solid teal "+ Add Event" primary Button, "Today's Events" sidebar, no error boundary.
+- **Net S2+S3 (both shipped since last QA at S1=341): `offShellControls 341 → 307 (−34)`, both migrations render-confirmed live.** ▶ NEXT = **S4 (Clock 13 + Photos 12 → 0)**.
 
-This QA run adds no app code, so every auto-metric reproduces the committed S1 snapshot exactly (Δ ±0).
+Top off-shell offenders now (heaviest-first): FormBuilder 16, Calculator 14, DataCenter 14, AIChat 13, Maps 12, Photos 12, Clock 11, Goals 10.
 
-### Epic-acceptance — EPIC-14 · Shell conformance (S1 CONFIRMED)
+### Metrics snapshot (all Δ ±0 vs committed)
+| Metric | Value |
+| --- | --- |
+| Apps / routes | 31 (smoke↔registry exact; 32/32 incl. desktop shell) |
+| Test cases | 411 · Test files 52 |
+| Token violations / Off-system utils / Off-system style | 0 / 0 / 0 (r0/t0/m0) |
+| Off-shell controls | 307 (b243/i44/s6/t14) |
+| Bundle gz (KB) | 730.2 |
 
-**S1 acceptance = "build the audit + complete the primitive set + establish the baseline (drive nothing yet)."** Independently CONFIRMED this run:
-- `metrics.mjs` reproduces the baseline **exactly**: `offShellControls = 341 (b271/i48/s6/t16)` — the control-shell axis is now MEASURED where nothing measured it before.
-- The three colour/style axes stay locked at **0** through the new primitive additions (`--assert-zero` exit 0) — the new `ui` `Select`/`IconButton`/`Segmented` audit token-clean, as S1 required.
-- Top offenders reproduce heaviest-first: Reader 19, FormBuilder 16, Calendar 15, Calculator 14, DataCenter 14, AIChat 13, Maps 12, Photos 12 — the S2 target order is intact.
+### Env noise (NOT bugs)
+- `mail` net:1 — `/api/integrations/status` 401 (no backend); renders "Provider himalaya not configured." gracefully, no error boundary (`app-mail.png`).
+- `maps` — Leaflet CARTO tiles blocked in the cloud sandbox; the real Leaflet container + zoom + search render fine (`app-maps.png`).
+- `weather` — geocoding-api + Geolocation permissions-policy blocked (env-expected); app renders.
+- `files` — `/api/files` 401 (Android-only backend); app renders.
 
-**S1 is done-confirmed. `offShellControls` holding at 341 is CORRECT, not a regression** — S1 drives nothing; the number only moves when the first migration stage lands. **▶ NEXT for the Builder = EPIC-14 S2 (migrate Reader 19→0).**
-
-### Env-expected non-bugs (NOT regressions)
-
-- `mail` → `net:1` (`/api/integrations/status` 401): Himalaya mail backend not configured in cloud (UI shows honest "Provider himalaya not configured", renders clean).
-- `maps` → OSM/CARTO tiles grey: tile-CDN egress-blocked; Leaflet container, zoom, search, attribution all render.
-- `weather` → Open-Meteo geocoding + Geolocation blocked in cloud.
-- `files` → `/api/files` 401 (Android-only device-FS path, absent in cloud).
+### Visually inspected (local only — never committed)
+`desktop.png` (Bridge "Good morning" + 4 stat cards + full 32-tile launcher Cakra→Crypto), `app-reader.png` (S2 shelled), `app-calendar.png` (S3 shelled), `app-mail.png` (graceful not-configured), `app-maps.png` (real Leaflet, tiles env-blocked).
 
 ---
 
@@ -66,7 +61,7 @@ This QA run adds no app code, so every auto-metric reproduces the committed S1 s
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
