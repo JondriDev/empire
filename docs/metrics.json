@@ -1,6 +1,6 @@
 {
   "current": {
-    "generatedAt": "2026-07-12T11:36:36.574Z",
+    "generatedAt": "2026-07-12T13:08:22.789Z",
     "apps": 31,
     "testFiles": 64,
     "testCases": 458,
@@ -23,52 +23,6 @@
     "bundleRawKB": 2461.4
   },
   "history": [
-    {
-      "generatedAt": "2026-07-11T13:08:35.182Z",
-      "apps": 31,
-      "testFiles": 52,
-      "testCases": 411,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 307,
-      "offShellControlDims": {
-        "button": 243,
-        "input": 44,
-        "select": 6,
-        "textarea": 14
-      },
-      "bundleGzKB": 730.2,
-      "bundleRawKB": 2467.2
-    },
-    {
-      "generatedAt": "2026-07-11T16:32:32.661Z",
-      "apps": 31,
-      "testFiles": 54,
-      "testCases": 419,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 284,
-      "offShellControlDims": {
-        "button": 226,
-        "input": 39,
-        "select": 5,
-        "textarea": 14
-      },
-      "bundleGzKB": 731,
-      "bundleRawKB": 2469.7
-    },
     {
       "generatedAt": "2026-07-11T17:15:57.544Z",
       "apps": 31,
@@ -712,6 +666,52 @@
       },
       "bundleGzKB": 731,
       "bundleRawKB": 2462.9
+    },
+    {
+      "generatedAt": "2026-07-12T11:36:36.574Z",
+      "apps": 31,
+      "testFiles": 64,
+      "testCases": 458,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 122,
+      "offShellControlDims": {
+        "button": 100,
+        "input": 13,
+        "select": 2,
+        "textarea": 7
+      },
+      "bundleGzKB": 730.9,
+      "bundleRawKB": 2461.4
+    },
+    {
+      "generatedAt": "2026-07-12T13:08:22.636Z",
+      "apps": 31,
+      "testFiles": 64,
+      "testCases": 458,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 122,
+      "offShellControlDims": {
+        "button": 100,
+        "input": 13,
+        "select": 2,
+        "textarea": 7
+      },
+      "bundleGzKB": 730.9,
+      "bundleRawKB": 2461.4
     }
   ]
 }
