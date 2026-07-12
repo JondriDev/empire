@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Card, Button } from '../../../components/ui'
+import { Card, Button, IconButton, Input, Select, TextArea } from '../../../components/ui'
+import { cssVar, tint, type TokenName } from '../../../design-system/tokens'
 import { emit } from '../../../lib/eventBus'
 import { apiUrl } from '../../../lib/apiBase'
 import { mirrorCollection } from '../../../lib/core/sync'
@@ -136,6 +137,13 @@ const CATEGORY_COLORS: Record<Category, string> = {
 const CATEGORY_LABELS: Record<Category, string> = {
   general: 'General', coding: 'Coding', creative: 'Creative',
   analysis: 'Analysis', learning: 'Learning', communication: 'Communication',
+}
+
+// Token names backing CATEGORY_COLORS — used for the migrated filter chips'
+// active state (inline style wins over a ghost Button's transparent base).
+const CATEGORY_TOKENS: Record<Category, TokenName> = {
+  general: 'text3', coding: 'ion', creative: 'c-danger',
+  analysis: 'signal', learning: 'c-success', communication: 'c-warn',
 }
 
 export default function PromptGenerator() {
@@ -278,12 +286,16 @@ export default function PromptGenerator() {
             <Wand2 className="w-5 h-5" /> Prompt Generator
           </h1>
           <div className="flex gap-1 ml-auto">
-            <button onClick={() => { setMode('template'); setShowTemplates(true) }} className={`text-xs px-3 py-1 rounded ${mode === 'template' ? 'bg-signal text-fg' : 'bg-glass text-muted hover:text-fg'}`}>
+            <Button variant="ghost" size="sm" onClick={() => { setMode('template'); setShowTemplates(true) }}
+              aria-pressed={mode === 'template'} className="text-xs"
+              style={mode === 'template' ? { background: cssVar('signal'), color: cssVar('void') } : undefined}>
               Templates
-            </button>
-            <button onClick={() => setMode('custom')} className={`text-xs px-3 py-1 rounded ${mode === 'custom' ? 'bg-signal text-fg' : 'bg-glass text-muted hover:text-fg'}`}>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setMode('custom')}
+              aria-pressed={mode === 'custom'} className="text-xs"
+              style={mode === 'custom' ? { background: cssVar('signal'), color: cssVar('void') } : undefined}>
               Custom
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -295,11 +307,17 @@ export default function PromptGenerator() {
 
         {/* Category filter */}
         <div className="flex gap-1 flex-wrap">
-          <button onClick={() => setCategoryFilter('all')} className={`text-xs px-2 py-0.5 rounded ${categoryFilter === 'all' ? 'bg-glass text-fg' : 'text-faint'}`}>All</button>
+          <Button variant="ghost" size="sm" onClick={() => setCategoryFilter('all')}
+            aria-pressed={categoryFilter === 'all'} className="text-xs"
+            style={categoryFilter === 'all' ? { background: 'var(--gl-bg)', color: 'var(--text)' } : { color: 'var(--text3)' }}>All</Button>
           {(Object.keys(CATEGORY_LABELS) as Category[]).map(cat => (
-            <button key={cat} onClick={() => setCategoryFilter(cat)} className={`text-xs px-2 py-0.5 rounded ${categoryFilter === cat ? CATEGORY_COLORS[cat] : 'text-faint'}`}>
+            <Button key={cat} variant="ghost" size="sm" onClick={() => setCategoryFilter(cat)}
+              aria-pressed={categoryFilter === cat} className="text-xs"
+              style={categoryFilter === cat
+                ? { background: tint(CATEGORY_TOKENS[cat], 30), color: cssVar(CATEGORY_TOKENS[cat]) }
+                : { color: 'var(--text3)' }}>
               {CATEGORY_LABELS[cat]}
-            </button>
+            </Button>
           ))}
         </div>
       </Card>
@@ -342,12 +360,19 @@ export default function PromptGenerator() {
  <div className="space-y-1">
  {filteredSaved.map(p => (
  <div key={p.id} className="flex items-center gap-2 p-2 rounded hover:bg-glass group">
- <button onClick={() => loadSaved(p)} className="flex-1 text-left">
- <p className="text-sm">{p.title}</p>
- <p className="text-xs text-faint truncate">{p.content}</p>
- </button>
+ <Button variant="ghost" size="sm" onClick={() => loadSaved(p)} className="flex-1"
+   aria-label={`Load prompt ${p.title}`}
+   style={{ justifyContent: 'flex-start', padding: '4px 8px' }}>
+ <span style={{ display: 'block', minWidth: 0, textAlign: 'left' }}>
+ <span className="block text-sm">{p.title}</span>
+ <span className="block text-xs text-faint truncate">{p.content}</span>
+ </span>
+ </Button>
  <NodeActions type="prompt" sourceId={p.id} />
- <button onClick={() => deleteSaved(p.id)} className="opacity-0 group-hover:opacity-100 text-faint hover:text-danger text-xs">✕</button>
+ <span className="opacity-0 group-hover:opacity-100">
+ <IconButton onClick={() => deleteSaved(p.id)} size="sm" aria-label={`Delete prompt ${p.title}`}
+   icon={<span className="text-xs">✕</span>} style={{ color: cssVar('text3') }} />
+ </span>
  </div>
  ))}
  </div>
@@ -372,12 +397,10 @@ export default function PromptGenerator() {
                 {extractVariables(selectedTemplate.template).map(v => (
                   <div key={v}>
                     <label className="text-xs text-muted capitalize mb-1 block">{v.replace(/_/g, ' ')}</label>
-                    <input
-                      type="text"
+                    <Input
                       value={variables[v] || ''}
-                      onChange={e => setVariables(prev => ({ ...prev, [v]: e.target.value }))}
+                      onChange={val => setVariables(prev => ({ ...prev, [v]: val }))}
                       placeholder={`Enter ${v.replace(/_/g, ' ')}...`}
-                      className="w-full bg-glass border-0 rounded px-3 py-2 text-sm"
                     />
                   </div>
                 ))}
@@ -394,17 +417,21 @@ export default function PromptGenerator() {
               <div className="flex items-center justify-between mb-2">
                 <h2 className="font-bold">Custom Prompt</h2>
                 {saved.length > 0 && (
-                  <select onChange={e => { const p = saved.find(s => s.id === e.target.value); if (p) loadSaved(p) }} className="bg-glass border-0 rounded px-2 py-1 text-xs">
-                    <option value="">Load saved...</option>
-                    {saved.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
-                  </select>
+                  <div className="w-40">
+                    <Select
+                      value=""
+                      onChange={val => { const p = saved.find(s => s.id === val); if (p) loadSaved(p) }}
+                      ariaLabel="Load saved prompt"
+                      options={[{ value: '', label: 'Load saved...' }, ...saved.map(p => ({ value: p.id, label: p.title }))]}
+                    />
+                  </div>
                 )}
               </div>
-              <textarea
+              <TextArea
                 value={customPrompt}
-                onChange={e => setCustomPrompt(e.target.value)}
+                onChange={setCustomPrompt}
                 placeholder="Write your prompt here... or start from a template above"
-                className="w-full bg-glass border-0 rounded px-3 py-2 text-sm min-h-[150px] resize-y"
+                style={{ minHeight: '150px' }}
               />
             </Card>
           )}

@@ -9,6 +9,7 @@
  */
 import { Suspense, lazy, useState } from 'react'
 import { AppWindow, ChevronRight, FileText, Loader2, Shapes } from 'lucide-react'
+import { Button } from '../../../components/ui'
 import type { ArtifactSpec, ArtifactType } from '../lib/artifactProtocol'
 import { saveGenerated } from '../../artifacts/lib/artifactStore'
 import { cssVar, tint } from '../../../design-system/tokens'
@@ -44,36 +45,43 @@ export default function ArtifactCard({ artifact, streaming = false }: Props) {
 
   return (
     <>
-      <button
+      <Button
+        variant="ghost"
+        fullWidth
         onClick={() => setOpen(true)}
         disabled={building}
-        className="press flex items-center gap-3 w-full max-w-md my-2 px-3 py-2.5 rounded-xl text-left transition-colors"
+        className="press my-2 max-w-md"
+        iconRight={!building ? <ChevronRight className="w-4 h-4 shrink-0" style={{ color: tint('xenon', 40) }} /> : undefined}
         style={{
+          justifyContent: 'space-between',
+          padding: '10px 12px',
+          borderRadius: 'var(--radius-lg)',
           background: 'color-mix(in srgb, var(--c-cakra) 8%, transparent)',
           border: '1px solid color-mix(in srgb, var(--c-cakra) 22%, transparent)',
         }}
       >
-        <span
-          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: 'color-mix(in srgb, var(--c-cakra) 15%, transparent)', color: 'var(--c-cakra)' }}
-        >
-          {building
-            ? <Loader2 className="w-4 h-4 animate-spin" />
-            : <Icon className="w-4 h-4" />}
-        </span>
-        <span className="flex-1 min-w-0">
-          <span className="block truncate text-sm font-medium" style={{ color: cssVar('text') }}>
-            {artifact.title}
-          </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
           <span
-            className="block text-xs"
-            style={{ color: interrupted ? cssVar('c-warn') : cssVar('text2') }}
+            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: 'color-mix(in srgb, var(--c-cakra) 15%, transparent)', color: 'var(--c-cakra)' }}
           >
-            {status}
+            {building
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <Icon className="w-4 h-4" />}
+          </span>
+          <span className="min-w-0" style={{ textAlign: 'left' }}>
+            <span className="block truncate text-sm font-medium" style={{ color: cssVar('text') }}>
+              {artifact.title}
+            </span>
+            <span
+              className="block text-xs"
+              style={{ color: interrupted ? cssVar('c-warn') : cssVar('text2') }}
+            >
+              {status}
+            </span>
           </span>
         </span>
-        {!building && <ChevronRight className="w-4 h-4 shrink-0" style={{ color: tint('xenon', 40) }} />}
-      </button>
+      </Button>
 
       {open && (
         <Suspense fallback={null}>

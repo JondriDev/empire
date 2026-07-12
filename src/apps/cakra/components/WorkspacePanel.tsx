@@ -15,6 +15,7 @@ import {
   type ActivityEntry,
 } from '../lib/activityStore'
 import { formatToolResult } from '../lib/toolExecutor'
+import { Button, IconButton } from '../../../components/ui'
 import { cssVar, tint } from '../../../design-system/tokens'
 
 const ACCENT = cssVar('signal')
@@ -123,23 +124,23 @@ export default function WorkspacePanel({ onClose, overlay }: Props) {
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           {entries.length > 0 && (
-            <button
+            <IconButton
               onClick={clear}
+              aria-label="Clear activity"
               title="Clear activity"
-              className="p-1.5 rounded-lg transition-colors hover:text-fg"
+              size="sm"
+              icon={<Trash2 className="w-4 h-4" />}
               style={{ color: cssVar('text3') }}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            />
           )}
-          <button
+          <IconButton
             onClick={onClose}
+            aria-label="Hide workspace"
             title="Hide workspace"
-            className="p-1.5 rounded-lg transition-colors hover:text-fg"
+            size="sm"
+            icon={<ChevronRight className="w-4 h-4" />}
             style={{ color: cssVar('text3') }}
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          />
         </div>
       </div>
 
@@ -165,30 +166,33 @@ export default function WorkspacePanel({ onClose, overlay }: Props) {
               const d = describeActivity(entry)
               const isSel = selected?.id === entry.id
               return (
-                <button
+                <Button
                   key={entry.id}
+                  variant="ghost"
+                  fullWidth
                   onClick={() => select(entry.id)}
-                  className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 transition-colors"
+                  iconRight={<StatusIcon status={entry.status} accent={d.accent} />}
                   style={{
+                    justifyContent: 'space-between',
+                    padding: '10px 12px',
                     background: isSel ? tint('signal', 8) : 'transparent',
                     borderLeft: `2px solid ${isSel ? ACCENT : 'transparent'}`,
                   }}
                 >
-                  <span className="text-base leading-none flex-shrink-0">{d.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-medium truncate" style={{ color: 'var(--text)' }}>
-                      {d.verb}
-                    </div>
-                    {d.target && (
-                      <div className="text-[11px] truncate font-mono" style={{ color: cssVar('text3') }}>
-                        {d.target}
-                      </div>
-                    )}
-                  </div>
-                  <span className="flex-shrink-0">
-                    <StatusIcon status={entry.status} accent={d.accent} />
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                    <span className="text-base leading-none flex-shrink-0">{d.icon}</span>
+                    <span className="min-w-0" style={{ textAlign: 'left' }}>
+                      <span className="block text-xs font-medium truncate" style={{ color: 'var(--text)' }}>
+                        {d.verb}
+                      </span>
+                      {d.target && (
+                        <span className="block text-[11px] truncate font-mono" style={{ color: cssVar('text3') }}>
+                          {d.target}
+                        </span>
+                      )}
+                    </span>
                   </span>
-                </button>
+                </Button>
               )
             })}
           </div>

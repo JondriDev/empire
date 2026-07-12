@@ -278,14 +278,22 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
 
   </details>
 
-- [ ] **S9 · Migrate the Cakra family, part 1 — the tabs + chat surface (39 → 0).** `src/apps/cakra/AIChat.tsx` (**13** `b9/i2/t2`;
-  send/model/attach controls → `IconButton`/`Button`, prompt `<textarea>` → `TextArea` — keep the chat/handoff wiring),
-  `src/apps/cakra/tabs/Editor.tsx` (**9** `b7/s1/t1`; **`<select>` → `Select`**, run/format/copy → `Button`, editor `<textarea>`
-  → `TextArea`), `src/apps/cakra/tabs/PromptGenerator.tsx` (**9** `b6/i1/s1/t1`; **`<select>` → `Select`**),
-  `src/apps/cakra/tabs/TokenCounter.tsx` (**3** `b1/t2`; textareas → `TextArea`), `src/apps/cakra/components/WorkspacePanel.tsx`
-  (**3** `b3`), `src/apps/cakra/CakraShell.tsx` (**1** `b1`), `src/apps/cakra/components/ArtifactCard.tsx` (**1** `b1`).
-  Mapping rule. *Acceptance:* all seven = 0 (`offShellControls 122 → 83`, −39); Cakra tabs render clean; build🟢 vitest🟢
-  eslint clean; conformance 0.
+- [x] **S9 · Migrate the Cakra family, part 1 — the tabs + chat surface (39 → 0).** ✅ **SHIPPED 2026-07-12 (green main).**
+  `offShellControls 122 → 83 (−39)`, EXACTLY the S9 target (`b100/i13/s2/t7 → b72/i10/s0/t1`); all seven files 0 — AIChat 13→0,
+  Editor 9→0, PromptGenerator 9→0, TokenCounter 3→0, WorkspacePanel 3→0, CakraShell 1→0, ArtifactCard 1→0. AIChat: header
+  clear/settings + message-copy + modal-close + compose-send → `IconButton`, context-disclosure + quick-prompt chips + Cancel/Save
+  → `Button`, model/apiKey → `Input`, compose + system-prompt → `TextArea` (compose ref → `id`+`getElementById` since TextArea
+  isn't forwardRef — the Weather trap; `<form onSubmit>` → `<div>` + send `onClick` since IconButton can't submit). Editor: language
+  `<select>` → `Select` (`w-36` wrap), stats-toggle/askCakra/copy → `IconButton`, save/run/clear → `Button`, code → `TextArea mono`
+  (borderless). PromptGenerator: mode + category-filter chips → `Button ghost + aria-pressed` (per-category accent preserved via new
+  `CATEGORY_TOKENS` inline-style map — ghost's transparent base would swallow a `bg-*` class), saved-load `<select>` → `Select`,
+  variable `<input>` → `Input`, custom `<textarea>` → `TextArea`, saved-row → `Button ghost` + delete `IconButton` (opacity-0
+  group-hover span). TokenCounter: model toggles → `Button`, both textareas → `TextArea`. WorkspacePanel: clear/close → `IconButton`,
+  activity rows → `Button ghost fullWidth` with the **space-between + `iconRight` recipe** (see CONTEXT trap-solver). CakraShell tab
+  bar → `Button ghost` keeping `role="tab"`/`aria-selected` passthrough + the animated `c-cakra` underline. ArtifactCard →
+  `Button ghost fullWidth` + `iconRight` chevron. Kept intact: `useInboundHandoff('empire-ai/editor/prompt/token-clipboard')`,
+  `mirrorCollection('prompt')`, all `emit`/`SendResultMenu`/`ProvenanceChip`/`NodeActions` wiring. build🟢 vitest 530/530🟢 eslint
+  clean; `--assert-zero` exit 0; qa-smoke 32/32 clean + all 13 guards green (**PROVENANCE editor→ai-chat/prompt-generator ✅**).
 
 - [ ] **S10 · Migrate the Cakra family, part 2 — agent + solver + settings (35 → 0).** `src/apps/cakra/AgentSurface.tsx` (**8**
   `b7/t1`), `src/apps/cakra/solver/SolverPanel.tsx` (**8** `b6/i2`; **keep the World-Solver `feed.json` read path UNTOUCHED — do

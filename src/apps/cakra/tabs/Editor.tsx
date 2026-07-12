@@ -7,6 +7,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Code, Copy, Check, Play, Save, FileText, Bot, BarChart2, Trash2 } from 'lucide-react'
 import { emit } from '../../../lib/eventBus'
+import { Button, IconButton, Select, TextArea } from '../../../components/ui'
+import { cssVar } from '../../../design-system/tokens'
 import { ProvenanceChip } from '../../../components/ui/ProvenanceChip'
 import { SendResultMenu } from '../../../components/ui/SendResultMenu'
 import { useInboundHandoff } from '../../../lib/useInboundHandoff'
@@ -139,20 +141,19 @@ export default function Editor() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <select
+          <Select
             value={language}
-            onChange={e => setLanguage(e.target.value)}
-            className="bg-glass border-0 rounded-lg px-3 py-1.5 text-xs text-fg"
-          >
-            {LANGUAGE_OPTIONS.map(l => (
-              <option key={l.id} value={l.id} className="bg-faint">{l.label}</option>
-            ))}
-          </select>
-          <button onClick={() => setShowStats(!showStats)}
-            className={`p-2 rounded-lg transition-colors ${showStats ? 'bg-signal text-fg' : 'hover:bg-glass text-muted'}`}
-            title="Toggle stats">
-            <BarChart2 className="w-4 h-4" />
-          </button>
+            onChange={setLanguage}
+            ariaLabel="Editor language"
+            className="w-36"
+            options={LANGUAGE_OPTIONS.map(l => ({ value: l.id, label: l.label }))}
+          />
+          <IconButton onClick={() => setShowStats(!showStats)}
+            aria-label="Toggle stats"
+            aria-pressed={showStats}
+            title="Toggle stats"
+            icon={<BarChart2 className="w-4 h-4" />}
+            style={showStats ? { color: cssVar('signal') } : undefined} />
         </div>
       </div>
 
@@ -178,13 +179,13 @@ export default function Editor() {
       {savedFiles.length > 0 && (
         <div className="flex gap-2 overflow-x-auto pb-2">
           {savedFiles.slice(0, 8).map(f => (
-            <button key={f.name} onClick={() => loadFile(f)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-glass hover:bg-glass text-xs whitespace-nowrap border border-hair">
-              <FileText className="w-3 h-3" />
+            <Button key={f.name} variant="ghost" size="sm" onClick={() => loadFile(f)}
+              className="text-xs whitespace-nowrap"
+              icon={<FileText className="w-3 h-3" />}>
               {f.name}
               <span onClick={e => { e.stopPropagation(); deleteFile(f.name) }}
                 className="text-faint hover:text-danger ml-1">×</span>
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -194,45 +195,47 @@ export default function Editor() {
         <div className="flex items-center justify-between px-4 py-2 border-b border-hair bg-glass">
           <span className="text-xs text-faint font-mono">{language}</span>
           <div className="flex gap-1">
-            <button onClick={askCakra}
-              className="p-1 rounded hover:bg-signal/20 text-signal transition-colors" title="Ask Cakra about this code">
-              <Bot className="w-3.5 h-3.5" />
-            </button>
-            <button onClick={copyCode}
-              className="p-1 rounded hover:bg-glass text-muted transition-colors" title="Copy code">
-              {copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
-            </button>
+            <IconButton onClick={askCakra} size="sm"
+              aria-label="Ask Cakra about this code" title="Ask Cakra about this code"
+              icon={<Bot className="w-3.5 h-3.5" />} style={{ color: cssVar('signal') }} />
+            <IconButton onClick={copyCode} size="sm"
+              aria-label="Copy code" title="Copy code"
+              icon={copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />} />
           </div>
         </div>
-        <textarea
+        <TextArea
           value={code}
-          onChange={e => setCode(e.target.value)}
+          onChange={setCode}
           placeholder={`Write or paste ${language} code...`}
-          className="w-full bg-transparent px-4 py-3 text-sm font-mono min-h-[300px] resize-y focus:outline-none leading-relaxed"
-          style={{ color: 'var(--text)' }}
+          mono
           spellCheck={false}
+          className="leading-relaxed"
+          style={{ background: 'transparent', border: 'none', minHeight: '300px', padding: '12px 16px' }}
         />
       </div>
 
       {/* Actions */}
       <div className="flex gap-2">
-        <button onClick={handleSave}
-          disabled={!code.trim()}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-signal hover:bg-signal disabled:opacity-30 text-fg text-sm transition-colors">
-          <Save className="w-4 h-4" /> Save
-        </button>
-        <button onClick={() => emit({ type: 'CODE_RUN', language, code, output: 'Code saved to event bus' })}
-          disabled={!code.trim()}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-success/30 hover:bg-success/50 disabled:opacity-30 text-success text-sm transition-colors">
-          <Play className="w-4 h-4" /> Run
-        </button>
+        <Button onClick={handleSave} disabled={!code.trim()}
+          icon={<Save className="w-4 h-4" />}
+          style={{ background: cssVar('signal'), color: cssVar('void') }}>
+          Save
+        </Button>
+        <Button onClick={() => emit({ type: 'CODE_RUN', language, code, output: 'Code saved to event bus' })}
+          disabled={!code.trim()} variant="ghost"
+          icon={<Play className="w-4 h-4" />}
+          style={{ background: 'color-mix(in srgb, var(--c-success) 22%, transparent)', color: cssVar('c-success') }}>
+          Run
+        </Button>
         {/* Re-inject this buffer into the organism — lights an editor→target arc. */}
         <SendResultMenu source="editor" text={code} title={`Code — ${language}`} label="Send code to…" />
         {code.trim() && (
-          <button onClick={() => { setCode(''); setStats({ lines: 0, chars: 0, words: 0, functions: 0, imports: 0, brackets: 0 }) }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-danger/20 hover:bg-danger/30 text-danger text-sm transition-colors ml-auto">
-            <Trash2 className="w-4 h-4" /> Clear
-          </button>
+          <Button variant="ghost" className="ml-auto"
+            onClick={() => { setCode(''); setStats({ lines: 0, chars: 0, words: 0, functions: 0, imports: 0, brackets: 0 }) }}
+            icon={<Trash2 className="w-4 h-4" />}
+            style={{ background: 'color-mix(in srgb, var(--c-danger) 20%, transparent)', color: cssVar('c-danger') }}>
+            Clear
+          </Button>
         )}
       </div>
     </div>

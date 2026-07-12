@@ -11,10 +11,11 @@ import { streamChat, buildEmpireContext, saveConfig, getConfig } from '../../lib
 import { hasArtifacts, ARTIFACT_SYSTEM_PROMPT } from './lib/artifactProtocol'
 import ArtifactMessageContent from './components/ArtifactMessageContent'
 import { emit, getRecent } from '../../lib/eventBus'
+import { Button, IconButton, Input, TextArea } from '../../components/ui'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { SendResultMenu } from '../../components/ui/SendResultMenu'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
-import { tint } from '../../design-system/tokens'
+import { cssVar, tint } from '../../design-system/tokens'
 
 interface Message {
   id: string
@@ -32,7 +33,6 @@ export default function AIChat() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [contextExpanded, setContextExpanded] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
 
  // Emit APP_OPENED for activity feed tracking
  useEffect(() => {
@@ -45,7 +45,7 @@ export default function AIChat() {
     if (!inbound.payload?.text) return
     const { text, title } = inbound.payload
     setInput(title ? `${title}\n\n${text}` : text)
-    setTimeout(() => inputRef.current?.focus(), 100)
+    setTimeout(() => (document.getElementById('cakra-compose') as HTMLTextAreaElement | null)?.focus(), 100)
   }, [inbound.payload])
 
   // Load recent AI events from bus
@@ -165,33 +165,36 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <IconButton
             onClick={clearChat}
-            className="p-2 rounded-lg hover:bg-glass transition-colors text-muted hover:text-fg"
+            aria-label="Clear chat"
             title="Clear chat"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-          <button
+            icon={<Trash2 className="w-4 h-4" />}
+          />
+          <IconButton
             onClick={() => setSettingsOpen(true)}
-            className="p-2 rounded-lg hover:bg-glass transition-colors text-muted hover:text-fg"
+            aria-label="AI Settings"
             title="AI Settings"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
+            icon={<Settings className="w-4 h-4" />}
+          />
         </div>
       </div>
 
       {/* Empire Context Banner */}
       {empireContext && (
         <div className="mx-6 mt-4 p-3 rounded-xl border" style={{ borderColor: 'var(--border)', background: tint('signal', 5) }}>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
+            fullWidth
             onClick={() => setContextExpanded(!contextExpanded)}
-            className="w-full flex items-center justify-between text-xs text-signal"
+            aria-expanded={contextExpanded}
+            className="text-xs text-signal"
+            style={{ justifyContent: 'space-between', padding: 0, color: cssVar('signal') }}
           >
             <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" /> Empire Context Active</span>
             <span className="text-faint">{contextExpanded ? '▲' : '▼'}</span>
-          </button>
+          </Button>
           {contextExpanded && (
             <pre className="mt-2 text-xs text-muted whitespace-pre-wrap font-mono overflow-auto max-h-32">{empireContext}</pre>
           )}
@@ -216,13 +219,16 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
                 'Analyze this code...',
                 'Draft a message',
               ].map((q, i) => (
-                <button
+                <Button
                   key={i}
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setInput(q)}
-                  className="px-3 py-1.5 rounded-full text-xs border border-signal/30 text-signal hover:bg-signal/10 transition-colors"
+                  className="text-xs"
+                  style={{ borderRadius: 'var(--radius-full)', border: `1px solid ${tint('signal', 30)}`, color: cssVar('signal') }}
                 >
                   {q}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -254,13 +260,14 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
               <div className="flex items-center gap-2 mt-1.5">
                 {msg.role === 'assistant' && (
                   <>
-                    <button
+                    <IconButton
                       onClick={() => copyMessage(msg.content)}
-                      className="p-0.5 text-faint hover:text-muted transition-colors"
+                      aria-label="Copy message"
                       title="Copy"
-                    >
-                      <Copy className="w-3 h-3" />
-                    </button>
+                      size="sm"
+                      icon={<Copy className="w-3 h-3" />}
+                      style={{ width: '20px', height: '20px' }}
+                    />
                     {/* Route this reply onward — lights an ai-chat→target arc. */}
                     <SendResultMenu source="ai-chat" text={msg.content} label="Send reply to…" />
                   </>
@@ -279,11 +286,11 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
             <ProvenanceChip from={inbound.source} onDismiss={inbound.dismiss} />
           </div>
         )}
-        <form onSubmit={handleSubmit} className="relative">
-          <textarea
-            ref={inputRef}
+        <div className="relative">
+          <TextArea
+            id="cakra-compose"
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={setInput}
             onKeyDown={e => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
@@ -291,18 +298,18 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
               }
             }}
             placeholder="Ask Cakra anything..."
-            className="w-full resize-none rounded-2xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-signal/50"
-            style={{ background: 'var(--input-bg)', color: 'var(--text)', minHeight: '52px', maxHeight: '120px' }}
             rows={1}
+            style={{ minHeight: '52px', maxHeight: '120px', paddingRight: '48px', resize: 'none', borderRadius: 'var(--radius-lg)' }}
           />
-          <button
-            type="submit"
+          <IconButton
+            onClick={() => handleSubmit()}
             disabled={!input.trim() || loading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-signal hover:bg-signal disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-          >
-            <Send className="w-3.5 h-3.5 text-fg" />
-          </button>
-        </form>
+            aria-label="Send message"
+            icon={<Send className="w-3.5 h-3.5 text-fg" />}
+            className="absolute right-2 top-1/2 -translate-y-1/2"
+            style={{ width: '32px', height: '32px', background: cssVar('signal') }}
+          />
+        </div>
         <p className="text-center text-[10px] text-faint mt-2">
           Cakra sees all apps · Press Enter to send, Shift+Enter for newline
         </p>
@@ -332,17 +339,15 @@ function AISettingsModal({ onClose }: { onClose: () => void }) {
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Settings className="w-4 h-4" /> AI Settings
           </h2>
-          <button onClick={onClose} className="text-muted hover:text-fg"><X className="w-4 h-4" /></button>
+          <IconButton onClick={onClose} aria-label="Close settings" size="sm" icon={<X className="w-4 h-4" />} />
         </div>
 
         <div className="space-y-4">
           <div>
             <label className="text-xs text-muted mb-1 block">Model</label>
-            <input
+            <Input
               value={model}
-              onChange={e => setModel(e.target.value)}
-              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-signal"
-              style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
+              onChange={setModel}
               placeholder="deepseek/deepseek-v4-flash"
             />
             <p className="text-[10px] text-faint mt-1">Defaults to DeepSeek V4 Flash via OpenRouter</p>
@@ -350,41 +355,32 @@ function AISettingsModal({ onClose }: { onClose: () => void }) {
 
           <div>
             <label className="text-xs text-muted mb-1 block">API Key (optional — server env var used if empty)</label>
-            <input
+            <Input
               type="password"
               value={apiKey}
-              onChange={e => setApiKey(e.target.value)}
-              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-signal"
-              style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
+              onChange={setApiKey}
               placeholder="sk-or-v-..."
             />
           </div>
 
           <div>
             <label className="text-xs text-muted mb-1 block">System Prompt</label>
-            <textarea
+            <TextArea
               value={systemPrompt}
-              onChange={e => setSystemPrompt(e.target.value)}
+              onChange={setSystemPrompt}
               rows={4}
-              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-signal resize-none"
-              style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
+              style={{ resize: 'none' }}
             />
           </div>
         </div>
 
         <div className="flex gap-2 mt-6">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2 rounded-xl border border-hair text-sm hover:bg-glass transition-colors"
-          >
+          <Button variant="secondary" fullWidth onClick={onClose} className="flex-1">
             Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="flex-1 px-4 py-2 rounded-xl bg-signal text-fg text-sm hover:bg-signal transition-colors"
-          >
+          </Button>
+          <Button fullWidth onClick={handleSave} className="flex-1" style={{ flex: 1, background: cssVar('signal'), color: cssVar('void') }}>
             Save
-          </button>
+          </Button>
         </div>
       </div>
     </div>

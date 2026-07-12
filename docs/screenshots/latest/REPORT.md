@@ -1,22 +1,8 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-12T13:08:17.186Z
+**Generated:** 2026-07-12T15:26:26.722Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
-
-> **No runtime bug found this run. No drift.** main is GREEN (`tsc -b && vite build` ✅, PWA precache 91).
-
-## ★ EPIC-14 S8 acceptance CONFIRMED — `offShellControls 162 → 122 (−40)`
-
-First independent QA since **EPIC-14 S8 shipped** (green main `b20f90c`; the immediately-prior commit `36bdf32` is the S7-QA commit, `52126da` is CacheCleaner-only polish — neither touches `offShellControls`). `node scripts/metrics.mjs` reproduces the active-epic target **EXACTLY on a fresh checkout: `offShellControls = 122 (b100/i13/s2/t7)`, Δ ±0** vs the committed snapshot → **EPIC-14 S8 acceptance (standalone tool + entity apps 162→122, −40) CONFIRMED.** All seven S8 files (Calculator 14→0, Goals 10→0, LearningTracker 7→0, Messages 5→0, Notes 2→0, Mail 1→0, Inbox 1→0) are off the offenders list. Top offenders are now precisely the **S9 (Cakra family)** targets, heaviest-first: **AIChat 13, Editor 9, PromptGenerator 9**, AgentSurface 8, SolverPanel 8, Desktop 8, SettingsPanel 7, ProblemDetail 6.
-
-`node scripts/metrics.mjs --assert-zero` **exits 0** — the design-system ratchet holds: tokenViolations **0**, offSystemUtilities **0**, offSystemStyle **0 (r0/t0/m0)**.
-
-**Metric deltas (Δ vs committed snapshot):** apps **31** (±0) · test cases **458** (±0) · test files **64** (±0) · tokenViolations **0** (±0) · offSystemUtilities **0** (±0) · offSystemStyle **0 (r0/t0/m0)** (±0) · **offShellControls 122 (b100/i13/s2/t7)** (±0) · bundle gz **730.9** (±0).
-
-**Guard sweep: all 13 green** — INBOUND-LANDS 4/4 (incl. goals/messages, the S8 must-holds), MEDIA-PERSISTS 3/3, GRAPH-LEGIBLE 3/3 (incl. mail/draft), GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2 (incl. add-to-learning), TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, PRECACHE 91 no-gap, OFFLINE-BOOT 5/5.
-
-**Not visually diffed in-cloud this run (no PNG inspection — text-only artifacts).** The S8 migrations are style-preserving by construction (Calculator keypad keeps its inline styles + pulse-motion verbatim); the Builder flagged two cosmetic items for on-device confirm: the **Messages contact-row left-cluster** (the `Button ghost fullWidth` rich-row limit — timestamp won't right-align) and the **Goals `Slider` accent**. Both render clean headless (no crash, no boundary); neither is a runtime bug.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -40,7 +26,7 @@ First independent QA since **EPIC-14 S8 shipped** (green main `b20f90c`; the imm
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |

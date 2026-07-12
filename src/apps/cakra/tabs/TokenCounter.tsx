@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Card, Button } from '../../../components/ui'
+import { Card, Button, TextArea } from '../../../components/ui'
+import { cssVar, tint } from '../../../design-system/tokens'
 import { ProvenanceChip } from '../../../components/ui/ProvenanceChip'
 import { SendResultMenu } from '../../../components/ui/SendResultMenu'
 import { useInboundHandoff } from '../../../lib/useInboundHandoff'
@@ -76,7 +77,6 @@ export default function TokenCounter() {
   const [compareMode, setCompareMode] = useState(false)
   const [comparisonTexts, setComparisonTexts] = useState<string[]>(['', ''])
   const [fileNames] = useState<string[]>(['', ''])
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const inbound = useInboundHandoff<{ text?: string; from?: string }>('empire-token-clipboard')
@@ -166,10 +166,13 @@ export default function TokenCounter() {
         <div className="flex items-center gap-1 flex-wrap mb-2">
           <span className="text-xs text-faint mr-1">Models:</span>
           {(Object.keys(MODEL_LABELS) as Model[]).map(model => (
-            <button key={model} onClick={() => toggleModel(model)}
-              className={`text-xs px-2 py-0.5 rounded transition ${selectedModels.includes(model) ? 'bg-signal/40 text-signal' : 'bg-glass text-faint'}`}>
+            <Button key={model} variant="ghost" size="sm" onClick={() => toggleModel(model)}
+              aria-pressed={selectedModels.includes(model)} className="text-xs"
+              style={selectedModels.includes(model)
+                ? { background: tint('signal', 40), color: cssVar('signal') }
+                : { color: cssVar('text3') }}>
               {MODEL_LABELS[model]}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -179,12 +182,12 @@ export default function TokenCounter() {
           </div>
         )}
 
-        <textarea
-          ref={textareaRef}
+        <TextArea
           value={text}
-          onChange={e => setText(e.target.value)}
+          onChange={setText}
           placeholder="Paste or type text to count tokens..."
-          className="w-full bg-glass border-0 rounded-lg px-4 py-3 text-sm min-h-[180px] resize-y font-mono"
+          mono
+          style={{ minHeight: '180px' }}
         />
 
         <div className="flex gap-2 mt-2">
@@ -215,15 +218,17 @@ export default function TokenCounter() {
                   <span className="text-xs text-faint">Text {i + 1} {fileNames[i] && `(${fileNames[i]})`}</span>
                   <span className="text-xs text-faint">{comparisonTexts[i] ? `${estimateTokens(comparisonTexts[i], 'estimate')} tokens` : '—'}</span>
                 </div>
-                <textarea
+                <TextArea
                   value={comparisonTexts[i]}
-                  onChange={e => {
+                  onChange={val => {
                     const next = [...comparisonTexts]
-                    next[i] = e.target.value
+                    next[i] = val
                     setComparisonTexts(next)
                   }}
                   placeholder={`Text ${i + 1}...`}
-                  className="w-full bg-glass border-0 rounded p-2 text-xs min-h-[100px] resize-y font-mono"
+                  mono
+                  className="text-xs"
+                  style={{ minHeight: '100px' }}
                 />
               </div>
             ))}

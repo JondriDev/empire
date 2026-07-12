@@ -1,6 +1,6 @@
 {
   "current": {
-    "generatedAt": "2026-07-12T13:08:22.789Z",
+    "generatedAt": "2026-07-12T15:29:45.644Z",
     "apps": 31,
     "testFiles": 64,
     "testCases": 458,
@@ -12,86 +12,17 @@
       "type": 0,
       "motion": 0
     },
-    "offShellControls": 122,
+    "offShellControls": 83,
     "offShellControlDims": {
-      "button": 100,
-      "input": 13,
-      "select": 2,
-      "textarea": 7
+      "button": 72,
+      "input": 10,
+      "select": 0,
+      "textarea": 1
     },
-    "bundleGzKB": 730.9,
-    "bundleRawKB": 2461.4
+    "bundleGzKB": 731,
+    "bundleRawKB": 2459.3
   },
   "history": [
-    {
-      "generatedAt": "2026-07-11T17:15:57.544Z",
-      "apps": 31,
-      "testFiles": 55,
-      "testCases": 425,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 284,
-      "offShellControlDims": {
-        "button": 226,
-        "input": 39,
-        "select": 5,
-        "textarea": 14
-      },
-      "bundleGzKB": 731.3,
-      "bundleRawKB": 2470.6
-    },
-    {
-      "generatedAt": "2026-07-11T18:07:38.893Z",
-      "apps": 31,
-      "testFiles": 55,
-      "testCases": 425,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 284,
-      "offShellControlDims": {
-        "button": 226,
-        "input": 39,
-        "select": 5,
-        "textarea": 14
-      },
-      "bundleGzKB": 731.3,
-      "bundleRawKB": 2470.6
-    },
-    {
-      "generatedAt": "2026-07-11T18:07:49.245Z",
-      "apps": 31,
-      "testFiles": 55,
-      "testCases": 425,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 284,
-      "offShellControlDims": {
-        "button": 226,
-        "input": 39,
-        "select": 5,
-        "textarea": 14
-      },
-      "bundleGzKB": 731.3,
-      "bundleRawKB": 2470.6
-    },
     {
       "generatedAt": "2026-07-11T20:10:49.743Z",
       "apps": 31,
@@ -712,6 +643,75 @@
       },
       "bundleGzKB": 730.9,
       "bundleRawKB": 2461.4
+    },
+    {
+      "generatedAt": "2026-07-12T13:08:22.789Z",
+      "apps": 31,
+      "testFiles": 64,
+      "testCases": 458,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 122,
+      "offShellControlDims": {
+        "button": 100,
+        "input": 13,
+        "select": 2,
+        "textarea": 7
+      },
+      "bundleGzKB": 730.9,
+      "bundleRawKB": 2461.4
+    },
+    {
+      "generatedAt": "2026-07-12T15:10:49.482Z",
+      "apps": 31,
+      "testFiles": 64,
+      "testCases": 458,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 122,
+      "offShellControlDims": {
+        "button": 100,
+        "input": 13,
+        "select": 2,
+        "textarea": 7
+      },
+      "bundleGzKB": 730.9,
+      "bundleRawKB": 2461.4
+    },
+    {
+      "generatedAt": "2026-07-12T15:22:36.308Z",
+      "apps": 31,
+      "testFiles": 64,
+      "testCases": 458,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 83,
+      "offShellControlDims": {
+        "button": 72,
+        "input": 10,
+        "select": 0,
+        "textarea": 1
+      },
+      "bundleGzKB": 731,
+      "bundleRawKB": 2459.3
     }
   ]
 }

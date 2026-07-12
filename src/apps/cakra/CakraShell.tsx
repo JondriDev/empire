@@ -12,6 +12,7 @@
 import { Suspense, lazy, useEffect, useState, type ReactNode } from 'react'
 import { Sparkles, Puzzle, Palette, Wand2, Hash, Code2 } from 'lucide-react'
 import { useCakraTab, type CakraTab } from '../../lib/cakraTab'
+import { Button } from '../../components/ui'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 import Cakra from './Cakra'
@@ -59,19 +60,21 @@ export default function CakraShell() {
         {TABS.map(({ id, label, Icon }) => {
           const active = tab === id
           return (
-            <button
+            <Button
               key={id}
+              variant="ghost"
+              size="sm"
               onClick={() => setTab(id)}
               role="tab"
               aria-selected={active}
-              className="press relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+              icon={<Icon className="w-4 h-4" />}
+              className="press"
               style={active
-                ? { background: 'color-mix(in srgb, var(--c-cakra) 20%, transparent)', color: 'var(--c-cakra)' }
-                : { color: 'var(--text3)' }}
+                ? { position: 'relative', background: 'color-mix(in srgb, var(--c-cakra) 20%, transparent)', color: 'var(--c-cakra)' }
+                : { position: 'relative', color: 'var(--text3)' }}
               onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'var(--text)' }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.color = 'var(--text3)' }}
             >
-              <Icon className="w-4 h-4" />
               {label}
               {active && (
                 <span
@@ -80,7 +83,7 @@ export default function CakraShell() {
                   style={{ background: 'var(--c-cakra)' }}
                 />
               )}
-            </button>
+            </Button>
           )
         })}
       </div>
