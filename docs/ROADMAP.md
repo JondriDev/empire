@@ -10,11 +10,12 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-07-11** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 436/60 files,
-> token-violations 0, off-system 0, offSystemStyle 0 r0/t0/m0, `--assert-zero` exit 0, `offShellControls` **238 (b193/i29/s4/t12)**
-> after EPIC-14 S1–S5, bundle gz 731) · QA (2026-07-11, first QA since S4): 32/32 render clean, all 13 guard suites green, no
-> drift. **EPIC-14 S1–S5 shipped (341 → 238); stages S6–S12 re-decomposed this run from the live census — the old S6–S8 estimate
-> covered only ~65 of the real 238 controls.** **EPIC-1..13 all DONE**
+> Last re-ranked: **2026-07-12** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 460/64 files,
+> token-violations 0, off-system 0, offSystemStyle 0 r0/t0/m0, `--assert-zero` exit 0, `offShellControls` **49 (b45/i4/s0/t0)**
+> after EPIC-14 S1–S10, bundle gz 730) · QA (2026-07-12, S9-acceptance confirm): 32/32 render clean, all 13 guard suites green, no
+> drift. **EPIC-14 S1–S10 shipped (341 → 49); ONLY S11 (migrate the last 49 → 0, incl. the ONE control the out-of-band Cakra NIM
+> upgrade `07d8c43` re-regressed into `AIChat.tsx`) + S12 (LOCK in `--assert-zero`) remain — the epic is TWO stages from
+> CODE-COMPLETE.** **EPIC-1..13 all DONE**
 > (organism both-ways 9/9 · token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable · off-system
 > 1076→0, CI-locked · durable provenance `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` + Reader graph-legible ·
 > `GLOBAL-SEARCH 1/1` queryable organism · `NODE-LINEAGE 1/1` per-artifact ancestry, navigable · `TIMELINE 1/1` temporal lens,
@@ -142,9 +143,11 @@ now **EPIC-6 S4**:
   `<input>`/`<textarea>`. Root cause: the `ui` set is incomplete (no `Select`/`IconButton`/`Segmented`), so apps drop to bare
   HTML — exactly why Mail/Crypto were islands. Complete the primitive set (S1 ✅) + migrate every offender file + lock a new
   **`offShellControls` metric** in `--assert-zero`. **Real baseline was 341 (b271/i48/s6/t16), not the ≈148 subset estimate;
-  S1–S5 drove it 341 → 238; S6–S12 (re-decomposed 2026-07-11 from the live census across the remaining 43 files) drive it
-  238 → 0.** Closes when QA confirms `offShellControls 0` LOCKED. Folds in the ad-hoc a11y work (IconButton forces `aria-label`,
-  Segmented forces `aria-pressed`).
+  S1–S10 drove it 341 → 49 (Reader/Calendar/Clock/Photos/artifacts/media+lang/utility/standalone/Cakra×2). ONLY S11 (the last 49
+  shell + artifacts-wrapper files → 0, incl. the ONE bare control the out-of-band Cakra NIM upgrade `07d8c43` re-regressed into the
+  S9-shipped `AIChat.tsx` — caught by the Strategist's live census 2026-07-12) + S12 (LOCK) remain.** Closes when QA confirms
+  `offShellControls 0` LOCKED — the lock is what stops exactly this NIM-style regression recurring. Folds in the ad-hoc a11y work
+  (IconButton forces `aria-label`, Segmented forces `aria-pressed`).
 - **Measured accessibility pass — a FUTURE epic candidate (largely seeded by EPIC-14's primitive a11y dividend).**
   `prefers-reduced-motion` honoured across all animations + an ARIA-name / keyboard-reachability coverage metric driven to a
   target and locked via `--assert-zero` — the EPIC-5/11 template applied to a11y. Captures the ad-hoc per-app aria passes

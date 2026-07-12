@@ -305,16 +305,29 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   + feed loads.** build🟢 vitest 532/532🟢 eslint clean (6 touched); `--assert-zero` exit 0; qa-smoke 32/32 clean, all 13 guards
   green (INBOUND messages←ai-chat 4/4 ✅, PROVENANCE editor→ai-chat 3/3 ✅). bundle gz 731.1→730.9 (−0.2); no new deps.
 
-- [ ] **S11 · Migrate the shell components + artifacts wrappers (48 → 0) — the LAST offenders.** The desktop chrome + the four
-  organism lenses + the artifacts wrappers. `src/components/Desktop.tsx` (**8** `b7/i1`), `src/components/AppShell.tsx` (**6**
+- [ ] **S11 · Migrate the shell components + artifacts wrappers + the ONE re-regressed Cakra file (49 → 0) — the LAST offenders.**
+  The desktop chrome + the four organism lenses + the artifacts wrappers. **★ Live census re-run by the Strategist 2026-07-12 (post-S10):
+  `offShellControls = 49 (b45/i4/s0/t0)`, NOT the 48 this stage was decomposed for — the out-of-band Cakra NIM upgrade
+  (`07d8c43`, "power Cakra on NVIDIA NIM") re-introduced ONE bare control into an already-shipped S9 file:**
+  `src/apps/cakra/AIChat.tsx` (**1** `b1` — a NEW "Reasoning/Thinking" collapsible-disclosure toggle at `AIChat.tsx:380`, a bare
+  `<button onClick={() => setOpen(o => !o)}>` wrapping a `Brain` glyph + label + a `ChevronRight` that rotates on open). **Migrate it
+  with the exact WorkspacePanel/ArtifactCard recipe (see CONTEXT → "space-between + `iconRight`"):** `Button variant="ghost" fullWidth`,
+  `icon={Brain}`, `children`=the "Thinking…/Reasoning" label span, `iconRight`=the `ChevronRight` (keep the `rotate(90deg)` open-transform
+  in its `style`), `style={{justifyContent:'space-between', color: cssVar('signal'), …}}` — preserving the signal tint + the
+  expand/collapse behaviour verbatim. This is a design-system regression that slipped in *precisely because `offShellControls` is not
+  yet gated* — it is the live proof of S12's value, and S11 must sweep it or S12's lock fails at 49≠0.
+  The rest (heaviest-first): `src/components/Desktop.tsx` (**8** `b7/i1`), `src/components/AppShell.tsx` (**6**
   `b6`), `src/apps/network/Network.tsx` (**4** `b4`; **keep the mesh/legend + inspector**), `src/apps/search/Search.tsx` (**4**
   `b3/i1`; **keep `GLOBAL-SEARCH` + `openEntity`**), `src/components/Bridge.tsx` (**4** `b3/i1`; **keep `HOME-ALIVE` widgets + the
   Cakra line**), `src/components/AppHost.tsx` (**3** `b3`), `src/components/ContextMenu.tsx` (**3** `b3`),
   `src/apps/artifacts/GeneratedSection.tsx` (**3**), `src/apps/artifacts/generated/ArtifactViewer.tsx` (**3**),
   `src/components/CommandPalette.tsx` (**2** `b1/i1`; **keep the ⌘K palette + `intentsFor` wiring**), `src/components/Recents.tsx`
   (**2** `b2`), `src/apps/timeline/Timeline.tsx` (**2** `b2`; **keep `TIMELINE` facets**), `src/apps/artifacts/ArtifactsApp.tsx`
-  (**2**), `src/components/ErrorBoundary.tsx` (**1** `b1`), `src/apps/artifacts/ArtifactGallery.tsx` (**1**). **Re-run the FULL
-  census; drive ANY residual offender any earlier stage missed to 0 too — do not stop at "mostly."** *Acceptance:*
+  (**2**), `src/components/ErrorBoundary.tsx` (**1** `b1`), `src/apps/artifacts/ArtifactGallery.tsx` (**1**). **★ DO NOT migrate
+  `src/apps/artifacts/artifacts/ColorPalette.tsx`** — it shows 13 bare controls in the raw census but is `DS_INFRA` (audit-EXEMPT in
+  `metrics.mjs`), a colour-theory tool whose swatch buttons ARE the content; migrating it is pure churn for 0 metric gain. **Re-run the
+  FULL census with `node scripts/metrics.mjs` FIRST; drive ANY residual offender any earlier stage missed OR any later out-of-band
+  commit re-introduced to 0 too — do not stop at "mostly."** *Acceptance:*
   `node scripts/metrics.mjs` → **`offShellControls = 0 (b0/i0/s0/t0)`**; all 32 routes render clean + **all 13 guards green**
   (HOME-ALIVE, GLOBAL-SEARCH, TIMELINE, INBOUND, GRAPH-LEGIBLE, PROVENANCE, OFFLINE …); build🟢 vitest🟢 eslint clean;
   tokens/off-system/offSystemStyle 0.
