@@ -5,6 +5,16 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-12 · QA — visual + smoke: EPIC-14 S7 acceptance CONFIRMED (utility apps 204→162, −42)
+
+**Did:** First independent QA since EPIC-14 S7 shipped (green main `9cbd322`; immediately-prior `52126da` is CacheCleaner-only polish). Build 🟢 (`tsc -b && vite build`, 13.3s; PWA precache 91). Ran `qa-smoke.mjs`: **32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught / 0 boundaries / 0 console errors), **all 13 guards green** (INBOUND 4/4, MEDIA 3/3, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH, NODE-LINEAGE, INTENT-ROUNDTRIP 2/2, TIMELINE 6-axes, HOME-ALIVE, PROVENANCE 3/3+3/3, PRECACHE 91 no-gap, OFFLINE 5/5). `metrics.mjs --assert-zero` **exit 0** (token/util/style all 0).
+
+**Verified (the fitness field):** `offShellControls` reproduces the S7 snapshot EXACTLY — **162 (b133/i17/s2/t10), Δ ±0 → EPIC-14 S7 acceptance (204→162, −42) CONFIRMED.** All five S7 files (DataCenter/Maps/Files/Weather/Grammar) off the offenders list; top offenders now Calculator 14, AIChat 13, Goals 10, Editor 9, PromptGenerator 9, AgentSurface 8, SolverPanel 8, Desktop 8 (the S8 targets). Auto-metrics Δ ±0: apps 31, tests 458, files 64, bundle gz 731. Visually inspected 7 PNGs (local only): all S7 apps render shelled + clean (datacenter `seamless` cells, maps Segmented+plasma controls, files/weather graceful env-fail, grammar borderless TextArea), desktop "Good morning" clean.
+
+**Env noise (not bugs):** maps CARTO tiles (net:8), weather geo, files/mail 401 — all graceful, no error boundaries. **No runtime bug, no drift.** ▶ NEXT = EPIC-14 S8 (standalone tool + entity apps, 40→0; 162→122).
+
+---
+
 ## 2026-07-12 · BUILDER — EPIC-14 S7: utility apps migrated onto the `ui` shell (42 → 0) + NEW `seamless` Input variant
 
 **Did:** Executed EPIC-14 S7. Migrated all five utility apps off bare controls: **DataCenter 14→0, Maps 12→0, Files 8→0, Weather 6→0, Grammar 2→0** → `offShellControls 204 → 162 (−42)`, EXACTLY the S7 target (`b167/i24/s2/t11 → b133/i17/s2/t10`). Added a **new `seamless` prop on the `Input` primitive** (`src/components/ui/index.tsx`) — the `ui` layer had no home for an **inline-edit cell** (DataCenter's spreadsheet cells were un-migratable off-shell `<input>`s because default `Input` is a fixed-height glass box). `seamless` = borderless/transparent, still a real textbox (a11y + tokens), focus just tints the bg; **additive — default is byte-identical to before**, zero regression to existing consumers. Mapping applied per file: DataCenter sidebar/modal/actions → `Button`/`IconButton` + the two table cells → `Input seamless`; Maps Search/Saved tabs → `Segmented`, search `<form>`→`<div>`+`Input`+`IconButton`, accent-solid buttons via `ghost`+`style` bg; Files Home/breadcrumb/quick-path → `Button ghost sm`, expand/download/preview → `IconButton`, search → `Input`; Weather header/close → `IconButton` (dropped the `useRef` focus-restore for an `id`-based one since IconButton isn't `forwardRef`), Cancel/Save → `Button`; Grammar textarea → `TextArea`, copy → `Button`. Graph-mirrors + env-gated fetch (Leaflet/Nominatim/CARTO, Open-Meteo, `filesGraph` union, `mirrorCollection('dataset')`) UNTOUCHED. Left Grammar's Check/Fix toggle as `Button` (already non-bare; its test locks `aria-pressed`).
