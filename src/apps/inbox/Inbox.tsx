@@ -20,6 +20,7 @@ import { apps, getAppIcon } from '../../lib/registry'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { NodeLineage } from '../../components/ui/NodeLineage'
 import { EmptyState } from '../../components/ui/Utility'
+import { IconButton } from '../../components/ui'
 import type { CoreNode } from '../../lib/core/graph'
 
 // One accent per view — the Inbox reads as the CORE teal "signal", since a task
@@ -116,21 +117,19 @@ function TaskRow({
   return (
     <div className="gp gp-interactive group relative rounded-2xl flex items-center gap-3"
       style={{ padding: 'var(--space-3, 14px)' }}>
-      <button
+      <IconButton
         onClick={() => onToggle(node)}
         aria-label={done ? 'Mark task open' : 'Mark task done'}
         aria-pressed={done}
-        className="flex-shrink-0 flex items-center justify-center rounded-lg transition-colors"
+        icon={done ? <Check className="w-3.5 h-3.5" /> : <Circle className="w-3 h-3 opacity-0" />}
         style={{
           width: 26, height: 26,
+          borderRadius: 'var(--radius-md)',
           color: done ? 'var(--void)' : 'var(--text3)',
           background: done ? ACCENT : 'transparent',
           border: done ? 'none' : '1px solid var(--hair)',
-          transitionDuration: 'var(--dur-fast)',
         }}
-      >
-        {done ? <Check className="w-3.5 h-3.5" /> : <Circle className="w-3 h-3 opacity-0" />}
-      </button>
+      />
 
       <div className="flex-1 min-w-0">
         <div

@@ -10,6 +10,7 @@ import { useStore } from '../../lib/store'
 import { emit } from '../../lib/eventBus'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { EmptyState } from '../../components/ui/Utility'
+import { Button, IconButton, TextArea } from '../../components/ui'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { LineageTrail } from '../../components/ui/LineageTrail'
@@ -83,32 +84,37 @@ export default function Messages() {
           <p className="text-xs text-muted">{messages.length} messages</p>
         </div>
         <div className="flex-1 overflow-auto">
-          <button
+          <Button
+            variant="ghost"
+            fullWidth
             onClick={askCakraThread}
-            className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-glass transition-colors border-b"
-            style={{ borderColor: 'var(--border)' }}
+            icon={<Bot className="w-4 h-4 text-signal" />}
+            className="border-b"
+            style={{ justifyContent: 'flex-start', gap: '8px', padding: '12px 16px', borderColor: 'var(--border)' }}
           >
-            <Bot className="w-4 h-4 text-signal" />
-            <div>
+            <span style={{ display: 'block', textAlign: 'left' }}>
               <div className="text-sm font-medium text-signal">Ask Cakra</div>
               <div className="text-xs text-faint">Analyze my messages</div>
-            </div>
-          </button>
+            </span>
+          </Button>
           {CONTACTS.map(contact => {
           const contactMessages = messages.filter(m => m.sender === contact || (m.sender === 'Me' && contact === recipient))
           const lastMsg = contactMessages[contactMessages.length - 1]
           return (
-          <button
+          <Button
           key={contact}
+          variant="ghost"
+          fullWidth
           onClick={() => setRecipient(contact)}
-          className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b ${recipient === contact ? 'bg-signal/10' : 'hover:bg-glass'}`}
-          style={{ borderColor: 'var(--border)' }}
+          aria-pressed={recipient === contact}
+          className="border-b"
+          style={{ justifyContent: 'flex-start', gap: '12px', padding: '12px 16px', borderColor: 'var(--border)', background: recipient === contact ? 'color-mix(in srgb, var(--signal) 10%, transparent)' : undefined }}
           >
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ion to-ion flex items-center justify-center text-fg text-sm font-medium flex-shrink-0">
           {contact[0]}
           </div>
-          <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
+          <div className="flex-1 min-w-0" style={{ textAlign: 'left' }}>
+          <div className="flex items-center justify-between gap-2">
           <span className="text-sm font-medium">{contact}</span>
           {lastMsg && (
           <span className="text-[10px] text-faint">
@@ -120,7 +126,7 @@ export default function Messages() {
           {lastMsg ? `${lastMsg.sender === 'Me' ? 'You: ' : ''}${lastMsg.content}` : `${messages.filter(m => m.sender === contact || m.sender === 'Me').length} messages`}
           </div>
           </div>
-          </button>
+          </Button>
           )
           })}
         </div>
@@ -189,9 +195,9 @@ export default function Messages() {
             </div>
           )}
           <div className="flex gap-2 items-end">
-            <textarea
+            <TextArea
               value={draft}
-              onChange={e => setDraft(e.target.value)}
+              onChange={setDraft}
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
@@ -200,25 +206,27 @@ export default function Messages() {
               }}
               placeholder={`Message ${recipient}...`}
               rows={1}
-              className="flex-1 resize-none rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-signal/50"
-              style={{ background: 'var(--input-bg)', color: 'var(--text)', minHeight: '48px', maxHeight: '100px' }}
+              className="flex-1"
+              style={{ resize: 'none', minHeight: '48px', maxHeight: '100px' }}
             />
             {draft.trim() && (
-              <button
+              <IconButton
                 onClick={askCakraDraft}
-                className="w-10 h-10 rounded-xl bg-signal/20 hover:bg-signal/30 flex items-center justify-center text-signal transition-colors flex-shrink-0"
+                aria-label="Refine with Cakra"
                 title="Refine with Cakra"
-              >
-                <Bot className="w-4 h-4" />
-              </button>
+                icon={<Bot className="w-4 h-4" />}
+                className="flex-shrink-0"
+                style={{ width: 40, height: 40, borderRadius: 'var(--radius-lg)', background: 'color-mix(in srgb, var(--signal) 20%, transparent)', color: 'var(--signal)' }}
+              />
             )}
-            <button
+            <IconButton
               onClick={send}
               disabled={!draft.trim()}
-              className="w-10 h-10 rounded-xl bg-signal hover:bg-signal disabled:opacity-30 flex items-center justify-center text-fg transition-colors flex-shrink-0"
-            >
-              <Send className="w-4 h-4" />
-            </button>
+              aria-label="Send message"
+              icon={<Send className="w-4 h-4" />}
+              className="flex-shrink-0"
+              style={{ width: 40, height: 40, borderRadius: 'var(--radius-lg)', background: 'var(--signal)', color: 'var(--void)' }}
+            />
           </div>
           <p className="text-[10px] text-faint mt-1.5">Enter to send · Shift+Enter for newline</p>
         </div>

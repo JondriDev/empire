@@ -11,6 +11,7 @@ import { emit } from '../../lib/eventBus'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { EmptyState } from '../../components/ui/Utility'
+import { Button, IconButton, Input, TextArea } from '../../components/ui'
 import type { LearningItem } from '../../lib/store'
 
 export default function LearningTracker() {
@@ -86,12 +87,15 @@ export default function LearningTracker() {
             {masteredCount}/{learningItems.length} mastered
           </p>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={askCakraAll}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-signal/20 text-signal text-xs hover:bg-signal/30 transition-colors"
+          icon={<Bot className="w-3.5 h-3.5" />}
+          style={{ background: 'color-mix(in srgb, var(--signal) 18%, transparent)', color: 'var(--signal)' }}
         >
-          <Bot className="w-3.5 h-3.5" /> Ask Cakra
-        </button>
+          Ask Cakra
+        </Button>
       </div>
 
       {/* Progress bar */}
@@ -105,42 +109,45 @@ export default function LearningTracker() {
       {/* Add form */}
       <div className="p-4 rounded-2xl border border-success/20 mb-6" style={{ background: 'var(--card-bg)' }}>
         <h3 className="text-sm font-medium mb-3 flex items-center gap-1"><Plus className="w-3.5 h-3.5 text-success" /> New Topic</h3>
-        <input
+        <Input
           value={topic}
-          onChange={e => setTopic(e.target.value)}
+          onChange={setTopic}
           placeholder="Topic (e.g. Rust ownership)"
-          className="w-full rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-1 focus:ring-success/50"
-          style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
+          className="mb-2"
         />
-        <textarea
+        <TextArea
           value={learned}
-          onChange={e => setLearned(e.target.value)}
+          onChange={setLearned}
           placeholder="What did you learn?"
           rows={2}
-          className="w-full rounded-lg px-3 py-2 text-sm mb-2 resize-none focus:outline-none focus:ring-1 focus:ring-success/50"
-          style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
+          className="mb-2"
+          style={{ resize: 'none', minHeight: 0 }}
         />
-        <button
+        <Button
           onClick={add}
           disabled={!topic.trim()}
-          className="px-4 py-1.5 rounded-lg bg-success hover:bg-success disabled:opacity-30 text-fg text-sm transition-colors"
+          style={{ background: 'var(--c-success)', color: 'var(--void)' }}
         >
           Add Topic
-        </button>
+        </Button>
       </div>
 
       {/* Filters */}
       <div className="flex gap-2 mb-4">
         {(['all', 'active', 'mastered'] as const).map(f => (
-          <button
+          <Button
             key={f}
+            variant="ghost"
+            size="sm"
             onClick={() => setFilter(f)}
-            className={`px-3 py-1 rounded-full text-xs capitalize transition-colors ${
-              filter === f ? 'bg-success/20 text-success' : 'text-muted hover:text-muted'
-            }`}
+            aria-pressed={filter === f}
+            className="capitalize"
+            style={filter === f
+              ? { background: 'color-mix(in srgb, var(--c-success) 20%, transparent)', color: 'var(--c-success)' }
+              : { color: 'var(--text2)' }}
           >
             {f}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -160,14 +167,16 @@ export default function LearningTracker() {
             style={{ background: 'var(--card-bg)' }}
           >
             <div className="flex items-start gap-3">
-              <button
+              <IconButton
                 onClick={() => toggleMastered(item.id, !item.mastered)}
-                className={`w-6 h-6 rounded-lg border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
-                  item.mastered ? 'bg-success border-success text-fg' : 'border-hair hover:border-success/50'
-                }`}
-              >
-                {item.mastered && <Check className="w-3 h-3" />}
-              </button>
+                aria-label={item.mastered ? `Mark ${item.topic} not mastered` : `Mark ${item.topic} mastered`}
+                aria-pressed={item.mastered}
+                icon={item.mastered ? <Check className="w-3 h-3" /> : <span className="w-3 h-3" />}
+                className="flex-shrink-0 mt-0.5"
+                style={item.mastered
+                  ? { width: 24, height: 24, borderRadius: 'var(--radius-md)', background: 'var(--c-success)', border: '1px solid var(--c-success)', color: 'var(--void)' }
+                  : { width: 24, height: 24, borderRadius: 'var(--radius-md)', border: '1px solid var(--hair)', color: 'var(--text3)' }}
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className={`font-medium ${item.mastered ? 'line-through text-faint' : ''}`}>{item.topic}</h3>
@@ -192,13 +201,16 @@ export default function LearningTracker() {
               <span className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                 <NodeActions type="learning" sourceId={item.id} />
               </span>
-              <button
-                onClick={() => askCakraTopic(item)}
-                className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-signal/20 text-signal transition-all"
-                title="Ask Cakra about this topic"
-              >
-                <Bot className="w-4 h-4" />
-              </button>
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                <IconButton
+                  onClick={() => askCakraTopic(item)}
+                  aria-label="Ask Cakra about this topic"
+                  title="Ask Cakra about this topic"
+                  size="sm"
+                  icon={<Bot className="w-4 h-4" />}
+                  style={{ color: 'var(--signal)' }}
+                />
+              </span>
             </div>
           </div>
         ))}

@@ -260,6 +260,10 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   seamless-Input ×1, DataCenter ×4, Maps ×3) eslint clean; `--assert-zero` exit 0; bundle gz 731 ±0; no new deps. qa-smoke 32/32
   clean + all 13 guards green (GRAPH-LEGIBLE 3/3, OFFLINE 5/5 incl `/app/maps` cold-boot, PRECACHE 91 no-gap).
 
+- [x] **S8 · Migrate the standalone tool + entity apps (40 → 0).** ✅ **SHIPPED 2026-07-12 (green main).** `offShellControls 162 → 122 (−40)`, EXACTLY the S8 target (`b133/i17/s2/t10 → b100/i13/s2/t7`); all seven files 0 — Calculator 14→0, Goals 10→0, LearningTracker 7→0, Messages 5→0, Notes 2→0, Mail 1→0, Inbox 1→0. Calculator keypad/sci/memory/history → `Button variant="ghost"` (kept the per-button inline style objects + the EPIC-11 pulse motion handlers verbatim — Button composes caller `style` LAST so the look is preserved), copy/askCakra/clear-history → `IconButton`. Goals + LearningTracker: filters → `Button ghost sm` + `aria-pressed`, checkbox toggles → `IconButton` (`aria-pressed`), title/target → `Input`, note → `TextArea`, **Goals' `type="range"` → the `Slider` primitive**, hover-reveal ask/delete → `IconButton` wrapped in an `opacity-0 group-hover` span (IconButton's inline `opacity:1` would beat a Tailwind opacity class — the S6 trap). Messages compose → `TextArea`, send/refine → `IconButton`, contact + Ask-Cakra rows → `Button ghost fullWidth`. Notes footer Analyze → `Button`, `ActionIconBtn` → `IconButton`. Mail draft-open row → `Button ghost`. Inbox task-toggle → `IconButton`. Kept intact: `useInboundHandoff('empire-goals-clipboard')`/`('empire-messages-clipboard')` + `ProvenanceChip` + graph-mirrors, the `add-to-learning` receive path, Mail's `mirrorCollection('draft')`. build🟢 vitest 530/530🟢 eslint clean; `--assert-zero` exit 0; qa-smoke 32/32 clean + **INBOUND-LANDS goals/messages 4/4 ✅ + INTENT-ROUNDTRIP add-to-learning 2/2 ✅ + GRAPH-LEGIBLE mail/draft 3/3 ✅**. The heaviest standalone instrument (Calculator's full keypad) + the four handoff-receiving entity apps.
+
+  <details><summary>Original S8 spec (pre-ship)</summary>
+
 - [ ] **S8 · Migrate the standalone tool + entity apps (40 → 0).** `src/apps/calculator/Calculator.tsx` (**14** `b14`; the whole
   keypad + operator buttons → `Button` — pick `secondary`/`ghost` by role; the EPIC-11-tokenised pulse motion stays),
   `src/apps/goals/Goals.tsx` (**10** `b6/i3/t1`; add/complete/delete → `Button`/`IconButton`, title/target `<input>` → `Input`,
@@ -271,6 +275,8 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   `src/apps/inbox/Inbox.tsx` (**1** `b1`). Mapping rule. *Acceptance:* all seven = 0 (`offShellControls 162 → 122`, −40);
   **`INBOUND-LANDS goals/messages` + `INTENT-ROUNDTRIP add-to-learning` + `GRAPH-LEGIBLE mail/draft` guards still ✅**; each
   renders clean; build🟢 vitest🟢 eslint clean; conformance 0.
+
+  </details>
 
 - [ ] **S9 · Migrate the Cakra family, part 1 — the tabs + chat surface (39 → 0).** `src/apps/cakra/AIChat.tsx` (**13** `b9/i2/t2`;
   send/model/attach controls → `IconButton`/`Button`, prompt `<textarea>` → `TextArea` — keep the chat/handoff wiring),

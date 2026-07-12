@@ -16,7 +16,7 @@ import { emit } from '../../lib/eventBus'
 import { useGraph } from '../../lib/core/graph'
 import { useFocus } from '../../lib/core/focus'
 import type { Note } from '../../lib/store'
-import { Button, Input, TextArea, Card, Badge } from '../../components/ui'
+import { Button, IconButton, Input, TextArea, Card, Badge } from '../../components/ui'
 import { EmptyState, SectionHeader } from '../../components/ui/Utility'
 import { useToast } from '../../components/ui/Toast'
 import { NodeActions } from '../../components/ui/NodeActions'
@@ -421,28 +421,22 @@ function NoteCard({ note, landed, cardRef, isEditing, onStartEdit, onSaveEdit, o
               {' · '}
               {(note.content.trim() ? note.content.trim().split(/\s+/).length : 0)} words
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={onAskCakra}
+              icon={<MessageSquare className="w-2.5 h-2.5" />}
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
                 gap: '4px',
-                background: 'none',
-                border: 'none',
                 color: 'var(--color-cyan-3)',
-                cursor: 'pointer',
                 fontSize: 'var(--text-xs)',
-                fontWeight: 500,
                 padding: '2px 4px',
-                borderRadius: 'var(--radius-sm)',
-                transition: 'background var(--dur-fast)',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = tint('signal', 8) }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
             >
-              <MessageSquare className="w-2.5 h-2.5" />
               Analyze
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -452,20 +446,14 @@ function NoteCard({ note, landed, cardRef, isEditing, onStartEdit, onSaveEdit, o
 
 function ActionIconBtn({ icon, title, onClick, accent }: { icon: React.ReactNode; title: string; onClick: () => void; accent?: string }) {
   return (
-    <button
+    <IconButton
       onClick={onClick}
       title={title}
+      aria-label={title}
+      icon={icon}
+      size="sm"
       style={{
-        padding: '6px',
-        borderRadius: 'var(--radius-md)',
-        background: 'transparent',
-        border: 'none',
         color: 'var(--text3)',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'all var(--dur-fast) var(--ease-spring)',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.color = accent || 'var(--text)'
@@ -479,9 +467,7 @@ function ActionIconBtn({ icon, title, onClick, accent }: { icon: React.ReactNode
       }}
       onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.92)' }}
       onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1.1)' }}
-    >
-      {icon}
-    </button>
+    />
   )
 }
 

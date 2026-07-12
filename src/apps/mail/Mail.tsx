@@ -222,19 +222,22 @@ export default function MailApp() {
                 className="flex items-center justify-between gap-3"
                 style={{ padding: 12, borderTop: i ? '1px solid var(--border)' : undefined }}
               >
-                <button
+                <Button
                   onClick={() => openDraft(d)}
-                  className="flex-1 text-left"
-                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', minWidth: 0 }}
+                  variant="ghost"
+                  className="flex-1"
+                  style={{ justifyContent: 'flex-start', textAlign: 'left', minWidth: 0, padding: '0' }}
                   aria-label={`Open draft ${d.subject || '(no subject)'}`}
                 >
-                  <div className="truncate" style={{ color: 'var(--text)', fontWeight: 600 }}>
-                    {d.subject || '(no subject)'}
-                  </div>
-                  <div className="text-sm truncate" style={{ color: 'var(--text3)' }}>
-                    {d.to || 'no recipient'}
-                  </div>
-                </button>
+                  <span style={{ display: 'block', minWidth: 0 }}>
+                    <div className="truncate" style={{ color: 'var(--text)', fontWeight: 600 }}>
+                      {d.subject || '(no subject)'}
+                    </div>
+                    <div className="text-sm truncate" style={{ color: 'var(--text3)' }}>
+                      {d.to || 'no recipient'}
+                    </div>
+                  </span>
+                </Button>
                 <div className="flex items-center gap-1 shrink-0">
                   <NodeActions type="draft" sourceId={d.id} />
                   <Button size="sm" onClick={() => removeDraft(d.id)} aria-label={`Delete draft ${d.subject || '(no subject)'}`}>

@@ -5,9 +5,10 @@
 
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bot, Plus, Check, Target, Flag } from 'lucide-react'
+import { Bot, Plus, Check, Target, Flag, Trash2 } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
+import { Button, IconButton, Input, TextArea, Slider } from '../../components/ui'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
@@ -148,7 +149,6 @@ export default function Goals() {
   // registry tile). Everything else routes through the Deep-Field text tokens
   // so editing a design-system token restyles this app with the rest.
   const ACCENT = 'var(--ion)'
-  const inputStyle = { background: 'var(--input-bg)', color: 'var(--text)' } as const
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
@@ -162,13 +162,15 @@ export default function Goals() {
             {completedCount}/{goals.length} completed
           </p>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={askCakraAll}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-colors"
-          style={{ background: 'color-mix(in srgb, var(--ion) 18%, transparent)', color: ACCENT, transitionDuration: 'var(--dur-fast)' }}
+          icon={<Bot className="w-3.5 h-3.5" />}
+          style={{ background: 'color-mix(in srgb, var(--ion) 18%, transparent)', color: ACCENT }}
         >
-          <Bot className="w-3.5 h-3.5" /> Ask Cakra
-        </button>
+          Ask Cakra
+        </Button>
       </div>
 
       {inbound.source && (
@@ -194,45 +196,45 @@ export default function Goals() {
         <h3 className="text-sm font-medium mb-3 flex items-center gap-1" style={{ color: 'var(--text)' }}>
           <Plus className="w-3.5 h-3.5" style={{ color: ACCENT }} /> New Goal
         </h3>
-        <input
+        <Input
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={setTitle}
           placeholder="Goal title (e.g. Learn React)"
-          className="w-full rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none"
-          style={inputStyle}
+          className="mb-2"
         />
-        <textarea
+        <TextArea
           value={description}
-          onChange={e => setDescription(e.target.value)}
+          onChange={setDescription}
           placeholder="Description"
           rows={2}
-          className="w-full rounded-lg px-3 py-2 text-sm mb-2 resize-none focus:outline-none"
-          style={inputStyle}
+          className="mb-2"
+          style={{ resize: 'none', minHeight: 0 }}
         />
-        <input
+        <Input
           type="date"
           value={deadline}
-          onChange={e => setDeadline(e.target.value)}
-          className="w-full rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none"
-          style={inputStyle}
+          onChange={setDeadline}
+          className="mb-2"
         />
-        <button
+        <Button
           onClick={add}
           disabled={!title.trim()}
-          className="px-4 py-1.5 rounded-lg disabled:opacity-30 text-sm transition-colors"
-          style={{ background: ACCENT, color: 'var(--void)', transitionDuration: 'var(--dur-fast)' }}
+          style={{ background: ACCENT, color: 'var(--void)' }}
         >
           Add Goal
-        </button>
+        </Button>
       </div>
 
       {/* Filters */}
       <div className="flex gap-2 mb-4">
         {(['all', 'active', 'completed'] as const).map(f => (
-          <button
+          <Button
             key={f}
+            variant="ghost"
+            size="sm"
             onClick={() => setFilter(f)}
-            className="px-3 py-1 rounded-full text-xs capitalize transition-colors"
+            aria-pressed={filter === f}
+            className="capitalize"
             style={
               filter === f
                 ? { background: 'color-mix(in srgb, var(--ion) 18%, transparent)', color: ACCENT }
@@ -240,7 +242,7 @@ export default function Goals() {
             }
           >
             {f}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -259,17 +261,18 @@ export default function Goals() {
             className="gp gp-interactive group relative p-4 rounded-2xl"
           >
             <div className="flex items-start gap-3">
-              <button
+              <IconButton
                 onClick={() => toggleCompleted(goal.id, !goal.completed)}
-                className="w-6 h-6 rounded-lg border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors"
+                aria-label={goal.completed ? `Mark ${goal.title} incomplete` : `Mark ${goal.title} complete`}
+                aria-pressed={goal.completed}
+                icon={goal.completed ? <Check className="w-3 h-3" /> : <span className="w-3 h-3" />}
+                className="flex-shrink-0 mt-0.5"
                 style={
                   goal.completed
-                    ? { background: ACCENT, borderColor: ACCENT, color: 'var(--void)' }
-                    : { borderColor: 'var(--hair)' }
+                    ? { width: 24, height: 24, borderRadius: 'var(--radius-md)', background: ACCENT, border: `1px solid ${ACCENT}`, color: 'var(--void)' }
+                    : { width: 24, height: 24, borderRadius: 'var(--radius-md)', border: '1px solid var(--hair)', color: 'var(--text3)' }
                 }
-              >
-                {goal.completed && <Check className="w-3 h-3" />}
-              </button>
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium" style={{ color: goal.completed ? 'var(--text3)' : 'var(--text)', textDecoration: goal.completed ? 'line-through' : 'none' }}>{goal.title}</h3>
@@ -294,39 +297,38 @@ export default function Goals() {
                     <span>Progress</span>
                     <span>{goal.progress}%</span>
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
+                  <Slider
+                    min={0}
+                    max={100}
                     value={goal.progress}
-                    onChange={(e) => updateProgress(goal.id, parseInt(e.target.value))}
-                    className="w-full h-1.5 rounded-full appearance-none"
-                    style={{
-                      background: `linear-gradient(to right, var(--ion) 0%, var(--ion) ${goal.progress}%, var(--input-bg) ${goal.progress}%, var(--input-bg) 100%)`
-                    }}
+                    onChange={(v) => updateProgress(goal.id, v)}
+                    aria-label={`Progress for ${goal.title}`}
+                    style={{ height: '6px', borderRadius: 'var(--radius-full)' }}
                   />
                 </div>
               </div>
               <div className="flex flex-col gap-1">
                 <NodeActions type="goal" sourceId={goal.id} />
-                <button
-                  onClick={() => askCakraGoal(goal)}
-                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                  style={{ color: ACCENT }}
-                  title="Ask Cakra about this goal"
-                >
-                  <Bot className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => deleteGoal(goal.id)}
-                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                  style={{ color: 'var(--ember)' }}
-                  title="Delete goal"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <IconButton
+                    onClick={() => askCakraGoal(goal)}
+                    aria-label="Ask Cakra about this goal"
+                    title="Ask Cakra about this goal"
+                    size="sm"
+                    icon={<Bot className="w-4 h-4" />}
+                    style={{ color: ACCENT }}
+                  />
+                </span>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <IconButton
+                    onClick={() => deleteGoal(goal.id)}
+                    aria-label="Delete goal"
+                    title="Delete goal"
+                    size="sm"
+                    icon={<Trash2 className="w-4 h-4" />}
+                    style={{ color: 'var(--ember)' }}
+                  />
+                </span>
               </div>
             </div>
           </div>

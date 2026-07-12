@@ -15,6 +15,7 @@ import { Sparkles, History, Trash2, Copy, Check } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { cssVar, tint } from '../../design-system/tokens'
 import { useToast } from '../../components/ui/Toast'
+import { Button, IconButton } from '../../components/ui'
 
 type Op = '+' | '-' | '×' | '÷' | '^' | null
 
@@ -307,43 +308,35 @@ export default function Calculator() {
               {expression}
             </div>
             <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
-              <button
+              <IconButton
                 onClick={copyResult}
                 title={copied ? 'Copied!' : 'Copy result'}
+                aria-label={copied ? 'Copied' : 'Copy result'}
+                icon={copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                 style={{
                   width: '24px', height: '24px',
                   borderRadius: 'var(--radius-sm)',
-                  border: 'none',
                   background: 'transparent',
                   color: copied ? cssVar('c-success') : 'var(--text3)',
-                  cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all var(--dur-fast)',
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.background = tint('xenon', 5) }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = copied ? cssVar('c-success') : 'var(--text3)'; e.currentTarget.style.background = 'transparent' }}
-              >
-                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-              </button>
+              />
               {display !== '0' && (
-                <button
+                <IconButton
                   onClick={askCakra}
                   title="Ask Cakra about this result"
+                  aria-label="Ask Cakra about this result"
+                  icon={<Sparkles className="w-3 h-3" />}
                   style={{
                     width: '24px', height: '24px',
                     borderRadius: 'var(--radius-sm)',
-                    border: 'none',
                     background: 'transparent',
                     color: 'var(--color-cyan-3)',
-                    cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'all var(--dur-fast)',
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = tint('signal', 10) }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
-                >
-                  <Sparkles className="w-3 h-3" />
-                </button>
+                />
               )}
             </div>
           </div>
@@ -370,8 +363,9 @@ export default function Calculator() {
         {/* Scientific row 1 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
           {[['sin','sin'], ['cos','cos'], ['tan','tan'], ['log','log'], ['ln','ln']].map(([l, fn]) => (
-            <button
+            <Button
               key={fn}
+              variant="ghost"
               style={fnStyle(false)}
               onClick={() => sciFunc(fn)}
               onMouseEnter={onEnter()}
@@ -379,15 +373,16 @@ export default function Calculator() {
               onMouseDown={onPress(fnStyle(false))}
             >
               {l}
-            </button>
+            </Button>
           ))}
         </div>
 
         {/* Scientific row 2 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
           {([['x²','sq'], ['x³','cube'], ['√','sqrt'], ['π','pi'], ['e','e']] as const).map(([l, fn]) => (
-            <button
+            <Button
               key={l}
+              variant="ghost"
               style={fnStyle(false)}
               onClick={() => {
                 if (fn === 'pi') inputPi()
@@ -399,7 +394,7 @@ export default function Calculator() {
               onMouseDown={onPress(fnStyle(false))}
             >
               {l}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -412,8 +407,9 @@ export default function Calculator() {
             { label: 'MR', fn: () => { setDisplay(String(memStore)); setNewNumber(true); setJustCalculated(false) } },
             { label: 'MC', fn: () => { setMemStore(0); setMemLabel(''); toast.info('Memory cleared') } },
           ].map(b => (
-            <button
+            <Button
               key={b.label}
+              variant="ghost"
               style={fnStyle(false)}
               onClick={b.fn}
               onMouseEnter={onEnter()}
@@ -421,7 +417,7 @@ export default function Calculator() {
               onMouseDown={onPress(fnStyle(false))}
             >
               {b.label}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -435,8 +431,9 @@ export default function Calculator() {
         {/* Main buttons */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
           {(['C','±','%','÷'] as const).map(b => (
-            <button
+            <Button
               key={b}
+              variant="ghost"
               style={b === 'C' ? clearStyle : (b === '÷' ? (op === '÷' ? opActive : opStyle) : digitStyle)}
               onClick={() => {
                 if (b === 'C') clear()
@@ -449,12 +446,13 @@ export default function Calculator() {
               onMouseDown={onPress(b === 'C' ? clearStyle : (b === '÷' ? (op === '÷' ? opActive : opStyle) : digitStyle))}
             >
               {b}
-            </button>
+            </Button>
           ))}
 
           {([['7','7'],['8','8'],['9','9'],['×','×']] as const).map(([l, v]) => (
-            <button
+            <Button
               key={l}
+              variant="ghost"
               style={v === '×' ? (op === '×' ? opActive : opStyle) : digitStyle}
               onClick={() => v === '×' ? handleOp('×') : inputDigit(v)}
               onMouseEnter={onEnter()}
@@ -462,12 +460,13 @@ export default function Calculator() {
               onMouseDown={onPress(v === '×' ? (op === '×' ? opActive : opStyle) : digitStyle)}
             >
               {l}
-            </button>
+            </Button>
           ))}
 
           {([['4','4'],['5','5'],['6','6'],['-','-']] as const).map(([l, v]) => (
-            <button
+            <Button
               key={l}
+              variant="ghost"
               style={v === '-' ? (op === '-' ? opActive : opStyle) : digitStyle}
               onClick={() => v === '-' ? handleOp('-') : inputDigit(v)}
               onMouseEnter={onEnter()}
@@ -475,12 +474,13 @@ export default function Calculator() {
               onMouseDown={onPress(v === '-' ? (op === '-' ? opActive : opStyle) : digitStyle)}
             >
               {l}
-            </button>
+            </Button>
           ))}
 
           {([['1','1'],['2','2'],['3','3'],['+','+']] as const).map(([l, v]) => (
-            <button
+            <Button
               key={l}
+              variant="ghost"
               style={v === '+' ? (op === '+' ? opActive : opStyle) : digitStyle}
               onClick={() => v === '+' ? handleOp('+') : inputDigit(v)}
               onMouseEnter={onEnter()}
@@ -488,23 +488,26 @@ export default function Calculator() {
               onMouseDown={onPress(v === '+' ? (op === '+' ? opActive : opStyle) : digitStyle)}
             >
               {l}
-            </button>
+            </Button>
           ))}
 
-          <button
+          <Button
+            variant="ghost"
             style={{ ...baseBtn, background: tint('xenon', 4), color: 'var(--text3)', borderColor: tint('xenon', 5) }}
             onClick={backspace}
             onMouseEnter={onEnter()}
             onMouseLeave={onLeave}
             onMouseDown={onPress(baseBtn)}
             title="Backspace"
+            aria-label="Backspace"
           >
             ⌫
-          </button>
+          </Button>
 
           {([['0','0'],['.','.']] as const).map(([l, v]) => (
-            <button
+            <Button
               key={l}
+              variant="ghost"
               style={digitStyle}
               onClick={() => v === '.' ? inputDecimal() : inputDigit(v)}
               onMouseEnter={onEnter()}
@@ -512,18 +515,20 @@ export default function Calculator() {
               onMouseDown={onPress(digitStyle)}
             >
               {l}
-            </button>
+            </Button>
           ))}
 
-          <button
+          <Button
+            variant="ghost"
             style={equalsStyle}
             onClick={equals}
+            aria-label="Equals"
             onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px) scale(1.02)'; e.currentTarget.style.filter = 'brightness(1.1)' }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.filter = '' }}
             onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.94)'; setTimeout(() => { e.currentTarget.style.transform = '' }, 100) }}
           >
             =
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -563,24 +568,21 @@ export default function Calculator() {
             History
           </span>
           {history.length > 0 && (
-            <button
+            <IconButton
               onClick={() => { setHistory([]); toast.info('History cleared') }}
               title="Clear history"
+              aria-label="Clear history"
+              icon={<Trash2 className="w-3 h-3" />}
+              size="sm"
               style={{
-                padding: '3px',
+                width: '24px', height: '24px',
                 borderRadius: 'var(--radius-sm)',
                 background: 'transparent',
-                border: 'none',
                 color: 'var(--text3)',
-                cursor: 'pointer',
-                display: 'flex',
-                transition: 'all var(--dur-fast)',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.color = cssVar('c-danger'); e.currentTarget.style.background = tint('c-danger', 10) }}
               onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; e.currentTarget.style.background = 'transparent' }}
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
+            />
           )}
         </div>
 
@@ -591,8 +593,11 @@ export default function Calculator() {
             </div>
           ) : (
             history.map((h, i) => (
-              <button
+              <Button
                 key={`${h.expr}-${h.result}-${i}`}
+                variant="ghost"
+                fullWidth
+                aria-label={`Recall ${h.expr} = ${h.result}`}
                 onClick={() => {
                   setDisplay(h.result)
                   setExpression('')
@@ -600,25 +605,24 @@ export default function Calculator() {
                   setJustCalculated(false)
                 }}
                 style={{
-                  width: '100%',
                   textAlign: 'left',
+                  justifyContent: 'flex-start',
                   padding: '6px 8px',
                   borderRadius: 'var(--radius-md)',
                   background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'background var(--dur-fast)',
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = tint('xenon', 4) }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
               >
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {h.expr}
-                </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', color: cssVar('ember'), fontWeight: 500 }}>
-                  = {h.result}
-                </div>
-              </button>
+                <span style={{ display: 'block', minWidth: 0, width: '100%' }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {h.expr}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', color: cssVar('ember'), fontWeight: 500 }}>
+                    = {h.result}
+                  </div>
+                </span>
+              </Button>
             ))
           )}
         </div>
