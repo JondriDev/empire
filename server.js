@@ -10,6 +10,12 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Load a local .env (Termux/dev) so NVIDIA_API_KEY and friends reach the proxy
+// without adding a dotenv dependency. Builtin since Node 20.6; the try/catch
+// covers the normal case where no .env exists (production uses the real env).
+try { process.loadEnvFile(path.join(__dirname, '.env')); } catch { /* no .env file */ }
+
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
@@ -1043,7 +1049,7 @@ app.post('/api/ai/chat', authMiddleware, rateLimit('ai-chat', 120, 60 * 1000), a
   const useNvidia = !apiKey && !baseUrl && !!nvidiaKey;
   const finalBaseUrl = baseUrl || (useNvidia ? 'https://integrate.api.nvidia.com/v1' : 'https://openrouter.ai/api/v1');
   const finalKey = apiKey || (useNvidia ? nvidiaKey : (orKey || aiKey || ''));
-  const finalSystem = systemPrompt || 'You are Hermes, the AI agent powering The Empire.';
+  const finalSystem = systemPrompt || 'You are Cakra, the unified frontier-level intelligence powering The Empire. Reason carefully on hard problems and answer directly on simple ones; be accurate first, concise second.';
 
   if (!finalKey) return res.status(400).json({ error: 'No AI API key configured.' });
 
@@ -1067,7 +1073,9 @@ app.post('/api/ai/chat', authMiddleware, rateLimit('ai-chat', 120, 60 * 1000), a
         max_tokens: maxTokens ?? 2048,
         stream: true,
       }),
-      signal: AbortSignal.timeout(60000),
+      // Frontier reasoning models (minimax-m3, nemotron) can think for a while
+      // before the first answer token — allow up to 2 min end-to-end.
+      signal: AbortSignal.timeout(120000),
     });
 
     if (!response.ok) {

@@ -45,7 +45,7 @@ export function getSettings(): AgentSettings {
       groq: { apiKey: '', model: 'llama-3.3-70b-versatile', enabled: true },
       google: { apiKey: '', model: 'gemini-2.0-flash', enabled: true },
       together: { apiKey: '', model: 'meta-llama/Llama-3-70b-chat-hf', enabled: true },
-      nvidia: { apiKey: '', model: 'nvidia/llama-3.1-nemotron-70b-instruct', enabled: true },
+      nvidia: { apiKey: '', model: 'minimaxai/minimax-m3', enabled: true },
     },
     activeProvider: 'openrouter',
     autoConfirmDangerous: false,

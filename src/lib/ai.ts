@@ -24,12 +24,12 @@ export interface AIConfig {
 
 const DEFAULT_CONFIG: AIConfig = {
   provider: 'nvidia',
-  model: 'deepseek-ai/deepseek-v4-flash',
+  model: 'minimaxai/minimax-m3',
   apiKey: '',
   baseUrl: 'https://integrate.api.nvidia.com/v1',
   systemPrompt: CAKRA_SYSTEM_PROMPT,
   temperature: 0.7,
-  maxTokens: 2048,
+  maxTokens: 4096,
   router: { enabled: true, roles: {} },
 }
 
@@ -42,6 +42,8 @@ export interface ChatOptions {
   temperature?: number
   maxTokens?: number
   signal?: AbortSignal
+  /** Pin a specific NIM model for this call, overriding the per-task router. */
+  model?: string
 }
 
 export function getConfig(): AIConfig {
@@ -64,21 +66,29 @@ export function resetConfig(): AIConfig {
   return { ...DEFAULT_CONFIG }
 }
 
-/** Stream a chat completion via the server proxy endpoint. */
+/** Stream a chat completion via the server proxy endpoint.
+ *
+ * `onThinking` (optional) receives the model's reasoning/chain-of-thought
+ * tokens (`delta.reasoning_content`) separately from the answer tokens, so
+ * reasoning models (minimax-m3, nemotron) can show a live thinking trace
+ * instead of appearing to stall before the answer arrives.
+ */
 export async function streamChat(
   messages: ChatMessage[],
   options: ChatOptions = {},
   onToken: (_token: string) => void,
   onDone?: () => void,
-  onError?: (_err: Error) => void
+  onError?: (_err: Error) => void,
+  onThinking?: (_token: string) => void
 ): Promise<void> {
   const config = getConfig()
   const controller = new AbortController()
   const signal = options.signal || controller.signal
 
-  // Cakra router: classify this task and pick the best model (NVIDIA NIM).
-  let model = config.model
-  if (config.provider === 'nvidia' && config.router?.enabled !== false) {
+  // Model selection: an explicit per-call model wins; otherwise the Cakra
+  // router classifies the task and picks the best NIM model.
+  let model = options.model || config.model
+  if (!options.model && config.provider === 'nvidia' && config.router?.enabled !== false) {
     model = pickModel(lastUserText(messages), config.router?.roles, config.model).model
   }
 
@@ -122,7 +132,12 @@ export async function streamChat(
           if (data === '[DONE]') continue
           try {
             const parsed = JSON.parse(data)
-            const content = parsed.choices?.[0]?.delta?.content || ''
+            const delta = parsed.choices?.[0]?.delta
+            // Reasoning models stream their chain-of-thought in a separate
+            // `reasoning_content` field before (or alongside) the answer.
+            const reasoning = delta?.reasoning_content || ''
+            if (reasoning && onThinking) onThinking(reasoning)
+            const content = delta?.content || ''
             if (content) onToken(content)
           } catch { /* skip malformed */ }
         }

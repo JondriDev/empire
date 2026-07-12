@@ -38,6 +38,15 @@ const PERSONA =
   'You are precise, practical and honest about uncertainty: never invent facts, ' +
   'and surface thin evidence as a risk instead of hiding it.'
 
+/**
+ * Every solver stage runs on a frontier reasoning model — not the everyday chat
+ * default — so decomposition and adversarial critique get genuine reasoning.
+ * minimax-m3 is fast (~seconds), has a 1M context, and reliably returns real
+ * `content` (some Nemotron reasoners return only reasoning and an empty answer).
+ * Token caps below leave headroom for the model's hidden reasoning before the JSON.
+ */
+const SOLVER_MODEL = 'minimaxai/minimax-m3'
+
 // ─── JSON plumbing ────────────────────────────────────────────────────────────
 
 /** Pull the outermost JSON object out of a possibly chatty model reply. */
@@ -57,6 +66,8 @@ interface JsonCallOpts {
   maxTokens: number
   temperature: number
   signal?: AbortSignal
+  /** Pin a specific model for this stage (defaults to the frontier reasoner). */
+  model?: string
 }
 
 /** One stage call: ask → extract → validate; on failure retry once, stricter. */
@@ -72,7 +83,7 @@ async function callJson<T>(
         { role: 'system', content: `${PERSONA}\n\n${opts.system}${extra}` },
         { role: 'user', content: opts.user },
       ],
-      { temperature: opts.temperature, maxTokens: opts.maxTokens, signal: opts.signal },
+      { temperature: opts.temperature, maxTokens: opts.maxTokens, signal: opts.signal, model: opts.model ?? SOLVER_MODEL },
     )
     return validate(extractJson(raw))
   }
@@ -134,7 +145,7 @@ export async function analyzeProblem(
       '- severity: harm caused. tractability: how realistically it can be moved.\n' +
       '- isAtomic: true only if ONE concrete action plan could address it without splitting it further.',
     user: problemBlock(p, ancestry),
-    maxTokens: 600,
+    maxTokens: 2000,
     temperature: 0.3,
     signal,
   }, (v) => {
@@ -177,7 +188,7 @@ export async function decomposeProblem(
       '- Each must be MORE tractable than the parent — closer to something a real plan can move.\n' +
       '- Titles short and concrete; blurbs one sentence.',
     user: problemBlock(p, ancestry) + causes,
-    maxTokens: 900,
+    maxTokens: 2800,
     temperature: 0.4,
     signal,
   }, (v) => {
@@ -236,7 +247,7 @@ export async function solveProblem(
       '- 3–7 steps, each genuinely actionable — no platitudes ("raise awareness" alone is banned).\n' +
       '- confidence: your honest belief this plan moves the problem if executed.',
     user: problemBlock(p, ancestry) + causes,
-    maxTokens: 1600,
+    maxTokens: 4096,
     temperature: 0.5,
     signal,
   }, (v) => {
@@ -292,7 +303,7 @@ export async function critiqueSolution(
       '- verdict "revise": include improved* fields with the FULL corrected version.\n' +
       '- confidence: honest final belief in the (possibly improved) plan.',
     user: `${problemBlock(p, [])}\n\nDRAFT SUMMARY: ${draft.summary}\n\nDRAFT PLAN:\n${plan}\n\nSTATED RISKS: ${draft.risks.join('; ') || 'none'}`,
-    maxTokens: 1200,
+    maxTokens: 3000,
     temperature: 0.3,
     signal,
   }, (v) => {

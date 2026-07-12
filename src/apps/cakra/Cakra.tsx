@@ -1,40 +1,45 @@
 /**
  * Cakra — the single AI surface for The Empire.
  *
- * Cakra both *chats* and *acts*, but what it can do depends on where it runs:
+ * Cakra both *chats* and *acts*. The model calls take one of two routes, and
+ * which one is reliable depends on how Cakra reaches its LLM:
  *
- *   • Native runtime (Termux `server.js`, a configured remote backend, or an
- *     APK pointed at one) → the full tool-calling **AgentSurface**: files,
- *     shell, web search, code execution, with a live Workspace panel. Model
- *     calls go direct to the user's chosen provider with their key.
+ *   • **AIChat** (default) — the server-proxied chat: every model call goes
+ *     through the Empire proxy (`/api/ai/chat` → server.js locally, or the
+ *     hosted Cakra proxy on the live PWA), so it's powered by the server-side
+ *     `.env` NVIDIA NIM key and works in ANY browser (local Termux or github.io)
+ *     with zero setup. NIM sends no CORS headers, so this is the only path that
+ *     works browser-side with a NIM key. Now includes **Cakra Auto** multi-model
+ *     orchestration + a live reasoning trace.
  *
- *   • Live web PWA (github.io, no backend) → the proxy-routed **AIChat**:
- *     zero-setup chat through the Cakra Supabase proxy (NIM is CORS-blocked
- *     when called direct), with full Empire context + handoff. Shell/file
- *     tools can't run in a browser, so we don't pretend to offer them.
+ *   • **AgentSurface** — the full tool-calling agent (files, shell, web search,
+ *     code exec, Workspace panel). It calls the model provider *directly*, which
+ *     only works where CORS isn't enforced (a native APK webview) or against a
+ *     CORS-friendly backend. So we only mount it when the user has deliberately
+ *     pointed Cakra at a backend/proxy (Agent → Settings → "Backend server").
  *
  * The app keeps id `ai-chat` + route `/app/ai-chat` so every existing
  * handoff/event/automation keeps working. Both children emit APP_OPENED
  * themselves, so this wrapper must not.
  */
 import { useEffect, useState } from 'react'
-import { isLocalRuntime, checkBackend } from '../../lib/apiBase'
+import { getApiBase, checkBackend } from '../../lib/apiBase'
 import AgentSurface from './AgentSurface'
 import AIChat from './AIChat'
 
 export default function Cakra() {
-  // Synchronous best-guess for first paint: render the full agent only where a
-  // backend is plausibly reachable (avoids a flash of chat on Termux).
-  const [native, setNative] = useState(() => isLocalRuntime())
+  // Only the explicitly-configured "Backend server" override unlocks the direct
+  // tool-calling agent; otherwise use the proxy chat (which the .env NIM key
+  // powers and which works in every browser). First paint mirrors this guess.
+  const [tools, setTools] = useState(() => !!getApiBase())
 
   useEffect(() => {
-    // On the live web PWA there's no backend to probe — stay on proxy chat.
-    if (!isLocalRuntime()) return
+    if (!getApiBase()) { setTools(false); return }
     let alive = true
-    // Confirm server.js actually answers; downgrade to proxy chat if not.
-    checkBackend(2000).then((ok) => { if (alive) setNative(ok) }).catch(() => { if (alive) setNative(false) })
+    // Confirm the configured backend actually answers before showing the agent.
+    checkBackend(2000).then((ok) => { if (alive) setTools(ok) }).catch(() => { if (alive) setTools(false) })
     return () => { alive = false }
   }, [])
 
-  return native ? <AgentSurface /> : <AIChat />
+  return tools ? <AgentSurface /> : <AIChat />
 }

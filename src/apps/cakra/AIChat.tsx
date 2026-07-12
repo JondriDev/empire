@@ -6,8 +6,9 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Bot, Send, Settings, Sparkles, X, Trash2, Copy } from 'lucide-react'
+import { Bot, Send, Settings, Sparkles, X, Trash2, Copy, Zap, Brain, ChevronRight } from 'lucide-react'
 import { streamChat, buildEmpireContext, saveConfig, getConfig } from '../../lib/ai'
+import { runAutoChat } from './lib/autoChat'
 import { hasArtifacts, ARTIFACT_SYSTEM_PROMPT } from './lib/artifactProtocol'
 import ArtifactMessageContent from './components/ArtifactMessageContent'
 import { emit, getRecent } from '../../lib/eventBus'
@@ -21,10 +22,14 @@ interface Message {
   id: string
   role: 'user' | 'assistant' | 'system'
   content: string
+  /** Reasoning / orchestration trace, streamed separately from the answer. */
+  thinking?: string
   timestamp: number
 }
 
 const CONTEXT_APPS = ['notes', 'calendar', 'messages', 'learning-tracker', 'token-counter', 'prompt-generator', 'editor', 'calculator', 'datacenter']
+
+const AUTO_KEY = 'cakra-auto-mode'
 
 export default function AIChat() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -32,6 +37,15 @@ export default function AIChat() {
   const [loading, setLoading] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [contextExpanded, setContextExpanded] = useState(false)
+  // Cakra Auto: multi-model orchestration (Thinker → Answerer) on the proxy path. On by default.
+  const [autoMode, setAutoMode] = useState(() => {
+    try { return localStorage.getItem(AUTO_KEY) !== '0' } catch { return true }
+  })
+  const toggleAuto = () => setAutoMode(v => {
+    const next = !v
+    try { localStorage.setItem(AUTO_KEY, next ? '1' : '0') } catch { /* ignore */ }
+    return next
+  })
   const bottomRef = useRef<HTMLDivElement>(null)
 
  // Emit APP_OPENED for activity feed tracking
@@ -100,39 +114,52 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
 
     try {
       let assistantContent = ''
+      let assistantThinking = ''
       const assistantMsgId = (Date.now() + 1).toString()
 
       setMessages(prev => [...prev, {
         id: assistantMsgId,
         role: 'assistant',
         content: '',
+        thinking: '',
         timestamp: Date.now(),
       }])
 
-      await streamChat(
-        [
-          { role: 'system', content: systemPrompt },
-          ...historyMessages,
-          { role: 'user', content: userMsg.content },
-        ],
-        {},
-        (token) => {
-          assistantContent += token
-          setMessages(prev => prev.map(m =>
-            m.id === assistantMsgId ? { ...m, content: assistantContent } : m
-          ))
-        },
-        () => {
-          setLoading(false)
-          emit({ type: 'AI_RESPONSE', query: userMsg.content, response: assistantContent, app: 'ai-chat' })
-        },
-        (err) => {
-          setLoading(false)
-          setMessages(prev => prev.map(m =>
-            m.id === assistantMsgId ? { ...m, content: `⚠️ Error: ${err.message}` } : m
-          ))
-        }
-      )
+      const outMessages = [
+        { role: 'system' as const, content: systemPrompt },
+        ...historyMessages,
+        { role: 'user' as const, content: userMsg.content },
+      ]
+      const onToken = (token: string) => {
+        assistantContent += token
+        setMessages(prev => prev.map(m =>
+          m.id === assistantMsgId ? { ...m, content: assistantContent } : m
+        ))
+      }
+      const onThinking = (text: string) => {
+        assistantThinking += text
+        setMessages(prev => prev.map(m =>
+          m.id === assistantMsgId ? { ...m, thinking: assistantThinking } : m
+        ))
+      }
+      const onDone = () => {
+        setLoading(false)
+        emit({ type: 'AI_RESPONSE', query: userMsg.content, response: assistantContent, app: 'ai-chat' })
+      }
+      const onError = (err: Error) => {
+        setLoading(false)
+        setMessages(prev => prev.map(m =>
+          m.id === assistantMsgId ? { ...m, content: `⚠️ Error: ${err.message}` } : m
+        ))
+      }
+
+      // Auto ON → multi-model orchestration (hard tasks get a Thinker pass);
+      // Auto OFF → a single streamed model (still shows reasoning traces).
+      if (autoMode) {
+        await runAutoChat(outMessages, { onToken, onThinking, onDone, onError })
+      } else {
+        await streamChat(outMessages, {}, onToken, onDone, onError, onThinking)
+      }
     } catch (err: unknown) {
     setLoading(false)
     const errMsg = err instanceof Error ? err.message : 'Unknown error'
@@ -144,7 +171,7 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
     }
       setMessages(prev => [...prev.slice(0, -1), errorMsg])
     }
-  }, [input, loading, messages])
+  }, [input, loading, messages, autoMode])
 
   const clearChat = () => setMessages([])
   const copyMessage = (content: string) => navigator.clipboard.writeText(content)
@@ -165,6 +192,19 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleAuto}
+            icon={<Zap className="w-3.5 h-3.5" />}
+            aria-pressed={autoMode}
+            title={autoMode ? 'Cakra Auto ON — routes hard tasks through a multi-model pass' : 'Cakra Auto OFF — single model'}
+            style={autoMode
+              ? { background: tint('signal', 15), color: cssVar('signal'), border: `1px solid ${tint('signal', 30)}` }
+              : { color: cssVar('text3'), border: '1px solid var(--border)' }}
+          >
+            Auto
+          </Button>
           <IconButton
             onClick={clearChat}
             aria-label="Clear chat"
@@ -246,6 +286,12 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
                 ? 'bg-signal text-fg rounded-tr-sm'
                 : 'border border-hair rounded-tl-sm'
             }`} style={msg.role === 'assistant' ? { background: 'var(--card-bg)' } : {}}>
+              {msg.role === 'assistant' && msg.thinking ? (
+                <ThinkingBox
+                  text={msg.thinking}
+                  live={loading && msg.id === messages[messages.length - 1]?.id && !msg.content}
+                />
+              ) : null}
               {msg.role === 'assistant' && hasArtifacts(msg.content) ? (
                 <div className="text-sm leading-relaxed">
                   <ArtifactMessageContent
@@ -321,6 +367,38 @@ Be concise, helpful, and slightly playful. When referencing data from other apps
   )
 }
 
+/** Collapsible reasoning / orchestration trace shown above an assistant reply. */
+function ThinkingBox({ text, live }: { text: string; live: boolean }) {
+  const [open, setOpen] = useState(live)
+  // Auto-expand while the model is thinking, collapse once the answer arrives.
+  useEffect(() => { setOpen(live) }, [live])
+  return (
+    <div
+      className="mb-2 rounded-xl text-xs overflow-hidden"
+      style={{ background: tint('signal', 5), border: `1px solid ${tint('signal', 20)}` }}
+    >
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-1.5 px-3 py-2"
+        style={{ color: cssVar('signal') }}
+      >
+        <Brain className="w-3 h-3" />
+        <span style={{ fontWeight: 600 }}>{live ? 'Thinking…' : 'Reasoning'}</span>
+        <ChevronRight
+          className="w-3 h-3 ml-auto transition-transform"
+          style={{ transform: open ? 'rotate(90deg)' : 'none' }}
+        />
+      </button>
+      {open && (
+        <pre
+          className="px-3 pb-2 whitespace-pre-wrap font-mono overflow-auto max-h-48"
+          style={{ color: cssVar('text2') }}
+        >{text}</pre>
+      )}
+    </div>
+  )
+}
+
 function AISettingsModal({ onClose }: { onClose: () => void }) {
   const config = getConfig()
   const [model, setModel] = useState(config.model)
@@ -348,9 +426,9 @@ function AISettingsModal({ onClose }: { onClose: () => void }) {
             <Input
               value={model}
               onChange={setModel}
-              placeholder="deepseek/deepseek-v4-flash"
+              placeholder="minimaxai/minimax-m3"
             />
-            <p className="text-[10px] text-faint mt-1">Defaults to DeepSeek V4 Flash via OpenRouter</p>
+            <p className="text-[10px] text-faint mt-1">Defaults to MiniMax-M3 via NVIDIA NIM; Cakra auto-routes harder tasks to a deeper model.</p>
           </div>
 
           <div>
@@ -359,7 +437,7 @@ function AISettingsModal({ onClose }: { onClose: () => void }) {
               type="password"
               value={apiKey}
               onChange={setApiKey}
-              placeholder="sk-or-v-..."
+              placeholder="nvapi-..."
             />
           </div>
 
