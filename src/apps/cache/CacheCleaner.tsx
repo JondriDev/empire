@@ -28,11 +28,14 @@ function formatBytes(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
+type PendingClear = 'all' | 'selected' | null
+
 export default function CacheCleaner() {
   const [entries, setEntries] = useState<CacheEntry[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [freed, setFreed] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [pending, setPending] = useState<PendingClear>(null)
 
   const scan = useCallback(() => {
     setLoading(true)
@@ -42,6 +45,7 @@ export default function CacheCleaner() {
       setEntries([...ls, ...ss])
       setSelected(new Set())
       setFreed(0)
+      setPending(null)
     } catch (err) {
       console.error('Cache scan failed:', err)
     } finally {
@@ -67,41 +71,47 @@ export default function CacheCleaner() {
     setSelected(allKeys)
   }
 
-  const clearSelected = () => {
+  const removeEntries = (toRemove: CacheEntry[]) => {
     let bytesFreed = 0
-    selected.forEach(key => {
-      const entry = entries.find(e => e.key === key)
-      if (!entry) return
-      try {
-        if (entry.type === 'localStorage') localStorage.removeItem(key)
-        else sessionStorage.removeItem(key)
-        bytesFreed += entry.size
-      } catch { /* ignore */ }
-    })
-    setFreed(bytesFreed)
-    emit({ type: 'CALCULATION_RESULT', expression: 'cache cleared', result: `${formatBytes(bytesFreed)} freed` })
-    scan()
-  }
-
-  const clearAll = () => {
-    let bytesFreed = 0
-    entries.forEach(entry => {
+    toRemove.forEach(entry => {
       try {
         if (entry.type === 'localStorage') localStorage.removeItem(entry.key)
         else sessionStorage.removeItem(entry.key)
         bytesFreed += entry.size
       } catch { /* ignore */ }
     })
+    // Refresh the list in place — NOT via scan(), which resets `freed` to 0 and
+    // would blow away the "Freed X" confirmation we're about to show.
+    const ls = getStorageEntries(localStorage, 'localStorage')
+    const ss = getStorageEntries(sessionStorage, 'sessionStorage')
+    setEntries([...ls, ...ss])
+    setSelected(new Set())
+    setPending(null)
     setFreed(bytesFreed)
     emit({ type: 'CALCULATION_RESULT', expression: 'cache cleared', result: `${formatBytes(bytesFreed)} freed` })
-    scan()
+  }
+
+  // Clearing is irreversible and wipes every app's saved data, so both destructive
+  // actions arm a confirmation first; the second tap (Delete forever) executes.
+  const confirmClear = () => {
+    if (pending === 'selected') {
+      removeEntries(entries.filter(e => selected.has(e.key)))
+    } else if (pending === 'all') {
+      removeEntries(entries)
+    }
   }
 
   const totalSize = entries.reduce((sum, e) => sum + e.size, 0)
+  const pendingEntries = pending === 'selected'
+    ? entries.filter(e => selected.has(e.key))
+    : pending === 'all'
+      ? entries
+      : []
+  const pendingBytes = pendingEntries.reduce((sum, e) => sum + e.size, 0)
 
   if (loading) {
     return (
-      <Card className="p-6">
+      <Card className="p-6" role="status" aria-label="Scanning cache">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-glass rounded w-48" />
           <div className="h-40 bg-glass rounded" />
@@ -114,29 +124,58 @@ export default function CacheCleaner() {
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Cache Cleaner</h1>
-        <Button onClick={scan} className="text-sm bg-glass hover:bg-glass">⟳ Rescan</Button>
+        <Button onClick={scan} aria-label="Rescan cache" className="text-sm bg-glass hover:bg-glass">
+          <span aria-hidden="true">⟳</span> Rescan
+        </Button>
       </div>
 
       {freed > 0 && (
-        <div className="mb-4 p-3 rounded-lg bg-success/20 border border-success/30 text-success">
-          ✓ Freed {formatBytes(freed)}
+        <div role="status" className="mb-4 p-3 rounded-lg bg-success/20 border border-success/30 text-success">
+          <span aria-hidden="true">✓</span> Freed {formatBytes(freed)}
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-sm text-muted">
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <div className="text-sm text-muted" aria-live="polite">
           {entries.length} entries · {formatBytes(totalSize)} total · {selected.size} selected
         </div>
         <div className="flex gap-2">
-          <Button onClick={selectAll} className="text-xs bg-glass">Select All</Button>
-          <Button onClick={clearSelected} className="text-xs bg-warn hover:bg-warn" >
+          <Button onClick={selectAll} disabled={entries.length === 0} className="text-xs bg-glass">Select All</Button>
+          <Button
+            onClick={() => setPending('selected')}
+            disabled={selected.size === 0}
+            className="text-xs bg-warn hover:bg-warn"
+          >
             Clear Selected
           </Button>
-          <Button onClick={clearAll} className="text-xs bg-danger hover:bg-danger">
+          <Button
+            onClick={() => setPending('all')}
+            disabled={entries.length === 0}
+            className="text-xs bg-danger hover:bg-danger"
+          >
             Clear All
           </Button>
         </div>
       </div>
+
+      {pending && (
+        <div
+          role="alertdialog"
+          aria-label="Confirm cache deletion"
+          className="mb-4 p-4 rounded-lg bg-danger/15 border border-danger/40"
+        >
+          <p className="text-sm text-fg mb-3">
+            Delete {pendingEntries.length} {pendingEntries.length === 1 ? 'entry' : 'entries'}
+            {' '}({formatBytes(pendingBytes)})? This clears saved app data and can't be undone.
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={() => setPending(null)} className="text-xs bg-glass">Cancel</Button>
+            <Button onClick={confirmClear} className="text-xs bg-danger hover:bg-danger">
+              Delete forever
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-1 max-h-[60vh] overflow-y-auto pr-1">
         {entries.length === 0 ? (
