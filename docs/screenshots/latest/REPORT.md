@@ -1,28 +1,22 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-11T23:07:56.811Z
+**Generated:** 2026-07-12T03:08:47.924Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
 
 ---
 
-## ✅ QA SUMMARY (2026-07-11, green main `487f3ce`) — EPIC-14 S5 acceptance CONFIRMED, clean run, no drift
+## ✅ Summary — EPIC-14 S6 acceptance CONFIRMED (first QA since S6 shipped)
 
-**No runtime bug.** First QA since EPIC-14 S5 shipped (`dff0a2b` artifacts-family migration; then `487f3ce` academy no-op — neither since touches product render paths). On a fresh cloud checkout of `main`: build 🟢 (`tsc -b && vite build`, 91 precache entries), **32/32 routes render clean** (desktop + all 31 registry apps, 0 uncaught / 0 error boundaries / 0 console errors on every route), all **13 guard suites green**, `--assert-zero` **exit 0**.
+**No runtime bug. No drift.** This is the first independent QA since EPIC-14 S6 shipped (`6d70a57` — media + language migrated onto the `ui` shell). `metrics.mjs` reproduces the active-epic target **EXACTLY**:
 
-**★ Active-epic target `offShellControls` reproduces the S5 ship EXACTLY: `238 (b193/i29/s4/t12)`, Δ ±0** vs the committed snapshot → **EPIC-14 S5 acceptance CONFIRMED (artifacts family 284 → 238, −46).** All five counted artifacts files (FormBuilder 16, Flashcards 9, Kanban 8, ChartBuilder 8, MarkdownStudio 5) are OFF the offenders list. Top offenders now heaviest-first: **Calculator 14, DataCenter 14, AIChat 13, Maps 12, Goals 10, Editor 9, PromptGenerator 9, Music 9** (▶ S6 = media + language: Video 8 + Language 7 + Music 6 + Browser 6). ColorPalette correctly stays un-migrated (DS_INFRA audit-exempt — its swatches are the content).
+- **`offShellControls = 204 (b167/i24/s2/t11)`, Δ ±0** vs the committed snapshot → **EPIC-14 S6 acceptance (media + language 238 → 204, −34) CONFIRMED.** All four counted files (Music/Video/Browser/Language) are off the offenders list. Top offenders now heaviest-first: **Calculator 14, DataCenter 14, AIChat 13, Maps 12, Goals 10, Editor 9, PromptGenerator 9, AgentSurface 8** (▶ S7 = utility apps: DataCenter + Maps + Files + Weather + Grammar, 204 → 162).
+- **`--assert-zero` exit 0** — the three gated axes hold at 0: `tokenViolations 0`, `offSystemUtilities 0`, `offSystemStyle 0 (r0/t0/m0)`.
+- **Auto-metrics, all Δ ±0:** apps/routes **31**, test cases **444**, test files **61**, bundle gz **730.8 KB**.
 
-**Guards:** INBOUND-LANDS 4/4, MEDIA-PERSISTS 3/3 (music/video/photos), GRAPH-LEGIBLE 3/3 (reader/book + crypto/wallet + mail/draft), GLOBAL-SEARCH 1/1 (tagOnly ✅), NODE-LINEAGE 1/1 (5 axes), INTENT-ROUNDTRIP 2/2, TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3 + PROVENANCE-ENTITY 3/3, PRECACHE 91 no-gap, OFFLINE-BOOT 5/5.
+**Render/guard result:** 32/32 routes render clean (desktop + all 31 registry apps; 0 uncaught JS, 0 error boundaries, 0 console errors). All 13 guard suites green: INBOUND-LANDS 4/4, **MEDIA-PERSISTS 3/3 (music/video/photos — media path intact through the S6 migration)**, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1 (6 axes), HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, PRECACHE 91 no-gap, OFFLINE-BOOT 5/5.
 
-**Design-system ratchet HOLDS:** tokenViolations 0, offSystemUtilities 0, offSystemStyle 0 (r0/t0/m0), all Δ ±0. Auto-metrics all Δ ±0 vs committed snapshot: **apps 31, test cases 436, test files 60, bundle gz 731**.
-
-**Visually inspected (headless, 0 console errors on each):** `desktop.png` (Bridge "Good night" + 4 live stat cards + full launcher grid Cakra→Crypto), `artifacts.png` (the Imperial-Suite gallery renders all 6 tiles — Form Builder / Chart Builder / Kanban / Flashcards / Markdown Studio / Color Palette — no error boundary), and the three S5 migrations drilled into: `formbuilder.png` (Untitled-Form title Input, Preview + teal-primary Export Buttons, left-accented field-type palette rows with `+`, per-field Inputs, up/down chevron + trash IconButtons), `chartbuilder.png` (**Segmented bar/line/pie** toggle — bar selected — + Randomize/SVG Buttons + title/label/value Inputs + `+` IconButton, live bar chart), `markdownstudio.png` (**Segmented edit/split/preview** toggle — Split selected — + Reset/Copy Buttons + ember-gradient Download-.md Button + borderless transparent TextArea editor with live preview). All shelled controls render exactly as the S5 mapping specifies.
-
-**Env-expected noise only (not render failures):** maps CARTO tiles (`ERR_TUNNEL_CONNECTION_FAILED` ×8), weather geocode + geolocation-policy, files `/api/files` 401, mail `/api/integrations/status` 401 — all handled gracefully, no boundary.
-
-**▶ NEXT = EPIC-14 S6** (media + language: Video 8 + Language 7 + Music 6 + Browser 6 → 0; ≈238 → ≈211; keep `MEDIA-PERSISTS music/video` ✅). Full S6 spec in EPICS.md → EPIC-14 S6.
-
----
+**Visually inspected (local PNGs, never committed):** `desktop.png` (Bridge "Good night" + 4 stat cards + full Cakra→Crypto launcher), `app-music.png` (shelled "+ Add Files" Button, "No track playing" empty state), `app-language.png` (S6 shelled — two `Select` language fields English/Spanish, teal ⇄ swap IconButton, borderless transparent TextArea "Type text to translate…", quick-phrase greeting Buttons, "Ask Cakra" ghost Button), `app-browser.png` (S6 shelled — Segmented Browse/Bookmarks/History tabs, Input URL bar with search icon, teal "Go" primary Button, askCakra IconButton). Env noise only (maps CARTO tiles ERR_TUNNEL, weather geocode/geolocation, files/mail 401 — all graceful, no error boundary).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -46,7 +40,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
