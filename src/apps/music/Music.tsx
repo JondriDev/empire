@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Card, Button } from '../../components/ui'
+import { Card, Button, IconButton, Slider } from '../../components/ui'
 import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 import {
@@ -256,10 +256,10 @@ export default function Music() {
     }
   }
 
-  const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const seek = (value: number) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = parseFloat(e.target.value)
-      setCurrentTime(parseFloat(e.target.value))
+      audioRef.current.currentTime = value
+      setCurrentTime(value)
     }
   }
 
@@ -309,15 +309,13 @@ export default function Music() {
 
             {/* Progress */}
             <div className="mt-3">
-              <input
-                type="range"
+              <Slider
                 min={0}
                 max={duration || 100}
                 value={currentTime}
                 onChange={seek}
                 aria-label="Seek"
                 aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
-                className="w-full h-1 accent-signal cursor-pointer"
               />
               <div className="flex justify-between text-xs text-faint mt-1">
                 <span>{formatTime(currentTime)}</span>
@@ -326,38 +324,51 @@ export default function Music() {
             </div>
 
             {/* Controls */}
-            <div className="flex items-center justify-center gap-4 mt-3">
-              <button onClick={() => setShuffle(s => !s)} aria-label="Shuffle" aria-pressed={shuffle} className={`p-2 rounded-full transition ${shuffle ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
-                <Shuffle className="w-4 h-4" aria-hidden="true" />
-              </button>
-              <button onClick={prevTrack} aria-label="Previous track" className="p-2 text-muted hover:text-fg transition">
-                <SkipBack className="w-5 h-5" aria-hidden="true" />
-              </button>
-              <button onClick={playPause} aria-label={playing ? 'Pause' : 'Play'} className="p-4 bg-glass text-void rounded-full hover:bg-glass transition shadow-lg">
-                {playing ? <Pause className="w-6 h-6" aria-hidden="true" /> : <Play className="w-6 h-6 ml-0.5" aria-hidden="true" />}
-              </button>
-              <button onClick={nextTrack} aria-label="Next track" className="p-2 text-muted hover:text-fg transition">
-                <SkipForward className="w-5 h-5" aria-hidden="true" />
-              </button>
-              <button onClick={() => setRepeat(r => r === 'none' ? 'all' : r === 'all' ? 'one' : 'none')} aria-label={`Repeat: ${repeat === 'none' ? 'off' : repeat}`} aria-pressed={repeat !== 'none'} className={`p-2 rounded-full transition ${repeat !== 'none' ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
-                <Repeat className={`w-4 h-4 ${repeat === 'one' ? 'text-xs' : ''}`} aria-hidden="true" />
-              </button>
+            <div className="flex items-center justify-center gap-3 mt-3">
+              <IconButton
+                onClick={() => setShuffle(s => !s)}
+                aria-label="Shuffle"
+                aria-pressed={shuffle}
+                icon={<Shuffle className="w-4 h-4" />}
+                style={shuffle ? { color: 'var(--signal)' } : undefined}
+              />
+              <IconButton onClick={prevTrack} aria-label="Previous track" icon={<SkipBack className="w-5 h-5" />} />
+              <IconButton
+                onClick={playPause}
+                aria-label={playing ? 'Pause' : 'Play'}
+                variant="primary"
+                size="lg"
+                icon={playing ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+                style={{ borderRadius: 'var(--radius-full)' }}
+              />
+              <IconButton onClick={nextTrack} aria-label="Next track" icon={<SkipForward className="w-5 h-5" />} />
+              <IconButton
+                onClick={() => setRepeat(r => r === 'none' ? 'all' : r === 'all' ? 'one' : 'none')}
+                aria-label={`Repeat: ${repeat === 'none' ? 'off' : repeat}`}
+                aria-pressed={repeat !== 'none'}
+                icon={<Repeat className="w-4 h-4" />}
+                style={repeat !== 'none' ? { color: 'var(--signal)' } : undefined}
+              />
             </div>
 
             {/* Volume */}
             <div className="flex items-center gap-2 mt-3">
-              <button onClick={() => setMuted(m => !m)} aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'} aria-pressed={muted} className="text-faint hover:text-fg">
-                {muted || volume === 0 ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume2 className="w-4 h-4" aria-hidden="true" />}
-              </button>
-              <input
-                type="range"
+              <IconButton
+                onClick={() => setMuted(m => !m)}
+                aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
+                aria-pressed={muted}
+                size="sm"
+                icon={muted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                style={muted ? { color: 'var(--signal)' } : undefined}
+              />
+              <Slider
+                className="flex-1"
                 min={0}
                 max={1}
                 step={0.01}
                 value={muted ? 0 : volume}
-                onChange={e => { setVolume(parseFloat(e.target.value)); setMuted(false) }}
+                onChange={value => { setVolume(value); setMuted(false) }}
                 aria-label="Volume"
-                className="flex-1 h-1 accent-signal cursor-pointer"
               />
             </div>
           </div>
@@ -425,13 +436,13 @@ export default function Music() {
                   <span className="text-[10px] text-warn/70 px-1.5 py-0.5 rounded bg-warn/10" title="Too large to save — won't survive a reload">session</span>
                 )}
                 <span className="text-xs text-faint">{track.duration ? formatTime(track.duration) : '—'}</span>
-                <button
+                <IconButton
                   onClick={e => { e.stopPropagation(); removeTrack(track.id) }}
                   aria-label={`Remove ${track.title}`}
-                  className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100 text-faint hover:text-danger transition p-1"
-                >
-                  <X className="w-3 h-3" aria-hidden="true" />
-                </button>
+                  size="sm"
+                  className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
+                  icon={<X className="w-3 h-3" />}
+                />
               </div>
             ))}
           </div>

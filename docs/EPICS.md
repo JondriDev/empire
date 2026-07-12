@@ -239,7 +239,7 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
 > `node scripts/metrics.mjs` before starting (counts shift as siblings migrate; the FILE LIST per stage is the contract, the
 > numbers are the current census).
 
-- [ ] **S6 · Migrate media + language (34 → 0).** The four media/language instruments, all with real transport/format controls.
+- [x] **S6 · Migrate media + language (34 → 0).** ✅ **SHIPPED 2026-07-12 (green main).** `offShellControls 238 → 204 (−34)`; Music/Video/Browser/Language all 0. Added a NEW `Slider` `ui` primitive (the shell home for range controls — spec said "→ `Input`" but `Input` is a text field that can't host/style a range; `Slider` also unblocks the S8 Goals + S10 Settings ranges). Transport → `IconButton` (a11y names + `aria-pressed` preserved; active = accent-as-light `color:var(--signal)`), Browser tabs → `Segmented`, selects → `Select`, textareas → `TextArea`. build🟢 vitest 508→516🟢 eslint clean; `--assert-zero` exit 0; qa-smoke 32/32 clean + `MEDIA-PERSISTS music/video 3/3 ✅`. The four media/language instruments, all with real transport/format controls.
   `src/apps/music/Music.tsx` (**9** `b7/i2`; icon transport play/pause/prev/next/shuffle/repeat → `IconButton` — **PRESERVE the
   accessible names the 2026-07-10 music a11y polish added**; seek/volume `<input>` → `Input`), `src/apps/video/Video.tsx`
   (**9** `b7/i2`; same transport idiom → `IconButton`; sliders → `Input`), `src/apps/browser/Browser.tsx` (**8** `b7/i1`;

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { IconButton, Select, Segmented } from './index'
+import { IconButton, Select, Segmented, Slider } from './index'
 
 describe('IconButton', () => {
   it('renders as a button carrying the required aria-label', () => {
@@ -40,6 +40,22 @@ describe('Select', () => {
     render(<Select value="a" onChange={fn} options={opts} ariaLabel="Pick" />)
     fireEvent.change(screen.getByRole('combobox', { name: 'Pick' }), { target: { value: 'b' } })
     expect(fn).toHaveBeenCalledWith('b')
+  })
+})
+
+describe('Slider', () => {
+  it('renders a range slider carrying the required aria-label', () => {
+    render(<Slider value={5} min={0} max={10} onChange={() => {}} aria-label="Seek" />)
+    const el = screen.getByRole('slider', { name: 'Seek' }) as HTMLInputElement
+    expect(el.getAttribute('type')).toBe('range')
+    expect(el.value).toBe('5')
+  })
+
+  it('emits a numeric value (not a string) on change', () => {
+    const fn = vi.fn()
+    render(<Slider value={0} min={0} max={1} step={0.1} onChange={fn} aria-label="Volume" />)
+    fireEvent.change(screen.getByRole('slider', { name: 'Volume' }), { target: { value: '0.4' } })
+    expect(fn).toHaveBeenCalledWith(0.4)
   })
 })
 

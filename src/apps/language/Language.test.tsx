@@ -40,6 +40,16 @@ describe('Language Lab — a11y + honest states', () => {
     expect(screen.getByLabelText('Text to translate')).toBeTruthy()
   })
 
+  it('routes the selectors through the ui Select (comboboxes) with the Auto-Detect option preserved', () => {
+    renderLanguage()
+    const from = screen.getByRole('combobox', { name: 'Translate from' }) as HTMLSelectElement
+    const to = screen.getByRole('combobox', { name: 'Translate to' }) as HTMLSelectElement
+    // The "from" select carries the extra 🌐 Auto Detect option; "to" does not.
+    expect(screen.getByRole('option', { name: /Auto Detect/ })).toBeTruthy()
+    expect(from.value).toBe('en')
+    expect(to.value).toBe('es')
+  })
+
   it('exposes the Phrases toggle state via aria-pressed and flips it on click', () => {
     renderLanguage()
     const toggle = screen.getByRole('button', { name: /phrases/i })

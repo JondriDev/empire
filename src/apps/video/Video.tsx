@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Card, Button } from '../../components/ui'
+import { Card, Button, IconButton, Slider } from '../../components/ui'
 import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 import {
@@ -152,10 +152,10 @@ export default function Video() {
     }
   }
 
-  const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const seek = (value: number) => {
     if (videoRef.current) {
-      videoRef.current.currentTime = parseFloat(e.target.value)
-      setCurrentTime(parseFloat(e.target.value))
+      videoRef.current.currentTime = value
+      setCurrentTime(value)
     }
   }
 
@@ -235,50 +235,62 @@ export default function Video() {
               />
               {/* Video Controls */}
               <div className="p-3 space-y-2">
-                <input
-                  type="range"
+                <Slider
                   min={0}
                   max={duration || 100}
                   value={currentTime}
                   onChange={seek}
-                  className="w-full h-1 accent-signal cursor-pointer"
                   aria-label="Seek"
                   aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
                 />
                 <div className="flex items-center gap-3 flex-wrap">
-                  <button onClick={togglePlay} className="p-2 bg-glass text-void rounded-full hover:bg-glass" aria-label={playing ? 'Pause' : 'Play'}>
-                    {playing ? <Pause className="w-5 h-5" aria-hidden="true" /> : <Play className="w-5 h-5" aria-hidden="true" />}
-                  </button>
-                  <button onClick={() => skip(-10)} className="p-1.5 text-muted hover:text-fg" aria-label="Back 10 seconds">
-                    <SkipBack className="w-4 h-4" aria-hidden="true" /> <span className="text-xs ml-0.5" aria-hidden="true">10</span>
-                  </button>
-                  <button onClick={() => skip(10)} className="p-1.5 text-muted hover:text-fg" aria-label="Forward 10 seconds">
-                    <SkipForward className="w-4 h-4" aria-hidden="true" /> <span className="text-xs ml-0.5" aria-hidden="true">10</span>
-                  </button>
+                  <IconButton
+                    onClick={togglePlay}
+                    variant="primary"
+                    aria-label={playing ? 'Pause' : 'Play'}
+                    icon={playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                    style={{ borderRadius: 'var(--radius-full)' }}
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => skip(-10)} aria-label="Back 10 seconds" icon={<SkipBack className="w-4 h-4" />}>
+                    <span aria-hidden="true">10</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => skip(10)} aria-label="Forward 10 seconds" icon={<SkipForward className="w-4 h-4" />}>
+                    <span aria-hidden="true">10</span>
+                  </Button>
                   <div className="flex items-center gap-1 flex-1">
-                    <button onClick={() => setMuted(m => !m)} className="p-1 text-muted hover:text-fg" aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'} aria-pressed={muted}>
-                      {muted || volume === 0 ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume1 className="w-4 h-4" aria-hidden="true" />}
-                    </button>
-                    <input
-                      type="range"
+                    <IconButton
+                      onClick={() => setMuted(m => !m)}
+                      size="sm"
+                      aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
+                      aria-pressed={muted}
+                      icon={muted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume1 className="w-4 h-4" />}
+                      style={muted ? { color: 'var(--signal)' } : undefined}
+                    />
+                    <Slider
                       min={0} max={1} step={0.05}
                       value={muted ? 0 : volume}
-                      onChange={e => { setVolume(parseFloat(e.target.value)); setMuted(false) }}
-                      className="w-20 h-1 accent-signal cursor-pointer"
+                      onChange={value => { setVolume(value); setMuted(false) }}
                       aria-label="Volume"
+                      style={{ width: '96px' }}
                     />
                   </div>
                   <span className="text-xs text-muted">{formatTime(currentTime)} / {formatTime(duration)}</span>
                   <div className="flex items-center gap-1" role="group" aria-label="Playback speed">
                     {([0.5, 1, 1.5, 2] as const).map(rate => (
-                      <button key={rate} onClick={() => changeRate(rate)} aria-label={`Playback speed ${rate}×`} aria-pressed={playbackRate === rate} className={`text-xs px-1.5 py-0.5 rounded ${playbackRate === rate ? 'bg-signal text-fg' : 'text-faint hover:text-fg'}`}>
+                      <Button
+                        key={rate}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => changeRate(rate)}
+                        aria-label={`Playback speed ${rate}×`}
+                        aria-pressed={playbackRate === rate}
+                        style={playbackRate === rate ? { color: 'var(--signal)' } : undefined}
+                      >
                         {rate}×
-                      </button>
+                      </Button>
                     ))}
                   </div>
-                  <button onClick={toggleFullscreen} className="p-1.5 text-muted hover:text-fg" aria-label="Fullscreen">
-                    <Maximize className="w-4 h-4" aria-hidden="true" />
-                  </button>
+                  <IconButton onClick={toggleFullscreen} size="sm" aria-label="Fullscreen" icon={<Maximize className="w-4 h-4" />} />
                 </div>
                 <p className="text-sm text-fg truncate" role="status" aria-live="polite">{current.title}</p>
               </div>
@@ -315,9 +327,13 @@ export default function Video() {
                     {video.duration > 0 && <p className="text-xs text-faint">{formatTime(video.duration)}</p>}
                     {video.ephemeral && <p className="text-[10px] text-warn/70" title="Too large to save — won't survive a reload">session-only</p>}
                   </div>
-                  <button onClick={e => { e.stopPropagation(); removeVideo(video.id) }} aria-label={`Remove ${video.title}`} className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100 text-faint hover:text-danger p-1">
-                    <X className="w-3 h-3" aria-hidden="true" />
-                  </button>
+                  <IconButton
+                    onClick={e => { e.stopPropagation(); removeVideo(video.id) }}
+                    aria-label={`Remove ${video.title}`}
+                    size="sm"
+                    className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
+                    icon={<X className="w-3 h-3" />}
+                  />
                 </div>
               ))}
             </div>

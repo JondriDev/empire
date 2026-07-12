@@ -247,6 +247,46 @@ export function TextArea({ value, onChange, placeholder, className = '', mono, .
   )
 }
 
+/* ── SLIDER ── the `ui` home for a range control (seek bars, volume, numeric
+   ranges). App code should never render a bare `<input type="range">`: the
+   thumb/track accent is tokenised to `signal` (accent as LIGHT), and — like
+   `IconButton` — the TS type REQUIRES `aria-label`, so a slider can never ship
+   unnamed to assistive tech. Native keyboard + a11y (arrow keys, Home/End,
+   implicit role="slider") come free from the element it wraps. */
+interface SliderProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'type'> {
+  value: number
+  onChange: (value: number) => void
+  min?: number
+  max?: number
+  step?: number
+  'aria-label': string
+  className?: string
+}
+
+export function Slider({ value, onChange, min = 0, max = 100, step, className = '', style, ...rest }: SliderProps) {
+  return (
+    <input
+      {...rest}
+      type="range"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={e => onChange(parseFloat(e.target.value))}
+      className={`empire-slider ${className}`}
+      style={{
+        width: '100%',
+        height: '4px',
+        accentColor: cssVar('signal'),
+        background: 'transparent',
+        cursor: 'pointer',
+        // Per-instance overrides (e.g. a fixed volume-slider width) compose last.
+        ...style,
+      }}
+    />
+  )
+}
+
 /* ── ICON BUTTON ── icon-only button; the TS type REQUIRES `aria-label` so an
    icon-only control can never ship unlabelled (folds a11y into the primitive). */
 interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type'> {

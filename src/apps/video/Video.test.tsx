@@ -55,6 +55,12 @@ describe('Video player — a11y', () => {
     expect(screen.getByLabelText('Volume')).toBeTruthy()
   })
 
+  it('renders seek + volume as ui Slider range controls (role=slider)', async () => {
+    await renderPlaying()
+    expect(screen.getByRole('slider', { name: 'Seek' }).getAttribute('type')).toBe('range')
+    expect(screen.getByRole('slider', { name: 'Volume' }).getAttribute('type')).toBe('range')
+  })
+
   it('exposes the mute control state via aria-pressed and flips its label', async () => {
     await renderPlaying()
     const mute = screen.getByRole('button', { name: 'Mute' })

@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Globe, Bookmark, History, Bot, ExternalLink, Trash2, Star, Search } from 'lucide-react'
+import { Button, IconButton, Input, Segmented } from '../../components/ui'
 import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 
@@ -90,51 +91,46 @@ export default function Browser() {
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Globe className="w-6 h-6 text-signal" /> Browser
         </h1>
-        <div className="flex gap-1 bg-glass rounded-xl p-1">
-          {(['browse', 'bookmarks', 'history'] as const).map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
-              className={`text-xs px-3 py-1.5 rounded-lg capitalize transition-colors ${
-                activeTab === tab ? 'bg-signal text-fg' : 'text-muted hover:text-fg'
-              }`}>
-              {tab === 'browse' && <Globe className="w-3 h-3 inline mr-1" />}
-              {tab === 'bookmarks' && <Bookmark className="w-3 h-3 inline mr-1" />}
-              {tab === 'history' && <History className="w-3 h-3 inline mr-1" />}
-              {tab}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          value={activeTab}
+          onChange={v => setActiveTab(v as 'browse' | 'bookmarks' | 'history')}
+          ariaLabel="Browser section"
+          items={[
+            { value: 'browse', label: 'Browse', icon: <Globe className="w-3 h-3" /> },
+            { value: 'bookmarks', label: 'Bookmarks', icon: <Bookmark className="w-3 h-3" /> },
+            { value: 'history', label: 'History', icon: <History className="w-3 h-3" /> },
+          ]}
+        />
       </div>
 
       {/* URL bar */}
-      <div className="flex gap-2">
-        <div className="flex-1 flex items-center gap-2 rounded-2xl border border-hair px-4 py-2" style={{ background: 'var(--card-bg)' }}>
-          <Search className="w-4 h-4 text-faint flex-shrink-0" />
-          <input
-            type="text"
-            value={url}
-            onChange={e => setUrl(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') navigate(url) }}
-            placeholder="Enter URL or search..."
-            className="flex-1 bg-transparent text-sm focus:outline-none"
-            style={{ color: 'var(--text)' }}
+      <div className="flex gap-2 items-center">
+        <Input
+          className="flex-1"
+          value={url}
+          onChange={setUrl}
+          onKeyDown={e => { if (e.key === 'Enter') navigate(url) }}
+          placeholder="Enter URL or search..."
+          aria-label="URL or search query"
+          icon={<Search className="w-4 h-4" />}
+        />
+        {url && (
+          <IconButton
+            onClick={addBookmark}
+            aria-label="Bookmark this URL"
+            icon={<Star className="w-4 h-4" />}
+            style={{ color: 'var(--c-warn)' }}
           />
-          {url && (
-            <button onClick={addBookmark}
-              className="p-1 rounded hover:bg-warn/20 text-faint hover:text-warn transition-colors"
-              title="Bookmark this URL">
-              <Star className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-        <button onClick={() => navigate(url)}
-          disabled={!url.trim()}
-          className="px-4 py-2 rounded-xl bg-signal hover:bg-signal disabled:opacity-30 text-fg text-sm transition-colors flex items-center gap-1">
-          <ExternalLink className="w-4 h-4" /> Go
-        </button>
-        <button onClick={askCakra}
-          className="p-2 rounded-xl hover:bg-signal/20 text-signal transition-colors" title="Ask Cakra about this URL">
-          <Bot className="w-5 h-5" />
-        </button>
+        )}
+        <Button variant="primary" onClick={() => navigate(url)} disabled={!url.trim()} icon={<ExternalLink className="w-4 h-4" />}>
+          Go
+        </Button>
+        <IconButton
+          onClick={askCakra}
+          aria-label="Ask Cakra about this URL"
+          icon={<Bot className="w-5 h-5" />}
+          style={{ color: 'var(--signal)' }}
+        />
       </div>
 
       {/* Content */}
@@ -146,11 +142,11 @@ export default function Browser() {
                 <ExternalLink className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">External link ready to open</p>
                 <p className="text-xs text-faint mt-1 font-mono">{url}</p>
-                <button
-                  onClick={() => window.open(url, '_blank')}
-                  className="mt-3 px-4 py-2 rounded-xl bg-signal hover:bg-signal text-fg text-sm inline-flex items-center gap-1 transition-colors">
-                  <ExternalLink className="w-4 h-4" /> Open in Browser
-                </button>
+                <div className="mt-3 inline-flex">
+                  <Button variant="primary" onClick={() => window.open(url, '_blank')} icon={<ExternalLink className="w-4 h-4" />}>
+                    Open in Browser
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="text-center">
@@ -188,10 +184,14 @@ export default function Browser() {
                     <div className="text-sm font-medium truncate">{b.name}</div>
                     <div className="text-xs text-faint truncate">{b.url}</div>
                   </div>
-                  <button onClick={e => { e.stopPropagation(); removeBookmark(b.url) }}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-danger/20 rounded transition-all">
-                    <Trash2 className="w-3 h-3 text-danger" />
-                  </button>
+                  <IconButton
+                    onClick={e => { e.stopPropagation(); removeBookmark(b.url) }}
+                    aria-label={`Remove bookmark ${b.name}`}
+                    size="sm"
+                    className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
+                    icon={<Trash2 className="w-3 h-3" />}
+                    style={{ color: 'var(--c-danger)' }}
+                  />
                 </div>
               ))}
             </div>
@@ -206,9 +206,9 @@ export default function Browser() {
               <History className="w-4 h-4" /> {history.length} entries
             </h3>
             {history.length > 0 && (
-              <button onClick={clearHistory} className="text-xs text-danger hover:text-danger flex items-center gap-1">
-                <Trash2 className="w-3 h-3" /> Clear All
-              </button>
+              <Button variant="ghost" size="sm" onClick={clearHistory} icon={<Trash2 className="w-3 h-3" />} style={{ color: 'var(--c-danger)' }}>
+                Clear All
+              </Button>
             )}
           </div>
           {history.length === 0 ? (

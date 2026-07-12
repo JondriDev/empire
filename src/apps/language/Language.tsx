@@ -5,8 +5,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Languages, Copy, Check, BookOpen, ArrowRightLeft, Globe, Bot, Loader2 } from 'lucide-react'
-import { Button } from '../../components/ui'
+import { Languages, Copy, Check, BookOpen, ArrowRightLeft, Globe, Bot, Loader2, X } from 'lucide-react'
+import { Button, IconButton, Select, TextArea } from '../../components/ui'
 import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 import { chat } from '../../lib/ai'
@@ -191,26 +191,26 @@ export default function Language() {
 
       {/* Language selector */}
       <div className="flex items-center gap-2">
-        <select value={fromLang} onChange={e => setFromLang(e.target.value)}
-          aria-label="Translate from"
-          className="flex-1 bg-glass border-0 rounded-xl px-3 py-2.5 text-sm text-fg">
-          <option value="auto" className="bg-faint">🌐 Auto Detect</option>
-          {LANGUAGES.map(l => (
-            <option key={l.code} value={l.code} className="bg-faint">{l.name}</option>
-          ))}
-        </select>
-        <button onClick={swapLanguages}
+        <Select
+          className="flex-1"
+          value={fromLang}
+          onChange={setFromLang}
+          ariaLabel="Translate from"
+          options={[{ value: 'auto', label: '🌐 Auto Detect' }, ...LANGUAGES.map(l => ({ value: l.code, label: l.name }))]}
+        />
+        <IconButton
+          onClick={swapLanguages}
           aria-label="Swap languages"
-          className="p-2.5 rounded-xl hover:bg-glass text-signal transition-colors">
-          <ArrowRightLeft className="w-5 h-5" aria-hidden="true" />
-        </button>
-        <select value={toLang} onChange={e => setToLang(e.target.value)}
-          aria-label="Translate to"
-          className="flex-1 bg-glass border-0 rounded-xl px-3 py-2.5 text-sm text-fg">
-          {LANGUAGES.map(l => (
-            <option key={l.code} value={l.code} className="bg-faint">{l.name}</option>
-          ))}
-        </select>
+          icon={<ArrowRightLeft className="w-5 h-5" />}
+          style={{ color: 'var(--signal)' }}
+        />
+        <Select
+          className="flex-1"
+          value={toLang}
+          onChange={setToLang}
+          ariaLabel="Translate to"
+          options={LANGUAGES.map(l => ({ value: l.code, label: l.name }))}
+        />
       </div>
 
       {detectedLang && fromLang === 'auto' && (
@@ -222,10 +222,10 @@ export default function Language() {
       {/* Quick phrases */}
       <div className="flex gap-1 flex-wrap">
         {Object.entries(GREETINGS).slice(0, 6).map(([code, greeting]) => (
-          <button key={code} onClick={() => { setInput(greeting); setToLang(code); if (code !== 'en') setFromLang('en') }}
-            className="text-xs px-2 py-1 rounded-lg bg-glass hover:bg-glass text-muted transition-colors">
+          <Button key={code} variant="ghost" size="sm"
+            onClick={() => { setInput(greeting); setToLang(code); if (code !== 'en') setFromLang('en') }}>
             {LANGUAGES.find(l => l.code === code)?.name}: {greeting}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -236,13 +236,12 @@ export default function Language() {
             {LANGUAGES.find(l => l.code === (fromLang === 'auto' ? detectedLang || 'en' : fromLang))?.name}
           </span>
         </div>
-        <textarea
+        <TextArea
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={setInput}
           placeholder="Type text to translate..."
           aria-label="Text to translate"
-          className="w-full bg-transparent px-4 py-3 text-sm min-h-[120px] resize-y focus:outline-none"
-          style={{ color: 'var(--text)' }}
+          style={{ background: 'transparent', border: 'none', resize: 'vertical', minHeight: '120px', padding: '12px 16px' }}
         />
       </div>
 
@@ -263,16 +262,20 @@ export default function Language() {
           <div className="flex items-center justify-between px-4 py-2 border-b border-hair">
             <span className="text-xs text-faint">{LANGUAGES.find(l => l.code === toLang)?.name}</span>
             <div className="flex gap-1">
-              <button onClick={copyTranslation}
+              <IconButton
+                onClick={copyTranslation}
                 aria-label={copied ? 'Copied' : 'Copy translation'}
-                className="p-1 rounded hover:bg-glass text-muted transition-colors">
-                {copied ? <Check className="w-3.5 h-3.5 text-success" aria-hidden="true" /> : <Copy className="w-3.5 h-3.5" aria-hidden="true" />}
-              </button>
-              <button onClick={saveToPhraseBook}
+                size="sm"
+                icon={copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                style={copied ? { color: 'var(--c-success)' } : undefined}
+              />
+              <IconButton
+                onClick={saveToPhraseBook}
                 aria-label="Save to phrase book"
-                className="p-1 rounded hover:bg-warn/20 text-warn transition-colors" title="Save to phrase book">
-                <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
-              </button>
+                size="sm"
+                icon={<BookOpen className="w-3.5 h-3.5" />}
+                style={{ color: 'var(--c-warn)' }}
+              />
             </div>
           </div>
           <div className="p-4 text-sm whitespace-pre-wrap" aria-live="polite" style={{ color: 'var(--text)' }}>
@@ -304,9 +307,12 @@ export default function Language() {
                       <p className="text-sm mt-1">{p.original}</p>
                       <p className="text-sm text-success mt-0.5">{p.translated}</p>
                     </div>
-                    <button onClick={() => deletePhrase(p.id)}
+                    <IconButton
+                      onClick={() => deletePhrase(p.id)}
                       aria-label="Delete saved phrase"
-                      className="text-faint hover:text-danger text-xs p-1"><span aria-hidden="true">✕</span></button>
+                      size="sm"
+                      icon={<X className="w-3.5 h-3.5" />}
+                    />
                   </div>
                 </div>
               ))}
