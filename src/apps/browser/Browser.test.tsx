@@ -54,4 +54,26 @@ describe('Browser — shell conformance a11y', () => {
     expect(remove).toBeTruthy()
     expect(remove.className).not.toContain('opacity-0')
   })
+
+  it('exposes bookmark tiles as keyboard-operable buttons and activates them with Enter', () => {
+    renderBrowser()
+    fireEvent.click(screen.getByRole('radio', { name: 'Bookmarks' }))
+    // Each default bookmark tile is a focusable role=button with an accessible name.
+    const tile = screen.getByRole('button', { name: 'Open GitHub' })
+    expect(tile.getAttribute('tabindex')).toBe('0')
+    // Enter navigates: it jumps back to Browse and the URL field carries the target.
+    fireEvent.keyDown(tile, { key: 'Enter' })
+    expect(screen.getByRole('radio', { name: 'Browse' }).getAttribute('aria-checked')).toBe('true')
+    expect((screen.getByLabelText('URL or search query') as HTMLInputElement).value).toBe('https://github.com')
+  })
+
+  it('does not record a history entry when Enter is pressed on an empty URL field', () => {
+    renderBrowser()
+    const field = screen.getByLabelText('URL or search query')
+    fireEvent.keyDown(field, { key: 'Enter' })
+    fireEvent.click(screen.getByRole('radio', { name: 'History' }))
+    // The empty-URL Enter is a no-op (mirrors the disabled Go button) — no junk
+    // "https://" entry, so the honest empty state shows.
+    expect(screen.getByText('No browsing history yet')).toBeTruthy()
+  })
 })

@@ -15,7 +15,7 @@
 
 ---
 
-## ▶ NEXT: `browser`
+## ▶ NEXT: `notes`
 
 (continue down the registry order, wrapping back to the top after The Bridge.)
 
@@ -38,8 +38,8 @@ Newest-visited float to the bottom of the "visited" understanding; unvisited = n
 | video | 2026-07-11 | a11y + touch pass (mirrors Music): accessible names on every icon-only transport control (play/pause, back/forward 10s, mute, fullscreen) + the playlist-toggle + seek/volume sliders; `aria-pressed` on mute + the active playback-speed + the playlist toggle (state was colour-only) + `role="group"` on the speed strip; `aria-valuetext` (human time) on the seek slider; Now Playing title wrapped `role="status" aria-live="polite"`; decorative glyphs `aria-hidden`. **Touch bug fixed:** the per-item remove ✕ was `opacity-0 group-hover:opacity-100` — invisible/unreachable on a phone (no hover); now `opacity-60` base + hover/focus emphasis. +`Video.test.tsx` (5). |
 | files | 2026-07-11 | a11y + touch pass: `aria-label`s on the icon-only refresh/up/home + per-file download/preview + dir-expand controls (`aria-expanded`); `aria-label` on the search box; `aria-pressed` on the quick-path chips (active was colour-only); `<nav aria-label>` + `aria-current="page"` on the breadcrumb; `role="status"` loading + `role="alert"` load-failure; decorative glyphs `aria-hidden`. **Touch bug fixed:** per-file action row was `opacity-0 group-hover:opacity-100` — invisible/unreachable on a phone (no hover); now `opacity-60` base + hover/focus emphasis (mirrors Music/Video). **Honest-state:** Up now truly `disabled` at internal-storage root (visual said disabled, behaviour still navigated up); empty-state copy splits empty-folder vs no-search-match. +`Files.test.tsx` (6). |
 | cache | 2026-07-12 | Destructive-action safety + honest-state + a11y: **Clear All / Clear Selected now arm a confirmation** (`role="alertdialog"` bar naming count + bytes + "can't be undone") — first tap arms, "Delete forever" executes; previously Clear All wiped **every app's localStorage** on a single tap with no gate. Disabled honest-states (Clear Selected off when 0 selected; Select All / Clear All off when 0 entries). **Latent bug fixed:** the "✓ Freed X" success banner never showed — `removeEntries` set `freed` then `scan()` reset it to 0 in the same batched handler; removal now refreshes the list in place and preserves the banner. a11y: `role="status"` on freed banner + loading Card (`aria-label="Scanning cache"`), `aria-label="Rescan cache"` on the ⟳ icon button, `aria-live="polite"` on the count line, decorative ⟳/✓ `aria-hidden`. +`CacheCleaner.test.tsx` (6). |
-| browser | — | ◀ NEXT |
-| notes | — | — |
+| browser | 2026-07-12 | Keyboard-a11y + honest-navigation pass: bookmark tiles & history rows were click-only `<div>`s (no keyboard reach) — now `role="button"` + `tabIndex={0}` + `aria-label` (`Open <name>`/`Open <url>`) + Enter/Space activation (shared `onRowKey` helper) + `focus-visible` ring. **Bug fixed:** the Go button was `disabled` on an empty URL but the Enter-key handler wasn't — pressing Enter in an empty bar recorded a junk `https://` history entry; `navigate` now trims + no-ops on empty. +`Browser.test.tsx` (2 → 5). |
+| notes | — | ◀ NEXT |
 | photos | — | — |
 | datacenter | — | — |
 | maps | — | — |

@@ -3,7 +3,7 @@
  * URL navigation, bookmarks, history, and Cakra integration.
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Globe, Bookmark, History, Bot, ExternalLink, Trash2, Star, Search } from 'lucide-react'
 import { Button, IconButton, Input, Segmented } from '../../components/ui'
@@ -35,7 +35,9 @@ export default function Browser() {
   }, [])
 
   const navigate = (targetUrl: string) => {
-    const normalized = targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`
+    const trimmed = targetUrl.trim()
+    if (!trimmed) return
+    const normalized = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`
     setUrl(normalized)
     const entry = { url: normalized, time: new Date().toISOString(), id: Date.now().toString() }
     const newHistory = [entry, ...history].slice(0, 50)
@@ -72,6 +74,12 @@ export default function Browser() {
       from: 'browser',
     }))
     routerNavigate('/app/ai-chat')
+  }
+
+  // Clickable rows (bookmark tiles, history entries) are plain <div>s for layout,
+  // so mirror native button keyboard activation: Enter/Space fire the same action.
+  const onRowKey = (fn: () => void) => (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn() }
   }
 
   const formatTime = (iso: string) => {
@@ -174,9 +182,14 @@ export default function Browser() {
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {bookmarks.map(b => (
-                <div key={b.url} className="group flex items-center gap-2 p-3 rounded-xl border border-hair hover:border-signal/30 transition-all cursor-pointer"
+                <div key={b.url}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open ${b.name}`}
+                  className="group flex items-center gap-2 p-3 rounded-xl border border-hair hover:border-signal/30 focus-visible:border-signal/30 transition-all cursor-pointer"
                   style={{ background: 'var(--card-bg)' }}
-                  onClick={() => { navigate(b.url); setActiveTab('browse') }}>
+                  onClick={() => { navigate(b.url); setActiveTab('browse') }}
+                  onKeyDown={onRowKey(() => { navigate(b.url); setActiveTab('browse') })}>
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-ion to-ion flex items-center justify-center text-fg text-xs font-bold">
                     {b.name[0]}
                   </div>
@@ -221,8 +234,13 @@ export default function Browser() {
           ) : (
             <div className="space-y-1">
               {history.slice(0, 30).map((h) => (
-              <div key={h.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-glass cursor-pointer"
-                  onClick={() => { navigate(h.url); setActiveTab('browse') }}>
+              <div key={h.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open ${h.url}`}
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-glass focus-visible:bg-glass cursor-pointer"
+                  onClick={() => { navigate(h.url); setActiveTab('browse') }}
+                  onKeyDown={onRowKey(() => { navigate(h.url); setActiveTab('browse') })}>
                   <Globe className="w-3.5 h-3.5 text-faint flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm truncate">{h.url}</div>
