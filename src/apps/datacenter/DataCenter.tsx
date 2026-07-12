@@ -13,6 +13,7 @@ import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { EmptyState } from '../../components/ui/Utility'
+import { Button, IconButton, Input } from '../../components/ui'
 import {
   STORAGE_KEY, type DCStore, type DCTable, type TableRow,
   deserializeStore, serializeStore, newId,
@@ -122,14 +123,17 @@ export default function DataCenter() {
           </p>
         </div>
         <div className="flex-1 overflow-auto">
-          <button
+          <Button
             onClick={askCakra}
             disabled={!table}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm border-b disabled:opacity-40 hover:bg-glass"
-            style={{ borderColor: 'var(--border)', color: ACCENT }}
+            variant="ghost"
+            icon={<Bot className="w-3.5 h-3.5" />}
+            fullWidth
+            className="border-b"
+            style={{ justifyContent: 'flex-start', padding: '10px 16px', borderColor: 'var(--border)', color: ACCENT }}
           >
-            <Bot className="w-3.5 h-3.5" /> Ask Cakra
-          </button>
+            Ask Cakra
+          </Button>
           {tableNames.map(t => {
             const active = activeTable === t
             return (
@@ -138,34 +142,38 @@ export default function DataCenter() {
                 className="group flex items-center border-b hover:bg-glass"
                 style={{ borderColor: 'var(--border)', background: active ? 'color-mix(in srgb, var(--c-mesin) 14%, transparent)' : undefined }}
               >
-                <button
+                <Button
                   onClick={() => setActiveTable(t)}
-                  className="flex-1 px-4 py-2.5 text-left text-sm capitalize transition-colors"
-                  style={{ color: active ? ACCENT : 'var(--text2)' }}
+                  variant="ghost"
+                  className="flex-1 capitalize"
+                  style={{ justifyContent: 'flex-start', padding: '10px 16px', color: active ? ACCENT : 'var(--text2)' }}
                 >
                   {t}
-                </button>
+                </Button>
                 <span className="flex items-center pr-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <NodeActions type="dataset" sourceId={t} />
-                  <button
+                  <IconButton
                     onClick={() => deleteTable(t)}
-                    className="p-1 rounded hover:bg-danger/20 text-danger/50 hover:text-danger transition-colors"
+                    aria-label={`Delete ${t} table`}
                     title={`Delete ${t} table`}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                    size="sm"
+                    style={{ color: 'var(--c-danger)' }}
+                    icon={<Trash2 className="w-3.5 h-3.5" />}
+                  />
                 </span>
               </div>
             )
           })}
         </div>
-        <button
+        <Button
           onClick={() => setShowNewTable(true)}
-          className="p-3 text-xs hover:opacity-80 transition-opacity flex items-center justify-center gap-1.5 border-t"
-          style={{ borderColor: 'var(--border)', color: 'var(--text3)' }}
+          variant="ghost"
+          icon={<Plus className="w-3.5 h-3.5" />}
+          className="border-t"
+          style={{ padding: '12px', borderColor: 'var(--border)', color: 'var(--text3)', fontSize: 'var(--text-xs)' }}
         >
-          <Plus className="w-3.5 h-3.5" /> New table
-        </button>
+          New table
+        </Button>
       </div>
 
       {/* Main */}
@@ -181,13 +189,15 @@ export default function DataCenter() {
             )}
           </div>
           {table && (
-            <button
+            <Button
               onClick={askCakra}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors"
+              variant="ghost"
+              size="sm"
+              icon={<Bot className="w-3.5 h-3.5" />}
               style={{ background: 'color-mix(in srgb, var(--c-mesin) 20%, transparent)', color: ACCENT }}
             >
-              <Bot className="w-3.5 h-3.5" /> Analyze with Cakra
-            </button>
+              Analyze with Cakra
+            </Button>
           )}
         </div>
 
@@ -199,9 +209,9 @@ export default function DataCenter() {
               title="No tables yet"
               description="Create a table to store rows locally — every table also becomes a dataset node in The Network."
               action={
-                <button onClick={() => setShowNewTable(true)} className="text-sm" style={{ color: ACCENT }}>
+                <Button onClick={() => setShowNewTable(true)} variant="ghost" size="sm" style={{ color: ACCENT }}>
                   Create your first table
-                </button>
+                </Button>
               }
             />
           ) : (
@@ -222,22 +232,24 @@ export default function DataCenter() {
                     <tr key={row.id} className="border-b group hover:bg-glass/[0.03] transition-colors" style={{ borderColor: 'var(--border)' }}>
                       {table.columns.map(col => (
                         <td key={col} className="px-1 py-0.5">
-                          <input
+                          <Input
+                            seamless
+                            aria-label={`${col} value`}
                             value={row[col] ?? ''}
-                            onChange={e => updateCell(row.id, col, e.target.value)}
-                            className="w-full bg-transparent px-2 py-1.5 rounded focus:outline-none focus:bg-glass"
-                            style={{ color: 'var(--text2)' }}
+                            onChange={v => updateCell(row.id, col, v)}
                           />
                         </td>
                       ))}
                       <td className="px-2 text-right">
-                        <button
+                        <IconButton
                           onClick={() => deleteRow(row.id)}
-                          className="opacity-0 group-hover:opacity-100 text-danger/50 hover:text-danger transition"
+                          aria-label="Delete row"
                           title="Delete row"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100"
+                          style={{ color: 'var(--c-danger)' }}
+                          icon={<Trash2 className="w-3.5 h-3.5" />}
+                        />
                       </td>
                     </tr>
                   ))}
@@ -245,20 +257,18 @@ export default function DataCenter() {
                   <tr>
                     {table.columns.map((col, i) => (
                       <td key={col} className="px-1 py-0.5">
-                        <input
+                        <Input
+                          seamless
+                          aria-label={`New row ${col}`}
                           value={newRow[col] || ''}
-                          onChange={e => setNewRow(prev => ({ ...prev, [col]: e.target.value }))}
+                          onChange={v => setNewRow(prev => ({ ...prev, [col]: v }))}
                           onKeyDown={e => { if (e.key === 'Enter') addRow() }}
                           placeholder={i === 0 ? 'Add a row…' : ''}
-                          className="w-full bg-transparent px-2 py-1.5 rounded focus:outline-none focus:bg-glass placeholder:text-[var(--text3)]"
-                          style={{ color: 'var(--text)' }}
                         />
                       </td>
                     ))}
                     <td className="px-2 text-right">
-                      <button onClick={addRow} className="transition-colors" style={{ color: ACCENT }} title="Add row">
-                        <Plus className="w-4 h-4" />
-                      </button>
+                      <IconButton onClick={addRow} aria-label="Add row" title="Add row" size="sm" style={{ color: ACCENT }} icon={<Plus className="w-4 h-4" />} />
                     </td>
                   </tr>
                 </tbody>
@@ -280,36 +290,35 @@ export default function DataCenter() {
               <h2 className="font-semibold flex items-center gap-2">
                 <Database className="w-4 h-4" style={{ color: ACCENT }} /> New table
               </h2>
-              <button onClick={() => setShowNewTable(false)} className="hover:opacity-70" style={{ color: 'var(--text3)' }}>
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton onClick={() => setShowNewTable(false)} aria-label="Close" size="sm" style={{ color: 'var(--text3)' }} icon={<X className="w-4 h-4" />} />
             </div>
-            <label className="block text-xs mb-1" style={{ color: 'var(--text3)' }}>Table name</label>
-            <input
+            <label htmlFor="dc-new-table-name" className="block text-xs mb-1" style={{ color: 'var(--text3)' }}>Table name</label>
+            <Input
+              id="dc-new-table-name"
               autoFocus
               value={newTableName}
-              onChange={e => setNewTableName(e.target.value)}
+              onChange={setNewTableName}
               placeholder="contacts"
-              className="w-full mb-3 px-3 py-2 rounded-lg bg-glass text-sm focus:outline-none focus:bg-glass"
-              style={{ color: 'var(--text)' }}
+              className="mb-3"
             />
-            <label className="block text-xs mb-1" style={{ color: 'var(--text3)' }}>Columns (comma-separated)</label>
-            <input
+            <label htmlFor="dc-new-table-cols" className="block text-xs mb-1" style={{ color: 'var(--text3)' }}>Columns (comma-separated)</label>
+            <Input
+              id="dc-new-table-cols"
               value={newTableCols}
-              onChange={e => setNewTableCols(e.target.value)}
+              onChange={setNewTableCols}
               onKeyDown={e => { if (e.key === 'Enter') createTable() }}
               placeholder="name, email, phone"
-              className="w-full mb-4 px-3 py-2 rounded-lg bg-glass text-sm focus:outline-none focus:bg-glass"
-              style={{ color: 'var(--text)' }}
+              className="mb-4"
             />
-            <button
+            <Button
               onClick={createTable}
               disabled={!newTableName.trim() || !newTableCols.trim()}
-              className="w-full py-2 rounded-lg text-sm font-medium disabled:opacity-40 transition-opacity"
-              style={{ background: ACCENT, color: 'var(--void)' }}
+              fullWidth
+              variant="ghost"
+              style={{ background: ACCENT, color: 'var(--void)', fontWeight: 500 }}
             >
               Create table
-            </button>
+            </Button>
           </div>
         </div>
       )}

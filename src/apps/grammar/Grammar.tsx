@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { SpellCheck, Copy, Check, RefreshCw, ListChecks, AlertTriangle, Info } from 'lucide-react'
-import { Button } from '../../components/ui'
+import { Button, TextArea } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 
 interface GrammarIssue {
@@ -199,13 +199,12 @@ export default function Grammar() {
 
       {/* Input */}
       <div className="rounded-2xl border border-hair overflow-hidden" style={{ background: 'var(--card-bg)' }}>
-        <textarea
+        <TextArea
           value={text}
-          onChange={e => setText(e.target.value)}
+          onChange={setText}
           placeholder="Paste or type text to check grammar..."
           aria-label="Text to check for grammar issues"
-          className="w-full bg-transparent px-4 py-3 text-sm min-h-[180px] resize-y focus:outline-none focus:ring-1 focus:ring-signal/50 rounded-lg"
-          style={{ color: 'var(--text)' }}
+          style={{ background: 'transparent', border: 'none', minHeight: '180px', padding: '12px 16px' }}
         />
       </div>
 
@@ -261,9 +260,15 @@ export default function Grammar() {
             <span className="text-xs text-muted flex items-center gap-1">
               <Info className="w-3 h-3" /> Corrected Text
             </span>
-            <button onClick={copyResult} className="text-xs text-signal hover:text-signal flex items-center gap-1">
+            <Button
+              onClick={copyResult}
+              variant="ghost"
+              size="sm"
+              aria-label="Copy corrected text"
+              style={{ color: copied ? 'var(--c-success)' : 'var(--signal)' }}
+            >
               {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
-            </button>
+            </Button>
           </div>
           <div className="p-4 text-sm whitespace-pre-wrap" style={{ color: 'var(--text)' }}>
             {correctedText || text}

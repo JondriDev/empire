@@ -135,7 +135,11 @@ export function Button({
   )
 }
 
-/* ── INPUT ── polish: hover state, focused cyan halo, monospace option */
+/* ── INPUT ── polish: hover state, focused cyan halo, monospace option.
+   `seamless` renders a borderless/transparent field for inline-edit contexts
+   (spreadsheet cells, in-place rename) that would drown under the full glass
+   chrome — it still routes through the primitive, so it keeps the shared focus
+   affordance + a11y and never counts as a bare off-shell control. */
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   value: string
   onChange: (value: string) => void
@@ -143,13 +147,23 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChan
   icon?: ReactNode
   className?: string
   mono?: boolean
+  seamless?: boolean
 }
 
-export function Input({ value, onChange, placeholder, icon, className = '', mono, ...rest }: InputProps) {
-  return (
-    <div
-      className={`empire-input-wrap ${className}`}
-      style={{
+export function Input({ value, onChange, placeholder, icon, className = '', mono, seamless, ...rest }: InputProps) {
+  const wrapStyle: CSSProperties = seamless
+    ? {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '0 8px',
+        background: 'transparent',
+        border: '1px solid transparent',
+        borderRadius: 'var(--radius-sm)',
+        minHeight: '30px',
+        transition: 'background var(--dur-fast), border-color var(--dur-fast)',
+      }
+    : {
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
@@ -160,8 +174,9 @@ export function Input({ value, onChange, placeholder, icon, className = '', mono
         borderRadius: 'var(--radius-md)',
         height: '38px',
         transition: 'background var(--dur-fast), border-color var(--dur-fast), box-shadow var(--dur-fast)',
-      }}
-    >
+      }
+  return (
+    <div className={`empire-input-wrap ${className}`} style={wrapStyle}>
       {icon && <span style={{ display: 'inline-flex', color: 'var(--text3)', flexShrink: 0 }}>{icon}</span>}
       <input
         {...rest}
@@ -181,15 +196,21 @@ export function Input({ value, onChange, placeholder, icon, className = '', mono
           padding: '0',
         }}
         onFocus={(e) => {
-          e.currentTarget.parentElement!.style.background = 'var(--input-bg-focus)'
-          ;(e.currentTarget.parentElement! as HTMLElement).style.borderColor = tint('signal', 50)
-          ;(e.currentTarget.parentElement! as HTMLElement).style.boxShadow = 'var(--input-shadow-focus)'
+          const p = e.currentTarget.parentElement as HTMLElement
+          p.style.background = 'var(--input-bg-focus)'
+          if (!seamless) {
+            p.style.borderColor = tint('signal', 50)
+            p.style.boxShadow = 'var(--input-shadow-focus)'
+          }
           rest.onFocus?.(e)
         }}
         onBlur={(e) => {
-          e.currentTarget.parentElement!.style.background = 'var(--input-bg)'
-          ;(e.currentTarget.parentElement! as HTMLElement).style.borderColor = 'var(--input-border-b)'
-          ;(e.currentTarget.parentElement! as HTMLElement).style.boxShadow = 'none'
+          const p = e.currentTarget.parentElement as HTMLElement
+          p.style.background = seamless ? 'transparent' : 'var(--input-bg)'
+          if (!seamless) {
+            p.style.borderColor = 'var(--input-border-b)'
+            p.style.boxShadow = 'none'
+          }
           rest.onBlur?.(e)
         }}
       />

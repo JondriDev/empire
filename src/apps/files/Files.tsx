@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Card, Button } from '../../components/ui'
+import { Card, Button, IconButton, Input } from '../../components/ui'
 import { emit } from '../../lib/eventBus'
 import { apiUrl } from '../../lib/apiBase'
 import { mirrorCollection } from '../../lib/core/sync'
@@ -173,24 +173,24 @@ export default function Files() {
           <Button onClick={navigateUp} disabled={atHome} aria-label="Go up one folder" className="text-sm bg-glass hover:bg-glass">
             <span aria-hidden="true">↑</span> Up
           </Button>
-          <button onClick={() => navigateTo('/storage/emulated/0')} aria-label="Go to internal storage" className="text-sm text-faint hover:text-fg">
-            <Home className="w-5 h-5" aria-hidden="true" />
-          </button>
+          <IconButton onClick={() => navigateTo('/storage/emulated/0')} aria-label="Go to internal storage" size="sm" icon={<Home className="w-5 h-5" />} />
         </div>
 
         {/* Breadcrumb */}
         <nav aria-label="Folder path" className="flex items-center gap-1 text-sm text-muted mb-2 overflow-x-auto">
-          <button onClick={() => navigateTo('/storage/emulated/0')} className="hover:text-fg flex-shrink-0">storage</button>
+          <Button onClick={() => navigateTo('/storage/emulated/0')} variant="ghost" size="sm" className="flex-shrink-0" style={{ padding: '2px 6px' }}>storage</Button>
           {breadcrumb.map((part, i) => (
             <span key={i} className="flex items-center gap-1 flex-shrink-0">
               <ChevronRight className="w-3 h-3" aria-hidden="true" />
-              <button
+              <Button
                 onClick={() => navigateTo('/' + breadcrumb.slice(0, i + 1).join('/'))}
                 aria-current={i === breadcrumb.length - 1 ? 'page' : undefined}
-                className="hover:text-fg"
+                variant="ghost"
+                size="sm"
+                style={{ padding: '2px 6px' }}
               >
                 {part}
-              </button>
+              </Button>
             </span>
           ))}
         </nav>
@@ -198,20 +198,26 @@ export default function Files() {
         {/* Quick paths */}
         <div className="flex gap-1 flex-wrap mb-2">
           {QUICK_PATHS.map(qp => (
-            <button key={qp.path} onClick={() => navigateTo(qp.path)} aria-pressed={path === qp.path} className={`text-xs px-2 py-1 rounded ${path === qp.path ? 'bg-signal/40 text-signal' : 'bg-glass text-muted hover:bg-glass'}`}>
+            <Button
+              key={qp.path}
+              onClick={() => navigateTo(qp.path)}
+              aria-pressed={path === qp.path}
+              variant="ghost"
+              size="sm"
+              style={{ padding: '3px 10px', color: path === qp.path ? 'var(--signal)' : 'var(--text2)' }}
+            >
               {qp.label}
-            </button>
+            </Button>
           ))}
         </div>
 
         {/* Search */}
-        <input
+        <Input
           type="text"
           placeholder="Search files..."
           aria-label="Search files in this folder"
           value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          className="w-full bg-glass border-0 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-signal/50"
+          onChange={setSearchQuery}
         />
       </Card>
 
@@ -244,14 +250,13 @@ export default function Files() {
               className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer group transition ${selected === entry.name ? 'bg-signal/20' : 'hover:bg-glass'}`}
             >
               {entry.isDirectory ? (
-                <button
+                <IconButton
                   onClick={e => { e.stopPropagation(); toggleDir(entry.path) }}
                   aria-label={expandedDirs.has(entry.path) ? `Collapse ${entry.name}` : `Expand ${entry.name}`}
                   aria-expanded={expandedDirs.has(entry.path)}
-                  className="text-faint hover:text-fg"
-                >
-                  {expandedDirs.has(entry.path) ? <ChevronDown className="w-3 h-3" aria-hidden="true" /> : <ChevronRight className="w-3 h-3" aria-hidden="true" />}
-                </button>
+                  size="sm"
+                  icon={expandedDirs.has(entry.path) ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                />
               ) : <span className="w-3" />}
               {getIcon(entry, expandedDirs.has(entry.path))}
               <div className="flex-1 min-w-0">
@@ -263,12 +268,8 @@ export default function Files() {
               {!entry.isDirectory && (
                 <div className="flex gap-1 items-center opacity-60 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                   <NodeActions type="file" sourceId={entry.path} />
-                  <button onClick={e => { e.stopPropagation(); downloadFile(entry) }} aria-label={`Download ${entry.name}`} className="p-1.5 text-faint hover:text-fg">
-                    <Download className="w-3.5 h-3.5" aria-hidden="true" />
-                  </button>
-                  <button onClick={e => { e.stopPropagation(); setPreviewContent(null); openFile(entry) }} aria-label={`Preview ${entry.name}`} className="p-1.5 text-faint hover:text-fg">
-                    <Eye className="w-3.5 h-3.5" aria-hidden="true" />
-                  </button>
+                  <IconButton onClick={e => { e.stopPropagation(); downloadFile(entry) }} aria-label={`Download ${entry.name}`} size="sm" icon={<Download className="w-3.5 h-3.5" />} />
+                  <IconButton onClick={e => { e.stopPropagation(); setPreviewContent(null); openFile(entry) }} aria-label={`Preview ${entry.name}`} size="sm" icon={<Eye className="w-3.5 h-3.5" />} />
                 </div>
               )}
             </div>

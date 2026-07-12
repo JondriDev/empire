@@ -1,6 +1,20 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { IconButton, Select, Segmented, Slider } from './index'
+import { IconButton, Select, Segmented, Slider, Input } from './index'
+
+describe('Input (seamless)', () => {
+  it('renders a borderless textbox that still emits the raw string value', () => {
+    const fn = vi.fn()
+    render(<Input seamless value="hi" onChange={fn} aria-label="Cell" />)
+    const el = screen.getByRole('textbox', { name: 'Cell' }) as HTMLInputElement
+    expect(el.value).toBe('hi')
+    // The seamless wrapper is transparent + borderless (no glass chrome).
+    const wrap = el.parentElement as HTMLElement
+    expect(wrap.style.background).toBe('transparent')
+    fireEvent.change(el, { target: { value: 'ho' } })
+    expect(fn).toHaveBeenCalledWith('ho')
+  })
+})
 
 describe('IconButton', () => {
   it('renders as a button carrying the required aria-label', () => {

@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   CloudSun, Cloud, CloudRain, CloudSnow, CloudFog, Zap, Sun,
-  Settings, RefreshCw, Thermometer, Droplets, Wind, AlertCircle, MapPin,
+  Settings, RefreshCw, Thermometer, Droplets, Wind, AlertCircle, MapPin, X,
 } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
+import { Button, IconButton, Input } from '../../components/ui'
 import { type Cat, type WeatherData, EMPTY, mapForecast } from './weatherLogic'
 
 /**
@@ -59,12 +60,11 @@ export default function Weather() {
   const [weather, setWeather] = useState<WeatherData>({ ...EMPTY, isLoading: true })
   const [showSettings, setShowSettings] = useState(false)
   const [tempLocation, setTempLocation] = useState('')
-  // Return focus to the trigger when the settings dialog closes (a11y — no lost gaze).
-  const settingsBtnRef = useRef<HTMLButtonElement>(null)
 
   const closeSettings = useCallback(() => {
     setShowSettings(false)
-    settingsBtnRef.current?.focus()
+    // Return focus to the trigger when the dialog closes (a11y — no lost gaze).
+    ;(document.getElementById('weather-settings-btn') as HTMLElement | null)?.focus()
   }, [])
 
   const fetchWeather = useCallback(async (cfg: WeatherConfig) => {
@@ -130,18 +130,19 @@ export default function Weather() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => fetchWeather(config)} className="p-2 rounded-xl hover:bg-glass transition-colors" title="Refresh" aria-label="Refresh weather">
-            <RefreshCw className={`w-5 h-5 ${weather.isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
-          </button>
-          <button
-            ref={settingsBtnRef}
+          <IconButton
+            onClick={() => fetchWeather(config)}
+            title="Refresh"
+            aria-label="Refresh weather"
+            icon={<RefreshCw className={`w-5 h-5 ${weather.isLoading ? 'animate-spin' : ''}`} />}
+          />
+          <IconButton
+            id="weather-settings-btn"
             onClick={() => { setTempLocation(config.location === 'Auto' ? '' : config.location); setShowSettings(true) }}
-            className="p-2 rounded-xl hover:bg-glass transition-colors"
             title="Settings"
             aria-label="Weather settings"
-          >
-            <Settings className="w-5 h-5" />
-          </button>
+            icon={<Settings className="w-5 h-5" />}
+          />
         </div>
       </div>
 
@@ -234,22 +235,18 @@ export default function Weather() {
               <h2 id="weather-settings-title" className="text-lg font-semibold flex items-center gap-2">
                 <Settings className="w-4 h-4" aria-hidden="true" /> Weather Settings
               </h2>
-              <button onClick={closeSettings} className="text-muted hover:text-fg" aria-label="Close settings">
-                <span className="text-xl" aria-hidden="true">×</span>
-              </button>
+              <IconButton onClick={closeSettings} aria-label="Close settings" size="sm" icon={<X className="w-4 h-4" />} />
             </div>
 
             <div className="space-y-4">
               <div>
                 <label htmlFor="weather-location" className="text-xs text-muted mb-1 block flex items-center gap-1"><MapPin className="w-3 h-3" aria-hidden="true" /> Location</label>
-                <input
+                <Input
                   id="weather-location"
                   autoFocus
                   value={tempLocation}
-                  onChange={e => setTempLocation(e.target.value)}
+                  onChange={setTempLocation}
                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSaveConfig() } }}
-                  className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ion"
-                  style={{ background: 'var(--input-bg)', color: 'var(--text)' }}
                   placeholder="City name (leave empty to use your location)"
                 />
                 <p className="text-[10px] text-faint mt-1">Powered by Open-Meteo — free, no API key.</p>
@@ -257,12 +254,12 @@ export default function Weather() {
             </div>
 
             <div className="flex gap-2 mt-6">
-              <button onClick={closeSettings} className="flex-1 px-4 py-2 rounded-xl border border-hair text-sm hover:bg-glass transition-colors">
+              <Button onClick={closeSettings} variant="secondary" className="flex-1">
                 Cancel
-              </button>
-              <button onClick={handleSaveConfig} className="flex-1 px-4 py-2 rounded-xl bg-ion text-fg text-sm hover:bg-ion transition-colors">
+              </Button>
+              <Button onClick={handleSaveConfig} variant="primary" className="flex-1" style={{ background: 'var(--ion)', color: 'var(--void)', border: '1px solid var(--ion)' }}>
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </div>

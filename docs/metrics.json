@@ -1,9 +1,9 @@
 {
   "current": {
-    "generatedAt": "2026-07-12T04:11:29.377Z",
+    "generatedAt": "2026-07-12T05:24:02.623Z",
     "apps": 31,
-    "testFiles": 62,
-    "testCases": 450,
+    "testFiles": 64,
+    "testCases": 458,
     "tokenViolations": 0,
     "offSystemUtilities": 0,
     "offSystemStyle": 0,
@@ -12,86 +12,17 @@
       "type": 0,
       "motion": 0
     },
-    "offShellControls": 204,
+    "offShellControls": 162,
     "offShellControlDims": {
-      "button": 167,
-      "input": 24,
+      "button": 133,
+      "input": 17,
       "select": 2,
-      "textarea": 11
+      "textarea": 10
     },
     "bundleGzKB": 731,
-    "bundleRawKB": 2465.7
+    "bundleRawKB": 2462.9
   },
   "history": [
-    {
-      "generatedAt": "2026-07-11T11:20:01.535Z",
-      "apps": 31,
-      "testFiles": 52,
-      "testCases": 411,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 307,
-      "offShellControlDims": {
-        "button": 243,
-        "input": 44,
-        "select": 6,
-        "textarea": 14
-      },
-      "bundleGzKB": 730.2,
-      "bundleRawKB": 2467.2
-    },
-    {
-      "generatedAt": "2026-07-11T11:20:32.434Z",
-      "apps": 31,
-      "testFiles": 52,
-      "testCases": 411,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 307,
-      "offShellControlDims": {
-        "button": 243,
-        "input": 44,
-        "select": 6,
-        "textarea": 14
-      },
-      "bundleGzKB": 730.2,
-      "bundleRawKB": 2467.2
-    },
-    {
-      "generatedAt": "2026-07-11T11:20:32.627Z",
-      "apps": 31,
-      "testFiles": 52,
-      "testCases": 411,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 307,
-      "offShellControlDims": {
-        "button": 243,
-        "input": 44,
-        "select": 6,
-        "textarea": 14
-      },
-      "bundleGzKB": 730.2,
-      "bundleRawKB": 2467.2
-    },
     {
       "generatedAt": "2026-07-11T11:20:32.815Z",
       "apps": 31,
@@ -712,6 +643,75 @@
       },
       "bundleGzKB": 730.8,
       "bundleRawKB": 2464.6
+    },
+    {
+      "generatedAt": "2026-07-12T04:11:29.377Z",
+      "apps": 31,
+      "testFiles": 62,
+      "testCases": 450,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 204,
+      "offShellControlDims": {
+        "button": 167,
+        "input": 24,
+        "select": 2,
+        "textarea": 11
+      },
+      "bundleGzKB": 731,
+      "bundleRawKB": 2465.7
+    },
+    {
+      "generatedAt": "2026-07-12T05:10:51.558Z",
+      "apps": 31,
+      "testFiles": 62,
+      "testCases": 450,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 204,
+      "offShellControlDims": {
+        "button": 167,
+        "input": 24,
+        "select": 2,
+        "textarea": 11
+      },
+      "bundleGzKB": 731,
+      "bundleRawKB": 2465.7
+    },
+    {
+      "generatedAt": "2026-07-12T05:20:48.274Z",
+      "apps": 31,
+      "testFiles": 62,
+      "testCases": 450,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 162,
+      "offShellControlDims": {
+        "button": 133,
+        "input": 17,
+        "select": 2,
+        "textarea": 10
+      },
+      "bundleGzKB": 731,
+      "bundleRawKB": 2462.9
     }
   ]
 }

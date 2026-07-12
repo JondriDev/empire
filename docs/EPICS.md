@@ -250,15 +250,15 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   `getByRole('radio')`+`aria-checked`). *Acceptance:* all four = 0 (`offShellControls 238 → 204`, −34); each renders clean +
   **`MEDIA-PERSISTS music/video` axes still ✅**; build🟢 vitest🟢 eslint clean; tokens/off-system/offSystemStyle 0.
 
-- [ ] **S7 · Migrate the utility apps (42 → 0) — DataCenter + Maps anchor this (far heavier than the old estimate).**
-  `src/apps/datacenter/DataCenter.tsx` (**14** `b10/i4`; table/query/import controls → `Button`/`Input`; **keep the
-  `mirrorCollection('dataset',…)` graph-mirror + per-table row-count logic UNTOUCHED**), `src/apps/maps/Maps.tsx` (**12**
-  `b11/i1`; search/zoom/layer controls → `IconButton`/`Input`; **keep the Leaflet container + env-gated tile/geocode fetch
-  behaviour**), `src/apps/files/Files.tsx` (**8** `b7/i1`; breadcrumb/action controls → `Button`/`IconButton`; **keep the
-  `filesGraph` session-union mirror**), `src/apps/weather/Weather.tsx` (**6** `b6`; city search/unit toggle → `Input` +
-  `Segmented`; **keep the Open-Meteo env-gated fetch**), `src/apps/grammar/Grammar.tsx` (**2** `b1/t1`; check/copy → `Button`,
-  textarea → `TextArea`). Mapping rule. *Acceptance:* all five = 0 (`offShellControls 204 → 162`, −42); each renders clean
-  (Files/Weather/Maps keep their env-gated-fetch + graph-mirror behaviour); build🟢 vitest🟢 eslint clean; conformance 0.
+- [x] **S7 · Migrate the utility apps (42 → 0) — DataCenter + Maps anchored it.** ✅ **SHIPPED 2026-07-12 (green main).**
+  `offShellControls 204 → 162 (−42)`, EXACTLY the target; all five (DataCenter 14, Maps 12, Files 8, Weather 6, Grammar 2) off
+  the offenders list (`b167/i24/s2/t11 → b133/i17/s2/t10`). **NEW `seamless` `Input` variant** (`ui/index.tsx`) — the shell home
+  for inline-edit cells (DataCenter's spreadsheet); borderless/transparent, still a real textbox (a11y + tokens), additive
+  (default unchanged). Maps tabs → `Segmented`, search `<form>`→`<div>` + `Input`+`IconButton` (IconButton is `type=button` so
+  the submit moved to `onClick` + Input `onKeyDown` Enter). Graph-mirrors + env-gated fetch (Leaflet/Open-Meteo/Nominatim,
+  `filesGraph` union, `mirrorCollection('dataset',…)`) all UNTOUCHED. build🟢 vitest 522→530🟢 (metrics test-cases 450→458, +8:
+  seamless-Input ×1, DataCenter ×4, Maps ×3) eslint clean; `--assert-zero` exit 0; bundle gz 731 ±0; no new deps. qa-smoke 32/32
+  clean + all 13 guards green (GRAPH-LEGIBLE 3/3, OFFLINE 5/5 incl `/app/maps` cold-boot, PRECACHE 91 no-gap).
 
 - [ ] **S8 · Migrate the standalone tool + entity apps (40 → 0).** `src/apps/calculator/Calculator.tsx` (**14** `b14`; the whole
   keypad + operator buttons → `Button` — pick `secondary`/`ghost` by role; the EPIC-11-tokenised pulse motion stays),
