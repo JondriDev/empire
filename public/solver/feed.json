@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T00:00:00Z",
+  "generatedAt": "2026-07-12T00:00:00Z",
   "problems": [
     {
       "catalogId": "disc-sudan-famine",
@@ -54,6 +54,24 @@
       "severity": 5,
       "tractability": 2,
       "discoveredFrom": "2026 humanitarian watchlists (IRC, UNICEF, Concern) and the Global Humanitarian Overview 2026 flag Haiti's compounding violence, mass displacement, near-famine food insecurity and cholera outbreak as severe and underfunded."
+    },
+    {
+      "catalogId": "disc-mpox-cladeIb",
+      "title": "Mpox clade Ib multi-country outbreak",
+      "blurb": "The clade Ib mpox outbreak remains a WHO-graded global health emergency, with community transmission now reported in Colombia and across Europe and Asia and a cluster of neonatal deaths in Pakistan, even as African cases decline and safe vaccines exist.",
+      "category": "Health & Disease",
+      "severity": 3,
+      "tractability": 4,
+      "discoveredFrom": "WHO Multi-country mpox external situation reports #63–66 (Jan–May 2026) keep the outbreak a graded emergency under the IHR, noting clade Ib community transmission in 9+ non-African countries and infant deaths in Sindh, Pakistan."
+    },
+    {
+      "catalogId": "disc-drc-m23-conflict",
+      "title": "Eastern DR Congo M23 conflict & displacement",
+      "blurb": "The Rwanda-backed M23 offensive that seized Goma (Jan 2026) and Bukavu (Feb 2026) has helped drive over 7 million people into internal displacement — Africa's largest — with 26.6 million Congolese facing acute food insecurity amid competition over minerals and weak state authority.",
+      "category": "Governance & Rights",
+      "severity": 5,
+      "tractability": 2,
+      "discoveredFrom": "UN OCHA/UNHCR and CFR/HRW 2026 reporting: M23 captured Goma (27 Jan) and Bukavu (16 Feb 2026), 7M+ IDPs and 26.6M acutely food-insecure, with the Security Council renewing MONUSCO amid renewed offensives."
     }
   ],
   "briefs": {
@@ -479,6 +497,107 @@
         "https://www.unep.org/news-and-stories/press-release/ministers-urge-decisive-methane-action-global-report-shows-progress"
       ],
       "updatedAt": "2026-07-11"
+    },
+    "pandemic-preparedness": {
+      "summary": "The WHO Pandemic Agreement was adopted by the World Health Assembly on 20 May 2025 after three years of talks — the first treaty of its kind since 2005 — but its Pathogen Access and Benefit-Sharing (PABS) annex is still being negotiated ahead of the 2026 Assembly, so core mechanisms are not yet operational. Financing is the binding constraint: the World Bank's Pandemic Fund had mobilised about $2.24 billion and approved roughly $911 million in projects by 2025, far below the ~$10.5 billion/year the G20 estimated is needed. In a February 2026 review, WHO warned that surveillance, health-workforce and equitable-manufacturing gaps persist six years after COVID-19. Proven tools — genomic surveillance, rapid vaccine platforms and regional manufacturing — exist but remain unevenly funded and concentrated in high-income countries.",
+      "interventions": [
+        {
+          "title": "100 Days Mission — rapid vaccine platforms",
+          "evidence": "CEPI's G7- and G20-endorsed 100 Days Mission aims to compress vaccine development against a new pathogen to ~100 days using prototype and mRNA platforms.",
+          "actor": "CEPI + vaccine developers"
+        },
+        {
+          "title": "Genomic surveillance & shared intelligence",
+          "evidence": "The WHO Hub for Pandemic and Epidemic Intelligence (Berlin) and platforms such as GISAID pool viral sequence data to detect emerging threats earlier.",
+          "actor": "WHO Hub for Pandemic and Epidemic Intelligence / national labs"
+        },
+        {
+          "title": "Regional mRNA manufacturing (tech-transfer hubs)",
+          "evidence": "The WHO–Medicines Patent Pool mRNA Technology Transfer Programme, with the Afrigen hub in South Africa, builds LMIC vaccine-production capacity to close the equity gaps exposed by COVID-19.",
+          "actor": "WHO / Medicines Patent Pool / Afrigen"
+        },
+        {
+          "title": "Sustained pooled financing (Pandemic Fund)",
+          "evidence": "The World Bank's Pandemic Fund raised ~$2.24bn and approved ~$911m in country-preparedness projects by 2025 but needs recurrent replenishment to meet estimated need.",
+          "actor": "World Bank Pandemic Fund / donor governments"
+        },
+        {
+          "title": "Implement the Pandemic Agreement & IHR (2024) amendments",
+          "evidence": "The 2025 WHO Pandemic Agreement and 2024 International Health Regulations amendments set binding surveillance, One Health and equity obligations once ratified.",
+          "actor": "WHO Member States"
+        }
+      ],
+      "sources": [
+        "https://www.who.int/news/item/02-02-2026-six-years-after-covid-19-s-global-alarm-is-the-world-better-prepared-for-the-next-pandemic",
+        "https://www.who.int/news-room/questions-and-answers/item/pandemic-prevention--preparedness-and-response-accord",
+        "https://cepi.net/100-days",
+        "https://cepi.net/cepi-partners-afrigen-speed-mrna-vaccine-development-and-access"
+      ],
+      "updatedAt": "2026-07-12"
+    },
+    "climate-adaptation": {
+      "summary": "UNEP's 2025 Adaptation Gap Report ('Running on Empty') estimates developing countries will need over US$310 billion per year for climate adaptation by 2035 — roughly 12 times current international public adaptation finance flows. Those flows did rise from about $22 billion in 2021 to $28 billion in 2022, the largest year-on-year increase since the Paris Agreement, but the Glasgow Pact goal of doubling adaptation finance from 2019 levels by 2025 is set to be missed, and even meeting it would close only about 5% of the gap. The shortfall falls hardest on the communities most exposed to heat, floods and sea-level rise. Cheap, high-return measures — above all early-warning systems — remain under-deployed.",
+      "interventions": [
+        {
+          "title": "Early-warning systems (Early Warnings for All)",
+          "evidence": "The Global Commission on Adaptation found ~$800m spent on early-warning systems in developing countries could avert $3–16bn in losses a year; the UN Early Warnings for All initiative targets universal coverage by 2027.",
+          "actor": "WMO / UNDRR / ITU / IFRC"
+        },
+        {
+          "title": "Scale up and reform adaptation finance",
+          "evidence": "UNEP 2025 puts developing-country needs above $310bn/yr by 2035 versus roughly a twelfth in current flows, requiring more grant finance and reform of the multilateral development banks.",
+          "actor": "Multilateral development banks / Green Climate Fund / Adaptation Fund / donors"
+        },
+        {
+          "title": "Locally-led & nature-based adaptation",
+          "evidence": "The Global Commission on Adaptation estimates adaptation investments deliver benefit-cost ratios of roughly 10:1, with mangroves, wetlands and resilient agriculture among the highest-return options.",
+          "actor": "National & local governments + community organisations"
+        },
+        {
+          "title": "Climate-resilient infrastructure & agriculture",
+          "evidence": "UNEP finds resilient construction and drought-tolerant crops sharply cut disaster losses yet remain underfunded relative to need.",
+          "actor": "Governments / development finance institutions"
+        }
+      ],
+      "sources": [
+        "https://www.unep.org/resources/adaptation-gap-report-2025",
+        "https://www.unep.org/news-and-stories/press-release/slow-climate-adaptation-threatening-lives-and-economies",
+        "https://wmo.int/activities/early-warnings-all",
+        "https://www.carbonbrief.org/un-report-five-charts-which-explain-the-gap-in-finance-for-climate-adaptation/"
+      ],
+      "updatedAt": "2026-07-12"
+    },
+    "mental-health": {
+      "summary": "WHO estimates more than 1 billion people — about 1 in 7 — live with a mental disorder, with depression (~280 million) and anxiety (~301 million) the most common. The treatment gap is severe: worldwide only around 9% of people with depression receive minimally adequate care, and governments still allocate under 2% of health budgets to mental health, against an estimated shortage of ~1.2 million mental-health workers. The economic cost is put at roughly $6 trillion a year. Effective, low-cost interventions exist — the binding constraint is delivery and financing, not the absence of treatments.",
+      "interventions": [
+        {
+          "title": "Task-sharing via non-specialist workers (mhGAP)",
+          "evidence": "WHO's mhGAP Intervention Guide lets trained primary-care and lay workers manage depression; cluster-randomised trials in India, Nigeria and South Africa show improved detection and outcomes.",
+          "actor": "Ministries of health / primary-care systems (WHO mhGAP)"
+        },
+        {
+          "title": "Integrate mental health into primary care",
+          "evidence": "WHO's Special Initiative for Mental Health and national programmes embed screening and counselling into primary- and chronic-care visits, expanding access at low marginal cost.",
+          "actor": "WHO / national health ministries"
+        },
+        {
+          "title": "Digital and tele-mental-health delivery",
+          "evidence": "Peer-reviewed implementation studies show digital training and delivery platforms extend supervision and psychosocial interventions to non-specialists where clinicians are scarce.",
+          "actor": "Health systems / NGOs / digital-health providers"
+        },
+        {
+          "title": "Raise mental-health financing",
+          "evidence": "With under 2% of health budgets going to mental health, WHO urges higher domestic allocation to narrow the ~9% treatment-coverage and ~1.2m-worker gaps.",
+          "actor": "Governments / finance ministries / donors"
+        }
+      ],
+      "sources": [
+        "https://www.who.int/news-room/fact-sheets/detail/depression",
+        "https://pharmacally.com/global-mental-health-in-2025-evidence-gaps-and-the-way-forward-analysis-of-who-reports/",
+        "https://link.springer.com/article/10.1186/s12875-025-02943-6",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6559947/"
+      ],
+      "updatedAt": "2026-07-12"
     }
   }
 }
