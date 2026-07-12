@@ -5,6 +5,7 @@
  */
 import { useState } from 'react'
 import { ChevronLeft, ListChecks, Play, Trash2 } from 'lucide-react'
+import { Button } from '../../../components/ui'
 import { useSolverStore } from './store'
 import { nextStageFor, runQueueTick } from './queue'
 import { nodesOfType } from '../../../lib/core/graph'
@@ -74,12 +75,28 @@ export default function ProblemDetail({ problem, problems, solutions, feedBrief,
     <div className="h-full overflow-y-auto p-4 md:p-6">
       {/* Breadcrumb / back */}
       <div className="flex items-center gap-1 flex-wrap text-xs mb-3" style={{ color: 'var(--text3)' }}>
-        <button onClick={onBack} className="press inline-flex items-center gap-1 md:hidden" aria-label="Back to problem list">
-          <ChevronLeft className="w-4 h-4" /> All problems
-        </button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          icon={<ChevronLeft className="w-4 h-4" />}
+          aria-label="Back to problem list"
+          className="md:hidden"
+          style={{ padding: '2px 6px', fontSize: 'var(--text-xs)', color: 'var(--text3)' }}
+        >
+          All problems
+        </Button>
         {ancestry.map(a => (
           <span key={a.id} className="inline-flex items-center gap-1">
-            <button onClick={() => onSelect(a.id)} className="press underline-offset-2 hover:underline">{a.title}</button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onSelect(a.id)}
+              className="underline-offset-2 hover:underline"
+              style={{ padding: '2px 4px', fontSize: 'var(--text-xs)', color: 'var(--text3)' }}
+            >
+              {a.title}
+            </Button>
             <span aria-hidden>→</span>
           </span>
         ))}
@@ -100,32 +117,34 @@ export default function ProblemDetail({ problem, problems, solutions, feedBrief,
       {/* Actions */}
       <div className="mt-4 flex flex-wrap gap-2">
         {stage && (
-          <button
+          <Button
             onClick={runNext}
             disabled={busy}
-            className="press inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50"
+            icon={<Play className="w-4 h-4" />}
             style={{ background: 'color-mix(in srgb, var(--c-cakra) 20%, transparent)', color: 'var(--c-cakra)' }}
           >
-            <Play className="w-4 h-4" /> {busy ? 'Thinking…' : STAGE_LABEL[stage]}
-          </button>
+            {busy ? 'Thinking…' : STAGE_LABEL[stage]}
+          </Button>
         )}
         {solution && solution.firstActions.length > 0 && (
-          <button
+          <Button
+            variant="ghost"
             onClick={sendToTasks}
-            className="press inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border"
-            style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+            icon={<ListChecks className="w-4 h-4" />}
+            style={{ border: '1px solid var(--border)', color: 'var(--text)' }}
           >
-            <ListChecks className="w-4 h-4" /> Plan → Tasks
-          </button>
+            Plan → Tasks
+          </Button>
         )}
-        <button
+        <Button
+          variant="ghost"
           onClick={del}
-          className="press inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border"
-          style={{ borderColor: 'var(--border)', color: 'var(--text3)' }}
+          icon={<Trash2 className="w-4 h-4" />}
           aria-label="Delete problem"
+          style={{ border: '1px solid var(--border)', color: 'var(--text3)' }}
         >
-          <Trash2 className="w-4 h-4" /> Delete
-        </button>
+          Delete
+        </Button>
       </div>
 
       {/* Analysis */}
@@ -237,17 +256,18 @@ function SubTree({ parentId, problems, onSelect }: {
     <ul className="space-y-1 ml-1 pl-3 border-l" style={{ borderColor: 'var(--border)' }}>
       {children.map(c => (
         <li key={c.id}>
-          <button
+          <Button
+            variant="ghost"
+            fullWidth
             onClick={() => onSelect(c.id)}
-            className="press w-full text-left text-sm py-1 flex items-start gap-2"
-            style={{ color: 'var(--text)' }}
+            icon={<span aria-hidden className="shrink-0">{STATUS_GLYPH[c.status]}</span>}
+            style={{ justifyContent: 'flex-start', alignItems: 'flex-start', whiteSpace: 'normal', padding: '4px 0', color: 'var(--text)' }}
           >
-            <span aria-hidden className="shrink-0">{STATUS_GLYPH[c.status]}</span>
-            <span className="min-w-0">
+            <span className="min-w-0 text-sm" style={{ textAlign: 'left' }}>
               {c.title}
               <span className="ml-2 text-xs font-mono" style={{ color: 'var(--text3)' }}>S{c.severity}·T{c.tractability}</span>
             </span>
-          </button>
+          </Button>
           <SubTree parentId={c.id} problems={problems} onSelect={onSelect} />
         </li>
       ))}

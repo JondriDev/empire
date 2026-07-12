@@ -9,6 +9,7 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { Globe2, Play, Plus, Square } from 'lucide-react'
+import { Button, IconButton, Input } from '../../../components/ui'
 import { getConfig } from '../../../lib/ai'
 import { useSolverStore, todayKey } from './store'
 import { registerSolverIntents } from './solverIntents'
@@ -66,8 +67,8 @@ export default function SolverPanel() {
 
   const selected = selectedId ? problems[selectedId] : undefined
 
-  const submitNew = (e: React.FormEvent) => {
-    e.preventDefault()
+  const submitNew = (e?: React.FormEvent) => {
+    e?.preventDefault()
     const title = newTitle.trim()
     if (!title) return
     const p = addProblem({ title, scale: 'personal', source: 'user' })
@@ -93,27 +94,26 @@ export default function SolverPanel() {
         <div className="flex-1" />
         <label className="text-xs inline-flex items-center gap-1.5" style={{ color: 'var(--text3)' }}>
           daily budget
-          <input
+          <Input
             type="number"
             min={1}
-            value={dailyBudget}
-            onChange={e => setDailyBudget(Number(e.target.value))}
-            className="w-16 px-2 py-1 rounded-md border bg-transparent text-right"
-            style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+            value={String(dailyBudget)}
+            onChange={v => setDailyBudget(Number(v))}
+            className="w-16"
             aria-label="Daily AI call budget"
           />
         </label>
-        <button
+        <Button
           onClick={() => (running ? stopQueue() : startQueue())}
-          className="press inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium"
-          style={running
-            ? { background: 'color-mix(in srgb, var(--c-cakra) 30%, transparent)', color: 'var(--c-cakra)' }
-            : { background: 'color-mix(in srgb, var(--c-cakra) 18%, transparent)', color: 'var(--c-cakra)' }}
+          icon={running ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           aria-label={running ? 'Stop the auto-solver' : 'Start the auto-solver'}
+          style={{
+            background: `color-mix(in srgb, var(--c-cakra) ${running ? 30 : 18}%, transparent)`,
+            color: 'var(--c-cakra)',
+          }}
         >
-          {running ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           {running ? 'Stop solving' : 'Solve everything'}
-        </button>
+        </Button>
       </div>
 
       {noKey && (
@@ -130,46 +130,48 @@ export default function SolverPanel() {
           style={{ borderColor: 'var(--border)' }}
         >
           <div className="p-3 space-y-2 border-b" style={{ borderColor: 'var(--border)' }}>
-            <form onSubmit={submitNew} className="flex gap-2">
-              <input
+            <div className="flex gap-2">
+              <Input
                 value={newTitle}
-                onChange={e => setNewTitle(e.target.value)}
+                onChange={setNewTitle}
+                onKeyDown={e => { if (e.key === 'Enter') submitNew() }}
                 placeholder="Add a problem to solve…"
-                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border bg-transparent text-sm"
-                style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                className="flex-1 min-w-0"
                 aria-label="New problem title"
               />
-              <button
-                type="submit"
-                className="press px-2.5 rounded-lg"
-                style={{ background: 'color-mix(in srgb, var(--c-cakra) 18%, transparent)', color: 'var(--c-cakra)' }}
+              <IconButton
+                onClick={() => submitNew()}
+                icon={<Plus className="w-4 h-4" />}
                 aria-label="Add problem"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </form>
+                style={{ background: 'color-mix(in srgb, var(--c-cakra) 18%, transparent)', color: 'var(--c-cakra)' }}
+              />
+            </div>
             {catalogRemaining > 0 && (
-              <button
+              <Button
                 onClick={doImportCatalog}
-                className="press w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border"
-                style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
+                variant="ghost"
+                fullWidth
+                icon={<Globe2 className="w-4 h-4" />}
+                style={{ border: '1px solid var(--border)', color: 'var(--text)' }}
               >
-                <Globe2 className="w-4 h-4" /> Import world catalog ({catalogRemaining})
-              </button>
+                Import world catalog ({catalogRemaining})
+              </Button>
             )}
             {categories.length > 2 && (
               <div className="flex gap-1.5 flex-wrap">
                 {categories.map(c => (
-                  <button
+                  <Button
                     key={c}
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setCategory(c)}
-                    className="press px-2 py-0.5 rounded-full text-xs"
+                    aria-pressed={category === c}
                     style={category === c
-                      ? { background: 'color-mix(in srgb, var(--c-cakra) 20%, transparent)', color: 'var(--c-cakra)' }
-                      : { color: 'var(--text3)' }}
+                      ? { background: 'color-mix(in srgb, var(--c-cakra) 20%, transparent)', color: 'var(--c-cakra)', borderRadius: 'var(--radius-full)', padding: '2px 8px', fontSize: 'var(--text-xs)' }
+                      : { color: 'var(--text3)', borderRadius: 'var(--radius-full)', padding: '2px 8px', fontSize: 'var(--text-xs)' }}
                   >
                     {c === 'all' ? 'All' : c}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -184,24 +186,32 @@ export default function SolverPanel() {
             <ul>
               {shown.map(p => (
                 <li key={p.id}>
-                  <button
+                  <Button
+                    variant="ghost"
+                    fullWidth
                     onClick={() => setSelectedId(p.id)}
-                    className="press w-full text-left px-3 py-2.5 flex items-start gap-2 border-b"
+                    aria-pressed={selectedId === p.id}
+                    icon={
+                      <span aria-hidden className={`shrink-0 ${p.status === 'analyzing' ? 'animate-pulse' : ''}`}>
+                        {STATUS_GLYPH[p.status]}
+                      </span>
+                    }
                     style={{
-                      borderColor: 'var(--border)',
+                      justifyContent: 'flex-start',
+                      alignItems: 'flex-start',
+                      whiteSpace: 'normal',
+                      padding: '10px 12px',
+                      borderBottom: '1px solid var(--border)',
                       background: selectedId === p.id ? 'color-mix(in srgb, var(--c-cakra) 10%, transparent)' : 'transparent',
                     }}
                   >
-                    <span aria-hidden className={`shrink-0 ${p.status === 'analyzing' ? 'animate-pulse' : ''}`}>
-                      {STATUS_GLYPH[p.status]}
-                    </span>
-                    <span className="min-w-0 flex-1">
+                    <span className="min-w-0 flex-1" style={{ textAlign: 'left' }}>
                       <span className="block text-sm leading-snug" style={{ color: 'var(--text)' }}>{p.title}</span>
                       <span className="block text-xs mt-0.5" style={{ color: 'var(--text3)' }}>
                         {p.category} · <span className="font-mono">S{p.severity}·T{p.tractability}</span>
                       </span>
                     </span>
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -217,13 +227,15 @@ export default function SolverPanel() {
                     <li key={fp.catalogId} className="gp rounded-lg p-2.5">
                       <p className="text-sm leading-snug" style={{ color: 'var(--text)' }}>{fp.title}</p>
                       {fp.blurb && <p className="text-xs mt-0.5" style={{ color: 'var(--text3)' }}>{fp.blurb}</p>}
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => { const p = importFeedProblem(fp); if (p) setSelectedId(p.id) }}
-                        className="press mt-1.5 text-xs px-2 py-0.5 rounded-md"
-                        style={{ background: 'color-mix(in srgb, var(--c-cakra) 18%, transparent)', color: 'var(--c-cakra)' }}
+                        className="mt-1.5"
+                        style={{ background: 'color-mix(in srgb, var(--c-cakra) 18%, transparent)', color: 'var(--c-cakra)', padding: '2px 8px', fontSize: 'var(--text-xs)' }}
                       >
                         Import
-                      </button>
+                      </Button>
                     </li>
                   ))}
                 </ul>

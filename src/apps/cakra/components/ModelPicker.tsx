@@ -4,6 +4,7 @@
 
 import { useState } from 'react'
 import { X, Check } from 'lucide-react'
+import { Button, IconButton } from '../../../components/ui'
 import { PROVIDER_LIST, getNimPool } from '../lib/providers'
 import type { ProviderId } from '../lib/types'
 import type { AgentSettings } from '../lib/agent'
@@ -34,17 +35,37 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: tint('xenon', 10) }}>
           <h2 className="text-base font-semibold" style={{ color: cssVar('text') }}>Choose Model</h2>
-          <button onClick={onClose} className="p-1 rounded" style={{ color: cssVar('text2') }}>
-            <X className="w-5 h-5" />
-          </button>
+          <IconButton
+            onClick={onClose}
+            icon={<X className="w-5 h-5" />}
+            aria-label="Close model picker"
+            style={{ color: cssVar('text2') }}
+          />
         </div>
 
         {/* Cakra Auto — orchestrate across the whole NIM pool */}
         <div className="px-5 pt-4">
-          <button
+          <Button
+            variant="ghost"
+            fullWidth
             onClick={() => onChange({ ...settings, orchestrate: !settings.orchestrate })}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors"
+            aria-pressed={settings.orchestrate}
+            iconRight={
+              <div
+                className="w-10 h-6 rounded-full flex items-center px-0.5 transition-all"
+                style={{
+                  background: settings.orchestrate ? cssVar('aurora') : tint('xenon', 15),
+                  justifyContent: settings.orchestrate ? 'flex-end' : 'flex-start',
+                }}
+              >
+                <div className="w-5 h-5 rounded-full bg-glass" />
+              </div>
+            }
             style={{
+              justifyContent: 'space-between',
+              textAlign: 'left',
+              padding: '12px 16px',
+              borderRadius: 'var(--radius-lg)',
               background: settings.orchestrate ? tint('aurora', 12) : tint('xenon', 4),
               border: `1px solid ${settings.orchestrate ? tint('aurora', 33) : 'transparent'}`,
             }}
@@ -57,16 +78,7 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
                 Orchestrate across {getNimPool().length} NIM models — auto-routes & escalates hard tasks
               </div>
             </div>
-            <div
-              className="w-10 h-6 rounded-full flex items-center px-0.5 transition-all"
-              style={{
-                background: settings.orchestrate ? cssVar('aurora') : tint('xenon', 15),
-                justifyContent: settings.orchestrate ? 'flex-end' : 'flex-start',
-              }}
-            >
-              <div className="w-5 h-5 rounded-full bg-glass" />
-            </div>
-          </button>
+          </Button>
           {settings.orchestrate && (
             <p className="text-xs mt-2 px-1" style={{ color: cssVar('aurora') }}>
               Cakra picks the model per task. Manual selection below turns Auto off.
@@ -80,18 +92,21 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
           style={{ opacity: settings.orchestrate ? 0.45 : 1 }}
         >
           {PROVIDER_LIST.map(p => (
-            <button
+            <Button
               key={p.id}
+              variant="ghost"
+              size="sm"
               onClick={() => setSelected(p.id)}
-              className="px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-colors"
+              aria-pressed={selected === p.id}
               style={{
+                fontSize: 'var(--text-xs)',
                 background: selected === p.id ? `color-mix(in srgb, ${p.color} 13%, transparent)` : tint('xenon', 5),
                 color: selected === p.id ? p.color : cssVar('text2'),
                 border: `1px solid ${selected === p.id ? `color-mix(in srgb, ${p.color} 27%, transparent)` : 'transparent'}`,
               }}
             >
-              <span>{p.logo}</span> {p.name}
-            </button>
+              <span>{p.logo} {p.name}</span>
+            </Button>
           ))}
         </div>
 
@@ -104,43 +119,50 @@ export default function ModelPicker({ settings, onChange, onClose }: Props) {
 
         {/* Model list */}
         <div className="px-5 pb-5 space-y-2 max-h-64 overflow-y-auto">
-          {provider.models.map(m => (
-            <button
-              key={m.id}
-              onClick={() => {
-                onChange({
-                  ...settings,
-                  orchestrate: false,
-                  activeProvider: selected,
-                  providers: {
-                    ...settings.providers,
-                    [selected]: {
-                      ...settings.providers[selected],
-                      model: m.id,
+          {provider.models.map(m => {
+            const isActive = settings.providers[selected]?.model === m.id
+            return (
+              <Button
+                key={m.id}
+                variant="ghost"
+                fullWidth
+                onClick={() => {
+                  onChange({
+                    ...settings,
+                    orchestrate: false,
+                    activeProvider: selected,
+                    providers: {
+                      ...settings.providers,
+                      [selected]: {
+                        ...settings.providers[selected],
+                        model: m.id,
+                      },
                     },
-                  },
-                })
-                onClose()
-              }}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left text-sm transition-colors"
-              style={{
-                background: settings.providers[selected]?.model === m.id
-                  ? `color-mix(in srgb, ${provider.color} 8%, transparent)`
-                  : tint('xenon', 4),
-                border: `1px solid ${settings.providers[selected]?.model === m.id ? `color-mix(in srgb, ${provider.color} 27%, transparent)` : 'transparent'}`,
-              }}
-            >
-              <div>
-                <div style={{ color: cssVar('text') }}>{m.name}</div>
-                <div className="text-xs mt-0.5" style={{ color: cssVar('text3') }}>
-                  {m.contextWindow.toLocaleString()} ctx · {m.notes}
+                  })
+                  onClose()
+                }}
+                aria-pressed={isActive}
+                iconRight={isActive ? <Check className="w-4 h-4" style={{ color: provider.color }} /> : undefined}
+                style={{
+                  justifyContent: 'space-between',
+                  textAlign: 'left',
+                  padding: '12px 16px',
+                  borderRadius: 'var(--radius-lg)',
+                  background: isActive
+                    ? `color-mix(in srgb, ${provider.color} 8%, transparent)`
+                    : tint('xenon', 4),
+                  border: `1px solid ${isActive ? `color-mix(in srgb, ${provider.color} 27%, transparent)` : 'transparent'}`,
+                }}
+              >
+                <div>
+                  <div style={{ color: cssVar('text') }}>{m.name}</div>
+                  <div className="text-xs mt-0.5" style={{ color: cssVar('text3') }}>
+                    {m.contextWindow.toLocaleString()} ctx · {m.notes}
+                  </div>
                 </div>
-              </div>
-              {settings.providers[selected]?.model === m.id && (
-                <Check className="w-4 h-4" style={{ color: provider.color }} />
-              )}
-            </button>
-          ))}
+              </Button>
+            )
+          })}
         </div>
 
         {/* API key status */}

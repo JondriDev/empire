@@ -4,6 +4,7 @@
 
 import type { ToolCall } from '../lib/types'
 import { AlertTriangle } from 'lucide-react'
+import { Button } from '../../../components/ui'
 import { cssVar, tint } from '../../../design-system/tokens'
 
 interface Props {
@@ -63,20 +64,22 @@ export default function ConfirmModal({ calls, onConfirm, onDeny }: Props) {
           </div>
 
           <div className="flex gap-3">
-            <button
+            <Button
+              variant="ghost"
               onClick={onDeny}
-              className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors"
-              style={{ background: tint('xenon', 7), color: cssVar('text2') }}
+              className="flex-1"
+              style={{ background: tint('xenon', 7), color: cssVar('text2'), padding: '10px', borderRadius: 'var(--radius-lg)' }}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
               onClick={onConfirm}
-              className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors"
-              style={{ background: cssVar('ember'), color: cssVar('void') }}
+              className="flex-1"
+              style={{ background: cssVar('ember'), color: cssVar('void'), padding: '10px', borderRadius: 'var(--radius-lg)' }}
             >
               Run Anyway
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@
 
 import { useState } from 'react'
 import { X, Eye, EyeOff } from 'lucide-react'
+import { Button, IconButton, Input, Slider } from '../../../components/ui'
 import { cssVar, tint } from '../../../design-system/tokens'
 import { getApiBase, setApiBase, checkBackend } from '../../../lib/apiBase'
 import { PROVIDER_LIST } from '../lib/providers'
@@ -44,9 +45,12 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: tint('xenon', 10) }}>
           <h2 className="text-base font-semibold" style={{ color: cssVar('text') }}>Agent Settings</h2>
-          <button onClick={onClose} className="p-1 rounded" style={{ color: cssVar('text2') }}>
-            <X className="w-5 h-5" />
-          </button>
+          <IconButton
+            onClick={onClose}
+            icon={<X className="w-5 h-5" />}
+            aria-label="Close settings"
+            style={{ color: cssVar('text2') }}
+          />
         </div>
 
         {/* Scrollable content */}
@@ -62,25 +66,24 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
               Termux box on the same Wi-Fi). Leave blank to use the local server when present.
             </p>
             <div className="flex gap-2">
-              <input
+              <Input
                 type="text"
                 value={backendUrl}
-                onChange={e => setBackendUrl(e.target.value)}
+                onChange={setBackendUrl}
                 placeholder="http://192.168.1.10:3001"
-                className="flex-1 rounded-lg px-3 py-2 text-sm font-mono"
-                style={{ background: tint('xenon', 5), border: `1px solid ${tint('xenon', 10)}`, color: cssVar('text'), outline: 'none' }}
+                className="flex-1"
+                mono
               />
-              <button
+              <Button
                 onClick={async () => {
                   setApiBase(backendUrl)
                   setBackendTest('testing')
                   setBackendTest((await checkBackend()) ? 'online' : 'offline')
                 }}
-                className="px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
                 style={{ background: tint('ion', 22), color: cssVar('text') }}
               >
                 {backendTest === 'testing' ? 'Testing…' : 'Save & test'}
-              </button>
+              </Button>
             </div>
             {backendTest === 'online' && (
               <p className="text-xs mt-2" style={{ color: cssVar('c-success') }}>● Connected</p>
@@ -107,34 +110,27 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
                       {provider.logo} {provider.name}
                     </label>
                     <div className="flex gap-2">
-                      <input
+                      <Input
                         type={isVisible ? 'text' : 'password'}
                         value={key}
-                        onChange={e => {
+                        onChange={value => {
                           onChange({
                             ...settings,
                             providers: {
                               ...settings.providers,
-                              [provider.id]: { ...config!, apiKey: e.target.value },
+                              [provider.id]: { ...config!, apiKey: value },
                             },
                           })
                         }}
                         placeholder={`Enter ${provider.name} API key`}
-                        className="flex-1 rounded-lg px-3 py-2 text-sm"
-                        style={{
-                          background: tint('xenon', 5),
-                          border: `1px solid ${tint('xenon', 10)}`,
-                          color: cssVar('text'),
-                          outline: 'none',
-                        }}
+                        className="flex-1"
                       />
-                      <button
+                      <IconButton
                         onClick={() => toggleKeyVisibility(provider.id)}
-                        className="p-2 rounded-lg"
+                        icon={isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        aria-label={isVisible ? `Hide ${provider.name} API key` : `Show ${provider.name} API key`}
                         style={{ color: cssVar('text2'), background: tint('xenon', 5) }}
-                      >
-                        {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
+                      />
                     </div>
                   </div>
                 )
@@ -187,27 +183,25 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs mb-1 block" style={{ color: cssVar('text2') }}>Temperature</label>
-                <input
-                  type="range"
+                <Slider
                   min={0}
                   max={2}
                   step={0.1}
                   value={settings.temperature}
-                  onChange={e => onChange({ ...settings, temperature: parseFloat(e.target.value) })}
-                  className="w-full"
+                  onChange={v => onChange({ ...settings, temperature: v })}
+                  aria-label="Temperature"
                 />
                 <div className="text-xs text-center" style={{ color: cssVar('text2') }}>{settings.temperature.toFixed(1)}</div>
               </div>
               <div>
                 <label className="text-xs mb-1 block" style={{ color: cssVar('text2') }}>Max Tokens</label>
-                <input
-                  type="range"
+                <Slider
                   min={512}
                   max={8192}
                   step={256}
                   value={settings.maxTokens}
-                  onChange={e => onChange({ ...settings, maxTokens: parseInt(e.target.value) })}
-                  className="w-full"
+                  onChange={v => onChange({ ...settings, maxTokens: v })}
+                  aria-label="Max tokens"
                 />
                 <div className="text-xs text-center" style={{ color: cssVar('text2') }}>{settings.maxTokens}</div>
               </div>

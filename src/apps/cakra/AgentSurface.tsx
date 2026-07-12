@@ -6,7 +6,8 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Bot, Settings, Play, Square, Zap, ChevronDown, PanelRight } from 'lucide-react'
+import { Bot, Settings, Play, Square, Zap, ChevronDown, PanelRight, Trash2 } from 'lucide-react'
+import { Button, IconButton, TextArea } from '../../components/ui'
 import { runAgentTurn, getSettings, saveSettings, type AgentSettings } from './lib/agent'
 import { runOrchestratedTurn } from './lib/orchestrator'
 import type { Message, ToolCall, ThinkingStep } from './lib/types'
@@ -118,6 +119,16 @@ export default function AgentSurface() {
       } catch { /* ignore */ }
     }
   }, [])
+
+  // Auto-grow the compose field to fit its content (bounded), on both typing
+  // and inbound-clipboard prefill. (The TextArea primitive isn't a forwardRef,
+  // so we size it by id — the AIChat S9 pattern.)
+  useEffect(() => {
+    const el = document.getElementById('cakra-agent-compose') as HTMLTextAreaElement | null
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px'
+  }, [input])
 
   // ─── Run agent turn ───────────────────────────────────────────────────────
   const runTurn = useCallback((userContent: string, extraMessages: Message[] = []) => {
@@ -248,66 +259,72 @@ export default function AgentSurface() {
             </div>
             <div>
               <h1 className="text-base font-semibold">{AGENT_NAME}</h1>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setModelPickerOpen(true)}
-                className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full cursor-pointer"
-                style={settings.orchestrate
-                  ? { background: tint('aurora', 15), color: cssVar('aurora') }
-                  : { background: tint('ion', 15), color: cssVar('ion') }}
+                iconRight={<ChevronDown className="w-3 h-3" />}
+                aria-label="Choose model"
+                style={{
+                  ...(settings.orchestrate
+                    ? { background: tint('aurora', 15), color: cssVar('aurora') }
+                    : { background: tint('ion', 15), color: cssVar('ion') }),
+                  borderRadius: 'var(--radius-full)',
+                  padding: '2px 8px',
+                  fontSize: 'var(--text-xs)',
+                  gap: '4px',
+                }}
               >
-                {settings.orchestrate ? (
-                  <>
-                    <span>✨ Cakra Auto</span>
-                    <span style={{ color: cssVar('text2') }}>·</span>
-                    <span>NIM pool</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{activeProvider.name}</span>
-                    <span style={{ color: cssVar('text2') }}>·</span>
-                    <span>{activeModel?.split('/').pop()}</span>
-                  </>
-                )}
-                <ChevronDown className="w-3 h-3" />
-              </button>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  {settings.orchestrate ? (
+                    <>
+                      <span>✨ Cakra Auto</span>
+                      <span style={{ color: cssVar('text2') }}>·</span>
+                      <span>NIM pool</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{activeProvider.name}</span>
+                      <span style={{ color: cssVar('text2') }}>·</span>
+                      <span>{activeModel?.split('/').pop()}</span>
+                    </>
+                  )}
+                </span>
+              </Button>
             </div>
           </div>
 
           <div className="flex items-center gap-1">
-            <button
+            <IconButton
               onClick={() => setShowThinking(v => !v)}
-              className="p-2 rounded-lg text-xs"
-              style={{ color: cssVar('text2'), background: showThinking ? tint('signal', 10) : 'transparent' }}
+              icon={<Zap className="w-4 h-4" />}
+              aria-label="Toggle thinking trace"
+              aria-pressed={showThinking}
               title="Toggle thinking trace"
-            >
-              <Zap className="w-4 h-4" />
-            </button>
-            <button
+              style={{ color: cssVar('text2'), background: showThinking ? tint('signal', 10) : 'transparent' }}
+            />
+            <IconButton
               onClick={() => setPanelOpen(v => !v)}
-              className="p-2 rounded-lg text-xs"
-              style={{ color: panelOpen ? cssVar('signal') : cssVar('text2'), background: panelOpen ? tint('signal', 10) : 'transparent' }}
+              icon={<PanelRight className="w-4 h-4" />}
+              aria-label="Toggle Workspace"
+              aria-pressed={panelOpen}
               title="Toggle Workspace — see what Cakra is doing"
-            >
-              <PanelRight className="w-4 h-4" />
-            </button>
-            <button
+              style={{ color: panelOpen ? cssVar('signal') : cssVar('text2'), background: panelOpen ? tint('signal', 10) : 'transparent' }}
+            />
+            <IconButton
               onClick={clearChat}
-              className="p-2 rounded-lg text-muted hover:text-fg transition-colors"
+              icon={<Trash2 className="w-4 h-4" />}
+              aria-label="Clear chat"
               title="Clear chat"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                <path d="M10 11v6M14 11v6" />
-              </svg>
-            </button>
-            <button
+              style={{ color: cssVar('text2') }}
+            />
+            <IconButton
               onClick={() => setSettingsOpen(true)}
-              className="p-2 rounded-lg text-muted hover:text-fg transition-colors"
+              icon={<Settings className="w-4 h-4" />}
+              aria-label="Settings"
               title="Settings"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
+              style={{ color: cssVar('text2') }}
+            />
           </div>
         </div>
 
@@ -328,11 +345,12 @@ export default function AgentSurface() {
 
         {/* Input area */}
         <div className="p-4 border-t" style={{ borderColor: 'var(--border)' }}>
-          <form onSubmit={handleSubmit} className="flex items-end gap-2">
+          <div className="flex items-end gap-2">
             <div className="flex-1 relative">
-              <textarea
+              <TextArea
+                id="cakra-agent-compose"
                 value={input}
-                onChange={e => setInput(e.target.value)}
+                onChange={setInput}
                 onKeyDown={e => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault()
@@ -341,46 +359,43 @@ export default function AgentSurface() {
                 }}
                 placeholder="Ask me to do something..."
                 rows={1}
-                className="w-full rounded-xl px-4 py-3 pr-12 resize-none text-sm"
+                aria-label="Message Cakra"
+                className="pr-12"
+                disabled={loading}
                 style={{
                   background: tint('xenon', 5),
-                  border: '1px solid var(--border)',
-                  color: 'var(--text)',
+                  resize: 'none',
+                  minHeight: 0,
                   maxHeight: '120px',
-                  outline: 'none',
-                }}
-                disabled={loading}
-                ref={el => {
-                  if (el) {
-                    el.style.height = 'auto'
-                    el.style.height = Math.min(el.scrollHeight, 120) + 'px'
-                  }
+                  padding: '12px 48px 12px 16px',
+                  borderRadius: 'var(--radius-lg)',
                 }}
               />
               {loading && (
-                <button
-                  type="button"
+                <IconButton
+                  size="sm"
                   onClick={handleCancel}
-                  className="absolute right-3 bottom-3 p-1 rounded"
+                  icon={<Square className="w-4 h-4" />}
+                  aria-label="Stop"
+                  className="absolute right-3 bottom-3"
                   style={{ color: cssVar('c-danger') }}
-                >
-                  <Square className="w-4 h-4" />
-                </button>
+                />
               )}
             </div>
-            <button
-              type="submit"
+            <IconButton
+              onClick={() => handleSubmit()}
               disabled={!input.trim() || loading}
-              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+              icon={<Play className="w-4 h-4" />}
+              aria-label="Send"
               style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: 'var(--radius-lg)',
                 background: input.trim() && !loading ? cssVar('ion') : tint('ion', 30),
                 color: cssVar('xenon'),
-                cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
               }}
-            >
-              <Play className="w-4 h-4" />
-            </button>
-          </form>
+            />
+          </div>
           <p className="text-xs text-center mt-2" style={{ color: cssVar('text3') }}>
             Shift+Enter for newline · Enter to send · I'm an AI that can take actions
           </p>

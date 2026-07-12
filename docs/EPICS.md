@@ -295,13 +295,15 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   `mirrorCollection('prompt')`, all `emit`/`SendResultMenu`/`ProvenanceChip`/`NodeActions` wiring. build🟢 vitest 530/530🟢 eslint
   clean; `--assert-zero` exit 0; qa-smoke 32/32 clean + all 13 guards green (**PROVENANCE editor→ai-chat/prompt-generator ✅**).
 
-- [ ] **S10 · Migrate the Cakra family, part 2 — agent + solver + settings (35 → 0).** `src/apps/cakra/AgentSurface.tsx` (**8**
-  `b7/t1`), `src/apps/cakra/solver/SolverPanel.tsx` (**8** `b6/i2`; **keep the World-Solver `feed.json` read path UNTOUCHED — do
-  NOT edit `feed.json`**), `src/apps/cakra/components/SettingsPanel.tsx` (**7** `b3/i4`; setting inputs → `Input`, toggles →
-  `Segmented`/`IconButton`), `src/apps/cakra/solver/ProblemDetail.tsx` (**6** `b6`), `src/apps/cakra/components/ModelPicker.tsx`
-  (**4** `b4`; model list → `Segmented` or `Button` rows), `src/apps/cakra/components/ConfirmModal.tsx` (**2** `b2`). Mapping
-  rule. *Acceptance:* all six = 0 (`offShellControls 83 → 48`, −35); solver + settings render clean, **the solver feed still
-  loads**; build🟢 vitest🟢 eslint clean; conformance 0.
+- [x] **S10 · Migrate the Cakra family, part 2 — agent + solver + settings (35 → 0).** ✅ **SHIPPED 2026-07-12 (green main).**
+  `offShellControls 83 → 48 (−35)`, EXACTLY the S10 target (`b72/i10/s0/t1 → b44/i4/s0/t0`); all six files 0 — AgentSurface 8→0,
+  SolverPanel 8→0, SettingsPanel 7→0, ProblemDetail 6→0, ModelPicker 4→0, ConfirmModal 2→0. Two range inputs (SettingsPanel
+  temperature/maxTokens) → `Slider`; the auto-solver, provider tabs, model rows, and Cakra-Auto toggle → `Button` (the model rows
+  + toggle use the **space-between + iconRight recipe** with `aria-pressed`); the AgentSurface compose `<form>` → `<div>` (send is
+  now an `IconButton onClick`, auto-grow via `id`+`useEffect` since `TextArea` isn't a forwardRef) and the SolverPanel add-problem
+  `<form>` → `<div>` (Input `onKeyDown` Enter → `submitNew`). **World-Solver `feed.json` read path UNTOUCHED — solver renders clean
+  + feed loads.** build🟢 vitest 532/532🟢 eslint clean (6 touched); `--assert-zero` exit 0; qa-smoke 32/32 clean, all 13 guards
+  green (INBOUND messages←ai-chat 4/4 ✅, PROVENANCE editor→ai-chat 3/3 ✅). bundle gz 731.1→730.9 (−0.2); no new deps.
 
 - [ ] **S11 · Migrate the shell components + artifacts wrappers (48 → 0) — the LAST offenders.** The desktop chrome + the four
   organism lenses + the artifacts wrappers. `src/components/Desktop.tsx` (**8** `b7/i1`), `src/components/AppShell.tsx` (**6**
