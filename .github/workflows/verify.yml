@@ -15,7 +15,11 @@ name: Verify build
 # "design-system conformance" gate (scripts/metrics.mjs --assert-zero) that fails
 # if any raw hex/rgb literal (tokenViolations) or off-system Tailwind palette
 # class (offSystemUtilities) re-enters src/ — locking the EPIC-5 1076→0 sweep so
-# the one-palette/themeable win can't silently rot. Finally runs the "dependency
+# the one-palette/themeable win can't silently rot — and now also fails if a bare
+# <button>/<input>/<select>/<textarea> re-enters src/ (offShellControls), locking
+# the EPIC-14 307→0 shell-conformance sweep so a control can't drift off the `ui`
+# primitive layer behind a green build (the census used to be re-counted by hand
+# each QA run; e.g. the Cakra NIM commit silently re-added one, 48→49). Finally runs the "dependency
 # security audit" gate (scripts/check-audit.mjs) that fails if a NEW high/critical
 # npm advisory enters the tree — the deliberately-deferred dev-tooling advisories
 # (vite/vitest/esbuild dev-server-only, need a major bump) are documented in that
@@ -70,7 +74,7 @@ jobs:
       - name: Guard — registry ↔ appComponents route parity (App-not-available drift)
         run: node scripts/check-route-parity.mjs
 
-      - name: Guard — design-system conformance (tokenViolations=0, offSystemUtilities=0)
+      - name: Guard — design-system + shell conformance (tokenViolations=0, offSystemUtilities=0, offShellControls=0)
         run: node scripts/metrics.mjs --assert-zero
 
       - name: Guard — dependency security audit (fails on any NEW high/critical vuln)
