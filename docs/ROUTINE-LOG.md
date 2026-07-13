@@ -5,6 +5,22 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-13 · QA — visual + smoke on green `d131376`: 32/32 clean, all 14 guards green; ★ EPIC-16 S1 CONFIRMED (`docMass 3269 → 0`)
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` @ `d131376`. `npm install` → `npm run build` (`tsc -b && vite build`) **GREEN** (PWA precache 91 entries / 3134 KiB). Served `dist/` on :3001 via `node server.js`.
+
+**Smoke (`node scripts/qa-smoke.mjs`): 32/32 passed, 0 failed.** Desktop + 31 registry routes render with uncaught:0. Full guard suite green: INBOUND-LANDS 4/4 · MEDIA-PERSISTS 3/3 · GRAPH-LEGIBLE 3/3 · GLOBAL-SEARCH 1/1 · NODE-LINEAGE 1/1 · INTENT-ROUNDTRIP 2/2 · TIMELINE 1/1 · HOME-ALIVE 1/1 · PROVENANCE-PERSISTS 3/3 · PROVENANCE-ENTITY 3/3 · PRECACHE-AUDIT no gap (91 entries; 55 JS + 3 CSS) · OFFLINE-BOOT 5/5 cold-offline.
+
+**Metrics (`--assert-zero` exit 0):** apps 31 · test cases 468 (+3) · test files 65 · all five product axes 0 & LOCKED (`tokenViolations`/`offSystemUtilities`/`offSystemStyle` r0/t0/m0/`offShellControls` b0/i0/s0/t0/`keyboardA11y`) · **`docMass` 0** (CONTEXT 399/400, EPICS 153/500 — measured, not yet gated) · bundle gz 733.8 (+1.0, dev-only playwright).
+
+**Active-epic acceptance — EPIC-16 · doc-mass conformance:** **✅ S1 target metric CONFIRMED MOVED — `docMass 3269 → 0`.** Both read-every-run docs held under budget after S1's prune. A stage is done-confirmed only when its acceptance metric moves; `docMass=0` confirms it. Next: **S2/S3 lock `docMass` in `--assert-zero`** (add `docMass>0` to the gate + verify it bites) → EPIC-16 CODE-COMPLETE.
+
+**Runtime bugs: NONE.** All console noise env-expected only — headless geolocation permissions-policy block (weather), blocked external tile/API CDN tunnels (weather, maps ×8), authed-only 401s (files, mail). No code defect. Visual spot-check: desktop styled home (greeting + Ask-Cakra + TODAY/TASKS/GOALS/ORGANISM cards + 31-app grid), photos new honest empty state, maps Leaflet chrome intact (tiles grey from blocked CDN only).
+
+**Since last QA commit `f133f5d`:** `1cc462e` (EPIC-16 S1) + `d131376` (photos filename-search + honest empty states) landed; build + smoke re-run on `d131376` so this report describes the pushed tree. **Next:** Builder does EPIC-16 S2/S3 (lock `docMass`).
+
+---
+
 ## 2026-07-13 · BUILDER — EPIC-16 PROMOTED & S1 SHIPPED: stand up the `docMass` metric + prune both working-memory docs under budget (`docMass 3269 → 0`)
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (@ `ab92d32`). `npm install` → `npm run build` (`tsc -b && vite build`) GREEN; `npx vitest run` 465-src / 556-total baseline; `--assert-zero` exit 0 (all 5 product axes 0). Confirmed green before touching anything.

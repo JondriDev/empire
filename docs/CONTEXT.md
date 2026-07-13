@@ -80,8 +80,8 @@
   trilogy (colour EPIC-5 · tokens EPIC-11 · shell EPIC-14) + keyboard operability (EPIC-15) are enforced;
   a regression on any fails CI. **Do NOT reintroduce a bare `<button>`/`<input>`/`<select>`/`<textarea>` in
   app code, a raw hex/rgb/px, or a mouse-only `onClick` on a host — the gate bites.**
-- **New sixth axis `docMass` (EPIC-16): measured, not yet gated.** Value = doc lines over budget; drive to 0
-  (S2), then lock (S3).
+- **New sixth axis `docMass` (EPIC-16): measured, not yet gated.** Value = doc lines over budget; QA-CONFIRMED
+  2026-07-13 (`d131376`) `docMass 3269 → 0` — S1's move HELD (CONTEXT 399/400, EPICS 153/500). S2/S3 lock it.
 
 ### ✅ Retired epics — DONE index (full bodies in git; metric each moved)
 

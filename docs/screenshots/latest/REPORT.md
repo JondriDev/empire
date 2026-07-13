@@ -1,37 +1,47 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-13T13:09:33.925Z
+**Generated:** 2026-07-13T18:08:59.155Z · **main @ `d131376`** · build 🟢 GREEN
 
-**Result:** 32/32 rendered without crash, 0 failed.
+**Result:** 32/32 rendered without crash, 0 failed. All 14 guards green. Ratchet `--assert-zero` exit 0.
 
-## ✅ No runtime bug found — green main `61c4f7b`
+> **✅ NO RUNTIME BUG FOUND.** Every console message observed is env-expected noise (headless
+> geolocation permissions-policy block, external tile/API tunnels blocked by the cloud egress policy,
+> authed-only 401s). None is a code defect — nothing for the build routine to pick up.
 
-## ★ Epic-acceptance — EPIC-15 CODE-COMPLETE, target metric CONFIRMED MOVED
+## Metrics (`node scripts/metrics.mjs`, `--assert-zero` exit 0)
 
-- **Active epic:** EPIC-15 · Keyboard operability (WCAG 2.1.1). **Target metric `keyboardA11y`: 24 → 0 (−24).**
-- **Confirmed this run:** `node scripts/metrics.mjs` reports `keyboardA11y = 0`; `node scripts/metrics.mjs --assert-zero` **exits 0** and its success line now names all five conformance gates — `tokenViolations=0, offSystemUtilities=0, offSystemStyle=0, offShellControls=0, keyboardA11y=0`. The S2+S3+S4 sweep + lock all landed in one commit (`61c4f7b`); the Builder verified the lock BITES (bare `<div onClick>` → exit 1, reverted). **EPIC-15 acceptance metric MOVED → S1–S4 done-confirmed → EPIC-15 CODE-COMPLETE. Ready for the Strategist to retire → DONE.**
-- **Device-gated remainder:** on-device tab-through of the migrated apps (focus rings + Enter/Space actually activating) — the code fix is cloud-verified; the felt experience is device-only.
+| Metric | Value | Δ vs last QA (`f133f5d`) | Note |
+|---|---|---|---|
+| Apps / routes | 31 | ±0 | smoke↔registry exact at 31; 32/32 incl. desktop |
+| Test cases | 468 | +3 | src-static |
+| Test files | 65 | ±0 | |
+| Token violations | 0 | ±0 | LOCKED |
+| Off-system utils | 0 | ±0 | LOCKED |
+| Off-system style | 0 (r0/t0/m0) | ±0 | LOCKED |
+| Off-shell controls | 0 (b0/i0/s0/t0) | ±0 | LOCKED |
+| Keyboard a11y | 0 | ±0 | LOCKED |
+| **Doc mass (over)** | **0** | ±0 | CONTEXT 399/400, EPICS 153/500 — both under budget; not yet gated (S2/S3 lock) |
+| Bundle gz (KB) | 733.8 | +1.0 | dev-only playwright never enters prod bundle |
 
-## Metric deltas (vs committed snapshot; `metrics.mjs` this run)
+Success line names all five gated axes: `tokenViolations=0, offSystemUtilities=0, offSystemStyle=0,
+offShellControls=0, keyboardA11y=0`.
 
-| Metric | Value | Δ |
-|---|---|---|
-| Apps / routes | 31 | ±0 |
-| Test cases | 465 | ±0 |
-| Test files | 65 | ±0 |
-| tokenViolations | 0 | ±0 |
-| offSystemUtilities | 0 | ±0 |
-| offSystemStyle | 0 (r0/t0/m0) | ±0 |
-| offShellControls | 0 (b0/i0/s0/t0) | ±0 |
-| **keyboardA11y** | **0** | **±0** (was 24 at S1 baseline; −24 landed in `61c4f7b`) |
-| Bundle gz (KB) | 732.8 | ±0 |
+## Active-epic acceptance — EPIC-16 · doc-mass conformance
 
-## Visual inspection (captured + read locally, none committed)
+**✅ S1 CONFIRMED — target metric moved.** EPIC-16 S1 shipped this cycle (`1cc462e`); its target metric
+**`docMass` moved 3269 → 0** (both read-every-run docs now under budget: CONTEXT 399/400, EPICS 153/500).
+A stage is done-confirmed only when its acceptance metric moves — `docMass=0` confirms S1. `docMass` is
+measured but **not yet in `--assert-zero`**; **S2/S3 lock it** (add `docMass>0` to the gate, verify it bites).
+No product-code risk touched — five product axes stay 0 & LOCKED.
 
-- `desktop.png` — Bridge "Good afternoon · MONDAY, JULY 13" (date correct), 4 live stat cards (Today/Open Tasks/Goals/Organism), full Cakra→Crypto launcher, glass/alien palette intact.
-- `calendar.png` — July 2026 with the 13th highlighted under **Mon** (July 13 2026 IS a Monday ✅); panel reads "13 July 2026 Monday". Migrated day-cells render as keyboard-operable surfaces.
-- `photos.png` — clean "No photos yet" empty state; Import Button + grid-cols/view/All·Favorites Segmented, all shelled.
-- `network.png` — CORE mesh + full node-types legend (note/task/message/learning/goal/prompt/wallet/draft/other).
+Since last QA commit `f133f5d`: code commits `1cc462e` (EPIC-16 S1) + `d131376` (photos filename-search +
+honest empty states) landed. Build + smoke re-run green on `d131376` — this report describes the tree it is
+pushed against. Visual spot-check: **desktop** styled home (greeting, Ask-Cakra, TODAY/TASKS/GOALS/ORGANISM,
+31-app grid); **photos** renders the new "No photos yet" honest empty state; **maps** Leaflet chrome intact
+(only tiles grey from blocked CDN).
+
+---
+
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -55,7 +65,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -186,7 +196,7 @@ Distinct from the edge guard above: each S3 receiver was seeded with an inbound 
 
 The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (`setOffline`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.
 
-**Precache:** 90 manifest entries; 54 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
+**Precache:** 91 manifest entries; 55 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
 
 | Route | Renders offline |
 |---|---|
