@@ -11,6 +11,7 @@ import { Button, IconButton, Select, TextArea } from '../../../components/ui'
 import { cssVar } from '../../../design-system/tokens'
 import { ProvenanceChip } from '../../../components/ui/ProvenanceChip'
 import { SendResultMenu } from '../../../components/ui/SendResultMenu'
+import { onActivate } from '../../../lib/a11y'
 import { useInboundHandoff } from '../../../lib/useInboundHandoff'
 
 interface EditorStats {
@@ -183,7 +184,9 @@ export default function Editor() {
               className="text-xs whitespace-nowrap"
               icon={<FileText className="w-3 h-3" />}>
               {f.name}
-              <span onClick={e => { e.stopPropagation(); deleteFile(f.name) }}
+              <span role="button" tabIndex={0} aria-label={`Delete ${f.name}`}
+                onClick={e => { e.stopPropagation(); deleteFile(f.name) }}
+                onKeyDown={onActivate(() => deleteFile(f.name))}
                 className="text-faint hover:text-danger ml-1">×</span>
             </Button>
           ))}

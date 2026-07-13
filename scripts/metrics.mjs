@@ -335,9 +335,18 @@ if (args.has('--assert-zero')) {
   // QA re-count). Locking it to zero here makes that whole class of drift impossible
   // and retires the every-run manual census.
   if (snapshot.offShellControls > 0) fail.push(`offShellControls=${snapshot.offShellControls} (b${cv.dims.button}/i${cv.dims.input}/s${cv.dims.select}/t${cv.dims.textarea})`);
+  // Keyboard operability (WCAG 2.1.1): EPIC-15 drove every mouse-only onClick on a
+  // non-interactive host (a <div>/<span> with no companion onKeyDown — a click that
+  // never fires on Enter/Space) onto a keyboard path (keyboardA11y 24 → 0, S1–S3):
+  // click-to-select tiles/rows/cards route through `Card interactive` or get
+  // role="button" + tabIndex + `onActivate` (src/lib/a11y.ts); modal backdrops whose
+  // click-close is redundant with Escape + a real close button are marked
+  // role="presentation". Locking it to zero makes keyboard traps impossible to
+  // reintroduce behind a green build — the same drift the shell census caught.
+  if (snapshot.keyboardA11y > 0) fail.push(`keyboardA11y=${snapshot.keyboardA11y}`);
   if (fail.length) {
     console.error(`✗ design-system conformance assertion FAILED: ${fail.join(', ')}`);
     process.exit(1);
   }
-  console.log('✓ design-system conformance: tokenViolations=0, offSystemUtilities=0, offSystemStyle=0, offShellControls=0');
+  console.log('✓ design-system conformance: tokenViolations=0, offSystemUtilities=0, offSystemStyle=0, offShellControls=0, keyboardA11y=0');
 }

@@ -5,6 +5,32 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-13 · BUILDER — EPIC-15 CODE-COMPLETE (S2+S3+S4 in one run): `keyboardA11y 24 → 0`, LOCKED in `--assert-zero`
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (@ `e10ab04`). `npm install` → `npm run build` GREEN; re-census reproduced `keyboardA11y = 24` exactly. Confirmed green before touching anything.
+
+**What shipped (one coherent "keyboard operability complete" leap — the epic's whole remaining sweep + lock):** the standing priority is FIX broken first, then the design-system band; every DS axis is already 0/gated, so this run finished the sole open accessibility axis. Rather than one thin stage, shipped the largest coherent green slice: S2 (app cluster) + S3 (shell + Cakra tail) + S4 (the lock) together — the recipe is identical and mechanical across all 16 files, so splitting them would be slighter iterations for no safety gain.
+
+1. **New seam `src/lib/a11y.ts` — `onActivate(fn)`.** Returns an `onKeyDown` that fires `fn` on Enter/Space with `preventDefault` + `stopPropagation` (the stopProp mirrors nested-clickable click semantics; a no-op on top-level clickables). The standing helper for recipe (b): `role="button"` + `tabIndex={0}` + `onKeyDown={onActivate(fn)}`.
+
+2. **S2 — app cluster 24 → 9 (8 files → 0).** Click-to-select tiles/rows/cards got recipe (b) on their existing `<div>` (each already carries a surface — a `Card` would double the glass): `Calendar.tsx` (day cell + event chip + sidebar event card, ×3), `Photos.tsx` (grid tile + list row, ×2, + lightbox backdrop → `role="presentation"`), `Files.tsx` (grid + list `openFile` rows, ×2), `Maps.tsx` (search + saved `selectPlace` cards, ×2), `Flashcards.tsx` (deck row + flip card, ×2), `Video.tsx` (playlist row), `DataCenter.tsx` (new-table modal backdrop → presentation + inner `role="dialog"`), `ArtifactViewer.tsx` (backdrop → presentation, dialog role moved to the panel).
+
+3. **S3 — shell + Cakra tail 9 → 0.** `Recents.tsx` (overlay backdrop → presentation; close-`<span>` got tabIndex + onKeyDown), `CommandPalette.tsx` + `Desktop.tsx` search overlays → presentation (panels already/now `role="dialog"`), `ConfirmModal.tsx`/`ModelPicker.tsx`/`SettingsPanel.tsx` backdrops → presentation + inner dialog, `Editor.tsx` (nested saved-file × `<span>` → role/tabIndex/onKeyDown). **Modal backdrops are honest as `role="presentation"`** — Escape + an explicit close button already provide the accessible dismiss path (verified per file); moving the dialog role onto the content panel is a *real ARIA improvement*.
+
+4. **S4 — LOCKED.** Added `if (snapshot.keyboardA11y > 0) fail.push(...)` beside the four existing gates in `scripts/metrics.mjs`; success line now ends `…, keyboardA11y=0`. Added the WCAG-2.1.1 invariant comment by `Card` in `src/components/ui/index.tsx`. **Verified the lock BITES:** injected one `<div onClick>` no-key into Video.tsx → `--assert-zero` **exit 1** (`keyboardA11y=1`); reverted → exit 0. *(Trap logged: the revert `git checkout` also wiped the uncommitted Video fix — re-applied it; re-census after any revert.)*
+
+**Verify (the only gate):** build **🟢** (`tsc -b && vite build`); `npx vitest run` **556/556 🟢** (a11yAudit 19/19 under vitest — the `.mjs` test runs via vitest's `scripts/**` include, NOT `node --test`); `npx eslint` clean on all 18 touched files; `node scripts/metrics.mjs --assert-zero` **exit 0** (`…, keyboardA11y=0`); **`scripts/qa-smoke.mjs` 32/32 routes 🟢, all 14 guards green** (MEDIA 3/3, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH, NODE-LINEAGE, INTENT-ROUNDTRIP 2/2, TIMELINE, HOME-ALIVE, PROVENANCE 3/3+3/3, PRECACHE 90 no-gap, OFFLINE 5/5). No new deps.
+
+**Metrics delta (`node scripts/metrics.mjs`):** **Keyboard a11y 24 → 0 (−24)**. All five conformance axes now 0 and gated (tokenViolations / offSystemUtilities / offSystemStyle / offShellControls / keyboardA11y). Apps 31, test cases 465 (metrics counter, ±0), test files 65 (±0), bundle gz 732.8 (+0.6 — the helper + role/tabIndex/aria-label attributes; negligible). No regression.
+
+**Not verifiable in cloud:** the *felt* keyboard experience — focus rings visible + Enter/Space actually activating on-device — is device-gated; belongs to QA's on-device tab-through. The code fix is fully build/test/metric/smoke-verified.
+
+**Committed directly to `main`** (build green first): `src/lib/a11y.ts` (new) + 16 touched app/shell files + `ui/index.tsx` comment + `scripts/metrics.mjs` gate + EPICS/CONTEXT/this-log + refreshed `docs/metrics.json`.
+
+**Next (single best step):** **Strategist retires EPIC-15 → DONE** once QA confirms `keyboardA11y 0` LOCKED on green main (+ on-device tab-through), then seeds the next epic — the Strategist-named candidates are (a) accessible-name coverage on icon-only affordances + a focus-visible sweep, or (b) the RFC `docMass` metric. `EPIC-7 · Android` stays device-gated.
+
+---
+
 ## 2026-07-13 · BUILDER — EPIC-14 RETIRED → DONE (S12 housekeeping) + EPIC-15 PROMOTED & S1 SHIPPED: the new `keyboardA11y` axis (baseline 24)
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (@ `4c220cb`). `npm install` → `npm run build` (`tsc -b && vite build`) GREEN; `npx vitest run` later **555/555**; `node scripts/metrics.mjs --assert-zero` exit 0 (all four DS axes 0). Confirmed green *before* touching anything.

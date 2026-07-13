@@ -5,6 +5,7 @@ import { apiUrl } from '../../lib/apiBase'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { accumulateFiles, fileNodeData, type AccumulatedFile } from './filesGraph'
+import { onActivate } from '../../lib/a11y'
 import {
   Folder, FolderOpen, File, FileText, Image, Film, Music,
   Code, Archive, ChevronRight, ChevronDown, Download,
@@ -246,7 +247,11 @@ export default function Files() {
           {filtered.map(entry => (
             <div
               key={entry.path}
+              role="button"
+              tabIndex={0}
+              aria-label={entry.isDirectory ? `Open folder ${entry.name}` : `Open ${entry.name}`}
               onClick={() => openFile(entry)}
+              onKeyDown={onActivate(() => openFile(entry))}
               className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer group transition ${selected === entry.name ? 'bg-signal/20' : 'hover:bg-glass'}`}
             >
               {entry.isDirectory ? (
@@ -280,7 +285,11 @@ export default function Files() {
           {filtered.map(entry => (
             <div
               key={entry.path}
+              role="button"
+              tabIndex={0}
+              aria-label={entry.isDirectory ? `Open folder ${entry.name}` : `Open ${entry.name}`}
               onClick={() => openFile(entry)}
+              onKeyDown={onActivate(() => openFile(entry))}
               className={`p-3 rounded-lg cursor-pointer text-center group transition ${selected === entry.name ? 'bg-signal/20' : 'hover:bg-glass'}`}
             >
               <div className="text-3xl mb-1">{entry.isDirectory ? '📁' : '📄'}</div>

@@ -10,6 +10,7 @@ import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { Button, IconButton, Input, TextArea } from '../../components/ui'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
+import { onActivate } from '../../lib/a11y'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { LineageTrail } from '../../components/ui/LineageTrail'
 import { tint } from '../../design-system/tokens'
@@ -235,7 +236,11 @@ export default function Calendar() {
             return (
               <div
                 key={day}
+                role="button"
+                tabIndex={0}
+                aria-label={`Select ${dateStr}`}
                 onClick={() => setSelectedDate(dateStr)}
+                onKeyDown={onActivate(() => setSelectedDate(dateStr))}
                 className={`group bg-void/30 p-1.5 min-h-[80px] cursor-pointer transition-colors hover:bg-glass ${
                   isSelected ? 'ring-1 ring-signal' : ''
                 } ${isToday ? 'bg-signal/10' : ''}`}
@@ -254,7 +259,11 @@ export default function Calendar() {
                 <div className="space-y-0.5">
                   {dayEvents.slice(0, 3).map(e => (
                     <div key={e.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Edit ${e.title}`}
                       onClick={e_ => { e_.stopPropagation(); openEditForm(e) }}
+                      onKeyDown={onActivate(() => openEditForm(e))}
                       className={`text-[10px] px-1 py-0.5 rounded truncate text-fg ${e.color} cursor-pointer hover:opacity-80`}>
                       {e.time} {e.title}
                     </div>
@@ -293,7 +302,9 @@ export default function Calendar() {
             </div>
           )}
           {(selectedDate ? selectedEvents : todayEvents).map(e => (
-            <div key={e.id} onClick={() => openEditForm(e)}
+            <div key={e.id} role="button" tabIndex={0} aria-label={`Edit ${e.title}`}
+              onClick={() => openEditForm(e)}
+              onKeyDown={onActivate(() => openEditForm(e))}
               className="p-3 rounded-xl border border-hair hover:border-signal/30 cursor-pointer transition-all group"
               style={{ background: 'var(--card-bg)' }}>
               <div className="flex items-start gap-2">

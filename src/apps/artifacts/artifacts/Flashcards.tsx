@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, RotateCcw, ChevronLeft, ChevronRight, Trash2, Check, X as XIcon, Sparkles, ListChecks } from 'lucide-react'
 import { Button, IconButton } from '../../../components/ui'
+import { onActivate } from '../../../lib/a11y'
 
 interface Card { id: string; front: string; back: string; known?: boolean }
 interface Deck { id: string; name: string; emoji: string; cards: Card[] }
@@ -111,8 +112,10 @@ export default function Flashcards() {
               const known = d.cards.filter(c => c.known).length
               const pct = d.cards.length ? Math.round((known / d.cards.length) * 100) : 0
               return (
-                <div key={d.id} className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer ${activeDeck === d.id ? 'bg-ion/20 border border-ion/30' : 'hover:bg-glass border border-transparent'}`}
-                  onClick={() => { setActiveDeck(d.id); setIdx(0); setFlipped(false) }}>
+                <div key={d.id} role="button" tabIndex={0} aria-label={`Open deck ${d.name}`}
+                  className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer ${activeDeck === d.id ? 'bg-ion/20 border border-ion/30' : 'hover:bg-glass border border-transparent'}`}
+                  onClick={() => { setActiveDeck(d.id); setIdx(0); setFlipped(false) }}
+                  onKeyDown={onActivate(() => { setActiveDeck(d.id); setIdx(0); setFlipped(false) })}>
                   <span className="text-lg">{d.emoji}</span>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{d.name}</div>
@@ -163,7 +166,11 @@ export default function Flashcards() {
 
               {/* Card */}
               <div
+                role="button"
+                tabIndex={0}
+                aria-label={flipped ? 'Show question' : 'Show answer'}
                 onClick={() => setFlipped(!flipped)}
+                onKeyDown={onActivate(() => setFlipped(!flipped))}
                 className="relative bg-gradient-to-br from-xenon/10 to-xenon/5 backdrop-blur border border-hair rounded-3xl p-12 min-h-[320px] flex items-center justify-center cursor-pointer hover:border-hair transition shadow-2xl shadow-ion/10"
               >
                 <div className="text-center max-w-xl">

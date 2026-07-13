@@ -160,8 +160,8 @@ export default function Desktop() {
       <Recents open={showRecents} onClose={() => setShowRecents(false)} />
 
       {showSearch && (
-        <div className="empire-search-overlay" onClick={() => setShowSearch(false)}>
-          <div className="empire-search-panel" onClick={e => e.stopPropagation()}>
+        <div className="empire-search-overlay" role="presentation" onClick={() => setShowSearch(false)}>
+          <div className="empire-search-panel" role="dialog" aria-modal="true" aria-label="Search apps" onClick={e => e.stopPropagation()}>
             <div className="empire-search-input-wrap">
               <Search className="w-5 h-5" style={{ color: 'var(--text3)' }} />
               <Input

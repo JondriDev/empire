@@ -88,7 +88,8 @@ visible, tab order is sane). The organism stops being a mouse-only instrument. *
   `keyboardA11y = 24` across 16 files** (heaviest: Calendar 3, Photos 3, Flashcards 2, Files 2, Maps 2, Recents 2). **NOT yet
   in `--assert-zero`** (baseline is non-zero — the lock is S4). *Acceptance (met):* metric prints + persists to metrics.json;
   `--assert-zero` still exits 0 (unchanged — keyboardA11y ungated); build🟢 vitest🟢 (555) eslint clean; no new deps.
-- [ ] **S2 · SWEEP the app cluster (~16 → establish the recipe).** Make every flagged clickable in the standalone apps
+- [x] **S2 · SWEEP the app cluster (~16 → establish the recipe).** ✅ SHIPPED 2026-07-13 (with S3+S4 — the whole
+  operability sweep landed in one run). Make every flagged clickable in the standalone apps
   keyboard-operable, heaviest-first: `apps/calendar/Calendar.tsx` (3 — day cells + event chip + edit card), `apps/photos/
   Photos.tsx` (3 — grid tile + list row select), `apps/files/Files.tsx` (2 — grid/list `openFile` rows), `apps/maps/Maps.tsx`
   (2 — `selectPlace` result cards), `apps/artifacts/artifacts/Flashcards.tsx` (2), `apps/artifacts/generated/ArtifactViewer.tsx`
@@ -99,12 +100,15 @@ visible, tab order is sane). The organism stops being a mouse-only instrument. *
   action on `Enter`/`' '` (extract a tiny shared `onActivate(fn)` helper if it repeats). Keep every existing handoff / graph
   / motion wiring intact. *Acceptance:* those 9 files → 0 on `keyboardA11y`; `keyboardA11y` ~24 → ~8; the render-smoke stays
   32/32 clean; build🟢 vitest🟢 eslint clean; the four DS axes still 0.
-- [ ] **S3 · SWEEP the shell + Cakra cluster (~8 → 0).** `components/Recents.tsx` (2 — window strip rows), `components/
+- [x] **S3 · SWEEP the shell + Cakra cluster (~8 → 0).** ✅ SHIPPED 2026-07-13 (same run as S2/S4). `components/Recents.tsx` (2 — window strip rows), `components/
   CommandPalette.tsx` (1), `components/Desktop.tsx` (1), `apps/cakra/components/ConfirmModal.tsx` (1), `apps/cakra/components/
   ModelPicker.tsx` (1), `apps/cakra/components/SettingsPanel.tsx` (1), `apps/cakra/tabs/Editor.tsx` (1 — saved-file delete),
   `apps/cakra/tabs/PromptGenerator.tsx` (1), `apps/reader/Reader.tsx` (1). Same recipe. Re-census first (counts shift as S2
   lands). *Acceptance:* `keyboardA11y → 0`; render-smoke clean; build🟢 vitest🟢 eslint clean.
-- [ ] **S4 · LOCK `keyboardA11y` in `--assert-zero` → ★ EPIC-15 CODE-COMPLETE.** Add `if (snapshot.keyboardA11y > 0)
+- [x] **S4 · LOCK `keyboardA11y` in `--assert-zero` → ★ EPIC-15 CODE-COMPLETE.** ✅ SHIPPED 2026-07-13 (verified the
+  lock BITES: injected one `<div onClick>` with no key handler into Video.tsx → `--assert-zero` exit 1
+  `keyboardA11y=1`, reverted → exit 0). WCAG-2.1.1 invariant comment landed in `src/components/ui/index.tsx` by `Card`.
+  Add `if (snapshot.keyboardA11y > 0)
   fail.push(...)` beside the existing four gates in `scripts/metrics.mjs` + extend the success line. Add an a11y-invariant note
   (a `// WCAG 2.1.1` comment) near `Card`/`Button` in `src/components/ui/index.tsx` pointing to the shell path for clickables.
   **Verify the lock BITES:** temporarily re-introduce one `<div onClick>` with no key handler → `--assert-zero` exits 1 →

@@ -18,12 +18,16 @@ export default function ConfirmModal({ calls, onConfirm, onDeny }: Props) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: tint('void', 70), backdropFilter: 'blur(4px)' }}
+      role="presentation"
       onClick={onDeny}
     >
       <div
         className="w-full max-w-md rounded-2xl overflow-hidden"
         style={{ background: cssVar('abyss'), border: `1px solid ${tint('ember', 30)}` }}
         onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Confirm action"
       >
         <div className="p-5">
           <div className="flex items-center gap-3 mb-4">

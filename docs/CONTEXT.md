@@ -16,36 +16,31 @@
 
 ---
 
-## ★ EPIC-14 RETIRED → DONE + EPIC-15 PROMOTED (2026-07-13, green main) — the design-system trilogy is LOCKED; the new axis is KEYBOARD OPERABILITY
+## ★ EPIC-15 CODE-COMPLETE (S1–S4, 2026-07-13, green main) — keyboard operability LOCKED; awaiting QA confirm → Strategist retires
 
-**★ EPIC-14 CODE-COMPLETE (S1–S12) & retired to DONE.** S12 housekeeping shipped this run: the invariant header comment landed
-in `src/components/ui/index.tsx` (top block — "app code renders every interactive control through these primitives; a bare
-control fails CI"); the S12 checkbox is `[x]`; re-verified the `--assert-zero` gate BITES (reintroduced one bare `<button>` →
-exit 1 `offShellControls=1`, reverted → exit 0). `offShellControls` stays **0 (b0/i0/s0/t0)**, gated. All four DS axes 0.
+**★ EPIC-15 CODE-COMPLETE.** `keyboardA11y 24 → 0` and LOCKED in `--assert-zero`. S1 (metric+baseline) shipped last run; **S2+S3+S4
+all shipped THIS run in one coherent "operability complete" leap.** Every mouse-only `onClick` on a non-interactive host across
+16 files is now keyboard-operable. The five conformance axes are all 0 and gated: `tokenViolations`/`offSystemUtilities`/
+`offSystemStyle`/`offShellControls`/`keyboardA11y` = 0. **Verified the S4 lock BITES** (injected one `<div onClick>` no-key into
+Video.tsx → `--assert-zero` exit 1 `keyboardA11y=1`; reverted → exit 0). Success line now ends `…, keyboardA11y=0`.
 
-**▶ NEW ACTIVE: EPIC-15 · Keyboard operability (WCAG 2.1.1).** New measured axis **`keyboardA11y`** (`scripts/a11yAudit.mjs`
-→ `scanA11yViolations`, wired into `scripts/metrics.mjs` as snapshot field + "Keyboard a11y" table row + `--json`
-`keyboardA11yTop`; unit-pinned `scripts/a11yAudit.test.mjs`, 19 cases). It counts a `onClick` on a NON-interactive host tag
-(`<div>`/`<span>`/anchor-without-`href`/…) with NO `onKeyDown`/`onKeyUp`/`onKeyPress` — a keyboard trap (in React such a
-handler never fires on Enter/Space). **Baseline `keyboardA11y = 24` across 16 app files.** NOT gated yet (baseline non-zero;
-S4 locks it). S1 (metric + baseline) SHIPPED this run.
+**★ NEW SEAM — `src/lib/a11y.ts` `onActivate(fn)`** — the standing helper for recipe (b): returns an `onKeyDown` firing `fn` on
+Enter/Space with `preventDefault` + `stopPropagation` (the stopProp mirrors nested-clickable click semantics; harmless on a
+top-level clickable). Pair it with `role="button"` + `tabIndex={0}`. Used in Calendar/Photos/Files/Maps/Flashcards/Video/
+PromptGenerator/Editor/Recents. **The two remediation patterns actually used (both honest, both drive the metric to 0):**
+- **Click-to-select tile/row/card** → `role="button"` + `tabIndex={0}` + `aria-label` + `onKeyDown={onActivate(fn)}` on the
+  existing `<div>` (recipe b). `Card interactive` was NOT used for these — every one already has its own surface (bg-glass/
+  card-bg/gl-bg), so a `Card` would double the glass (the S1 trap). Recipe (b) is the workhorse.
+- **Modal/lightbox backdrop whose click closes it** → mark the backdrop `role="presentation"` (detector-exempt) AND move
+  `role="dialog"`/`aria-modal`/`aria-label` onto the inner content panel. Honest because Escape + an explicit close button
+  already give the accessible dismiss path (verified per-file). Applied to Photos lightbox, ArtifactViewer, DataCenter modal,
+  ConfirmModal, ModelPicker, SettingsPanel, CommandPalette, Desktop search. This is a *real ARIA improvement*, not a metric dodge.
 
-**▶ NEXT = EPIC-15 S2 (SWEEP the app cluster ~24 → ~8, establish the remediation recipe).** Make every flagged clickable
-keyboard-operable, heaviest-first (re-census FIRST with the one-liner below — counts shift as files land):
-`apps/calendar/Calendar.tsx` (**3** — day cells `onClick={()=>setSelectedDate}`, the event chip, the edit-form card),
-`apps/photos/Photos.tsx` (**3** — grid tile + list-row `onClick={()=>setSelected}`; NOT the `stopPropagation` NodeActions
-wrappers — those are already exempt), `apps/files/Files.tsx` (**2** — grid+list `openFile(entry)` rows),
-`apps/maps/Maps.tsx` (**2** — `selectPlace(place)` result cards), `apps/artifacts/artifacts/Flashcards.tsx` (**2**),
-`apps/artifacts/generated/ArtifactViewer.tsx` (**1**), `apps/datacenter/DataCenter.tsx` (**1**), `apps/video/Video.tsx`
-(**1**), `apps/weather/Weather.tsx` (**1**). **THE RECIPE (pick per case, log the winner):** (a) a click-to-SELECT tile/row/
-card → convert/wrap in **`Card interactive`** — it already wires `role="button"` + `tabIndex={0}` + Enter/Space→`onClick`
-(`src/components/ui/index.tsx` `Card`, lines ~24-40), the zero-bespoke path; (b) a control that must stay a bare `<div>`/
-`<span>` for layout → add `role="button"` + `tabIndex={0}` + an `onKeyDown` firing the same action on `Enter`/`' '` (extract a
-tiny shared `onActivate(fn)` helper if it repeats ≥3×). Keep every handoff/graph/motion wire intact. *Acceptance:* those 9
-files → 0 `keyboardA11y`; metric ~24 → ~8; render-smoke 32/32 clean; build🟢 vitest🟢 eslint clean; the four DS axes still 0.
-Then S3 sweeps the shell+Cakra tail (Recents 2, CommandPalette 1, Desktop 1, cakra ConfirmModal/ModelPicker/SettingsPanel/
-Editor/PromptGenerator, Reader 1) → 0; S4 LOCKS it in `--assert-zero` + adds the WCAG-2.1.1 invariant note by `Card`. Full spec
-EPICS.md → EPIC-15.
+**▶ NEXT = STRATEGIST retires EPIC-15 → DONE (QA first confirms `keyboardA11y 0` LOCKED on green main + on-device tab-through).**
+Then promote the next cloud-executable epic. Candidates the Strategist named: **(a) accessible-name coverage on icon-only
+affordances + a focus-visible sweep** (the natural continuation of the a11y band — measure unnamed interactive controls / missing
+`:focus-visible` rings), or **(b) the RFC `docMass` doc-conformance metric.** `EPIC-7 · Android` stays device-gated. No active
+stage after retire → the topmost ROADMAP-NOW item is the a11y follow-on; EPICS needs the Strategist to seed it.
 
 **Re-census one-liner** (the detector over the exact `appCodeFiles()` set):
 ```
@@ -65,6 +60,15 @@ node --input-type=module -e 'import {scanA11yViolations} from "./scripts/a11yAud
   are excluded — a standalone `walk` census counts 25, the real metric 24 (the ColorPalette 1 is out of scope).
 - Adding `role="button"`+`tabIndex` WITHOUT an `onKeyDown` does NOT satisfy the metric (and wouldn't work) — the key handler
   is the load-bearing part. `Card interactive` bundles all three; that's why it's the preferred path.
+- **★ TRAP (bit me once): `git checkout <file>` to revert a gate-BITES injection ALSO wipes your UNCOMMITTED edits to that
+  file.** When verifying `--assert-zero` bites, inject the trap into a file you've *already fully edited* and revert via a
+  surgical string-replace (or `git stash`), NOT `git checkout` — or inject into a throwaway/untracked file. I lost the Video.tsx
+  fix this way and had to re-apply it; re-census after any revert.
+- `<video>`/`<audio>`/`<canvas>` are NOT in the detector's `HOST_TAGS`, so a `<video onClick={togglePlay}>` does NOT count
+  (Video.tsx line ~232) — don't chase it. Video's only real violation was the playlist-row `<div>`.
+- A nested delete affordance that must live INSIDE a `<Button>` (can't nest a real `<button>`) stays a `<span>` — give it
+  `role="button"`+`tabIndex`+`onKeyDown={onActivate(fn)}` (Editor.tsx saved-file ×). The nesting is a pre-existing pattern; the
+  key handler is all the metric needs.
 
 ### ★ EPIC-15 S1 QA-CONFIRMED (2026-07-13, green main `90077c8`) — first independent QA since the `keyboardA11y` axis shipped
 First QA since S1. Code commits since last QA `91cc214`: `79c9272` (EPIC-15 S1 — `a11yAudit.mjs` detector + baseline + 19 unit

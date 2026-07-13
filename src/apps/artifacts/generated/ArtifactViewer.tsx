@@ -51,14 +51,15 @@ export default function ArtifactViewer({ artifact, onClose, onSave, saved }: Pro
       className="fixed inset-0 z-50 flex flex-col justify-end"
       style={{ background: tint('void', 70), backdropFilter: 'blur(4px)' }}
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={artifact.title}
+      role="presentation"
     >
       <div
         className="flex flex-col w-full h-[94%] rounded-t-2xl overflow-hidden animate-slide-up"
         style={{ background: cssVar('abyss'), border: '1px solid var(--border)', borderBottom: 'none' }}
         onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={artifact.title}
       >
         <div
           className="flex items-center gap-2 px-3 py-2 border-b shrink-0"

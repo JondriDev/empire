@@ -7,6 +7,7 @@ import { mirrorCollection } from '../../../lib/core/sync'
 import { NodeActions } from '../../../components/ui/NodeActions'
 import { ProvenanceChip } from '../../../components/ui/ProvenanceChip'
 import { useInboundHandoff } from '../../../lib/useInboundHandoff'
+import { onActivate } from '../../../lib/a11y'
 import {
   Wand2, Copy, Check, Sparkles, MessageSquare,
   Code, BookOpen, PenTool, Zap, Tag
@@ -329,7 +330,11 @@ export default function PromptGenerator() {
             {filteredTemplates.map(template => (
               <div
                 key={template.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Use ${template.name} template`}
                 onClick={() => applyTemplate(template)}
+                onKeyDown={onActivate(() => applyTemplate(template))}
                 className={`p-3 cursor-pointer transition hover:bg-glass rounded-2xl shadow-2xl ${selectedTemplate?.id === template.id ? 'ring-1 ring-signal' : ''}`}
                 style={{
                   background: 'var(--gl-bg)',
