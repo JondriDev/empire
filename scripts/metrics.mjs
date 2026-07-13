@@ -20,6 +20,7 @@ import zlib from 'zlib';
 import { scanStyleViolations } from './styleAudit.mjs';
 import { scanControlViolations } from './controlAudit.mjs';
 import { scanA11yViolations } from './a11yAudit.mjs';
+import { scanDocMass, countLines, DOC_BUDGETS } from './docMassAudit.mjs';
 
 const ROOT = process.cwd();
 const args = new Set(process.argv.slice(2));
@@ -221,6 +222,29 @@ function a11yViolations() {
   return { count, top: offenders.slice(0, 8) };
 }
 
+// ---- metric: doc-mass conformance (lower is better) ------------------------
+// The fleet eats its own dog food. The five axes above lock the PRODUCT; this locks
+// the FLEET's working memory: the read-every-run docs (CONTEXT.md, EPICS.md) against
+// line budgets, so a routine's orient phase stays cheap and its budget goes to the
+// change, not to re-reading history (which already lives in git + ROUTINE-LOG.md).
+// Value = total lines OVER budget across the tracked docs. Detection is the pure,
+// unit-pinned `scanDocMass` (scripts/docMassAudit.mjs). Baseline is non-zero; the
+// doc-mass epic prunes it under budget, the final stage locks it in --assert-zero.
+// Ratified in docs/rfc/iteration-plan-musk.md (Step 3).
+function docMass() {
+  const docs = DOC_BUDGETS.map((d) => ({
+    path: d.path,
+    lines: countLines(read(path.join(ROOT, d.path))),
+    budget: d.budget,
+  }));
+  const r = scanDocMass(docs);
+  const top = r.perDoc
+    .filter((d) => d.over > 0)
+    .sort((a, b) => b.over - a.over)
+    .map((d) => [d.path, `${d.lines}/${d.budget} (+${d.over})`]);
+  return { count: r.overage, perDoc: r.perDoc, top };
+}
+
 // ---- metric: shipped bundle size (gzipped) ---------------------------------
 function bundleSize() {
   const dir = path.join(ROOT, 'dist/assets');
@@ -242,6 +266,7 @@ const osu = offSystemUtilities();
 const sv = styleViolations();
 const cv = controlViolations();
 const av = a11yViolations();
+const dm = docMass();
 const bundle = bundleSize();
 const snapshot = {
   generatedAt: new Date().toISOString(),
@@ -255,12 +280,14 @@ const snapshot = {
   offShellControls: cv.count,
   offShellControlDims: cv.dims,
   keyboardA11y: av.count,
+  docMass: dm.count,
+  docMassDims: dm.perDoc,
   bundleGzKB: bundle ? bundle.gzKB : null,
   bundleRawKB: bundle ? bundle.rawKB : null,
 };
 
 if (JSON_ONLY) {
-  console.log(JSON.stringify({ ...snapshot, tokenViolationTop: tv.top, offSystemUtilitiesTop: osu.top, offSystemStyleTop: sv.top, offShellControlsTop: cv.top, keyboardA11yTop: av.top }, null, 2));
+  console.log(JSON.stringify({ ...snapshot, tokenViolationTop: tv.top, offSystemUtilitiesTop: osu.top, offSystemStyleTop: sv.top, offShellControlsTop: cv.top, keyboardA11yTop: av.top, docMassTop: dm.top }, null, 2));
   process.exit(0);
 }
 
@@ -293,6 +320,7 @@ const rows = [
   ['Off-system style', `${snapshot.offSystemStyle} (r${sv.dims.radii}/t${sv.dims.type}/m${sv.dims.motion})`, delta('offSystemStyle'), 'LOWER is better (raw radii/type/easing bypassing --radius-*/--text-*/--ease-*)'],
   ['Off-shell controls', `${snapshot.offShellControls} (b${cv.dims.button}/i${cv.dims.input}/s${cv.dims.select}/t${cv.dims.textarea})`, delta('offShellControls'), 'LOWER is better (bare <button>/<input>/<select>/<textarea> bypassing the ui primitive layer)'],
   ['Keyboard a11y', snapshot.keyboardA11y, delta('keyboardA11y'), 'LOWER is better (mouse-only onClick on non-interactive hosts — WCAG 2.1.1)'],
+  ['Doc mass (over)', snapshot.docMass, delta('docMass'), 'LOWER is better (lines over budget in the read-every-run docs CONTEXT.md/EPICS.md)'],
   ['Bundle gz (KB)', snapshot.bundleGzKB ?? 'n/a (no dist)', delta('bundleGzKB'), 'LOWER is better; build first to measure'],
 ];
 const w = (s, n) => String(s).padEnd(n);
@@ -319,6 +347,10 @@ if (cv.top.length) {
 if (av.top.length) {
   console.log(`\nTop keyboard-a11y files (mouse-only onClick on non-interactive hosts):`);
   for (const [f, n] of av.top) console.log(`  ${n}\t${f}`);
+}
+if (dm.top.length) {
+  console.log(`\nOver-budget working-memory docs (lines/budget):`);
+  for (const [f, n] of dm.top) console.log(`  ${n}\t${f}`);
 }
 console.log('');
 

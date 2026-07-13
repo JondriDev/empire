@@ -38,6 +38,7 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 | Off-system utilities | **0** (↓ from 1076 — the redesign batch's `98c61c7` "token-ize Tailwind palette classes across all apps" swept the whole mass; EPIC-5 S8 `c51f79f` LOCKED it with `--assert-zero` CI gate; re-confirmed 0 this run) | 0 | ↓ Tailwind palette classes (`text-gray-400`, `bg-cyan-600`, `bg-white/10`, `text-white`, `text-red-400`…) that bypass the JondriDev tokens — **EPIC-5 TARGET MET (0)** |
 | Off-system style | **0** (r0/t0/m0 — **the full −56 leap from the S1 baseline of 56; EPIC-11 TARGET MET (0)**; **QA-CONFIRMED independently 2026-07-05 on green main `4c643a9`** — `metrics.mjs` reproduces `0 (r0/t0/m0)` exactly and **`--assert-zero` exits 0**. S2 drove type t42→0, S3 drove radii r12→0, **S4 drove motion m2→0 and LOCKED it in `--assert-zero`** (mirrors the EPIC-5 S8 offSystemUtilities lock). All three sub-counts 0 and gated — cannot regress. **S1–S4 done-confirmed; EPIC-11 CODE-COMPLETE, ready to retire to DONE.** | 0 | ↓ raw radii/type/easing bypassing `--radius-*`/`--text-*`/`--ease-*` |
 | Off-shell controls | **122** (b100/i13/s2/t7 — after EPIC-14 S2–S8 migrations Reader/Calendar/Clock/Photos/artifacts-family/media+language/utility-apps/tool+entity-apps, from the S1 baseline 341; QA-confirmed 2026-07-12 green main `b20f90c`, Δ ±0; bare `<button>`/`<input>`/`<select>`/`<textarea>` in app code bypassing the `ui` primitive layer, over the same `appCodeFiles()` set minus `src/components/ui/`; `type=file/checkbox/radio` inputs exempt). Detector = pure `scanControlViolations` (`scripts/controlAudit.mjs`, 13 cases). Top offenders now the Cakra family (S9 targets): AIChat 13, Editor 9, PromptGenerator 9, AgentSurface 8, SolverPanel 8, Desktop 8. **NOT yet in `--assert-zero`** — EPIC-14 S2–S12 drive it to 0 heaviest-first, the final stage locks it. | 0 (then LOCK) | ↓ bare controls bypassing `ui` `Button`/`IconButton`/`Input`/`TextArea`/`Select`/`Segmented` |
+| Doc mass (over) | **0** (CONTEXT 395/400, EPICS 153/500 — both under budget after the EPIC-16 S1 prune, from baseline `3269`; the read-every-run working docs; **NOT yet in `--assert-zero`**, S2 locks it) | 0 (then LOCK) | ↓ lines over budget in the read-every-run docs |
 | Bundle gz (KB) | **729.8** (Δ ±0 vs the committed snapshot — EPIC-13 S3 + playwright devDep already landed here; playwright is dev-only, never enters the prod bundle; no new shipped deps) | hold / shrink | ↓ |
 
 > **Off-shell controls (added 2026-07-11 — design-system conformance III).** The colour audits
@@ -65,6 +66,18 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 > `label`), capitalised `ui` primitives, elements DECLARED inert (`aria-hidden`/`role=presentation|none`), and event-plumbing
 > guards (`onClick={e => e.stopPropagation()}` — no user action). **Baseline `24` (2026-07-13, EPIC-15 S1).** **NOT yet in
 > `--assert-zero`** — EPIC-15 S2–S3 drive it to 0 heaviest-first, S4 locks it (exactly as EPIC-14 S12 locked `offShellControls`).
+
+> **Doc mass (added 2026-07-13 — the fleet eats its own dog food, EPIC-16).** The five axes above lock the
+> PRODUCT; `docMass` turns the same measure→drive-to-0→lock ratchet on the FLEET's own working memory. The
+> scarcest resource across the 8-routine fleet is per-run context budget, and its biggest spend is reading its
+> own memory — `docs/CONTEXT.md` + `docs/EPICS.md` are read in full every run yet carried mostly HISTORY (which
+> lives in git + `ROUTINE-LOG.md`). `docMass` = total lines OVER budget across those read-every-run docs
+> (`docs/CONTEXT.md` ≤ 400, `docs/EPICS.md` ≤ 500). Detector = the pure, unit-pinned `scanDocMass`
+> (`scripts/docMassAudit.mjs`, 11 cases in `docMassAudit.test.mjs`); the row names each over-budget doc as
+> `lines/budget (+over)`. Ratified in `docs/rfc/iteration-plan-musk.md` (Step 3). **Baseline `3269`
+> (2026-07-13); EPIC-16 S1 pruned both docs under budget → `0`; S2 locks it in `--assert-zero`** (exactly as
+> EPIC-5 S8 / EPIC-11 S4 / EPIC-14 S12 / EPIC-15 S4). The chronological journal (`ROUTINE-LOG.md`) and reference
+> docs are NOT budgeted — they aren't read every run, so budgeting them would measure nothing.
 
 > **Off-system style (added 2026-07-04 — design-system conformance II).** The two colour audits
 > (`tokenViolations` = raw `#hex`/`rgba()`; `offSystemUtilities` = Tailwind palette classes) are both at **0**,

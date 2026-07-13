@@ -5,6 +5,32 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-13 · BUILDER — EPIC-16 PROMOTED & S1 SHIPPED: stand up the `docMass` metric + prune both working-memory docs under budget (`docMass 3269 → 0`)
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (@ `ab92d32`). `npm install` → `npm run build` (`tsc -b && vite build`) GREEN; `npx vitest run` 465-src / 556-total baseline; `--assert-zero` exit 0 (all 5 product axes 0). Confirmed green before touching anything.
+
+**Why this stage:** EPIC-15 (keyboard operability) is CODE-COMPLETE + QA-confirmed with **no unchecked stage**, so per the routine I took the topmost cloud-executable ROADMAP-NOW item — the **user-ratified** `docMass` doc-mass metric from `docs/rfc/iteration-plan-musk.md` (Steps 2–3, ratified 2026-07-10). The named a11y follow-on candidates turned out already-closed (all 125 `IconButton`s carry `aria-label`; an icon-only-`Button` "no-text-child" detector over-counts dynamic-text children badly — too noisy to be an honest conformance metric — logged in CONTEXT). `docMass` is genuinely open, honest, driveable to 0, and multiplicative (it enlarges every routine's per-run budget).
+
+**What shipped (one coherent "measure + prune under budget" leap):**
+
+1. **New metric `docMass`** = total lines OVER budget across the read-every-run working docs (`docs/CONTEXT.md` ≤400, `docs/EPICS.md` ≤500). Pure detector `scripts/docMassAudit.mjs` (`DOC_BUDGETS`, `countLines`, `scanDocMass`) + `docMassAudit.test.mjs` (11 cases); wired a `Doc mass (over)` row + over-budget-doc offenders list into `scripts/metrics.mjs`. **NOT yet in `--assert-zero`** (S2 locks it — measure-only S1, matching every prior epic's S1). **Baseline `docMass = 3269`** (CONTEXT 1923/400 +1523, EPICS 2246/500 +1746).
+
+2. **Pruned `docs/CONTEXT.md` 1923 → 395 lines.** Removed the dead archaeology — retired EPIC-12/13/14 dated SHIPPED/QA-CONFIRMED strata, the stale EPIC-14 stage playbook (S1–S12, all shipped), and the 06-29/06-30 prior-QA blocks. **Preserved every live seam verbatim** (Codebase seams / Invariants & traps / QA headless recipe / Tried & rejected / SOLVER) and carried the reusable design-system recipes (ui-primitive mapping, keyboard-operability recipe, offSystemStyle px trap, ColorPalette exemption) + retired-epic live traps (the EPIC-12 sourceId trap) into a compact "Standing recipes" + "DONE index" block. Rewrote the active-epic block to EPIC-16.
+
+3. **Pruned `docs/EPICS.md` 2246 → 153 lines.** Collapsed the retired EPIC-1..15 bodies to a **one-line DONE index each** (name · metric moved · dates · key commit); the S-by-S detail lives in git + this log. Promoted **EPIC-16 · doc-mass conformance** to ▶ ACTIVE (S1 `[x]`, S2 lock `[ ]`). Kept the QUEUED EPIC-7 · Android block verbatim.
+
+**Verify (the only gate):** build **🟢**; `npx vitest run` **567/567 🟢** (scripts +11 docMass cases); `npx eslint` clean on the 3 touched scripts; `node scripts/metrics.mjs --assert-zero` **exit 0** (5 product axes still 0 & LOCKED — no product code touched). **`docMass 3269 → 0`** (CONTEXT 395/400, EPICS 153/500, both under budget). No new deps.
+
+**Metrics delta (`node scripts/metrics.mjs`):** **Doc mass (over) 3269 → 0 (−3269).** All 5 product axes 0 & gated (±0). Apps 31, test cases 465 (metrics counts `src/` only — the +11 docMass tests are in `scripts/`, consistent with a11y/controlAudit), test files 65, bundle gz 733.7 (±0 — no product code). No regression.
+
+**Not verifiable in cloud (honest note):** none of this is visual — it's tooling + docs. The one judgement call that isn't machine-checkable is "did the prune drop a seam a future run needs?" — I preserved the live reference sections verbatim (grep-confirmed: `mirrorCollection PRUNES`, `onActivate`, Blank-dark trap, Calendar-owns-storage, react-refresh split all still present) and any dropped detail is a cheap `git show`, per the RFC's Musk caveat.
+
+**Committed directly to `main`** (green first): `scripts/docMassAudit.mjs` (new) + `scripts/docMassAudit.test.mjs` (new) + `scripts/metrics.mjs` + `docs/METRICS.md` + `docs/CONTEXT.md` + `docs/EPICS.md` + this log + refreshed `docs/metrics.json`.
+
+**Next (single best step):** **EPIC-16 S2 — LOCK `docMass` in `--assert-zero`** (add `if (snapshot.docMass > 0) fail.push(...)` beside the 5 existing gates, verify the lock BITES with a filler-line injection) → ★ EPIC-16 CODE-COMPLETE. *(Strategist: confirm the EPIC-16 framing + formally retire EPIC-15 → DONE.)*
+
+---
+
 ## 2026-07-13 · BUILDER — EPIC-15 CODE-COMPLETE (S2+S3+S4 in one run): `keyboardA11y 24 → 0`, LOCKED in `--assert-zero`
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (@ `e10ab04`). `npm install` → `npm run build` GREEN; re-census reproduced `keyboardA11y = 24` exactly. Confirmed green before touching anything.
