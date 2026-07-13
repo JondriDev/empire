@@ -14,6 +14,7 @@ import { useLang } from '../../lib/i18n'
 import { onAny, type EmpireEvent } from '../../lib/eventBus'
 import { useGraph } from '../../lib/core/graph'
 import { useFocus } from '../../lib/core/focus'
+import { Button, IconButton } from '../../components/ui'
 import { NodeLineage } from '../../components/ui/NodeLineage'
 import type { CoreNode } from '../../lib/core/graph'
 import { flowForEvent } from '../../lib/core/flow'
@@ -621,20 +622,26 @@ export default function Network() {
           const a = appById(n.app)
           const RowIcon = a ? getAppIcon(a.icon) : null
           return (
-            <button
+            <Button
               key={glyph + n.app}
+              variant="ghost"
+              fullWidth
               onClick={() => openById(n.app)}
-              style={rowStyle}
+              style={{ ...rowStyle, justifyContent: 'space-between' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = tint('signal', 10) }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+              icon={
+                <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flex: '0 0 auto' }}>
+                  <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', width: 12 }}>{glyph}</span>
+                  {RowIcon && a && (
+                    <span style={{ color: a.color, display: 'flex' }}><RowIcon className="w-3 h-3" /></span>
+                  )}
+                </span>
+              }
+              iconRight={<span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)' }}>{ago(Date.now() - n.at)}</span>}
             >
-              <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', flex: '0 0 auto', width: 12 }}>{glyph}</span>
-              {RowIcon && a && (
-                <span style={{ color: a.color, flex: '0 0 auto', display: 'flex' }}><RowIcon className="w-3 h-3" /></span>
-              )}
-              <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{appName(n.app)}</span>
-              <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', flex: '0 0 auto' }}>{ago(Date.now() - n.at)}</span>
-            </button>
+              <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left' }}>{appName(n.app)}</span>
+            </Button>
           )
         }
         return (
@@ -663,16 +670,14 @@ export default function Network() {
                 </div>
                 <div className="t-label" style={{ color: 'var(--text3)' }}>{selected.id}</div>
               </div>
-              <button
+              <IconButton
+                variant="ghost"
+                size="sm"
                 aria-label="Close inspector"
                 onClick={() => setSelected(null)}
-                style={{
-                  flex: '0 0 auto', padding: 5, borderRadius: 'var(--radius-md)', background: 'transparent',
-                  border: 'none', color: 'var(--text3)', cursor: 'pointer', display: 'flex',
-                }}
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
+                style={{ flex: '0 0 auto', color: 'var(--text3)' }}
+                icon={<X className="w-3.5 h-3.5" />}
+              />
             </div>
 
             {/* Entities owned by this app — the real nodes, newest first. Each
@@ -727,22 +732,24 @@ export default function Network() {
                   const dir = selEdges!.out.includes(id) && selEdges!.in.includes(id) ? '↔'
                     : selEdges!.out.includes(id) ? '→' : '←'
                   return (
-                    <button
+                    <Button
                       key={id}
+                      variant="ghost"
+                      fullWidth
                       onClick={() => openById(id)}
                       style={{
                         display: 'flex', alignItems: 'center', gap: 'var(--space-2)', width: '100%',
                         padding: '6px 8px', background: 'transparent', border: 'none',
                         borderRadius: 'var(--radius-md)', color: 'var(--text)', textAlign: 'left',
-                        fontSize: 'var(--text-xs)', cursor: 'pointer',
+                        fontSize: 'var(--text-xs)', justifyContent: 'flex-start',
                         transition: 'background var(--dur-fast)',
                       }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = rgbCss('52,245,214', 0.10) }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+                      icon={<span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', width: 12, flex: '0 0 auto' }}>{dir}</span>}
                     >
-                      <span style={{ color: 'var(--text3)', fontFamily: 'var(--mono)', flex: '0 0 auto', width: 12 }}>{dir}</span>
-                      <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{appName(id)}</span>
-                    </button>
+                      <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left' }}>{appName(id)}</span>
+                    </Button>
                   )
                 })
               )}
@@ -781,20 +788,23 @@ export default function Network() {
               )}
             </div>
 
-            <button
+            <Button
+              variant="ghost"
+              fullWidth
               onClick={() => openById(selected.id)}
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-2)',
-                padding: '8px 10px', borderRadius: 'var(--radius-md)', cursor: 'pointer',
+                gap: 'var(--space-2)',
+                padding: '8px 10px', borderRadius: 'var(--radius-md)',
                 border: `1px solid ${rgbCss('255,255,255', 0.12)}`, background: 'transparent',
                 color: rgbCss('52,245,214'), fontSize: 'var(--text-sm)', fontWeight: 600,
                 transition: 'background var(--dur-fast)',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = rgbCss('52,245,214', 0.10) }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+              icon={<Zap className="w-3.5 h-3.5" />}
             >
-              <Zap className="w-3.5 h-3.5" /> {t('network.open', 'Open')} {appName(selected.id)}
-            </button>
+              {t('network.open', 'Open')} {appName(selected.id)}
+            </Button>
           </div>
         )
       })()}

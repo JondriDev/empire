@@ -10,6 +10,7 @@ import { Suspense, lazy, useEffect, useState } from 'react'
 import { AppWindow, Bot, FileText, Pencil, Shapes, Trash2 } from 'lucide-react'
 import type { ArtifactSpec, ArtifactType } from '../cakra/lib/artifactProtocol'
 import { mirrorCollection } from '../../lib/core/sync'
+import { Button, IconButton } from '../../components/ui'
 import { cssVar, tint } from '../../design-system/tokens'
 import { useLang } from '../../lib/i18n'
 import {
@@ -80,18 +81,22 @@ export default function GeneratedSection({ metas, onChange }: Props) {
                 className="flex items-center gap-3 rounded-xl border border-hair p-3 transition-colors"
                 style={{ background: 'color-mix(in srgb, var(--c-cakra) 5%, transparent)' }}
               >
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => open(meta)}
-                  className="press flex items-center gap-3 flex-1 min-w-0 text-left"
+                  className="press"
                   title={t('artifacts.open')}
+                  icon={
+                    <span
+                      className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: 'color-mix(in srgb, var(--c-cakra) 15%, transparent)', color: 'var(--c-cakra)' }}
+                    >
+                      <Icon size={16} />
+                    </span>
+                  }
+                  style={{ flex: 1, minWidth: 0, justifyContent: 'flex-start', gap: '12px', padding: 0 }}
                 >
-                  <span
-                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: 'color-mix(in srgb, var(--c-cakra) 15%, transparent)', color: 'var(--c-cakra)' }}
-                  >
-                    <Icon size={16} />
-                  </span>
-                  <span className="flex-1 min-w-0">
+                  <span className="flex-1 min-w-0" style={{ textAlign: 'left' }}>
                     <span className="block truncate text-sm font-medium" style={{ color: cssVar('text') }}>
                       {meta.title}
                     </span>
@@ -99,25 +104,27 @@ export default function GeneratedSection({ metas, onChange }: Props) {
                       {meta.type} · {new Date(meta.createdAt).toLocaleDateString()}
                     </span>
                   </span>
-                </button>
-                <button
+                </Button>
+                <IconButton
+                  variant="ghost"
+                  size="sm"
                   onClick={() => rename(meta)}
-                  className="press p-1.5 rounded-lg transition-colors"
+                  className="press"
                   style={{ color: cssVar('text2'), background: tint('xenon', 7) }}
                   title={t('artifacts.rename')}
                   aria-label={`${t('artifacts.rename')} ${meta.title}`}
-                >
-                  <Pencil size={12} />
-                </button>
-                <button
+                  icon={<Pencil size={12} />}
+                />
+                <IconButton
+                  variant="ghost"
+                  size="sm"
                   onClick={() => remove(meta)}
-                  className="press p-1.5 rounded-lg transition-colors"
+                  className="press"
                   style={{ color: cssVar('c-danger'), background: tint('c-danger', 10) }}
                   title={t('artifacts.delete')}
                   aria-label={`${t('artifacts.delete')} ${meta.title}`}
-                >
-                  <Trash2 size={12} />
-                </button>
+                  icon={<Trash2 size={12} />}
+                />
               </div>
             )
           })}

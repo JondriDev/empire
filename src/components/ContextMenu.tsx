@@ -5,6 +5,7 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useWindowStore } from '../lib/windowStore'
 import { apps, getAppIcon } from '../lib/registry'
+import { Button } from './ui'
 
 interface ContextMenuState {
   visible: boolean
@@ -128,17 +129,20 @@ export default function ContextMenu() {
         {apps.slice(0, 8).map(app => {
           const Icon = getAppIcon(app.icon)
           return (
-            <button
+            <Button
               key={app.id}
+              variant="ghost"
+              fullWidth
               className="empire-context-menu-item"
+              style={{ padding: '7px 10px', justifyContent: 'flex-start', borderRadius: 'var(--radius-sm)' }}
               onClick={() => {
                 openApp(app.id, app.name, app.icon, app.color)
                 setMenu(m => ({ ...m, visible: false }))
               }}
+              icon={<Icon className="w-3.5 h-3.5" style={{ color: app.color }} />}
             >
-              <Icon className="w-3.5 h-3.5" style={{ color: app.color }} />
               <span>{app.name}</span>
-            </button>
+            </Button>
           )
         })}
       </div>
@@ -148,24 +152,30 @@ export default function ContextMenu() {
       {/* Desktop actions */}
       <div className="empire-context-menu-section">
         <div className="empire-context-menu-label">Desktop</div>
-        <button
+        <Button
+          variant="ghost"
+          fullWidth
           className="empire-context-menu-item"
+          style={{ padding: '7px 10px', justifyContent: 'flex-start', borderRadius: 'var(--radius-sm)' }}
           onClick={() => {
             minimizeAllWindows()
             setMenu(m => ({ ...m, visible: false }))
           }}
         >
           <span>Minimize All</span>
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="ghost"
+          fullWidth
           className="empire-context-menu-item"
+          style={{ padding: '7px 10px', justifyContent: 'flex-start', borderRadius: 'var(--radius-sm)' }}
           onClick={() => {
             closeAllWindows()
             setMenu(m => ({ ...m, visible: false }))
           }}
         >
           <span>Close All Windows</span>
-        </button>
+        </Button>
       </div>
     </div>
   )

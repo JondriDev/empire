@@ -1,61 +1,174 @@
-# The Empire — Visual + Smoke QA Report
+# Empire QA — Visual + Smoke Report
 
-**Run:** 2026-07-12 (cloud, fresh checkout) · **main:** `07d8c43` (product tree — `feat(cakra): power Cakra on NVIDIA NIM`) · **build:** 🟢 GREEN (`tsc -b && vite build`, 15.4s, PWA precache 91 entries)
+**Generated:** 2026-07-13T00:49:08.671Z
 
-> **⚠️ EPIC-14 CONFORMANCE DRIFT (not a runtime bug — for the Builder/Strategist):** `offShellControls` sits at **49, +1 above the S10 target of 48** (the committed snapshot already records 49 — the NIM commit baked the drift in, reproduced exactly here). S10 landed it at 48; the later NIM commit `07d8c43` reintroduced **one bare `<button>` in `src/apps/cakra/AIChat.tsx:380`** (the new collapsible "Thinking / Reasoning" trace disclosure header — `<button onClick={() => setOpen(o => !o)}>`). AIChat was a clean S9 file (0 before the NIM commit, confirmed via `git show 07d8c43^:src/apps/cakra/AIChat.tsx` → 0 bare buttons; now 1). It renders clean, so **not** a runtime regression — but it's a real design-system regression the metric caught. **Consequence: EPIC-14 S11's baseline is now `49 → 0`, not `48 → 0`** — the S11 sweep must fold in `AIChat.tsx` (map the disclosure toggle → `ui.Button variant="ghost"` / a disclosure, keeping `aria-expanded`). `--assert-zero` still exits 0 (offShellControls is ungated until S12).
+**Result:** 32/32 rendered without crash, 0 failed.
 
-## Result: 32 / 32 routes render clean · 0 failed · all 14 guard families green
+> **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
+> Network & console noise (failed external CDN fetches, backend API calls needing auth) is
+> listed separately — expected in the offline cloud sandbox and **not** a render failure.
 
-- **0 uncaught JS exceptions, 0 error boundaries, 0 blank routes, 0 console errors** across desktop + all 31 registry apps.
-- `SHELL-IS-STYLED` ✅ (top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm .empire-desktop`)
-- `REGISTRY-COVERAGE` ✅ smoke list ↔ registry exact (**31 apps**)
-- Env-expected network noise only (blocked/authed endpoints): `weather` net:1, `files` net:1, `maps` net:8 (Leaflet OSM tiles env-blocked), `mail` net:1 (himalaya 401). None trip an error boundary.
-
-### Guard suite (all green)
-| Guard | Result |
-|---|---|
-| SHELL-IS-STYLED | ✅ |
-| REGISTRY-COVERAGE | ✅ 31 apps, bidirectional |
-| INBOUND-LANDS | 4/4 ✅ (incl. messages←ai-chat) |
-| MEDIA-PERSISTS | 3/3 ✅ (music/video/photos, IDB survives reload) |
-| GRAPH-LEGIBLE | 3/3 ✅ (reader/book + crypto/wallet + mail/draft) |
-| GLOBAL-SEARCH | 1/1 ✅ (book+task+twoApps+tagOnly) |
-| NODE-LINEAGE | 1/1 ✅ (5 axes) |
-| INTENT-ROUNDTRIP | 2/2 ✅ (make-note-from + add-to-learning) |
-| TIMELINE | 1/1 ✅ (ordered+grouped+flow+persisted+filtered+descendants) |
-| HOME-ALIVE | 1/1 ✅ (The Bridge) |
-| PROVENANCE-PERSISTS | 3/3 ✅ (editor→notes/ai-chat/prompt-generator) |
-| PROVENANCE-ENTITY | 3/3 ✅ |
-| PRECACHE-AUDIT | ✅ 91 entries, no gap (55 JS + 3 CSS chunks all precached) |
-| OFFLINE-BOOT | 5/5 ✅ routes boot cold-offline from precache |
-
-### Route render table (32/32 PASS)
-desktop · calculator · calendar · clock · weather · grammar · language · music · video · files · cache · browser · editor · notes · photos · datacenter · maps · messages · prompt-generator · token-counter · learning-tracker · ai-chat · goals · artifacts · network · inbox · reader · search · timeline · solver · mail · crypto — **all PASS (uncaught:0, no error boundary, no blank)**.
-
-## Fitness metrics (`node scripts/metrics.mjs`)
-| Metric | Value | Δ vs committed | Note |
+| App | Render | Uncaught JS / crash | Network / console notes |
 |---|---|---|---|
-| Apps / routes | 31 | ±0 | registry = truth |
-| Test cases | 460 | ±0 | |
-| Test files | 64 | ±0 | |
-| Token violations | 0 | ±0 | ratchet holds |
-| Off-system utils | 0 | ±0 | ratchet holds |
-| Off-system style | 0 (r0/t0/m0) | ±0 | ratchet holds |
-| **Off-shell controls** | **49 (b45/i4/s0/t0)** | ±0 vs committed; **+1 vs S10 target 48** | **⚠️ NIM commit `07d8c43` already recorded 49 (added 1 bare button in AIChat.tsx — see banner); reproduced exactly here** |
-| Bundle gz (KB) | 732.5 | +2.5 | fresh build vs the committed 730 (Cakra Auto/orchestration logic); snapshot refreshed |
+| desktop | ✅ | — | — |
+| calculator | ✅ | — | — |
+| calendar | ✅ | — | — |
+| clock | ✅ | — | — |
+| weather | ✅ | — | https://geocoding-api.open-meteo.com/v1/search?name=Jakarta&count=1&language=en&format=json (net::ERR_TUNNEL_CONNECTION_FAILED)<br>Permissions policy violation: Geolocation access has been blocked because of a permissions policy applied to the current document. See https://crbug.com/4143482 |
+| grammar | ✅ | — | — |
+| language | ✅ | — | — |
+| music | ✅ | — | — |
+| video | ✅ | — | — |
+| files | ✅ | — | /api/files?path=%2Fstorage%2Femulated%2F0 → HTTP 401 |
+| cache | ✅ | — | — |
+| browser | ✅ | — | — |
+| editor | ✅ | — | — |
+| notes | ✅ | — | — |
+| photos | ✅ | — | — |
+| datacenter | ✅ | — | — |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| messages | ✅ | — | — |
+| prompt-generator | ✅ | — | — |
+| token-counter | ✅ | — | — |
+| learning-tracker | ✅ | — | — |
+| ai-chat | ✅ | — | — |
+| goals | ✅ | — | — |
+| artifacts | ✅ | — | — |
+| network | ✅ | — | — |
+| inbox | ✅ | — | — |
+| reader | ✅ | — | — |
+| search | ✅ | — | — |
+| timeline | ✅ | — | — |
+| solver | ✅ | — | — |
+| mail | ✅ | — | /api/integrations/status → HTTP 401 |
+| crypto | ✅ | — | — |
 
-`node scripts/metrics.mjs --assert-zero` → **exit 0** (tokenViolations=0, offSystemUtilities=0, offSystemStyle=0 all hold).
+## Inbound-lands guard (organism emit↔receive loop)
 
-Top off-shell offenders (S11 sweep targets, heaviest-first): Desktop 8, AppShell 6, Network 4, Search 4, Bridge 4, GeneratedSection 3, ArtifactViewer 3, AppHost 3, ContextMenu 3 … **+ AIChat 1 (the new drift)**.
+Each entity receiver was seeded with a cross-app payload + reloaded; PASS = a "Received from <source>" chip rendered AND a control was prefilled.
 
-## Active epic — EPIC-14 · Shell conformance (`offShellControls → 0`, then LOCK)
-- **S10 migration HOLDS:** all six S10 files (AgentSurface, SolverPanel, SettingsPanel, ProblemDetail, ModelPicker, ConfirmModal) are **0** in the full census — the Cakra part-2 migration is intact.
-- **But the aggregate is 49, not the S10 target 48** — because the subsequent NIM commit reintroduced 1 bare control in AIChat.tsx (a previously-migrated S9 file). So this run **CONTRADICTS a clean 48**: S10's per-file work is confirmed, but a new drift landed on top. **S11 must sweep 49 → 0** (shell chrome + artifacts wrappers **+ AIChat.tsx**).
-- **S11 not yet landed; S12 (lock) not yet landed.** No stage-acceptance to newly confirm this run beyond "S10 files stayed 0."
+| Receiver | From | Chip | Prefilled | Result |
+|---|---|---|---|---|
+| calendar | editor | ✅ | ✅ | ✅ |
+| goals | notes | ✅ | ✅ | ✅ |
+| messages | ai-chat | ✅ | ✅ | ✅ |
+| mail | notes | ✅ | ✅ | ✅ |
 
-## Visual inspection (local screenshots — none committed)
-- `desktop.png` — Bridge "Good night" home fully styled: greeting + "Ask Cakra anything…" bar, 4 live stat cards (Today/Open Tasks/Goals/Organism), full 32-tile launcher Cakra→Crypto, dock. Clean.
-- `app-ai-chat.png` — Cakra shell: Chat/Solver/Artifacts/Prompt/Tokens/Code tab bar, "Cakra · AI Connector" header, the **new NIM "Auto" toggle pill** rendering top-right, compose Input + round teal send IconButton, "Cakra sees all apps · Press Enter to send" hint. Renders clean (the drifted disclosure only appears once a reasoning message exists).
-- `app-network.png` — The Network: CORE hub-and-spoke mesh, Node-Types legend (note/task/message/learning/goal/prompt/wallet/draft/other), Memory + Live-Signal panels. GRAPH-LEGIBLE confirmed.
+## Media-persists guard (EPIC-3 S2/S3 — IndexedDB blob roundtrip)
 
-**No runtime bug.** One design-system drift (AIChat bare button, flagged above for S11).
+Each media app's real file `<input>` was driven with a small blob, then the page was reloaded; PASS = the item appeared after add AND survived the reload (rehydrated from IndexedDB, not dropped as a ghost). This exercises the S2 acceptance that jsdom cannot (no IndexedDB).
+
+| App | Added | Survived reload | Result |
+|---|---|---|---|
+| music | ✅ | ✅ | ✅ |
+| video | ✅ | ✅ | ✅ |
+| photos | ✅ | ✅ | ✅ |
+
+## Graph-legible guard (EPIC-6 S4 + EPIC-13 S1/S3 — collection-owning apps join the organism)
+
+Each collection-owning app must mirror its real entities into the Core graph (`empire-core-graph`) so they are legible in The Network / Search / Timeline. **reader/book** (EPIC-6 S4): Reader's real file `<input>` was driven with a small `.txt` book; PASS = a `book` node owned by `app==='reader'` appeared AND survived a reload. **crypto/wallet** (EPIC-13 S1): the `crypto-watch-list` was seeded with a BTC address before Crypto mounted; PASS = a `wallet` node owned by `app==='crypto'` appeared AND survived a reload (the re-mounted app re-mirrors its watch-list). **mail/draft** (EPIC-13 S3): `empire-mail-drafts` was seeded with one draft before Mail mounted; PASS = a `draft` node owned by `app==='mail'` appeared AND survived a reload. Mail + Crypto were the last two raw-HTML islands — S1/S2/S3 make both first-class citizens (graph-legible + emit; Mail also receives handoffs).
+
+| Collection | Node created | Survived reload | Result |
+|---|---|---|---|
+| reader/book | ✅ | ✅ | ✅ |
+| crypto/wallet | ✅ | ✅ | ✅ |
+| mail/draft | ✅ | ✅ | ✅ |
+
+**GRAPH-LEGIBLE: 3/3 ✅**
+
+## Global-search guard (EPIC-8 S1 + S2 — the organism becomes queryable)
+
+The Core graph was seeded with entities sharing a rare term across TWO apps (a `book` in Reader, a `task` in Goals); after a reload (persist rehydrate) the term was typed into the Search field. PASS = BOTH entities surface, grouped under their own app sections — one lens querying every app's real entities at once. **S2 adds a tag-only match:** a third node carries the term `Tessellate` ONLY in `data.tags` (a string array) — it surfaces iff `nodeBodyText` now flattens array elements (the S2 corpus gap). The pure ranking spine (`searchNodes`) is unit-pinned in `search.test.ts`; this carries the graph→input→grouped-render roundtrip jsdom cannot.
+
+| Query | Book hit | Task hit | Spans 2 apps | Tag-only hit | Result |
+|---|---|---|---|---|---|
+| Xenolith / Tessellate | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**GLOBAL-SEARCH: 1/1 ✅**
+
+## Node-lineage guard (node-level lineage — per-artifact ancestry is legible)
+
+App-level provenance remembers which app fed which app; node-level lineage answers which ENTITY an exact artifact descended from. The core intents stamp `data.from = sourceNode.id` on every node they create, so the graph already holds a durable per-artifact ancestry edge. Two graph-survivable `task` nodes were seeded — a parent and a child whose `data.from` points at it — then reloaded so the persist store rehydrated; PASS = the Inbox child row renders a `<NodeLineage>` (`[data-node-lineage]`) carrying the parent entity's real title, AND it still resolves after a second reload (the `from` link is durable). **S2 extends the surface:** the same seeded ancestry must ALSO render on the Search result row (query "anomaly" → the child hit shows `[data-node-lineage=qa-lineage-parent]`), proving `<NodeLineage>` is now legible on every node-rendering view, not just the Inbox — the same drop-in surface also mounts on The Network inspector's per-entity list (visual/on-device). The pure walker `nodeLineageOf` is unit-pinned in `nodeLineage.test.ts`; this carries the graph→persist→rehydrate→render roundtrip jsdom cannot.
+
+ **S3 makes it NAVIGABLE:** each ancestry hop is a real `[role="button"]` that climbs to the source entity (`openEntity` → open its owning app + set the gaze); the guard asserts the parent hop renders as a focusable control whose accessible name targets the parent entity, then clicks it (the window/focus change is unit-pinned in `NodeLineage.test.tsx` — on the /app/search route AppShell renders by URL, so in-app navigation isn't observable headless).
+
+| Artifact | Lineage rendered | Parent title shown | Survived reload | Search surface | Hop clickable | Result |
+|---|---|---|---|---|---|---|
+| task ← Chart the Xenobloom anomaly | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**NODE-LINEAGE: 1/1 ✅**
+
+## Intent-roundtrip guard (EPIC-12 S1–S2 — cross-app creation makes REAL, durable entities)
+
+The core cross-app intents must produce a REAL, editable, reload-durable entity in its home app — not a phantom graph node. Before EPIC-12, `make-note-from` / `add-to-learning` called `g.addNode({type:'note'|'learning'})` directly: a graph node with NO store row and NO `data.sourceId`, which `reconcile()` PRUNES (`note`/`learning` are centrally-mirrored types) — so the "created" entity never showed in its app and vanished on the next store mutation / reload. Each stage routes its intent through the REAL store (`useStore.addNote` / `addLearningItem`); the synchronous `useStore.subscribe(syncAll)` then materializes an un-prunable, `sourceId`-keyed mirror. **S1 (note):** a graph-survivable `task` source is seeded, its ⚡ `<NodeActions>` "Make Note from this" menu is driven on the Inbox; PASS = a real note with `from`=source id + copied content in `empire-store` (`stored`), a `note` node owned by `app==='notes'` with `data.from` (`mirrored`), both surviving a second reload (`persisted`). **S2 (learning):** a REAL note is seeded in `empire-store` (a valid `add-to-learning` source that itself survives the reconcile), its ⚡ "Add to Learning" menu is driven on /app/notes; PASS = a real `learningItems` entry with `from`=source id + topic=source title (`stored`), a `learning` node owned by `app==='learning-tracker'` with `data.from` (`mirrored`), both surviving a second reload (`persisted`). The pure store-writes are unit-pinned in `sync.test.ts`; this carries the intent→store→subscribe→reconcile→persist→reload roundtrip jsdom cannot.
+
+| Intent | Real store entry | Mirrored (owned by home app) | Survived reload | Result |
+|---|---|---|---|---|
+| make-note-from → notes | ✅ | ✅ | ✅ | ✅ |
+| add-to-learning → learning-tracker | ✅ | ✅ | ✅ | ✅ |
+
+**INTENT-ROUNDTRIP: 2/2 ✅**
+
+## Timeline guard (EPIC-10 S1–S3 — the TEMPORAL lens: faceted, and read BOTH ways)
+
+The Empire had three lenses over its one Core graph — Network (STRUCTURAL), Search (QUERY), Inbox (TASK) — but no way to see *when* it did things, even though every `CoreNode` stamps `meta.created` and every `ProvEdge` stamps `at`. The Timeline app merges every entity-birth + every app→app handoff into one newest-first, day-grouped stream via the pure `buildTimeline`/`groupByDay`/`dayKey` spine, now filtered by the pure `filterTimeline`/`timelineFacets` helpers (all unit-pinned in `timeline.test.ts`). Two graph-survivable `task` nodes (distinct `meta.created`, owned by two apps, the newer's `data.from` = the older) + one `empire-provenance` edge were seeded, then reloaded so BOTH persist stores rehydrated; PASS = the two entity rows render newest-`created` first (`ordered`), at least one `[data-timeline-day]` header renders (`grouped`), the seeded edge renders as a `[data-timeline-kind=flow]` row (`flow`), all of it still holds after a SECOND reload (`persisted`), the older entity's row surfaces a `<NodeDescendants>` (`[data-node-descendants=qa-tl-older]`) naming the newer child it spawned (`descendants`), and clicking the `goals` App chip narrows to ONLY the goals-owned entity — dropping the notes entity + the notes→goals flow (`filtered`). **S3** surfaces the long-dormant `childrenOf` walker so a moment reads BOTH ways — `↖ ancestry` (`<NodeLineage>`) and `→ spawned` (`<NodeDescendants>`), each hop a navigable `[role="button"]` (unit-pinned in `NodeDescendants.test.tsx`). This carries the graph+ledger→persist→rehydrate→ordered-render + faceted-narrow + descendants roundtrip jsdom cannot; the sticky day headers, relative labels + chip tints are the on-device visual.
+
+| Ordered newest-first | Grouped by day | Flow row | Survived reload | Spawned-child shown | App-chip narrows | Result |
+|---|---|---|---|---|---|---|
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**TIMELINE: 1/1 ✅**
+
+## Home-alive guard (The Bridge — the home screen is living telemetry)
+
+The Core graph was seeded with a today-dated `event` (Calendar), an open `task` (Goals) and a `book` (Reader), then home was reloaded (persist rehydrate). PASS = the Today and Open Tasks widgets show the live count + entity, the jump-back-in strip lists all three newest-first, clicking a row lands in its owning app (the `openEntity` rail), and a question typed into the Cakra line opens Cakra prefilled (the `empire-ai-clipboard` rail). The pure selectors are unit-pinned in `bridge.test.ts`; this carries the rendered-home roundtrip jsdom cannot.
+
+| Today widget | Tasks widget | Recents strip | Exact landing | Cakra line | Result |
+|---|---|---|---|---|---|
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**HOME-ALIVE: 1/1 ✅**
+
+## Provenance-persists guard (EPIC-6 — durable app→app memory)
+
+Real `editor→<target>` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event `flowForEvent` turns into an edge in the durable `empire-provenance` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).
+
+| Edge | Recorded | Persisted (reload) | Result |
+|---|---|---|---|
+| editor→notes | ✅ | ✅ | ✅ |
+| editor→ai-chat | ✅ | ✅ | ✅ |
+| editor→prompt-generator | ✅ | ✅ | ✅ |
+
+**PROVENANCE-PERSISTS: 3/3 ✅**
+
+## Provenance-entity guard (EPIC-6 S3 — per-entity source survives reload)
+
+Distinct from the edge guard above: each S3 receiver was seeded with an inbound payload, reloaded so it consumed the chip + prefilled, then its OWN create/send was triggered so the entity persisted its durable `from`; the page was reloaded again (chip now gone) and a `<LineageTrail>` ("From <source>") must still render off the persisted entity. This is the headline S3 acceptance jsdom cannot exercise.
+
+| Entity edge | Trail after create | Trail after reload | Result |
+|---|---|---|---|
+| calculator→goals | ✅ | ✅ | ✅ |
+| editor→messages | ✅ | ✅ | ✅ |
+| notes→calendar | ✅ | ✅ | ✅ |
+
+**PROVENANCE-ENTITY: 3/3 ✅**
+
+## Offline-boot guard (EPIC-4 S1 — cold boot from SW precache)
+
+The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (`setOffline`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.
+
+**Precache:** 90 manifest entries; 54 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
+
+| Route | Renders offline |
+|---|---|
+| / | ✅ |
+| /app/clock | ✅ |
+| /app/maps | ✅ |
+| /app/network | ✅ |
+| /app/photos | ✅ |
+
+**Cold-offline boot: 5/5 ✅**
+
+## Screenshots
+
+See PNGs in this folder. `desktop.png` is the shell; `app-<id>.png` is each app route.

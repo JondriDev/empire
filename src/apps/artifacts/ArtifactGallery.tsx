@@ -9,6 +9,7 @@
 import { useEffect, useState } from 'react'
 import { FormInput, BarChart3, Columns, GraduationCap, FileText, Palette, Sparkles, ArrowRight, Star, Zap, Code2 } from 'lucide-react'
 import { cssVar } from '../../design-system/tokens'
+import { Card } from '../../components/ui'
 import { on } from '../../lib/eventBus'
 import GeneratedSection from './GeneratedSection'
 import { listGenerated } from './lib/artifactStore'
@@ -148,13 +149,16 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
             const Icon = ICONS[a.icon]
             const isHovered = hovered === a.id
             return (
-              <button
+              <Card
                 key={a.id}
+                interactive
+                padding="none"
                 onMouseEnter={() => setHovered(a.id)}
                 onMouseLeave={() => setHovered(null)}
                 onClick={() => onLaunch?.(a.id)}
-                className="group relative text-left rounded-2xl border border-hair bg-glass/[0.03] backdrop-blur p-5 hover:bg-glass/[0.06] hover:border-hair transition-all duration-300 hover:-translate-y-1 overflow-hidden animate-fadeIn"
+                className="group relative text-left rounded-2xl overflow-hidden animate-fadeIn"
                 style={{
+                  padding: '20px',
                   animationDelay: `${i * 60}ms`,
                   animationFillMode: 'both',
                 } as any}
@@ -221,7 +225,7 @@ export default function ArtifactGallery({ onLaunch }: { onLaunch?: (id: string) 
                     </span>
                   ))}
                 </div>
-              </button>
+              </Card>
             )
           })}
         </div>

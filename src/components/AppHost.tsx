@@ -11,6 +11,7 @@ import { ChevronLeft, House, LayoutGrid } from 'lucide-react'
 import { getAppIcon } from '../lib/registry'
 import { useWindowStore } from '../lib/windowStore'
 import { appComponents } from '../lib/appComponents'
+import { IconButton } from './ui'
 import LoadingSpinner from './ui/LoadingSpinner'
 import { ErrorBoundary } from './ErrorBoundary'
 
@@ -31,20 +32,34 @@ export default function AppHost({ onRecents }: { onRecents: () => void }) {
       key={win.appId}
     >
       <div className="empire-topbar">
-        <button className="empire-topbar-back" onClick={goHome} aria-label="Back to home">
-          <ChevronLeft className="w-5 h-5" />
-        </button>
+        <IconButton
+          className="empire-topbar-back"
+          style={{ width: '40px', height: '40px' }}
+          onClick={goHome}
+          aria-label="Back to home"
+          icon={<ChevronLeft className="w-5 h-5" />}
+        />
         <div className="empire-topbar-identity">
           <Icon className="w-4 h-4" style={{ color: win.color }} aria-hidden />
           <span className="empire-topbar-title">{win.title}</span>
         </div>
         <div className="empire-topbar-actions">
-          <button className="empire-topbar-btn" onClick={goHome} aria-label="Home" title="Home">
-            <House className="w-4 h-4" />
-          </button>
-          <button className="empire-topbar-btn" onClick={onRecents} aria-label="Recent apps" title="Recents">
-            <LayoutGrid className="w-4 h-4" />
-          </button>
+          <IconButton
+            className="empire-topbar-btn"
+            style={{ width: '40px', height: '40px' }}
+            onClick={goHome}
+            aria-label="Home"
+            title="Home"
+            icon={<House className="w-4 h-4" />}
+          />
+          <IconButton
+            className="empire-topbar-btn"
+            style={{ width: '40px', height: '40px' }}
+            onClick={onRecents}
+            aria-label="Recent apps"
+            title="Recents"
+            icon={<LayoutGrid className="w-4 h-4" />}
+          />
         </div>
       </div>
 

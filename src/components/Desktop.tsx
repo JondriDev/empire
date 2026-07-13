@@ -19,6 +19,7 @@ import Recents from './Recents'
 import ContextMenu from './ContextMenu'
 import CommandPalette from './CommandPalette'
 import { ToastViewport } from './ui/Toast'
+import { Button, IconButton, Input } from './ui'
 import {
   Search, Sun, Moon, House, LayoutGrid,
   ArrowUp, ArrowDown, CornerDownLeft,
@@ -39,7 +40,6 @@ export default function Desktop() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchSelected, setSearchSelected] = useState(0)
   const [clock, setClock] = useState(new Date())
-  const searchInputRef = useRef<HTMLInputElement>(null)
   const prevFocusRef = useRef<HTMLElement | null>(null)
 
   // Restore focus when the palette closes (WCAG 2.4.3 focus order).
@@ -120,29 +120,32 @@ export default function Desktop() {
               const Icon = getAppIcon(app.icon)
               const isRunning = windows.some(w => w.appId === app.id)
               return (
-                <button
+                <Button
                   key={app.id}
+                  variant="ghost"
                   className="empire-desktop-icon app-card"
-                  style={{ ['--app-color' as string]: app.color, animationDelay: `${Math.min(i * 35, 700)}ms` }}
+                  style={{ ['--app-color' as string]: app.color, animationDelay: `${Math.min(i * 35, 700)}ms`, flexDirection: 'column', padding: '8px 4px', gap: '7px', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '84px' }}
                   onClick={() => handleAppOpen(app.id)}
                   title={app.description || app.name}
                   aria-label={appLabel(app)}
+                  icon={
+                    <div className="empire-desktop-icon-img app-icon" style={{ background: `${app.color}15` }}>
+                      <Icon className="w-7 h-7" style={{ color: app.color }} />
+                      {isRunning && (
+                        <span
+                          aria-label="Running"
+                          style={{
+                            position: 'absolute', bottom: 3, right: 3, width: 7, height: 7,
+                            borderRadius: '50%', background: app.color,
+                            boxShadow: `0 0 8px ${app.color}, 0 0 0 1.5px ${tint('void', 60)}`,
+                          }}
+                        />
+                      )}
+                    </div>
+                  }
                 >
-                  <div className="empire-desktop-icon-img app-icon" style={{ background: `${app.color}15` }}>
-                    <Icon className="w-7 h-7" style={{ color: app.color }} />
-                    {isRunning && (
-                      <span
-                        aria-label="Running"
-                        style={{
-                          position: 'absolute', bottom: 3, right: 3, width: 7, height: 7,
-                          borderRadius: '50%', background: app.color,
-                          boxShadow: `0 0 8px ${app.color}, 0 0 0 1.5px ${tint('void', 60)}`,
-                        }}
-                      />
-                    )}
-                  </div>
                   <span className="empire-desktop-icon-label">{appLabel(app)}</span>
-                </button>
+                </Button>
               )
             })}
             </div>
@@ -161,13 +164,12 @@ export default function Desktop() {
           <div className="empire-search-panel" onClick={e => e.stopPropagation()}>
             <div className="empire-search-input-wrap">
               <Search className="w-5 h-5" style={{ color: 'var(--text3)' }} />
-              <input
-                ref={searchInputRef}
-                className="empire-search-input"
-                type="text"
+              <Input
+                seamless
+                className="flex-1"
                 placeholder={t('shell.search', 'Search apps, commands…')}
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={setSearchQuery}
                 autoFocus
                 onKeyDown={e => {
                   if (e.key === 'ArrowDown') {
@@ -195,29 +197,33 @@ export default function Desktop() {
                   const Icon = getAppIcon(app.icon)
                   const isSelected = idx === searchSelected
                   return (
-                    <button
+                    <Button
                       key={app.id}
+                      variant="ghost"
+                      fullWidth
                       className="empire-search-result"
                       data-selected={isSelected || undefined}
                       onClick={() => handleAppOpen(app.id)}
                       onMouseEnter={() => setSearchSelected(idx)}
-                      style={{ ['--app-color' as string]: app.color }}
-                    >
-                      <div style={{
-                        width: 36, height: 36, borderRadius: 'var(--radius-lg)',
-                        background: `${app.color}1A`, display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', border: `1px solid ${app.color}30`, flexShrink: 0,
-                      }}>
-                        <Icon className="w-4 h-4" style={{ color: app.color }} />
-                      </div>
-                      <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
-                        <div className="empire-search-result-name">{appLabel(app)}</div>
-                        {app.description && <div className="empire-search-result-desc">{app.description}</div>}
-                      </div>
-                      {isSelected && (
+                      style={{ ['--app-color' as string]: app.color, padding: '10px 12px', borderRadius: 'var(--radius-md)', justifyContent: 'space-between' }}
+                      iconRight={isSelected ? (
                         <span className="empire-search-kbd"><CornerDownLeft className="w-2.5 h-2.5" /></span>
-                      )}
-                    </button>
+                      ) : undefined}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                        <div style={{
+                          width: 36, height: 36, borderRadius: 'var(--radius-lg)',
+                          background: `${app.color}1A`, display: 'flex', alignItems: 'center',
+                          justifyContent: 'center', border: `1px solid ${app.color}30`, flexShrink: 0,
+                        }}>
+                          <Icon className="w-4 h-4" style={{ color: app.color }} />
+                        </div>
+                        <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
+                          <div className="empire-search-result-name">{appLabel(app)}</div>
+                          {app.description && <div className="empire-search-result-desc">{app.description}</div>}
+                        </div>
+                      </span>
+                    </Button>
                   )
                 })
               )}
@@ -245,24 +251,28 @@ export default function Desktop() {
       {/* Layer 4 — HomeBar (always on top) */}
       <div className="empire-homebar">
         <div className="empire-homebar-nav">
-          <button
+          <IconButton
             className={`empire-homebar-btn ${atHome ? 'is-active' : ''}`}
             onClick={goHome}
             title="Home"
             aria-label="Home"
-          >
-            <House className="w-5 h-5" />
-          </button>
-          <button
+            style={{ width: 'auto', minWidth: '44px', height: '44px', padding: '0 10px', borderRadius: 'var(--radius-md)', color: atHome ? 'var(--signal)' : 'var(--text3)', background: atHome ? 'color-mix(in srgb, var(--signal) 12%, transparent)' : 'transparent' }}
+            icon={<House className="w-5 h-5" />}
+          />
+          <IconButton
             className="empire-homebar-btn"
             onClick={() => setShowRecents(true)}
             title="Recent apps"
             aria-label="Recent apps"
-          >
-            <LayoutGrid className="w-5 h-5" />
-            {windows.length > 0 && <span className="empire-homebar-badge">{windows.length}</span>}
-          </button>
-          <button
+            style={{ width: 'auto', minWidth: '44px', height: '44px', padding: '0 10px', borderRadius: 'var(--radius-md)', color: 'var(--text3)' }}
+            icon={
+              <>
+                <LayoutGrid className="w-5 h-5" />
+                {windows.length > 0 && <span className="empire-homebar-badge">{windows.length}</span>}
+              </>
+            }
+          />
+          <IconButton
             className="empire-homebar-btn"
             onClick={() => {
               setShowSearch(v => {
@@ -273,28 +283,30 @@ export default function Desktop() {
             }}
             title="Search (Ctrl+Space)"
             aria-label="Search apps (Ctrl+Space)"
-          >
-            <Search className="w-5 h-5" />
-          </button>
+            style={{ width: 'auto', minWidth: '44px', height: '44px', padding: '0 10px', borderRadius: 'var(--radius-md)', color: 'var(--text3)' }}
+            icon={<Search className="w-5 h-5" />}
+          />
         </div>
 
         <div className="empire-homebar-tray">
-          <button
+          <IconButton
             className="empire-homebar-btn"
             onClick={toggleTheme}
             title={isLight ? 'Dark mode' : 'Light mode'}
             aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
-          >
-            {isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </button>
-          <button
+            style={{ width: 'auto', minWidth: '44px', height: '44px', padding: '0 10px', borderRadius: 'var(--radius-md)', color: 'var(--text3)' }}
+            icon={isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          />
+          <Button
+            variant="ghost"
             className="empire-homebar-btn empire-homebar-lang"
             onClick={toggleLang}
             title={`${t('shell.language', 'Language')}: ${lang === 'en' ? 'English' : 'Bahasa Indonesia'}`}
             aria-label={`${t('shell.language', 'Language')}: ${lang === 'en' ? 'English' : 'Bahasa Indonesia'}`}
+            style={{ minWidth: '44px', height: '44px', padding: '0 10px', borderRadius: 'var(--radius-md)', color: 'var(--text3)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', fontWeight: 700, letterSpacing: '0.05em' }}
           >
             {lang.toUpperCase()}
-          </button>
+          </Button>
           <div className="empire-homebar-clock" title={clock.toLocaleString()}>
             <span className="empire-homebar-time">
               {clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

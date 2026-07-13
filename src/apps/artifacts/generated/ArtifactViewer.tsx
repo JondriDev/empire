@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import { Check, Copy, Save, X } from 'lucide-react'
 import type { ArtifactSpec } from '../../cakra/lib/artifactProtocol'
 import { cssVar, tint } from '../../../design-system/tokens'
+import { Button, IconButton } from '../../../components/ui'
 import { useLang } from '../../../lib/i18n'
 import ArtifactFrame from './ArtifactFrame'
 
@@ -75,37 +76,39 @@ export default function ArtifactViewer({ artifact, onClose, onSave, saved }: Pro
           <h2 className="flex-1 min-w-0 truncate text-sm font-semibold" style={{ color: cssVar('text') }}>
             {artifact.title}
           </h2>
-          <button
+          <IconButton
+            variant="ghost"
             onClick={handleCopy}
-            className="press p-2 rounded-lg transition-colors"
+            className="press"
             style={{ color: copied ? cssVar('c-success') : cssVar('text2'), background: tint('xenon', 7) }}
             title={t('artifacts.copy')}
             aria-label={t('artifacts.copy')}
-          >
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-          </button>
+            icon={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          />
           {onSave && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={onSave}
               disabled={saved}
-              className="press flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+              className="press"
+              icon={saved ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
               style={saved
                 ? { color: cssVar('c-success'), background: tint('c-success', 12) }
                 : { color: cssVar('void'), background: 'var(--c-cakra)' }}
             >
-              {saved ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
               {saved ? t('artifacts.saved') : t('artifacts.save')}
-            </button>
+            </Button>
           )}
-          <button
+          <IconButton
+            variant="ghost"
             onClick={onClose}
-            className="press p-2 rounded-lg transition-colors"
+            className="press"
             style={{ color: cssVar('text2'), background: tint('xenon', 7) }}
             title={`${t('artifacts.close')} (Esc)`}
             aria-label={t('artifacts.close')}
-          >
-            <X className="w-4 h-4" />
-          </button>
+            icon={<X className="w-4 h-4" />}
+          />
         </div>
         <div className="flex-1 min-h-0">
           <ArtifactFrame type={artifact.type} content={artifact.content} title={artifact.title} />

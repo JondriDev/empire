@@ -955,8 +955,8 @@ try {
   // (same `empire-ai-clipboard` rail every app's "Ask Cakra" uses).
   await page.click('button[aria-label="Home"]');
   await page.waitForTimeout(400);
-  await page.fill('.bridge-ask-input', 'Bridge probe question');
-  await page.press('.bridge-ask-input', 'Enter');
+  await page.fill('.bridge-ask input', 'Bridge probe question');
+  await page.press('.bridge-ask input', 'Enter');
   await page.waitForTimeout(900);
   const cakraBar = await page.$eval('.empire-topbar-title', (el) => el.textContent || '').catch(() => '');
   const prefilled = await page.evaluate(() =>

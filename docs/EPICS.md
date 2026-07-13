@@ -305,6 +305,28 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   + feed loads.** build🟢 vitest 532/532🟢 eslint clean (6 touched); `--assert-zero` exit 0; qa-smoke 32/32 clean, all 13 guards
   green (INBOUND messages←ai-chat 4/4 ✅, PROVENANCE editor→ai-chat 3/3 ✅). bundle gz 731.1→730.9 (−0.2); no new deps.
 
+- [x] **S11 · Migrate the shell components + artifacts wrappers + the ONE re-regressed Cakra file (49 → 0) — the LAST offenders.**
+  ✅ **SHIPPED 2026-07-13 (green main).** `offShellControls 49 → 0 (−49)` — EXACTLY zeroed (`b45/i4/s0/t0 → b0/i0/s0/t0`); ALL 16 files 0
+  (AIChat re-regression 1→0, Desktop 8→0, AppShell 6→0, Network 4→0, Search 4→0, Bridge 4→0, AppHost 3→0, ContextMenu 3→0,
+  GeneratedSection 3→0, ArtifactViewer 3→0, CommandPalette 2→0, Recents 2→0, Timeline 2→0, ArtifactsApp 2→0, ErrorBoundary 1→0,
+  ArtifactGallery 1→0). Icon-only chrome (AppHost topbar, AppShell titlebar + dock, homebar House/Recents/Search/Theme, inspector
+  close, artifact copy/close) → `IconButton` (kept the bespoke `empire-topbar-btn`/`empire-homebar-btn` classes for hover/is-active,
+  overrode size via `style` since **there is NO `.empire-icon-btn` CSS — the bespoke class carries the hover**). Menu/facet/result rows
+  → `Button ghost` (space-between + `iconRight` recipe for CommandPalette/Desktop/Bridge/Network trailing kbd/meta; leading-column
+  `<span flexDirection:column>` for Timeline/Search title blocks). Clickable rich CARDS (Recents card, Bridge widgets, ArtifactGallery
+  tiles) → `Card interactive padding="none"` — window-manager.css loads AFTER design-system.css so the bespoke `:hover` wins over
+  `.gp-interactive:hover` (app-color glow preserved). Launcher app-cards → `Button ghost` with `flexDirection:column` (keeps the
+  transparent floating look — `Card` would add an unwanted `.gp` glass panel). Text fields (CommandPalette/Desktop/Bridge/Search)
+  → `Input seamless` nested inside their existing `*-input-wrap` (preserves the bottom divider); Search's `⌘F focus/select` rail moved
+  from a dead `useRef` to `id`+`getElementById` (Input isn't forwardRef); Bridge ask `<form onSubmit>` → `<div>` + Enter-key + `IconButton`
+  onClick (IconButton hardcodes `type="button"`). **HOME-ALIVE guard selector updated `.bridge-ask-input` → `.bridge-ask input`** (the
+  primitive moved the class from the field to the wrap; same behaviour asserted). `ColorPalette.tsx` left bare (DS_INFRA-exempt). build🟢
+  vitest 532/532🟢 (+ audit units 29🟢) eslint clean (16 files); metrics tokens/utils/style/**offShellControls all 0**; `--assert-zero`
+  exit 0; qa-smoke 32/32 clean + **all 13 guards green (HOME-ALIVE 1/1, GLOBAL-SEARCH, TIMELINE, INBOUND 4/4, PROVENANCE, OFFLINE 5/5,
+  PRECACHE no-gap)**; bundle gz 731→731.9 (+0.9); no new deps. ▶ **NEXT = S12 (LOCK `offShellControls` in `--assert-zero`).**
+
+  <details><summary>Original S11 spec (pre-ship)</summary>
+
 - [ ] **S11 · Migrate the shell components + artifacts wrappers + the ONE re-regressed Cakra file (49 → 0) — the LAST offenders.**
   The desktop chrome + the four organism lenses + the artifacts wrappers. **★ Live census re-run by the Strategist 2026-07-12 (post-S10):
   `offShellControls = 49 (b45/i4/s0/t0)`, NOT the 48 this stage was decomposed for — the out-of-band Cakra NIM upgrade
@@ -331,6 +353,8 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
   `node scripts/metrics.mjs` → **`offShellControls = 0 (b0/i0/s0/t0)`**; all 32 routes render clean + **all 13 guards green**
   (HOME-ALIVE, GLOBAL-SEARCH, TIMELINE, INBOUND, GRAPH-LEGIBLE, PROVENANCE, OFFLINE …); build🟢 vitest🟢 eslint clean;
   tokens/off-system/offSystemStyle 0.
+
+  </details>
 
 - [ ] **S12 · LOCK `offShellControls` in `--assert-zero` → ★ EPIC-14 CODE-COMPLETE.** Add `if (snapshot.offShellControls > 0)
   fail.push(...)` to the `--assert-zero` block (`scripts/metrics.mjs`, beside the existing `tokenViolations`/

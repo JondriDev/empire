@@ -5,6 +5,7 @@
 import { X } from 'lucide-react'
 import { getAppIcon } from '../lib/registry'
 import { useWindowStore } from '../lib/windowStore'
+import { Button, Card } from './ui'
 
 export default function Recents({ open, onClose }: { open: boolean; onClose: () => void }) {
   const windows = useWindowStore(s => s.windows)
@@ -18,12 +19,14 @@ export default function Recents({ open, onClose }: { open: boolean; onClose: () 
       <div className="empire-recents-head">
         <span>Recent apps</span>
         {windows.length > 0 && (
-          <button
+          <Button
+            variant="ghost"
             className="empire-recents-clear"
+            style={{ padding: '5px 12px', borderRadius: 'var(--radius-full)', fontSize: 'var(--text-xs)', border: '1px solid var(--hair)', color: 'var(--text3)' }}
             onClick={(e) => { e.stopPropagation(); useWindowStore.setState({ windows: [], activeWindowId: null }); onClose() }}
           >
             Close all
-          </button>
+          </Button>
         )}
       </div>
 
@@ -34,10 +37,12 @@ export default function Recents({ open, onClose }: { open: boolean; onClose: () 
           {windows.map(win => {
             const Icon = getAppIcon(win.icon)
             return (
-              <button
+              <Card
                 key={win.id}
+                interactive
+                padding="none"
                 className="empire-recents-card animate-scale-in"
-                style={{ ['--app-color' as string]: win.color }}
+                style={{ padding: '22px 12px 16px', ['--app-color' as string]: win.color }}
                 onClick={() => { focusWindow(win.id); onClose() }}
               >
                 <span
@@ -52,7 +57,7 @@ export default function Recents({ open, onClose }: { open: boolean; onClose: () 
                   <Icon className="w-7 h-7" style={{ color: win.color }} />
                 </span>
                 <span className="empire-recents-title">{win.title}</span>
-              </button>
+              </Card>
             )
           })}
         </div>

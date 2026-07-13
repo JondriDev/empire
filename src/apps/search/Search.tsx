@@ -15,7 +15,7 @@
  * when Search is already foregrounded (mount autofocus covers the first open).
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Search as SearchIcon, ArrowUpRight } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { useGraph } from '../../lib/core/graph'
@@ -29,11 +29,14 @@ import {
 } from '../../lib/core/search'
 import { apps, getAppIcon } from '../../lib/registry'
 import { openEntity } from '../../lib/windowStore'
+import { Button, IconButton, Input } from '../../components/ui'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { NodeLineage } from '../../components/ui/NodeLineage'
 
 // One accent per view — Search reads as ion-blue, the calm scanning light.
 const ACCENT = 'var(--ion)'
+// Stable id for the global search field (see searchField() — the ⌘F focus rail).
+const SEARCH_INPUT_ID = 'empire-global-search-input'
 
 export default function Search() {
   const nodes = useGraph(s => s.nodes)
@@ -41,7 +44,9 @@ export default function Search() {
   const [typeFilter, setTypeFilter] = useState<string[]>([])
   const [appFilter, setAppFilter] = useState<string[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
+  // The Input primitive isn't a forwardRef, so reach the field by id for the
+  // focus/select summon (the GLOBAL-SEARCH ⌘F rail) instead of a React ref.
+  const searchField = () => document.getElementById(SEARCH_INPUT_ID) as HTMLInputElement | null
 
   const appById = useMemo(
     () => Object.fromEntries(apps.map(a => [a.id, a])) as Record<string, typeof apps[number]>,
@@ -50,14 +55,15 @@ export default function Search() {
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'search' })
-    inputRef.current?.focus()
+    searchField()?.focus()
   }, [])
 
   // Re-focus + select on a global summon, even when already foregrounded.
   useEffect(() => {
     const onSummon = () => {
-      inputRef.current?.focus()
-      inputRef.current?.select()
+      const el = searchField()
+      el?.focus()
+      el?.select()
     }
     window.addEventListener('empire:summon-search', onSummon)
     return () => window.removeEventListener('empire:summon-search', onSummon)
@@ -119,14 +125,19 @@ export default function Search() {
   ) => {
     const on = dimension.includes(value)
     return (
-      <button
+      <Button
         key={`${label}-${value}`}
+        variant="ghost"
+        size="sm"
         onClick={() => setDimension(toggleFacet(dimension, value))}
         aria-pressed={on}
-        className="rounded-full text-xs flex items-center gap-1.5 transition-colors"
+        className="rounded-full"
         style={{
           padding: '4px 10px',
+          borderRadius: 'var(--radius-full)',
           fontFamily: 'var(--mono)',
+          fontSize: 'var(--text-xs)',
+          gap: '6px',
           transitionDuration: 'var(--dur-fast)',
           color: on ? 'var(--text)' : 'var(--text2)',
           background: on ? 'color-mix(in srgb, var(--ion) 22%, transparent)' : 'transparent',
@@ -138,7 +149,7 @@ export default function Search() {
         )}
         <span>{label}</span>
         <span style={{ color: 'var(--text3)' }}>{count}</span>
-      </button>
+      </Button>
     )
   }
 
@@ -158,15 +169,16 @@ export default function Search() {
           style={{ padding: 'var(--space-3, 14px)' }}
         >
           <SearchIcon className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--text3)' }} />
-          <input
-            ref={inputRef}
+          <Input
+            id={SEARCH_INPUT_ID}
+            seamless
+            mono
+            className="flex-1"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={setQuery}
             onKeyDown={onKeyDown}
             placeholder="Search notes, tasks, events, books, files…"
             aria-label="Search across every app"
-            className="flex-1 bg-transparent outline-none text-sm"
-            style={{ color: 'var(--text)', fontFamily: 'var(--mono)' }}
             spellCheck={false}
             autoComplete="off"
           />
@@ -274,35 +286,38 @@ function ResultRow({
         style={{ width: 8, height: 8, background: accent ?? 'var(--text3)' }}
       />
 
-      <button
+      <Button
+        variant="ghost"
         onClick={() => openEntity(appId, node.id)}
-        className="flex-1 min-w-0 text-left"
         aria-label={`Open ${node.title} in ${appId}`}
+        style={{ flex: 1, minWidth: 0, justifyContent: 'flex-start', padding: 0, background: 'transparent' }}
       >
-        <div className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>
-          {node.title || '(untitled)'}
-        </div>
-        <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs" style={{ color: 'var(--text3)' }}>
-          <span style={{ fontFamily: 'var(--mono)' }}>{node.type}</span>
-          {hit.snippet && <span className="truncate">— {hit.snippet}</span>}
-          {/* Node-level lineage — the exact entity this hit descended from. */}
-          <NodeLineage nodeId={node.id} />
-        </div>
-      </button>
+        <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flex: 1 }}>
+          <div className="text-sm font-medium truncate" style={{ color: 'var(--text)', maxWidth: '100%' }}>
+            {node.title || '(untitled)'}
+          </div>
+          <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs" style={{ color: 'var(--text3)' }}>
+            <span style={{ fontFamily: 'var(--mono)' }}>{node.type}</span>
+            {hit.snippet && <span className="truncate">— {hit.snippet}</span>}
+            {/* Node-level lineage — the exact entity this hit descended from. */}
+            <NodeLineage nodeId={node.id} />
+          </div>
+        </span>
+      </Button>
 
       <div
         className={`flex items-center gap-1 transition-opacity ${active ? '' : 'opacity-0 group-hover:opacity-100'}`}
         style={{ transitionDuration: 'var(--dur-fast)' }}
       >
         <NodeActions nodeId={node.id} />
-        <button
+        <IconButton
+          variant="ghost"
+          size="sm"
           onClick={() => openEntity(appId, node.id)}
           aria-label={`Open in ${appId}`}
-          className="p-1.5 rounded-lg"
           style={{ color: 'var(--text3)' }}
-        >
-          <ArrowUpRight className="w-4 h-4" />
-        </button>
+          icon={<ArrowUpRight className="w-4 h-4" />}
+        />
       </div>
     </div>
   )

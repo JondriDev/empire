@@ -1,5 +1,6 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
 import { tint } from '../design-system/tokens'
+import { Button } from './ui'
 
 interface Props { children: ReactNode; fallback?: ReactNode }
 interface State { hasError: boolean; error: Error | null }
@@ -37,7 +38,8 @@ export class ErrorBoundary extends Component<Props, State> {
           <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text3)', marginBottom: '1rem' }}>
             {this.state.error?.message || 'Unknown error'}
           </p>
-          <button
+          <Button
+            variant="ghost"
             onClick={this.reset}
             style={{
               background: tint('signal', 20),
@@ -45,12 +47,11 @@ export class ErrorBoundary extends Component<Props, State> {
               borderRadius: 'var(--radius-sm)',
               padding: '0.5rem 1.5rem',
               color: 'color-mix(in srgb, var(--signal) 70%, var(--text))',
-              cursor: 'pointer',
               fontSize: 'var(--text-sm)',
             }}
           >
             Try again
-          </button>
+          </Button>
         </div>
       )
     }

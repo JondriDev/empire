@@ -35,6 +35,7 @@ import { toggleFacet } from '../../lib/core/search'
 import { agoLabel } from '../../lib/core/bridge'
 import { apps, getAppIcon } from '../../lib/registry'
 import { openEntity } from '../../lib/windowStore'
+import { Button } from '../../components/ui'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { NodeLineage } from '../../components/ui/NodeLineage'
 import { NodeDescendants } from '../../components/ui/NodeDescendants'
@@ -123,15 +124,20 @@ export default function Timeline() {
   ) => {
     const on = current.includes(value)
     return (
-      <button
+      <Button
         key={`${dim}-${value}`}
+        variant="ghost"
+        size="sm"
         data-timeline-facet={`${dim}:${value}`}
         onClick={() => setDim(toggleFacet(current, value))}
         aria-pressed={on}
-        className="rounded-full text-xs flex items-center gap-1.5 transition-colors"
+        className="rounded-full"
         style={{
           padding: '4px 10px',
+          borderRadius: 'var(--radius-full)',
           fontFamily: 'var(--mono)',
+          fontSize: 'var(--text-xs)',
+          gap: '6px',
           transitionDuration: 'var(--dur-fast)',
           color: on ? 'var(--text)' : 'var(--text2)',
           background: on ? 'color-mix(in srgb, var(--signal) 22%, transparent)' : 'transparent',
@@ -143,7 +149,7 @@ export default function Timeline() {
         )}
         <span>{label}</span>
         <span style={{ color: 'var(--text3)' }}>{count}</span>
-      </button>
+      </Button>
     )
   }
 
@@ -264,26 +270,29 @@ function EntityRow({
         style={{ width: 8, height: 8, background: accent ?? 'var(--text3)' }}
       />
 
-      <button
+      <Button
+        variant="ghost"
         onClick={() => openEntity(entry.app, nodeId)}
-        className="flex-1 min-w-0 text-left"
         aria-label={`Open ${entry.title} in ${entry.app}`}
+        style={{ flex: 1, minWidth: 0, justifyContent: 'flex-start', padding: 0, background: 'transparent' }}
       >
-        <div data-timeline-title className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>
-          {entry.title || '(untitled)'}
-        </div>
-        <div
-          className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs"
-          style={{ color: 'var(--text3)' }}
-        >
-          {entry.type && <span style={{ fontFamily: 'var(--mono)' }}>{entry.type}</span>}
-          <span style={{ fontFamily: 'var(--mono)' }}>{agoLabel(entry.at, now)}</span>
-          {/* Node-level ancestry — the exact entity this one descended from. */}
-          <NodeLineage nodeId={nodeId} />
-          {/* …and forward: the entities this moment spawned (EPIC-10 S3). */}
-          <NodeDescendants nodeId={nodeId} />
-        </div>
-      </button>
+        <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flex: 1 }}>
+          <div data-timeline-title className="text-sm font-medium truncate" style={{ color: 'var(--text)', maxWidth: '100%' }}>
+            {entry.title || '(untitled)'}
+          </div>
+          <div
+            className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs"
+            style={{ color: 'var(--text3)' }}
+          >
+            {entry.type && <span style={{ fontFamily: 'var(--mono)' }}>{entry.type}</span>}
+            <span style={{ fontFamily: 'var(--mono)' }}>{agoLabel(entry.at, now)}</span>
+            {/* Node-level ancestry — the exact entity this one descended from. */}
+            <NodeLineage nodeId={nodeId} />
+            {/* …and forward: the entities this moment spawned (EPIC-10 S3). */}
+            <NodeDescendants nodeId={nodeId} />
+          </div>
+        </span>
+      </Button>
 
       <div
         className={`flex items-center gap-1 transition-opacity ${active ? '' : 'opacity-0 group-hover:opacity-100'}`}

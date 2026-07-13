@@ -17,6 +17,7 @@ import { bridgeSnapshot, agoLabel } from '../lib/core/bridge'
 import { openAppById, openEntity } from '../lib/windowStore'
 import { apps, getAppIcon } from '../lib/registry'
 import { useLang } from '../lib/i18n'
+import { Button, Card, IconButton, Input } from './ui'
 import type { CoreNode } from '../lib/core/graph'
 
 const appById = Object.fromEntries(apps.map(a => [a.id, a]))
@@ -45,8 +46,8 @@ export default function Bridge() {
   // Hand the question to Cakra over the same clipboard rail every app uses.
   // No `from` field: the home shell is not a registry app, and provenance
   // stays honest (no invented app→app edge).
-  const submitAsk = (e: React.FormEvent) => {
-    e.preventDefault()
+  const submitAsk = (e?: React.SyntheticEvent) => {
+    e?.preventDefault()
     const text = ask.trim()
     if (!text) return
     sessionStorage.setItem('empire-ai-clipboard', JSON.stringify({ text }))
@@ -71,24 +72,29 @@ export default function Bridge() {
         <h1 className="bridge-greeting">{t(`home.greet.${snap.greeting}`, 'Welcome')}</h1>
       </header>
 
-      <form className="bridge-ask" onSubmit={submitAsk}>
+      <div className="bridge-ask">
         <span className="bridge-ask-glyph" aria-hidden="true">
           <CakraIcon className="w-5 h-5" />
         </span>
-        <input
-          className="bridge-ask-input"
-          type="text"
+        <Input
+          seamless
+          className="flex-1"
           value={ask}
-          onChange={e => setAsk(e.target.value)}
+          onChange={setAsk}
           placeholder={t('home.ask', 'Ask Cakra anything…')}
           aria-label={t('home.ask.label', 'Ask Cakra')}
+          onKeyDown={e => { if (e.key === 'Enter') submitAsk(e) }}
         />
         {ask.trim() && (
-          <button type="submit" className="bridge-ask-go" aria-label={t('home.ask.label', 'Ask Cakra')}>
-            <CornerDownLeft className="w-4 h-4" />
-          </button>
+          <IconButton
+            className="bridge-ask-go"
+            onClick={submitAsk}
+            aria-label={t('home.ask.label', 'Ask Cakra')}
+            style={{ background: 'color-mix(in srgb, var(--c-cakra) 20%, transparent)', color: 'var(--c-cakra)', borderRadius: 'var(--r-full)', border: 'none' }}
+            icon={<CornerDownLeft className="w-4 h-4" />}
+          />
         )}
-      </form>
+      </div>
 
       {/* ── Telemetry: four live widgets, each a portal into its app ── */}
       <div className="bridge-widgets">
@@ -136,24 +142,30 @@ export default function Bridge() {
               const owner = ownerOf(n)
               const Icon = getAppIcon(owner.icon)
               return (
-                <button
+                <Button
                   key={n.id}
+                  variant="ghost"
+                  fullWidth
                   className="bridge-continue-row"
                   data-bridge-recent={n.id}
-                  style={{ ['--app-color' as string]: owner.color }}
+                  style={{ ['--app-color' as string]: owner.color, padding: '8px 12px', borderRadius: 'var(--r-md)', border: '1px solid transparent', justifyContent: 'space-between', gap: '10px' }}
                   onClick={() => openEntity(owner.id, n.id)}
                   title={n.title}
+                  iconRight={
+                    <span className="bridge-continue-meta">
+                      {n.type} · {agoLabel(n.meta.updated, minute)}
+                    </span>
+                  }
                 >
-                  <span className="bridge-continue-chip" aria-hidden="true">
-                    <Icon className="w-3.5 h-3.5" />
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                    <span className="bridge-continue-chip" aria-hidden="true">
+                      <Icon className="w-3.5 h-3.5" />
+                    </span>
+                    <span className="bridge-continue-title">
+                      {n.type === 'task' ? n.title.replace(/^Do:\s*/, '') : n.title}
+                    </span>
                   </span>
-                  <span className="bridge-continue-title">
-                    {n.type === 'task' ? n.title.replace(/^Do:\s*/, '') : n.title}
-                  </span>
-                  <span className="bridge-continue-meta">
-                    {n.type} · {agoLabel(n.meta.updated, minute)}
-                  </span>
-                </button>
+                </Button>
               )
             })}
           </div>
@@ -175,10 +187,12 @@ function Widget(props: {
   const app = appById[props.appId]
   const Icon = getAppIcon(app.icon)
   return (
-    <button
+    <Card
+      interactive
+      padding="none"
       className="bridge-widget"
       data-widget={props.dataId}
-      style={{ ['--app-color' as string]: app.color }}
+      style={{ padding: '14px 16px 13px', ['--app-color' as string]: app.color }}
       onClick={() => openAppById(props.appId)}
       aria-label={`${props.label}: ${props.value}`}
     >
@@ -193,6 +207,6 @@ function Widget(props: {
           <div className="bridge-widget-fill" style={{ width: `${Math.min(100, Math.max(0, props.progress))}%` }} />
         </div>
       )}
-    </button>
+    </Card>
   )
 }

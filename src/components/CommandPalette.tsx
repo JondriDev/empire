@@ -19,6 +19,7 @@ import { intentsFor, runIntent } from '../lib/core/intents'
 import { useWindowStore } from '../lib/windowStore'
 import { apps } from '../lib/registry'
 import { typeRgb, rgbCss } from '../apps/network/nodeColors'
+import { Button, Input } from './ui'
 import { useToast } from './ui/Toast'
 
 interface PaletteAction {
@@ -33,7 +34,6 @@ export default function CommandPalette() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
   const prevFocusRef = useRef<HTMLElement | null>(null)
   const toast = useToast()
   const openApp = useWindowStore(s => s.openApp)
@@ -170,13 +170,12 @@ export default function CommandPalette() {
         {/* Filter input */}
         <div className="empire-search-input-wrap">
           <Zap className="w-4 h-4" style={{ color: 'var(--text3)' }} />
-          <input
-            ref={inputRef}
-            className="empire-search-input"
-            type="text"
+          <Input
+            seamless
+            className="flex-1"
             placeholder="Run an action on this node…"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={setQuery}
             autoFocus
             onKeyDown={e => {
               if (e.key === 'ArrowDown') {
@@ -212,31 +211,36 @@ export default function CommandPalette() {
             filtered.map((action, idx) => {
               const isSelected = idx === selected
               return (
-                <button
+                <Button
                   key={action.id}
+                  variant="ghost"
+                  fullWidth
                   className="empire-search-result"
                   data-selected={isSelected || undefined}
                   onClick={() => run(action)}
                   onMouseEnter={() => setSelected(idx)}
-                >
-                  <span
-                    aria-hidden
-                    style={{
-                      width: 28, height: 28, borderRadius: 'var(--radius-md)', flexShrink: 0,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 'var(--text-base)', color: 'var(--text2)',
-                      background: rgbCss('255,255,255', 0.04), border: `1px solid ${rgbCss('255,255,255', 0.06)}`,
-                    }}
-                  >
-                    {action.id.startsWith('open:') ? <ExternalLink className="w-3.5 h-3.5" /> : action.icon}
-                  </span>
-                  <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
-                    <div className="empire-search-result-name">{action.label}</div>
-                  </div>
-                  {isSelected && (
+                  style={{ padding: '10px 12px', borderRadius: 'var(--radius-md)', justifyContent: 'space-between' }}
+                  iconRight={isSelected ? (
                     <span className="empire-search-kbd"><CornerDownLeft className="w-2.5 h-2.5" /></span>
-                  )}
-                </button>
+                  ) : undefined}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                    <span
+                      aria-hidden
+                      style={{
+                        width: 28, height: 28, borderRadius: 'var(--radius-md)', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 'var(--text-base)', color: 'var(--text2)',
+                        background: rgbCss('255,255,255', 0.04), border: `1px solid ${rgbCss('255,255,255', 0.06)}`,
+                      }}
+                    >
+                      {action.id.startsWith('open:') ? <ExternalLink className="w-3.5 h-3.5" /> : action.icon}
+                    </span>
+                    <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
+                      <div className="empire-search-result-name">{action.label}</div>
+                    </div>
+                  </span>
+                </Button>
               )
             })
           )}

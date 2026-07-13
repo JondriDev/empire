@@ -4,6 +4,7 @@ import { ArrowLeft, Grid3X3, Sun, Moon, Bot } from 'lucide-react'
 import { apps, getAppIcon } from '../lib/registry'
 import { useStore } from '../lib/store'
 import { tint } from '../design-system/tokens'
+import { Button, IconButton } from './ui'
 import LoadingSpinner from './ui/LoadingSpinner'
 import { ErrorBoundary } from './ErrorBoundary'
 
@@ -24,13 +25,14 @@ export default function AppShell({ appMap }: AppShellProps) {
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <div className="text-center">
           <p className="text-xl" style={{ color: 'var(--text)' }}>App not found</p>
-          <button
+          <Button
+            variant="ghost"
             onClick={() => navigate('/')}
-            className="mt-4 text-sm rounded-xl px-4 py-2 transition-colors"
-            style={{ color: 'var(--color-teal-3)', background: 'var(--btn-secondary-bg)' }}
+            className="mt-4"
+            style={{ color: 'var(--color-teal-3)', background: 'var(--btn-secondary-bg)', borderRadius: 'var(--radius-lg)', fontSize: 'var(--text-sm)' }}
           >
             Back to Empire
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -56,17 +58,18 @@ export default function AppShell({ appMap }: AppShellProps) {
         {/* Left: back chevron + app identity */}
         <div className="flex items-center gap-3">
           {/* Android back chevron */}
-          <button
+          <IconButton
+            variant="ghost"
             onClick={() => navigate('/')}
-            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95"
             style={{
+              width: '32px', height: '32px', borderRadius: 'var(--radius-lg)',
               background: tint('xenon', 6),
               border: `1px solid ${tint('xenon', 8)}`,
             }}
             title="Back to Empire"
-          >
-            <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text2)' }} />
-          </button>
+            aria-label="Back to Empire"
+            icon={<ArrowLeft className="w-4 h-4" style={{ color: 'var(--text2)' }} />}
+          />
 
           {/* App icon + name */}
           <Icon className="w-4 h-4 ml-1" style={{ color: appDef.color }} />
@@ -86,30 +89,30 @@ export default function AppShell({ appMap }: AppShellProps) {
 
         {/* Right: controls */}
         <div className="flex items-center gap-1">
-          <button
+          <IconButton
+            variant="ghost"
             onClick={() => navigate('/app/ai-chat')}
-            className="p-2 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
-            style={{ color: 'var(--text2)' }}
+            style={{ color: 'var(--text2)', borderRadius: 'var(--radius-lg)' }}
             title="Ask Cakra"
-          >
-            <Bot className="w-4 h-4" />
-          </button>
-          <button
+            aria-label="Ask Cakra"
+            icon={<Bot className="w-4 h-4" />}
+          />
+          <IconButton
+            variant="ghost"
             onClick={toggleTheme}
-            className="p-2 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
-            style={{ color: 'var(--text2)' }}
+            style={{ color: 'var(--text2)', borderRadius: 'var(--radius-lg)' }}
             title={isLight ? 'Dark mode' : 'Light mode'}
-          >
-            {isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </button>
-          <button
+            aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+            icon={isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          />
+          <IconButton
+            variant="ghost"
             onClick={() => navigate('/')}
-            className="p-2 rounded-xl transition-all duration-150 hover:scale-105 active:scale-95"
-            style={{ color: 'var(--text2)' }}
+            style={{ color: 'var(--text2)', borderRadius: 'var(--radius-lg)' }}
             title="Empire home"
-          >
-            <Grid3X3 className="w-4 h-4" />
-          </button>
+            aria-label="Empire home"
+            icon={<Grid3X3 className="w-4 h-4" />}
+          />
         </div>
       </div>
 
@@ -149,22 +152,24 @@ function Dock({ currentApp }: { currentApp: string }) {
           const Icon = getAppIcon(app.icon)
           const isActive = app.id === currentApp
           return (
-            <button
+            <Button
               key={app.id}
+              variant="ghost"
               onClick={() => navigate(app.route)}
-              className="dock-item relative p-2 rounded-xl"
-              style={
-                isActive
-                  ? { background: 'var(--gl-bg-h)' }
-                  : {}
-              }
+              className="dock-item relative rounded-xl"
+              style={{
+                padding: '8px',
+                borderRadius: 'var(--radius-lg)',
+                ...(isActive ? { background: 'var(--gl-bg-h)' } : {}),
+              }}
               title={app.name}
+              icon={
+                <Icon
+                  className="w-5 h-5"
+                  style={{ color: isActive ? app.color : 'var(--text2)' }}
+                />
+              }
             >
-              <Icon
-                className="w-5 h-5"
-                style={{ color: isActive ? app.color : 'var(--text2)' }}
-              />
-
               {/* Active dot */}
               {isActive && (
                 <span
@@ -185,7 +190,7 @@ function Dock({ currentApp }: { currentApp: string }) {
               >
                 {app.name}
               </span>
-            </button>
+            </Button>
           )
         })}
       </div>

@@ -15,6 +15,7 @@ import Flashcards from './artifacts/Flashcards'
 import MarkdownStudio from './artifacts/MarkdownStudio'
 import ColorPalette from './artifacts/ColorPalette'
 import { cssVar } from '../../design-system/tokens'
+import { Button, IconButton } from '../../components/ui'
 
 // Lazy-ish: import all statically for instant switching inside this window.
 // They're small and self-contained; preloading costs ~5KB total.
@@ -59,13 +60,15 @@ export default function ArtifactsApp() {
             borderBottomColor: `color-mix(in srgb, ${accent} 19%, transparent)`,
           }}
         >
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleClose}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-glass hover:bg-glass border border-hair text-xs transition-colors"
+            icon={<ArrowLeft size={12} />}
             title="Back to gallery (Esc)"
           >
-            <ArrowLeft size={12} /> Gallery
-          </button>
+            Gallery
+          </Button>
           <div className="flex-1" />
           <span
             className="px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold"
@@ -73,13 +76,14 @@ export default function ArtifactsApp() {
           >
             {title}
           </span>
-          <button
+          <IconButton
+            variant="secondary"
+            size="sm"
             onClick={handleClose}
-            className="p-1.5 rounded-lg bg-glass hover:bg-danger/30 border border-hair text-muted hover:text-fg transition-colors"
             title="Close"
-          >
-            <X size={12} />
-          </button>
+            aria-label="Close"
+            icon={<X size={12} />}
+          />
         </div>
         <div className="flex-1 overflow-hidden">
           <Component />

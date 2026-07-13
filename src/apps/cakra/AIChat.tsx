@@ -377,18 +377,22 @@ function ThinkingBox({ text, live }: { text: string; live: boolean }) {
       className="mb-2 rounded-xl text-xs overflow-hidden"
       style={{ background: tint('signal', 5), border: `1px solid ${tint('signal', 20)}` }}
     >
-      <button
+      <Button
+        variant="ghost"
+        fullWidth
+        size="sm"
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-1.5 px-3 py-2"
-        style={{ color: cssVar('signal') }}
+        icon={<Brain className="w-3 h-3" />}
+        iconRight={
+          <ChevronRight
+            className="w-3 h-3 transition-transform"
+            style={{ transform: open ? 'rotate(90deg)' : 'none' }}
+          />
+        }
+        style={{ justifyContent: 'space-between', gap: '6px', padding: '8px 12px', fontSize: 'var(--text-xs)', fontWeight: 600, color: cssVar('signal') }}
       >
-        <Brain className="w-3 h-3" />
-        <span style={{ fontWeight: 600 }}>{live ? 'Thinking…' : 'Reasoning'}</span>
-        <ChevronRight
-          className="w-3 h-3 ml-auto transition-transform"
-          style={{ transform: open ? 'rotate(90deg)' : 'none' }}
-        />
-      </button>
+        <span>{live ? 'Thinking…' : 'Reasoning'}</span>
+      </Button>
       {open && (
         <pre
           className="px-3 pb-2 whitespace-pre-wrap font-mono overflow-auto max-h-48"
