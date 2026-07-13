@@ -316,7 +316,23 @@ function NoteCard({ note, landed, cardRef, isEditing, onStartEdit, onSaveEdit, o
       />
 
       {isEditing ? (
-        <>
+        // Keyboard parity with the create form: Escape cancels the edit,
+        // Cmd/Ctrl+Enter commits it — so an in-place edit never traps a
+        // keyboard user who expects the same shortcuts the new-note card offers.
+        <div
+          role="group"
+          aria-label="Edit note"
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.preventDefault()
+              onCancelEdit()
+            }
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault()
+              onSaveEdit()
+            }
+          }}
+        >
           <Input
             value={editTitle}
             onChange={setEditTitle}
@@ -327,7 +343,7 @@ function NoteCard({ note, landed, cardRef, isEditing, onStartEdit, onSaveEdit, o
           <TextArea
             value={editContent}
             onChange={setEditContent}
-            placeholder="Write your note…"
+            placeholder="Write your note… (Cmd/Ctrl+Enter to save, Esc to cancel)"
             rows={5}
             style={{ marginBottom: '14px' }}
           />
@@ -337,7 +353,7 @@ function NoteCard({ note, landed, cardRef, isEditing, onStartEdit, onSaveEdit, o
               Save
             </Button>
           </div>
-        </>
+        </div>
       ) : (
         <>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
