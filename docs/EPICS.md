@@ -47,64 +47,91 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ---
 
-## ★ CODE-COMPLETE — EPIC-16 · The fleet eats its own dog food (doc-mass conformance)
+## ▶ ACTIVE — EPIC-17 · The Bridge becomes the organism's cockpit (from legible to proactive)
 
-> **★ CODE-COMPLETE 2026-07-13** — all three stages shipped on green main; `docMass 3269 → 0` LOCKED in
-> `--assert-zero`. **No unchecked stage remains. Strategist: formally retire EPIC-16 → DONE, retire EPIC-15
-> → DONE, and promote the next ROADMAP-NOW epic** (there is no active stage for the next Builder run).
+> **Strategist-promoted 2026-07-13**, after EPIC-15 (keyboard operability) + EPIC-16 (doc-mass) both
+> reached CODE-COMPLETE with no unchecked stage — both now formally retired to the DONE index below.
 >
-> **Builder-promoted 2026-07-13** from the **user-ratified** RFC
-> [`docs/rfc/iteration-plan-musk.md`](./rfc/iteration-plan-musk.md) (Steps 2–3–5), after EPIC-15
-> reached CODE-COMPLETE with no unchecked stage. This is the topmost cloud-executable ROADMAP-NOW
-> item — **not a self-ratified new direction** (the RFC scoped it end-to-end).
+> **Why highest gradient now.** The conformance band is exhausted at the systemic level — all six axes
+> (colour · utilities · style · shell · keyboardA11y · docMass) are **0 & LOCKED**; reduced-motion is
+> already global (`design-system.css`), the accessible-name metric was rejected as over-counting, and
+> per-app craft belongs to the App Artisan rotation. Per the priority bias, with QA reporting **no
+> runtime bug** and every conformance number maxed, the steepest remaining **systemic** gradient is
+> **organism depth**. The four read-lenses (Network · Search · Inbox · Timeline) and the emit↔receive
+> loop are complete, but the organism is **passive**: it mirrors, remembers and displays, yet never
+> tells you *what needs you now*. The front door proves it — `src/components/Bridge.tsx` shows mute
+> **counts** (Today: N · Tasks: N · Organism: N) + a recents strip, not a ranked, resolvable feed.
+> This epic turns the home from a dashboard into a **cockpit**: one prioritized "Attention" stream that
+> synthesizes every app's live signals, explains each, and lets you resolve it in one tap. Highest felt
+> capability ("alien technology that anticipates you"), 100 % cloud-verifiable, reuses the `bridge.ts` /
+> `tasks.ts` / `openEntity` / `a11y.ts` / `ui` rails, **no new deps**, keeps all six axes 0.
 >
-> **Why highest gradient now.** The fleet's scarcest resource is per-run context budget, and its
-> biggest spend is reading its own working memory. `docs/CONTEXT.md` + `docs/EPICS.md` are read in
-> full every run by every routine, yet carry mostly HISTORY — which already lives in git +
-> `docs/ROUTINE-LOG.md`. Shrinking them enlarges every future run's usable budget across all 8
-> routines: a **multiplicative** lever (the "bias to leverage" row of the fleet operating table).
-> It reuses the exact **measure → drive-to-0 → lock** template (EPIC-5 S8 / EPIC-11 S4 / EPIC-14
-> S12 / EPIC-15 S4) with **no product-code risk** (docs + one metric) and a natural 0 target.
->
-> **Target metric `docMass`** = total lines OVER budget across the read-every-run docs
-> (`docs/CONTEXT.md` ≤ 400, `docs/EPICS.md` ≤ 500). Detector = pure `scanDocMass`
-> (`scripts/docMassAudit.mjs`) wired into `scripts/metrics.mjs`. Baseline (pre-epic) `docMass = 3269`
-> (CONTEXT 1923/400, EPICS 2246/500). The final stage locks it in `--assert-zero`.
+> **Target metric** = a new **`HOME-ATTENTION` QA guard** (`scripts/qa-smoke.mjs`), the organism-epic
+> pattern (cf. `GRAPH-LEGIBLE 3/3`, `TIMELINE 1/1`): seed a graph that mixes an overdue task, a today
+> event, a plain open task, a stalled low-progress goal, an in-progress book and a fresh handoff →
+> assert the Bridge renders ONE ranked feed, urgency-ordered, each row reasoned + actionable, one-tap
+> open lands. **Goal: `HOME-ATTENTION 0 → 6/6` confirmed by QA on green main**, plus the pure
+> `computeAttention` spine unit-pinned. Baseline (pre-epic): no attention feed exists (`0/6`).
 
-- [x] **S1 · Stand up `docMass` + baseline + a first prune. ✅ SHIPPED 2026-07-13 (green main).**
-  Added `scripts/docMassAudit.mjs` (`DOC_BUDGETS`, `countLines`, `scanDocMass`) + `docMassAudit.test.mjs`
-  (11 cases) + the `Doc mass (over)` row + over-budget-doc offenders list in `scripts/metrics.mjs`.
-  Then pruned **`docs/CONTEXT.md` 1923 → ~412 lines** (removed retired EPIC-12/13/14 dated SHIPPED/
-  QA-CONFIRMED strata + the stale EPIC-14 stage playbook + old 06-29/06-30 QA blocks), preserving every
-  live seam verbatim (Codebase seams / Invariants & traps / QA recipe / Tried & rejected / SOLVER) and
-  the reusable design-system recipes, and rewrote its active-epic block to EPIC-16. Collapsed EPICS.md's
-  retired-epic bodies (EPIC-1..15) to the DONE index below. **`docMass` 3269 → (this run) well under half.**
-  `--assert-zero` NOT yet gating `docMass` (S3 locks it). build🟢 vitest +11🟢 eslint clean; five product
-  axes stay 0 & LOCKED; bundle gz ±0; no new deps.
-- [x] **S2 · Drive `docMass` under budget. ✅ ACHIEVED in S1's prune (2026-07-13).** S1 pruned CONTEXT.md
-  (1923 → 399/400) and EPICS.md (2246 → 153/500), so `node scripts/metrics.mjs` already reports
-  `docMass = 0` (both docs within budget) with every live `file.ts:line` seam preserved verbatim. No
-  further trim was required before the lock.
-- [x] **S3 · LOCK `docMass` in `--assert-zero` → ★ EPIC-16 CODE-COMPLETE. ✅ SHIPPED 2026-07-13 (green main).**
-  Added the `if (snapshot.docMass > 0) fail.push(...)` gate in `scripts/metrics.mjs` (after the keyboardA11y
-  check, with the offending doc's `lines/budget` named) and `docMass=0` to the success line. **Lock BITES:
-  verified** — appended 250 filler lines to CONTEXT.md → `--assert-zero` exit 1 (`docMass=499 (docs/CONTEXT.md
-  899/400)`), reverted → exit 0. build🟢 vitest 570🟢 eslint clean; all six axes 0 & LOCKED; bundle gz 733.8
-  ±0; no new deps. The doc-conformance ratchet now makes working-memory bloat impossible behind a green build.
+- [ ] **S1 · Pure attention engine + unit tests (measure-only; NO UI change).** New
+  `src/lib/core/attention.ts`: `export type AttentionKind = 'task-overdue'|'event-today'|'task-open'|'goal-stalled'|'reading'|'handoff'`;
+  `export interface AttentionItem { id: string; node: CoreNode; kind: AttentionKind; score: number; reasonKey: string; app: string }`;
+  pure `computeAttention(nodes: CoreNode[], now: number, limit = 8): AttentionItem[]` that scores each
+  candidate 0..100 by urgency, sorts **score desc → `meta.updated` desc**, de-dupes by node id, caps to
+  `limit`. Small pure scorers `scoreTask`/`scoreEvent`/`scoreGoal`/`scoreReading` (overdue > today >
+  open; a `goal` with `data.progress` low **and** aged is `goal-stalled`; a `book` with reading progress
+  <100 is `reading`; a recent inbound `HANDOFF`/`app:*` mirror surfaces once). Reuse `eventsOn`/`dayStamp`
+  from `bridge.ts`, `partitionTasks` from `tasks.ts`. New `src/lib/core/attention.test.ts` (~12 cases):
+  ordering (overdue task ⟩ today event ⟩ plain open task), stalled-goal detection, `reading` inclusion,
+  `limit` cap, empty→`[]`, done-task exclusion, id de-dupe, `meta.updated` tie-break. **Acceptance:**
+  `npx vitest run attention` green; `computeAttention` exported + typed; **no component edited** (S1 is
+  measure-only, mirroring every prior epic's S1); `node scripts/metrics.mjs --assert-zero` exit 0.
+- [ ] **S2 · Render the ranked Attention feed on the Bridge.** Edit `src/components/Bridge.tsx`: add an
+  `Attention` section (above the app grid, keep greeting + organism stats) fed by
+  `computeAttention(Object.values(nodes), Date.now())` via the existing `useGraph` sub + the `minute`
+  clock. Each item is a `ui` `Card` row carrying: the entity title, a **reason chip** (`reasonKey` → an
+  EN/ID string via `useLang`/`t(...)`, one key per `AttentionKind`), a due/`agoLabel` badge, and the
+  owning-app accent (`registry` `getAppIcon`/`color`). Empty feed → `<EmptyState size="sm">` ("All clear
+  — nothing needs you"). Rows must be design-system-clean: `ui` primitives only, tokens only, no bare
+  control, no raw hex/px (keeps `offShellControls`/`offSystemStyle`/`tokenViolations` at 0). **Acceptance:**
+  new/extended `src/components/Bridge.test.tsx` seeds nodes and asserts the rows render **in `computeAttention`
+  order** with each reason string present + the empty-state fallback; render-smoke desktop stays clean;
+  `--assert-zero` exit 0.
+- [ ] **S3 · Make each item RESOLVABLE + navigable (the cockpit acts, not just shows).** Each row gets a
+  primary open via `openEntity(app, node.id)` (`src/lib/windowStore.ts:126` — sets gaze + navigates) made
+  keyboard-operable with `onActivate` (`src/lib/a11y.ts:23`) + `role="button"`/`tabIndex`/`aria-label`
+  (keeps `keyboardA11y` 0), plus a type-appropriate quick-resolve rendered as a `ui` `IconButton`
+  (TS-forced `aria-label`): `task` → done toggle (`updateNode(id,{data:{...data,done:true}})`), `event`
+  → open Calendar, `goal` → open Goals, `handoff` → dismiss. Reuse `<NodeActions>` where a ⚡ menu fits.
+  **Acceptance:** `Bridge.test.tsx` extends — toggling a task row's done control flips `data.done` **and
+  drops it from the feed** on the next `computeAttention`; the open control fires `openEntity` (window/focus
+  asserted as in `NodeLineage.test.tsx`); `--assert-zero` exit 0.
+- [ ] **S4 · QA guard → ★ EPIC-17 CODE-COMPLETE.** Add the `HOME-ATTENTION` guard to
+  `scripts/qa-smoke.mjs`: seed `empire-core-graph` with an overdue `task`, a today `event`, a plain open
+  `task`, a low-progress aged `goal`, an in-progress `book`, and a fresh `HANDOFF` edge; reload (persist
+  rehydrate); assert the Bridge renders ONE ranked feed, the **overdue task ranks above the plain open
+  task and the today event**, each row shows a reason + an action control, and one-tap open lands in the
+  owning app. Fold a `HOME-ATTENTION 6/6` line into `docs/screenshots/latest/REPORT.md`. **Acceptance:**
+  smoke green with `HOME-ATTENTION 6/6`; build🟢 vitest🟢 `--assert-zero` exit 0; the guard is the durable
+  lock (mirrors the EPIC-10/13 organism guards). QA confirms the metric moved → Strategist retires to DONE.
 
-> _**Sequencing note.** The RFC's other queued items are already handled or out of Builder scope: the
-> playwright-devDep + qa-smoke auto-server INFRA GAP is CLOSED (2026-07-10); the routine-prompt amendments
-> (dep-rule carve-out, "replace don't append", doc budgets) go through the Optimizer → human-applies flow,
-> not a Builder commit. **EPIC-7 · Android stays device-gated** (below)._
+> _**Sequencing note.** No new deps, no config/dep changes, all product-code stays behind the green
+> six-axis gate. EPIC-16's remaining RFC items are handled or out of Builder scope (playwright-devDep +
+> auto-server INFRA GAP closed 2026-07-10; routine-prompt amendments go through the Optimizer flow).
+> **EPIC-7 · Android stays device-gated** (below) — promote only with an on-device QA path._
 
 ---
 
 ## ✅ DONE — retired epics (one-line index; full bodies + per-stage detail in git history + `docs/ROUTINE-LOG.md`)
 
+- **EPIC-16 · The fleet eats its own dog food (doc-mass conformance)** — `docMass 3269 → 0` LOCKED (2026-07-13,
+  S1–S3). `scripts/docMassAudit.mjs` (`scanDocMass`) budgets the read-every-run docs (CONTEXT ≤400, EPICS ≤500);
+  S1 stood up the metric + pruned both under budget, S3 added the `docMass>0` gate to `--assert-zero` (bite-verified).
+  Enlarges every routine's per-run budget; the sixth gated axis. Key commits `1cc462e` (S1) · `19e0454` (S3).
 - **EPIC-15 · Keyboard operability (WCAG 2.1.1)** — `keyboardA11y 24 → 0` LOCKED (2026-07-13). Every mouse-only
   `onClick` on a non-interactive host made keyboard-operable via `src/lib/a11y.ts` `onActivate` + role/tabIndex,
   or `role="presentation"` on redundant modal backdrops. S1 detector+baseline `79c9272`; S2+S3+S4 sweep+lock
-  `61c4f7b`. *(Strategist: formally retire.)*
+  `61c4f7b`.
 - **EPIC-14 · Shell conformance** — `offShellControls 341 → 0` LOCKED (2026-07-13, S1–S12). Every bare
   `<button>`/`<input>`/`<select>`/`<textarea>` migrated onto the `ui` primitive layer (`Button`/`IconButton`/
   `Input`/`TextArea`/`Select`/`Segmented`); the shell-conformance invariant lives in `src/components/ui/index.tsx`.

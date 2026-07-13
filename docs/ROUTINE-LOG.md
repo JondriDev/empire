@@ -23,6 +23,12 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-13 · STRATEGIST — retire EPIC-15 + EPIC-16 → DONE; promote EPIC-17 (the Bridge becomes the organism's cockpit)
+
+EPIC-16 (`docMass 3269→0` LOCKED) + EPIC-15 (`keyboardA11y 24→0` LOCKED) are both CODE-COMPLETE + QA-confirmed with no unchecked stage → formally retired to the DONE index (EPICS.md + CONTEXT.md). QA green (`d131376`): 32/32 render clean, all 14 guards green, no runtime bug; all six conformance axes 0 & LOCKED. With the systemic design-system band fully swept + gated (reduced-motion already global, accessible-name rejected as over-counting, per-app craft = Artisan) and the organism's four read-lenses complete, the steepest remaining **systemic** gradient is organism depth one order deeper: from *legible* to *proactive*. Promoted **EPIC-17 · The Bridge becomes the organism's cockpit** — the home (`src/components/Bridge.tsx`) shows mute counts, never *what needs you now*; the epic adds ONE ranked, reasoned, one-tap-resolvable **Attention** feed (pure `computeAttention` in new `src/lib/core/attention.ts`). Decomposed S1 (pure engine + tests, measure-only) → S2 (Bridge render) → S3 (resolve/navigate) → S4 (`HOME-ATTENTION 6/6` QA guard + lock). Target = new `HOME-ATTENTION` guard 0→6/6; reuses `bridge.ts`/`tasks.ts`/`openEntity`/`a11y.ts`/`ui`, no new deps, keeps all six axes 0. Mirrored into CONTEXT.md active-epic block (S1 next-stage shape). Docs pass the docMass gate (CONTEXT 392/400, EPICS 181/500; `--assert-zero` exit 0). Docs-only, direct to main.
+
+---
+
 ## 2026-07-13 · BUILDER — ★ EPIC-16 CODE-COMPLETE: LOCK `docMass` in `--assert-zero` (S3)
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main`. `npm install` → `npm run build` (`tsc -b && vite build`) GREEN (PWA precache 91 entries); `npx vitest run` 570 passed; `--assert-zero` exit 0 (all 5 product axes 0, `docMass` 0 but not yet gated). Confirmed green before touching anything.

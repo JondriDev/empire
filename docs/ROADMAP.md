@@ -10,31 +10,26 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-07-12** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 460/64 files,
-> token-violations 0, off-system 0, offSystemStyle 0 r0/t0/m0, `--assert-zero` exit 0, `offShellControls` **49 (b45/i4/s0/t0)**
-> after EPIC-14 S1–S10, bundle gz 730) · QA (2026-07-12, S9-acceptance confirm): 32/32 render clean, all 13 guard suites green, no
-> drift. **EPIC-14 S1–S10 shipped (341 → 49); ONLY S11 (migrate the last 49 → 0, incl. the ONE control the out-of-band Cakra NIM
-> upgrade `07d8c43` re-regressed into `AIChat.tsx`) + S12 (LOCK in `--assert-zero`) remain — the epic is TWO stages from
-> CODE-COMPLETE.** **EPIC-1..13 all DONE**
-> (organism both-ways 9/9 · token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable · off-system
-> 1076→0, CI-locked · durable provenance `PROVENANCE-PERSISTS 3/3` + `PROVENANCE-ENTITY 3/3` + Reader graph-legible ·
-> `GLOBAL-SEARCH 1/1` queryable organism · `NODE-LINEAGE 1/1` per-artifact ancestry, navigable · `TIMELINE 1/1` temporal lens,
-> all six axes · `offSystemStyle` 56→0 LOCKED — EPIC-11 · `INTENT-ROUNDTRIP` 0/2→2/2, reconcile-survival LOCKED — EPIC-12 ·
-> **the last two islands (Mail + Crypto) joined the organism, `GRAPH-LEGIBLE 3/3` + `INBOUND-LANDS 4/4` — EPIC-13 retired
-> 2026-07-10**). **The organism has NO islands left** — interconnection is complete, so the priority bias descends to
-> design-system consistency.
-> **▶ EPIC-14 · Shell conformance — the component shell becomes total (no app renders a bare interactive control) ACTIVE —
-> RATIFIED 2026-07-10.** With every interconnection epic done, the Strategist audited the design-system band and found the
-> steepest remaining gradient at the **last unlocked conformance axis: the component/control shell, which NOTHING measures.**
-> EPIC-5 locked colour, EPIC-11 locked radii/type/motion — but a census finds **148 bare interactive controls across 27 app
-> files** (`<button>`×127, text `<input>`×~14, `<select>`×5, `<textarea>`×2) bypassing the `ui` primitives. **Root cause:** the
-> `ui` set is INCOMPLETE (`Button`/`Input`/`TextArea`/`Card`/`Badge` only — no `Select`/`IconButton`/`Segmented`), so apps with
-> a dropdown/icon-toggle/tab-bar have no shell home and drop to bare HTML — **exactly why Mail + Crypto shipped as islands.**
-> **Leap:** complete the `ui` set (add `Select`/`IconButton`/`Segmented`) + migrate all 27 files onto it. **Target: new
-> `offShellControls` metric ≈148 → 0, then LOCKED in `--assert-zero`** (the EPIC-5/11 measure→drive→lock template; natural 0
-> target, 100 % cloud-verifiable, no new deps; folds in the ad-hoc a11y work — IconButton forces `aria-label`, Segmented forces
-> `aria-pressed`). Closes when QA confirms `offShellControls 0` LOCKED on green main. **Android is EPIC-7 (QUEUED)** —
-> device-gated, promote only with on-device QA.
+> Last re-ranked: **2026-07-13** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 468/65 files,
+> **all six conformance axes 0 & LOCKED** — token-violations 0, off-system 0, offSystemStyle 0 r0/t0/m0, offShellControls 0
+> b0/i0/s0/t0, keyboardA11y 0, docMass 0 — `--assert-zero` exit 0, bundle gz 733.8) · QA (2026-07-13, green main `d131376`):
+> 32/32 render clean, all 14 guard suites green, **no runtime bug**. **EPIC-1..16 all DONE** (organism both-ways 9/9 ·
+> token-violations 501→0 · shallow instruments 8/8 · PWA offline+base+installable · off-system 1076→0 CI-locked · durable
+> provenance `PROVENANCE-PERSISTS 3/3`+`PROVENANCE-ENTITY 3/3` · `GLOBAL-SEARCH 1/1` · `NODE-LINEAGE 1/1` · `TIMELINE 1/1` ·
+> `offSystemStyle` 56→0 LOCKED — EPIC-11 · `INTENT-ROUNDTRIP` 0/2→2/2 — EPIC-12 · Mail+Crypto joined, `GRAPH-LEGIBLE 3/3`+
+> `INBOUND-LANDS 4/4` — EPIC-13 · `offShellControls` 341→0 LOCKED — EPIC-14 · `keyboardA11y` 24→0 LOCKED — EPIC-15 · `docMass`
+> 3269→0 LOCKED — EPIC-16). **The organism has NO islands left AND the design-system conformance band is fully swept + gated**
+> (reduced-motion is already global; the accessible-name metric was rejected as over-counting; per-app craft belongs to the App
+> Artisan rotation). So the steepest remaining **systemic** gradient descends back to **organism depth** — but one order deeper:
+> from *legible* to *proactive*.
+> **▶ EPIC-17 · The Bridge becomes the organism's cockpit — from legible to proactive ACTIVE — promoted 2026-07-13.** The four
+> read-lenses (Network · Search · Inbox · Timeline) + the emit↔receive loop are complete, but the organism is **passive**: the
+> home (`src/components/Bridge.tsx`) shows mute counts (Today: N · Tasks: N · Organism: N) + a recents strip, never *what needs
+> you now*. **Leap:** one ranked, reasoned, one-tap-resolvable **Attention** feed that synthesizes every app's live signals
+> (overdue task ⟩ today event ⟩ open task · stalled goal · unfinished book · fresh handoff). **Target: new `HOME-ATTENTION` QA
+> guard 0 → 6/6** on green main (the EPIC-10/13 organism-guard pattern) + the pure `computeAttention` spine unit-pinned. Reuses
+> `bridge.ts`/`tasks.ts`/`openEntity`/`a11y.ts`/`ui`; no new deps; keeps all six axes 0. Closes when QA confirms `HOME-ATTENTION
+> 6/6`. **Android is EPIC-7 (QUEUED)** — device-gated, promote only with on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
@@ -137,34 +132,28 @@ now **EPIC-6 S4**:
   EPIC-6 `mirrorCollection` rail + the EPIC-1 `useInboundHandoff` rail — both graph-legible, receive, and emit. `GRAPH-LEGIBLE
   1/1 → 3/3` (crypto wallets + mail drafts) + `INBOUND-LANDS 3/3 → 4/4` (mail). Retired 2026-07-10. *The organism has no
   islands left.*
-- **Shell conformance — the component shell becomes total (no app renders a bare interactive control).** *(In progress — this
-  IS EPIC-14, ▶ ACTIVE, RATIFIED 2026-07-10.)* The last unlocked design-system axis: EPIC-5 locked colour, EPIC-11 locked
-  radii/type/motion, but nothing measures whether apps render `ui.Button`/`Input`/`TextArea` or bare `<button>`/`<select>`/
-  `<input>`/`<textarea>`. Root cause: the `ui` set is incomplete (no `Select`/`IconButton`/`Segmented`), so apps drop to bare
-  HTML — exactly why Mail/Crypto were islands. Complete the primitive set (S1 ✅) + migrate every offender file + lock a new
-  **`offShellControls` metric** in `--assert-zero`. **Real baseline was 341 (b271/i48/s6/t16), not the ≈148 subset estimate;
-  S1–S10 drove it 341 → 49 (Reader/Calendar/Clock/Photos/artifacts/media+lang/utility/standalone/Cakra×2). ONLY S11 (the last 49
-  shell + artifacts-wrapper files → 0, incl. the ONE bare control the out-of-band Cakra NIM upgrade `07d8c43` re-regressed into the
-  S9-shipped `AIChat.tsx` — caught by the Strategist's live census 2026-07-12) + S12 (LOCK) remain.** Closes when QA confirms
-  `offShellControls 0` LOCKED — the lock is what stops exactly this NIM-style regression recurring. Folds in the ad-hoc a11y work
-  (IconButton forces `aria-label`, Segmented forces `aria-pressed`).
-- **Measured accessibility pass — a FUTURE epic candidate (largely seeded by EPIC-14's primitive a11y dividend).**
-  `prefers-reduced-motion` honoured across all animations + an ARIA-name / keyboard-reachability coverage metric driven to a
-  target and locked via `--assert-zero` — the EPIC-5/11 template applied to a11y. Captures the ad-hoc per-app aria passes
-  (language/music) into one coherent, measured leap. Rank against the RFC `docMass` metric below.
-- **Design-system STATE conformance (empty / loading / error) — a FUTURE epic candidate (not yet decomposed; NOTE: weaker
-  metric story).** `<EmptyState>` is a fully general primitive (adoption 1→6→13, incl. `size="sm"`). *Caveat surfaced
-  2026-07-10:* an `emptyStateAdoption` count is a **"grow" metric with no natural 0 target** (unlike `offShellControls`), and
-  "which `.map()` needs an empty branch" is hard to detect statically — so this ranks BELOW the shell-conformance and a11y
-  candidates until a crisp, driveable metric definition exists.
-- **The fleet eats its own dog food — doc-mass conformance + the QA infra gap (a FUTURE epic candidate, user-ratified
-  direction 2026-07-10).** Full plan in [`docs/rfc/iteration-plan-musk.md`](./rfc/iteration-plan-musk.md) (Musk's 5-step
-  algorithm applied to process + product; **sequenced strictly AFTER EPIC-13 retires**). Headline moves: ~~`playwright` →
-  devDependencies + `qa-smoke.mjs` auto-server (kills the per-run manual install / CONNECTION_REFUSED traps)~~ **✅ SHIPPED
-  2026-07-10 (Builder, as a standing-infra-gap fix while no epic stage was active — see ROUTINE-LOG)**; prune
-  CONTEXT.md/EPICS.md to their own "tight" rule with a new measured `docMass` metrics row, then LOCK it in
-  `--assert-zero` — the exact EPIC-5/11 measure→drive→lock template, applied to the fleet itself. Rank against the
-  STATE-conformance and accessibility candidates above.
+- **Shell conformance — the component shell becomes total (no app renders a bare interactive control).** ✅ **DONE — this WAS
+  EPIC-14** (S1–S12, retired 2026-07-13): completed the `ui` set (`Select`/`IconButton`/`Segmented`) + migrated every offender
+  file; `offShellControls 341 → 0` LOCKED in `--assert-zero`. The shell-conformance invariant lives in `src/components/ui/index.tsx`.
+- **Keyboard operability (WCAG 2.1.1).** ✅ **DONE — this WAS EPIC-15** (retired 2026-07-13): every mouse-only `onClick` on a
+  non-interactive host made keyboard-operable via `src/lib/a11y.ts` `onActivate`; `keyboardA11y 24 → 0` LOCKED.
+- **The fleet eats its own dog food — doc-mass conformance.** ✅ **DONE — this WAS EPIC-16** (S1–S3, retired 2026-07-13): the
+  user-ratified `docMass` metric (`scripts/docMassAudit.mjs` `scanDocMass`) budgets the read-every-run docs (CONTEXT ≤400,
+  EPICS ≤500); `docMass 3269 → 0` LOCKED. *(The RFC's QA-infra gap — playwright→devDep + auto-server — shipped 2026-07-10.)*
+- **From legible to proactive — the Bridge becomes the organism's cockpit.** *(In progress — this IS EPIC-17, ▶ ACTIVE,
+  promoted 2026-07-13.)* The organism is fully legible + interconnected but passive; the home shows mute counts, not *what needs
+  you now*. Add one ranked, reasoned, one-tap-resolvable **Attention** feed (pure `computeAttention` spine + Bridge render +
+  resolve/navigate + `HOME-ATTENTION 6/6` QA guard). See `docs/EPICS.md` for the S1–S4 decomposition.
+- **Measured accessibility pass — LARGELY CLOSED; parking-lot.** `prefers-reduced-motion` is **already global**
+  (`src/design-system.css` `@media (prefers-reduced-motion: reduce)` neutralizes all CSS animation/transition; the 2 JS canvas
+  surfaces already guard `matchMedia`), and the accessible-name (WCAG 4.1.2) metric was **rejected 2026-07-13** as over-counting
+  (all 125 `IconButton`s already carry a TS-forced `aria-label`; an icon-only-`Button` detector flags dynamic-text children it
+  can't see). What remains (focus-visible coverage, focus-trap correctness) is thin + murky to detect statically — no crisp,
+  driveable 0-metric. Revisit only if a honest one emerges; per-surface a11y is Artisan-owned.
+- **Design-system STATE conformance (empty / loading / error) — Artisan-owned; weak systemic metric.** `<EmptyState>` is a
+  general primitive (`src/components/ui/Utility.tsx`); the App Artisan adopts honest states per-surface each run (photos/cache/
+  files/language recently). An `emptyStateAdoption` count is a **"grow" metric with no natural 0 target** and "which `.map()`
+  needs an empty branch" resists static detection — so it stays craft-level (Artisan rotation), NOT a Strategist drive-to-0 epic.
 - **Android APK validation.** *(QUEUED EPIC-7 — renumbered EPIC-5→6→7.)* Device-gated: an unattended cloud
   builder can't install an APK or run on-device smoke, so its target isn't cloud-verifiable. Promote only when an
   on-device QA path exists; until then it's lower *realizable* gradient than the cloud-executable themes above.

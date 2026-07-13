@@ -25,18 +25,23 @@
 > git + `docs/ROUTINE-LOG.md`; working memory stays tight (its budget is the
 > `docMass` metric — see below).
 
-- **★ EPIC-16 · The fleet eats its own dog food (doc-mass conformance) — CODE-COMPLETE 2026-07-13.**
-  All three stages shipped on green main: `docMass 3269 → 0` LOCKED in `--assert-zero`. The target metric
-  `docMass` = lines OVER budget across the read-every-run docs (`docs/CONTEXT.md` ≤400, `docs/EPICS.md` ≤500),
-  detected by pure `scanDocMass` (`scripts/docMassAudit.mjs`, 11 cases) in `metrics.mjs`. S1 stood up the
-  metric + pruned both docs under budget (CONTEXT 1923→399, EPICS 2246→153); S2 confirmed both under budget
-  (no further trim needed); **S3 (this run) added the `docMass>0` gate in `metrics.mjs` (after keyboardA11y,
-  naming the offending doc's `lines/budget`) + `docMass=0` in the success line — lock BITES-verified** (+250
-  filler → exit 1, revert → exit 0). No product code touched; all six axes now 0 & LOCKED.
-  - **▶ NEXT: no active stage. EPIC-16 is CODE-COMPLETE.** The next Builder run must do the topmost ROADMAP-NOW
-    item and note that EPICS needs the Strategist to promote a new active epic (and formally retire EPIC-15 +
-    EPIC-16 → DONE). Keep CONTEXT ≤400 / EPICS ≤500 — the gate now bites, so any edit here that pushes a doc
-    over budget fails `--assert-zero`. When trimming, keep every live `file.ts:line` seam; history is a `git show`.
+- **▶ EPIC-17 · The Bridge becomes the organism's cockpit (from legible to proactive) — ACTIVE (promoted
+  2026-07-13).** The organism is fully legible (4 read-lenses + emit↔receive) but **passive**: the home
+  (`src/components/Bridge.tsx`) shows mute counts (Today/Tasks/Organism) + a recents strip, never *what needs
+  you now*. This epic adds ONE ranked, reasoned, one-tap-resolvable **Attention** feed synthesizing every app's
+  live signals. Target = a new **`HOME-ATTENTION` QA guard** (`scripts/qa-smoke.mjs`) → **0 → 6/6** on green
+  main (organism-epic pattern, cf. `GRAPH-LEGIBLE 3/3`). Reuses `bridge.ts`/`tasks.ts`/`openEntity`
+  (`windowStore.ts:126`)/`onActivate` (`a11y.ts:23`)/`ui`; no new deps; keeps all six axes 0.
+  - **▶ NEXT (S1, measure-only, NO UI change):** new **`src/lib/core/attention.ts`** — pure
+    `computeAttention(nodes: CoreNode[], now: number, limit = 8): AttentionItem[]` (`AttentionItem =
+    {id,node,kind,score,reasonKey,app}`; `kind ∈ task-overdue|event-today|task-open|goal-stalled|reading|handoff`).
+    Score each candidate 0..100 by urgency (overdue⟩today⟩open; aged low-progress goal = stalled; unfinished book
+    = reading; fresh inbound handoff once), sort **score desc → `meta.updated` desc**, de-dupe by node id, cap to
+    `limit`. Reuse `eventsOn`/`dayStamp` (bridge.ts) + `partitionTasks` (tasks.ts). New `attention.test.ts` (~12):
+    ordering, stalled detection, reading inclusion, cap, empty→[], done-exclusion, id de-dupe, updated tie-break.
+    **Acceptance:** `vitest run attention` 🟢; no component edited; `metrics.mjs --assert-zero` exit 0. Then S2
+    renders the feed on the Bridge, S3 wires resolve/navigate, S4 adds the `HOME-ATTENTION` guard + locks it.
+    **Keep CONTEXT ≤400 / EPICS ≤500 — the docMass gate bites.** When trimming, keep every live seam; history is `git show`.
 
 ### Standing design-system recipes (carry forward — reusable across any future migration)
 
@@ -72,9 +77,10 @@
 
 ### ✅ Retired epics — DONE index (full bodies in git; metric each moved)
 
-- **EPIC-15 · Keyboard operability (WCAG 2.1.1)** — CODE-COMPLETE 2026-07-13, `keyboardA11y 24 → 0` LOCKED
-  (S1 detector+baseline `79c9272`; S2+S3+S4 sweep+lock `61c4f7b`). QA-confirmed on green main. *(Strategist:
-  flip to fully-retired.)*
+- **EPIC-16 · Doc-mass conformance** — DONE 2026-07-13, `docMass 3269 → 0` LOCKED (S1–S3; `scanDocMass` in
+  `scripts/docMassAudit.mjs` budgets CONTEXT ≤400 / EPICS ≤500; the sixth gated axis). `1cc462e` · `19e0454`.
+- **EPIC-15 · Keyboard operability (WCAG 2.1.1)** — DONE 2026-07-13, `keyboardA11y 24 → 0` LOCKED
+  (S1 detector+baseline `79c9272`; S2+S3+S4 sweep+lock `61c4f7b`). QA-confirmed on green main.
 - **EPIC-14 · Shell conformance** — DONE 2026-07-13, `offShellControls 307/341 → 0` LOCKED (S1–S12; every bare
   control onto the `ui` primitive layer; the shell-conformance invariant lives in `src/components/ui/index.tsx`).
 - **EPIC-13 · Mail + Crypto join the organism** — DONE 2026-07-10, `GRAPH-LEGIBLE 1/1 → 3/3` + `INBOUND-LANDS
