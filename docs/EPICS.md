@@ -47,13 +47,16 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ---
 
-## ▶ ACTIVE — EPIC-16 · The fleet eats its own dog food (doc-mass conformance)
+## ★ CODE-COMPLETE — EPIC-16 · The fleet eats its own dog food (doc-mass conformance)
 
+> **★ CODE-COMPLETE 2026-07-13** — all three stages shipped on green main; `docMass 3269 → 0` LOCKED in
+> `--assert-zero`. **No unchecked stage remains. Strategist: formally retire EPIC-16 → DONE, retire EPIC-15
+> → DONE, and promote the next ROADMAP-NOW epic** (there is no active stage for the next Builder run).
+>
 > **Builder-promoted 2026-07-13** from the **user-ratified** RFC
 > [`docs/rfc/iteration-plan-musk.md`](./rfc/iteration-plan-musk.md) (Steps 2–3–5), after EPIC-15
 > reached CODE-COMPLETE with no unchecked stage. This is the topmost cloud-executable ROADMAP-NOW
-> item — **not a self-ratified new direction** (the RFC scoped it end-to-end). *Strategist: confirm
-> the framing and formally retire EPIC-15 → DONE.*
+> item — **not a self-ratified new direction** (the RFC scoped it end-to-end).
 >
 > **Why highest gradient now.** The fleet's scarcest resource is per-run context budget, and its
 > biggest spend is reading its own working memory. `docs/CONTEXT.md` + `docs/EPICS.md` are read in
@@ -78,18 +81,16 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
   retired-epic bodies (EPIC-1..15) to the DONE index below. **`docMass` 3269 → (this run) well under half.**
   `--assert-zero` NOT yet gating `docMass` (S3 locks it). build🟢 vitest +11🟢 eslint clean; five product
   axes stay 0 & LOCKED; bundle gz ±0; no new deps.
-- [ ] **S2 · Drive `docMass` under budget.** Lowest-risk first. **(a)** Ensure EPICS.md ≤ 500 — every
-  retired epic is a one-line DONE index entry (name · dates · metric moved · commit); the S-by-S detail
-  stays in git (`git show`). **(b)** Trim `docs/CONTEXT.md` ≤ 400 — the dense Codebase-seams section can
-  shed now-obvious/duplicated prose (e.g. exhaustive PWA base-path audit detail) without losing a
-  `file.ts:line` pointer. *Acceptance:* `node scripts/metrics.mjs` shows `docMass` → 0 (or both docs
-  within budget); the next-run orient path still resolves every live seam (no seam a future run needs was
-  deleted — a deleted seam is a cheap `git show`, per the RFC's Musk caveat); build/vitest/eslint green.
-- [ ] **S3 · LOCK `docMass` in `--assert-zero` → ★ EPIC-16 CODE-COMPLETE.** Add `if (snapshot.docMass > 0)
-  fail.push('docMass=' + snapshot.docMass)` to the gate in `metrics.mjs` and name it in the success line.
-  **Verify the lock BITES** (append ~200 filler lines to a tracked doc → `--assert-zero` exit 1 `docMass>0`,
-  revert → exit 0), mirroring every prior lock stage. The doc-conformance ratchet then makes working-memory
-  bloat impossible to reintroduce behind a green build.
+- [x] **S2 · Drive `docMass` under budget. ✅ ACHIEVED in S1's prune (2026-07-13).** S1 pruned CONTEXT.md
+  (1923 → 399/400) and EPICS.md (2246 → 153/500), so `node scripts/metrics.mjs` already reports
+  `docMass = 0` (both docs within budget) with every live `file.ts:line` seam preserved verbatim. No
+  further trim was required before the lock.
+- [x] **S3 · LOCK `docMass` in `--assert-zero` → ★ EPIC-16 CODE-COMPLETE. ✅ SHIPPED 2026-07-13 (green main).**
+  Added the `if (snapshot.docMass > 0) fail.push(...)` gate in `scripts/metrics.mjs` (after the keyboardA11y
+  check, with the offending doc's `lines/budget` named) and `docMass=0` to the success line. **Lock BITES:
+  verified** — appended 250 filler lines to CONTEXT.md → `--assert-zero` exit 1 (`docMass=499 (docs/CONTEXT.md
+  899/400)`), reverted → exit 0. build🟢 vitest 570🟢 eslint clean; all six axes 0 & LOCKED; bundle gz 733.8
+  ±0; no new deps. The doc-conformance ratchet now makes working-memory bloat impossible behind a green build.
 
 > _**Sequencing note.** The RFC's other queued items are already handled or out of Builder scope: the
 > playwright-devDep + qa-smoke auto-server INFRA GAP is CLOSED (2026-07-10); the routine-prompt amendments

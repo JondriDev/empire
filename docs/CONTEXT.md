@@ -25,31 +25,18 @@
 > git + `docs/ROUTINE-LOG.md`; working memory stays tight (its budget is the
 > `docMass` metric — see below).
 
-- **▶ ACTIVE: EPIC-16 · The fleet eats its own dog food (doc-mass conformance).**
-  Builder-promoted 2026-07-13 from the **user-ratified** RFC `docs/rfc/iteration-plan-musk.md`
-  (Steps 2–3–5), since EPIC-15 is CODE-COMPLETE with no unchecked stage. Reuses the exact
-  measure→drive→lock template with **no product-code risk** (docs + one metric); the gradient is
-  multiplicative — every run of every routine reads these docs in full, so shrinking them enlarges
-  all 8 routines' usable budget. *(Strategist: confirm framing + formally retire EPIC-15 → DONE.)*
-  - **Target metric `docMass` = lines OVER budget across the read-every-run docs**
-    (`docs/CONTEXT.md` ≤400, `docs/EPICS.md` ≤500). Detector = pure `scanDocMass`
-    (`scripts/docMassAudit.mjs`, 11 unit cases) in `scripts/metrics.mjs`. **NOT yet in `--assert-zero`**
-    (S2 locks it, mirroring EPIC-5 S8 / EPIC-11 S4 / EPIC-14 S12 / EPIC-15 S4).
-  - **✅ S1 SHIPPED 2026-07-13 (this run, green main) — stand up `docMass` + prune both docs under budget.**
-    Added `scripts/docMassAudit.mjs` + `docMassAudit.test.mjs` (11 cases) + the `Doc mass (over)` row/offenders
-    in `metrics.mjs`. **Baseline `docMass = 3269`** (CONTEXT 1923/400, EPICS 2246/500). Pruned CONTEXT.md
-    (**1923 → ~395**: removed retired EPIC-12/13/14 dated strata + the stale EPIC-14 stage playbook + old QA
-    blocks) and EPICS.md (**2246 → ~154**: retired-epic bodies → the DONE index below), preserving every live
-    seam verbatim + the reusable recipes below. **`docMass 3269 → 0`** (both docs under budget). No product
-    code touched; five product axes stay 0 & LOCKED.
-  - **▶ S2 (next — start here) — LOCK `docMass` in `--assert-zero` → ★ EPIC-16 CODE-COMPLETE.** Both docs are
-    already under budget, so no further prune is required first (re-check `node scripts/metrics.mjs`: if a run
-    pushed one back over, trim it — keep CONTEXT's live seams; the DONE-index one-liners in EPICS are the floor).
-    Add `if (snapshot.docMass > 0) fail.push('docMass=' + snapshot.docMass)` to the gate in `metrics.mjs`
-    (~:340, after the keyboardA11y check) and name `docMass=0` in the success line. **Verify the lock BITES**
-    (append ~200 filler lines to a tracked doc → `--assert-zero` exit 1, revert → exit 0). The RFC's other items
-    are out of Builder scope: the playwright/auto-server INFRA GAP is CLOSED; the routine-prompt amendments go
-    through the Optimizer → human-applies flow.
+- **★ EPIC-16 · The fleet eats its own dog food (doc-mass conformance) — CODE-COMPLETE 2026-07-13.**
+  All three stages shipped on green main: `docMass 3269 → 0` LOCKED in `--assert-zero`. The target metric
+  `docMass` = lines OVER budget across the read-every-run docs (`docs/CONTEXT.md` ≤400, `docs/EPICS.md` ≤500),
+  detected by pure `scanDocMass` (`scripts/docMassAudit.mjs`, 11 cases) in `metrics.mjs`. S1 stood up the
+  metric + pruned both docs under budget (CONTEXT 1923→399, EPICS 2246→153); S2 confirmed both under budget
+  (no further trim needed); **S3 (this run) added the `docMass>0` gate in `metrics.mjs` (after keyboardA11y,
+  naming the offending doc's `lines/budget`) + `docMass=0` in the success line — lock BITES-verified** (+250
+  filler → exit 1, revert → exit 0). No product code touched; all six axes now 0 & LOCKED.
+  - **▶ NEXT: no active stage. EPIC-16 is CODE-COMPLETE.** The next Builder run must do the topmost ROADMAP-NOW
+    item and note that EPICS needs the Strategist to promote a new active epic (and formally retire EPIC-15 +
+    EPIC-16 → DONE). Keep CONTEXT ≤400 / EPICS ≤500 — the gate now bites, so any edit here that pushes a doc
+    over budget fails `--assert-zero`. When trimming, keep every live `file.ts:line` seam; history is a `git show`.
 
 ### Standing design-system recipes (carry forward — reusable across any future migration)
 
@@ -80,8 +67,8 @@
   trilogy (colour EPIC-5 · tokens EPIC-11 · shell EPIC-14) + keyboard operability (EPIC-15) are enforced;
   a regression on any fails CI. **Do NOT reintroduce a bare `<button>`/`<input>`/`<select>`/`<textarea>` in
   app code, a raw hex/rgb/px, or a mouse-only `onClick` on a host — the gate bites.**
-- **New sixth axis `docMass` (EPIC-16): measured, not yet gated.** Value = doc lines over budget; QA-CONFIRMED
-  2026-07-13 (`d131376`) `docMass 3269 → 0` — S1's move HELD (CONTEXT 399/400, EPICS 153/500). S2/S3 lock it.
+- **Sixth axis `docMass` (EPIC-16): 0 AND LOCKED in `--assert-zero` (S3, this run).** Value = doc lines over
+  budget; `docMass 3269 → 0`. The gate now bites — any edit that pushes CONTEXT >400 or EPICS >500 fails CI.
 
 ### ✅ Retired epics — DONE index (full bodies in git; metric each moved)
 

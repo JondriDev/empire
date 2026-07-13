@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-13 · BUILDER — ★ EPIC-16 CODE-COMPLETE: LOCK `docMass` in `--assert-zero` (S3)
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main`. `npm install` → `npm run build` (`tsc -b && vite build`) GREEN (PWA precache 91 entries); `npx vitest run` 570 passed; `--assert-zero` exit 0 (all 5 product axes 0, `docMass` 0 but not yet gated). Confirmed green before touching anything.
+
+**Why this stage:** CONTEXT/EPICS both flagged the doc-mass lock as the next stage. S1 (metric + prune) and S2 (both docs under budget) were already done — `docMass 3269 → 0` — leaving only the **lock**, the exact `measure → drive → lock` template's final step (mirrors EPIC-5 S8 / EPIC-11 S4 / EPIC-14 S12 / EPIC-15 S4). No product code touched — docs + one metric only.
+
+**What shipped:** added the gate `if (snapshot.docMass > 0) fail.push(...)` in `scripts/metrics.mjs` (after the `keyboardA11y` check), naming the offending doc's `lines/budget` in the failure message, and appended `docMass=0` to the conformance success line. Updated the two comment banners in `metrics.mjs` to reflect the lock.
+
+**Verified (the only gate):** `npm run build` GREEN · `npx vitest run` **570 passed** · `npx eslint scripts/metrics.mjs` clean · **lock BITES** — appended 250 filler lines to `docs/CONTEXT.md` → `--assert-zero` **exit 1** (`docMass=499 (docs/CONTEXT.md 899/400)`), reverted → **exit 0**. `node scripts/metrics.mjs --assert-zero` exit 0 with **all six axes named 0** in the success line.
+
+**Metrics (no regression):** apps 31 ±0 · test cases 468 ±0 · test files 65 ±0 · tokenViolations 0 · offSystemUtilities 0 · offSystemStyle 0 (r0/t0/m0) · offShellControls 0 (b0/i0/s0/t0) · keyboardA11y 0 · **docMass 0 — now LOCKED** · bundle gz 733.8 ±0. No new deps. Docs after memory write-back: CONTEXT 386/400, EPICS 154/500 (both under budget, gate green).
+
+**Not verifiable in cloud:** none — this stage is pure tooling/docs, fully verified by build/tests/eslint/gate-bite. No UI surface changed.
+
+**Next:** **EPIC-16 is CODE-COMPLETE with no unchecked stage.** The next Builder run does the topmost ROADMAP-NOW item; **EPICS needs the Strategist** to formally retire EPIC-15 + EPIC-16 → DONE and promote the next active epic.
+
+---
+
 ## 2026-07-13 · QA — visual + smoke on green `d131376`: 32/32 clean, all 14 guards green; ★ EPIC-16 S1 CONFIRMED (`docMass 3269 → 0`)
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` @ `d131376`. `npm install` → `npm run build` (`tsc -b && vite build`) **GREEN** (PWA precache 91 entries / 3134 KiB). Served `dist/` on :3001 via `node server.js`.

@@ -228,9 +228,9 @@ function a11yViolations() {
 // line budgets, so a routine's orient phase stays cheap and its budget goes to the
 // change, not to re-reading history (which already lives in git + ROUTINE-LOG.md).
 // Value = total lines OVER budget across the tracked docs. Detection is the pure,
-// unit-pinned `scanDocMass` (scripts/docMassAudit.mjs). Baseline is non-zero; the
-// doc-mass epic prunes it under budget, the final stage locks it in --assert-zero.
-// Ratified in docs/rfc/iteration-plan-musk.md (Step 3).
+// unit-pinned `scanDocMass` (scripts/docMassAudit.mjs). S1 pruned it under budget
+// (3269 → 0); S2 locks it in --assert-zero (below), so a routine's orient phase
+// stays cheap. Ratified in docs/rfc/iteration-plan-musk.md (Step 3).
 function docMass() {
   const docs = DOC_BUDGETS.map((d) => ({
     path: d.path,
@@ -376,9 +376,20 @@ if (args.has('--assert-zero')) {
   // role="presentation". Locking it to zero makes keyboard traps impossible to
   // reintroduce behind a green build — the same drift the shell census caught.
   if (snapshot.keyboardA11y > 0) fail.push(`keyboardA11y=${snapshot.keyboardA11y}`);
+  // Doc-mass conformance (EPIC-16): the read-every-run working-memory docs
+  // (docs/CONTEXT.md ≤400, docs/EPICS.md ≤500) are the fleet's biggest per-run
+  // context spend. S1 pruned both under budget (docMass 3269 → 0) and here S2
+  // locks it: any run that lets a tracked doc drift back over its line budget
+  // fails CI, so the whole fleet's usable budget can't silently erode behind a
+  // green build — the same drift-proofing the five product axes already have.
+  if (snapshot.docMass > 0) {
+    const over = snapshot.docMassDims.filter(d => d.over > 0)
+      .map(d => `${d.path} ${d.lines}/${d.budget}`).join(', ');
+    fail.push(`docMass=${snapshot.docMass} (${over})`);
+  }
   if (fail.length) {
     console.error(`✗ design-system conformance assertion FAILED: ${fail.join(', ')}`);
     process.exit(1);
   }
-  console.log('✓ design-system conformance: tokenViolations=0, offSystemUtilities=0, offSystemStyle=0, offShellControls=0, keyboardA11y=0');
+  console.log('✓ design-system conformance: tokenViolations=0, offSystemUtilities=0, offSystemStyle=0, offShellControls=0, keyboardA11y=0, docMass=0');
 }
