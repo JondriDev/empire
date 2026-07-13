@@ -66,6 +66,22 @@ node --input-type=module -e 'import {scanA11yViolations} from "./scripts/a11yAud
 - Adding `role="button"`+`tabIndex` WITHOUT an `onKeyDown` does NOT satisfy the metric (and wouldn't work) — the key handler
   is the load-bearing part. `Card interactive` bundles all three; that's why it's the preferred path.
 
+### ★ EPIC-15 S1 QA-CONFIRMED (2026-07-13, green main `90077c8`) — first independent QA since the `keyboardA11y` axis shipped
+First QA since S1. Code commits since last QA `91cc214`: `79c9272` (EPIC-15 S1 — `a11yAudit.mjs` detector + baseline + 19 unit
+cases) → `4c220cb` (notes edit-card keyboard parity), plus docs/merge commits. Build 🟢 (precache 90). **`metrics.mjs`
+reproduces the EPIC-15 baseline EXACTLY on a fresh checkout: `keyboardA11y = 24`** across 16 files (Calendar 3, Photos 3,
+Flashcards 2, Files 2, Maps 2, Recents 2, ArtifactViewer 1, ConfirmModal 1, …). `--assert-zero` **exit 0** — all five gated
+axes (`tokenViolations`/`offSystemUtilities`/`offSystemStyle`/`offShellControls` = 0; `keyboardA11y` measured, ungated until
+S4). **S1 is measure-only → the target metric has NOT moved and is NOT expected to; no acceptance to confirm, no
+contradiction, no regression.** 32/32 routes render clean, all 14 guards green (INBOUND 4/4, MEDIA 3/3, GRAPH-LEGIBLE 3/3,
+GLOBAL-SEARCH, NODE-LINEAGE, INTENT-ROUNDTRIP 2/2, TIMELINE 6-axes, HOME-ALIVE, PROVENANCE 3/3+3/3, PRECACHE 90 no-gap,
+OFFLINE 5/5). Console errors ONLY on the 4 env-noise routes (weather Geolocation/geocoding, maps 8× tiles, files+mail 401 —
+all env-expected, not bugs). Auto-metrics Δ vs committed snapshot: apps 31 (±0), test cases 465 (+1), files 65 (±0), bundle gz
+732.2 (+0.1). **Visually inspected (captured + read locally, none committed):** `desktop.png` (Bridge "Good morning · MONDAY,
+JULY 13" — date correct; 4 stat cards; full Cakra→Crypto launcher; glass/alien palette intact), `app-calendar.png` (July 2026,
+13th highlighted under **Mon**, panel "13 July 2026 Monday" — date logic correct), `app-maps.png` (real Leaflet + zoom +
+OSM/CARTO attribution, tiles egress-blocked). No runtime bug, no drift. ▶ NEXT = **EPIC-15 S2** (sweep the app cluster, ~24 → ~8).
+
 ## ★ EPIC-14 S11 SHIPPED (2026-07-13, green main) — the LAST 49 off-shell controls (shell chrome + 4 organism lenses + artifacts wrappers + the re-regressed AIChat NIM button) migrated onto the `ui` shell: **`offShellControls 49 → 0 (−49)` — the metric is now ZERO (`b0/i0/s0/t0`).** All 16 files 0 (Desktop 8, AppShell 6, Network 4, Search 4, Bridge 4, AppHost 3, ContextMenu 3, GeneratedSection 3, ArtifactViewer 3, CommandPalette 2, Recents 2, Timeline 2, ArtifactsApp 2, ErrorBoundary 1, ArtifactGallery 1, AIChat 1). tokens/utils/style all 0 too; qa-smoke 32/32 + all 13 guards green; bundle gz 731.9.
 
 **★ QA 2026-07-13 (green main `1ce7fe4`) — S11 acceptance CONFIRMED + the S12 GATE ALREADY LANDED and BITES.** `node scripts/metrics.mjs` → `offShellControls = 0 (b0/i0/s0/t0)` reproduced independently (49→0 CONFIRMED). The S12 `--assert-zero` gate shipped in `1ce7fe4` ("lock offShellControls=0 as a CI guard"): `scripts/metrics.mjs:304` now has `if (snapshot.offShellControls > 0) fail.push(...)` and the success message lists `offShellControls=0`. **QA verified live it BITES** — reintroduced one bare `<button>` into `src/apps/notes/Notes.tsx` → `--assert-zero` **exited 1** (`offShellControls=1 (b1/i0/s0/t0)`), then reverted. 32/32 routes clean, all 14 guards green, visually re-inspected (desktop/calculator/ai-chat/maps/mail/network/reader/timeline — all shell-migrated controls render with the look preserved, no bare-HTML islands). **So EPIC-14 is effectively CODE-COMPLETE (S1–S12).**
