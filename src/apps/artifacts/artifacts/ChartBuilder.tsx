@@ -76,9 +76,9 @@ export default function ChartBuilder() {
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Data editor */}
-        <div className="w-72 border-r border-hair bg-void/20 p-4 overflow-auto">
+        <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-hair bg-void/20 p-4 overflow-auto max-h-[40dvh] md:max-h-none">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs uppercase tracking-wider text-faint font-semibold">Data Points</h3>
             <IconButton variant="ghost" size="sm" aria-label="Add data point" onClick={addRow} icon={<Plus size={14} />} />

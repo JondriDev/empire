@@ -111,9 +111,10 @@ export default function DataCenter() {
   }
 
   return (
-    <div className="relative flex h-full" style={{ background: 'var(--bg)' }}>
-      {/* Sidebar */}
-      <div className="w-56 border-r flex flex-col" style={{ borderColor: 'var(--border)' }}>
+    <div className="relative flex flex-col md:flex-row h-full" style={{ background: 'var(--bg)' }}>
+      {/* Sidebar — a table picker; stacks above the table on compact (capped
+          height, its own list scrolls) so it doesn't eat the phone screen. */}
+      <div className="w-full md:w-56 border-b md:border-b-0 md:border-r flex flex-col max-h-[40dvh] md:max-h-none" style={{ borderColor: 'var(--border)' }}>
         <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <h1 className="text-base font-bold flex items-center gap-2">
             <Database className="w-4 h-4" style={{ color: ACCENT }} /> Data Center
@@ -280,9 +281,9 @@ export default function DataCenter() {
 
       {/* New-table modal */}
       {showNewTable && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-void/50 backdrop-blur-sm" onClick={() => setShowNewTable(false)}>
+        <div className="absolute inset-0 z-20 flex items-center justify-center p-4 bg-void/50 backdrop-blur-sm" onClick={() => setShowNewTable(false)}>
           <div
-            className="w-80 rounded-2xl border p-5"
+            className="w-full max-w-80 rounded-2xl border p-5"
             style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}
             onClick={e => e.stopPropagation()}
           >

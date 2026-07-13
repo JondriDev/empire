@@ -211,7 +211,7 @@ export default function Video() {
         </div>
       </Card>
 
-      <div className="flex gap-4" style={{ flexDirection: showPlaylist ? 'row' : 'column' }}>
+      <div className={`flex gap-4 flex-col ${showPlaylist ? 'lg:flex-row' : ''}`}>
         {/* Player */}
         <div ref={containerRef} className="flex-1">
           {current ? (
@@ -309,7 +309,7 @@ export default function Video() {
 
         {/* Playlist */}
         {showPlaylist && videos.length > 0 && (
-          <Card className="w-64 p-3 flex-shrink-0">
+          <Card className="w-full lg:w-64 p-3 flex-shrink-0">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-sm font-bold flex items-center gap-1"><ListVideo className="w-4 h-4" aria-hidden="true" /> Playlist</h2>
               <span className="text-xs text-faint">{videos.length}</span>

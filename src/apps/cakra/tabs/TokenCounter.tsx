@@ -211,7 +211,7 @@ export default function TokenCounter() {
           <h2 className="text-sm font-bold mb-3 flex items-center gap-2">
             <BarChart2 className="w-4 h-4" /> Compare Texts
           </h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[0, 1].map(i => (
               <div key={i}>
                 <div className="flex items-center justify-between mb-1">
@@ -234,7 +234,7 @@ export default function TokenCounter() {
             ))}
           </div>
           {comparisonTexts[0] && comparisonTexts[1] && (
-            <div className="mt-3 grid grid-cols-2 gap-2 text-center">
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-center">
               <div className="p-2 bg-glass rounded-lg">
                 <p className="text-xs text-faint">Text 1</p>
                 <p className="text-xl font-bold">{estimateTokens(comparisonTexts[0], 'estimate')} tokens</p>

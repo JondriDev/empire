@@ -102,9 +102,9 @@ export default function Flashcards() {
         <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={newDeck}>New Deck</Button>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 border-r border-hair bg-void/20 p-3 overflow-auto">
+        <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-hair bg-void/20 p-3 overflow-auto max-h-[40dvh] md:max-h-none">
           <h3 className="text-xs uppercase tracking-wider text-faint mb-2 px-2 font-semibold">Decks</h3>
           <div className="space-y-1">
             {decks.map(d => {

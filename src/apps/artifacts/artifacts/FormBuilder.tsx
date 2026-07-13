@@ -146,7 +146,7 @@ export default function FormBuilder() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden flex">
+      <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
         {preview ? (
           <div className="flex-1 overflow-auto p-8">
             <div className="max-w-2xl mx-auto bg-glass backdrop-blur-xl border border-hair rounded-2xl p-8">
@@ -172,7 +172,7 @@ export default function FormBuilder() {
         ) : (
           <>
             {/* Palette */}
-            <div className="w-64 border-r border-hair bg-void/20 p-4 overflow-auto">
+            <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-hair bg-void/20 p-4 overflow-auto max-h-[40dvh] md:max-h-none">
               <h3 className="text-xs uppercase tracking-wider text-faint mb-3 font-semibold">Field Types</h3>
               <div className="space-y-1.5">
                 {PALETTE.map(p => {

@@ -11,6 +11,7 @@ import { emit } from '../../lib/eventBus'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { EmptyState } from '../../components/ui/Utility'
 import { Button, IconButton, TextArea } from '../../components/ui'
+import { TwoPane } from '../../components/ui/TwoPane'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { LineageTrail } from '../../components/ui/LineageTrail'
@@ -23,6 +24,9 @@ export default function Messages() {
  const [draft, setDraft] = useState('')
  const [draftFrom, setDraftFrom] = useState<string | undefined>(undefined)
  const [recipient, setRecipient] = useState(CONTACTS[0])
+ // Compact (< md) shows the thread list first; opening a contact pushes the
+ // conversation. Ignored on wide layouts, where both panes are always visible.
+ const [chatOpen, setChatOpen] = useState(false)
 
  // Emit APP_OPENED for activity feed tracking
  useEffect(() => {
@@ -76,9 +80,13 @@ export default function Messages() {
   }
 
   return (
-    <div className="flex h-full" style={{ background: 'var(--bg)' }}>
-      {/* Thread list */}
-      <div className="w-72 border-r flex flex-col" style={{ borderColor: 'var(--border)' }}>
+    <TwoPane
+      style={{ background: 'var(--bg)' }}
+      showMain={chatOpen}
+      onBack={() => setChatOpen(false)}
+      backLabel={recipient}
+      side={
+        <>
         <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <h1 className="text-lg font-bold">Messages</h1>
           <p className="text-xs text-muted">{messages.length} messages</p>
@@ -105,7 +113,7 @@ export default function Messages() {
           key={contact}
           variant="ghost"
           fullWidth
-          onClick={() => setRecipient(contact)}
+          onClick={() => { setRecipient(contact); setChatOpen(true) }}
           aria-pressed={recipient === contact}
           className="border-b"
           style={{ justifyContent: 'flex-start', gap: '12px', padding: '12px 16px', borderColor: 'var(--border)', background: recipient === contact ? 'color-mix(in srgb, var(--signal) 10%, transparent)' : undefined }}
@@ -130,10 +138,10 @@ export default function Messages() {
           )
           })}
         </div>
-      </div>
-
-      {/* Chat area */}
-      <div className="flex-1 flex flex-col">
+        </>
+      }
+      main={
+        <>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-3">
@@ -163,7 +171,7 @@ export default function Messages() {
         return (
         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
         <div
-        className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
+        className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-2.5 ${
         isMe ? 'bg-signal text-fg rounded-tr-sm' : 'border border-hair rounded-tl-sm'
         }`}
         style={!isMe ? { background: 'var(--card-bg)' } : {}}
@@ -230,7 +238,8 @@ export default function Messages() {
           </div>
           <p className="text-[10px] text-faint mt-1.5">Enter to send · Shift+Enter for newline</p>
         </div>
-      </div>
-    </div>
+        </>
+      }
+    />
   )
 }

@@ -56,7 +56,7 @@ export default function CakraShell() {
   return (
     <div className="h-full flex flex-col" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       {/* Segmented tab bar */}
-      <div className="flex items-center gap-1 px-3 py-2 border-b" style={{ borderColor: 'var(--border)' }} role="tablist">
+      <div className="flex items-center gap-1 px-3 py-2 border-b overflow-x-auto" style={{ borderColor: 'var(--border)' }} role="tablist">
         {TABS.map(({ id, label, Icon }) => {
           const active = tab === id
           return (
@@ -68,7 +68,7 @@ export default function CakraShell() {
               role="tab"
               aria-selected={active}
               icon={<Icon className="w-4 h-4" />}
-              className="press"
+              className="press flex-shrink-0"
               style={active
                 ? { position: 'relative', background: 'color-mix(in srgb, var(--c-cakra) 20%, transparent)', color: 'var(--c-cakra)' }
                 : { position: 'relative', color: 'var(--text3)' }}
