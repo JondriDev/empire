@@ -47,7 +47,82 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ---
 
-## ▶ ACTIVE — EPIC-14 · Shell conformance — the component shell becomes total (no app renders a bare interactive control)
+## ▶ ACTIVE — EPIC-15 · Keyboard operability — the whole organism is drivable without a mouse (WCAG 2.1.1)
+
+> **RATIFIED + PROMOTED by the Strategist 2026-07-13.** EPIC-14 is retired to DONE (below — `offShellControls 307 → 0`
+> S1–S12, the `--assert-zero` gate BITES on green main `4c220cb`, the shell-conformance invariant header landed in
+> `src/components/ui/index.tsx`). The design-system **trilogy** — colour (EPIC-5), tokens (EPIC-11), component-shell
+> (EPIC-14) — now locks how the Empire *looks*. Every "does it LOOK like one organism" axis is at 0 and gated. So the
+> priority bias descends one band from **design-system consistency** to **experience quality / accessibility**, and the
+> Strategist audited that band for the steepest remaining cloud-executable gradient.
+>
+> **The gap (code-confirmed this run — a repo-wide census with the new `scripts/a11yAudit.mjs`):** the Empire is *beautiful*
+> but not fully *operable*. **`keyboardA11y = 24` across 16 app files** — 24 places where a `onClick` sits on a
+> NON-interactive host element (`<div>`/`<span>`/anchor-without-href) with **no companion `onKeyDown`/`onKeyUp`/`onKeyPress`**.
+> In React such a handler *never fires on Enter/Space* (the browser only synthesises click-on-key for natively-actionable
+> elements), so these are keyboard TRAPS: a mouse user selects a calendar day, opens a file, picks a map result, favourites a
+> photo — a keyboard / switch / screen-reader user **cannot**. This is a WCAG 2.1.1 (Keyboard) Level-A failure, and — exactly
+> like the shell drift before EPIC-14 — **nothing measured it**, so it accreted silently across 16 apps.
+>
+> **Why this is the highest-gradient move now (one line):** "alien technology that feels effortless" must include *effortless
+> for everyone* — a holographic OS you can only touch with a mouse is a half-built organism, and interconnection (the band
+> above) is already DONE end-to-end (EPIC-1..13). It has a natural, honest **0 target** (unlike an ever-growing adoption
+> count), is 100 % cloud + metric verifiable (a static audit + the render-smoke; no device needed for the *code* fix — only
+> the on-device tab-through is device-gated), and reuses the exact EPIC-5/11/14 **measure → drive-to-0-by-descending-file-mass
+> → lock** template with no new deps. It also compounds the EPIC-14 dividend: the `ui` `Card interactive` primitive already
+> wires `role="button"` + `tabIndex` + Enter/Space, so most fixes are "route the click through the shell," not bespoke a11y.
+
+**Leap:** every clickable surface in the Empire — calendar days, photo tiles, file rows, map results, saved-place cards, the
+Recents window strip, artifact cards — becomes **keyboard-operable** (Enter/Space activates what a click activates, focus is
+visible, tab order is sane). The organism stops being a mouse-only instrument. **Target metric:** `keyboardA11y` (docs/METRICS.md)
+`24 → 0`, then LOCKED in `--assert-zero` so keyboard traps can never creep back.
+
+- [x] **S1 · MEASURE — stand up the `keyboardA11y` axis + baseline (pure-additive, zero migration risk).** ✅ SHIPPED
+  2026-07-13. Added `scripts/a11yAudit.mjs` (`scanA11yViolations(text)` — pure, dependency-free): counts an `onClick` on a
+  non-interactive host tag (`<div>`/`<span>`/`<li>`/…/anchor-without-`href`) that has NO `onKeyDown`/`onKeyUp`/`onKeyPress`.
+  **Exemptions (honest, so the number is driveable):** native actionable tags (`button`, `a[href]`, `input`/`select`/
+  `textarea`, `label`), capitalised `ui` primitives (`<Card>`/`<Button>` — they wire keyboard themselves), elements DECLARED
+  inert (`aria-hidden` / `role=presentation|none`), and event-plumbing-only handlers (`onClick={e => e.stopPropagation()}` /
+  `preventDefault` — no user action). Unit-pinned in `scripts/a11yAudit.test.mjs` (19 cases). Wired into `scripts/metrics.mjs`
+  as `keyboardA11y` (snapshot field + `Keyboard a11y` table row + top-offenders + `--json` `keyboardA11yTop`). **Baseline
+  `keyboardA11y = 24` across 16 files** (heaviest: Calendar 3, Photos 3, Flashcards 2, Files 2, Maps 2, Recents 2). **NOT yet
+  in `--assert-zero`** (baseline is non-zero — the lock is S4). *Acceptance (met):* metric prints + persists to metrics.json;
+  `--assert-zero` still exits 0 (unchanged — keyboardA11y ungated); build🟢 vitest🟢 (555) eslint clean; no new deps.
+- [ ] **S2 · SWEEP the app cluster (~16 → establish the recipe).** Make every flagged clickable in the standalone apps
+  keyboard-operable, heaviest-first: `apps/calendar/Calendar.tsx` (3 — day cells + event chip + edit card), `apps/photos/
+  Photos.tsx` (3 — grid tile + list row select), `apps/files/Files.tsx` (2 — grid/list `openFile` rows), `apps/maps/Maps.tsx`
+  (2 — `selectPlace` result cards), `apps/artifacts/artifacts/Flashcards.tsx` (2), `apps/artifacts/generated/ArtifactViewer.tsx`
+  (1), `apps/datacenter/DataCenter.tsx` (1), `apps/video/Video.tsx` (1), `apps/weather/Weather.tsx` (1). **Recipe (pick per
+  case, document the winner in CONTEXT):** (a) a click-to-select TILE/ROW/CARD → wrap in / convert to `Card interactive`
+  (already wires `role="button"` + `tabIndex={0}` + Enter/Space → `onClick`) — the zero-bespoke path; (b) a control that must
+  stay a `<div>`/`<span>` (layout constraints) → add `role="button"`, `tabIndex={0}`, and an `onKeyDown` that fires the same
+  action on `Enter`/`' '` (extract a tiny shared `onActivate(fn)` helper if it repeats). Keep every existing handoff / graph
+  / motion wiring intact. *Acceptance:* those 9 files → 0 on `keyboardA11y`; `keyboardA11y` ~24 → ~8; the render-smoke stays
+  32/32 clean; build🟢 vitest🟢 eslint clean; the four DS axes still 0.
+- [ ] **S3 · SWEEP the shell + Cakra cluster (~8 → 0).** `components/Recents.tsx` (2 — window strip rows), `components/
+  CommandPalette.tsx` (1), `components/Desktop.tsx` (1), `apps/cakra/components/ConfirmModal.tsx` (1), `apps/cakra/components/
+  ModelPicker.tsx` (1), `apps/cakra/components/SettingsPanel.tsx` (1), `apps/cakra/tabs/Editor.tsx` (1 — saved-file delete),
+  `apps/cakra/tabs/PromptGenerator.tsx` (1), `apps/reader/Reader.tsx` (1). Same recipe. Re-census first (counts shift as S2
+  lands). *Acceptance:* `keyboardA11y → 0`; render-smoke clean; build🟢 vitest🟢 eslint clean.
+- [ ] **S4 · LOCK `keyboardA11y` in `--assert-zero` → ★ EPIC-15 CODE-COMPLETE.** Add `if (snapshot.keyboardA11y > 0)
+  fail.push(...)` beside the existing four gates in `scripts/metrics.mjs` + extend the success line. Add an a11y-invariant note
+  (a `// WCAG 2.1.1` comment) near `Card`/`Button` in `src/components/ui/index.tsx` pointing to the shell path for clickables.
+  **Verify the lock BITES:** temporarily re-introduce one `<div onClick>` with no key handler → `--assert-zero` exits 1 →
+  revert. *Acceptance:* `--assert-zero` gates `keyboardA11y=0` and goes RED on a single re-introduced mouse-only click;
+  build🟢 vitest🟢 eslint clean; all five conformance axes 0. **★ EPIC-15 CODE-COMPLETE → QA confirms `keyboardA11y 0` LOCKED
+  on green main → Strategist retires to DONE.** *(On-device: QA tab-throughs a few migrated apps to confirm focus rings +
+  Enter/Space actually activate — the code fix is cloud-verified, the felt experience is device-gated.)*
+
+> _**Ratified 2026-07-13.** Ordered downhill mirroring EPIC-14: S1 is pure-additive (detector + baseline, zero migration
+> risk); S2 sweeps the heaviest app cluster AND fixes the remediation recipe; S3 finishes the shell + Cakra tail; S4 locks the
+> metric so keyboard traps can never creep back. When all ship AND QA confirms `keyboardA11y 0` LOCKED on green main → retire
+> EPIC-15 to DONE. The next cloud-executable candidate after this is the remaining a11y surface (accessible-name coverage on
+> icon-only affordances, focus-visible sweep) or the RFC's **`docMass`** doc-mass conformance metric; **EPIC-7 · Android stays
+> device-gated.**_
+
+---
+
+## ✅ DONE — retired by the Strategist 2026-07-13 (S1–S12 all shipped; `offShellControls 307 → 0` LOCKED in `--assert-zero`, the gate BITES, the shell-conformance invariant landed in `src/components/ui/index.tsx`) — EPIC-14 · Shell conformance — the component shell becomes total (no app renders a bare interactive control)
 
 > **RATIFIED + PROMOTED by the Strategist 2026-07-10.** EPIC-13 is retired to DONE (below — `GRAPH-LEGIBLE 1/1 → 3/3` +
 > `INBOUND-LANDS 3/3 → 4/4` QA-render-CONFIRMED LIVE on green main `a9bec85`; the last two graph-islands closed). Every
@@ -356,7 +431,10 @@ Stages (Builder takes the topmost `[ ]`; each one run, downhill given the ones b
 
   </details>
 
-- [ ] **S12 · LOCK `offShellControls` in `--assert-zero` → ★ EPIC-14 CODE-COMPLETE.** Add `if (snapshot.offShellControls > 0)
+- [x] **S12 · LOCK `offShellControls` in `--assert-zero` → ★ EPIC-14 CODE-COMPLETE.** ✅ SHIPPED 2026-07-13 — the
+  `--assert-zero` gate (`scripts/metrics.mjs:304`) + success-line landed in `1ce7fe4`; the header-comment invariant landed
+  in `src/components/ui/index.tsx`; re-verified the lock BITES (reintroduced one bare `<button>` → `--assert-zero` exit 1,
+  `offShellControls=1 (b1/i0/s0/t0)`, reverted → exit 0). **EPIC-14 CODE-COMPLETE (S1–S12); retired to DONE below.** Add `if (snapshot.offShellControls > 0)
   fail.push(...)` to the `--assert-zero` block (`scripts/metrics.mjs`, beside the existing `tokenViolations`/
   `offSystemUtilities`/`offSystemStyle` gates) + a `controlAudit` line to the success message. Add a header comment in
   `src/components/ui/index.tsx` stating the invariant: *app code renders interactive controls through the `ui` primitives —

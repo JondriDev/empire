@@ -16,6 +16,56 @@
 
 ---
 
+## ★ EPIC-14 RETIRED → DONE + EPIC-15 PROMOTED (2026-07-13, green main) — the design-system trilogy is LOCKED; the new axis is KEYBOARD OPERABILITY
+
+**★ EPIC-14 CODE-COMPLETE (S1–S12) & retired to DONE.** S12 housekeeping shipped this run: the invariant header comment landed
+in `src/components/ui/index.tsx` (top block — "app code renders every interactive control through these primitives; a bare
+control fails CI"); the S12 checkbox is `[x]`; re-verified the `--assert-zero` gate BITES (reintroduced one bare `<button>` →
+exit 1 `offShellControls=1`, reverted → exit 0). `offShellControls` stays **0 (b0/i0/s0/t0)**, gated. All four DS axes 0.
+
+**▶ NEW ACTIVE: EPIC-15 · Keyboard operability (WCAG 2.1.1).** New measured axis **`keyboardA11y`** (`scripts/a11yAudit.mjs`
+→ `scanA11yViolations`, wired into `scripts/metrics.mjs` as snapshot field + "Keyboard a11y" table row + `--json`
+`keyboardA11yTop`; unit-pinned `scripts/a11yAudit.test.mjs`, 19 cases). It counts a `onClick` on a NON-interactive host tag
+(`<div>`/`<span>`/anchor-without-`href`/…) with NO `onKeyDown`/`onKeyUp`/`onKeyPress` — a keyboard trap (in React such a
+handler never fires on Enter/Space). **Baseline `keyboardA11y = 24` across 16 app files.** NOT gated yet (baseline non-zero;
+S4 locks it). S1 (metric + baseline) SHIPPED this run.
+
+**▶ NEXT = EPIC-15 S2 (SWEEP the app cluster ~24 → ~8, establish the remediation recipe).** Make every flagged clickable
+keyboard-operable, heaviest-first (re-census FIRST with the one-liner below — counts shift as files land):
+`apps/calendar/Calendar.tsx` (**3** — day cells `onClick={()=>setSelectedDate}`, the event chip, the edit-form card),
+`apps/photos/Photos.tsx` (**3** — grid tile + list-row `onClick={()=>setSelected}`; NOT the `stopPropagation` NodeActions
+wrappers — those are already exempt), `apps/files/Files.tsx` (**2** — grid+list `openFile(entry)` rows),
+`apps/maps/Maps.tsx` (**2** — `selectPlace(place)` result cards), `apps/artifacts/artifacts/Flashcards.tsx` (**2**),
+`apps/artifacts/generated/ArtifactViewer.tsx` (**1**), `apps/datacenter/DataCenter.tsx` (**1**), `apps/video/Video.tsx`
+(**1**), `apps/weather/Weather.tsx` (**1**). **THE RECIPE (pick per case, log the winner):** (a) a click-to-SELECT tile/row/
+card → convert/wrap in **`Card interactive`** — it already wires `role="button"` + `tabIndex={0}` + Enter/Space→`onClick`
+(`src/components/ui/index.tsx` `Card`, lines ~24-40), the zero-bespoke path; (b) a control that must stay a bare `<div>`/
+`<span>` for layout → add `role="button"` + `tabIndex={0}` + an `onKeyDown` firing the same action on `Enter`/`' '` (extract a
+tiny shared `onActivate(fn)` helper if it repeats ≥3×). Keep every handoff/graph/motion wire intact. *Acceptance:* those 9
+files → 0 `keyboardA11y`; metric ~24 → ~8; render-smoke 32/32 clean; build🟢 vitest🟢 eslint clean; the four DS axes still 0.
+Then S3 sweeps the shell+Cakra tail (Recents 2, CommandPalette 1, Desktop 1, cakra ConfirmModal/ModelPicker/SettingsPanel/
+Editor/PromptGenerator, Reader 1) → 0; S4 LOCKS it in `--assert-zero` + adds the WCAG-2.1.1 invariant note by `Card`. Full spec
+EPICS.md → EPIC-15.
+
+**Re-census one-liner** (the detector over the exact `appCodeFiles()` set):
+```
+node --input-type=module -e 'import {scanA11yViolations} from "./scripts/a11yAudit.mjs";import fs from "fs";import path from "path";const R=process.cwd();const w=(d,a=[])=>{let e=[];try{e=fs.readdirSync(d,{withFileTypes:true})}catch{return a}for(const x of e){if(["node_modules",".git","dist"].includes(x.name))continue;const f=path.join(d,x.name);x.isDirectory()?w(f,a):a.push(f)}return a};const DS=new Set(["src/apps/artifacts/artifacts/ColorPalette.tsx","src/lib/registry.ts","src/apps/cakra/lib/providers.ts","src/apps/reader/lib/render/epub.ts"].map(p=>p.split("/").join(path.sep)));const fs2=w(path.join(R,"src")).filter(f=>/\.(ts|tsx)$/.test(f)&&!f.includes(path.sep+"components"+path.sep+"ui"+path.sep)&&!f.includes(path.sep+"design-system"+path.sep)&&!DS.has(path.relative(R,f))&&!/\.test\.tsx?$/.test(f));let t=0;const o=[];for(const f of fs2){const c=scanA11yViolations(fs.readFileSync(f,"utf8")).count;if(c){t+=c;o.push([path.relative(R,f),c])}}o.sort((a,b)=>b[1]-a[1]);console.log("keyboardA11y",t);for(const[f,n]of o)console.log(" ",n,f)'
+```
+
+### EPIC-15 traps / notes (carry forward)
+- **`Card interactive` is the shell home for a clickable region** — it renders a `<div className="gp gp-interactive">` with
+  `role="button"`/`tabIndex={0}`/Enter+Space handler. It ALWAYS paints `.gp` glass (card-bg+border+shadow+blur). For a tile
+  that ALREADY has its own surface/bg (Photos grid tile has `bg-glass rounded-lg`), converting to `Card` may double the
+  surface — prefer recipe (b) (role+tabIndex+onKeyDown on the existing `<div>`) there, OR pass `Card`'s `className`/`style` to
+  neutralise the extra glass. Choose per case; log which won.
+- **`onClick={e => e.stopPropagation()}` / `preventDefault()`-only handlers are EXEMPT** (event-plumbing, no user action) — do
+  NOT "fix" them; they're correctly not counted. A handler that ALSO does a real action (`e.stopPropagation(); del(x)`) IS
+  counted and DOES need a keyboard path.
+- **The metric is over `appCodeFiles()`** (same set as the DS audits) so `ColorPalette.tsx` (DS_INFRA) and `src/components/ui/`
+  are excluded — a standalone `walk` census counts 25, the real metric 24 (the ColorPalette 1 is out of scope).
+- Adding `role="button"`+`tabIndex` WITHOUT an `onKeyDown` does NOT satisfy the metric (and wouldn't work) — the key handler
+  is the load-bearing part. `Card interactive` bundles all three; that's why it's the preferred path.
+
 ## ★ EPIC-14 S11 SHIPPED (2026-07-13, green main) — the LAST 49 off-shell controls (shell chrome + 4 organism lenses + artifacts wrappers + the re-regressed AIChat NIM button) migrated onto the `ui` shell: **`offShellControls 49 → 0 (−49)` — the metric is now ZERO (`b0/i0/s0/t0`).** All 16 files 0 (Desktop 8, AppShell 6, Network 4, Search 4, Bridge 4, AppHost 3, ContextMenu 3, GeneratedSection 3, ArtifactViewer 3, CommandPalette 2, Recents 2, Timeline 2, ArtifactsApp 2, ErrorBoundary 1, ArtifactGallery 1, AIChat 1). tokens/utils/style all 0 too; qa-smoke 32/32 + all 13 guards green; bundle gz 731.9.
 
 **★ QA 2026-07-13 (green main `1ce7fe4`) — S11 acceptance CONFIRMED + the S12 GATE ALREADY LANDED and BITES.** `node scripts/metrics.mjs` → `offShellControls = 0 (b0/i0/s0/t0)` reproduced independently (49→0 CONFIRMED). The S12 `--assert-zero` gate shipped in `1ce7fe4` ("lock offShellControls=0 as a CI guard"): `scripts/metrics.mjs:304` now has `if (snapshot.offShellControls > 0) fail.push(...)` and the success message lists `offShellControls=0`. **QA verified live it BITES** — reintroduced one bare `<button>` into `src/apps/notes/Notes.tsx` → `--assert-zero` **exited 1** (`offShellControls=1 (b1/i0/s0/t0)`), then reverted. 32/32 routes clean, all 14 guards green, visually re-inspected (desktop/calculator/ai-chat/maps/mail/network/reader/timeline — all shell-migrated controls render with the look preserved, no bare-HTML islands). **So EPIC-14 is effectively CODE-COMPLETE (S1–S12).**

@@ -19,6 +19,7 @@ import path from 'path';
 import zlib from 'zlib';
 import { scanStyleViolations } from './styleAudit.mjs';
 import { scanControlViolations } from './controlAudit.mjs';
+import { scanA11yViolations } from './a11yAudit.mjs';
 
 const ROOT = process.cwd();
 const args = new Set(process.argv.slice(2));
@@ -195,6 +196,31 @@ function controlViolations() {
   return { count, dims, top: offenders.slice(0, 8) };
 }
 
+// ---- metric: keyboard-a11y conformance (lower is better) -------------------
+// Accessibility axis — WCAG 2.1.1 (Keyboard). The design-system trilogy locks how
+// the Empire LOOKS; this locks whether it can be OPERATED without a mouse. Counts
+// app code that renders a keyboard-INOPERABLE control: an `onClick` on a
+// non-interactive host element (`<div>`/`<span>`/anchor-without-href/…) with NO
+// companion `onKeyDown`/`onKeyUp`/`onKeyPress` — in React such a handler never
+// fires on Enter/Space, so mouse users can act but keyboard/switch/AT users cannot.
+// Detection is the pure, unit-pinned `scanA11yViolations` (scripts/a11yAudit.mjs);
+// same app-code file set as the colour/style/control audits, minus src/components/ui/
+// (the primitives — Card/Button — add keyboard operability themselves). Event-plumbing
+// guards (`onClick={e => e.stopPropagation()}`), native controls, and elements DECLARED
+// inert (aria-hidden / role=presentation) are exempt. Baseline is non-zero; EPIC-15
+// drives it to 0. NOT yet gated by --assert-zero (that lock lands in EPIC-15's final stage).
+function a11yViolations() {
+  const files = appCodeFiles();
+  let count = 0;
+  const offenders = [];
+  for (const f of files) {
+    const r = scanA11yViolations(read(f));
+    if (r.count) { count += r.count; offenders.push([path.relative(ROOT, f), r.count]); }
+  }
+  offenders.sort((a, b) => b[1] - a[1]);
+  return { count, top: offenders.slice(0, 8) };
+}
+
 // ---- metric: shipped bundle size (gzipped) ---------------------------------
 function bundleSize() {
   const dir = path.join(ROOT, 'dist/assets');
@@ -215,6 +241,7 @@ const tv = tokenViolations();
 const osu = offSystemUtilities();
 const sv = styleViolations();
 const cv = controlViolations();
+const av = a11yViolations();
 const bundle = bundleSize();
 const snapshot = {
   generatedAt: new Date().toISOString(),
@@ -227,12 +254,13 @@ const snapshot = {
   offSystemStyleDims: sv.dims,
   offShellControls: cv.count,
   offShellControlDims: cv.dims,
+  keyboardA11y: av.count,
   bundleGzKB: bundle ? bundle.gzKB : null,
   bundleRawKB: bundle ? bundle.rawKB : null,
 };
 
 if (JSON_ONLY) {
-  console.log(JSON.stringify({ ...snapshot, tokenViolationTop: tv.top, offSystemUtilitiesTop: osu.top, offSystemStyleTop: sv.top, offShellControlsTop: cv.top }, null, 2));
+  console.log(JSON.stringify({ ...snapshot, tokenViolationTop: tv.top, offSystemUtilitiesTop: osu.top, offSystemStyleTop: sv.top, offShellControlsTop: cv.top, keyboardA11yTop: av.top }, null, 2));
   process.exit(0);
 }
 
@@ -264,6 +292,7 @@ const rows = [
   ['Off-system utils', snapshot.offSystemUtilities, delta('offSystemUtilities'), 'LOWER is better (Tailwind palette classes bypassing tokens)'],
   ['Off-system style', `${snapshot.offSystemStyle} (r${sv.dims.radii}/t${sv.dims.type}/m${sv.dims.motion})`, delta('offSystemStyle'), 'LOWER is better (raw radii/type/easing bypassing --radius-*/--text-*/--ease-*)'],
   ['Off-shell controls', `${snapshot.offShellControls} (b${cv.dims.button}/i${cv.dims.input}/s${cv.dims.select}/t${cv.dims.textarea})`, delta('offShellControls'), 'LOWER is better (bare <button>/<input>/<select>/<textarea> bypassing the ui primitive layer)'],
+  ['Keyboard a11y', snapshot.keyboardA11y, delta('keyboardA11y'), 'LOWER is better (mouse-only onClick on non-interactive hosts — WCAG 2.1.1)'],
   ['Bundle gz (KB)', snapshot.bundleGzKB ?? 'n/a (no dist)', delta('bundleGzKB'), 'LOWER is better; build first to measure'],
 ];
 const w = (s, n) => String(s).padEnd(n);
@@ -286,6 +315,10 @@ if (sv.top.length) {
 if (cv.top.length) {
   console.log(`\nTop off-shell-control files (bare <button>/<input>/<select>/<textarea>):`);
   for (const [f, n] of cv.top) console.log(`  ${n}\t${f}`);
+}
+if (av.top.length) {
+  console.log(`\nTop keyboard-a11y files (mouse-only onClick on non-interactive hosts):`);
+  for (const [f, n] of av.top) console.log(`  ${n}\t${f}`);
 }
 console.log('');
 

@@ -5,6 +5,30 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-13 · BUILDER — EPIC-14 RETIRED → DONE (S12 housekeeping) + EPIC-15 PROMOTED & S1 SHIPPED: the new `keyboardA11y` axis (baseline 24)
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (@ `4c220cb`). `npm install` → `npm run build` (`tsc -b && vite build`) GREEN; `npx vitest run` later **555/555**; `node scripts/metrics.mjs --assert-zero` exit 0 (all four DS axes 0). Confirmed green *before* touching anything.
+
+**What shipped (one coherent stage — close the shell-conformance axis, open the keyboard-operability axis):**
+
+1. **EPIC-14 S12 completed → EPIC-14 CODE-COMPLETE (S1–S12), retired to DONE.** The `--assert-zero` gate for `offShellControls` already landed in `1ce7fe4`; the two loose ends closed this run: (a) added the **shell-conformance invariant header comment** to `src/components/ui/index.tsx` (top block — every interactive control goes through the primitives; a bare control fails CI); (b) flipped the S12 checkbox `[x]` in `docs/EPICS.md`. **Re-verified the lock BITES:** injected one bare `<button>` into an app file → `--assert-zero` **exit 1** (`offShellControls=1 (b1/i0/s0/t0)`), reverted → exit 0. `offShellControls` holds **0 (b0/i0/s0/t0)**.
+
+2. **EPIC-15 promoted to ACTIVE + S1 shipped (measure — pure-additive).** The design-system *trilogy* (colour/tokens/shell) now locks how the Empire LOOKS; the next-highest gradient is whether it can be OPERATED without a mouse (WCAG 2.1.1). New pure detector **`scripts/a11yAudit.mjs`** (`scanA11yViolations` — counts an `onClick` on a non-interactive host tag `<div>`/`<span>`/anchor-without-`href` with NO `onKeyDown`/`onKeyUp`/`onKeyPress`; a keyboard trap since React never fires such a handler on Enter/Space). Honest exemptions so the number is driveable: native tags (`button`/`a[href]`/`input`/`select`/`textarea`/`label`), capitalised `ui` primitives (`Card`/`Button` wire keyboard themselves), declared-inert (`aria-hidden`/`role=presentation|none`), and event-plumbing-only handlers (`onClick={e => e.stopPropagation()}`). Unit-pinned in **`scripts/a11yAudit.test.mjs` (19 cases)**. Wired into `scripts/metrics.mjs` as `keyboardA11y` (snapshot field + "Keyboard a11y" table row + top-offenders + `--json keyboardA11yTop`). **Baseline `keyboardA11y = 24` across 16 app files** (Calendar 3, Photos 3, Flashcards 2, Files 2, Maps 2, Recents 2, +others). **NOT added to `--assert-zero`** — baseline is non-zero; the lock is EPIC-15 S4 — so the existing gate is UNCHANGED (still exit 0).
+
+**Why (root cause, not a chore):** exactly like the shell drift before EPIC-14, keyboard-inoperability accreted silently across 16 apps because *nothing measured it*. A mouse user selects a calendar day / opens a file / picks a map result; a keyboard/switch/AT user cannot. "Alien technology that feels effortless" must be effortless for everyone; interconnection (the band above) is already DONE, so accessibility is the steepest remaining cloud-executable gradient. Reuses the exact EPIC-5/11/14 measure→drive-to-0→lock template, no new deps.
+
+**Verify (the only gate):** build **🟢** (`tsc -b && vite build`); `npx vitest run` **555/555 🟢** (+19 from the new a11y test; +others already present); `npx eslint` clean on all four touched files (`a11yAudit.mjs`, `a11yAudit.test.mjs`, `metrics.mjs`, `ui/index.tsx`); `node scripts/metrics.mjs --assert-zero` **exit 0** (design-system conformance line unchanged — `keyboardA11y` ungated by design). No new deps. Additive metric — cannot regress the existing four axes.
+
+**Metrics delta (`node scripts/metrics.mjs`):** NEW row **Keyboard a11y = 24** (baseline, no Δ yet). All four DS axes steady at **0** (tokenViolations / offSystemUtilities / offSystemStyle / offShellControls=0 gated). Apps 31, test cases 483 (metrics counter, +19), test files 66 (+1), bundle gz 732.1 (±0 — no app/bundle change, all changes are scripts + one comment). No regression.
+
+**Not verifiable in cloud:** none for the *code* (a metric + detector + a comment — fully build/test-verified). The felt keyboard experience (focus rings visible, Enter/Space actually activates) is device-gated and belongs to the S2–S3 sweeps + on-device QA tab-through.
+
+**Committed directly to `main`** (build green first): `a11yAudit.mjs` + its test, `metrics.mjs` wiring, `ui/index.tsx` header comment, EPICS/METRICS/CONTEXT/this-log, refreshed `docs/metrics.json`.
+
+**Next (single best step):** EPIC-15 **S2** — sweep the app cluster (Calendar/Photos/Files/Maps/Flashcards/ArtifactViewer/DataCenter/Video/Weather, ~24 → ~8) using the `Card interactive` recipe (it already wires role+tabIndex+Enter/Space), establishing the remediation pattern. Exact shape + re-census one-liner in `docs/CONTEXT.md` (top block).
+
+---
+
 ## 2026-07-13 · DEPS & SECURITY — safe patch/minor bumps (incl. dompurify); vite/vitest majors still deferred; leverage: `offShellControls=0` now CI-locked
 
 **Baseline:** fresh cloud checkout, `git pull --rebase` → green `main` (@ `e819c6a`). `npm install` → `npm run build` (`tsc -b && vite build`) GREEN, `npx vitest run` **532/532 pass**, all 6 CI guards green. Confirmed green *before* touching anything.

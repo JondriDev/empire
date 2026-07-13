@@ -8,6 +8,16 @@ import { cssVar, tint } from '../../design-system/tokens'
    - Active press (tactile feedback)
    - Focus ring with cyan halo
    - Disabled = opacity + cursor not-allowed
+
+   ★ SHELL-CONFORMANCE INVARIANT (EPIC-14, locked in CI):
+   App code renders EVERY interactive control through these primitives —
+   Button / IconButton / Input / TextArea / Select / Segmented / Slider.
+   A bare <button>, <select>, <textarea>, or text-<input> in an app file
+   fails CI: `node scripts/metrics.mjs --assert-zero` gates
+   offShellControls=0 (checkbox/radio/file inputs are exempt — no text-field
+   home). Need a control the shell lacks? ADD a primitive here, don't drop to
+   bare HTML. This file is excluded from the app-code audit set because it
+   legitimately wraps the bare elements (Button→<button>, Input→<input>, …).
    ═══════════════════════════════════════════════ */
 
 interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onClick'> {

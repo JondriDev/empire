@@ -49,6 +49,19 @@ The machine-measurable rows are computed by [`scripts/metrics.mjs`](../scripts/m
 > has a shell home; S2–S8 migrate the 54 offender files by descending mass, S9 adds `offShellControls` to
 > `--assert-zero` to lock it at 0 — exactly as EPIC-5 S8 locked `offSystemUtilities` and EPIC-11 S4 locked `offSystemStyle`.
 
+> **Keyboard a11y (added 2026-07-13 — accessibility conformance, EPIC-15).** The design-system trilogy
+> (`tokenViolations`/`offSystemUtilities`/`offSystemStyle`/`offShellControls`) is all at **0 and gated** — the Empire is
+> fully on-system *visually*. `keyboardA11y` opens the axis of whether it can be **operated without a mouse** (WCAG 2.1.1,
+> Keyboard). It counts app code that renders a keyboard-INOPERABLE control: an `onClick` on a non-interactive host element
+> (`<div>`/`<span>`/anchor-without-`href`/…) with NO companion `onKeyDown`/`onKeyUp`/`onKeyPress` — in React such a handler
+> never fires on Enter/Space, so mouse users can act but keyboard/switch/AT users cannot. Detector = the pure, unit-pinned
+> `scanA11yViolations` (`scripts/a11yAudit.mjs`, 19 cases in `a11yAudit.test.mjs`) over the same app-code file set the
+> colour/style/control audits walk, minus `src/components/ui/` (the `Card`/`Button` primitives wire keyboard themselves).
+> **Exempt** (so the number is honest + driveable): native actionable tags (`button`/`a[href]`/`input`/`select`/`textarea`/
+> `label`), capitalised `ui` primitives, elements DECLARED inert (`aria-hidden`/`role=presentation|none`), and event-plumbing
+> guards (`onClick={e => e.stopPropagation()}` — no user action). **Baseline `24` (2026-07-13, EPIC-15 S1).** **NOT yet in
+> `--assert-zero`** — EPIC-15 S2–S3 drive it to 0 heaviest-first, S4 locks it (exactly as EPIC-14 S12 locked `offShellControls`).
+
 > **Off-system style (added 2026-07-04 — design-system conformance II).** The two colour audits
 > (`tokenViolations` = raw `#hex`/`rgba()`; `offSystemUtilities` = Tailwind palette classes) are both at **0**,
 > but app code still hardcodes the NON-colour design values — **radii, type sizes, easings** — instead of
