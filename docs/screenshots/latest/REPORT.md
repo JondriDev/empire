@@ -1,47 +1,38 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-13T18:08:59.155Z · **main @ `d131376`** · build 🟢 GREEN
+**Generated:** 2026-07-13T23:08:18.924Z
 
-**Result:** 32/32 rendered without crash, 0 failed. All 14 guards green. Ratchet `--assert-zero` exit 0.
+**Result:** 32/32 rendered without crash, 0 failed.
 
-> **✅ NO RUNTIME BUG FOUND.** Every console message observed is env-expected noise (headless
-> geolocation permissions-policy block, external tile/API tunnels blocked by the cloud egress policy,
-> authed-only 401s). None is a code defect — nothing for the build routine to pick up.
+> **✅ NO RUNTIME BUG FOUND.** Green build, 32/32 render clean (desktop + 31 apps), all 14 guards green, all six conformance axes 0 & LOCKED (`--assert-zero` exit 0). Console/network noise is env-expected only (blocked map/geocoding CDNs, authed 401s) — no regression for the build routine to pick up.
 
-## Metrics (`node scripts/metrics.mjs`, `--assert-zero` exit 0)
+## Run summary (metrics + epic-acceptance) — green main `19e0454`, QA 2026-07-13
 
-| Metric | Value | Δ vs last QA (`f133f5d`) | Note |
+**Build:** GREEN (`tsc -b && vite build`, 12.3s; PWA precache 91 entries / 3134.65 KiB).
+**Smoke:** 32/32 rendered without crash (desktop + 31 registry apps), 0 uncaught JS / error boundaries / blank screens.
+**Guards (14/14 green):** SHELL-IS-STYLED · REGISTRY-COVERAGE · INBOUND-LANDS 4/4 · MEDIA-PERSISTS 3/3 · GRAPH-LEGIBLE 3/3 · GLOBAL-SEARCH 1/1 · NODE-LINEAGE 1/1 · INTENT-ROUNDTRIP 2/2 · TIMELINE 1/1 · HOME-ALIVE 1/1 · PROVENANCE-PERSISTS 3/3 · PROVENANCE-ENTITY 3/3 · PRECACHE-AUDIT (no gap) · OFFLINE-BOOT 5/5.
+**Visual inspection:** desktop shell (styled glass, "Good night" home alive), Network (CORE mesh + legend), Solver (world catalog backlog), Reader (honest empty state) — all confirmed rendering real content, no blank/unstyled traps.
+
+### Metric deltas (`scripts/metrics.mjs`, `--assert-zero` **exit 0**)
+
+| Metric | Value | Δ vs last QA (`d7ef5fe`) | Note |
 |---|---|---|---|
-| Apps / routes | 31 | ±0 | smoke↔registry exact at 31; 32/32 incl. desktop |
-| Test cases | 468 | +3 | src-static |
+| Apps / routes | 31 | ±0 | smoke↔registry exact at 31; 32/32 incl. desktop render clean |
+| Test cases | 468 | ±0 | `src/` static |
 | Test files | 65 | ±0 | |
 | Token violations | 0 | ±0 | LOCKED |
-| Off-system utils | 0 | ±0 | LOCKED |
+| Off-system utilities | 0 | ±0 | LOCKED |
 | Off-system style | 0 (r0/t0/m0) | ±0 | LOCKED |
 | Off-shell controls | 0 (b0/i0/s0/t0) | ±0 | LOCKED |
 | Keyboard a11y | 0 | ±0 | LOCKED |
-| **Doc mass (over)** | **0** | ±0 | CONTEXT 399/400, EPICS 153/500 — both under budget; not yet gated (S2/S3 lock) |
-| Bundle gz (KB) | 733.8 | +1.0 | dev-only playwright never enters prod bundle |
+| **Doc mass (over)** | **0** | ±0 | **LOCKED** (CONTEXT ≤400 / EPICS ≤500 gate bites) |
+| Bundle gz (KB) | 733.8 | ±0 | dev-only playwright never enters prod bundle |
 
-Success line names all five gated axes: `tokenViolations=0, offSystemUtilities=0, offSystemStyle=0,
-offShellControls=0, keyboardA11y=0`.
+### Epic-acceptance confirmation
 
-## Active-epic acceptance — EPIC-16 · doc-mass conformance
-
-**✅ S1 CONFIRMED — target metric moved.** EPIC-16 S1 shipped this cycle (`1cc462e`); its target metric
-**`docMass` moved 3269 → 0** (both read-every-run docs now under budget: CONTEXT 399/400, EPICS 153/500).
-A stage is done-confirmed only when its acceptance metric moves — `docMass=0` confirms S1. `docMass` is
-measured but **not yet in `--assert-zero`**; **S2/S3 lock it** (add `docMass>0` to the gate, verify it bites).
-No product-code risk touched — five product axes stay 0 & LOCKED.
-
-Since last QA commit `f133f5d`: code commits `1cc462e` (EPIC-16 S1) + `d131376` (photos filename-search +
-honest empty states) landed. Build + smoke re-run green on `d131376` — this report describes the tree it is
-pushed against. Visual spot-check: **desktop** styled home (greeting, Ask-Cakra, TODAY/TASKS/GOALS/ORGANISM,
-31-app grid); **photos** renders the new "No photos yet" honest empty state; **maps** Leaflet chrome intact
-(only tiles grey from blocked CDN).
-
----
-
+- **★ EPIC-16 · doc-mass conformance — CODE-COMPLETE (S1–S3), re-confirmed this run.** Target metric `docMass` holds at **0** and is LOCKED in `--assert-zero` (S3 gate present after `keyboardA11y`; the success line names `docMass=0`). Both read-every-run docs stay under budget. No new stage; no product code changed. **No contradiction** — the acceptance metric that moved last run (`docMass 3269 → 0`) is reproduced exactly on `19e0454`.
+- **All six conformance axes 0 & LOCKED** (tokenViolations · offSystemUtilities · offSystemStyle · offShellControls · keyboardA11y · docMass). Any regression fails CI.
+- No active stage remains — the design-system/accessibility/doc-mass trilogy is fully enforced. Strategist to promote the next ROADMAP-NOW epic (and formally retire EPIC-15 + EPIC-16 → DONE).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -65,7 +56,7 @@ pushed against. Visual spot-check: **desktop** styled home (greeting, Ask-Cakra,
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |

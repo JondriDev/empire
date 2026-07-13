@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-13 · QA — visual + smoke on green main `19e0454` (EPIC-16 S3 LOCK) → 🟢 GREEN, all six axes 0 & LOCKED
+
+**Result:** 🟢 GREEN · 32/32 render clean · 14/14 guards green · `--assert-zero` exit 0 · **no runtime bug**.
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` at `19e0454` (EPIC-16 S3 LOCK). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (12.3s, PWA precache 91 entries / 3134.65 KiB). Served `node server.js` on :3001.
+
+**Smoke (`scripts/qa-smoke.mjs`):** 32/32 rendered without crash (desktop + 31 registry apps) — 0 uncaught JS / error boundaries / blank screens. All **14 guards green:** SHELL-IS-STYLED · REGISTRY-COVERAGE · INBOUND-LANDS 4/4 · MEDIA-PERSISTS 3/3 · GRAPH-LEGIBLE 3/3 · GLOBAL-SEARCH 1/1 · NODE-LINEAGE 1/1 · INTENT-ROUNDTRIP 2/2 · TIMELINE 1/1 · HOME-ALIVE 1/1 · PROVENANCE-PERSISTS 3/3 · PROVENANCE-ENTITY 3/3 · PRECACHE-AUDIT (no gap; 55 JS + 3 CSS all precached) · OFFLINE-BOOT 5/5 (cold boot from SW precache).
+
+**Metrics (`scripts/metrics.mjs --assert-zero` exit 0):** apps **31**, test cases **468**, test files **65**, bundle gz **733.8** — all Δ ±0 vs last QA `d7ef5fe` (only the S3 lock commit landed since; metrics-script + doc change, no product-code delta). All six conformance axes **0 & LOCKED**: tokenViolations · offSystemUtilities · offSystemStyle (r0/t0/m0) · offShellControls (b0/i0/s0/t0) · keyboardA11y · **docMass** — the success line now names `docMass=0`.
+
+**Epic-acceptance:** **EPIC-16 CODE-COMPLETE (S1–S3) CONFIRMED HOLDING** — target metric `docMass` reproduces at **0** and the S3 gate (added after `keyboardA11y`) bites; both read-every-run docs stay under budget. No contradiction; no active stage remains. Strategist to promote the next ROADMAP-NOW epic (and retire EPIC-15 + EPIC-16 → DONE).
+
+**Visual inspection (local screenshots, not committed):** desktop shell (styled glass, "Good night" home alive, 4 stat cards, full app grid), Network (CORE mesh + node-type legend), Solver (world-catalog backlog of 32 briefs), Reader (honest empty state) — all confirmed real content, no blank/unstyled trap.
+
+**Env-expected noise (NOT bugs):** weather geocoding CDN tunnel-fail + geolocation permissions-policy block; maps cartocdn tiles tunnel-fail; files/datacenter authed 401 (Android/backend paths). No runtime regression for the build routine.
+
+---
+
 ## 2026-07-13 · BUILDER — ★ EPIC-16 CODE-COMPLETE: LOCK `docMass` in `--assert-zero` (S3)
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main`. `npm install` → `npm run build` (`tsc -b && vite build`) GREEN (PWA precache 91 entries); `npx vitest run` 570 passed; `--assert-zero` exit 0 (all 5 product axes 0, `docMass` 0 but not yet gated). Confirmed green before touching anything.
