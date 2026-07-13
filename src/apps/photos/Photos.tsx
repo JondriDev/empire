@@ -191,6 +191,15 @@ export default function Photos() {
 
   const currentLightboxPhoto = lightboxIdx >= 0 ? filtered[lightboxIdx] : null
 
+  // Honest empty state: distinguish an empty library from a filter/search that
+  // matched nothing (a search over a non-empty library, or Favorites with none),
+  // so the copy never claims "No photos yet" when photos actually exist.
+  const empty = photos.length === 0
+    ? { title: 'No photos yet', description: 'Import images to get started — every photo also becomes a node in The Network.' }
+    : searchTag
+    ? { title: 'No matches', description: `No photo matches "${searchTag}".` }
+    : { title: 'No favorites yet', description: 'Tap the heart on a photo to add it here.' }
+
   return (
     <div className="space-y-4">
       {/* Toolbar */}
@@ -238,8 +247,10 @@ export default function Photos() {
           <span className="text-xs text-faint">{photos.length} photo{photos.length !== 1 ? 's' : ''}</span>
         </div>
 
-        {/* Search + Tags */}
-        {(allTags.length > 0 || searchTag) && (
+        {/* Search + Tags — reachable whenever there are photos (tags start
+            empty and there's no tag-adding UI, so gating on tags alone made the
+            filename search permanently unreachable). */}
+        {photos.length > 0 && (
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <Input
               className="flex-1 min-w-[150px]"
@@ -282,8 +293,8 @@ export default function Photos() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={<Image className="w-6 h-6" />}
-          title="No photos yet"
-          description="Import images to get started — every photo also becomes a node in The Network."
+          title={empty.title}
+          description={empty.description}
         />
       ) : viewMode === 'grid' ? (
         <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}>

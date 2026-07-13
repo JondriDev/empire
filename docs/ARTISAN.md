@@ -15,7 +15,7 @@
 
 ---
 
-## ▶ NEXT: `photos`
+## ▶ NEXT: `datacenter`
 
 (continue down the registry order, wrapping back to the top after The Bridge.)
 
@@ -40,8 +40,8 @@ Newest-visited float to the bottom of the "visited" understanding; unvisited = n
 | cache | 2026-07-12 | Destructive-action safety + honest-state + a11y: **Clear All / Clear Selected now arm a confirmation** (`role="alertdialog"` bar naming count + bytes + "can't be undone") — first tap arms, "Delete forever" executes; previously Clear All wiped **every app's localStorage** on a single tap with no gate. Disabled honest-states (Clear Selected off when 0 selected; Select All / Clear All off when 0 entries). **Latent bug fixed:** the "✓ Freed X" success banner never showed — `removeEntries` set `freed` then `scan()` reset it to 0 in the same batched handler; removal now refreshes the list in place and preserves the banner. a11y: `role="status"` on freed banner + loading Card (`aria-label="Scanning cache"`), `aria-label="Rescan cache"` on the ⟳ icon button, `aria-live="polite"` on the count line, decorative ⟳/✓ `aria-hidden`. +`CacheCleaner.test.tsx` (6). |
 | browser | 2026-07-12 | Keyboard-a11y + honest-navigation pass: bookmark tiles & history rows were click-only `<div>`s (no keyboard reach) — now `role="button"` + `tabIndex={0}` + `aria-label` (`Open <name>`/`Open <url>`) + Enter/Space activation (shared `onRowKey` helper) + `focus-visible` ring. **Bug fixed:** the Go button was `disabled` on an empty URL but the Enter-key handler wasn't — pressing Enter in an empty bar recorded a junk `https://` history entry; `navigate` now trims + no-ops on empty. +`Browser.test.tsx` (2 → 5). |
 | notes | 2026-07-13 | Keyboard-parity pass: the in-place **edit** card now honours the same shortcuts the create card already had — **Escape cancels**, **Cmd/Ctrl+Enter saves** (`role="group" aria-label="Edit note"` wrapper carries the handler; placeholder now advertises the shortcuts). A keyboard user who learned the shortcuts on the new-note form no longer hits a dead surface when editing. +`Notes.test.tsx` (4 — locks both cards' Escape + Cmd/Ctrl+Enter contract; first test file for this surface). |
-| photos | — | ◀ NEXT |
-| datacenter | — | — |
+| photos | 2026-07-13 | Reachability + honest-state fix: the filename **search was permanently unreachable** — the search `<Input>` row was gated behind `allTags.length > 0`, but photos import untagged and there's no tag-adding UI, so `allTags` was always empty → the input never mounted → `searchTag` could never be set (the `filtered`-by-name logic was dead code). Now gated on `photos.length > 0`, so search-by-filename works; tag chips stay gated on `allTags.length`. **Honest empty state:** the collection-empty block always said "No photos yet" even with photos present — now three-way (no-photos / `No matches` for a search miss / `No favorites yet` for the Favorites filter). +`Photos.test.tsx` (4 → 7): untagged-library search reachability, filename filter + no-match state, favourites empty state (mutable `vi.hoisted` fixture). |
+| datacenter | — | ◀ NEXT |
 | maps | — | — |
 | messages | — | — |
 | learning-tracker | — | — |
