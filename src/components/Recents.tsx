@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 import { getAppIcon } from '../lib/registry'
 import { useWindowStore } from '../lib/windowStore'
 import { Button, Card } from './ui'
+import { onActivate } from '../lib/a11y'
 
 export default function Recents({ open, onClose }: { open: boolean; onClose: () => void }) {
   const windows = useWindowStore(s => s.windows)
@@ -15,7 +16,7 @@ export default function Recents({ open, onClose }: { open: boolean; onClose: () 
   if (!open) return null
 
   return (
-    <div className="empire-recents" onClick={onClose}>
+    <div className="empire-recents" role="presentation" onClick={onClose}>
       <div className="empire-recents-head">
         <span>Recent apps</span>
         {windows.length > 0 && (
@@ -48,8 +49,10 @@ export default function Recents({ open, onClose }: { open: boolean; onClose: () 
                 <span
                   className="empire-recents-close"
                   role="button"
+                  tabIndex={0}
                   aria-label={`Close ${win.title}`}
                   onClick={(e) => { e.stopPropagation(); closeWindow(win.id) }}
+                  onKeyDown={onActivate(() => closeWindow(win.id))}
                 >
                   <X className="w-3.5 h-3.5" />
                 </span>

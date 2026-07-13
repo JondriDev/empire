@@ -4,6 +4,7 @@ import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { EmptyState } from '../../components/ui/Utility'
+import { onActivate } from '../../lib/a11y'
 import {
   putMedia, deleteMedia, loadMediaUrls,
   toStorableMeta, rehydrateMedia, shouldPersistBlob,
@@ -289,8 +290,13 @@ export default function Photos() {
           {filtered.map((photo, idx) => (
             <div
               key={photo.id}
+              role="button"
+              tabIndex={0}
+              aria-label={`Select ${photo.name}`}
+              aria-pressed={selected === photo.id}
               className={`relative group aspect-square bg-glass rounded-lg overflow-hidden cursor-pointer ${selected === photo.id ? 'ring-2 ring-signal' : 'hover:ring-1 hover:ring-hair'}`}
               onClick={() => setSelected(photo.id === selected ? null : photo.id)}
+              onKeyDown={onActivate(() => setSelected(photo.id === selected ? null : photo.id))}
               onDoubleClick={() => openLightbox(idx)}
             >
               <img src={photo.src} alt={photo.name} className="w-full h-full object-cover" loading="lazy" />
@@ -320,7 +326,12 @@ export default function Photos() {
             {filtered.map(photo => (
               <div
                 key={photo.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Select ${photo.name}`}
+                aria-pressed={selected === photo.id}
                 onClick={() => setSelected(photo.id === selected ? null : photo.id)}
+                onKeyDown={onActivate(() => setSelected(photo.id === selected ? null : photo.id))}
                 className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer group ${selected === photo.id ? 'bg-signal/30' : 'hover:bg-glass'}`}
               >
                 <img src={photo.src} alt={photo.name} className="w-12 h-12 object-cover rounded" />
@@ -349,7 +360,7 @@ export default function Photos() {
 
       {/* Lightbox */}
       {lightboxIdx >= 0 && currentLightboxPhoto && (
-        <div className="fixed inset-0 z-50 bg-void/95 flex flex-col" onClick={closeLightbox}>
+        <div className="fixed inset-0 z-50 bg-void/95 flex flex-col" role="presentation" onClick={closeLightbox}>
           {/* Header */}
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">

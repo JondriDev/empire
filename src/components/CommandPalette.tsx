@@ -123,7 +123,7 @@ export default function CommandPalette() {
   const accent = node ? rgbCss(typeRgb(node.type)) : 'var(--text3)'
 
   return (
-    <div className="empire-search-overlay" onClick={close}>
+    <div className="empire-search-overlay" role="presentation" onClick={close}>
       <div
         className="empire-search-panel"
         role="dialog"

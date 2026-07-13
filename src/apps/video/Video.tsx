@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Card, Button, IconButton, Slider } from '../../components/ui'
 import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
+import { onActivate } from '../../lib/a11y'
 import {
   putMedia, deleteMedia, loadMediaUrls,
   toStorableMeta, rehydrateMedia, shouldPersistBlob,
@@ -318,7 +319,11 @@ export default function Video() {
               {videos.map((video, i) => (
                 <div
                   key={video.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Play ${video.title}`}
                   onClick={() => playVideo(video)}
+                  onKeyDown={onActivate(() => playVideo(video))}
                   className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer group transition ${current?.id === video.id ? 'bg-signal/30' : 'hover:bg-glass'}`}
                 >
                   <span className="text-xs text-faint w-5 text-center">{i + 1}</span>

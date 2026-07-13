@@ -35,12 +35,16 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: tint('void', 70), backdropFilter: 'blur(4px)' }}
+      role="presentation"
       onClick={onClose}
     >
       <div
         className="w-full max-w-lg rounded-2xl overflow-hidden max-h-[85vh] flex flex-col"
         style={{ background: cssVar('abyss'), border: `1px solid ${tint('xenon', 10)}` }}
         onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Cakra settings"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: tint('xenon', 10) }}>

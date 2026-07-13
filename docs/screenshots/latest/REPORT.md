@@ -1,111 +1,85 @@
-# Visual & Smoke QA — 2026-07-13
+# The Empire — Visual & Smoke QA Report
 
-**Tree:** green `main` `1ce7fe4` · build 🟢 (`tsc -b && vite build`, 13.7s) · served `node server.js` on :3001
-**Verdict:** ✅ **32/32 routes render clean · all 14 guards green · no runtime bug · no DS drift.** The ACTIVE epic's target
-metric reached **0 and is now LOCKED** (see below).
+**Run:** 2026-07-13 · green main `90077c8` · fresh cloud checkout
+**Verdict:** 🟢 GREEN — build passes, **32/32 routes render clean**, all 14 guard suites green, `--assert-zero` exit 0. **No runtime bug found.**
 
-> **★ EPIC-14 S11 ACCEPTANCE CONFIRMED — `offShellControls` 49 → 0 (b0/i0/s0/t0).** The active-epic target metric MOVED to
-> its terminal value: `node scripts/metrics.mjs` reports `Off-shell controls = 0 (b0/i0/s0/t0)` this run, down from the 49
-> confirmed at the last QA (`124f8d9`). Every bare interactive control in app code is now rendered through the `ui` primitive
-> layer. **★ S12 LOCK is in place AND BITES:** `scripts/metrics.mjs --assert-zero` gates `offShellControls` (`metrics.mjs:304`),
-> **exits 0** on clean `main`, and I verified live that it **exits 1** when one bare `<button>` is reintroduced into an app
-> file (`offShellControls=1 (b1/i0/s0/t0)`, reverted). The design-system trilogy (colour · tokens · **components**) is now
-> fully enforced — islands can't creep back. **EPIC-14 is effectively CODE-COMPLETE (S1–S12).**
->
-> **Housekeeping for the Strategist/Builder (not a bug):** the S12 checkbox in `docs/EPICS.md` is still `[ ]` even though the
-> `--assert-zero` gate landed in `1ce7fe4` and bites; the S12 header-comment invariant in `src/components/ui/index.tsx`
-> (*"a bare control in an app file fails CI"*) is NOT present. The metric itself is done and locked — only the doc checkbox +
-> the header comment remain for the Builder, after which the Strategist can retire EPIC-14 → DONE.
+> **No runtime bug this run.** Nothing to escalate to the build routine.
 
-## Route render table (32/32 clean — desktop + 31 registry apps)
+## Headline
 
-| # | Route | Rendered | Uncaught JS | Net noise | Notes |
-|---|-------|----------|-------------|-----------|-------|
-| 1 | desktop | ✅ | 0 | 0 | Bridge "Good night" + 4 stat cards + full 32-tile launcher |
-| 2 | calculator | ✅ | 0 | 0 | full sci keypad, coloured keys preserved (Button ghost) |
-| 3 | calendar | ✅ | 0 | 0 | |
-| 4 | clock | ✅ | 0 | 0 | |
-| 5 | weather | ✅ | 0 | 1 | Open-Meteo/geolocation blocked (env) |
-| 6 | grammar | ✅ | 0 | 0 | |
-| 7 | language | ✅ | 0 | 0 | |
-| 8 | music | ✅ | 0 | 0 | |
-| 9 | video | ✅ | 0 | 0 | |
-| 10 | files | ✅ | 0 | 1 | `/api/files` Android path 500 (env) |
-| 11 | cache | ✅ | 0 | 0 | |
-| 12 | browser | ✅ | 0 | 0 | |
-| 13 | editor | ✅ | 0 | 0 | |
-| 14 | notes | ✅ | 0 | 0 | |
-| 15 | photos | ✅ | 0 | 0 | |
-| 16 | datacenter | ✅ | 0 | 0 | |
-| 17 | maps | ✅ | 0 | 8 | real Leaflet + zoom + OSM/CARTO attribution; tiles egress-blocked (env) |
-| 18 | messages | ✅ | 0 | 0 | |
-| 19 | prompt-generator | ✅ | 0 | 0 | |
-| 20 | token-counter | ✅ | 0 | 0 | |
-| 21 | learning-tracker | ✅ | 0 | 0 | |
-| 22 | ai-chat (Cakra) | ✅ | 0 | 0 | Chat/Solver/Artifacts/Prompt/Tokens/Code Segmented tabs + Auto pill |
-| 23 | goals | ✅ | 0 | 0 | |
-| 24 | artifacts | ✅ | 0 | 0 | |
-| 25 | network | ✅ | 0 | 0 | CORE mesh + full node-types legend (note…wallet/draft) |
-| 26 | inbox | ✅ | 0 | 0 | |
-| 27 | reader | ✅ | 0 | 0 | empty-library state, amber Add-book Buttons |
-| 28 | search | ✅ | 0 | 0 | |
-| 29 | timeline | ✅ | 0 | 0 | "No history yet" (fresh checkout) |
-| 30 | solver | ✅ | 0 | 0 | |
-| 31 | mail | ✅ | 0 | 1 | Himalaya/AgentMail Segmented + Refresh/Compose Buttons; "provider not configured" (env) |
-| 32 | crypto | ✅ | 0 | 0 | |
+- **Build:** 🟢 `tsc -b && vite build` — precache **90 entries** (3131 KiB), 0 errors.
+- **Routes rendering clean: 32/32** (desktop + all **31** registry apps). 0 uncaught JS, 0 error boundaries, 0 blank routes.
+- **ACTIVE epic = EPIC-15 (Keyboard operability, WCAG 2.1.1).** Target metric `keyboardA11y 24 → 0`. This run it sits at **24 (±0)**, its S1 baseline — **S1 is measure-only (drives nothing); S2 is the first mover**, so there is no acceptance to confirm yet. Consistent, no contradiction, no regression.
+- **Design-system ratchet holds:** all five conformance axes 0 and gated (`tokenViolations`/`offSystemUtilities`/`offSystemStyle`/`offShellControls` = 0; `keyboardA11y` measured but not yet gated). `--assert-zero` exit 0.
 
-All net noise is env-expected (blocked CDNs / authed-Android-only API calls) — **no uncaught JS exception, no error boundary,
-no blank route** anywhere.
+## Pass/fail table (per route)
 
-## Guard suite — 14/14 green
+All 32 routes: **PASS** (rendered without crash — no uncaught JS exception, no error boundary, not blank).
 
-| Guard | Result |
-|-------|--------|
-| SHELL-IS-STYLED | ✅ top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm` |
-| REGISTRY-COVERAGE | ✅ smoke list ↔ registry match exactly (31 apps) |
-| INBOUND-LANDS | ✅ 4/4 (calendar←editor, goals←notes, messages←ai-chat, mail←notes) |
-| MEDIA-PERSISTS | ✅ 3/3 (music + video + photos survive reload) |
-| GRAPH-LEGIBLE | ✅ 3/3 (reader/book + crypto/wallet + mail/draft) |
-| GLOBAL-SEARCH | ✅ 1/1 (book+task+twoApps+tagOnly) |
-| NODE-LINEAGE | ✅ 1/1 (rendered+title+persisted+search+clickable) |
-| INTENT-ROUNDTRIP | ✅ 2/2 (make-note-from + add-to-learning) |
-| TIMELINE | ✅ 1/1 (ordered+grouped+flow+persisted+filtered+descendants) |
-| HOME-ALIVE | ✅ 1/1 (today+tasks+recent+land+ask) |
-| PROVENANCE-PERSISTS | ✅ 3/3 (editor→notes/ai-chat/prompt-generator) |
-| PROVENANCE-ENTITY | ✅ 3/3 (calculator→goals, editor→messages, notes→calendar) |
-| PRECACHE-AUDIT | ✅ 90 entries (54 JS + 3 CSS); no gap |
-| OFFLINE-BOOT | ✅ 5/5 routes boot cold-offline from precache |
+| Route | Result | uncaught | console/net notes |
+|---|---|---|---|
+| desktop | PASS | 0 | clean |
+| calculator, clock, grammar, language, music, video, cache, browser, editor, notes, photos, datacenter, messages, prompt-generator, token-counter, learning-tracker, ai-chat, goals, artifacts, network, inbox, reader, search, timeline, solver, crypto, calendar | PASS | 0 | clean |
+| weather | PASS | 0 | net:1 + Geolocation policy — **env-expected** (Open-Meteo geocoding `ERR_TUNNEL_CONNECTION_FAILED`, Geolocation blocked by permissions policy) |
+| maps | PASS | 0 | net:8 — **env-expected** (CARTO/OSM tile PNGs egress-blocked; Leaflet container + zoom + attribution render) |
+| files | PASS | 0 | net:1 (401) — **env-expected** (authed/Android-only `/api/files`; graceful failure, no boundary) |
+| mail | PASS | 0 | net:1 (401) — **env-expected** (authed mail API; graceful "provider not configured", no boundary) |
 
-## Auto metrics (`scripts/metrics.mjs`, `metrics.json` this run)
+**Console errors** were emitted ONLY by the four routes above, and every one is a blocked-egress / authed-API / permissions-policy artifact — **none is a product bug.**
 
-| Metric | Value | Δ vs last QA (`124f8d9`) |
-|--------|-------|--------------------------|
+## Guard suite (all green)
+
+- SHELL-IS-STYLED ✅ (top-level `.empire-desktop{position:fixed}`, 0 `.hide-sm .empire-desktop`)
+- REGISTRY-COVERAGE ✅ (smoke list ↔ registry match exactly, **31 apps**)
+- INBOUND-LANDS **4/4 ✅** (calendar←editor, goals←notes, messages←ai-chat, mail←notes — each shows "Received from …" chip + prefilled control)
+- MEDIA-PERSISTS **3/3 ✅** (music + video + photos — added + survived-reload)
+- GRAPH-LEGIBLE **3/3 ✅** (reader/book + crypto/wallet + mail/draft)
+- GLOBAL-SEARCH **1/1 ✅** (book + task + twoApps + tagOnly; groups reader,goals)
+- NODE-LINEAGE **1/1 ✅** (rendered + title + persisted + search + clickable)
+- INTENT-ROUNDTRIP **2/2 ✅** (make-note-from + add-to-learning — stored + mirrored + persisted)
+- TIMELINE **1/1 ✅** (all 6 axes: ordered + grouped + flow + persisted + filtered + descendants)
+- HOME-ALIVE **1/1 ✅** (today + tasks + recent + land + ask)
+- PROVENANCE-PERSISTS **3/3 ✅** (editor→notes, editor→ai-chat, editor→prompt-generator)
+- PROVENANCE-ENTITY **3/3 ✅** (calculator→goals, editor→messages, notes→calendar)
+- PRECACHE-AUDIT ✅ **90 entries; 54 JS + 3 CSS chunks — no gap** (every emitted chunk in the SW precache)
+- OFFLINE-BOOT **5/5 ✅** (`/`, `/app/clock`, `/app/maps`, `/app/network`, `/app/photos` boot cold-offline from precache)
+
+`scripts/qa-smoke.mjs`: **32/32 passed, 0 failed.**
+
+## Metrics (fitness field) — Δ vs committed snapshot
+
+| Metric | Value | Δ |
+|---|---|---|
 | Apps / routes | 31 | ±0 |
-| Test cases (src) | 460 | ±0 |
-| Test files (src) | 64 | ±0 |
+| Test cases | 465 | +1 |
+| Test files | 65 | ±0 |
 | Token violations | 0 | ±0 |
 | Off-system utils | 0 | ±0 |
 | Off-system style | 0 (r0/t0/m0) | ±0 |
-| **Off-shell controls** | **0 (b0/i0/s0/t0)** | **49 → 0 (−49)** ★ |
-| Bundle gz (KB) | 732.1 | −0.4 |
+| Off-shell controls | 0 (b0/i0/s0/t0) | ±0 |
+| **Keyboard a11y (EPIC-15 target)** | **24** | **±0** (S1 baseline — S2 is first mover) |
+| Bundle gz (KB) | 732.2 | +0.1 |
 
-`node scripts/metrics.mjs --assert-zero` → **exit 0** (all four conformance axes at 0, ratchet holds — now including the
-newly-locked `offShellControls`).
+`node scripts/metrics.mjs --assert-zero` → **exit 0** (all five gated axes hold).
 
-## Commits since last QA (`124f8d9`)
-- `e819c6a` feat(ui): EPIC-14 S11 — migrate the last 49 off-shell controls onto the ui shell (49 → 0)
-- `1ce7fe4` chore(deps): safe patch/minor bumps + lock offShellControls=0 as a CI guard
+## Epic-acceptance confirmation
 
-## Visually inspected (captured + read locally; never committed — `docs/screenshots/latest/*.png` is gitignored)
-- `desktop.png` — Bridge "Good night", Ask-Cakra bar, 4 stat cards (Today/Tasks/Goals/Organism), full Cakra→Crypto launcher grid, dock. Glass/alien palette intact after the shell migration.
-- `app-network.png` — CORE radial mesh + full node-types legend (note/task/message/learning/goal/prompt/wallet/draft/other).
-- `app-ai-chat.png` — Cakra tabs migrated onto `ui.Segmented` (Chat active), Auto model pill, compose Input + teal send IconButton.
-- `app-calculator.png` — full scientific keypad migrated to `Button ghost`; per-key inline colours (red C, amber operators/=) preserved verbatim; History panel.
-- `app-maps.png` — real Leaflet container + `+/−` zoom + OSM/CARTO attribution + Search/Saved Segmented + city-chip Buttons + "Use My Location" (tiles grey, egress-blocked).
-- `app-mail.png` — Himalaya/AgentMail provider Segmented + Refresh/Compose Buttons; graceful "Provider himalaya not configured", no error boundary.
-- `app-reader.png` — empty-library state, amber "Add book" / "Add your first book" primary Buttons.
-- `app-timeline.png` — "No history yet" empty state (fresh checkout).
-- `app-artifacts.png`, `app-crypto.png` — clean.
+**EPIC-15 (ACTIVE) — Keyboard operability.** Target `keyboardA11y 24 → 0`, then LOCK.
+- S1 (measure — detector + baseline): SHIPPED (`79c9272`). Baseline `keyboardA11y = 24` **reproduced exactly** on this fresh checkout across 16 files (Calendar 3, Photos 3, Flashcards 2, Files 2, Maps 2, Recents 2, …).
+- S2/S3/S4: not yet landed. **The target metric has not moved yet — and is not expected to,** since S1 is pure-additive measurement. **No done-confirmation and no contradiction this run.** Next mover is S2 (sweep the app cluster, ~24 → ~8).
 
-**Runtime bugs found: none. DS drift: none.** The EPIC-14 shell migration is visually confirmed across every inspected app —
-no broken controls, no bare-HTML islands, look fully preserved.
+## Visual inspection (screenshots captured + read locally — NONE committed)
+
+- `desktop.png` — The Bridge: "Good morning · **MONDAY, JULY 13**" (date correct — 2026-07-13 is a Monday), 4 live stat cards (Today/Open Tasks/Goals/Organism), full launcher Cakra→Crypto, Earth-from-Space glass palette + alien glyphs intact.
+- `app-calendar.png` — July 2026, the **13th highlighted under the Mon column**, side panel reads "13 July 2026 **Monday**" → calendar date logic correct.
+- `app-maps.png` — real Leaflet container with +/- zoom + OSM/CARTO attribution; tiles grey (egress-blocked — env-expected, not a bug).
+- All remaining routes render clean per the smoke harness.
+
+## Env-expected noise (NOT bugs)
+
+- weather → Open-Meteo geocoding + Geolocation blocked (permissions policy + tunnel-blocked egress).
+- maps → CARTO/OSM dark tile PNGs egress-blocked (Leaflet container + attribution still render).
+- files / mail → 401 on the authed/Android-only API (graceful empty state, no error boundary).
+
+---
+*Working artifacts only. Screenshots live in this run's workspace (`docs/screenshots/latest/*.png` is gitignored) and are never committed. The human views the live PWA at jondridev.github.io/empire.*

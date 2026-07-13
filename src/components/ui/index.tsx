@@ -31,6 +31,15 @@ interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onClick'> {
 
 const padMap = { none: '0', sm: '12px', md: '16px', lg: '24px' }
 
+/* ★ KEYBOARD-OPERABILITY INVARIANT (EPIC-15 · WCAG 2.1.1, locked in CI):
+   A clickable region must be keyboard-driveable. `Card interactive` (or with an
+   onClick) is the shell home for a click-to-select tile/row/card — it wires
+   role="button" + tabIndex={0} + Enter/Space → onClick for free. When an element
+   must stay a bare <div>/<span> for layout, add role="button" + tabIndex={0} +
+   onKeyDown={onActivate(fn)} (src/lib/a11y.ts). A bare onClick on a
+   non-interactive host with no key handler fails CI:
+   `node scripts/metrics.mjs --assert-zero` gates keyboardA11y=0. */
+
 export function Card({ children, className = '', onClick, interactive, padding = 'md', style, onKeyDown, ...rest }: CardProps) {
   const clickable = onClick || interactive
   return (

@@ -281,11 +281,14 @@ export default function DataCenter() {
 
       {/* New-table modal */}
       {showNewTable && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center p-4 bg-void/50 backdrop-blur-sm" onClick={() => setShowNewTable(false)}>
+        <div className="absolute inset-0 z-20 flex items-center justify-center p-4 bg-void/50 backdrop-blur-sm" role="presentation" onClick={() => setShowNewTable(false)}>
           <div
             className="w-full max-w-80 rounded-2xl border p-5"
             style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}
             onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="New table"
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold flex items-center gap-2">

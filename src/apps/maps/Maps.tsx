@@ -14,6 +14,7 @@ import { Map as MapIcon, Search, Navigation, MapPin, Locate, Trash2, Star } from
 import { EmptyState } from '../../components/ui/Utility'
 import { Button, IconButton, Input, Segmented } from '../../components/ui'
 import { TwoPane } from '../../components/ui/TwoPane'
+import { onActivate } from '../../lib/a11y'
 
 interface Place {
   id: string
@@ -306,7 +307,11 @@ export default function Maps() {
               {searchResults.map(place => (
                 <div
                   key={place.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Show ${place.name} on map`}
                   onClick={() => selectPlace(place)}
+                  onKeyDown={onActivate(() => selectPlace(place))}
                   className="p-3 rounded-xl border cursor-pointer transition-all"
                   style={{
                     background: 'var(--card-bg)',
@@ -345,7 +350,11 @@ export default function Maps() {
               {savedPlaces.map(place => (
                 <div
                   key={place.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Show ${place.name} on map`}
                   onClick={() => selectPlace(place)}
+                  onKeyDown={onActivate(() => selectPlace(place))}
                   className="p-3 rounded-xl border cursor-pointer transition-all"
                   style={{ background: 'var(--card-bg)', borderColor: selectedPlace?.id === place.id ? ACCENT : 'var(--border)' }}
                 >
