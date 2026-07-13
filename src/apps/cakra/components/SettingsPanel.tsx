@@ -184,7 +184,7 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
           {/* Model settings */}
           <section>
             <h3 className="text-sm font-semibold mb-3" style={{ color: cssVar('text') }}>Generation</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs mb-1 block" style={{ color: cssVar('text2') }}>Temperature</label>
                 <input
@@ -217,7 +217,7 @@ export default function SettingsPanel({ settings, onChange, onClose }: Props) {
           {/* Tool info */}
           <section>
             <h3 className="text-sm font-semibold mb-3" style={{ color: cssVar('text') }}>Available Tools</h3>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
                 { name: 'file_read', icon: '📄', desc: 'Read files' },
                 { name: 'file_write', icon: '✏️', desc: 'Write files' },

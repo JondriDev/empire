@@ -156,7 +156,7 @@ export default function Editor() {
 
       {/* Stats panel */}
       {showStats && code.trim() && (
-        <div className="grid grid-cols-5 gap-2 text-center text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-center text-xs">
           {[
             { label: 'Lines', value: stats.lines },
             { label: 'Chars', value: stats.chars.toLocaleString() },
