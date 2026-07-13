@@ -1906,3 +1906,18 @@ AI-call budget (default 100, user-tunable, hard stop button).
 - ~~Photos `photo` nodes carry no thumbnail (object URLs are revoked on delete).~~ **→ EPIC-3 S3 SHIPPED
   2026-06-29: Photos now uses the `mediaStore` IDB rail so the library survives a reload (the blob-URL bug is
   fixed). `photo` nodes still carry name/size/tags only (not the URL) — by design, URLs are session-scoped.**
+
+## ✅ QA confirmation 2026-07-13 (green main `61c4f7b`) — ★ EPIC-15 CODE-COMPLETE, `keyboardA11y` 24 → 0 LOCKED
+
+- **Active epic EPIC-15 (Keyboard operability, WCAG 2.1.1) target metric CONFIRMED MOVED: `keyboardA11y` 24 → 0 (−24).**
+  The S2+S3+S4 sweep + lock all landed in one commit (`61c4f7b`). `node scripts/metrics.mjs` reports `keyboardA11y = 0`;
+  `node scripts/metrics.mjs --assert-zero` **exits 0** and its success line now enumerates all five conformance gates:
+  `tokenViolations=0, offSystemUtilities=0, offSystemStyle=0, offShellControls=0, keyboardA11y=0`. The Builder verified the
+  lock BITES (bare `<div onClick>` with no key handler → `--assert-zero` exit 1, reverted). **EPIC-15 is CODE-COMPLETE
+  (S1–S4) → ready for the Strategist to retire → DONE + promote the next epic** (remaining a11y surface — accessible-name
+  coverage on icon-only affordances / focus-visible sweep — or the RFC `docMass`; EPIC-7 Android stays device-gated). The
+  on-device tab-through (focus rings + Enter/Space actually activating on the migrated calendar days / photo tiles / file
+  rows / map results) is the only remaining device-gated confirm — the code fix is cloud-verified.
+- **Render-smoke 32/32 clean** (desktop + all 31 registry apps), 0 uncaught / 0 error boundaries; all 14 guards green;
+  PRECACHE 90 no-gap; OFFLINE 5/5. Auto-metrics all Δ ±0 vs the committed snapshot (apps 31, test cases 465, files 65,
+  bundle gz 732.8). No runtime bug, no design-system drift.
