@@ -1,15 +1,13 @@
 name: Android APK
 
 # Builds the offline Android app (Capacitor) and uploads the APK as an artifact.
-# No PC needed: trigger from the GitHub UI (Actions tab) or on a version tag,
-# then download the APK from the run's "Artifacts" section and install it on the
-# Samsung S9 FE (enable "Install unknown apps" for your browser/file manager).
+# No PC needed: trigger from the GitHub UI (Actions tab), then download the APK
+# from the run's "Artifacts" section and install it on the Samsung S9 FE
+# (enable "Install unknown apps" for your browser/file manager).
+# Version tags are handled by release.yml (which also publishes the Release).
 
 on:
   workflow_dispatch: {}        # manual "Run workflow" button
-  push:
-    tags:
-      - 'v*'                    # also build on version tags, e.g. v1.0.0
 
 permissions:
   contents: read

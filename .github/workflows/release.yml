@@ -1,0 +1,81 @@
+name: Release
+
+# Cut by the Release Manager routine (or a human) pushing an annotated tag v*.
+# Builds the web bundle + Android APK and publishes a GitHub Release with the
+# CHANGELOG section for that version as notes and the APK attached.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write # create the release + upload assets
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history for the release-notes fallback
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # Capacitor CLI v8 requires Node >=22
+          cache: npm
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21' # Capacitor 8's Android lib compiles with source release 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web assets (offline bundle)
+        run: npm run build
+
+      - name: Capacitor sync (Android)
+        run: npx cap sync android
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Stage APK with versioned name
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk "the-empire-${GITHUB_REF_NAME}.apk"
+
+      - name: Extract release notes from CHANGELOG
+        run: |
+          TAG="$GITHUB_REF_NAME"
+          if [ -f CHANGELOG.md ] && grep -q "^## $TAG " CHANGELOG.md; then
+            awk -v tag="$TAG" '$0 ~ "^## "tag" " {f=1; next} /^## v/ {if (f) exit} f' CHANGELOG.md > RELEASE_NOTES.md
+          else
+            PREV=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || true)
+            if [ -n "$PREV" ]; then
+              git log --oneline "$PREV..$TAG" > RELEASE_NOTES.md
+            else
+              git log --oneline -20 "$TAG" > RELEASE_NOTES.md
+            fi
+          fi
+          [ -s RELEASE_NOTES.md ] || echo "Release $TAG" > RELEASE_NOTES.md
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --verify-tag \
+            --title "The Empire $GITHUB_REF_NAME" \
+            --notes-file RELEASE_NOTES.md \
+            "the-empire-${GITHUB_REF_NAME}.apk"

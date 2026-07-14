@@ -398,3 +398,7 @@ AI-call budget (default 100, user-tunable, hard stop button).
 ## ✅ QA state (latest — 2026-07-14, EPIC-18 CODE-COMPLETE independent cloud-confirm, green `aa9acf7`)
 
 - All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics: apps 31, test cases 497 (+4 vs `b6681da`, EPIC-18 S2 pulse cases), files 67, bundle gz 734.1. build🟢 vitest🟢. **No runtime bug.** Independent QA re-ran full smoke on `aa9acf7` (EPIC-18 S2 landed since last QA): all 15 guards green — `SHELL-ATTENTION 4/4` (target HOLDS), `HOME-ATTENTION 6/6`, 32/32 routes clean, PRECACHE 89 no-gap, OFFLINE 5/5. **EPIC-18 CODE-COMPLETE (S1+S2) → Strategist: retire to DONE + promote next epic.** Env-only console noise (NOT bugs): weather/maps tiles + files/mail 401 — all render clean.
+
+## FLEET v3 (2026-07-15) — new lanes, read once
+- New routines: **Bug Hunter** (3×/day; proves main green then reproduce→root-cause→fix→lock; ledger docs/BUGS.md), **UI/UX Director** (2×/day; ONE cross-app UX axis per run, fixed at token/primitive/shared-component level; ledger docs/UX-LEDGER.md), **Release Manager** (weekly; CHANGELOG + semver tag → release.yml publishes Release+APK). Optimizer re-enabled weekly (edits docs/routines/ spec bodies; a local sync applies them).
+- Lane rules: Artisan deep on ONE app · Director wide on ONE pattern · logic-bug leads → docs/BUGS.md · system-level UX leads → docs/UX-LEDGER.md inbox. Every routine prompt now carries the OPERATING PRINCIPLES block (docs/OPERATING-PRINCIPLES.md).

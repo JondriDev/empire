@@ -1,79 +1,88 @@
-# The Empire — Routine Fleet (spec source-of-truth)
+# The Empire — Routine Fleet (specs-as-code, source of truth)
 
-Human-readable spec for The Empire's autonomous cloud fleet: **7 routines** that
-build and maintain this repo. One file per routine (`docs/routines/<name>.md`)
-holds its **current prompt + schedule + a short changelog**. The verbatim prompt
-in each file is the text to paste into the live routine config on claude.ai.
+The autonomous cloud fleet that builds and maintains this repo: **12 routines**
+(10 enabled), all `claude-opus-4-8`, each running unattended in a fresh cloud
+checkout of `main` and committing **directly to main** (no branches, no PRs —
+each routine's own green gate is the only gate; `main` is the live PWA).
 
-> **The live routine prompts live on claude.ai and only a human can edit them.**
-> These files are the source of truth: when you change a live config, paste the
-> resulting prompt back into the matching file here.
+## Specs-as-code (since 2026-07-15)
 
-> **⚠ Model update (direct-to-main, ~2026-06-22→24).** The fleet no longer uses PRs.
-> Every routine **self-verifies (green build/tests/metrics) and commits directly to
-> `main`** — its own green build is the only gate. The **Reviewer/Guardian
-> (`trig_01MBY9DbEJ6rM5pmL127wAnH`) is DISABLED**. The Optimizer (meta) commits its
-> proposals directly to `main` too (it still only *proposes*; committing the doc does
-> not apply a live-config change). **✅ Synced 2026-07-03:** every per-routine
-> `## Current prompt` below now matches the live config, plus a user-directed reality
-> sync (27 apps + The Bridge, 28-route/12-guard QA, Earth-from-Space · Liquid Glass
-> canon, `JondriDev/design-system` lockstep). To apply, paste each prompt into its live
-> routine on claude.ai.
+One file per routine: `docs/routines/<name>.md` =
 
-## The operating model (redesigned 2026-06-22 — "huge iterations"; direct-to-main since ~06-24)
+```
+---
+trigger: trig_…        # live trigger id (claude.ai/code/routines)
+name: The Empire - …   # display name
+cron: "0 …"            # UTC schedule
+model: claude-opus-4-8
+mcp: [Context7]        # attached connectors
+enabled: true|false
+---
+<prompt body — EXACTLY the live prompt, verbatim>
+```
 
-The fleet was re-architected from *first principles* to stop producing slight
-iterations. The old contract literally said "make the **smallest** coherent
-change," so it did. The new model keeps every safety rail (green-build hard gate,
-one careful merge per cycle, propose-only meta) but removes the **step-size
-governor** and adds the infrastructure that makes a big leap *cheap and safe*:
+- The **body is the live prompt**. The frontmatter mirrors the live config.
+- **`/sync-routines`** (a local Claude Code skill on the owner's device) diffs
+  every spec body against the live trigger config and applies changes —
+  prompts only; frontmatter drift is reported, never auto-applied. Cloud
+  routines cannot hold the claude.ai OAuth, so this local hop is the deliberate
+  safety gate.
+- The **Routine Optimizer edits spec bodies directly** (≤2 material edits/run,
+  hard fences: never frontmatter, never weaken PRINCIPLES/VERIFY/FENCES blocks)
+  and flags "spec edits pending /sync-routines" in the log + digest. Schedule /
+  model / connector / enable changes stay **proposals** for the human.
+- Every routine embeds the shared
+  [OPERATING PRINCIPLES](../OPERATING-PRINCIPLES.md) block (Musk's algorithm:
+  question → delete → simplify → accelerate → automate last) plus an
+  expert-in-field persona.
 
-| First-principles lever | Failure it fixes | Artifact |
-|---|---|---|
-| **Conserve context energy** | stateless runs re-derive the codebase every time (waste heat) | [`docs/CONTEXT.md`](../CONTEXT.md) — cross-run working memory |
-| **Lower activation energy** | big features fumble across many runs, re-planned each time | [`docs/EPICS.md`](../EPICS.md) — big leaps pre-decomposed into green stages |
-| **Build a potential field** | "better" was a vibe; no gradient to climb | [`docs/METRICS.md`](../METRICS.md) + [`scripts/metrics.mjs`](../../scripts/metrics.mjs) |
-| **Bias to leverage** | additive chores instead of multiplicative tooling | Deps routine lands one automation/week; QA owns CI guards |
+## Roster
 
-**Safety level: bounded leap.** Bigger *pre-planned* steps, not bigger raw diffs.
-There is no longer a Reviewer merge step — each routine's **own green build + no
-metric regression is the hard gate** before it pushes to `main`; the Optimizer still
-only proposes. The leap comes from *not wasting energy*, from pre-decomposition, and
-from measuring — not from recklessness.
+| # | Routine | Trigger ID | Cron (UTC) | On | Role |
+|---|---------|-----------|------------|----|------|
+| 1 | [Builder](./builder.md) | `trig_01NhehaEqini9ix3THyYLQcK` | `0 */5 * * *` | ✅ | **Epic Executor** — ships the next EPICS.md stage, largest safe green slice |
+| 2 | [Visual & Smoke QA](./visual-smoke-qa.md) | `trig_0135fY5VNK37f98voe3m91oo` | `0 3,8,13,18,23 * * *` | ✅ | **Fitness Evaluator** — renders, smoke-tests, computes the metric field (text-only commits, images never) |
+| 3 | [App Artisan](./app-artisan.md) | `trig_019UidtauKWfvnJf6sra2xAw` | `0 4,16 * * *` | ✅ | **Per-App Craftsman** — deep polish of ONE surface per run (rotation) |
+| 4 | [Bug Hunter](./bug-hunter.md) | `trig_01MBY9DbEJ6rM5pmL127wAnH` | `0 2,9,17 * * *` | ✅ | **Root-Cause Exterminator** — proves main green (safety net), then reproduce → root-cause → fix → lock with a regression test; ledger `docs/BUGS.md` |
+| 5 | [UI/UX Director](./ui-ux-director.md) | `trig_01GvWCNzCfdpg1RfgpTvpYfU` | `0 7,21 * * *` | ✅ | **Experience-System Owner** — one cross-app UX axis per run, fixed at token/primitive/shared-component level; ledger `docs/UX-LEDGER.md` |
+| 6 | [Strategist / Roadmap](./strategist-roadmap.md) | `trig_01TvJu2Ri1tsRRedJ4U3Mrdu` | `0 23 * * *` | ✅ | **Epic Architect** — ONE active epic, deeply decomposed |
+| 7 | [Daily Digest](./daily-digest.md) | `trig_017FcjDcs8ps3wSKyMvHgKwu` | `0 13 * * *` | ✅ | **Gradient Report** — numbers-first digest to Slack (fallback: docs/digests/) |
+| 8 | [Deps & Security](./deps-security.md) | `trig_0166eKG2PeiJZT1RixcPsJKk` | `0 1 * * 1` | ✅ | **Negentropy + Leverage** — safe bumps + one automation/week |
+| 9 | [Release Manager](./release-manager.md) | `trig_01VvxY2PFLHZz2Tn9DrQzUzY` | `0 12 * * 6` | ✅ | **Ship Master** — judges the week's delta; CHANGELOG + semver + tag → `release.yml` publishes the GitHub Release + APK |
+| 10 | [Routine Optimizer](./routine-optimizer.md) | `trig_01LH2rdoeNTMWkCCxF5fwTXm` | `0 6 * * 0` | ✅ | **Constraint Hunter & Fleet Editor** — names THE bottleneck, edits ≤2 spec bodies to elevate it |
+| 11 | [World Solver](./world-solver.md) | `trig_014H3aHQsaRpt8EYzjah4NP8` | `0 14 * * *` | ❌ | **Research Arm** — cited world-problem briefs into `public/solver/feed.json` |
+| 12 | [Academy Tutor](./academy-tutor.md) | `trig_015VngdgtQyLpDTCoEEmkEBL` | `0 22 * * *` | ❌ | **Course Author** — no-op until the Academy app lands |
+
+~19–20 Opus runs/day. Free cron hours were chosen so no two routines fire in
+the same UTC hour (except the pre-existing QA/Digest 13:00 and QA/Strategist
+23:00 overlaps).
 
 ## The loop
 
 ```
-Strategist ── defines ONE active EPIC, decomposed into green stages ──▶ docs/EPICS.md
-     ▲                                                                       │
-     │                                                                Builder takes next stage,
- Digest reports                                                        executes at full speed,
- metric gradient        reads CONTEXT.md first ──────────────────────▶ self-verifies (green
-     ▲                  writes seams + metric delta back ◀──────────── build/tests/metrics),
-     │                                                                  commits direct to main
- ROUTINE-LOG ◀── QA renders + measures + confirms the epic's metric moved ◀──┘
-                 (no Reviewer/Guardian — each routine's green build is the gate)
-                 Optimizer (weekly) names THE constraint, proposes the fix
+Strategist ── ONE active EPIC, pre-decomposed green stages ──▶ docs/EPICS.md
+     ▲                                                             │
+     │                                              Builder executes the next stage
+ Digest reports the gradient                        Artisan deepens one app/run
+     ▲                                              Director widens one UX axis/run
+     │                                              Bug Hunter proves green + kills defects
+ ROUTINE-LOG ◀── QA renders + measures + confirms the epic metric moved
+     │                                              Release Manager tags the week's delta
+     └── Optimizer (weekly): names THE constraint, EDITS the specs ──▶ /sync-routines applies
 ```
 
-## How changes flow (safety gate)
+## Safety model
 
-```
-Fleet routines ──self-verify (green build/tests/metrics)──▶ commit direct to main
-Optimizer (weekly, read-only of code) ──proposes──▶ docs commit to main ──human applies──▶ live config + paste back here
-```
-(Committing a proposal doc does **not** apply it — a human still edits the live routine config.)
+Bounded leap, unchanged: every producer's **green gate** (build + vitest +
+eslint + check-shell-styled + check-route-parity + check-audit +
+`metrics.mjs --assert-zero` + no-regression) before every push; rebase-retry,
+never force-push; lanes fenced per spec; QA commits text only (images are
+gitignored and never committed); localStorage schemas and the Artifacts/Solver
+security invariants are load-bearing in every spec; the Optimizer's edit
+authority is bounded by its fences + the sync skill's guards + git history
+(every spec edit is a revertable commit).
 
-## Roster
-
-| # | Routine | Trigger ID | Schedule | Role (redesigned) | Spec |
-|---|---------|-----------|----------|------|------|
-| 1 | Builder | `trig_01NhehaEqini9ix3THyYLQcK` | every 5h | **Epic Executor** — ships the next epic stage (largest safe green slice) direct to `main`; own green build is the gate | [builder.md](./builder.md) |
-| 2 | ~~Reviewer / Main-Health Guardian~~ | `trig_01MBY9DbEJ6rM5pmL127wAnH` | **DISABLED** | ex-Integrator; if re-enabled, verifies `main` is green/releasable & fixes a red `main` directly (does NOT merge PRs) | [reviewer.md](./reviewer.md) |
-| 3 | Visual & Smoke QA | `trig_0135fY5VNK37f98voe3m91oo` | every 5h | **Fitness evaluator** — render + measure + confirm epic metric moved | [visual-smoke-qa.md](./visual-smoke-qa.md) |
-| 4 | Strategist / Roadmap | `trig_01TvJu2Ri1tsRRedJ4U3Mrdu` | daily | **Epic Architect** — one active epic, deeply decomposed | [strategist-roadmap.md](./strategist-roadmap.md) |
-| 5 | Deps & Security | `trig_0166eKG2PeiJZT1RixcPsJKk` | weekly | **Negentropy/leverage** — safe bumps + 1 automation/week | [deps-security.md](./deps-security.md) |
-| 6 | Daily Digest | `trig_017FcjDcs8ps3wSKyMvHgKwu` | daily | **Gradient report** — metric trend + epic %-complete | [daily-digest.md](./daily-digest.md) |
-| 7 | Routine Optimizer | `trig_01LH2rdoeNTMWkCCxF5fwTXm` | weekly | **Constraint hunter** — name THE bottleneck, propose the fix (commits proposals direct to `main`) | [routine-optimizer.md](./routine-optimizer.md) |
-
-_Scaffolded 2026-06-21 (Optimizer first run). Redesigned 2026-06-22 (first-principles "huge iterations" model). Switched to direct-to-main + Guardian disabled ~2026-06-24._
+_Scaffolded 2026-06-21 · "huge iterations" redesign 2026-06-22 ·
+direct-to-main since ~2026-06-24 · **Fleet v3 2026-07-15**: Musk-principled
+prompts, Bug Hunter (ex-Guardian slot), UI/UX Director, Release Manager,
+spec-editing Optimizer, specs-as-code + /sync-routines._
