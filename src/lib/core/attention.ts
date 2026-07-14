@@ -152,3 +152,25 @@ export function computeAttention(_nodes: CoreNode[], _now: number, _limit = 8): 
     .sort((a, b) => b.score - a.score || b.node.meta.updated - a.node.meta.updated)
     .slice(0, _limit)
 }
+
+/** A one-glance summary of the Attention feed — the spine behind the shell badge. */
+export interface AttentionSummary {
+  /** How many items currently need you (capped by `limit`). */
+  count: number
+  /** The single most-urgent item, or null when nothing needs you. */
+  top: AttentionItem | null
+  /** True when the top item is an overdue task — the shell tints the badge red. */
+  urgent: boolean
+}
+
+/**
+ * Distil the ranked feed to what a persistent surface (the HomeBar Home button)
+ * needs: how many things need you and whether the most-urgent is overdue. Lets
+ * the shell nudge you from *inside* any app — the cockpit reaches beyond the
+ * home — without re-implementing the ranking. Pure, so it unit-tests browserless.
+ */
+export function attentionSummary(_nodes: CoreNode[], _now: number, _limit = 8): AttentionSummary {
+  const items = computeAttention(_nodes, _now, _limit)
+  const top = items[0] ?? null
+  return { count: items.length, top, urgent: top?.kind === 'task-overdue' }
+}

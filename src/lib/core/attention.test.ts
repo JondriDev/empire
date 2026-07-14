@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeAttention } from './attention'
+import { computeAttention, attentionSummary } from './attention'
 import { dayStamp } from './bridge'
 import type { CoreNode } from './graph'
 
@@ -143,5 +143,40 @@ describe('computeAttention', () => {
     const feed = computeAttention([node('e', { type: 'event', data: { date: TODAY }, meta: { created: NOW, updated: NOW, app: 'calendar' } })], NOW)
     expect(feed[0].app).toBe('calendar')
     expect(feed[0].reasonKey).toBe('attention.event-today')
+  })
+})
+
+describe('attentionSummary', () => {
+  it('is empty and calm for an empty graph', () => {
+    expect(attentionSummary([], NOW)).toEqual({ count: 0, top: null, urgent: false })
+  })
+
+  it('counts the feed and flags urgent when the top item is overdue', () => {
+    const nodes = [
+      node('open', { data: { done: false } }),
+      node('overdue', { data: { done: false, due: YESTERDAY } }),
+    ]
+    const s = attentionSummary(nodes, NOW)
+    expect(s.count).toBe(2)
+    expect(s.top?.id).toBe('overdue')
+    expect(s.urgent).toBe(true)
+  })
+
+  it('is not urgent when nothing overdue leads the feed', () => {
+    const nodes = [
+      node('open', { data: { done: false } }),
+      node('event', { type: 'event', data: { date: TODAY }, meta: { created: NOW, updated: NOW, app: 'calendar' } }),
+    ]
+    const s = attentionSummary(nodes, NOW)
+    expect(s.count).toBe(2)
+    expect(s.top?.kind).toBe('event-today')
+    expect(s.urgent).toBe(false)
+  })
+
+  it('respects the limit when counting', () => {
+    const nodes = Array.from({ length: 12 }, (_, i) =>
+      node(`t${i}`, { data: { done: false }, meta: { created: NOW, updated: NOW - i, app: 'notes' } })
+    )
+    expect(attentionSummary(nodes, NOW, 5).count).toBe(5)
   })
 })

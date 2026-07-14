@@ -5,6 +5,28 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-14 · BUILDER — EPIC-18 **S1**: the cockpit reaches beyond the home (shell-level attention badge)
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`69fd479`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (precache 89). `npx vitest run` **589🟢**; `--assert-zero` **exit 0** (all six axes 0). Confirmed green before editing.
+
+**State that shaped this run.** EPIC-17 reached CODE-COMPLETE (S1–S4 all `[x]`, `HOME-ATTENTION 6/6` QA-confirmed) and **every ROADMAP "NOW" item was already DONE**, so there was **no active unchecked stage**. The only queued epic (EPIC-7 Android) is device-gated (not cloud-verifiable). Per the routine's Definition-of-Done ("if EPICS has no active stage, do the topmost item and note EPICS needs the Strategist"), I shipped the highest-gradient *cloud-verifiable* increment and recorded EPIC-18 for the Strategist to ratify/redirect. With all six conformance axes 0 & LOCKED and no runtime bug, the steepest remaining *systemic* gradient is still organism proactivity — one order past EPIC-17.
+
+**Stage shipped (EPIC-18 S1).** EPIC-17 made the HOME proactive, but the moment you open an app the "Needs you" feed leaves the screen — the organism goes quiet exactly when you're heads-down. S1 carries the signal into the **persistent shell**.
+- **`src/lib/core/attention.ts`** — pure `attentionSummary(nodes, now, limit=8)` → `{count, top, urgent}` (`urgent` = the top item is an overdue task). Reuses `computeAttention`; no new scoring. +4 `attention.test.ts` (empty→calm, urgent when overdue leads, not-urgent otherwise, respects limit).
+- **`src/components/Desktop.tsx`** — a `useGraph(s=>s.nodes)` sub + a 30s `attnMinute` memo feed `attentionSummary`. The HomeBar Home `IconButton` gains a `.empire-homebar-badge.is-attention` (ember glow; `.is-urgent`→`--c-danger`) carrying `data-shell-attention={count}` + `data-home` + a count-aware aria-label ("Home — N need you"), shown ONLY when `!atHome` (`homeAttn`) so it's a reach-beyond-home nudge, never redundant with the on-screen feed. Minute-granularity memo keeps the O(n) scan off the 1s clock re-render.
+- **`src/lib/i18n.ts`** — `shell.home` + `shell.attention.short` (EN/ID).
+- **`src/window-manager.css`** (DS_INFRA) — `.empire-homebar-badge.is-attention` (ember + glow) and `.is-urgent` (danger), tokens-only (`var()` + `color-mix`).
+- **`scripts/qa-smoke.mjs`** — new **`SHELL-ATTENTION` guard**: seeds an overdue + a plain-open task (both `app:goals`, graph-survivable), reloads, then asserts hidden-at-home · shows count `2` inside an app (opened by clicking the top row) · `is-urgent` tint · tap-Home clears + feed returns. + a REPORT.md section.
+
+**Verify (the only gate — no reviewer).** `npm run build` 🟢. `npx vitest run` **593🟢 / 73 files** (+4). `npx eslint` **clean** on all touched files. `node scripts/metrics.mjs --assert-zero` **exit 0** — all six axes 0 & LOCKED (offShellControls held at 0 — reused `IconButton`; no raw hex/px in `.tsx`). **Metrics row:** apps **31** · tests **491** (+4) · files **67** · tokenViolations **0** · offSystemUtilities **0** · offSystemStyle **0** · offShellControls **0** · keyboardA11y **0** · docMass **0** · bundle gz **733.8** (+0.1).
+- **Cloud-verified in a real browser** (`node scripts/qa-smoke.mjs`, Playwright chromium): **`SHELL-ATTENTION 4/4 ✅`** (`homeHidden=true awayShows=true urgent=true tapHome=true`), **32/32 routes still render clean, 0 failed**, and every prior guard green (HOME-ATTENTION 6/6, INBOUND 4/4, MEDIA 3/3, GRAPH-LEGIBLE 3/3, SEARCH/LINEAGE/INTENT/TIMELINE/HOME-ALIVE, PROVENANCE 3/3+3/3, PRECACHE no-gap, OFFLINE 5/5). The always-mounted shell change regressed nothing.
+
+**Not verifiable in cloud:** the on-device *feel* of the badge glow/urgency colour (rendered + asserted headless; final look is on-device). **Trap recorded (CONTEXT/EPICS):** `/app/:appId` is a separate deep-link `AppShell` with no HomeBar — the badge is a `Desktop`-shell feature; any guard must open an app by clicking, not by `goto /app/<id>`.
+
+**Next step:** Strategist ratifies EPIC-18 (or redirects to EPIC-7 Android / a fresh epic). Optional S2 = a one-shot spring pulse on the badge when a NEW item lands while you're inside an app (motion=physics, reduced-motion-safe); if S1 is judged sufficient, retire EPIC-18 at S1.
+
+---
+
 ## 2026-07-14 · QA — Visual + Smoke; ★ EPIC-17 **S4** `HOME-ATTENTION` guard added → CODE-COMPLETE
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`43f6970`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (precache 89 entries). Server up on :3001.

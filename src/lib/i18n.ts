@@ -51,6 +51,9 @@ const DICT: Record<string, Entry> = {
   'attention.handoff':       { en: 'Handed to you', id: 'Diberikan ke kamu' },
   'attention.act.done':      { en: 'Mark done', id: 'Tandai selesai' },
   'attention.act.dismiss':   { en: 'Dismiss', id: 'Abaikan' },
+  // Shell attention badge — the cockpit reaches beyond the home (EPIC-18).
+  'shell.home':              { en: 'Home', id: 'Beranda' },
+  'shell.attention.short':   { en: 'need you', id: 'perlu perhatian' },
 
   // ── Network app ──
   'network.title':  { en: 'The Network', id: 'Jaringan Hidup' },

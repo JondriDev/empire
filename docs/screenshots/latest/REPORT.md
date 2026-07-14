@@ -1,6 +1,6 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-14T13:22:20.445Z
+**Generated:** 2026-07-14T15:24:18.907Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
 
@@ -26,7 +26,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -138,6 +138,16 @@ HOME-ALIVE proved the home *reflects* the organism; EPIC-17 makes it *proactive*
 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **HOME-ATTENTION: 6/6 ✅**
+
+## Shell-attention guard (EPIC-18 — the cockpit reaches beyond the home)
+
+EPIC-17 made the *home* proactive; the moment you open an app the "Needs you" feed leaves the screen. EPIC-18 carries the signal into the persistent shell: while an app is foregrounded, the HomeBar's Home button wears a live badge (`attentionSummary`, unit-pinned in `attention.test.ts`) tinted red when the most-urgent item is overdue. Two graph-survivable tasks were seeded — an overdue `task` (→ 95) and a plain open `task` (→ 50), both owned by Goals — then home was reloaded. PASS = at home the badge is ABSENT (the feed is already on screen), opening an app in-place shows the Home button count `2` with the urgent tint, and tapping Home clears it while the full feed returns.
+
+| Hidden at home | Shows inside app (count 2) | Urgent tint | Tap-home clears + feed back | Result |
+|---|---|---|---|---|
+| ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**SHELL-ATTENTION: 4/4 ✅**
 
 ## Provenance-persists guard (EPIC-6 — durable app→app memory)
 

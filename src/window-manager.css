@@ -601,6 +601,18 @@
   text-align: center;
 }
 
+/* The attention badge (Home button) — the organism nudging you from inside an
+   app. Colour is LIGHT, not fill: a warm ember glow, escalating to danger red
+   when something is overdue. Distinct from the plain signal recents count. */
+.empire-homebar-badge.is-attention {
+  background: var(--ember);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ember) 55%, transparent);
+}
+.empire-homebar-badge.is-attention.is-urgent {
+  background: var(--c-danger);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--c-danger) 60%, transparent);
+}
+
 .empire-homebar-clock {
   display: flex;
   flex-direction: column;

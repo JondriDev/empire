@@ -1070,6 +1070,70 @@ try {
 }
 console.log(`HOME-ATTENTION: ${homeAttention.pass ? '6/6 ✅' : `${homeAttention.checks || 0}/6 ⚠️`}`);
 
+// ── SHELL-ATTENTION guard (EPIC-18 target metric: the cockpit reaches beyond home) ──
+// EPIC-17 made the *home* proactive; the moment you open an app the "Needs you"
+// feed leaves the screen. EPIC-18 carries the signal into the persistent shell:
+// while an app is foregrounded, the HomeBar's Home button wears a live badge
+// (`attentionSummary`, unit-pinned in `attention.test.ts`) tinted red when the
+// most-urgent item is overdue. Seed two graph-survivable tasks (an overdue → 95
+// and a plain open → 50, both owned by Goals), reload, then: (1) at home the
+// badge is ABSENT (the feed is already on screen); (2) open an app in-place (the
+// same Desktop shell keeps the HomeBar on top) and the Home button shows the
+// count `2` with the urgent tint; (3) tap Home and it clears + the full feed is
+// back. Non-fatal like the guards above — a regression shows as ❌.
+const shellAttention = { homeHidden: false, awayShows: false, urgent: false, tapHome: false, pass: false };
+try {
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 30000 });
+  const now = Date.now();
+  const pastDue = await page.evaluate((n) => {
+    const d = new Date(n - 5 * 86_400_000); const p = (x) => String(x).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }, now);
+  const seed = { state: { nodes: {
+    'qa-shell-overdue': {
+      id: 'qa-shell-overdue', type: 'task', title: 'Overdue in the shell',
+      data: { done: false, due: pastDue }, links: [],
+      meta: { created: now - 3000, updated: now - 3000, app: 'goals' },
+    },
+    'qa-shell-open': {
+      id: 'qa-shell-open', type: 'task', title: 'A plain open task',
+      data: { done: false }, links: [],
+      meta: { created: now - 2000, updated: now - 2000, app: 'goals' },
+    },
+  } }, version: 0 };
+  await page.evaluate(([k, v]) => localStorage.setItem(k, v), [GRAPH_KEY, JSON.stringify(seed)]);
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(700);
+  // (1) At home the badge is hidden (the feed itself is on screen).
+  shellAttention.homeHidden = (await page.$('[data-shell-attention]')) === null;
+  // (2) Open an app in-place by clicking the top attention row's open control.
+  await page.click('[data-attention="qa-shell-overdue"]');
+  await page.waitForTimeout(600);
+  const badge = await page.$('[data-home] [data-shell-attention]');
+  if (badge) {
+    const info = await badge.evaluate((el) => ({ count: (el.textContent || '').trim(), cls: el.className }));
+    shellAttention.awayShows = info.count === '2';
+    shellAttention.urgent = /\bis-urgent\b/.test(info.cls);
+  }
+  // (3) Tap Home → the badge clears and the full feed is back.
+  await page.click('[data-home]');
+  await page.waitForTimeout(500);
+  const clearedBadge = (await page.$('[data-shell-attention]')) === null;
+  const feedRows = await page.$$eval('.bridge-attention-item', (els) => els.length);
+  shellAttention.tapHome = clearedBadge && feedRows === 2;
+  shellAttention.pass = shellAttention.homeHidden && shellAttention.awayShows && shellAttention.urgent && shellAttention.tapHome;
+  const checks = [shellAttention.homeHidden, shellAttention.awayShows, shellAttention.urgent, shellAttention.tapHome].filter(Boolean).length;
+  shellAttention.checks = checks;
+  console.log(`SHELL-ATTENTION  homeHidden=${shellAttention.homeHidden} awayShows=${shellAttention.awayShows} urgent=${shellAttention.urgent} tapHome=${shellAttention.tapHome}`);
+  await page.evaluate((k) => localStorage.removeItem(k), GRAPH_KEY);
+  await page.close();
+} catch (e) {
+  shellAttention.err = e.message;
+  console.warn(`SHELL-ATTENTION: guard did not complete — ${e.message}`);
+}
+console.log(`SHELL-ATTENTION: ${shellAttention.pass ? '4/4 ✅' : `${shellAttention.checks || 0}/4 ⚠️`}`);
+
 // ── PROVENANCE-PERSISTS guard (EPIC-6 target metric: durable app→app memory) ──
 // EPIC-6 S1 laid the spine: `src/lib/core/provenance.ts` — a Zustand+persist
 // store (`empire-provenance`) fed ONLY by `flowForEvent`, wired via
@@ -1285,6 +1349,13 @@ md += `HOME-ALIVE proved the home *reflects* the organism; EPIC-17 makes it *pro
 md += `| Six rows | Overdue on top | Score order | Every reason | Every act | One-tap lands | Result |\n|---|---|---|---|---|---|---|\n`;
 md += `| ${homeAttention.rendered ? '✅' : '❌'} | ${homeAttention.firstOverdue ? '✅' : '❌'} | ${homeAttention.ordered ? '✅' : '❌'} | ${homeAttention.reasons ? '✅' : '❌'} | ${homeAttention.acts ? '✅' : '❌'} | ${homeAttention.lands ? '✅' : '❌'} | ${homeAttention.pass ? '✅' : '❌'}${homeAttention.err ? ' (' + homeAttention.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**HOME-ATTENTION: ${homeAttention.pass ? '6/6 ✅' : `${homeAttention.checks || 0}/6 ⚠️`}**\n`;
+
+md += `\n## Shell-attention guard (EPIC-18 — the cockpit reaches beyond the home)\n\n`;
+md += `EPIC-17 made the *home* proactive; the moment you open an app the "Needs you" feed leaves the screen. EPIC-18 carries the signal into the persistent shell: while an app is foregrounded, the HomeBar's Home button wears a live badge (\`attentionSummary\`, unit-pinned in \`attention.test.ts\`) tinted red when the most-urgent item is overdue. Two graph-survivable tasks were seeded — an overdue \`task\` (→ 95) and a plain open \`task\` (→ 50), both owned by Goals — then home was reloaded. PASS = at home the badge is ABSENT (the feed is already on screen), opening an app in-place shows the Home button count \`2\` with the urgent tint, and tapping Home clears it while the full feed returns.\n\n`;
+md += `| Hidden at home | Shows inside app (count 2) | Urgent tint | Tap-home clears + feed back | Result |\n|---|---|---|---|---|\n`;
+md += `| ${shellAttention.homeHidden ? '✅' : '❌'} | ${shellAttention.awayShows ? '✅' : '❌'} | ${shellAttention.urgent ? '✅' : '❌'} | ${shellAttention.tapHome ? '✅' : '❌'} | ${shellAttention.pass ? '✅' : '❌'}${shellAttention.err ? ' (' + shellAttention.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n**SHELL-ATTENTION: ${shellAttention.pass ? '4/4 ✅' : `${shellAttention.checks || 0}/4 ⚠️`}**\n`;
+
 md += `\n## Provenance-persists guard (EPIC-6 — durable app→app memory)\n\n`;
 md += `Real \`editor→<target>\` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event \`flowForEvent\` turns into an edge in the durable \`empire-provenance\` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).\n\n`;
 md += `| Edge | Recorded | Persisted (reload) | Result |\n|---|---|---|---|\n`;

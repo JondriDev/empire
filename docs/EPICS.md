@@ -47,10 +47,57 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ---
 
-## ▶ ACTIVE — EPIC-17 · The Bridge becomes the organism's cockpit (from legible to proactive)
+## ▶ ACTIVE — EPIC-18 · The cockpit reaches beyond the home (shell-level attention)
+
+> **⚠️ Builder-proposed 2026-07-14, AWAITING STRATEGIST RATIFICATION.** EPIC-17 reached CODE-COMPLETE with
+> every stage checked and QA-confirmed `HOME-ATTENTION 6/6`, and every ROADMAP "NOW" item was already DONE — so
+> this run found **no active unchecked stage**. Per the routine's Definition-of-Done ("if EPICS has no active
+> stage, do the topmost item and note EPICS needs the Strategist"), the Builder shipped the highest-gradient
+> *cloud-verifiable* increment and recorded it here for the Strategist to ratify, refine, or redirect (the only
+> queued alternative, EPIC-7 Android, stays device-gated).
+>
+> **Why this gradient.** All six conformance axes are 0 & LOCKED and there is no runtime bug, so the steepest
+> remaining *systemic* gradient is still organism proactivity — one order past EPIC-17. EPIC-17 made the **home**
+> proactive (the ranked "Needs you" feed), but the instant you open an app that signal leaves the screen: the
+> organism goes quiet exactly when you're heads-down in a task. EPIC-18 carries the attention signal into the
+> **persistent shell** — a live badge on the HomeBar's Home button, tinted by urgency — so the cockpit can tap
+> you on the shoulder from *inside* any app, and one tap returns you to the feed. 100% cloud-verifiable, reuses
+> the `computeAttention` spine + the existing `empire-homebar-badge` pattern, no new deps, all six axes stay 0.
+>
+> **Target metric** = a new **`SHELL-ATTENTION` QA guard** (`scripts/qa-smoke.mjs`), the organism-guard pattern
+> (cf. `HOME-ATTENTION 6/6`): seed an overdue + a plain-open task, reload, and assert the Home button badge is
+> hidden at home, shows the live count with an urgent tint once an app is foregrounded, and clears (feed back)
+> on tap-Home. **Goal: `SHELL-ATTENTION 0 → 4/4` on green main**, plus the pure `attentionSummary` spine
+> unit-pinned. Baseline (pre-epic): no shell badge exists (`0/4`).
+
+- [x] **S1 · Shell attention indicator + guard (measure spine + render + lock).** ✅ Shipped 2026-07-14 (this
+  run). Pure `attentionSummary(nodes, now, limit=8)` in `src/lib/core/attention.ts` → `{count, top, urgent}`
+  (`urgent` = the top item is an overdue task; reuses `computeAttention`), +4 cases in `attention.test.ts`.
+  **Render (`src/components/Desktop.tsx`):** a `useGraph(s=>s.nodes)` sub + a 30s `attnMinute` memo feed
+  `attentionSummary`; the HomeBar Home `IconButton` gains a `.empire-homebar-badge.is-attention` (ember glow,
+  `.is-urgent`→`--c-danger`) carrying `data-shell-attention={count}` + `data-home` + a count-aware aria-label,
+  shown ONLY when `!atHome` (`homeAttn`) so it is a "reach-beyond-home" nudge, never redundant with the
+  on-screen feed. New i18n `shell.home`/`shell.attention.short`; CSS in DS_INFRA `src/window-manager.css`. New
+  **`SHELL-ATTENTION` guard** in `scripts/qa-smoke.mjs` seeds an overdue + open task (both `app:goals`,
+  graph-survivable), opens an app in-place by clicking the top row, and asserts 4 checks: hidden at home ·
+  shows count `2` inside the app · `is-urgent` tint · tap-Home clears it + the feed returns. **Acceptance MET:**
+  `SHELL-ATTENTION 4/4` on green main (target 0→4/4 MOVED); build🟢 vitest 593🟢 eslint🟢 `--assert-zero` exit 0
+  (all six axes 0); 32/32 smoke still clean, every prior guard green. **Trap discovered:** the primary shell is
+  `Desktop` (`/`, HomeBar always-on-top, apps open in-place via in-memory `windowStore` → `atHome=false`);
+  `/app/:appId` is a SEPARATE deep-link `AppShell` with its own chrome and NO HomeBar — the badge lives only in
+  `Desktop`, and any guard must open an app by CLICKING, not by `goto /app/<id>` (which resets the in-memory stack).
+- [ ] **S2 · (optional, Strategist to confirm) Motion polish — the badge breathes when a NEW item lands** while
+  you're inside an app (a one-shot spring pulse keyed on `attention.top?.id` changing), honoring
+  `prefers-reduced-motion`. If the Strategist judges S1 sufficient, retire EPIC-18 at S1 instead.
+
+---
+
+## ✅ CODE-COMPLETE (retire to DONE index) — EPIC-17 · The Bridge becomes the organism's cockpit (from legible to proactive)
 
 > **Strategist-promoted 2026-07-13**, after EPIC-15 (keyboard operability) + EPIC-16 (doc-mass) both
 > reached CODE-COMPLETE with no unchecked stage — both now formally retired to the DONE index below.
+> **★ EPIC-17 is now CODE-COMPLETE itself (S1–S4 all shipped, `HOME-ATTENTION 6/6` QA-confirmed on green main
+> `69fd479`).** The Strategist should move it to the DONE index; EPIC-18 (above) is the Builder-proposed successor.
 >
 > **Why highest gradient now.** The conformance band is exhausted at the systemic level — all six axes
 > (colour · utilities · style · shell · keyboardA11y · docMass) are **0 & LOCKED**; reduced-motion is

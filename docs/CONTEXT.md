@@ -25,31 +25,27 @@
 > git + `docs/ROUTINE-LOG.md`; working memory stays tight (its budget is the
 > `docMass` metric — see below).
 
-- **▶ EPIC-17 · The Bridge becomes the organism's cockpit (from legible to proactive) — ACTIVE (promoted
-  2026-07-13).** The organism is fully legible (4 read-lenses + emit↔receive) but **passive**: the home
-  (`src/components/Bridge.tsx`) shows mute counts (Today/Tasks/Organism) + a recents strip, never *what needs
-  you now*. This epic adds ONE ranked, reasoned, one-tap-resolvable **Attention** feed synthesizing every app's
-  live signals. Target = a new **`HOME-ATTENTION` QA guard** (`scripts/qa-smoke.mjs`) → **0 → 6/6** on green
-  main (organism-epic pattern, cf. `GRAPH-LEGIBLE 3/3`). Reuses `bridge.ts`/`tasks.ts`/`openEntity`
-  (`windowStore.ts:126`)/`onActivate` (`a11y.ts:23`)/`ui`; no new deps; keeps all six axes 0.
-  - **✅ S1–S4 SHIPPED 2026-07-14 → ★ EPIC-17 CODE-COMPLETE (awaiting Strategist retire to DONE).** Engine `attention.ts` — pure `computeAttention(nodes,now,limit=8)` → ranked
-    `AttentionItem[]` (`{id,node,kind,score,reasonKey,app}`; 6 kinds; `attention.test.ts` 13🟢). Scores: task
-    overdue 85+2·daysLate⩽100 ⟩ due-today 55 ⟩ open 50; event 75; goal-stalled 60 (progress<34 & ≥14d idle);
-    reading 35 (book 0<progress<1); handoff 70 (content w/ `data.from`, ≤1h). De-dupe best-per-node → score↓,
-    `meta.updated`↓ → cap. **Render (`Bridge.tsx`):** row = `.bridge-attention-item` flex wrapping a ghost open
-    `Button` (`openEntity(app,node.id)`; `data-attention` on it) + a SIBLING `AttentionResolve` (never nested):
-    `task`→✓done `IconButton` (`updateNode(id,{data:{...data,done:true}})`), fresh `handoff`→✕ clear `data.from`,
-    else→`<NodeActions nodeId>` ⚡. Labels via `t('attention.<kind>' | 'attention.act.done|dismiss')`; `badgeFor`;
-    `<EmptyState size="sm">`; CSS DS_INFRA `window-manager.css`; `Bridge.test.tsx` 4🟢. **Traps:** dispatch ✓done
-    off `node.type==='task'` FIRST (a make-task task carries `data.from`, so `isContentNode`→could score `handoff`,
-    yet must keep a done toggle); task `updateNode` durable (graph-only) but a note/learning dismiss REVERTS —
-    sync.ts:89/96 re-mirror `from` from the store; book `data.progress` **0..1** vs goal **0..100**; task
-    `data.due` = YYYY-MM-DD str OR ms (no app sets it yet → seed to exercise overdue).
-  - **✅ S4 (QA, `43f6970`).** `HOME-ATTENTION` guard in `qa-smoke.mjs` seeds all 6 kinds at graph-survivable types
-    (overdue `task` due-5d·today `event`·fresh `draft` handoff·aged low `goal`·open `task`·mid-progress `book` — `draft`
-    NOT pruned since syncAll only reconciles note/learning/message), reloads, asserts the ranked feed in exact score
-    order (overdue 95⟩event 75⟩handoff 70⟩goal 60⟩open 50⟩reading 35) + every row reason+act + one-tap open lands in
-    Goals. **PASSES 6/6** → target metric 0→6/6 MOVED. ▶ NEXT: Strategist promotes the next epic (EPIC-7 Android device-gated).
+- **▶ EPIC-18 · The cockpit reaches beyond the home (shell-level attention) — Builder-proposed 2026-07-14,
+  AWAITING STRATEGIST RATIFICATION.** EPIC-17 made the HOME proactive (the "Needs you" feed); the moment you
+  open an app the signal vanishes. EPIC-18 carries it into the persistent shell so the organism nudges you from
+  *inside* any app. Target = a new **`SHELL-ATTENTION` QA guard** (`qa-smoke.mjs`) → **0 → 4/4** on green main
+  (organism-guard pattern, cf. `HOME-ATTENTION 6/6`). Reuses the `computeAttention` spine + the
+  `empire-homebar-badge` CSS + `IconButton`; no new deps; keeps all six axes 0.
+  - **✅ S1 SHIPPED 2026-07-14 (this run).** Pure `attentionSummary(nodes,now,limit=8)` (`attention.ts:172`) →
+    `{count, top, urgent}` (`urgent` = top kind `task-overdue`); +4 `attention.test.ts`. **Render
+    (`Desktop.tsx`):** `useGraph(s=>s.nodes)` + a 30s `attnMinute` memo → `attention`; the HomeBar Home
+    `IconButton` gains a `.empire-homebar-badge.is-attention` (ember; `.is-urgent`→`--c-danger`) with
+    `data-shell-attention={count}` + `data-home` + a count-aware aria-label, shown ONLY when `!atHome`
+    (`homeAttn`, `Desktop.tsx:126`) so it's a "reach-beyond-home" nudge, not redundant with the on-screen feed.
+    i18n `shell.home`/`shell.attention.short`; CSS DS_INFRA `window-manager.css:607`. **Guard
+    `SHELL-ATTENTION` (`qa-smoke.mjs:1073`)** seeds an overdue+open task (both `app:goals`, graph-survivable),
+    asserts: badge hidden at home · shows count `2` inside an app · `is-urgent` tint (overdue leads) · tap-Home
+    clears it + the feed returns → **PASSES 4/4** (target 0→4/4 MOVED). build🟢 vitest 593🟢 eslint🟢 six axes 0.
+    **Trap:** the primary shell is `Desktop` (`/`, HomeBar always-on-top, apps open in-place via in-memory
+    `windowStore` → `atHome=false`); `/app/:appId` is a SEPARATE deep-link `AppShell` (own chrome, NO HomeBar) —
+    the badge lives only in `Desktop`, and the guard must open an app by CLICKING (not `goto /app/x`).
+    ▶ NEXT: Strategist ratifies EPIC-18 (or redirects to EPIC-7 Android/other); optional S2 = a subtle badge
+    pulse when a NEW item lands while you're inside an app (motion=physics), else retire at S1.
 
 ### Standing design-system recipes (carry forward — reusable across any future migration)
 
@@ -85,6 +81,9 @@
 
 ### ✅ Retired epics — DONE index (full bodies in git; metric each moved)
 
+- **EPIC-17 · The Bridge becomes the organism's cockpit (legible→proactive)** — DONE 2026-07-14, `HOME-ATTENTION
+  0 → 6/6` LOCKED (S1–S4). Pure `computeAttention` spine (`attention.ts`) + Bridge "Needs you" ranked feed with
+  inline quick-resolve (`AttentionResolve`); `HOME-ATTENTION` guard in `qa-smoke.mjs`. `69fd479`.
 - **EPIC-16 · Doc-mass conformance** — DONE 2026-07-13, `docMass 3269 → 0` LOCKED (S1–S3; `scanDocMass` in
   `scripts/docMassAudit.mjs` budgets CONTEXT ≤400 / EPICS ≤500; the sixth gated axis). `1cc462e` · `19e0454`.
 - **EPIC-15 · Keyboard operability (WCAG 2.1.1)** — DONE 2026-07-13, `keyboardA11y 24 → 0` LOCKED

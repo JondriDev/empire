@@ -12,6 +12,8 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useWindowStore, openAppById } from '../lib/windowStore'
 import { apps, launcherApps, getAppIcon } from '../lib/registry'
 import { useStore } from '../lib/store'
+import { useGraph } from '../lib/core/graph'
+import { attentionSummary } from '../lib/core/attention'
 import { useLang } from '../lib/i18n'
 import AppHost from './AppHost'
 import Bridge from './Bridge'
@@ -41,6 +43,19 @@ export default function Desktop() {
   const [searchSelected, setSearchSelected] = useState(0)
   const [clock, setClock] = useState(new Date())
   const prevFocusRef = useRef<HTMLElement | null>(null)
+
+  // The cockpit reaches beyond the home: while an app is foregrounded, the
+  // HomeBar's Home button carries a live "needs you" badge synthesised from the
+  // same graph the Bridge feed reads, so the organism can nudge you from inside
+  // any app. Minute-granularity memo (the shell already re-renders every second
+  // for the clock — keep the O(n) attention scan from recomputing that often).
+  const nodes = useGraph(s => s.nodes)
+  const [attnMinute, setAttnMinute] = useState(() => Date.now())
+  useEffect(() => {
+    const timer = setInterval(() => setAttnMinute(Date.now()), 30_000)
+    return () => clearInterval(timer)
+  }, [])
+  const attention = useMemo(() => attentionSummary(Object.values(nodes), attnMinute), [nodes, attnMinute])
 
   // Restore focus when the palette closes (WCAG 2.4.3 focus order).
   useEffect(() => {
@@ -105,6 +120,10 @@ export default function Desktop() {
 
   const isLight = theme === 'light'
   const atHome = !activeWindowId
+  // Only surface the badge while an app is foregrounded — at home the full
+  // "Needs you" feed is already on screen, so a count on the (active) Home
+  // button would be redundant. This is the "reach beyond the home" nudge.
+  const homeAttn = atHome ? 0 : attention.count
 
   return (
     <div className="empire-desktop" style={{ color: 'var(--text)' }}>
@@ -254,10 +273,23 @@ export default function Desktop() {
           <IconButton
             className={`empire-homebar-btn ${atHome ? 'is-active' : ''}`}
             onClick={goHome}
-            title="Home"
-            aria-label="Home"
+            data-home
+            title={homeAttn > 0 ? `${t('shell.home', 'Home')} — ${homeAttn} ${t('shell.attention.short', 'need you')}` : t('shell.home', 'Home')}
+            aria-label={homeAttn > 0 ? `${t('shell.home', 'Home')} — ${homeAttn} ${t('shell.attention.short', 'need you')}` : t('shell.home', 'Home')}
             style={{ width: 'auto', minWidth: '44px', height: '44px', padding: '0 10px', borderRadius: 'var(--radius-md)', color: atHome ? 'var(--signal)' : 'var(--text3)', background: atHome ? 'color-mix(in srgb, var(--signal) 12%, transparent)' : 'transparent' }}
-            icon={<House className="w-5 h-5" />}
+            icon={
+              <>
+                <House className="w-5 h-5" />
+                {homeAttn > 0 && (
+                  <span
+                    className={`empire-homebar-badge is-attention${attention.urgent ? ' is-urgent' : ''}`}
+                    data-shell-attention={homeAttn}
+                  >
+                    {homeAttn}
+                  </span>
+                )}
+              </>
+            }
           />
           <IconButton
             className="empire-homebar-btn"

@@ -22,14 +22,16 @@
 > (reduced-motion is already global; the accessible-name metric was rejected as over-counting; per-app craft belongs to the App
 > Artisan rotation). So the steepest remaining **systemic** gradient descends back to **organism depth** — but one order deeper:
 > from *legible* to *proactive*.
-> **▶ EPIC-17 · The Bridge becomes the organism's cockpit — from legible to proactive ACTIVE — promoted 2026-07-13.** The four
-> read-lenses (Network · Search · Inbox · Timeline) + the emit↔receive loop are complete, but the organism is **passive**: the
-> home (`src/components/Bridge.tsx`) shows mute counts (Today: N · Tasks: N · Organism: N) + a recents strip, never *what needs
-> you now*. **Leap:** one ranked, reasoned, one-tap-resolvable **Attention** feed that synthesizes every app's live signals
-> (overdue task ⟩ today event ⟩ open task · stalled goal · unfinished book · fresh handoff). **Target: new `HOME-ATTENTION` QA
-> guard 0 → 6/6** on green main (the EPIC-10/13 organism-guard pattern) + the pure `computeAttention` spine unit-pinned. Reuses
-> `bridge.ts`/`tasks.ts`/`openEntity`/`a11y.ts`/`ui`; no new deps; keeps all six axes 0. Closes when QA confirms `HOME-ATTENTION
-> 6/6`. **Android is EPIC-7 (QUEUED)** — device-gated, promote only with on-device QA.
+> **✅ EPIC-17 · The Bridge becomes the organism's cockpit — CODE-COMPLETE 2026-07-14** (`HOME-ATTENTION 0 → 6/6` LOCKED,
+> S1–S4): a ranked, reasoned, one-tap-resolvable **Attention** feed on the home synthesising every app's live signals via the
+> pure `computeAttention` spine. Strategist to retire to DONE.
+> **▶ EPIC-18 · The cockpit reaches beyond the home (shell-level attention) — Builder-proposed 2026-07-14, AWAITING STRATEGIST
+> RATIFICATION.** With EPIC-17 code-complete and every NOW item DONE, this run had no active stage; per the DoD the Builder
+> shipped the highest-gradient cloud-verifiable increment and flagged it here. **Leap:** carry the attention signal off the home
+> and into the **persistent shell** — a live "needs you" badge on the HomeBar Home button (urgency-tinted), so the organism nudges
+> you from *inside* any app; one tap returns to the feed. **Target: new `SHELL-ATTENTION` QA guard 0 → 4/4** (shipped this run:
+> S1 `attentionSummary` spine + `Desktop.tsx` badge + guard, **4/4 PASS**). Reuses `computeAttention` + `empire-homebar-badge`; no
+> new deps; all six axes 0. **Android is EPIC-7 (QUEUED)** — device-gated, promote only with on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
