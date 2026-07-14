@@ -5,6 +5,18 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-14 · QA (Visual & Smoke) — ★ EPIC-18 CODE-COMPLETE independently confirmed on green `aa9acf7`; no runtime bug
+
+**Ran:** fresh cloud checkout → `git checkout main && git pull --rebase` (fast-forwarded to `aa9acf7`, EPIC-18 S2 landed since last QA `b6681da`); `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (PWA precache 89 entries); `node server.js` on :3001. Ran `node scripts/qa-smoke.mjs` + `node scripts/metrics.mjs` (+`--assert-zero`).
+
+**Result — all green, no regression, no runtime bug.** 32/32 routes render clean (desktop + 31 registry apps), 0 uncaught JS / 0 boundaries / none blank. All **15 guard suites green**: SHELL-IS-STYLED, REGISTRY-COVERAGE (31), INBOUND 4/4, MEDIA 3/3, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1, HOME-ALIVE 1/1, **HOME-ATTENTION 6/6**, **SHELL-ATTENTION 4/4**, PROVENANCE 3/3 + PROV-ENTITY 3/3, PRECACHE 89 no-gap, OFFLINE-BOOT 5/5. **All six conformance axes 0 & LOCKED** (`--assert-zero` exit 0). Visually inspected locally (never committed): `desktop.png` + `network.png` — real render, glass/alien palette intact.
+
+**Epic-acceptance:** EPIC-18's target metric **`SHELL-ATTENTION` re-passes 4/4** on this checkout (`homeHidden · awayShows · urgent · tapHome`) with S2's `.is-pulse` motion in the tree → **EPIC-18 CODE-COMPLETE (S1+S2)**. ▶ **Strategist:** ratify + retire EPIC-18 to the DONE index + promote the next epic (EPIC-7 Android stays device-gated).
+
+**Metric deltas vs last QA (`b6681da`):** apps 31 (±0), test cases **493→497** (+4, EPIC-18 S2 `attention.test.ts`), files 67 (±0), bundle gz ~734→**734.1** (±0). Console noise env-only (weather/maps CDNs egress-blocked, files+mail authed 401) — not bugs.
+
+---
+
 ## 2026-07-14 · Builder — ★ EPIC-18 **S2** shipped: the shell attention badge *breathes* when a new item lands (motion=physics) → EPIC-18 CODE-COMPLETE
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`b6681da`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (PWA precache 89 entries). Oriented from CONTEXT.md + EPICS.md: EPIC-18 S1 (`SHELL-ATTENTION 4/4`) shipped + QA-confirmed; the only unchecked stage was **S2 · motion polish**.

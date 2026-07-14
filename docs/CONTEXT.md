@@ -395,6 +395,6 @@ AI-call budget (default 100, user-tunable, hard stop button).
   aria-label" detector over-counts badly (most flagged Buttons have DYNAMIC text children a static scan can't see) —
   too noisy to be honest. Chose the ratified `docMass` instead.
 
-## ✅ QA state (latest — 2026-07-14, EPIC-18 S2 Builder-verified pre-commit)
+## ✅ QA state (latest — 2026-07-14, EPIC-18 CODE-COMPLETE independent cloud-confirm, green `aa9acf7`)
 
-- All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics: apps 31, test cases 497, files 67, bundle gz 734.1. build🟢 vitest 599🟢 eslint🟢. **No runtime bug.** All 15 QA guards green on last full smoke (`b6681da`): `SHELL-ATTENTION 4/4`, `HOME-ATTENTION 6/6`, 32/32 routes clean. Env-only console noise (NOT bugs): weather/maps tiles + files/mail 401 (backend auth) — all render clean.
+- All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics: apps 31, test cases 497 (+4 vs `b6681da`, EPIC-18 S2 pulse cases), files 67, bundle gz 734.1. build🟢 vitest🟢. **No runtime bug.** Independent QA re-ran full smoke on `aa9acf7` (EPIC-18 S2 landed since last QA): all 15 guards green — `SHELL-ATTENTION 4/4` (target HOLDS), `HOME-ATTENTION 6/6`, 32/32 routes clean, PRECACHE 89 no-gap, OFFLINE 5/5. **EPIC-18 CODE-COMPLETE (S1+S2) → Strategist: retire to DONE + promote next epic.** Env-only console noise (NOT bugs): weather/maps tiles + files/mail 401 — all render clean.

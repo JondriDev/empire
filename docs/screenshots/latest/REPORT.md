@@ -1,12 +1,33 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-14T18:09:17.667Z
+**Generated:** 2026-07-14T23:08:54.742Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
 
-**NO RUNTIME BUG THIS RUN.** Build 🟢 (`tsc -b && vite build`, PWA precache 89 entries). Every one of the 32 routes rendered clean; console/network noise is env-expected only (weather Open-Meteo geocode tunnel-blocked, maps 8× CARTO tiles tunnel-blocked, files + mail 401 on authed/Android-only APIs). Visually re-inspected locally (never committed): `desktop.png` (styled shell, "Good evening", 4 stat tiles all 0 on a fresh session, "All clear — nothing needs you", full 31-app dock), `app-maps.png` (Leaflet chrome + search + controls render; grey tile pane is the blocked CARTO CDN), `app-network.png` (CORE hub + radial mesh + legend), `app-goals.png` (form + "No goals yet" empty state).
-
-**★ EPIC-18 S1 TARGET METRIC CONFIRMED MOVED — first independent QA confirm.** Since the last QA commit (`69fd479`), two app-code commits landed on main (`8a0c6c9` EPIC-18 S1 shell attention badge · `d4289b8` maps busy-state polish); this run rebuilt + re-smoked the tree it describes. The new **`SHELL-ATTENTION` guard PASSES 4/4** (`homeHidden=true awayShows=true urgent=true tapHome=true`): the Home badge is hidden at home, shows count `2` inside an app, tints `is-urgent` when an overdue task leads, and clears on tap-Home while the feed returns — the EPIC-18 S1 acceptance metric **0 → 4/4 MOVED, no contradiction.** All six conformance axes remain **0 & LOCKED** (`--assert-zero` exit 0); `HOME-ATTENTION` still 6/6. EPIC-18 remains **Builder-proposed, AWAITING STRATEGIST RATIFICATION** — the metric confirmation does not itself promote it.
+> ## ✅ No runtime bug this run — main is GREEN and healthy (`aa9acf7`)
+>
+> **★ EPIC-18 CODE-COMPLETE (S1 + S2) — target metric HOLDS on green main (independent re-confirm).**
+> This run's tree includes `aa9acf7` (EPIC-18 **S2** — "the badge breathes when a new item lands":
+> pure `shouldPulseAttention` in `src/lib/core/attention.ts` + a one-shot `.is-pulse` keyframe on the
+> Home badge, reduced-motion honoured globally). The EPIC-18 acceptance metric **`SHELL-ATTENTION`
+> re-passes 4/4** on this checkout (`homeHidden=true awayShows=true urgent=true tapHome=true`) — the
+> Home button badge stays hidden at home, shows the live count `2` with the urgent tint once an app is
+> foregrounded, and clears (feed back) on tap-Home. `HOME-ATTENTION` still 6/6. **EPIC-18 is now
+> CODE-COMPLETE (S1+S2 shipped, SHELL-ATTENTION 4/4 locked) → ready for the Strategist to ratify +
+> retire to the DONE index and promote the next epic** (EPIC-7 Android stays device-gated). *Cloud
+> limit:* the pulse animation itself is a live in-memory store mutation not drivable via localStorage
+> reload — its timing is unit-pinned (`attention.test.ts`), the badge-render + wiring is guard-covered.
+>
+> **All six conformance axes 0 & LOCKED** — `node scripts/metrics.mjs --assert-zero` **exits 0**
+> (`tokenViolations` 0 · `offSystemUtilities` 0 · `offSystemStyle` 0 r0/t0/m0 · `offShellControls` 0
+> b0/i0/s0/t0 · `keyboardA11y` 0 · `docMass` 0). **Metric deltas vs last QA (`b6681da`):** apps **31**
+> (±0), test cases **493 → 497** (+4 — EPIC-18 S2 `attention.test.ts` `shouldPulseAttention` cases),
+> test files **67** (±0), bundle gz **~734 → 734.1** (±0, motion is CSS + a pure fn — no new dep).
+> All 15 guard suites green; PRECACHE 89 entries no-gap; OFFLINE-BOOT 5/5. Console noise = env-expected
+> only (weather geocoding + maps tile CDNs egress-blocked, files + mail authed 401) — **no runtime bug.**
+> Visually inspected locally (never committed): `desktop.png` (Bridge "Good night", 4 stat tiles, full
+> Cakra→Crypto launcher, "All clear" feed), `network.png` (CORE mesh + node-type legend) — real render
+> confirmed, glass/alien palette intact.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -30,7 +51,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
