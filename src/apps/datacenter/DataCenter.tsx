@@ -151,7 +151,7 @@ export default function DataCenter() {
                 >
                   {t}
                 </Button>
-                <span className="flex items-center pr-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="flex items-center pr-1.5 opacity-60 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                   <NodeActions type="dataset" sourceId={t} />
                   <IconButton
                     onClick={() => deleteTable(t)}
@@ -247,7 +247,7 @@ export default function DataCenter() {
                           aria-label="Delete row"
                           title="Delete row"
                           size="sm"
-                          className="opacity-0 group-hover:opacity-100"
+                          className="opacity-60 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                           style={{ color: 'var(--c-danger)' }}
                           icon={<Trash2 className="w-3.5 h-3.5" />}
                         />

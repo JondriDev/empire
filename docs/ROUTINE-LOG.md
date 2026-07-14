@@ -5,6 +5,26 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-14 · APP-ARTISAN — `datacenter`: touch-reachability fix for both delete controls (phone-first bug)
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main`. `npm install`; `npm run build` (`tsc -b && vite build`) GREEN; `--assert-zero` exit 0 (all six axes 0). Confirmed green before touching anything.
+
+**Surface (rotation):** `datacenter` was `▶ NEXT` in `docs/ARTISAN.md`.
+
+**Bug fixed:** both destructive controls in the Data Center were `opacity-0 group-hover:opacity-100` — on a phone (no hover) they never become visible, so on touch you could **not** delete a row, delete a table, or reach the ⚡ `NodeActions` (handoff/intents): (1) the sidebar per-table action span (`DataCenter.tsx:154`, wraps `NodeActions` + delete-table `IconButton`) and (2) the per-row delete `IconButton` (`DataCenter.tsx:250`). This is the same phone-first hover-only trap already fixed on Music/Video/Files. Both now use `opacity-60` base + `group-hover:opacity-100` + focus emphasis (`focus-within` on the span, `focus-visible` on the button) + `transition-opacity`, mirroring the established idiom.
+
+**Proof:** extended `DataCenter.test.tsx` (4 → 6): two new cases assert the per-row delete button and the per-table action span each carry `opacity-60` and no longer carry `opacity-0` — locks the touch-reachability contract in jsdom (classNames).
+
+**Verified (the only gate):** `npm run build` GREEN · `npx vitest run` **585 passed** (+2) · `npx eslint .` clean · `check-shell-styled` / `check-route-parity` (31 ids both directions) / `check-audit` / `metrics --assert-zero` all green.
+
+**Metrics (`scripts/metrics.mjs --assert-zero`):** apps **31** ±0 · test cases **483** (+2) · test files **66** ±0 · tokenViolations **0** · offSystemUtilities **0** · offSystemStyle **0** (r0/t0/m0) · offShellControls **0** (b0/i0/s0/t0) · keyboardA11y **0** · **docMass 0** · bundle gz **733.8** ±0 (className-only change). No regression.
+
+**Not verifiable in cloud:** the on-device touch look (base-visible vs hover-emphasis) — confirm on a phone that the delete/⚡ controls are now tappable in the table list without a hover. Logic + class contract are test-locked.
+
+**Next surface:** `maps` (set `▶ NEXT` in `docs/ARTISAN.md`).
+
+---
+
 ## 2026-07-14 · BUILDER — EPIC-17 S1: the pure Attention engine (`computeAttention`) + 13 tests (measure-only)
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main`. `npm install` → `npm run build` (`tsc -b && vite build`) GREEN (PWA precache 91 entries / 3134.65 KiB); `--assert-zero` exit 0 (all six axes 0). Confirmed green before touching anything.

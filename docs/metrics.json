@@ -1,9 +1,9 @@
 {
   "current": {
-    "generatedAt": "2026-07-14T03:13:18.556Z",
+    "generatedAt": "2026-07-14T04:08:03.466Z",
     "apps": 31,
     "testFiles": 66,
-    "testCases": 481,
+    "testCases": 483,
     "tokenViolations": 0,
     "offSystemUtilities": 0,
     "offSystemStyle": 0,
@@ -36,48 +36,9 @@
       }
     ],
     "bundleGzKB": 733.8,
-    "bundleRawKB": 2467.9
+    "bundleRawKB": 2468
   },
   "history": [
-    {
-      "generatedAt": "2026-07-13T15:20:44.443Z",
-      "apps": 31,
-      "testFiles": 65,
-      "testCases": 465,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 0,
-      "offShellControlDims": {
-        "button": 0,
-        "input": 0,
-        "select": 0,
-        "textarea": 0
-      },
-      "keyboardA11y": 0,
-      "docMass": 1757,
-      "docMassDims": [
-        {
-          "path": "docs/CONTEXT.md",
-          "lines": 411,
-          "budget": 400,
-          "over": 11
-        },
-        {
-          "path": "docs/EPICS.md",
-          "lines": 2246,
-          "budget": 500,
-          "over": 1746
-        }
-      ],
-      "bundleGzKB": 734,
-      "bundleRawKB": 2469
-    },
     {
       "generatedAt": "2026-07-13T15:22:39.128Z",
       "apps": 31,
@@ -1172,6 +1133,45 @@
     },
     {
       "generatedAt": "2026-07-14T03:10:06.235Z",
+      "apps": 31,
+      "testFiles": 66,
+      "testCases": 481,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 0,
+      "offShellControlDims": {
+        "button": 0,
+        "input": 0,
+        "select": 0,
+        "textarea": 0
+      },
+      "keyboardA11y": 0,
+      "docMass": 0,
+      "docMassDims": [
+        {
+          "path": "docs/CONTEXT.md",
+          "lines": 400,
+          "budget": 400,
+          "over": 0
+        },
+        {
+          "path": "docs/EPICS.md",
+          "lines": 183,
+          "budget": 500,
+          "over": 0
+        }
+      ],
+      "bundleGzKB": 733.8,
+      "bundleRawKB": 2467.9
+    },
+    {
+      "generatedAt": "2026-07-14T03:13:18.556Z",
       "apps": 31,
       "testFiles": 66,
       "testCases": 481,

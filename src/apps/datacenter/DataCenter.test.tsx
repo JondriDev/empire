@@ -74,4 +74,25 @@ describe('Data Center — shell conformance', () => {
       expect(screen.getAllByLabelText('title value').length).toBe(before + 1),
     )
   })
+
+  // Touch-reachability: on a phone there is no hover, so a control gated
+  // `opacity-0 group-hover:opacity-100` is invisible and effectively
+  // unreachable. Both delete controls must carry a visible base opacity
+  // (mirrors the Music / Video / Files fixes).
+  it('keeps the per-row delete reachable on touch (base-visible, not hover-only)', () => {
+    renderDC()
+    const del = screen.getAllByRole('button', { name: 'Delete row' })[0]
+    expect(del.className).toContain('opacity-60')
+    expect(del.className).not.toContain('opacity-0')
+  })
+
+  it('keeps the per-table delete reachable on touch (base-visible, not hover-only)', () => {
+    renderDC()
+    // Seeded `tasks` + `ideas` tables → each has a delete control in a
+    // base-visible action span (no longer opacity-0/hover-only).
+    const del = screen.getAllByRole('button', { name: /Delete .* table/ })[0]
+    const actionSpan = del.closest('span')
+    expect(actionSpan?.className).toContain('opacity-60')
+    expect(actionSpan?.className).not.toContain('opacity-0')
+  })
 })
