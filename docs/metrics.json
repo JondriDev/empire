@@ -1,6 +1,6 @@
 {
   "current": {
-    "generatedAt": "2026-07-14T00:16:10.021Z",
+    "generatedAt": "2026-07-14T03:13:18.556Z",
     "apps": 31,
     "testFiles": 66,
     "testCases": 481,
@@ -39,108 +39,6 @@
     "bundleRawKB": 2467.9
   },
   "history": [
-    {
-      "generatedAt": "2026-07-13T15:11:49.911Z",
-      "apps": 31,
-      "testFiles": 65,
-      "testCases": 465,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 0,
-      "offShellControlDims": {
-        "button": 0,
-        "input": 0,
-        "select": 0,
-        "textarea": 0
-      },
-      "keyboardA11y": 0,
-      "bundleGzKB": 734,
-      "bundleRawKB": 2469
-    },
-    {
-      "generatedAt": "2026-07-13T15:17:45.381Z",
-      "apps": 31,
-      "testFiles": 65,
-      "testCases": 465,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 0,
-      "offShellControlDims": {
-        "button": 0,
-        "input": 0,
-        "select": 0,
-        "textarea": 0
-      },
-      "keyboardA11y": 0,
-      "docMass": 3269,
-      "docMassDims": [
-        {
-          "path": "docs/CONTEXT.md",
-          "lines": 1923,
-          "budget": 400,
-          "over": 1523
-        },
-        {
-          "path": "docs/EPICS.md",
-          "lines": 2246,
-          "budget": 500,
-          "over": 1746
-        }
-      ],
-      "bundleGzKB": 734,
-      "bundleRawKB": 2469
-    },
-    {
-      "generatedAt": "2026-07-13T15:17:45.576Z",
-      "apps": 31,
-      "testFiles": 65,
-      "testCases": 465,
-      "tokenViolations": 0,
-      "offSystemUtilities": 0,
-      "offSystemStyle": 0,
-      "offSystemStyleDims": {
-        "radii": 0,
-        "type": 0,
-        "motion": 0
-      },
-      "offShellControls": 0,
-      "offShellControlDims": {
-        "button": 0,
-        "input": 0,
-        "select": 0,
-        "textarea": 0
-      },
-      "keyboardA11y": 0,
-      "docMass": 3269,
-      "docMassDims": [
-        {
-          "path": "docs/CONTEXT.md",
-          "lines": 1923,
-          "budget": 400,
-          "over": 1523
-        },
-        {
-          "path": "docs/EPICS.md",
-          "lines": 2246,
-          "budget": 500,
-          "over": 1746
-        }
-      ],
-      "bundleGzKB": 734,
-      "bundleRawKB": 2469
-    },
     {
       "generatedAt": "2026-07-13T15:20:44.443Z",
       "apps": 31,
@@ -1157,6 +1055,123 @@
     },
     {
       "generatedAt": "2026-07-14T00:15:37.700Z",
+      "apps": 31,
+      "testFiles": 66,
+      "testCases": 481,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 0,
+      "offShellControlDims": {
+        "button": 0,
+        "input": 0,
+        "select": 0,
+        "textarea": 0
+      },
+      "keyboardA11y": 0,
+      "docMass": 0,
+      "docMassDims": [
+        {
+          "path": "docs/CONTEXT.md",
+          "lines": 400,
+          "budget": 400,
+          "over": 0
+        },
+        {
+          "path": "docs/EPICS.md",
+          "lines": 183,
+          "budget": 500,
+          "over": 0
+        }
+      ],
+      "bundleGzKB": 733.8,
+      "bundleRawKB": 2467.9
+    },
+    {
+      "generatedAt": "2026-07-14T00:16:10.021Z",
+      "apps": 31,
+      "testFiles": 66,
+      "testCases": 481,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 0,
+      "offShellControlDims": {
+        "button": 0,
+        "input": 0,
+        "select": 0,
+        "textarea": 0
+      },
+      "keyboardA11y": 0,
+      "docMass": 0,
+      "docMassDims": [
+        {
+          "path": "docs/CONTEXT.md",
+          "lines": 400,
+          "budget": 400,
+          "over": 0
+        },
+        {
+          "path": "docs/EPICS.md",
+          "lines": 183,
+          "budget": 500,
+          "over": 0
+        }
+      ],
+      "bundleGzKB": 733.8,
+      "bundleRawKB": 2467.9
+    },
+    {
+      "generatedAt": "2026-07-14T03:10:02.617Z",
+      "apps": 31,
+      "testFiles": 66,
+      "testCases": 481,
+      "tokenViolations": 0,
+      "offSystemUtilities": 0,
+      "offSystemStyle": 0,
+      "offSystemStyleDims": {
+        "radii": 0,
+        "type": 0,
+        "motion": 0
+      },
+      "offShellControls": 0,
+      "offShellControlDims": {
+        "button": 0,
+        "input": 0,
+        "select": 0,
+        "textarea": 0
+      },
+      "keyboardA11y": 0,
+      "docMass": 0,
+      "docMassDims": [
+        {
+          "path": "docs/CONTEXT.md",
+          "lines": 400,
+          "budget": 400,
+          "over": 0
+        },
+        {
+          "path": "docs/EPICS.md",
+          "lines": 183,
+          "budget": 500,
+          "over": 0
+        }
+      ],
+      "bundleGzKB": 733.8,
+      "bundleRawKB": 2467.9
+    },
+    {
+      "generatedAt": "2026-07-14T03:10:06.235Z",
       "apps": 31,
       "testFiles": 66,
       "testCases": 481,

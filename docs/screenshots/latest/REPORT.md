@@ -1,38 +1,28 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-13T23:08:18.924Z
+**Generated:** 2026-07-14 · green main `b1c296f` · fresh cloud checkout
+
+**Verdict:** ✅ main RUNS clean. Build GREEN · 32/32 routes render clean · all 14 guard suites green · all six conformance axes 0 & LOCKED (`--assert-zero` exit 0). **No runtime bug found — nothing for the Build routine to pick up.**
+
+## Active-epic acceptance — EPIC-17 (the Bridge becomes the organism's cockpit)
+
+- **S1 (pure `computeAttention` engine, measure-only) — SHIPPED & CONFIRMED GREEN.** `src/lib/core/attention.ts` present + typed; `npx vitest run attention` → **13/13 green**; build🟢, `--assert-zero` exit 0, all six axes 0.
+- **Target metric `HOME-ATTENTION` guard — NOT yet present → still 0/6.** This is **EXPECTED, not a contradiction**: S1 is measure-only and drives no UI. Visually confirmed on `desktop.png` — the Bridge still shows the passive mute-count tiles (Today/Tasks/Goals/Organism) with **no Attention feed above the app grid**, exactly the pre-S2 state.
+- **Next:** S2 renders the ranked feed on `src/components/Bridge.tsx`; S3 makes rows resolvable; S4 adds the `HOME-ATTENTION` guard + lock. The metric moves at S4.
+
+## Metric deltas — `scripts/metrics.mjs` (Δ vs last QA `19e0454`)
+
+| Metric | Value | Δ |
+|---|---|---|
+| Apps / routes | 31 | ±0 |
+| Test cases | 481 | **+13** (EPIC-17 S1 `attention.test.ts`) |
+| Test files | 66 | **+1** |
+| Token violations / Off-system utils / style / shell / keyboard-a11y / doc-mass | 0 / 0 / 0 / 0 / 0 / 0 | ±0 — all LOCKED |
+| Bundle gz (KB) | 733.8 | ±0 |
+
+`node scripts/metrics.mjs --assert-zero` → **exit 0**.
 
 **Result:** 32/32 rendered without crash, 0 failed.
-
-> **✅ NO RUNTIME BUG FOUND.** Green build, 32/32 render clean (desktop + 31 apps), all 14 guards green, all six conformance axes 0 & LOCKED (`--assert-zero` exit 0). Console/network noise is env-expected only (blocked map/geocoding CDNs, authed 401s) — no regression for the build routine to pick up.
-
-## Run summary (metrics + epic-acceptance) — green main `19e0454`, QA 2026-07-13
-
-**Build:** GREEN (`tsc -b && vite build`, 12.3s; PWA precache 91 entries / 3134.65 KiB).
-**Smoke:** 32/32 rendered without crash (desktop + 31 registry apps), 0 uncaught JS / error boundaries / blank screens.
-**Guards (14/14 green):** SHELL-IS-STYLED · REGISTRY-COVERAGE · INBOUND-LANDS 4/4 · MEDIA-PERSISTS 3/3 · GRAPH-LEGIBLE 3/3 · GLOBAL-SEARCH 1/1 · NODE-LINEAGE 1/1 · INTENT-ROUNDTRIP 2/2 · TIMELINE 1/1 · HOME-ALIVE 1/1 · PROVENANCE-PERSISTS 3/3 · PROVENANCE-ENTITY 3/3 · PRECACHE-AUDIT (no gap) · OFFLINE-BOOT 5/5.
-**Visual inspection:** desktop shell (styled glass, "Good night" home alive), Network (CORE mesh + legend), Solver (world catalog backlog), Reader (honest empty state) — all confirmed rendering real content, no blank/unstyled traps.
-
-### Metric deltas (`scripts/metrics.mjs`, `--assert-zero` **exit 0**)
-
-| Metric | Value | Δ vs last QA (`d7ef5fe`) | Note |
-|---|---|---|---|
-| Apps / routes | 31 | ±0 | smoke↔registry exact at 31; 32/32 incl. desktop render clean |
-| Test cases | 468 | ±0 | `src/` static |
-| Test files | 65 | ±0 | |
-| Token violations | 0 | ±0 | LOCKED |
-| Off-system utilities | 0 | ±0 | LOCKED |
-| Off-system style | 0 (r0/t0/m0) | ±0 | LOCKED |
-| Off-shell controls | 0 (b0/i0/s0/t0) | ±0 | LOCKED |
-| Keyboard a11y | 0 | ±0 | LOCKED |
-| **Doc mass (over)** | **0** | ±0 | **LOCKED** (CONTEXT ≤400 / EPICS ≤500 gate bites) |
-| Bundle gz (KB) | 733.8 | ±0 | dev-only playwright never enters prod bundle |
-
-### Epic-acceptance confirmation
-
-- **★ EPIC-16 · doc-mass conformance — CODE-COMPLETE (S1–S3), re-confirmed this run.** Target metric `docMass` holds at **0** and is LOCKED in `--assert-zero` (S3 gate present after `keyboardA11y`; the success line names `docMass=0`). Both read-every-run docs stay under budget. No new stage; no product code changed. **No contradiction** — the acceptance metric that moved last run (`docMass 3269 → 0`) is reproduced exactly on `19e0454`.
-- **All six conformance axes 0 & LOCKED** (tokenViolations · offSystemUtilities · offSystemStyle · offShellControls · keyboardA11y · docMass). Any regression fails CI.
-- No active stage remains — the design-system/accessibility/doc-mass trilogy is fully enforced. Strategist to promote the next ROADMAP-NOW epic (and formally retire EPIC-15 + EPIC-16 → DONE).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -56,7 +46,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |

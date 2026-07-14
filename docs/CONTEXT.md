@@ -394,7 +394,7 @@ AI-call budget (default 100, user-tunable, hard stop button).
   aria-label" detector over-counts badly (most flagged Buttons have DYNAMIC text children a static scan can't see) —
   too noisy to be honest. Chose the ratified `docMass` instead.
 
-## ✅ QA state (latest — 2026-07-13, green main `61c4f7b`)
+## ✅ QA state (latest — 2026-07-14, green main `b1c296f`)
 
-- EPIC-15 CODE-COMPLETE: `keyboardA11y 24 → 0` LOCKED; render-smoke 32/32 clean, all 14 guards green, PRECACHE 90 no-gap, OFFLINE 5/5. Auto-metrics: apps 31, test cases 465, files 65, bundle gz ~733. No runtime bug, no drift.
+- All six axes 0 & LOCKED (`--assert-zero` exit 0); render-smoke 32/32 clean, all 14 guards green, PRECACHE 91 no-gap, OFFLINE 5/5. Auto-metrics: apps 31, test cases 481 (+13 = EPIC-17 S1 `attention.test.ts`), files 66, bundle gz 733.8. No runtime bug, no drift. **EPIC-17 S1 (engine-only) shipped+green; `HOME-ATTENTION` guard not yet present → target still 0/6 (expected — S1 drives no UI; moves at S4).**
 - Env-only console noise (NOT bugs): weather geocoding/Geolocation blocked, maps CARTO tiles blocked, files+mail 401 (backend auth). All render clean.
