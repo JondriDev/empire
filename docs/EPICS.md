@@ -47,146 +47,117 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 
 ---
 
-## ▶ ACTIVE — EPIC-18 · The cockpit reaches beyond the home (shell-level attention)
+## ▶ ACTIVE — EPIC-19 · The organism relates (the associative constellation)
 
-> **⚠️ Builder-proposed 2026-07-14, AWAITING STRATEGIST RATIFICATION.** EPIC-17 reached CODE-COMPLETE with
-> every stage checked and QA-confirmed `HOME-ATTENTION 6/6`, and every ROADMAP "NOW" item was already DONE — so
-> this run found **no active unchecked stage**. Per the routine's Definition-of-Done ("if EPICS has no active
-> stage, do the topmost item and note EPICS needs the Strategist"), the Builder shipped the highest-gradient
-> *cloud-verifiable* increment and recorded it here for the Strategist to ratify, refine, or redirect (the only
-> queued alternative, EPIC-7 Android, stays device-gated).
+> **Strategist-promoted 2026-07-14**, after EPIC-17 (home cockpit, `HOME-ATTENTION 6/6`) **and** EPIC-18
+> (shell attention, `SHELL-ATTENTION 4/4`) both reached CODE-COMPLETE with every stage QA-confirmed on
+> green main — both now retired to the DONE index below. The "proactive cockpit" arc is closed.
 >
-> **Why this gradient.** All six conformance axes are 0 & LOCKED and there is no runtime bug, so the steepest
-> remaining *systemic* gradient is still organism proactivity — one order past EPIC-17. EPIC-17 made the **home**
-> proactive (the ranked "Needs you" feed), but the instant you open an app that signal leaves the screen: the
-> organism goes quiet exactly when you're heads-down in a task. EPIC-18 carries the attention signal into the
-> **persistent shell** — a live badge on the HomeBar's Home button, tinted by urgency — so the cockpit can tap
-> you on the shoulder from *inside* any app, and one tap returns you to the feed. 100% cloud-verifiable, reuses
-> the `computeAttention` spine + the existing `empire-homebar-badge` pattern, no new deps, all six axes stay 0.
+> **Why highest gradient now.** The conformance band is exhausted (all six axes 0 & LOCKED) and QA reports
+> **no runtime bug**, so per the priority bias the steepest remaining **systemic** gradient is still
+> **organism depth** — one order past *proactive*. The organism now has five lenses over its one Core graph
+> (Network · Search · Inbox · Timeline · Attention) and it *remembers movement* (provenance edges + node
+> lineage). But every edge it knows is **explicit**: an edge exists only if an app fired a handoff (`ProvEdge`)
+> or an intent stamped `data.from`. The organism has never revealed an **implicit** relationship — two notes
+> about the same topic, a task and an event that share a tag, entities born the same day. So an entity sits in
+> the mesh knowing only who *handed to* it, never what it is *about*. This epic adds the **associative layer**:
+> open any entity and see its *constellation* — the other entities across every app that are genuinely related
+> to it (shared terms · shared tags · same-day · already-linked), each ranked and reason-labelled, one tap
+> away. This is the felt "alien technology that sees the connections you didn't" leap: the 6th lens
+> (ASSOCIATIVE), turning a graph of isolated artifacts into a navigable web of meaning. 100% cloud-verifiable,
+> reuses the `search.ts` `nodeBodyText`/`queryTerms` spine + the graph's `links`/`data.from` + `openEntity` +
+> `ui` rails, **no new deps**, keeps all six axes 0.
 >
-> **Target metric** = a new **`SHELL-ATTENTION` QA guard** (`scripts/qa-smoke.mjs`), the organism-guard pattern
-> (cf. `HOME-ATTENTION 6/6`): seed an overdue + a plain-open task, reload, and assert the Home button badge is
-> hidden at home, shows the live count with an urgent tint once an app is foregrounded, and clears (feed back)
-> on tap-Home. **Goal: `SHELL-ATTENTION 0 → 4/4` on green main**, plus the pure `attentionSummary` spine
-> unit-pinned. Baseline (pre-epic): no shell badge exists (`0/4`).
+> **Target metric** = a new **`RELATED` QA guard** (`scripts/qa-smoke.mjs`), the organism-epic pattern
+> (cf. `NODE-LINEAGE 1/1`, `TIMELINE 1/1`, `HOME-ATTENTION 6/6`): seed a target entity plus three entities that
+> SHOULD relate to it by three distinct signals (an explicit `data.from` link, a shared rare term, a shared
+> tag) **and** one entity that must NOT relate (no overlap) → reload → assert the target's constellation renders
+> exactly the three related entities in score order (the explicit link on top), each carrying a reason chip, the
+> unrelated node ABSENT, and a one-tap open on the top row lands in its owning app. **Goal:
+> `RELATED 0 → 5/5` confirmed by QA on green main** (`linkedTop · sharedTerm · sharedTag · unrelatedAbsent ·
+> oneTapLands`), plus the pure `relatedTo` spine unit-pinned. Baseline (pre-epic): no relatedness surface
+> exists (`0/5`).
 
-- [x] **S1 · Shell attention indicator + guard (measure spine + render + lock).** ✅ Shipped 2026-07-14 (this
-  run). Pure `attentionSummary(nodes, now, limit=8)` in `src/lib/core/attention.ts` → `{count, top, urgent}`
-  (`urgent` = the top item is an overdue task; reuses `computeAttention`), +4 cases in `attention.test.ts`.
-  **Render (`src/components/Desktop.tsx`):** a `useGraph(s=>s.nodes)` sub + a 30s `attnMinute` memo feed
-  `attentionSummary`; the HomeBar Home `IconButton` gains a `.empire-homebar-badge.is-attention` (ember glow,
-  `.is-urgent`→`--c-danger`) carrying `data-shell-attention={count}` + `data-home` + a count-aware aria-label,
-  shown ONLY when `!atHome` (`homeAttn`) so it is a "reach-beyond-home" nudge, never redundant with the
-  on-screen feed. New i18n `shell.home`/`shell.attention.short`; CSS in DS_INFRA `src/window-manager.css`. New
-  **`SHELL-ATTENTION` guard** in `scripts/qa-smoke.mjs` seeds an overdue + open task (both `app:goals`,
-  graph-survivable), opens an app in-place by clicking the top row, and asserts 4 checks: hidden at home ·
-  shows count `2` inside the app · `is-urgent` tint · tap-Home clears it + the feed returns. **Acceptance MET:**
-  `SHELL-ATTENTION 4/4` on green main (target 0→4/4 MOVED); build🟢 vitest 593🟢 eslint🟢 `--assert-zero` exit 0
-  (all six axes 0); 32/32 smoke still clean, every prior guard green. **Trap discovered:** the primary shell is
-  `Desktop` (`/`, HomeBar always-on-top, apps open in-place via in-memory `windowStore` → `atHome=false`);
-  `/app/:appId` is a SEPARATE deep-link `AppShell` with its own chrome and NO HomeBar — the badge lives only in
-  `Desktop`, and any guard must open an app by CLICKING, not by `goto /app/<id>` (which resets the in-memory stack).
-- [x] **S2 · Motion polish — the badge breathes when a NEW item lands.** ✅ Shipped 2026-07-14 (this run).
-  Pure `shouldPulseAttention(prevTopId, nextTopId, atHome)` in `src/lib/core/attention.ts` (returns true iff a
-  genuinely NEW top item leads while an app is foregrounded — never at home, never the item you navigated past,
-  never null→…→null) + 4 cases in `attention.test.ts`. **Render (`Desktop.tsx`):** an effect keyed on
-  `attention.top?.id` sets a self-clearing `attnPulse` flag via `shouldPulseAttention`; the Home badge gains
-  `.is-pulse` → a one-shot `@keyframes empire-badge-pulse` (scale 1→1.55→1 + brightness bloom, `--ease-spring`
-  `--dur-slow`, iteration 1) that self-clears `onAnimationEnd`. `prefers-reduced-motion` is honoured by the
-  global reduce rule (`design-system.css`) which collapses the duration (same pattern as every `.animate-*`).
-  **Verified:** build🟢 vitest 599🟢 eslint🟢 six axes 0 `--assert-zero`; the SHELL-ATTENTION guard still passes
-  4/4 in a real browser AND no *spurious* pulse fires on the home→app transition (`noSpuriousPulse=true` — the
-  `is-pulse` binding is correctly wired). The pulse *animation itself* is not headless-observable (a live
-  in-memory store mutation isn't drivable via localStorage) — motion is verified by the unit-pinned timing rule.
-  **★ EPIC-18 is now CODE-COMPLETE (S1+S2 shipped, SHELL-ATTENTION 4/4 locked) — Strategist to ratify + retire
-  to the DONE index and promote the next epic (EPIC-7 Android stays device-gated).**
+- [ ] **S1 · Pure relatedness engine + unit tests (measure-only; NO UI change).** New
+  `src/lib/core/related.ts`. Types: `export type RelatedReason = 'linked' | 'shared-term' | 'shared-tag' |
+  'same-day'`; `export interface RelatedItem { node: CoreNode; score: number; reasons: RelatedReason[] }`.
+  Helpers: `export function significantTerms(node: CoreNode): string[]` — union of `node.title` (lowercased,
+  split on `/\W+/`) + the search spine's `nodeBodyText(node)` tokens, keep terms with **length ≥ 4**, drop a
+  small `STOP` set (`this·that·with·from·have·about·your·will·into·they·them·then·when·what·which·were·been`),
+  dedupe (Set). Import `nodeBodyText` from `./search` — do NOT re-implement it. Core:
+  `export function relatedTo(nodes: CoreNode[], id: string, limit = 6): RelatedItem[]` — resolve the target `T`
+  (return `[]` if `id` absent); for every other node `N` (`N.id !== id`) sum a score with the reasons that
+  fired: **linked +8** iff an explicit edge exists either way (`T.links.includes(N.id)` ‖ `N.links.includes(T.id)`
+  ‖ `T.data.from === N.id` ‖ `N.data.from === T.id`); **shared-tag +4 per common tag** (intersection of the
+  string elements of `T.data.tags` / `N.data.tags` arrays, capped +12); **shared-term +3 per common significant
+  term** (intersection of `significantTerms(T)` / `significantTerms(N)`, capped +9); **same-day +2** iff
+  `dayKey(T.meta.created) === dayKey(N.meta.created)` (add a local `dayKey(ms)=new Date(ms).toISOString().slice(0,10)`
+  — pure, no import cycle). Drop `score === 0`; sort **score desc → `meta.updated` desc**; cap to `limit`;
+  attach the reasons that scored (deterministic order: linked · shared-tag · shared-term · same-day). New
+  `src/lib/core/related.test.ts` (~13 cases): shared-term relates two notes; a no-overlap node excluded;
+  explicit `data.from` scores highest with `reasons:['linked',…]`; graph-`links` counts as linked both
+  directions; shared-tag; same-day; stopwords + <4-char terms do NOT create a match; self excluded; missing
+  `id` → `[]`; `limit` cap; score-desc ordering; `meta.updated` tie-break; empty graph → `[]`. **Acceptance:**
+  `npx vitest run related` green; `relatedTo`/`significantTerms` exported + typed; **no component edited** (S1 is
+  measure-only, mirroring every prior epic's S1); `node scripts/metrics.mjs --assert-zero` exit 0 (all six axes 0).
+- [ ] **S2 · Surface the constellation on the Network inspector (`<RelatedConstellation>`).** New
+  `src/components/ui/RelatedConstellation.tsx`: `export function RelatedConstellation({ nodeId }: { nodeId: string })`
+  — subscribes `useGraph(s => s.nodes)`, memoizes `relatedTo(Object.values(nodes), nodeId)`; renders `null` when
+  empty (self-hiding, like `<NodeLineage>`). Otherwise a labelled `[data-related=<nodeId>]` block of up to 6
+  rows, each a keyboard-safe `ui` `Button` (ghost, `data-related-item=<node.id>`) firing
+  `openEntity(node.meta.app, node.id)` — folds navigation in for free (no `keyboardA11y` regression). Each row:
+  the owning-app accent chip (`getAppIcon`/registry `color`, same idiom as the Bridge attention rows), the
+  entity title, and a **reason chip** for the top reason (`RelatedReason` → i18n `related.reason.linked|
+  sharedTag|sharedTerm|sameDay`, EN/ID, added to `src/lib/i18n.ts`). DS-clean: new `.related-*` CSS in DS_INFRA
+  `src/window-manager.css`; any inline style uses `var(--*)` only (no raw px/hex — the gate bites). **Mount it on
+  the Network inspector's per-entity list** (`src/apps/network/Network.tsx`, beside the existing `<NodeLineage>`/
+  `<NodeDescendants>` per entity) so clicking a node reveals both its ancestry AND its constellation. New
+  `src/components/ui/RelatedConstellation.test.tsx` (~4 cases): given a seeded graph, renders the related set in
+  score order with the correct reason chip per row; renders nothing for an entity with no relations; the row is a
+  focusable control (`role`/tag) targeting the related entity. **Acceptance:** build🟢 vitest🟢 eslint🟢; six axes
+  0 `--assert-zero`; `<RelatedConstellation>` exported + mounted on the Network inspector; render tests green.
+- [ ] **S3 · Extend the constellation to the Timeline + Search surfaces (reuse verbatim).** Drop the S2
+  `<RelatedConstellation nodeId={n.id}/>` onto the two other node-rendering views that already carry
+  `<NodeLineage>`: the **Timeline entity row** (`src/apps/timeline/Timeline.tsx`, beside `NodeLineage`/
+  `NodeDescendants` — a moment now reads *ancestry · descendants · constellation*) and the **Search result row**
+  (`src/apps/search/Search.tsx`). No new component — import and mount the S2 one. Confirm navigation still lands
+  via `openEntity` and every row is keyboard-operable (`Button`). Extend `RelatedConstellation.test.tsx` (+2) for
+  the row-click navigation path (handler fires with the related node's app+id, does not throw). **Acceptance:**
+  build🟢 vitest🟢 eslint🟢; six axes 0 `--assert-zero`; the constellation is legible on Network + Timeline +
+  Search (three surfaces, one component); nav test green.
+- [ ] **S4 · QA guard `RELATED` → ★ EPIC-19 CODE-COMPLETE.** Add the `RELATED` guard to `scripts/qa-smoke.mjs`
+  (mirror the `TIMELINE`/`HOME-ATTENTION` guards). Seed `empire-core-graph` with graph-survivable nodes that are
+  NOT pruned by `syncAll`'s note/learning/message reconcilers (use `task`/`book`/`goal` types): a **target** node
+  `T`; a **linked** node whose `data.from === T.id`; a **shared-term** node whose title/body shares a rare token
+  with `T` (e.g. `Xenobloom`) and NOTHING else; a **shared-tag** node carrying a tag `T` also has; and an
+  **unrelated** node with no overlap. Reload (persist rehydrate), then drive the **Timeline surface** (proven
+  headless-drivable by the `TIMELINE` guard — the Network canvas node-click is fragile, do NOT use it): open
+  `/app/timeline`, locate `T`'s row, and assert its `[data-related=<T.id>]` block renders exactly the three
+  related nodes in score order (linked ▸ shared-tag ▸ shared-term), each with its reason chip, the **unrelated
+  node ABSENT**, and a one-tap open on the top (linked) related row lands in its owning app. **Acceptance:**
+  smoke green with `RELATED 5/5` (`linkedTop · sharedTerm · sharedTag · unrelatedAbsent · oneTapLands`) → target
+  metric 0 → 5/5 MOVED; build🟢 `node scripts/metrics.mjs --assert-zero` exit 0 (six axes 0); the guard is the
+  durable lock (mirrors the EPIC-10/13/17 organism guards). ★ EPIC-19 CODE-COMPLETE → Strategist retires to DONE.
 
----
-
-## ✅ CODE-COMPLETE (retire to DONE index) — EPIC-17 · The Bridge becomes the organism's cockpit (from legible to proactive)
-
-> **Strategist-promoted 2026-07-13**, after EPIC-15 (keyboard operability) + EPIC-16 (doc-mass) both
-> reached CODE-COMPLETE with no unchecked stage — both now formally retired to the DONE index below.
-> **★ EPIC-17 is now CODE-COMPLETE itself (S1–S4 all shipped, `HOME-ATTENTION 6/6` QA-confirmed on green main
-> `69fd479`).** The Strategist should move it to the DONE index; EPIC-18 (above) is the Builder-proposed successor.
->
-> **Why highest gradient now.** The conformance band is exhausted at the systemic level — all six axes
-> (colour · utilities · style · shell · keyboardA11y · docMass) are **0 & LOCKED**; reduced-motion is
-> already global (`design-system.css`), the accessible-name metric was rejected as over-counting, and
-> per-app craft belongs to the App Artisan rotation. Per the priority bias, with QA reporting **no
-> runtime bug** and every conformance number maxed, the steepest remaining **systemic** gradient is
-> **organism depth**. The four read-lenses (Network · Search · Inbox · Timeline) and the emit↔receive
-> loop are complete, but the organism is **passive**: it mirrors, remembers and displays, yet never
-> tells you *what needs you now*. The front door proves it — `src/components/Bridge.tsx` shows mute
-> **counts** (Today: N · Tasks: N · Organism: N) + a recents strip, not a ranked, resolvable feed.
-> This epic turns the home from a dashboard into a **cockpit**: one prioritized "Attention" stream that
-> synthesizes every app's live signals, explains each, and lets you resolve it in one tap. Highest felt
-> capability ("alien technology that anticipates you"), 100 % cloud-verifiable, reuses the `bridge.ts` /
-> `tasks.ts` / `openEntity` / `a11y.ts` / `ui` rails, **no new deps**, keeps all six axes 0.
->
-> **Target metric** = a new **`HOME-ATTENTION` QA guard** (`scripts/qa-smoke.mjs`), the organism-epic
-> pattern (cf. `GRAPH-LEGIBLE 3/3`, `TIMELINE 1/1`): seed a graph that mixes an overdue task, a today
-> event, a plain open task, a stalled low-progress goal, an in-progress book and a fresh handoff →
-> assert the Bridge renders ONE ranked feed, urgency-ordered, each row reasoned + actionable, one-tap
-> open lands. **Goal: `HOME-ATTENTION 0 → 6/6` confirmed by QA on green main**, plus the pure
-> `computeAttention` spine unit-pinned. Baseline (pre-epic): no attention feed exists (`0/6`).
-
-- [x] **S1 · Pure attention engine + unit tests (measure-only; NO UI change).** ✅ Shipped 2026-07-14 —
-  `src/lib/core/attention.ts` (`computeAttention` + typed `AttentionItem`/`AttentionKind`, 5 pure scorers) +
-  `attention.test.ts` (13 green); build🟢 vitest🟢 `--assert-zero` exit 0, all six axes 0. New
-  `src/lib/core/attention.ts`: `export type AttentionKind = 'task-overdue'|'event-today'|'task-open'|'goal-stalled'|'reading'|'handoff'`;
-  `export interface AttentionItem { id: string; node: CoreNode; kind: AttentionKind; score: number; reasonKey: string; app: string }`;
-  pure `computeAttention(nodes: CoreNode[], now: number, limit = 8): AttentionItem[]` that scores each
-  candidate 0..100 by urgency, sorts **score desc → `meta.updated` desc**, de-dupes by node id, caps to
-  `limit`. Small pure scorers `scoreTask`/`scoreEvent`/`scoreGoal`/`scoreReading` (overdue > today >
-  open; a `goal` with `data.progress` low **and** aged is `goal-stalled`; a `book` with reading progress
-  <100 is `reading`; a recent inbound `HANDOFF`/`app:*` mirror surfaces once). Reuse `eventsOn`/`dayStamp`
-  from `bridge.ts`, `partitionTasks` from `tasks.ts`. New `src/lib/core/attention.test.ts` (~12 cases):
-  ordering (overdue task ⟩ today event ⟩ plain open task), stalled-goal detection, `reading` inclusion,
-  `limit` cap, empty→`[]`, done-task exclusion, id de-dupe, `meta.updated` tie-break. **Acceptance:**
-  `npx vitest run attention` green; `computeAttention` exported + typed; **no component edited** (S1 is
-  measure-only, mirroring every prior epic's S1); `node scripts/metrics.mjs --assert-zero` exit 0.
-- [x] **S2 · Render the ranked Attention feed on the Bridge.** ✅ Shipped 2026-07-14 — `Bridge.tsx` gains a
-  **Needs you** section (between the telemetry widgets and Jump-back-in) fed by
-  `computeAttention(Object.values(nodes), minute)` via the existing `useGraph` sub + minute clock. Each item
-  is a keyboard-safe `ui` `Button` (ghost) row: owning-app accent chip (`registry` `getAppIcon`/`color`),
-  entity title (tasks strip `Do:`), a **reason chip** (`reasonKey` → EN/ID via `t(...)`, one i18n key per
-  `AttentionKind`, added to `i18n.ts`), and a `badgeFor` badge (event→time · book→% · else `agoLabel`). Empty
-  feed → `<EmptyState size="sm">` ("All clear — nothing needs you"). DS-clean (new `.bridge-attention-*` CSS in
-  DS_INFRA `window-manager.css`; Bridge inline styles use `var(--r-*)` only). **Folded S3's primary open** —
-  row click fires `openEntity(app, node.id)`, keyboard-operable for free via `Button` (no `keyboardA11y`
-  regression). `Bridge.test.tsx` (2🟢) asserts 4-node feed renders **in score order** (overdue▸today▸handoff▸
-  open) with each reason string + empty-state fallback. build🟢 vitest 587🟢 eslint🟢 six axes 0 `--assert-zero`.
-- [x] **S3 · Inline quick-resolve controls (the cockpit acts in place, not just navigates).** ✅ Shipped
-  2026-07-14 — each "Needs you" row is now a `.bridge-attention-item` flex wrapper holding the ghost open `Button`
-  (unchanged: `openEntity`, `data-attention`) **plus** a SIBLING quick-resolve control (`AttentionResolve`, never
-  nested — no button-in-button): `task` → ✓ done `IconButton` (`updateNode(id,{data:{...data,done:true}})` —
-  durable, tasks are graph-only), fresh `handoff` → ✕ dismiss (clear `data.from`), else (event/goal/book) →
-  `<NodeActions nodeId>` ⚡ (make-task/make-note intents). TS-forced `aria-label`s via `t('attention.act.done|
-  dismiss')`. Dispatches ✓done off `node.type==='task'` FIRST so a make-task task (carries `data.from` → could
-  score `handoff`) still gets a done toggle. `Bridge.test.tsx` +2 (4🟢) — done control flips `data.done`, drops the
-  row on the next `computeAttention`, and is a proven sibling of the open button; handoff dismiss clears `from` +
-  drops. build🟢 vitest 589🟢 eslint🟢 six axes 0 `--assert-zero`; **cloud-verified in a real browser** (6 kinds
-  seeded → correct order + per-kind control; ✓-click dropped the row & persisted `done:true`; 0 console errors).
-- [x] **S4 · QA guard → ★ EPIC-17 CODE-COMPLETE.** ✅ Shipped by QA 2026-07-14 (`43f6970`). Added the
-  `HOME-ATTENTION` guard to `scripts/qa-smoke.mjs`: seeds `empire-core-graph` with all six kinds at
-  graph-survivable types (overdue `task` due-5d / today `event` / fresh `draft` handoff / aged low-progress
-  `goal` / plain open `task` / mid-progress `book` — none pruned by syncAll's note/learning/message
-  reconcilers), reloads (persist rehydrate), asserts the Bridge renders ONE ranked feed in EXACT score
-  order (overdue 95 ▸ event 75 ▸ handoff 70 ▸ goal 60 ▸ open 50 ▸ reading 35), every row carries a reason +
-  a resolve control, and a one-tap open on the top row lands in Goals. **Acceptance MET:** smoke green with
-  `HOME-ATTENTION 6/6` (target metric 0 → 6/6 MOVED); build🟢 `--assert-zero` exit 0; guard is the durable
-  lock (mirrors the EPIC-10/13 organism guards). ★ EPIC-17 CODE-COMPLETE → Strategist retires to DONE.
-
-> _**Sequencing note.** No new deps, no config/dep changes, all product-code stays behind the green
-> six-axis gate. EPIC-16's remaining RFC items are handled or out of Builder scope (playwright-devDep +
-> auto-server INFRA GAP closed 2026-07-10; routine-prompt amendments go through the Optimizer flow).
-> **EPIC-7 · Android stays device-gated** (below) — promote only with an on-device QA path._
+> _**Sequencing note.** No new deps, no config/dep changes; all product-code stays behind the green six-axis
+> gate. Each stage is downhill given the prior: S1 is a pure module (measure-only), S2 is one new self-hiding
+> component on ONE surface, S3 mounts that same component on two more, S4 is a headless guard on the
+> already-proven Timeline surface. **EPIC-7 · Android stays device-gated** (below) — promote only with an
+> on-device QA path._
 
 ---
 
 ## ✅ DONE — retired epics (one-line index; full bodies + per-stage detail in git history + `docs/ROUTINE-LOG.md`)
 
+- **EPIC-18 · The cockpit reaches beyond the home (shell-level attention)** — `SHELL-ATTENTION 0 → 4/4` LOCKED
+  (2026-07-14, S1–S2). Pure `attentionSummary(nodes,now,limit)` (`attention.ts`) → `{count,top,urgent}` feeds a
+  live `.empire-homebar-badge.is-attention` on the HomeBar Home `IconButton` (`Desktop.tsx`), shown only `!atHome`,
+  urgent-tinted when the top item is overdue; S2's `shouldPulseAttention` makes it spring-pulse when a NEW top item
+  lands. `SHELL-ATTENTION` guard in `qa-smoke.mjs`. Key commits `8a0c6c9` (S1) · `aa9acf7` (S2).
+- **EPIC-17 · The Bridge becomes the organism's cockpit (legible → proactive)** — `HOME-ATTENTION 0 → 6/6` LOCKED
+  (2026-07-14, S1–S4). Pure `computeAttention` spine (`attention.ts`) + Bridge "Needs you" ranked feed with inline
+  quick-resolve (`AttentionResolve`); one prioritized, reasoned, one-tap-resolvable Attention stream synthesising
+  every app's live signals. `HOME-ATTENTION` guard in `qa-smoke.mjs`. Key commits `b1c296f` (S1) · `43f6970` (S4).
 - **EPIC-16 · The fleet eats its own dog food (doc-mass conformance)** — `docMass 3269 → 0` LOCKED (2026-07-13,
   S1–S3). `scripts/docMassAudit.mjs` (`scanDocMass`) budgets the read-every-run docs (CONTEXT ≤400, EPICS ≤500);
   S1 stood up the metric + pruned both under budget, S3 added the `docMass>0` gate to `--assert-zero` (bite-verified).
@@ -234,11 +205,3 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 > **Target metric:** APK installs + all offline-capable apps function on-device with `server.js` absent.
 > Stage seeds: run the `Android APK` workflow; verify the backend-optional fallbacks (Files' `/api/files`
 > 500 → on-device storage path, etc.); on-device smoke of the 8 offline instruments.
-
----
-
-## DONE
-
-- **EPIC-0 · Organism foundation** — A-bus / B-graph / C-intents, `mirrorCollection`,
-  `NodeActions`, `HANDOFF` event, Network wired to the live bus + app→app arcs, core
-  unit tests. (Shipped #3/#5/#7/#8/#13/#20, 2026-06-20 → 06-21.) EPIC-1 completes it.

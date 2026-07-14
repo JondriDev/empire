@@ -10,7 +10,7 @@
 > **Priority bias (high → low):** fix what QA reports broken → interconnection
 > (the living graph) → design-system consistency → completing apps → PWA → Android.
 >
-> Last re-ranked: **2026-07-13** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 468/65 files,
+> Last re-ranked: **2026-07-14** (strategist) · Main: 🟢 green (`metrics.json` current: apps 31, vitest 468/65 files,
 > **all six conformance axes 0 & LOCKED** — token-violations 0, off-system 0, offSystemStyle 0 r0/t0/m0, offShellControls 0
 > b0/i0/s0/t0, keyboardA11y 0, docMass 0 — `--assert-zero` exit 0, bundle gz 733.8) · QA (2026-07-13, green main `d131376`):
 > 32/32 render clean, all 14 guard suites green, **no runtime bug**. **EPIC-1..16 all DONE** (organism both-ways 9/9 ·
@@ -20,18 +20,19 @@
 > `INBOUND-LANDS 4/4` — EPIC-13 · `offShellControls` 341→0 LOCKED — EPIC-14 · `keyboardA11y` 24→0 LOCKED — EPIC-15 · `docMass`
 > 3269→0 LOCKED — EPIC-16). **The organism has NO islands left AND the design-system conformance band is fully swept + gated**
 > (reduced-motion is already global; the accessible-name metric was rejected as over-counting; per-app craft belongs to the App
-> Artisan rotation). So the steepest remaining **systemic** gradient descends back to **organism depth** — but one order deeper:
-> from *legible* to *proactive*.
-> **✅ EPIC-17 · The Bridge becomes the organism's cockpit — CODE-COMPLETE 2026-07-14** (`HOME-ATTENTION 0 → 6/6` LOCKED,
-> S1–S4): a ranked, reasoned, one-tap-resolvable **Attention** feed on the home synthesising every app's live signals via the
-> pure `computeAttention` spine. Strategist to retire to DONE.
-> **▶ EPIC-18 · The cockpit reaches beyond the home (shell-level attention) — Builder-proposed 2026-07-14, AWAITING STRATEGIST
-> RATIFICATION.** With EPIC-17 code-complete and every NOW item DONE, this run had no active stage; per the DoD the Builder
-> shipped the highest-gradient cloud-verifiable increment and flagged it here. **Leap:** carry the attention signal off the home
-> and into the **persistent shell** — a live "needs you" badge on the HomeBar Home button (urgency-tinted), so the organism nudges
-> you from *inside* any app; one tap returns to the feed. **Target: new `SHELL-ATTENTION` QA guard 0 → 4/4** (shipped this run:
-> S1 `attentionSummary` spine + `Desktop.tsx` badge + guard, **4/4 PASS**). Reuses `computeAttention` + `empire-homebar-badge`; no
-> new deps; all six axes 0. **Android is EPIC-7 (QUEUED)** — device-gated, promote only with on-device QA.
+> Artisan rotation). So the steepest remaining **systemic** gradient stays **organism depth** — one order deeper each epic:
+> *legible* → *proactive* (EPIC-17/18, both DONE) → *associative* (EPIC-19, now ACTIVE).
+> **✅ EPIC-17 · The Bridge becomes the organism's cockpit — DONE 2026-07-14** (`HOME-ATTENTION 0 → 6/6` LOCKED, S1–S4): a
+> ranked, reasoned, one-tap-resolvable **Attention** feed on the home synthesising every app's live signals via the pure
+> `computeAttention` spine. **✅ EPIC-18 · The cockpit reaches beyond the home (shell-level attention) — DONE 2026-07-14**
+> (`SHELL-ATTENTION 0 → 4/4` LOCKED, S1–S2): the attention signal carried into the persistent shell — a live, urgency-tinted,
+> spring-pulsing "needs you" badge on the HomeBar Home button so the organism nudges you from *inside* any app.
+> **▶ EPIC-19 · The organism relates (the associative constellation) — ACTIVE, promoted 2026-07-14.** The order past *proactive*:
+> from surfacing *what needs you* to revealing *how everything connects*. Every graph edge today is EXPLICIT (a handoff or an
+> intent-stamped `data.from`); nothing reveals IMPLICIT relatedness. Add the **6th lens (ASSOCIATIVE)**: open any entity → its
+> *constellation* of cross-app relatives (shared-term · shared-tag · same-day · already-linked), ranked + reason-labelled + one
+> tap away. **Target: new `RELATED` QA guard 0 → 5/5**; pure `relatedTo` spine reusing `search.ts` + the graph. No new deps; six
+> axes 0. See `docs/EPICS.md` for the S1–S4 decomposition. **Android is EPIC-7 (QUEUED)** — device-gated, promote only with on-device QA.
 
 > **Note:** the day-to-day execution queue now lives in [`docs/EPICS.md`](./EPICS.md)
 > (one ACTIVE epic, deeply decomposed stages). This ROADMAP holds the **higher-altitude
@@ -142,10 +143,17 @@ now **EPIC-6 S4**:
 - **The fleet eats its own dog food — doc-mass conformance.** ✅ **DONE — this WAS EPIC-16** (S1–S3, retired 2026-07-13): the
   user-ratified `docMass` metric (`scripts/docMassAudit.mjs` `scanDocMass`) budgets the read-every-run docs (CONTEXT ≤400,
   EPICS ≤500); `docMass 3269 → 0` LOCKED. *(The RFC's QA-infra gap — playwright→devDep + auto-server — shipped 2026-07-10.)*
-- **From legible to proactive — the Bridge becomes the organism's cockpit.** *(In progress — this IS EPIC-17, ▶ ACTIVE,
-  promoted 2026-07-13.)* The organism is fully legible + interconnected but passive; the home shows mute counts, not *what needs
-  you now*. Add one ranked, reasoned, one-tap-resolvable **Attention** feed (pure `computeAttention` spine + Bridge render +
-  resolve/navigate + `HOME-ATTENTION 6/6` QA guard). See `docs/EPICS.md` for the S1–S4 decomposition.
+- **From legible to proactive — the Bridge becomes the organism's cockpit.** ✅ **DONE — this WAS EPIC-17** (retired 2026-07-14):
+  one ranked, reasoned, one-tap-resolvable **Attention** feed on the home (pure `computeAttention` spine + Bridge render +
+  inline resolve/navigate); `HOME-ATTENTION 0 → 6/6` LOCKED.
+- **The cockpit reaches beyond the home — shell-level attention.** ✅ **DONE — this WAS EPIC-18** (retired 2026-07-14): the
+  attention signal carried into the persistent shell — a live, urgency-tinted, spring-pulsing badge on the HomeBar Home button
+  (`attentionSummary` spine + `Desktop.tsx`); `SHELL-ATTENTION 0 → 4/4` LOCKED.
+- **From proactive to associative — the organism relates.** *(In progress — this IS EPIC-19, ▶ ACTIVE, promoted 2026-07-14.)*
+  The graph only knows EXPLICIT edges (handoffs / `data.from`); it never reveals IMPLICIT relatedness. Add the 6th lens
+  (ASSOCIATIVE): a per-entity **constellation** of cross-app relatives (shared-term · shared-tag · same-day · already-linked),
+  ranked + reason-labelled + navigable (pure `relatedTo` spine reusing `search.ts` + `<RelatedConstellation>` on Network/
+  Timeline/Search + `RELATED 5/5` QA guard). See `docs/EPICS.md` for the S1–S4 decomposition.
 - **Measured accessibility pass — LARGELY CLOSED; parking-lot.** `prefers-reduced-motion` is **already global**
   (`src/design-system.css` `@media (prefers-reduced-motion: reduce)` neutralizes all CSS animation/transition; the 2 JS canvas
   surfaces already guard `matchMedia`), and the accessible-name (WCAG 4.1.2) metric was **rejected 2026-07-13** as over-counting

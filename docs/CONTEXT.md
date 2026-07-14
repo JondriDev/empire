@@ -25,29 +25,26 @@
 > git + `docs/ROUTINE-LOG.md`; working memory stays tight (its budget is the
 > `docMass` metric — see below).
 
-- **▶ EPIC-18 · The cockpit reaches beyond the home (shell-level attention) — ★ CODE-COMPLETE 2026-07-14
-  (S1+S2 shipped, `SHELL-ATTENTION` 4/4 LOCKED). AWAITING STRATEGIST: retire to DONE index + promote next epic.**
-  Carries the EPIC-17 "Needs you" signal into the persistent shell so the organism nudges you from *inside* any
-  app. Reuses the `computeAttention` spine + `empire-homebar-badge` CSS + `IconButton`; no new deps; six axes 0.
-  - **✅ S1 (green main `d4289b8`, QA-confirmed):** pure `attentionSummary(nodes,now,limit=8)` (`attention.ts:172`)
-    → `{count, top, urgent}` (`urgent`=top kind `task-overdue`). **Render (`Desktop.tsx`):** `useGraph(s=>s.nodes)`
-    + 30s `attnMinute` memo → `attention`; HomeBar Home `IconButton` gains `.empire-homebar-badge.is-attention`
-    (ember; `.is-urgent`→`--c-danger`) with `data-shell-attention` + `data-home` + count-aware aria-label, shown
-    ONLY `!atHome` (`homeAttn`, `Desktop.tsx:126`). **Guard `SHELL-ATTENTION` (`qa-smoke.mjs:1073`)** seeds
-    overdue+open task, asserts hidden-at-home · count `2` in-app · `is-urgent` · tap-Home clears → **4/4**.
-  - **✅ S2 SHIPPED (this run):** motion polish — the badge breathes when a NEW item lands. Pure
-    `shouldPulseAttention(prevTopId,nextTopId,atHome)` (`attention.ts`, +4 tests) = true iff a genuinely new top
-    item leads while `!atHome` (never at home / same-item-navigated-past / empty). `Desktop.tsx`: effect keyed on
-    `attention.top?.id` sets self-clearing `attnPulse`; badge gains `.is-pulse` → one-shot `@keyframes
-    empire-badge-pulse` (scale 1→1.55→1 + brightness, `--ease-spring`/`--dur-slow`, iter 1) cleared
-    `onAnimationEnd`. reduced-motion honoured by the GLOBAL reduce rule (`design-system.css`, collapses duration —
-    same as every `.animate-*`; do NOT add a per-rule media query). build🟢 vitest 599🟢 eslint🟢 six axes 0.
-    **Trap:** the primary shell is `Desktop` (`/`, HomeBar always-on-top, apps open in-place via in-memory
-    `windowStore`→`atHome=false`); `/app/:appId` is a SEPARATE `AppShell` (own chrome, NO HomeBar) — the badge
-    lives only in `Desktop`; a guard must open an app by CLICKING (not `goto /app/x`). The pulse *animation* is
-    not headless-observable — its timing is unit-pinned; `noSpuriousPulse=true` confirms the class binding.
-    ▶ NEXT: **Strategist** retires EPIC-18 to DONE (SHELL-ATTENTION 4/4 moved) + promotes the next epic — six
-    axes 0, no runtime bug → steepest gradient stays organism depth; EPIC-7 Android device-gated.
+- **▶ EPIC-19 · The organism relates (the associative constellation) — ▶ ACTIVE, promoted 2026-07-14. NOT yet
+  built.** The order past *proactive*: from *what needs you* (EPIC-17/18) to *how everything connects*. Every graph
+  edge today is EXPLICIT (handoff `ProvEdge` / intent `data.from`); nothing reveals IMPLICIT relatedness. Add the
+  6th lens (ASSOCIATIVE): open any entity → its *constellation* of cross-app relatives (shared-term · shared-tag ·
+  same-day · linked), ranked + reason-labelled + one tap away. Reuses `search.ts` + graph + `openEntity` + `ui`; no new deps; six axes 0. **Target: new `RELATED` QA guard 0 → 5/5.**
+  - **▶ S1 (next — measure-only, NO UI):** new `src/lib/core/related.ts` — `RelatedReason` (`linked·shared-term·
+    shared-tag·same-day`), `RelatedItem {node,score,reasons}`, `significantTerms(node)` (title + `nodeBodyText`
+    tokens, len≥4, minus a small STOP set — import `nodeBodyText` from `./search`, don't re-impl), and
+    `relatedTo(nodes,id,limit=6)` scoring each other node: linked +8 (edge either way ‖ `data.from` either way),
+    shared-tag +4/tag (cap +12), shared-term +3/term (cap +9), same-day +2 (local `dayKey`); drop 0, sort
+    score↓→`meta.updated`↓, cap; attach reasons. `related.test.ts` ~13 cases. **Acceptance:** `vitest run
+    related` green; no component edited; `--assert-zero` exit 0.
+  - **S2:** `src/components/ui/RelatedConstellation.tsx` (`{nodeId}`; `useGraph`→`relatedTo`; `null` when empty; up
+    to 6 ghost `Button` rows, each app-chip + title + reason chip, click→`openEntity`) mounted on the Network
+    inspector per-entity list beside `<NodeLineage>`; i18n `related.reason.*`; `.related-*` CSS in DS_INFRA
+    `window-manager.css`; `RelatedConstellation.test.tsx`. **S3:** mount the SAME component on Timeline + Search
+    rows (verbatim). **S4:** `RELATED` guard in `qa-smoke.mjs` on the (headless-drivable) Timeline surface → `5/5`
+    (linkedTop·sharedTerm·sharedTag·unrelatedAbsent·oneTapLands) → EPIC-19 CODE-COMPLETE. **Trap:** use `task`/
+    `book`/`goal` seed types (note/learning/message get pruned by syncAll); drive Timeline, NOT the fragile
+    Network canvas click.
 
 ### Standing design-system recipes (carry forward — reusable across any future migration)
 
@@ -83,6 +80,10 @@
 
 ### ✅ Retired epics — DONE index (full bodies in git; metric each moved)
 
+- **EPIC-18 · The cockpit reaches beyond the home (shell-level attention)** — DONE 2026-07-14, `SHELL-ATTENTION
+  0 → 4/4` LOCKED (S1–S2). `attentionSummary` (`attention.ts`) → a live `.empire-homebar-badge.is-attention` on
+  the HomeBar Home `IconButton` (`Desktop.tsx`), shown only `!atHome`, urgent-tinted + spring-pulse on a new top
+  item (`shouldPulseAttention`). `SHELL-ATTENTION` guard in `qa-smoke.mjs`. `8a0c6c9` · `aa9acf7`.
 - **EPIC-17 · The Bridge becomes the organism's cockpit (legible→proactive)** — DONE 2026-07-14, `HOME-ATTENTION
   0 → 6/6` LOCKED (S1–S4). Pure `computeAttention` spine (`attention.ts`) + Bridge "Needs you" ranked feed with
   inline quick-resolve (`AttentionResolve`); `HOME-ATTENTION` guard in `qa-smoke.mjs`. `69fd479`.
@@ -98,8 +99,7 @@
 - **EPIC-12 · Intent integrity** — DONE 2026-07-09, `INTENT-ROUNDTRIP 0/2 → 2/2`. `make-note-from` +
   `add-to-learning` write REAL store entities (via `useStore` in `sync.ts`) that survive `reconcile()`; a raw
   `g.addNode` phantom is pruned. **TRAP (still live): a mirrored node gets a FRESH graph id — the store item id
-  lands in `data.sourceId`; ⚡ resolves by `type`+`sourceId`, and any guard asserting lineage must use the
-  MIRROR node id, never the store id.**
+  lands in `data.sourceId`; a guard asserting lineage must use the MIRROR node id, never the store id.**
 - **EPIC-1..11 · interconnection + PWA + design-system trilogy** — all DONE (organism graph/bus/intents,
   provenance, global search, Timeline, offline+installable PWA, colour+token+style conformance). Seams below.
 

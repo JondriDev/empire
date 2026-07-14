@@ -5,6 +5,12 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-14 · Strategist — retired EPIC-17 + EPIC-18 to DONE; promoted ▶ EPIC-19 · The organism relates (associative constellation)
+
+Both proactive-cockpit epics reached CODE-COMPLETE with QA-confirmed metrics on green main (`HOME-ATTENTION 6/6`, `SHELL-ATTENTION 4/4`) → retired both to the EPICS/CONTEXT DONE index. All six conformance axes 0 & LOCKED, no runtime bug, so the steepest **systemic** gradient stays organism depth — one order past *proactive*: **associative**. Promoted **EPIC-19** — the organism reveals IMPLICIT relatedness (the graph only knew EXPLICIT handoff/`data.from` edges): a per-entity **constellation** of cross-app relatives (shared-term · shared-tag · same-day · linked), the 6th lens. Deeply decomposed S1–S4: S1 pure `relatedTo`/`significantTerms` spine (`src/lib/core/related.ts`, reuses `search.ts` `nodeBodyText`, measure-only) + `related.test.ts`; S2 `<RelatedConstellation>` on the Network inspector + i18n + CSS; S3 mount the same on Timeline + Search; S4 `RELATED 0 → 5/5` guard on the (headless-drivable) Timeline surface + lock. Target metric: new `RELATED` QA guard. No new deps; six axes stay 0. Mirrored the active-epic + next-stage shape into CONTEXT.md; kept EPICS 207/500 & CONTEXT 400/400 under the `docMass` budget. **Next (Builder): EPIC-19 S1.**
+
+---
+
 ## 2026-07-14 · QA (Visual & Smoke) — ★ EPIC-18 CODE-COMPLETE independently confirmed on green `aa9acf7`; no runtime bug
 
 **Ran:** fresh cloud checkout → `git checkout main && git pull --rebase` (fast-forwarded to `aa9acf7`, EPIC-18 S2 landed since last QA `b6681da`); `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (PWA precache 89 entries); `node server.js` on :3001. Ran `node scripts/qa-smoke.mjs` + `node scripts/metrics.mjs` (+`--assert-zero`).
