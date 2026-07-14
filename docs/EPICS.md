@@ -73,7 +73,9 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 > open lands. **Goal: `HOME-ATTENTION 0 → 6/6` confirmed by QA on green main**, plus the pure
 > `computeAttention` spine unit-pinned. Baseline (pre-epic): no attention feed exists (`0/6`).
 
-- [ ] **S1 · Pure attention engine + unit tests (measure-only; NO UI change).** New
+- [x] **S1 · Pure attention engine + unit tests (measure-only; NO UI change).** ✅ Shipped 2026-07-14 —
+  `src/lib/core/attention.ts` (`computeAttention` + typed `AttentionItem`/`AttentionKind`, 5 pure scorers) +
+  `attention.test.ts` (13 green); build🟢 vitest🟢 `--assert-zero` exit 0, all six axes 0. New
   `src/lib/core/attention.ts`: `export type AttentionKind = 'task-overdue'|'event-today'|'task-open'|'goal-stalled'|'reading'|'handoff'`;
   `export interface AttentionItem { id: string; node: CoreNode; kind: AttentionKind; score: number; reasonKey: string; app: string }`;
   pure `computeAttention(nodes: CoreNode[], now: number, limit = 8): AttentionItem[]` that scores each

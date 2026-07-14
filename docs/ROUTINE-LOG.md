@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-14 · BUILDER — EPIC-17 S1: the pure Attention engine (`computeAttention`) + 13 tests (measure-only)
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main`. `npm install` → `npm run build` (`tsc -b && vite build`) GREEN (PWA precache 91 entries / 3134.65 KiB); `--assert-zero` exit 0 (all six axes 0). Confirmed green before touching anything.
+
+**Why this stage:** EPIC-17's `▶ NEXT` in CONTEXT/EPICS. The organism is legible but passive — the home shows mute counts, never *what needs you now*. S1 lays the pure spine the Bridge cockpit (S2–S4) renders, following every prior epic's measure-only-S1 pattern (no component edited).
+
+**What shipped:** new `src/lib/core/attention.ts` — pure `computeAttention(nodes, now, limit=8): AttentionItem[]` (`{id,node,kind,score,reasonKey,app}`; `AttentionKind = task-overdue|event-today|task-open|goal-stalled|reading|handoff`). Five small pure scorers over one graph snapshot: task (**overdue** `85 + 2·min(daysLate,7)` capped 100 ⟩ **due-today** 55 ⟩ **open** 50), **event-today** 75, **goal-stalled** 60 (numeric `data.progress` < 34 **AND** `meta.updated` aged ≥ 14 d), **reading** 35 (`book` with `0 < data.progress < 1`, a 0..1 fraction), **handoff** 70 (content node carrying `data.from`, `updated` within 1 h). Best-score-per-node de-dupe (`Map` keyed by id → each node "surfaces once", highest reason wins), sort **score↓ then `meta.updated`↓**, cap to `limit`. `reasonKey = 'attention.<kind>'` (one i18n key per kind, ready for S2). Reuses `dayStamp`/`isContentNode` (bridge.ts) + `isTaskDone` (tasks.ts). New `src/lib/core/attention.test.ts` — **13** cases: empty→[], full ordering (overdue⟩today⟩open), age-weighted overdue, done-exclusion, stalled detection (+ negatives: fresh goal / completed / high-progress), reading inclusion vs finished/unopened, fresh-vs-stale handoff, id de-dupe (task+from → one handoff row), `meta.updated` tie-break, `limit` cap, app/reasonKey carry-through.
+
+**Verified (the only gate):** `npm run build` GREEN · `npx vitest run` **583 passed** (+13, was 570) · `npx eslint src/lib/core/attention.ts attention.test.ts` clean · **metrics `--assert-zero` exit 0**, all six axes hold 0. Metrics row below.
+
+**Metrics (`scripts/metrics.mjs --assert-zero`):** apps **31** ±0 · test cases **481** (+13) · test files **66** (+1) · tokenViolations **0** · offSystemUtilities **0** · offSystemStyle **0** (r0/t0/m0) · offShellControls **0** (b0/i0/s0/t0) · keyboardA11y **0** · **docMass 0** (CONTEXT 400/400, EPICS 183/500) · bundle gz **733.8** ±0 (pure lib, tree-shaken out of eager path until S2 imports it). No regression.
+
+**Not verifiable in cloud:** none — S1 is pure logic, fully covered by unit tests; no visual surface (no component edited, by design).
+
+**Next:** **S2** — render the ranked feed on `src/components/Bridge.tsx`: an Attention section above the app grid fed by `computeAttention(Object.values(nodes), Date.now())` (existing `useGraph` sub + minute clock), each item a `ui` `Card` row (title · reason chip via `reasonKey`→`t(...)` · due/`agoLabel` badge · owning-app accent), empty→`<EmptyState size="sm">`; DS-clean (ui primitives + tokens only). Watch the S1 traps recorded in CONTEXT (task `data.due` unset by any app yet; book progress 0..1 vs goal 0..100).
+
+---
+
 ## 2026-07-13 · QA — visual + smoke on green main `19e0454` (EPIC-16 S3 LOCK) → 🟢 GREEN, all six axes 0 & LOCKED
 
 **Result:** 🟢 GREEN · 32/32 render clean · 14/14 guards green · `--assert-zero` exit 0 · **no runtime bug**.

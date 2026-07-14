@@ -32,16 +32,24 @@
   live signals. Target = a new **`HOME-ATTENTION` QA guard** (`scripts/qa-smoke.mjs`) → **0 → 6/6** on green
   main (organism-epic pattern, cf. `GRAPH-LEGIBLE 3/3`). Reuses `bridge.ts`/`tasks.ts`/`openEntity`
   (`windowStore.ts:126`)/`onActivate` (`a11y.ts:23`)/`ui`; no new deps; keeps all six axes 0.
-  - **▶ NEXT (S1, measure-only, NO UI change):** new **`src/lib/core/attention.ts`** — pure
-    `computeAttention(nodes: CoreNode[], now: number, limit = 8): AttentionItem[]` (`AttentionItem =
-    {id,node,kind,score,reasonKey,app}`; `kind ∈ task-overdue|event-today|task-open|goal-stalled|reading|handoff`).
-    Score each candidate 0..100 by urgency (overdue⟩today⟩open; aged low-progress goal = stalled; unfinished book
-    = reading; fresh inbound handoff once), sort **score desc → `meta.updated` desc**, de-dupe by node id, cap to
-    `limit`. Reuse `eventsOn`/`dayStamp` (bridge.ts) + `partitionTasks` (tasks.ts). New `attention.test.ts` (~12):
-    ordering, stalled detection, reading inclusion, cap, empty→[], done-exclusion, id de-dupe, updated tie-break.
-    **Acceptance:** `vitest run attention` 🟢; no component edited; `metrics.mjs --assert-zero` exit 0. Then S2
-    renders the feed on the Bridge, S3 wires resolve/navigate, S4 adds the `HOME-ATTENTION` guard + locks it.
-    **Keep CONTEXT ≤400 / EPICS ≤500 — the docMass gate bites.** When trimming, keep every live seam; history is `git show`.
+  - **✅ S1 SHIPPED 2026-07-14:** `src/lib/core/attention.ts` — pure `computeAttention(nodes, now, limit=8):
+    AttentionItem[]` (`{id,node,kind,score,reasonKey,app}`; kinds task-overdue|event-today|task-open|goal-stalled|
+    reading|handoff). 5 scorers: task (overdue 85+2·daysLate capped 100 ⟩ due-today 55 ⟩ open 50), event-today 75,
+    goal-stalled 60 (progress<34 AND untouched ≥14d), reading 35 (book 0<progress<1), handoff 70 (content node w/
+    `data.from`, updated ≤1h). Best-score-per-node de-dupe (Map by id → "surfaces once"), sort score↓ then
+    `meta.updated`↓, cap. `reasonKey='attention.<kind>'` (one i18n key per kind for S2). `attention.test.ts` 13🟢.
+    **Traps for S2:** task due = `data.due` (YYYY-MM-DD str OR ms num; no task app sets it yet → task-overdue only
+    appears once a future/seed app adds it, incl. S4's QA seed). Book `data.progress` is a **0..1 fraction**, goal `data.progress` **is 0..100** — don't conflate.
+  - **▶ NEXT (S2 · render the feed on the Bridge):** edit `src/components/Bridge.tsx` — add an **Attention** section
+    above the app grid (keep greeting + organism stats), fed by `computeAttention(Object.values(nodes), Date.now())`
+    via the existing `useGraph` sub + the `minute` clock. Each item = a `ui` `Card` row: entity title, a **reason
+    chip** (`reasonKey` → EN/ID via `useLang`/`t(...)`, one string per kind), a due/`agoLabel` badge, owning-app accent
+    (`registry` `getAppIcon`/`color`). Empty feed → `<EmptyState size="sm">` ("All clear — nothing needs you"). DS-clean:
+    `ui` primitives only, tokens only, no bare control, no raw hex/px (keeps offShellControls/offSystemStyle/tokenViolations
+    0). **Acceptance:** new/extended `Bridge.test.tsx` seeds nodes, asserts rows render in `computeAttention` order + each
+    reason string present + empty-state fallback; render-smoke desktop clean; `--assert-zero` exit 0. Then S3 wires
+    resolve/navigate (`openEntity` + `onActivate`), S4 adds the `HOME-ATTENTION` guard + locks. **Keep CONTEXT ≤400 /
+    EPICS ≤500 — the docMass gate bites.**
 
 ### Standing design-system recipes (carry forward — reusable across any future migration)
 
