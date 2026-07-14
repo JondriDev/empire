@@ -32,24 +32,22 @@
   live signals. Target = a new **`HOME-ATTENTION` QA guard** (`scripts/qa-smoke.mjs`) → **0 → 6/6** on green
   main (organism-epic pattern, cf. `GRAPH-LEGIBLE 3/3`). Reuses `bridge.ts`/`tasks.ts`/`openEntity`
   (`windowStore.ts:126`)/`onActivate` (`a11y.ts:23`)/`ui`; no new deps; keeps all six axes 0.
-  - **✅ S1 SHIPPED 2026-07-14:** `src/lib/core/attention.ts` — pure `computeAttention(nodes, now, limit=8):
-    AttentionItem[]` (`{id,node,kind,score,reasonKey,app}`; kinds task-overdue|event-today|task-open|goal-stalled|
-    reading|handoff). 5 scorers: task (overdue 85+2·daysLate capped 100 ⟩ due-today 55 ⟩ open 50), event-today 75,
-    goal-stalled 60 (progress<34 AND untouched ≥14d), reading 35 (book 0<progress<1), handoff 70 (content node w/
-    `data.from`, updated ≤1h). Best-score-per-node de-dupe (Map by id → "surfaces once"), sort score↓ then
-    `meta.updated`↓, cap. `reasonKey='attention.<kind>'` (one i18n key per kind for S2). `attention.test.ts` 13🟢.
-    **Traps for S2:** task due = `data.due` (YYYY-MM-DD str OR ms num; no task app sets it yet → task-overdue only
-    appears once a future/seed app adds it, incl. S4's QA seed). Book `data.progress` is a **0..1 fraction**, goal `data.progress` **is 0..100** — don't conflate.
-  - **▶ NEXT (S2 · render the feed on the Bridge):** edit `src/components/Bridge.tsx` — add an **Attention** section
-    above the app grid (keep greeting + organism stats), fed by `computeAttention(Object.values(nodes), Date.now())`
-    via the existing `useGraph` sub + the `minute` clock. Each item = a `ui` `Card` row: entity title, a **reason
-    chip** (`reasonKey` → EN/ID via `useLang`/`t(...)`, one string per kind), a due/`agoLabel` badge, owning-app accent
-    (`registry` `getAppIcon`/`color`). Empty feed → `<EmptyState size="sm">` ("All clear — nothing needs you"). DS-clean:
-    `ui` primitives only, tokens only, no bare control, no raw hex/px (keeps offShellControls/offSystemStyle/tokenViolations
-    0). **Acceptance:** new/extended `Bridge.test.tsx` seeds nodes, asserts rows render in `computeAttention` order + each
-    reason string present + empty-state fallback; render-smoke desktop clean; `--assert-zero` exit 0. Then S3 wires
-    resolve/navigate (`openEntity` + `onActivate`), S4 adds the `HOME-ATTENTION` guard + locks. **Keep CONTEXT ≤400 /
-    EPICS ≤500 — the docMass gate bites.**
+  - **✅ S1+S2 SHIPPED 2026-07-14.** Engine `src/lib/core/attention.ts` — pure `computeAttention(nodes, now,
+    limit=8): AttentionItem[]` (`{id,node,kind,score,reasonKey,app}`; 6 kinds, `attention.test.ts` 13🟢). Scores:
+    task overdue 85+2·daysLate⩽100 ⟩ due-today 55 ⟩ open 50; event 75; goal-stalled 60 (progress<34 AND untouched
+    ≥14d); reading 35 (book 0<progress<1); handoff 70 (content w/ `data.from`, updated ≤1h). De-dupe best-score-
+    per-node → sort score↓ then `meta.updated`↓ → cap. **S2 render:** `Bridge.tsx` "Needs you" section — ghost
+    `Button` rows from `computeAttention(…, minute)`; reason chip `t('attention.<kind>')` (keys in `i18n.ts`);
+    `badgeFor` (event→time·book→%·else `agoLabel`); `<EmptyState size="sm">` fallback; `.bridge-attention-*` CSS in
+    DS_INFRA `window-manager.css`. **Row click = `openEntity(app,node.id)` — S3 primary-open folded, keyboard-safe
+    via `Button`.** `Bridge.test.tsx` 2🟢. **Live traps:** task due = `data.due` (YYYY-MM-DD str OR ms num; no task
+    app SETS it yet → task-overdue only fires once a seed adds one, incl. S4 QA seed); book `data.progress` **0..1
+    fraction** vs goal `data.progress` **0..100** — don't conflate.
+  - **▶ NEXT (S3 · inline quick-resolve).** Add a trailing `ui` `IconButton` (TS-forced `aria-label`; must NOT
+    steal the row's open click) per kind — `task`→done toggle (`updateNode(id,{data:{...data,done:true}})`),
+    `handoff`→dismiss (clear `data.from`), `goal`→open Goals; reuse `<NodeActions nodeId=>` for a ⚡ menu.
+    **Acceptance:** `Bridge.test.tsx` — done control flips `data.done` AND drops the row next `computeAttention`;
+    control has an accessible name; `--assert-zero` 0. Then S4 = `HOME-ATTENTION` guard in `qa-smoke.mjs` + locks.
 
 ### Standing design-system recipes (carry forward — reusable across any future migration)
 
@@ -396,5 +394,5 @@ AI-call budget (default 100, user-tunable, hard stop button).
 
 ## ✅ QA state (latest — 2026-07-14, green main `b1c296f`)
 
-- All six axes 0 & LOCKED (`--assert-zero` exit 0); render-smoke 32/32 clean, all 14 guards green, PRECACHE 91 no-gap, OFFLINE 5/5. Auto-metrics: apps 31, test cases 481 (+13 = EPIC-17 S1 `attention.test.ts`), files 66, bundle gz 733.8. No runtime bug, no drift. **EPIC-17 S1 (engine-only) shipped+green; `HOME-ATTENTION` guard not yet present → target still 0/6 (expected — S1 drives no UI; moves at S4).**
+- All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics after EPIC-17 S2: apps 31, test cases 485 (+2 = `Bridge.test.tsx`), files 67, bundle gz 734.5 (+0.7). **EPIC-17 S1+S2 shipped+green** (engine + Bridge "Needs you" feed, row-open folded). `HOME-ATTENTION` guard not yet present → target still 0/6 (lands at S4). Bridge render verified via jsdom Bridge.test (feed order + empty state); headless render-smoke NOT re-run this build — QA to confirm the feed visually on-device.
 - Env-only console noise (NOT bugs): weather geocoding/Geolocation blocked, maps CARTO tiles blocked, files+mail 401 (backend auth). All render clean.

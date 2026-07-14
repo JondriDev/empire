@@ -40,6 +40,16 @@ const DICT: Record<string, Entry> = {
   'home.links':           { en: 'links', id: 'tautan' },
   'home.continue':        { en: 'Jump back in', id: 'Lanjutkan' },
 
+  // ── The Bridge · Attention feed (one reason string per AttentionKind) ──
+  'home.attention':          { en: 'Needs you', id: 'Perlu perhatian' },
+  'home.attention.clear':    { en: 'All clear — nothing needs you', id: 'Semua beres — tak ada yang perlu perhatian' },
+  'attention.task-overdue':  { en: 'Overdue', id: 'Terlambat' },
+  'attention.event-today':   { en: 'Today', id: 'Hari ini' },
+  'attention.task-open':     { en: 'To do', id: 'Perlu dikerjakan' },
+  'attention.goal-stalled':  { en: 'Stalled', id: 'Tersendat' },
+  'attention.reading':       { en: 'Reading', id: 'Sedang dibaca' },
+  'attention.handoff':       { en: 'Handed to you', id: 'Diberikan ke kamu' },
+
   // ── Network app ──
   'network.title':  { en: 'The Network', id: 'Jaringan Hidup' },
   'network.hint':   { en: 'CORE wired to every instrument — click a node to open it', id: 'INTI terhubung ke tiap instrumen — klik node untuk membuka' },

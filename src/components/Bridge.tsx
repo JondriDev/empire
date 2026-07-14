@@ -14,11 +14,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { CornerDownLeft } from 'lucide-react'
 import { useGraph } from '../lib/core/graph'
 import { bridgeSnapshot, agoLabel } from '../lib/core/bridge'
+import { computeAttention } from '../lib/core/attention'
 import { openAppById, openEntity } from '../lib/windowStore'
 import { apps, getAppIcon } from '../lib/registry'
 import { useLang } from '../lib/i18n'
 import { Button, Card, IconButton, Input } from './ui'
+import { EmptyState } from './ui/Utility'
 import type { CoreNode } from '../lib/core/graph'
+import type { AttentionItem } from '../lib/core/attention'
 
 const appById = Object.fromEntries(apps.map(a => [a.id, a]))
 
@@ -40,8 +43,25 @@ export default function Bridge() {
   }, [])
 
   const snap = useMemo(() => bridgeSnapshot(Object.values(nodes), minute), [nodes, minute])
+  // The proactive layer: one ranked, reasoned feed of what actually needs you
+  // now — synthesised from the same live graph the telemetry reads.
+  const attention = useMemo(() => computeAttention(Object.values(nodes), minute), [nodes, minute])
 
   const [ask, setAsk] = useState('')
+
+  // The right-side badge per item: an event's time, a book's %, else the
+  // language-neutral age of the last touch.
+  const badgeFor = (item: AttentionItem): string => {
+    const d = item.node.data
+    if (item.kind === 'event-today') {
+      return typeof d.time === 'string' && d.time ? d.time : t('home.today', 'Today')
+    }
+    if (item.kind === 'reading') {
+      const p = typeof d.progress === 'number' ? Math.round(d.progress * 100) : 0
+      return `${p}%`
+    }
+    return agoLabel(item.node.meta.updated, minute)
+  }
 
   // Hand the question to Cakra over the same clipboard rail every app uses.
   // No `from` field: the home shell is not a registry app, and provenance
@@ -131,6 +151,47 @@ export default function Bridge() {
           value={snap.organism.entities}
           sub={`${snap.organism.links} ${t('home.links', 'links')} · ${snap.organism.apps} ${t('shell.apps', 'apps')}`}
         />
+      </div>
+
+      {/* ── Needs you: the ranked, reasoned Attention feed — one tap resolves ── */}
+      <div className="bridge-attention">
+        <div className="bridge-attention-label">{t('home.attention', 'Needs you')}</div>
+        {attention.length > 0 ? (
+          <div className="bridge-attention-rows">
+            {attention.map(item => {
+              const owner = ownerOf(item.node)
+              const Icon = getAppIcon(owner.icon)
+              const title = item.node.type === 'task'
+                ? item.node.title.replace(/^Do:\s*/, '')
+                : item.node.title
+              return (
+                <Button
+                  key={item.id}
+                  variant="ghost"
+                  fullWidth
+                  className="bridge-attention-row"
+                  data-attention={item.id}
+                  style={{ ['--app-color' as string]: owner.color, padding: '9px 12px', borderRadius: 'var(--r-md)', border: '1px solid transparent', justifyContent: 'space-between', gap: '10px' }}
+                  onClick={() => openEntity(owner.id, item.node.id)}
+                  title={item.node.title}
+                  iconRight={<span className="bridge-attention-badge">{badgeFor(item)}</span>}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                    <span className="bridge-attention-chip" aria-hidden="true">
+                      <Icon className="w-3.5 h-3.5" />
+                    </span>
+                    <span className="bridge-attention-text">
+                      <span className="bridge-attention-title">{title}</span>
+                      <span className="bridge-attention-reason">{t(item.reasonKey, item.kind)}</span>
+                    </span>
+                  </span>
+                </Button>
+              )
+            })}
+          </div>
+        ) : (
+          <EmptyState size="sm" title={t('home.attention.clear', 'All clear — nothing needs you')} />
+        )}
       </div>
 
       {/* ── Jump back in: the newest touched entities, exact-landing ── */}

@@ -226,6 +226,83 @@
   transition: width var(--dur-slow) var(--ease-out);
 }
 
+/* ── Needs you — the ranked Attention feed (proactive layer) ── */
+.bridge-attention { width: 100%; }
+.bridge-attention-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin: 0 4px 6px;
+}
+.bridge-attention-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bridge-attention-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.bridge-attention-row:hover {
+  background: var(--holo-bg-h);
+  border-color: color-mix(in srgb, var(--app-color, var(--signal)) 30%, transparent);
+}
+.bridge-attention-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  color: var(--app-color, var(--signal));
+  background: color-mix(in srgb, var(--app-color, var(--signal)) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-color, var(--signal)) 22%, transparent);
+}
+.bridge-attention-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+}
+.bridge-attention-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bridge-attention-reason {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--app-color, var(--signal)) 75%, var(--text3));
+}
+.bridge-attention-badge {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Jump back in — exact-landing recents ── */
 .bridge-continue { width: 100%; }
 .bridge-continue-label {
