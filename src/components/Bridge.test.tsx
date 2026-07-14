@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import Bridge from './Bridge'
 import { useGraph, type CoreNode } from '../lib/core/graph'
 import { dayStamp } from '../lib/core/bridge'
+import { computeAttention } from '../lib/core/attention'
 
 /**
  * The Bridge · Attention feed (EPIC-17 S2). S1 shipped the pure engine
@@ -73,5 +74,50 @@ describe('Bridge — Attention feed (S2)', () => {
 
     expect(container.querySelectorAll('[data-attention]').length).toBe(0)
     expect(screen.getByText('All clear — nothing needs you')).toBeTruthy()
+  })
+})
+
+describe('Bridge — inline quick-resolve (S3)', () => {
+  beforeEach(() => {
+    useGraph.setState({ nodes: {} })
+  })
+
+  it('a task row exposes an accessible done control that resolves the task out of the feed', () => {
+    const yesterday = dayStamp(NOW - DAY)
+    seed([
+      node({ id: 'a', type: 'task', title: 'Do: File the report', data: { done: false, due: yesterday }, meta: { created: NOW, updated: NOW, app: 'inbox' } }),
+    ])
+
+    const { container } = render(<Bridge />)
+
+    // The control carries an accessible name (IconButton forces aria-label).
+    const doneBtn = screen.getByLabelText('Mark done')
+    expect(doneBtn).toBeTruthy()
+    // …and it is a SIBLING of the open row, not nested inside its <button>.
+    expect(container.querySelector('[data-attention="a"]')!.contains(doneBtn)).toBe(false)
+
+    fireEvent.click(doneBtn)
+
+    // The graph node flips done…
+    expect(useGraph.getState().nodes['a'].data.done).toBe(true)
+    // …the pure engine no longer surfaces it…
+    expect(computeAttention(Object.values(useGraph.getState().nodes), NOW)).toHaveLength(0)
+    // …and the live feed drops the row (falls back to the empty state).
+    expect(container.querySelectorAll('[data-attention]').length).toBe(0)
+    expect(screen.getByText('All clear — nothing needs you')).toBeTruthy()
+  })
+
+  it('a fresh handoff row exposes a dismiss control that clears data.from and drops it', () => {
+    seed([
+      node({ id: 'c', type: 'draft', title: 'Handed clip', data: { from: 'editor' }, meta: { created: NOW, updated: NOW, app: 'notes' } }),
+    ])
+
+    const { container } = render(<Bridge />)
+
+    const dismissBtn = screen.getByLabelText('Dismiss')
+    fireEvent.click(dismissBtn)
+
+    expect(useGraph.getState().nodes['c'].data.from).toBeUndefined()
+    expect(container.querySelectorAll('[data-attention]').length).toBe(0)
   })
 })

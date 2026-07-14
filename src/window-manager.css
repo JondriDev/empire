@@ -242,6 +242,23 @@
   flex-direction: column;
   gap: 4px;
 }
+/* One feed row: the open Button (flex:1) + a trailing quick-resolve control. */
+.bridge-attention-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  padding-right: 4px;
+}
+/* Trailing quick-resolve (done ✓ · dismiss ✕ · ⚡ menu). */
+.bridge-attention-act {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--text3);
+}
+.bridge-attention-act:hover {
+  color: var(--app-color, var(--signal));
+}
 .bridge-attention-row {
   display: flex;
   align-items: center;

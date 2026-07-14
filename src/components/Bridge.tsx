@@ -11,7 +11,7 @@
  * private stores, no fetches, fully offline.
  */
 import { useEffect, useMemo, useState } from 'react'
-import { CornerDownLeft } from 'lucide-react'
+import { Check, CornerDownLeft, X } from 'lucide-react'
 import { useGraph } from '../lib/core/graph'
 import { bridgeSnapshot, agoLabel } from '../lib/core/bridge'
 import { computeAttention } from '../lib/core/attention'
@@ -19,6 +19,7 @@ import { openAppById, openEntity } from '../lib/windowStore'
 import { apps, getAppIcon } from '../lib/registry'
 import { useLang } from '../lib/i18n'
 import { Button, Card, IconButton, Input } from './ui'
+import { NodeActions } from './ui/NodeActions'
 import { EmptyState } from './ui/Utility'
 import type { CoreNode } from '../lib/core/graph'
 import type { AttentionItem } from '../lib/core/attention'
@@ -165,27 +166,35 @@ export default function Bridge() {
                 ? item.node.title.replace(/^Do:\s*/, '')
                 : item.node.title
               return (
-                <Button
+                // The row is a container: a full-width open Button (chip · title ·
+                // reason · badge) plus a trailing, type-appropriate quick-resolve
+                // control — a sibling, never nested, so it can't steal the open tap.
+                <div
                   key={item.id}
-                  variant="ghost"
-                  fullWidth
-                  className="bridge-attention-row"
-                  data-attention={item.id}
-                  style={{ ['--app-color' as string]: owner.color, padding: '9px 12px', borderRadius: 'var(--r-md)', border: '1px solid transparent', justifyContent: 'space-between', gap: '10px' }}
-                  onClick={() => openEntity(owner.id, item.node.id)}
-                  title={item.node.title}
-                  iconRight={<span className="bridge-attention-badge">{badgeFor(item)}</span>}
+                  className="bridge-attention-item"
+                  style={{ ['--app-color' as string]: owner.color }}
                 >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
-                    <span className="bridge-attention-chip" aria-hidden="true">
-                      <Icon className="w-3.5 h-3.5" />
+                  <Button
+                    variant="ghost"
+                    className="bridge-attention-row"
+                    data-attention={item.id}
+                    style={{ flex: 1, minWidth: 0, padding: '9px 12px', borderRadius: 'var(--r-md)', border: '1px solid transparent', justifyContent: 'space-between', gap: '10px' }}
+                    onClick={() => openEntity(owner.id, item.node.id)}
+                    title={item.node.title}
+                    iconRight={<span className="bridge-attention-badge">{badgeFor(item)}</span>}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                      <span className="bridge-attention-chip" aria-hidden="true">
+                        <Icon className="w-3.5 h-3.5" />
+                      </span>
+                      <span className="bridge-attention-text">
+                        <span className="bridge-attention-title">{title}</span>
+                        <span className="bridge-attention-reason">{t(item.reasonKey, item.kind)}</span>
+                      </span>
                     </span>
-                    <span className="bridge-attention-text">
-                      <span className="bridge-attention-title">{title}</span>
-                      <span className="bridge-attention-reason">{t(item.reasonKey, item.kind)}</span>
-                    </span>
-                  </span>
-                </Button>
+                  </Button>
+                  <AttentionResolve item={item} />
+                </div>
               )
             })}
           </div>
@@ -233,6 +242,61 @@ export default function Bridge() {
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * The trailing quick-resolve control for an Attention row — the cockpit acting
+ * in place, not just navigating. Type-appropriate and durable:
+ *  · a `task` (however it surfaced) → a done toggle. Tasks are graph-only, so
+ *    `updateNode` sticks (no reconcile overwrites it) and the row drops on the
+ *    next `computeAttention` (a done task scores nothing).
+ *  · a fresh `handoff` (content node with `data.from`) → dismiss = clear `from`,
+ *    which drops it from the feed immediately.
+ *  · anything else (today's event, a stalled goal, a book mid-read) → the shared
+ *    ⚡ `NodeActions` menu (make-task / make-note / add-to-learning), which reuses
+ *    the organism's routing rail. Renders nothing when no intent applies.
+ * It's a SIBLING of the open Button (never nested — no button-in-button), so it
+ * never intercepts the row's open tap.
+ */
+function AttentionResolve({ item }: { item: AttentionItem }) {
+  const { t } = useLang()
+  const updateNode = useGraph(s => s.updateNode)
+  const node = item.node
+
+  if (node.type === 'task') {
+    return (
+      <IconButton
+        size="sm"
+        variant="ghost"
+        className="bridge-attention-act"
+        aria-label={t('attention.act.done', 'Mark done')}
+        title={t('attention.act.done', 'Mark done')}
+        icon={<Check className="w-4 h-4" />}
+        onClick={() => updateNode(node.id, { data: { ...node.data, done: true } })}
+        style={{ color: 'var(--c-success)' }}
+      />
+    )
+  }
+
+  if (item.kind === 'handoff') {
+    return (
+      <IconButton
+        size="sm"
+        variant="ghost"
+        className="bridge-attention-act"
+        aria-label={t('attention.act.dismiss', 'Dismiss')}
+        title={t('attention.act.dismiss', 'Dismiss')}
+        icon={<X className="w-4 h-4" />}
+        onClick={() => updateNode(node.id, { data: { ...node.data, from: undefined } })}
+      />
+    )
+  }
+
+  return (
+    <span className="bridge-attention-act">
+      <NodeActions nodeId={node.id} />
+    </span>
   )
 }
 

@@ -49,6 +49,8 @@ const DICT: Record<string, Entry> = {
   'attention.goal-stalled':  { en: 'Stalled', id: 'Tersendat' },
   'attention.reading':       { en: 'Reading', id: 'Sedang dibaca' },
   'attention.handoff':       { en: 'Handed to you', id: 'Diberikan ke kamu' },
+  'attention.act.done':      { en: 'Mark done', id: 'Tandai selesai' },
+  'attention.act.dismiss':   { en: 'Dismiss', id: 'Abaikan' },
 
   // ── Network app ──
   'network.title':  { en: 'The Network', id: 'Jaringan Hidup' },

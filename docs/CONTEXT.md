@@ -32,22 +32,24 @@
   live signals. Target = a new **`HOME-ATTENTION` QA guard** (`scripts/qa-smoke.mjs`) → **0 → 6/6** on green
   main (organism-epic pattern, cf. `GRAPH-LEGIBLE 3/3`). Reuses `bridge.ts`/`tasks.ts`/`openEntity`
   (`windowStore.ts:126`)/`onActivate` (`a11y.ts:23`)/`ui`; no new deps; keeps all six axes 0.
-  - **✅ S1+S2 SHIPPED 2026-07-14.** Engine `src/lib/core/attention.ts` — pure `computeAttention(nodes, now,
-    limit=8): AttentionItem[]` (`{id,node,kind,score,reasonKey,app}`; 6 kinds, `attention.test.ts` 13🟢). Scores:
-    task overdue 85+2·daysLate⩽100 ⟩ due-today 55 ⟩ open 50; event 75; goal-stalled 60 (progress<34 AND untouched
-    ≥14d); reading 35 (book 0<progress<1); handoff 70 (content w/ `data.from`, updated ≤1h). De-dupe best-score-
-    per-node → sort score↓ then `meta.updated`↓ → cap. **S2 render:** `Bridge.tsx` "Needs you" section — ghost
-    `Button` rows from `computeAttention(…, minute)`; reason chip `t('attention.<kind>')` (keys in `i18n.ts`);
-    `badgeFor` (event→time·book→%·else `agoLabel`); `<EmptyState size="sm">` fallback; `.bridge-attention-*` CSS in
-    DS_INFRA `window-manager.css`. **Row click = `openEntity(app,node.id)` — S3 primary-open folded, keyboard-safe
-    via `Button`.** `Bridge.test.tsx` 2🟢. **Live traps:** task due = `data.due` (YYYY-MM-DD str OR ms num; no task
-    app SETS it yet → task-overdue only fires once a seed adds one, incl. S4 QA seed); book `data.progress` **0..1
-    fraction** vs goal `data.progress` **0..100** — don't conflate.
-  - **▶ NEXT (S3 · inline quick-resolve).** Add a trailing `ui` `IconButton` (TS-forced `aria-label`; must NOT
-    steal the row's open click) per kind — `task`→done toggle (`updateNode(id,{data:{...data,done:true}})`),
-    `handoff`→dismiss (clear `data.from`), `goal`→open Goals; reuse `<NodeActions nodeId=>` for a ⚡ menu.
-    **Acceptance:** `Bridge.test.tsx` — done control flips `data.done` AND drops the row next `computeAttention`;
-    control has an accessible name; `--assert-zero` 0. Then S4 = `HOME-ATTENTION` guard in `qa-smoke.mjs` + locks.
+  - **✅ S1–S3 SHIPPED 2026-07-14.** Engine `attention.ts` — pure `computeAttention(nodes,now,limit=8)` → ranked
+    `AttentionItem[]` (`{id,node,kind,score,reasonKey,app}`; 6 kinds; `attention.test.ts` 13🟢). Scores: task
+    overdue 85+2·daysLate⩽100 ⟩ due-today 55 ⟩ open 50; event 75; goal-stalled 60 (progress<34 & ≥14d idle);
+    reading 35 (book 0<progress<1); handoff 70 (content w/ `data.from`, ≤1h). De-dupe best-per-node → score↓,
+    `meta.updated`↓ → cap. **Render (`Bridge.tsx`):** row = `.bridge-attention-item` flex wrapping a ghost open
+    `Button` (`openEntity(app,node.id)`; `data-attention` on it) + a SIBLING `AttentionResolve` (never nested):
+    `task`→✓done `IconButton` (`updateNode(id,{data:{...data,done:true}})`), fresh `handoff`→✕ clear `data.from`,
+    else→`<NodeActions nodeId>` ⚡. Labels via `t('attention.<kind>' | 'attention.act.done|dismiss')`; `badgeFor`;
+    `<EmptyState size="sm">`; CSS DS_INFRA `window-manager.css`; `Bridge.test.tsx` 4🟢. **Traps:** dispatch ✓done
+    off `node.type==='task'` FIRST (a make-task task carries `data.from`, so `isContentNode`→could score `handoff`,
+    yet must keep a done toggle); task `updateNode` durable (graph-only) but a note/learning dismiss REVERTS —
+    sync.ts:89/96 re-mirror `from` from the store; book `data.progress` **0..1** vs goal **0..100**; task
+    `data.due` = YYYY-MM-DD str OR ms (no app sets it yet → seed to exercise overdue).
+  - **▶ NEXT (S4 · QA guard → ★ CODE-COMPLETE).** `HOME-ATTENTION` in `qa-smoke.mjs`: seed `empire-core-graph`
+    (`{state:{nodes},version:0}`) — overdue `task`·today `event`·open `task`·aged low `goal`·in-progress `book`·fresh
+    `draft` handoff (NOT note/learning/message = PRUNED bare; `scoreEvent` keys `data.date`); reload; assert one
+    ranked feed overdue⟩open⟩event, each row reason + act, one-tap open lands; fold `HOME-ATTENTION 6/6` → REPORT.md
+    (the S3 headless render already exercised this exact seed shape — reuse it as the guard).
 
 ### Standing design-system recipes (carry forward — reusable across any future migration)
 
@@ -392,8 +394,7 @@ AI-call budget (default 100, user-tunable, hard stop button).
   aria-label" detector over-counts badly (most flagged Buttons have DYNAMIC text children a static scan can't see) —
   too noisy to be honest. Chose the ratified `docMass` instead.
 
-## ✅ QA state (latest — 2026-07-14, green main `73186e1`)
+## ✅ QA state (latest — 2026-07-14, S3 Builder-verified pre-commit)
 
-- All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics: apps 31, test cases 485, files 67, bundle gz 734.5 (Δ ±0 vs committed `metrics.json`; vs last QA commit +4 tests/+1 file/+0.7 bundle from S2 + datacenter). Smoke **32/32 clean**, all 14 guards green. **No runtime bug.**
-- **★ EPIC-17 S2 feed now CLOUD-CONFIRMED (was jsdom-only):** seeded one node per kind → Bridge "Needs you" rendered all 6 in exact order — overdue 89 ▸ today 75 ▸ handoff 70 ▸ stalled 60 ▸ open 50 ▸ reading 35 — each with reason chip + badge; fully styled, no blank-dark. This IS the S4 acceptance behaviour. `HOME-ATTENTION` guard still absent → target 0/6 (expected; Builder adds+locks at S4). **S4 seed traps:** handoff type must dodge central-sync prune (`note`/`learning`/`message` get PRUNED in a bare session — use `draft`/`task`/etc.); `scoreEvent` keys off `data.date` not `start`.
-- Env-only console noise (NOT bugs): weather geocoding/Geolocation blocked, maps CARTO tiles blocked, files+mail 401 (backend auth). All render clean.
+- All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics: apps 31, test cases 487, files 67, bundle gz 733.7. build🟢 vitest 589🟢 eslint🟢. **No runtime bug.**
+- **★ EPIC-17 S3 cloud-verified (real browser):** seeded all 6 kinds → Bridge "Needs you" rendered them in order (overdue89▸event75▸handoff70▸goal60▸open50▸book35), each with reason+badge+its own resolve control (task ✓done · handoff ✕dismiss · event/goal/book ⚡NodeActions); clicking ✓ dropped the row & persisted `done:true`; shell styled, 0 console errors. `HOME-ATTENTION` guard still absent → 0/6 (S4 adds+locks). QA to re-run full smoke. Env-only console noise (NOT bugs): weather/maps tiles + files/mail 401 (backend auth) — all render clean.

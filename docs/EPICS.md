@@ -99,13 +99,17 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
   row click fires `openEntity(app, node.id)`, keyboard-operable for free via `Button` (no `keyboardA11y`
   regression). `Bridge.test.tsx` (2🟢) asserts 4-node feed renders **in score order** (overdue▸today▸handoff▸
   open) with each reason string + empty-state fallback. build🟢 vitest 587🟢 eslint🟢 six axes 0 `--assert-zero`.
-- [ ] **S3 · Inline quick-resolve controls (the cockpit acts in place, not just navigates).** Row-open already
-  landed in S2; S3 adds a type-appropriate quick-resolve as a `ui` `IconButton` (TS-forced `aria-label`) at the
-  row's trailing edge, NOT stealing the row's open click: `task` → done toggle
-  (`updateNode(id,{data:{...data,done:true}})`), `goal` → open Goals, `handoff` (content w/ `data.from`) →
-  dismiss (clear `from`), reuse `<NodeActions nodeId=>` where a ⚡ menu fits. **Acceptance:** `Bridge.test.tsx`
-  extends — clicking a task row's done control flips `data.done` **and drops it from the feed** on the next
-  `computeAttention`; the control carries an accessible name; `--assert-zero` exit 0.
+- [x] **S3 · Inline quick-resolve controls (the cockpit acts in place, not just navigates).** ✅ Shipped
+  2026-07-14 — each "Needs you" row is now a `.bridge-attention-item` flex wrapper holding the ghost open `Button`
+  (unchanged: `openEntity`, `data-attention`) **plus** a SIBLING quick-resolve control (`AttentionResolve`, never
+  nested — no button-in-button): `task` → ✓ done `IconButton` (`updateNode(id,{data:{...data,done:true}})` —
+  durable, tasks are graph-only), fresh `handoff` → ✕ dismiss (clear `data.from`), else (event/goal/book) →
+  `<NodeActions nodeId>` ⚡ (make-task/make-note intents). TS-forced `aria-label`s via `t('attention.act.done|
+  dismiss')`. Dispatches ✓done off `node.type==='task'` FIRST so a make-task task (carries `data.from` → could
+  score `handoff`) still gets a done toggle. `Bridge.test.tsx` +2 (4🟢) — done control flips `data.done`, drops the
+  row on the next `computeAttention`, and is a proven sibling of the open button; handoff dismiss clears `from` +
+  drops. build🟢 vitest 589🟢 eslint🟢 six axes 0 `--assert-zero`; **cloud-verified in a real browser** (6 kinds
+  seeded → correct order + per-kind control; ✓-click dropped the row & persisted `done:true`; 0 console errors).
 - [ ] **S4 · QA guard → ★ EPIC-17 CODE-COMPLETE.** Add the `HOME-ATTENTION` guard to
   `scripts/qa-smoke.mjs`: seed `empire-core-graph` with an overdue `task`, a today `event`, a plain open
   `task`, a low-progress aged `goal`, an in-progress `book`, and a fresh `HANDOFF` edge; reload (persist

@@ -5,6 +5,25 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-14 · BUILDER — EPIC-17 **S3**: inline quick-resolve controls on the Attention feed (the cockpit acts in place)
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`7a9b3cc`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (precache 90). `--assert-zero` exit 0 (all six axes 0). Confirmed green before editing.
+
+**Stage shipped (EPIC-17 S3).** The "Needs you" feed was open-only (S2). S3 adds a **type-appropriate quick-resolve control** at each row's trailing edge — the home now *resolves* attention, not just navigates to it.
+- **`src/components/Bridge.tsx`** — each row is now a `.bridge-attention-item` flex wrapper holding the unchanged ghost open `Button` (`openEntity`, `data-attention`, chip·title·reason·badge) **plus a SIBLING** `AttentionResolve` control (never nested inside the button — no invalid button-in-button, so it can't steal the open tap). Dispatch: `node.type==='task'` → ✓ done `IconButton` (`updateNode(id,{data:{...data,done:true}})`); fresh `kind==='handoff'` → ✕ dismiss (`updateNode` clearing `data.from`); else (event/goal/book) → `<NodeActions nodeId>` ⚡ menu (make-task/make-note/add-to-learning). `node.type` is checked FIRST so a make-task task (which carries `data.from` and could score as `handoff`) still gets a done toggle. Done is **durable** — tasks are graph-only, no reconcile overwrites `done:true`.
+- **`src/lib/i18n.ts`** — `attention.act.done` ("Mark done" / "Tandai selesai") + `attention.act.dismiss` ("Dismiss" / "Abaikan"). `IconButton`'s TS type forces `aria-label`, so both controls carry accessible names.
+- **`src/window-manager.css`** — `.bridge-attention-item` (flex row, `padding-right`) + `.bridge-attention-act` (trailing control, `text3` → app-accent on hover). All tokens; DS_INFRA-exempt file.
+- **`src/components/Bridge.test.tsx`** — +2 (4🟢): a task row's done control carries `aria-label="Mark done"`, is a proven **sibling** of the open button, flips `data.done` on click, and drops the row from both `computeAttention` and the live DOM (→ empty state); a handoff row's dismiss clears `data.from` and drops.
+
+**Verify (the only gate — no reviewer).** `npm run build` 🟢 (`tsc -b && vite build`). `npx vitest run` **589🟢 / 73 files** (+2 src cases). `npx eslint` **clean** on all touched files. `node scripts/metrics.mjs --assert-zero` **exit 0** — all six axes 0 & LOCKED; **off-shell controls held at 0 (b0/i0/s0/t0)** despite the two new controls (reused `IconButton`/`NodeActions` primitives). **Metrics row (committed `metrics.json`):** apps **31** · tests **487** (+2) · files **67** · tokenViolations **0** · offSystemUtilities **0** · offSystemStyle **0** · offShellControls **0** · keyboardA11y **0** · docMass **0** · bundle gz **733.7** (−0.8).
+- **Cloud-verified in a real browser** (Playwright chromium, seeded `empire-core-graph` + reload): the feed rendered **6 rows in urgency order** — overdue89 ▸ event75 ▸ handoff70 ▸ goal60 ▸ open50 ▸ book35 — each with the **correct per-kind control** (task ✓done · handoff ✕dismiss · event/goal/book ⚡NodeActions). Clicking ✓ on the overdue task **dropped the row (6→5) and persisted `done:true`** to localStorage. Shell styled (`position:fixed`), **0 console errors**.
+
+**Not verifiable in cloud:** exact on-device touch ergonomics of the 28px controls (rendered + reachable in the headless run; final feel is on-device). A note/learning *handoff* dismiss reverts on the next store write (their syncers re-mirror `from`, sync.ts:89/96) — task/draft handoffs don't; acceptable since the freshness window is 1h.
+
+**Next step:** Builder ships EPIC-17 **S4** — the durable `HOME-ATTENTION` guard in `scripts/qa-smoke.mjs` (seed the six kinds, assert ranked feed + reason + act control + one-tap open → `0→6/6`), retiring the epic. The S3 headless script already exercises the exact seed shape — reuse it.
+
+---
+
 ## 2026-07-14 · QA (visual + smoke) — green main `73186e1`: 32/32 clean, all 14 guards green, six axes 0 & LOCKED; ★ EPIC-17 S2 "Needs you" feed CLOUD-CONFIRMED
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`73186e1`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (PWA precache 90 entries / 3139.84 KiB). `node server.js` serving `dist/` on :3001.
