@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 
 /**
  * Maps shell-conformance (EPIC-14 S7). Maps carried 12 bare controls
@@ -73,6 +73,43 @@ describe('Maps — shell conformance', () => {
     // The submit control is an icon-only IconButton (role=button, not the
     // "Search" tab which is role=radio) carrying its own accessible name.
     expect(screen.getByRole('button', { name: 'Search' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Use My Location' })).toBeTruthy()
+  })
+
+  it('shows an honest Locating… busy state while geolocation is pending, then clears on success', () => {
+    // Capture the success callback without invoking it → the request stays "pending".
+    let onSuccess: ((pos: unknown) => void) | undefined
+    const getCurrentPosition = vi.fn((success: (pos: unknown) => void) => { onSuccess = success })
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: { getCurrentPosition },
+    })
+
+    render(<Maps />)
+    const locate = screen.getByRole('button', { name: 'Use My Location' })
+    expect((locate as HTMLButtonElement).disabled).toBe(false)
+
+    fireEvent.click(locate)
+    // While pending: label flips to Locating…, button is disabled + aria-busy.
+    const busy = screen.getByRole('button', { name: 'Locating…' })
+    expect((busy as HTMLButtonElement).disabled).toBe(true)
+    expect(busy.getAttribute('aria-busy')).toBe('true')
+
+    // A second tap while pending must not fire another geolocation request.
+    fireEvent.click(busy)
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1)
+
+    // Resolving the position returns the button to its resting state.
+    act(() => { onSuccess?.({ coords: { latitude: 1, longitude: 2 } }) })
+    expect((screen.getByRole('button', { name: 'Use My Location' }) as HTMLButtonElement).disabled).toBe(false)
+  })
+
+  it('surfaces an error and does not get stuck busy when geolocation is unavailable', () => {
+    Object.defineProperty(navigator, 'geolocation', { configurable: true, value: undefined })
+    render(<Maps />)
+    fireEvent.click(screen.getByRole('button', { name: 'Use My Location' }))
+    expect(screen.getByText('Geolocation not available on this device.')).toBeTruthy()
+    // Never entered the busy state.
     expect(screen.getByRole('button', { name: 'Use My Location' })).toBeTruthy()
   })
 })

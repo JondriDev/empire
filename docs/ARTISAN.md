@@ -15,7 +15,7 @@
 
 ---
 
-## ▶ NEXT: `maps`
+## ▶ NEXT: `messages`
 
 (continue down the registry order, wrapping back to the top after The Bridge.)
 
@@ -42,8 +42,8 @@ Newest-visited float to the bottom of the "visited" understanding; unvisited = n
 | notes | 2026-07-13 | Keyboard-parity pass: the in-place **edit** card now honours the same shortcuts the create card already had — **Escape cancels**, **Cmd/Ctrl+Enter saves** (`role="group" aria-label="Edit note"` wrapper carries the handler; placeholder now advertises the shortcuts). A keyboard user who learned the shortcuts on the new-note form no longer hits a dead surface when editing. +`Notes.test.tsx` (4 — locks both cards' Escape + Cmd/Ctrl+Enter contract; first test file for this surface). |
 | photos | 2026-07-13 | Reachability + honest-state fix: the filename **search was permanently unreachable** — the search `<Input>` row was gated behind `allTags.length > 0`, but photos import untagged and there's no tag-adding UI, so `allTags` was always empty → the input never mounted → `searchTag` could never be set (the `filtered`-by-name logic was dead code). Now gated on `photos.length > 0`, so search-by-filename works; tag chips stay gated on `allTags.length`. **Honest empty state:** the collection-empty block always said "No photos yet" even with photos present — now three-way (no-photos / `No matches` for a search miss / `No favorites yet` for the Favorites filter). +`Photos.test.tsx` (4 → 7): untagged-library search reachability, filename filter + no-match state, favourites empty state (mutable `vi.hoisted` fixture). |
 | datacenter | 2026-07-14 | Touch-reachability fix (mirrors Music/Video/Files): both delete controls were `opacity-0 group-hover:opacity-100` — invisible/unreachable on a phone (no hover), so on touch you couldn't delete a row, delete a table, or reach ⚡ NodeActions. Now `opacity-60` base + hover/`focus-within`/`focus-visible` emphasis on the per-row delete **and** the sidebar table-action span (⚡ + delete-table). +`DataCenter.test.tsx` (4 → 6): locks both delete controls base-visible (not `opacity-0`). |
-| maps | — | ◀ NEXT |
-| messages | — | — |
+| maps | 2026-07-14 | Honest-async-feedback pass on the two network actions. **"Use My Location":** geolocation gave ZERO feedback while resolving (seconds on a phone → looks broken) and could be double-tapped firing parallel requests; now a `locating` state → button disables + `aria-busy` + label "Locating…" + pulse, re-entry guarded, cleared on success/deny; guard hardened to `!navigator.geolocation` (was `'geolocation' in navigator`, true even when the value is undefined). **Search `IconButton`:** now `disabled`+`aria-busy` while a request is in flight and the Enter handler no-ops while `isSearching` (no duplicate in-flight geocode). +`Maps.test.tsx` (3 → 5): locks the Locating… busy contract (disabled+aria-busy, single-request re-entry guard, clears on success) + the unavailable-geolocation error path. |
+| messages | — | ◀ NEXT |
 | learning-tracker | — | — |
 | goals | — | — |
 | network | — | — |

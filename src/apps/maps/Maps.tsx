@@ -59,6 +59,7 @@ export default function Maps() {
   const [activeTab, setActiveTab] = useState<'search' | 'saved'>('search')
   const [recentQueries, setRecentQueries] = useState<string[]>([])
   const [error, setError] = useState('')
+  const [locating, setLocating] = useState(false)
 
   // ── Load persisted state ───────────────────────────────────────────────
   useEffect(() => {
@@ -165,16 +166,23 @@ export default function Maps() {
   }, [savedPlaces, selectPlace])
 
   const getCurrentLocation = () => {
-    if (!('geolocation' in navigator)) {
+    if (locating) return
+    if (!navigator.geolocation) {
       setError('Geolocation not available on this device.')
       return
     }
+    setLocating(true)
+    setError('')
     navigator.geolocation.getCurrentPosition(
       pos => {
+        setLocating(false)
         setError('')
         flyTo(pos.coords.latitude, pos.coords.longitude, 13)
       },
-      () => setError('Location access denied.'),
+      () => {
+        setLocating(false)
+        setError('Location access denied.')
+      },
     )
   }
 
@@ -230,7 +238,7 @@ export default function Maps() {
               icon={<Search className="w-4 h-4" />}
               value={searchQuery}
               onChange={setSearchQuery}
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchLocations(searchQuery) } }}
+              onKeyDown={e => { if (e.key === 'Enter' && !isSearching) { e.preventDefault(); searchLocations(searchQuery) } }}
               placeholder="Search any place or address…"
               aria-label="Search any place or address"
             />
@@ -238,6 +246,8 @@ export default function Maps() {
               onClick={() => searchLocations(searchQuery)}
               aria-label="Search"
               variant="ghost"
+              disabled={isSearching}
+              aria-busy={isSearching}
               style={{ background: ACCENT, color: 'var(--void)' }}
               icon={<Search className="w-4 h-4" />}
             />
@@ -395,10 +405,12 @@ export default function Maps() {
             onClick={getCurrentLocation}
             variant="ghost"
             fullWidth
-            icon={<Locate className="w-4 h-4" />}
+            disabled={locating}
+            aria-busy={locating}
+            icon={<Locate className={`w-4 h-4 ${locating ? 'animate-pulse' : ''}`} />}
             style={{ background: ACCENT, color: 'var(--void)' }}
           >
-            Use My Location
+            {locating ? 'Locating…' : 'Use My Location'}
           </Button>
         </div>
           </>
