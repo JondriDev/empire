@@ -32,7 +32,7 @@
   live signals. Target = a new **`HOME-ATTENTION` QA guard** (`scripts/qa-smoke.mjs`) → **0 → 6/6** on green
   main (organism-epic pattern, cf. `GRAPH-LEGIBLE 3/3`). Reuses `bridge.ts`/`tasks.ts`/`openEntity`
   (`windowStore.ts:126`)/`onActivate` (`a11y.ts:23`)/`ui`; no new deps; keeps all six axes 0.
-  - **✅ S1–S3 SHIPPED 2026-07-14.** Engine `attention.ts` — pure `computeAttention(nodes,now,limit=8)` → ranked
+  - **✅ S1–S4 SHIPPED 2026-07-14 → ★ EPIC-17 CODE-COMPLETE (awaiting Strategist retire to DONE).** Engine `attention.ts` — pure `computeAttention(nodes,now,limit=8)` → ranked
     `AttentionItem[]` (`{id,node,kind,score,reasonKey,app}`; 6 kinds; `attention.test.ts` 13🟢). Scores: task
     overdue 85+2·daysLate⩽100 ⟩ due-today 55 ⟩ open 50; event 75; goal-stalled 60 (progress<34 & ≥14d idle);
     reading 35 (book 0<progress<1); handoff 70 (content w/ `data.from`, ≤1h). De-dupe best-per-node → score↓,
@@ -45,11 +45,11 @@
     yet must keep a done toggle); task `updateNode` durable (graph-only) but a note/learning dismiss REVERTS —
     sync.ts:89/96 re-mirror `from` from the store; book `data.progress` **0..1** vs goal **0..100**; task
     `data.due` = YYYY-MM-DD str OR ms (no app sets it yet → seed to exercise overdue).
-  - **▶ NEXT (S4 · QA guard → ★ CODE-COMPLETE).** `HOME-ATTENTION` in `qa-smoke.mjs`: seed `empire-core-graph`
-    (`{state:{nodes},version:0}`) — overdue `task`·today `event`·open `task`·aged low `goal`·in-progress `book`·fresh
-    `draft` handoff (NOT note/learning/message = PRUNED bare; `scoreEvent` keys `data.date`); reload; assert one
-    ranked feed overdue⟩open⟩event, each row reason + act, one-tap open lands; fold `HOME-ATTENTION 6/6` → REPORT.md
-    (the S3 headless render already exercised this exact seed shape — reuse it as the guard).
+  - **✅ S4 (QA, `43f6970`).** `HOME-ATTENTION` guard in `qa-smoke.mjs` seeds all 6 kinds at graph-survivable types
+    (overdue `task` due-5d·today `event`·fresh `draft` handoff·aged low `goal`·open `task`·mid-progress `book` — `draft`
+    NOT pruned since syncAll only reconciles note/learning/message), reloads, asserts the ranked feed in exact score
+    order (overdue 95⟩event 75⟩handoff 70⟩goal 60⟩open 50⟩reading 35) + every row reason+act + one-tap open lands in
+    Goals. **PASSES 6/6** → target metric 0→6/6 MOVED. ▶ NEXT: Strategist promotes the next epic (EPIC-7 Android device-gated).
 
 ### Standing design-system recipes (carry forward — reusable across any future migration)
 

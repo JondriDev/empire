@@ -5,6 +5,20 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-14 · QA — Visual + Smoke; ★ EPIC-17 **S4** `HOME-ATTENTION` guard added → CODE-COMPLETE
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`43f6970`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (precache 89 entries). Server up on :3001.
+
+**Smoke (before):** `node scripts/qa-smoke.mjs` → **32/32 routes render clean** (desktop + 31 registry apps), 0 uncaught JS / 0 error boundaries / none blank. All prior guards green: SHELL-IS-STYLED · REGISTRY-COVERAGE · INBOUND-LANDS 4/4 · MEDIA-PERSISTS 3/3 · GRAPH-LEGIBLE 3/3 · GLOBAL-SEARCH 1/1 · NODE-LINEAGE 1/1 · INTENT-ROUNDTRIP 2/2 · TIMELINE 1/1 · HOME-ALIVE 1/1 · PROVENANCE 3/3 + PROV-ENTITY 3/3 · PRECACHE 89 no-gap · OFFLINE-BOOT 5/5. `metrics.mjs --assert-zero` **exit 0** — all six axes 0 & LOCKED.
+
+**★ Change shipped (EPIC-17 S4 — I own `scripts/qa-smoke.mjs`).** The active epic's target metric was a not-yet-present `HOME-ATTENTION` guard (0/6). S1–S3 shipped the engine + render + resolve controls; S4 is the QA lock. Added the `HOME-ATTENTION` guard: seeds `empire-core-graph` with all six `AttentionKind`s at **graph-survivable types** (overdue `task` due-5d · today `event` · fresh `draft` handoff · aged low-progress `goal` · plain open `task` · mid-progress `book` — `draft` chosen because `syncAll` only reconciles/prunes note/learning/message, so it survives the boot reconcile while its app is unmounted), reloads (persist rehydrate), and asserts six checks: six rows render, overdue on top tagged "Overdue", **exact score order** (`qa-att-overdue > qa-att-event > qa-att-handoff > qa-att-goal > qa-att-open > qa-att-reading` = 95▸75▸70▸60▸50▸35), every row carries a reason label, every row carries a resolve control, and a one-tap open on the top row lands in Goals. Folded a `HOME-ATTENTION 6/6` table into `REPORT.md`.
+
+**Verify:** `node scripts/qa-smoke.mjs` → `HOME-ATTENTION rendered=true firstOverdue=true ordered=true reasons=true acts=true lands=true` → **6/6 ✅**; still **32/32 routes clean**; `metrics.mjs --assert-zero` **exit 0** (six axes 0, docMass 0 — CONTEXT 400/EPICS 186 both under budget). **Visually re-confirmed locally** (`desktop-attention.png`, never committed): the "NEEDS YOU" feed rendered all six rows in correct order with correct reason chips (OVERDUE/TODAY/HANDED TO YOU/STALLED/TO DO/READING) and per-kind resolve glyphs (✓ done · ⚡ actions · ✕ dismiss · 40% badge). Empty-state ("All clear — nothing needs you") confirmed on the unseeded desktop. Env-noise only (maps CARTO tiles net:8, mail himalaya not-configured net:1 — expected, not bugs).
+
+**★ EPIC-17 target metric 0 → 6/6 MOVED — EPIC-17 CODE-COMPLETE (S1–S4 all shipped + QA-confirmed).** No runtime bug found.
+
+**Next:** Strategist retires EPIC-17 to the DONE index and promotes the next epic (EPIC-7 · Android stays device-gated).
+
 ## 2026-07-14 · BUILDER — EPIC-17 **S3**: inline quick-resolve controls on the Attention feed (the cockpit acts in place)
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`7a9b3cc`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (precache 90). `--assert-zero` exit 0 (all six axes 0). Confirmed green before editing.

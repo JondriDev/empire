@@ -973,6 +973,103 @@ try {
 }
 console.log(`HOME-ALIVE: ${homeAlive.pass ? '1/1 ✅' : '0/1 ⚠️'}`);
 
+// ── HOME-ATTENTION guard (EPIC-17 target metric: the proactive cockpit feed) ──
+// HOME-ALIVE proved the home *reflects* the organism's state (mute counts +
+// recents). EPIC-17 makes it *proactive*: `computeAttention` (unit-pinned in
+// `attention.test.ts`) distils one graph snapshot into a single ranked, reasoned
+// "Needs you" feed, each row one-tap-resolvable. This carries the seed→persist→
+// reload→ranked-render + one-tap-open roundtrip jsdom can't. Seed the six kinds
+// (`attention.ts` scorers) at graph-survivable types (`task`/`event`/`goal`/
+// `book`/`draft` — none is reconciled/pruned by syncAll's note/learning/message
+// syncers while their apps stay unmounted), reload, assert the feed renders in
+// score order (overdue 95 ⟩ event 75 ⟩ handoff 70 ⟩ goal 60 ⟩ open 50 ⟩ reading
+// 35), every row carries a reason + a resolve control, and a one-tap open lands
+// in the owning app. Non-fatal like the guards above — a regression shows as ❌.
+const homeAttention = { rendered: false, firstOverdue: false, ordered: false, reasons: false, acts: false, lands: false, pass: false };
+try {
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 30000 });
+  const todayStamp = await page.evaluate(() => {
+    const d = new Date(); const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  });
+  const seedNow = Date.now();
+  const DAY = 86_400_000;
+  // Overdue task: due 5 days ago (YYYY-MM-DD) → score 85 + min(5,7)*2 = 95, the top row.
+  const pastDue = await page.evaluate((n) => {
+    const d = new Date(n - 5 * 86_400_000); const p = (x) => String(x).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }, seedNow);
+  const attnSeed = { state: { nodes: {
+    'qa-att-overdue': {
+      id: 'qa-att-overdue', type: 'task', title: 'Ship the overdue thing',
+      data: { done: false, due: pastDue }, links: [],
+      meta: { created: seedNow - 6000, updated: seedNow - 6000, app: 'goals' },
+    },
+    'qa-att-event': {
+      id: 'qa-att-event', type: 'event', title: 'Standup at two',
+      data: { date: todayStamp, time: '14:00', description: '' }, links: [],
+      meta: { created: seedNow - 5000, updated: seedNow - 5000, app: 'calendar' },
+    },
+    'qa-att-handoff': {
+      id: 'qa-att-handoff', type: 'draft', title: 'Reply handed to you',
+      data: { from: 'qa-att-source' }, links: [],
+      meta: { created: seedNow - 1000, updated: seedNow, app: 'mail' },
+    },
+    'qa-att-goal': {
+      id: 'qa-att-goal', type: 'goal', title: 'Learn the harmonica',
+      data: { progress: 10, completed: false }, links: [],
+      meta: { created: seedNow - 21 * DAY, updated: seedNow - 20 * DAY, app: 'goals' },
+    },
+    'qa-att-open': {
+      id: 'qa-att-open', type: 'task', title: 'Water the plants sometime',
+      data: { done: false }, links: [],
+      meta: { created: seedNow - 4000, updated: seedNow - 4000, app: 'goals' },
+    },
+    'qa-att-reading': {
+      id: 'qa-att-reading', type: 'book', title: 'The Half-Read Chronicle',
+      data: { format: 'txt', progress: 0.4 }, links: [],
+      meta: { created: seedNow - 3000, updated: seedNow - 3000, app: 'reader' },
+    },
+  } }, version: 0 };
+  await page.evaluate(([k, v]) => localStorage.setItem(k, v), [GRAPH_KEY, JSON.stringify(attnSeed)]);
+  await page.reload({ waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(700);
+  // The ranked feed: read each row's node id (order) + whether it carries a reason + an act.
+  const rows = await page.$$eval('.bridge-attention-item', (items) => items.map((it) => {
+    const row = it.querySelector('.bridge-attention-row');
+    const reason = it.querySelector('.bridge-attention-reason');
+    const act = it.querySelector('.bridge-attention-act');
+    return {
+      id: row ? row.getAttribute('data-attention') : null,
+      reason: reason ? (reason.textContent || '').trim() : '',
+      hasAct: !!act,
+    };
+  }));
+  const EXPECTED = ['qa-att-overdue', 'qa-att-event', 'qa-att-handoff', 'qa-att-goal', 'qa-att-open', 'qa-att-reading'];
+  homeAttention.rendered = rows.length === 6;
+  homeAttention.firstOverdue = rows[0]?.id === 'qa-att-overdue' && /Overdue/i.test(rows[0]?.reason || '');
+  homeAttention.ordered = rows.length === 6 && EXPECTED.every((id, i) => rows[i]?.id === id);
+  homeAttention.reasons = rows.length === 6 && rows.every((r) => r.reason.length > 0);
+  homeAttention.acts = rows.length === 6 && rows.every((r) => r.hasAct);
+  // One-tap open: click the top (overdue) row's open control → its owning app (Goals) lands.
+  await page.click('[data-attention="qa-att-overdue"]');
+  await page.waitForTimeout(700);
+  const attnTopbar = await page.$eval('.empire-topbar-title', (el) => el.textContent || '').catch(() => '');
+  homeAttention.lands = attnTopbar.includes('Goals');
+  homeAttention.pass = homeAttention.rendered && homeAttention.firstOverdue && homeAttention.ordered
+    && homeAttention.reasons && homeAttention.acts && homeAttention.lands;
+  const checks = [homeAttention.rendered, homeAttention.firstOverdue, homeAttention.ordered, homeAttention.reasons, homeAttention.acts, homeAttention.lands].filter(Boolean).length;
+  homeAttention.checks = checks;
+  console.log(`HOME-ATTENTION  rendered=${homeAttention.rendered} firstOverdue=${homeAttention.firstOverdue} ordered=${homeAttention.ordered} reasons=${homeAttention.reasons} acts=${homeAttention.acts} lands=${homeAttention.lands} (order: ${rows.map((r) => r.id).join(' > ')})`);
+  await page.evaluate((k) => localStorage.removeItem(k), GRAPH_KEY);
+  await page.close();
+} catch (e) {
+  homeAttention.err = e.message;
+  console.warn(`HOME-ATTENTION: guard did not complete — ${e.message}`);
+}
+console.log(`HOME-ATTENTION: ${homeAttention.pass ? '6/6 ✅' : `${homeAttention.checks || 0}/6 ⚠️`}`);
+
 // ── PROVENANCE-PERSISTS guard (EPIC-6 target metric: durable app→app memory) ──
 // EPIC-6 S1 laid the spine: `src/lib/core/provenance.ts` — a Zustand+persist
 // store (`empire-provenance`) fed ONLY by `flowForEvent`, wired via
@@ -1183,6 +1280,11 @@ md += `The Core graph was seeded with a today-dated \`event\` (Calendar), an ope
 md += `| Today widget | Tasks widget | Recents strip | Exact landing | Cakra line | Result |\n|---|---|---|---|---|---|\n`;
 md += `| ${homeAlive.today ? '✅' : '❌'} | ${homeAlive.tasks ? '✅' : '❌'} | ${homeAlive.recent ? '✅' : '❌'} | ${homeAlive.land ? '✅' : '❌'} | ${homeAlive.ask ? '✅' : '❌'} | ${homeAlive.pass ? '✅' : '❌'}${homeAlive.err ? ' (' + homeAlive.err.slice(0, 80) + ')' : ''} |\n`;
 md += `\n**HOME-ALIVE: ${homeAlive.pass ? '1/1 ✅' : '0/1 ⚠️'}**\n`;
+md += `\n## Home-attention guard (EPIC-17 — the proactive cockpit feed)\n\n`;
+md += `HOME-ALIVE proved the home *reflects* the organism; EPIC-17 makes it *proactive*. The graph was seeded with the six Attention kinds (\`attention.ts\` scorers) at graph-survivable types — an overdue \`task\` (due 5d ago → 95), a today \`event\` (75), a fresh \`draft\` handoff (70), an aged low-progress \`goal\` (60), a plain open \`task\` (50) and a mid-progress \`book\` (35) — then home was reloaded (persist rehydrate). PASS = the "Needs you" feed renders all six in score order, the top row is the overdue task tagged "Overdue", every row carries a reason + a one-tap resolve control, and clicking the top row's open lands in its owning app (Goals). The pure ranking is unit-pinned in \`attention.test.ts\`; this carries the seed→persist→reload→ranked-render + one-tap-open roundtrip jsdom cannot.\n\n`;
+md += `| Six rows | Overdue on top | Score order | Every reason | Every act | One-tap lands | Result |\n|---|---|---|---|---|---|---|\n`;
+md += `| ${homeAttention.rendered ? '✅' : '❌'} | ${homeAttention.firstOverdue ? '✅' : '❌'} | ${homeAttention.ordered ? '✅' : '❌'} | ${homeAttention.reasons ? '✅' : '❌'} | ${homeAttention.acts ? '✅' : '❌'} | ${homeAttention.lands ? '✅' : '❌'} | ${homeAttention.pass ? '✅' : '❌'}${homeAttention.err ? ' (' + homeAttention.err.slice(0, 80) + ')' : ''} |\n`;
+md += `\n**HOME-ATTENTION: ${homeAttention.pass ? '6/6 ✅' : `${homeAttention.checks || 0}/6 ⚠️`}**\n`;
 md += `\n## Provenance-persists guard (EPIC-6 — durable app→app memory)\n\n`;
 md += `Real \`editor→<target>\` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event \`flowForEvent\` turns into an edge in the durable \`empire-provenance\` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).\n\n`;
 md += `| Edge | Recorded | Persisted (reload) | Result |\n|---|---|---|---|\n`;
@@ -1213,6 +1315,6 @@ if (offline) {
 }
 md += `\n## Screenshots\n\nSee PNGs in this folder. \`desktop.png\` is the shell; \`app-<id>.png\` is each app route.\n`;
 fs.writeFileSync(path.join(OUT, 'REPORT.md'), md);
-fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, nodeLineage, intentRoundtrip, timeline, homeAlive, provResults, entityResults, offline }, null, 2));
+fs.writeFileSync('/tmp/qa-results.json', JSON.stringify({ now, pass, fail, total: results.length, results, inboundResults, mediaResults, graphLegible, globalSearch, nodeLineage, intentRoundtrip, timeline, homeAlive, homeAttention, provResults, entityResults, offline }, null, 2));
 console.log(`\n${pass}/${results.length} passed, ${fail} failed`);
 stopServer();

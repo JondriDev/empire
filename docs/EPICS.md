@@ -110,14 +110,15 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
   row on the next `computeAttention`, and is a proven sibling of the open button; handoff dismiss clears `from` +
   drops. build🟢 vitest 589🟢 eslint🟢 six axes 0 `--assert-zero`; **cloud-verified in a real browser** (6 kinds
   seeded → correct order + per-kind control; ✓-click dropped the row & persisted `done:true`; 0 console errors).
-- [ ] **S4 · QA guard → ★ EPIC-17 CODE-COMPLETE.** Add the `HOME-ATTENTION` guard to
-  `scripts/qa-smoke.mjs`: seed `empire-core-graph` with an overdue `task`, a today `event`, a plain open
-  `task`, a low-progress aged `goal`, an in-progress `book`, and a fresh `HANDOFF` edge; reload (persist
-  rehydrate); assert the Bridge renders ONE ranked feed, the **overdue task ranks above the plain open
-  task and the today event**, each row shows a reason + an action control, and one-tap open lands in the
-  owning app. Fold a `HOME-ATTENTION 6/6` line into `docs/screenshots/latest/REPORT.md`. **Acceptance:**
-  smoke green with `HOME-ATTENTION 6/6`; build🟢 vitest🟢 `--assert-zero` exit 0; the guard is the durable
-  lock (mirrors the EPIC-10/13 organism guards). QA confirms the metric moved → Strategist retires to DONE.
+- [x] **S4 · QA guard → ★ EPIC-17 CODE-COMPLETE.** ✅ Shipped by QA 2026-07-14 (`43f6970`). Added the
+  `HOME-ATTENTION` guard to `scripts/qa-smoke.mjs`: seeds `empire-core-graph` with all six kinds at
+  graph-survivable types (overdue `task` due-5d / today `event` / fresh `draft` handoff / aged low-progress
+  `goal` / plain open `task` / mid-progress `book` — none pruned by syncAll's note/learning/message
+  reconcilers), reloads (persist rehydrate), asserts the Bridge renders ONE ranked feed in EXACT score
+  order (overdue 95 ▸ event 75 ▸ handoff 70 ▸ goal 60 ▸ open 50 ▸ reading 35), every row carries a reason +
+  a resolve control, and a one-tap open on the top row lands in Goals. **Acceptance MET:** smoke green with
+  `HOME-ATTENTION 6/6` (target metric 0 → 6/6 MOVED); build🟢 `--assert-zero` exit 0; guard is the durable
+  lock (mirrors the EPIC-10/13 organism guards). ★ EPIC-17 CODE-COMPLETE → Strategist retires to DONE.
 
 > _**Sequencing note.** No new deps, no config/dep changes, all product-code stays behind the green
 > six-axis gate. EPIC-16's remaining RFC items are handled or out of Builder scope (playwright-devDep +

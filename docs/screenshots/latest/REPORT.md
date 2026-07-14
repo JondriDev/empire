@@ -1,33 +1,8 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-14T08:09:25.167Z
+**Generated:** 2026-07-14T13:22:20.445Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
-
----
-
-## QA verdict (2026-07-14, green main `73186e1`) — ALL SIX axes 0 & LOCKED; ★ EPIC-17 S2 feed VISUALLY CONFIRMED in cloud
-
-**No runtime bug found.** Build GREEN (`tsc -b && vite build`, PWA precache 90 entries). Smoke **32/32 clean** (desktop + 31 registry apps; 0 uncaught JS / 0 error boundaries / none blank). All **14 guard suites green**: SHELL-IS-STYLED, REGISTRY-COVERAGE (31), INBOUND-LANDS 4/4, MEDIA-PERSISTS 3/3, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1, HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, PRECACHE (90, no-gap), OFFLINE-BOOT 5/5. `node scripts/metrics.mjs --assert-zero` **exits 0** — all six conformance axes 0 & LOCKED.
-
-**Metrics (`scripts/metrics.mjs`).** Δ vs the committed `metrics.json` snapshot: **±0** across the board (the ratchet reproduces exactly). Δ vs the last QA commit `0c83192` (which reported 481/66/733.8): **apps 31 (±0)**, **test cases 485 (+4)**, **test files 67 (+1 — `Bridge.test.tsx`)**, **bundle gz 734.5 (+0.7 — S2's Bridge feed enters the eager path)** — the two intervening code commits are `73186e1` (EPIC-17 S2) + `f8e20d3` (datacenter touch-reachability, +2 tests). No regression. `tokenViolations 0 · offSystemUtilities 0 · offSystemStyle 0 (r0/t0/m0) · offShellControls 0 (b0/i0/s0/t0) · keyboardA11y 0 · docMass 0`.
-
-**★ EPIC-17 (ACTIVE) acceptance — S1+S2 shipped; the S2 render is now CLOUD-CONFIRMED, not just jsdom.** The prior run flagged "headless render-smoke NOT re-run — QA to confirm the feed visually on-device." This run **did** confirm it: I seeded `empire-core-graph` with one node per `AttentionKind` (an overdue task, a today `event`, a fresh `handoff` draft, a stalled low-progress goal, a plain open task, an in-progress book), reloaded, and the Bridge **"Needs you"** section rendered **all six rows in exact urgency order** —
-
-| # | Row | Reason chip | Badge | Score |
-|---|---|---|---|---|
-| 1 | Ship the quarterly report | OVERDUE | 2d | 89 |
-| 2 | Design review | TODAY | Today | 75 |
-| 3 | Meeting notes from Cakra | HANDED TO YOU | 10m | 70 |
-| 4 | Learn the cello | STALLED | 20d | 60 |
-| 5 | Reply to the vendor email | TO DO | 1h | 50 |
-| 6 | Thinking in Systems | READING | 40% | 35 |
-
-Each row carries its owning-app accent icon, the reasoned chip, and the correct badge (event→"Today" · book→"40%" · else `agoLabel`); the fully-styled Bridge (Good-morning header, Ask-Cakra bar, 4 stat tiles, glass/Earth-from-Space palette) rendered with no blank/dark regression. **This is precisely the S4 acceptance behaviour — the ranked, reasoned, one-tap feed — demonstrably present and correct in the cloud.** The durable **`HOME-ATTENTION` QA guard (S4)** is **not yet in `scripts/qa-smoke.mjs`** (it is the Builder's next stage), so the epic's target metric reads **still 0/6 → EXPECTED, no contradiction** — the guard lands + locks at S4, then the metric moves 0→6/6. *(Seed note for the S4 author: a `handoff` content node must use a type NOT in the central-sync list — `note`/`learning`/`message` get PRUNED by `reconcile()` in a bare session; `draft`/`goal`/`task`/`book`/`event` survive. And `scoreEvent` keys off `data.date`, not `data.start`.)*
-
-**Console noise — env-expected only, NOT bugs** (identical to prior runs): `weather` (Open-Meteo geocoding tunnel-blocked + Geolocation permissions-policy), `maps` (8× CARTO dark-tile PNGs egress-blocked; Leaflet container + attribution still render), `files` + `mail` (401 on the authed/Android-only API — graceful "not configured", no boundary). All four render clean.
-
----
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -51,7 +26,7 @@ Each row carries its owning-app accent icon, the reasoned chip, and the correct 
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -154,6 +129,16 @@ The Core graph was seeded with a today-dated `event` (Calendar), an open `task` 
 
 **HOME-ALIVE: 1/1 ✅**
 
+## Home-attention guard (EPIC-17 — the proactive cockpit feed)
+
+HOME-ALIVE proved the home *reflects* the organism; EPIC-17 makes it *proactive*. The graph was seeded with the six Attention kinds (`attention.ts` scorers) at graph-survivable types — an overdue `task` (due 5d ago → 95), a today `event` (75), a fresh `draft` handoff (70), an aged low-progress `goal` (60), a plain open `task` (50) and a mid-progress `book` (35) — then home was reloaded (persist rehydrate). PASS = the "Needs you" feed renders all six in score order, the top row is the overdue task tagged "Overdue", every row carries a reason + a one-tap resolve control, and clicking the top row's open lands in its owning app (Goals). The pure ranking is unit-pinned in `attention.test.ts`; this carries the seed→persist→reload→ranked-render + one-tap-open roundtrip jsdom cannot.
+
+| Six rows | Overdue on top | Score order | Every reason | Every act | One-tap lands | Result |
+|---|---|---|---|---|---|---|
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**HOME-ATTENTION: 6/6 ✅**
+
 ## Provenance-persists guard (EPIC-6 — durable app→app memory)
 
 Real `editor→<target>` handoffs were fired from the Editor's ⚡ Send menu (each executor emits the honest event `flowForEvent` turns into an edge in the durable `empire-provenance` store), then the page was reloaded from a different route; PASS = the edge was recorded when the handoff fired AND survived the reload (rehydrated from the persisted ledger). This is the runtime realization of EPIC-6's "seed handoff → reload → durable source still shows" acceptance that jsdom cannot exercise (no real localStorage reload).
@@ -182,7 +167,7 @@ Distinct from the edge guard above: each S3 receiver was seeded with an inbound 
 
 The built app was served, warm-loaded so the service worker precached, then ALL network was blocked (`setOffline`); each route below was navigated cold and must render purely from the precache. The precache audit cross-checks the SW manifest against every emitted chunk.
 
-**Precache:** 90 manifest entries; 54 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
+**Precache:** 89 manifest entries; 53 JS + 3 CSS chunks emitted — ✅ no gap (all chunks precached).
 
 | Route | Renders offline |
 |---|---|
