@@ -31,7 +31,7 @@
   *inside* any app. Target = a new **`SHELL-ATTENTION` QA guard** (`qa-smoke.mjs`) → **0 → 4/4** on green main
   (organism-guard pattern, cf. `HOME-ATTENTION 6/6`). Reuses the `computeAttention` spine + the
   `empire-homebar-badge` CSS + `IconButton`; no new deps; keeps all six axes 0.
-  - **✅ S1 SHIPPED 2026-07-14 (this run).** Pure `attentionSummary(nodes,now,limit=8)` (`attention.ts:172`) →
+  - **✅ S1 SHIPPED + QA-CONFIRMED 2026-07-14 (green main `d4289b8`; `SHELL-ATTENTION` 4/4, first independent confirm).** Pure `attentionSummary(nodes,now,limit=8)` (`attention.ts:172`) →
     `{count, top, urgent}` (`urgent` = top kind `task-overdue`); +4 `attention.test.ts`. **Render
     (`Desktop.tsx`):** `useGraph(s=>s.nodes)` + a 30s `attnMinute` memo → `attention`; the HomeBar Home
     `IconButton` gains a `.empire-homebar-badge.is-attention` (ember; `.is-urgent`→`--c-danger`) with

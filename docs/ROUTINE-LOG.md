@@ -5,6 +5,22 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-14 · QA (visual + smoke) — green main `d4289b8`: 32/32 clean, all 15 guards green, six axes 0 & LOCKED; ★ EPIC-18 **S1** `SHELL-ATTENTION` 4/4 CLOUD-CONFIRMED (first independent)
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`d4289b8`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (PWA precache 89 entries). `node server.js` serving `dist/` on :3001. Two app-code commits landed since the last QA (`69fd479`): `8a0c6c9` (EPIC-18 S1 shell attention badge) + `d4289b8` (maps busy-state polish) — so this run rebuilt + re-smoked the exact tree it reports on.
+
+**Smoke:** `node scripts/qa-smoke.mjs` → **32/32 routes render clean** (desktop + 31 registry apps), 0 uncaught JS / 0 boundaries / none blank. All 15 guards green: SHELL-IS-STYLED, REGISTRY-COVERAGE (31), INBOUND 4/4, MEDIA 3/3, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1, HOME-ALIVE 1/1, **HOME-ATTENTION 6/6**, **SHELL-ATTENTION 4/4**, PROVENANCE 3/3 + PROV-ENTITY 3/3, PRECACHE 89 no-gap, OFFLINE 5/5.
+
+**★ EPIC-18 S1 target metric MOVED (first independent confirm):** the new `SHELL-ATTENTION` guard PASSES **4/4** (`homeHidden=true awayShows=true urgent=true tapHome=true`) → acceptance **0 → 4/4**. Home badge hidden at home, shows count `2` inside an app, `is-urgent` tint when an overdue task leads, clears on tap-Home while the "Needs you" feed returns. EPIC-18 stays **Builder-proposed, AWAITING STRATEGIST RATIFICATION** — a metric confirm does not promote the epic.
+
+**Metrics:** `node scripts/metrics.mjs --assert-zero` **exit 0** — all six axes 0 & LOCKED (`tokenViolations`/`offSystemUtilities`/`offSystemStyle` r0/t0/m0/`offShellControls` b0/i0/s0/t0/`keyboardA11y`/`docMass` all 0). Auto: apps **31**, test cases **493**, files **67**, bundle gz **734**.
+
+**Visual (local only, never committed):** `desktop.png` (styled shell, "Good evening", 4 stat tiles all 0 fresh, "All clear — nothing needs you", full 31-app dock), `app-maps.png` (Leaflet chrome + search + zoom render; grey tile pane = blocked CARTO CDN, expected), `app-network.png` (CORE hub + radial mesh + legend), `app-goals.png` (form + "No goals yet"). Console/network noise env-expected only (weather Open-Meteo geocode + maps 8× CARTO tunnel-blocked; files + mail 401 authed/Android-only).
+
+**No runtime bug.** Committed docs + `metrics.json` directly to main. **Next:** Strategist ratifies/redirects EPIC-18 (optional S2 = badge pulse on new-item-while-inside; else retire at S1); EPIC-7 Android stays device-gated.
+
+---
+
 ## 2026-07-14 · BUILDER — EPIC-18 **S1**: the cockpit reaches beyond the home (shell-level attention badge)
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`69fd479`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (precache 89). `npx vitest run` **589🟢**; `--assert-zero` **exit 0** (all six axes 0). Confirmed green before editing.

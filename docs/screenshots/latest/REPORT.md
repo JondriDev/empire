@@ -1,8 +1,12 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-14T15:24:18.907Z
+**Generated:** 2026-07-14T18:09:17.667Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
+
+**NO RUNTIME BUG THIS RUN.** Build 🟢 (`tsc -b && vite build`, PWA precache 89 entries). Every one of the 32 routes rendered clean; console/network noise is env-expected only (weather Open-Meteo geocode tunnel-blocked, maps 8× CARTO tiles tunnel-blocked, files + mail 401 on authed/Android-only APIs). Visually re-inspected locally (never committed): `desktop.png` (styled shell, "Good evening", 4 stat tiles all 0 on a fresh session, "All clear — nothing needs you", full 31-app dock), `app-maps.png` (Leaflet chrome + search + controls render; grey tile pane is the blocked CARTO CDN), `app-network.png` (CORE hub + radial mesh + legend), `app-goals.png` (form + "No goals yet" empty state).
+
+**★ EPIC-18 S1 TARGET METRIC CONFIRMED MOVED — first independent QA confirm.** Since the last QA commit (`69fd479`), two app-code commits landed on main (`8a0c6c9` EPIC-18 S1 shell attention badge · `d4289b8` maps busy-state polish); this run rebuilt + re-smoked the tree it describes. The new **`SHELL-ATTENTION` guard PASSES 4/4** (`homeHidden=true awayShows=true urgent=true tapHome=true`): the Home badge is hidden at home, shows count `2` inside an app, tints `is-urgent` when an overdue task leads, and clears on tap-Home while the feed returns — the EPIC-18 S1 acceptance metric **0 → 4/4 MOVED, no contradiction.** All six conformance axes remain **0 & LOCKED** (`--assert-zero` exit 0); `HOME-ATTENTION` still 6/6. EPIC-18 remains **Builder-proposed, AWAITING STRATEGIST RATIFICATION** — the metric confirmation does not itself promote it.
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -26,7 +30,7 @@
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
