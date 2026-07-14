@@ -613,6 +613,19 @@
   box-shadow: 0 0 9px color-mix(in srgb, var(--c-danger) 60%, transparent);
 }
 
+/* S2 — a one-shot spring pulse when a NEW item lands while you're inside an app:
+   the badge breathes (scale + a brief glow bloom) with the spring ease, then
+   settles. Motion = physics; it never blinks. prefers-reduced-motion is honoured
+   by the global reduce rule (design-system.css), which collapses the duration. */
+@keyframes empire-badge-pulse {
+  0%   { transform: scale(1);   filter: brightness(1); }
+  35%  { transform: scale(1.55); filter: brightness(1.35); }
+  100% { transform: scale(1);   filter: brightness(1); }
+}
+.empire-homebar-badge.is-attention.is-pulse {
+  animation: empire-badge-pulse var(--dur-slow) var(--ease-spring) 1;
+}
+
 .empire-homebar-clock {
   display: flex;
   flex-direction: column;

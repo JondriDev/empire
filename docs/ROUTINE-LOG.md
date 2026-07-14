@@ -5,6 +5,23 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-14 · Builder — ★ EPIC-18 **S2** shipped: the shell attention badge *breathes* when a new item lands (motion=physics) → EPIC-18 CODE-COMPLETE
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`b6681da`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (PWA precache 89 entries). Oriented from CONTEXT.md + EPICS.md: EPIC-18 S1 (`SHELL-ATTENTION 4/4`) shipped + QA-confirmed; the only unchecked stage was **S2 · motion polish**.
+
+**Done (S2):** the HomeBar Home badge now gives a one-shot spring pulse when a genuinely NEW item becomes the most-urgent *while an app is foregrounded* — the organism taps you on the shoulder without a blink.
+- **Pure timing rule** `shouldPulseAttention(prevTopId, nextTopId, atHome)` in `src/lib/core/attention.ts` = true iff `!atHome && nextTopId && nextTopId !== prevTopId` (never at home — the feed is on screen; never the same item you navigated past; never an empty feed). +4 cases in `attention.test.ts`.
+- **Render** (`src/components/Desktop.tsx`): an effect keyed on `attention.top?.id` sets a self-clearing `attnPulse` flag via `shouldPulseAttention` (a `lastTopRef` tracks the prior top; `atHome` read latest, deliberately out of deps so home→app never pulses); the badge span gains `.is-pulse` and clears it `onAnimationEnd`.
+- **CSS** (DS_INFRA `src/window-manager.css`): `@keyframes empire-badge-pulse` (scale 1→1.55→1 + brightness bloom) on `.empire-homebar-badge.is-attention.is-pulse`, `--ease-spring`/`--dur-slow`, iteration 1. `prefers-reduced-motion` honoured by the GLOBAL reduce rule (`design-system.css`, collapses duration to 0.01ms) — same as every `.animate-*`; no per-rule media query.
+
+**Verified:** `npm run build` 🟢 · `npx vitest run` **599🟢** (73 files; +6 incl. the 4 new `shouldPulseAttention` cases) · `npx eslint` clean on touched files · `node scripts/metrics.mjs --assert-zero` **exit 0** — all six axes 0 & LOCKED, docMass back to 0 (trimmed CONTEXT to 400/400). **Real-browser check** (targeted, reused the SHELL-ATTENTION seed): `homeHidden=true awayShows=true urgent=true noSpuriousPulse=true` — the guard's 4/4 still holds AND no *spurious* pulse fires on the home→app transition (confirms the `.is-pulse` binding is wired). **Metrics:** apps 31 · tests 497 · files 67 · tokenViol 0 · offUtil 0 · offStyle 0 · offShell 0 · kbdA11y 0 · docMass 0 · bundle gz 734.1 (±0).
+
+**Not verifiable in cloud (honest):** the pulse *animation itself* is not headless-observable — a live in-memory graph mutation isn't drivable via localStorage (the running zustand store never sees a raw `localStorage.setItem`), so a real new-item→pulse can't be driven headless. Its timing is unit-pinned and the class binding is browser-confirmed; the on-device look (a warm ember/red badge that scales up and settles) is for the user to confirm.
+
+**Next:** ★ EPIC-18 is CODE-COMPLETE (S1+S2, `SHELL-ATTENTION 4/4` locked). **Strategist** should retire it to the DONE index (metric moved) and promote the next epic — conformance band exhausted (six axes 0), no runtime bug, so the steepest gradient stays organism depth; EPIC-7 Android remains device-gated.
+
+---
+
 ## 2026-07-14 · QA (visual + smoke) — green main `d4289b8`: 32/32 clean, all 15 guards green, six axes 0 & LOCKED; ★ EPIC-18 **S1** `SHELL-ATTENTION` 4/4 CLOUD-CONFIRMED (first independent)
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`d4289b8`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (PWA precache 89 entries). `node server.js` serving `dist/` on :3001. Two app-code commits landed since the last QA (`69fd479`): `8a0c6c9` (EPIC-18 S1 shell attention badge) + `d4289b8` (maps busy-state polish) — so this run rebuilt + re-smoked the exact tree it reports on.

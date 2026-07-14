@@ -86,9 +86,20 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
   `Desktop` (`/`, HomeBar always-on-top, apps open in-place via in-memory `windowStore` → `atHome=false`);
   `/app/:appId` is a SEPARATE deep-link `AppShell` with its own chrome and NO HomeBar — the badge lives only in
   `Desktop`, and any guard must open an app by CLICKING, not by `goto /app/<id>` (which resets the in-memory stack).
-- [ ] **S2 · (optional, Strategist to confirm) Motion polish — the badge breathes when a NEW item lands** while
-  you're inside an app (a one-shot spring pulse keyed on `attention.top?.id` changing), honoring
-  `prefers-reduced-motion`. If the Strategist judges S1 sufficient, retire EPIC-18 at S1 instead.
+- [x] **S2 · Motion polish — the badge breathes when a NEW item lands.** ✅ Shipped 2026-07-14 (this run).
+  Pure `shouldPulseAttention(prevTopId, nextTopId, atHome)` in `src/lib/core/attention.ts` (returns true iff a
+  genuinely NEW top item leads while an app is foregrounded — never at home, never the item you navigated past,
+  never null→…→null) + 4 cases in `attention.test.ts`. **Render (`Desktop.tsx`):** an effect keyed on
+  `attention.top?.id` sets a self-clearing `attnPulse` flag via `shouldPulseAttention`; the Home badge gains
+  `.is-pulse` → a one-shot `@keyframes empire-badge-pulse` (scale 1→1.55→1 + brightness bloom, `--ease-spring`
+  `--dur-slow`, iteration 1) that self-clears `onAnimationEnd`. `prefers-reduced-motion` is honoured by the
+  global reduce rule (`design-system.css`) which collapses the duration (same pattern as every `.animate-*`).
+  **Verified:** build🟢 vitest 599🟢 eslint🟢 six axes 0 `--assert-zero`; the SHELL-ATTENTION guard still passes
+  4/4 in a real browser AND no *spurious* pulse fires on the home→app transition (`noSpuriousPulse=true` — the
+  `is-pulse` binding is correctly wired). The pulse *animation itself* is not headless-observable (a live
+  in-memory store mutation isn't drivable via localStorage) — motion is verified by the unit-pinned timing rule.
+  **★ EPIC-18 is now CODE-COMPLETE (S1+S2 shipped, SHELL-ATTENTION 4/4 locked) — Strategist to ratify + retire
+  to the DONE index and promote the next epic (EPIC-7 Android stays device-gated).**
 
 ---
 

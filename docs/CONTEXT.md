@@ -25,27 +25,29 @@
 > git + `docs/ROUTINE-LOG.md`; working memory stays tight (its budget is the
 > `docMass` metric — see below).
 
-- **▶ EPIC-18 · The cockpit reaches beyond the home (shell-level attention) — Builder-proposed 2026-07-14,
-  AWAITING STRATEGIST RATIFICATION.** EPIC-17 made the HOME proactive (the "Needs you" feed); the moment you
-  open an app the signal vanishes. EPIC-18 carries it into the persistent shell so the organism nudges you from
-  *inside* any app. Target = a new **`SHELL-ATTENTION` QA guard** (`qa-smoke.mjs`) → **0 → 4/4** on green main
-  (organism-guard pattern, cf. `HOME-ATTENTION 6/6`). Reuses the `computeAttention` spine + the
-  `empire-homebar-badge` CSS + `IconButton`; no new deps; keeps all six axes 0.
-  - **✅ S1 SHIPPED + QA-CONFIRMED 2026-07-14 (green main `d4289b8`; `SHELL-ATTENTION` 4/4, first independent confirm).** Pure `attentionSummary(nodes,now,limit=8)` (`attention.ts:172`) →
-    `{count, top, urgent}` (`urgent` = top kind `task-overdue`); +4 `attention.test.ts`. **Render
-    (`Desktop.tsx`):** `useGraph(s=>s.nodes)` + a 30s `attnMinute` memo → `attention`; the HomeBar Home
-    `IconButton` gains a `.empire-homebar-badge.is-attention` (ember; `.is-urgent`→`--c-danger`) with
-    `data-shell-attention={count}` + `data-home` + a count-aware aria-label, shown ONLY when `!atHome`
-    (`homeAttn`, `Desktop.tsx:126`) so it's a "reach-beyond-home" nudge, not redundant with the on-screen feed.
-    i18n `shell.home`/`shell.attention.short`; CSS DS_INFRA `window-manager.css:607`. **Guard
-    `SHELL-ATTENTION` (`qa-smoke.mjs:1073`)** seeds an overdue+open task (both `app:goals`, graph-survivable),
-    asserts: badge hidden at home · shows count `2` inside an app · `is-urgent` tint (overdue leads) · tap-Home
-    clears it + the feed returns → **PASSES 4/4** (target 0→4/4 MOVED). build🟢 vitest 593🟢 eslint🟢 six axes 0.
+- **▶ EPIC-18 · The cockpit reaches beyond the home (shell-level attention) — ★ CODE-COMPLETE 2026-07-14
+  (S1+S2 shipped, `SHELL-ATTENTION` 4/4 LOCKED). AWAITING STRATEGIST: retire to DONE index + promote next epic.**
+  Carries the EPIC-17 "Needs you" signal into the persistent shell so the organism nudges you from *inside* any
+  app. Reuses the `computeAttention` spine + `empire-homebar-badge` CSS + `IconButton`; no new deps; six axes 0.
+  - **✅ S1 (green main `d4289b8`, QA-confirmed):** pure `attentionSummary(nodes,now,limit=8)` (`attention.ts:172`)
+    → `{count, top, urgent}` (`urgent`=top kind `task-overdue`). **Render (`Desktop.tsx`):** `useGraph(s=>s.nodes)`
+    + 30s `attnMinute` memo → `attention`; HomeBar Home `IconButton` gains `.empire-homebar-badge.is-attention`
+    (ember; `.is-urgent`→`--c-danger`) with `data-shell-attention` + `data-home` + count-aware aria-label, shown
+    ONLY `!atHome` (`homeAttn`, `Desktop.tsx:126`). **Guard `SHELL-ATTENTION` (`qa-smoke.mjs:1073`)** seeds
+    overdue+open task, asserts hidden-at-home · count `2` in-app · `is-urgent` · tap-Home clears → **4/4**.
+  - **✅ S2 SHIPPED (this run):** motion polish — the badge breathes when a NEW item lands. Pure
+    `shouldPulseAttention(prevTopId,nextTopId,atHome)` (`attention.ts`, +4 tests) = true iff a genuinely new top
+    item leads while `!atHome` (never at home / same-item-navigated-past / empty). `Desktop.tsx`: effect keyed on
+    `attention.top?.id` sets self-clearing `attnPulse`; badge gains `.is-pulse` → one-shot `@keyframes
+    empire-badge-pulse` (scale 1→1.55→1 + brightness, `--ease-spring`/`--dur-slow`, iter 1) cleared
+    `onAnimationEnd`. reduced-motion honoured by the GLOBAL reduce rule (`design-system.css`, collapses duration —
+    same as every `.animate-*`; do NOT add a per-rule media query). build🟢 vitest 599🟢 eslint🟢 six axes 0.
     **Trap:** the primary shell is `Desktop` (`/`, HomeBar always-on-top, apps open in-place via in-memory
-    `windowStore` → `atHome=false`); `/app/:appId` is a SEPARATE deep-link `AppShell` (own chrome, NO HomeBar) —
-    the badge lives only in `Desktop`, and the guard must open an app by CLICKING (not `goto /app/x`).
-    ▶ NEXT: Strategist ratifies EPIC-18 (or redirects to EPIC-7 Android/other); optional S2 = a subtle badge
-    pulse when a NEW item lands while you're inside an app (motion=physics), else retire at S1.
+    `windowStore`→`atHome=false`); `/app/:appId` is a SEPARATE `AppShell` (own chrome, NO HomeBar) — the badge
+    lives only in `Desktop`; a guard must open an app by CLICKING (not `goto /app/x`). The pulse *animation* is
+    not headless-observable — its timing is unit-pinned; `noSpuriousPulse=true` confirms the class binding.
+    ▶ NEXT: **Strategist** retires EPIC-18 to DONE (SHELL-ATTENTION 4/4 moved) + promotes the next epic — six
+    axes 0, no runtime bug → steepest gradient stays organism depth; EPIC-7 Android device-gated.
 
 ### Standing design-system recipes (carry forward — reusable across any future migration)
 
@@ -393,7 +395,6 @@ AI-call budget (default 100, user-tunable, hard stop button).
   aria-label" detector over-counts badly (most flagged Buttons have DYNAMIC text children a static scan can't see) —
   too noisy to be honest. Chose the ratified `docMass` instead.
 
-## ✅ QA state (latest — 2026-07-14, S3 Builder-verified pre-commit)
+## ✅ QA state (latest — 2026-07-14, EPIC-18 S2 Builder-verified pre-commit)
 
-- All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics: apps 31, test cases 487, files 67, bundle gz 733.7. build🟢 vitest 589🟢 eslint🟢. **No runtime bug.**
-- **★ EPIC-17 S3 cloud-verified (real browser):** seeded all 6 kinds → Bridge "Needs you" rendered them in order (overdue89▸event75▸handoff70▸goal60▸open50▸book35), each with reason+badge+its own resolve control (task ✓done · handoff ✕dismiss · event/goal/book ⚡NodeActions); clicking ✓ dropped the row & persisted `done:true`; shell styled, 0 console errors. `HOME-ATTENTION` guard still absent → 0/6 (S4 adds+locks). QA to re-run full smoke. Env-only console noise (NOT bugs): weather/maps tiles + files/mail 401 (backend auth) — all render clean.
+- All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics: apps 31, test cases 497, files 67, bundle gz 734.1. build🟢 vitest 599🟢 eslint🟢. **No runtime bug.** All 15 QA guards green on last full smoke (`b6681da`): `SHELL-ATTENTION 4/4`, `HOME-ATTENTION 6/6`, 32/32 routes clean. Env-only console noise (NOT bugs): weather/maps tiles + files/mail 401 (backend auth) — all render clean.

@@ -13,7 +13,7 @@ import { useWindowStore, openAppById } from '../lib/windowStore'
 import { apps, launcherApps, getAppIcon } from '../lib/registry'
 import { useStore } from '../lib/store'
 import { useGraph } from '../lib/core/graph'
-import { attentionSummary } from '../lib/core/attention'
+import { attentionSummary, shouldPulseAttention } from '../lib/core/attention'
 import { useLang } from '../lib/i18n'
 import AppHost from './AppHost'
 import Bridge from './Bridge'
@@ -56,6 +56,23 @@ export default function Desktop() {
     return () => clearInterval(timer)
   }, [])
   const attention = useMemo(() => attentionSummary(Object.values(nodes), attnMinute), [nodes, attnMinute])
+
+  // S2 motion polish — a one-shot spring pulse when a NEW item becomes the most
+  // urgent while an app is foregrounded (the badge breathes, drawing your eye
+  // without a blink). Keyed on the top item's id changing; never fires at home
+  // (the feed is on screen) or on the item you merely navigated past. The pulse
+  // self-clears on animationend; prefers-reduced-motion is honoured by the
+  // global reduce rule (design-system.css), which neutralises the animation.
+  const [attnPulse, setAttnPulse] = useState(false)
+  const lastTopRef = useRef<string | null>(null)
+  const topId = attention.top?.id ?? null
+  useEffect(() => {
+    if (shouldPulseAttention(lastTopRef.current, topId, atHome)) setAttnPulse(true)
+    lastTopRef.current = topId
+    // atHome is intentionally excluded: navigating home→app must NOT pulse (the
+    // top id is unchanged), only a genuinely new top item should.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topId])
 
   // Restore focus when the palette closes (WCAG 2.4.3 focus order).
   useEffect(() => {
@@ -282,8 +299,9 @@ export default function Desktop() {
                 <House className="w-5 h-5" />
                 {homeAttn > 0 && (
                   <span
-                    className={`empire-homebar-badge is-attention${attention.urgent ? ' is-urgent' : ''}`}
+                    className={`empire-homebar-badge is-attention${attention.urgent ? ' is-urgent' : ''}${attnPulse ? ' is-pulse' : ''}`}
                     data-shell-attention={homeAttn}
+                    onAnimationEnd={() => setAttnPulse(false)}
                   >
                     {homeAttn}
                   </span>

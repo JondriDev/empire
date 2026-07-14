@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeAttention, attentionSummary } from './attention'
+import { computeAttention, attentionSummary, shouldPulseAttention } from './attention'
 import { dayStamp } from './bridge'
 import type { CoreNode } from './graph'
 
@@ -178,5 +178,26 @@ describe('attentionSummary', () => {
       node(`t${i}`, { data: { done: false }, meta: { created: NOW, updated: NOW - i, app: 'notes' } })
     )
     expect(attentionSummary(nodes, NOW, 5).count).toBe(5)
+  })
+})
+
+describe('shouldPulseAttention (S2 motion rule)', () => {
+  it('pulses when a genuinely NEW item leads while inside an app', () => {
+    expect(shouldPulseAttention('a', 'b', false)).toBe(true)
+    expect(shouldPulseAttention(null, 'a', false)).toBe(true)
+  })
+
+  it('never pulses at home (the feed is already on screen)', () => {
+    expect(shouldPulseAttention('a', 'b', true)).toBe(false)
+    expect(shouldPulseAttention(null, 'a', true)).toBe(false)
+  })
+
+  it('does not pulse for the same top item you navigated past', () => {
+    expect(shouldPulseAttention('a', 'a', false)).toBe(false)
+  })
+
+  it('does not pulse for an empty feed', () => {
+    expect(shouldPulseAttention('a', null, false)).toBe(false)
+    expect(shouldPulseAttention(null, null, false)).toBe(false)
   })
 })

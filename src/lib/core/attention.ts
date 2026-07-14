@@ -174,3 +174,18 @@ export function attentionSummary(_nodes: CoreNode[], _now: number, _limit = 8): 
   const top = items[0] ?? null
   return { count: items.length, top, urgent: top?.kind === 'task-overdue' }
 }
+
+/**
+ * S2 motion rule: the shell badge gives a one-shot pulse ONLY when a genuinely
+ * NEW item becomes the most-urgent while an app is foregrounded. Never at home
+ * (the "Needs you" feed is already on screen), never when the top item is the
+ * same one you navigated past (home → app keeps the same top → no pulse), never
+ * for an empty feed. Pure, so the timing rule unit-tests browserless.
+ */
+export function shouldPulseAttention(
+  prevTopId: string | null,
+  nextTopId: string | null,
+  atHome: boolean,
+): boolean {
+  return !atHome && nextTopId != null && nextTopId !== prevTopId
+}
