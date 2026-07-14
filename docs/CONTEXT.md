@@ -392,7 +392,8 @@ AI-call budget (default 100, user-tunable, hard stop button).
   aria-label" detector over-counts badly (most flagged Buttons have DYNAMIC text children a static scan can't see) —
   too noisy to be honest. Chose the ratified `docMass` instead.
 
-## ✅ QA state (latest — 2026-07-14, green main `b1c296f`)
+## ✅ QA state (latest — 2026-07-14, green main `73186e1`)
 
-- All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics after EPIC-17 S2: apps 31, test cases 485 (+2 = `Bridge.test.tsx`), files 67, bundle gz 734.5 (+0.7). **EPIC-17 S1+S2 shipped+green** (engine + Bridge "Needs you" feed, row-open folded). `HOME-ATTENTION` guard not yet present → target still 0/6 (lands at S4). Bridge render verified via jsdom Bridge.test (feed order + empty state); headless render-smoke NOT re-run this build — QA to confirm the feed visually on-device.
+- All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics: apps 31, test cases 485, files 67, bundle gz 734.5 (Δ ±0 vs committed `metrics.json`; vs last QA commit +4 tests/+1 file/+0.7 bundle from S2 + datacenter). Smoke **32/32 clean**, all 14 guards green. **No runtime bug.**
+- **★ EPIC-17 S2 feed now CLOUD-CONFIRMED (was jsdom-only):** seeded one node per kind → Bridge "Needs you" rendered all 6 in exact order — overdue 89 ▸ today 75 ▸ handoff 70 ▸ stalled 60 ▸ open 50 ▸ reading 35 — each with reason chip + badge; fully styled, no blank-dark. This IS the S4 acceptance behaviour. `HOME-ATTENTION` guard still absent → target 0/6 (expected; Builder adds+locks at S4). **S4 seed traps:** handoff type must dodge central-sync prune (`note`/`learning`/`message` get PRUNED in a bare session — use `draft`/`task`/etc.); `scoreEvent` keys off `data.date` not `start`.
 - Env-only console noise (NOT bugs): weather geocoding/Geolocation blocked, maps CARTO tiles blocked, files+mail 401 (backend auth). All render clean.

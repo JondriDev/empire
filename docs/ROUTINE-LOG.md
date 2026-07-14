@@ -5,6 +5,24 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-14 · QA (visual + smoke) — green main `73186e1`: 32/32 clean, all 14 guards green, six axes 0 & LOCKED; ★ EPIC-17 S2 "Needs you" feed CLOUD-CONFIRMED
+
+**Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main` (`73186e1`). `npm install`; `npm run build` (`tsc -b && vite build`) **GREEN** (PWA precache 90 entries / 3139.84 KiB). `node server.js` serving `dist/` on :3001.
+
+**Smoke (`scripts/qa-smoke.mjs`, Playwright chromium-1194):** **32/32 rendered clean** (desktop + 31 registry apps; 0 uncaught JS / 0 error boundaries / none blank). All **14 guard suites green:** SHELL-IS-STYLED, REGISTRY-COVERAGE (31), INBOUND-LANDS 4/4, MEDIA-PERSISTS 3/3, GRAPH-LEGIBLE 3/3, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1, HOME-ALIVE 1/1, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, PRECACHE-AUDIT (90, no-gap), OFFLINE-BOOT 5/5.
+
+**Metrics (`scripts/metrics.mjs`; `--assert-zero` exit 0):** apps **31** · test cases **485** · test files **67** · tokenViolations **0** · offSystemUtilities **0** · offSystemStyle **0** (r0/t0/m0) · offShellControls **0** (b0/i0/s0/t0) · keyboardA11y **0** · **docMass 0** · bundle gz **734.5**. Δ vs committed `metrics.json`: **±0** (ratchet reproduces). Δ vs last QA commit `0c83192`: +4 tests / +1 file (`Bridge.test.tsx`) / +0.7 bundle — from the two intervening commits `73186e1` (EPIC-17 S2) + `f8e20d3` (datacenter touch-fix). All six axes 0 & LOCKED.
+
+**★ Epic-acceptance (EPIC-17, ACTIVE) — S2 render now cloud-confirmed, upgrading the prior jsdom-only check.** The last run left "confirm the feed visually on-device" open. This run seeded `empire-core-graph` with one node per `AttentionKind`, reloaded, and the Bridge **"Needs you"** section rendered **all six rows in exact urgency order** — overdue (89, "OVERDUE" · 2d) ▸ today event (75, "TODAY" · Today) ▸ handoff (70, "HANDED TO YOU" · 10m) ▸ stalled goal (60, "STALLED" · 20d) ▸ open task (50, "TO DO" · 1h) ▸ reading (35, "READING" · 40%) — each with owning-app accent icon + reason chip + correct badge, on a fully-styled Bridge (no blank-dark). This IS the S4 acceptance behaviour, demonstrably present in the cloud. The durable **`HOME-ATTENTION` guard is not yet in `qa-smoke.mjs`** (Builder's S4) → the epic target metric reads **still 0/6, EXPECTED** (guard lands + locks at S4, then 0→6/6). No contradiction. **S4 seed traps recorded** (CONTEXT): a handoff content node must avoid the central-sync prune (`note`/`learning`/`message` are reconciled-away in a bare session — use `draft`/`task`/`goal`/`book`/`event`); `scoreEvent` keys off `data.date`, not `data.start`.
+
+**Console noise — env-expected only, NOT bugs:** weather (Open-Meteo geocoding tunnel-blocked + Geolocation policy), maps (8× CARTO tile PNGs egress-blocked; container + attribution still render), files + mail (401 authed/Android-only API, graceful). All render clean.
+
+**Not verifiable in cloud:** on-device tap-to-resolve (S3 controls not yet built) and real per-app live signals (the feed was seeded, not organically populated). Render + ranking are now cloud-verified; S3/S4 interactions await the Builder.
+
+**Next step:** Builder ships EPIC-17 **S3** (inline quick-resolve controls) then **S4** (`HOME-ATTENTION` guard + lock → 0→6/6) to retire the epic.
+
+---
+
 ## 2026-07-14 · APP-ARTISAN — `datacenter`: touch-reachability fix for both delete controls (phone-first bug)
 
 **Baseline:** fresh cloud checkout, `git checkout main && git pull --rebase` → green `main`. `npm install`; `npm run build` (`tsc -b && vite build`) GREEN; `--assert-zero` exit 0 (all six axes 0). Confirmed green before touching anything.
