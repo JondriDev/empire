@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { significantTerms, relatedTo } from './related'
 import type { CoreNode } from './graph'
 
@@ -102,6 +102,33 @@ describe('relatedTo', () => {
     expect(out.map(r => r.node.id)).toEqual(['b'])
     expect(out[0].reasons).toEqual(['same-day'])
     expect(out[0].score).toBe(2)
+  })
+
+  // Regression: the same-day signal must bucket by the user's LOCAL calendar day
+  // (matching Calendar's `data.date`), not by UTC. A naive `toISOString()` bucket
+  // fires on the wrong day for any non-UTC user — false positives just after local
+  // midnight, false negatives just after UTC midnight. Forced TZ so a UTC CI (where
+  // local == UTC and the bug hides) still exercises it.
+  describe('same-day buckets by local calendar day, not UTC', () => {
+    const realTZ = process.env.TZ
+    beforeAll(() => { process.env.TZ = 'Asia/Jakarta' }) // UTC+7
+    afterAll(() => { process.env.TZ = realTZ })
+
+    it('does NOT relate two entities that share a UTC day but fall on different local days', () => {
+      // Both are 2026-07-14 in UTC, but in Jakarta a is 07-15 06:00 and b is 07-14 20:00.
+      const a = node({ id: 'a', title: 'alpha', meta: { created: Date.parse('2026-07-14T23:00:00Z'), updated: 0, app: 'notes' } })
+      const b = node({ id: 'b', title: 'bravo', meta: { created: Date.parse('2026-07-14T13:00:00Z'), updated: 0, app: 'notes' } })
+      expect(relatedTo([a, b], 'a')).toEqual([])
+    })
+
+    it('DOES relate two entities that share a local day but fall on different UTC days', () => {
+      // c is 2026-07-14 UTC and d is 2026-07-15 UTC, but in Jakarta both are 07-15.
+      const c = node({ id: 'c', title: 'charlie', meta: { created: Date.parse('2026-07-14T20:00:00Z'), updated: 0, app: 'notes' } })
+      const d = node({ id: 'd', title: 'delta', meta: { created: Date.parse('2026-07-15T02:00:00Z'), updated: 0, app: 'notes' } })
+      const out = relatedTo([c, d], 'c')
+      expect(out.map(r => r.node.id)).toEqual(['d'])
+      expect(out[0].reasons).toEqual(['same-day'])
+    })
   })
 
   it('does not relate via stopwords or sub-4-char terms', () => {

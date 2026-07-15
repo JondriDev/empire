@@ -14,6 +14,7 @@
  */
 import type { CoreNode } from './graph'
 import { nodeBodyText } from './search'
+import { dayStamp } from './bridge'
 
 /** Why one entity is related to another — one label per signal that fired. */
 export type RelatedReason = 'linked' | 'shared-term' | 'shared-tag' | 'same-day'
@@ -46,11 +47,6 @@ export function significantTerms(node: CoreNode): string[] {
     if (t.length >= 4 && !STOP.has(t)) out.add(t)
   }
   return [...out]
-}
-
-/** Local-calendar day bucket for a timestamp (pure, no import cycle). */
-function dayKey(ms: number): string {
-  return new Date(ms).toISOString().slice(0, 10)
 }
 
 /** The string elements of a node's `data.tags` array (empty when absent/not an array). */
@@ -112,7 +108,7 @@ export function relatedTo(nodes: CoreNode[], id: string, limit = 6): RelatedItem
       score += Math.min(sharedTerms * 3, 9)
       reasons.push('shared-term')
     }
-    if (dayKey(T.meta.created) === dayKey(N.meta.created)) {
+    if (dayStamp(T.meta.created) === dayStamp(N.meta.created)) {
       score += 2
       reasons.push('same-day')
     }

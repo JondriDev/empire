@@ -5,6 +5,39 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-15 · Bug Hunter — main GREEN + fix(core): `relatedTo` same-day bucketed by UTC, not the user's local day
+
+**Priority 0 — main proven GREEN on `fbb04f1`:** `npm run build` 🟢 (PWA precache 89) · `npx vitest run` 74 files /
+614 tests 🟢 · `npx eslint .` clean · check-shell-styled / check-route-parity / check-audit all 🟢 ·
+`node scripts/metrics.mjs --assert-zero` **exit 0** (all six axes 0, no regression vs METRICS.md). QA REPORT 32/32,
+no runtime bug → Lens **A** clean.
+
+**Hunt (Lens B — fresh-commit review of `fbb04f1`, ~30 min old):** found a real logic bug in the day-1 relatedness
+engine. `related.ts`'s private `dayKey(ms)` was `new Date(ms).toISOString().slice(0,10)` — a **UTC** day bucket —
+while its own doc-comment and the module intent ("entities born the same day") meant the user's **local** calendar
+day. For any non-UTC user this fires `same-day` on the wrong day: false-positive for entities created just after
+local midnight (same UTC day), false-negative for entities created just after UTC midnight (same local day). It also
+duplicated a concept the core already owns — `bridge.ts` `dayStamp(ms)`, doc'd as "the ONE" local-day format that
+matches Calendar's `data.date`.
+
+**Root cause + fix (DELETE the divergent part):** removed the private `dayKey`, imported and reused the canonical
+`dayStamp` from `./bridge` (verified no import cycle: bridge → {graph(type), tasks} only). Locked with two TZ-forced
+(`Asia/Jakarta`, UTC+7) regression tests in `related.test.ts` that straddle the UTC-midnight boundary — one asserts
+no relation for a shared-UTC-day / different-local-day pair, one asserts `same-day` for a shared-local-day /
+different-UTC-day pair. Fail-before / pass-after both verified by temporarily restoring the UTC helper.
+
+**Verified (cloud, full gate on the fixed tree):** `npm run build` 🟢 · `npx vitest run` **74 files / 616 tests
+green (+2)** · `npx eslint .` clean · all three guard scripts 🟢 · `metrics.mjs --assert-zero` **exit 0**.
+**Metrics row:** apps 31 (±0) · **test cases 514 (+2)** · test files 68 (±0) · tokenViolations 0 ·
+offSystemUtilities 0 · offSystemStyle 0 · offShellControls 0 · keyboardA11y 0 · docMass 0 · **bundle gz 734.1
+(±0** — reused an existing export, no new dep).
+
+**Done / Verified / Next:** Done — main green + 1 verified fix locked by regression tests, one commit pushed.
+Verified — full gate green, fail-before/pass-after proven. Next — Lens **C** (static sweeps: unhandled rejections,
+stale effect deps, `JSON.parse` guards, off-by-one, eventBus/mirror races).
+
+---
+
 ## 2026-07-15 · Builder — EPIC-19 S1: pure relatedness engine `relatedTo`/`significantTerms` (measure-only, NO UI)
 
 **Did:** shipped EPIC-19 **S1** — the pure associative-relatedness spine, the 6th lens's engine. New
