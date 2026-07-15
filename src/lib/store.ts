@@ -6,6 +6,8 @@ export interface Message {
   sender: string
   content: string
   timestamp: number
+  /** Recipient contact this message was sent to (only on `sender: 'Me'` messages). Optional → legacy sent messages predate recipient-scoping and are shown in every thread. */
+  to?: string
   /** Source app id when this message arrived via a cross-app handoff (S3). Optional → backward-compatible with stored messages. */
   from?: string
 }

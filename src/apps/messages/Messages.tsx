@@ -15,6 +15,7 @@ import { TwoPane } from '../../components/ui/TwoPane'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
 import { ProvenanceChip } from '../../components/ui/ProvenanceChip'
 import { LineageTrail } from '../../components/ui/LineageTrail'
+import { threadFor, lastInThread } from './messagesLogic'
 
 const CONTACTS = ['Jondri', 'Work', 'Family', 'Urgent', 'AI Bot']
 
@@ -51,6 +52,7 @@ export default function Messages() {
       sender: 'Me',
       content: draft.trim(),
       timestamp: Date.now(),
+      to: recipient,
       ...(draftFrom ? { from: draftFrom } : {}),
     }
     addMessage(msg)
@@ -106,8 +108,7 @@ export default function Messages() {
             </span>
           </Button>
           {CONTACTS.map(contact => {
-          const contactMessages = messages.filter(m => m.sender === contact || (m.sender === 'Me' && contact === recipient))
-          const lastMsg = contactMessages[contactMessages.length - 1]
+          const lastMsg = lastInThread(messages, contact)
           return (
           <Button
           key={contact}
@@ -131,7 +132,7 @@ export default function Messages() {
           )}
           </div>
           <div className="text-xs text-faint truncate">
-          {lastMsg ? `${lastMsg.sender === 'Me' ? 'You: ' : ''}${lastMsg.content}` : `${messages.filter(m => m.sender === contact || m.sender === 'Me').length} messages`}
+          {lastMsg ? `${lastMsg.sender === 'Me' ? 'You: ' : ''}${lastMsg.content}` : 'No messages yet'}
           </div>
           </div>
           </Button>
@@ -158,7 +159,7 @@ export default function Messages() {
         {/* Messages */}
         <div className="flex-1 overflow-auto px-6 py-4 space-y-3">
         {(() => {
-        const thread = messages.filter(m => m.sender === recipient || m.sender === 'Me')
+        const thread = threadFor(messages, recipient)
         if (thread.length === 0) return (
         <EmptyState
         icon={<Send className="w-6 h-6" />}
