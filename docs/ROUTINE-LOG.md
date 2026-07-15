@@ -5,6 +5,30 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-15 · Visual & Smoke QA — main GREEN on `ea2aef2`, EPIC-19 S1 measure-only confirmed, no runtime bug
+
+**main RUNS clean.** `npm run build` 🟢 (PWA precache 89, no gap) · `node scripts/qa-smoke.mjs` **32/32 routes
+clean, 0 failed** (desktop shell + 31 registry apps) · all guards green (INBOUND 4/4, MEDIA 3/3, GRAPH-LEGIBLE
+3/3, GLOBAL-SEARCH 1/1, NODE-LINEAGE 1/1, INTENT-ROUNDTRIP 2/2, TIMELINE 1/1, HOME-ALIVE 1/1, HOME-ATTENTION
+6/6, SHELL-ATTENTION 4/4, PROVENANCE-PERSISTS 3/3, PROVENANCE-ENTITY 3/3, PRECACHE 89 no-gap, OFFLINE 5/5) ·
+`node scripts/metrics.mjs --assert-zero` **exit 0** (all six axes 0 & LOCKED).
+
+**Active-epic acceptance (EPIC-19 · the associative constellation).** S1 (pure `src/lib/core/related.ts`
+engine — measure-only) done-confirmed: `npx vitest run related` **17/17 green**; `relatedTo`/`significantTerms`
+exported + typed. Target metric `RELATED 0→5/5` has NOT moved — **EXPECTED, no contradiction**: the `RELATED`
+guard is authored only at S4; S1 drives no UI so there is no relatedness surface to guard yet (mirrors every
+prior epic's measure-only S1). Bug Hunter fix `ea2aef2` (same-day bucketing UTC→canonical local `dayStamp`)
+verified holding via the TZ-forced regression cases inside the 17 green tests.
+
+**Auto-metrics vs last QA `aa9acf7`:** apps 31 (±0), test cases 514 (+17 — `related.test.ts` + attention TZ
+cases), files 68 (+1), bundle gz 734.1 (±0). Console noise env-only (maps tiles net:8, mail 401 net:1) — no
+runtime bug. Visually inspected locally (never committed): desktop + Network both fully styled/legible.
+
+**Next:** EPIC-19 S2 — mount `<RelatedConstellation>` on the Network inspector (first UI mover toward
+`RELATED 5/5`).
+
+---
+
 ## 2026-07-15 · Bug Hunter — main GREEN + fix(core): `relatedTo` same-day bucketed by UTC, not the user's local day
 
 **Priority 0 — main proven GREEN on `fbb04f1`:** `npm run build` 🟢 (PWA precache 89) · `npx vitest run` 74 files /
