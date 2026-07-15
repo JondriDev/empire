@@ -25,26 +25,25 @@
 > git + `docs/ROUTINE-LOG.md`; working memory stays tight (its budget is the
 > `docMass` metric — see below).
 
-- **▶ EPIC-19 · The organism relates (the associative constellation) — ▶ ACTIVE, promoted 2026-07-14. NOT yet
-  built.** The order past *proactive*: from *what needs you* (EPIC-17/18) to *how everything connects*. Every graph
-  edge today is EXPLICIT (handoff `ProvEdge` / intent `data.from`); nothing reveals IMPLICIT relatedness. Add the
-  6th lens (ASSOCIATIVE): open any entity → its *constellation* of cross-app relatives (shared-term · shared-tag ·
-  same-day · linked), ranked + reason-labelled + one tap away. Reuses `search.ts` + graph + `openEntity` + `ui`; no new deps; six axes 0. **Target: new `RELATED` QA guard 0 → 5/5.**
-  - **▶ S1 (next — measure-only, NO UI):** new `src/lib/core/related.ts` — `RelatedReason` (`linked·shared-term·
-    shared-tag·same-day`), `RelatedItem {node,score,reasons}`, `significantTerms(node)` (title + `nodeBodyText`
-    tokens, len≥4, minus a small STOP set — import `nodeBodyText` from `./search`, don't re-impl), and
-    `relatedTo(nodes,id,limit=6)` scoring each other node: linked +8 (edge either way ‖ `data.from` either way),
-    shared-tag +4/tag (cap +12), shared-term +3/term (cap +9), same-day +2 (local `dayKey`); drop 0, sort
-    score↓→`meta.updated`↓, cap; attach reasons. `related.test.ts` ~13 cases. **Acceptance:** `vitest run
-    related` green; no component edited; `--assert-zero` exit 0.
-  - **S2:** `src/components/ui/RelatedConstellation.tsx` (`{nodeId}`; `useGraph`→`relatedTo`; `null` when empty; up
-    to 6 ghost `Button` rows, each app-chip + title + reason chip, click→`openEntity`) mounted on the Network
-    inspector per-entity list beside `<NodeLineage>`; i18n `related.reason.*`; `.related-*` CSS in DS_INFRA
-    `window-manager.css`; `RelatedConstellation.test.tsx`. **S3:** mount the SAME component on Timeline + Search
-    rows (verbatim). **S4:** `RELATED` guard in `qa-smoke.mjs` on the (headless-drivable) Timeline surface → `5/5`
-    (linkedTop·sharedTerm·sharedTag·unrelatedAbsent·oneTapLands) → EPIC-19 CODE-COMPLETE. **Trap:** use `task`/
-    `book`/`goal` seed types (note/learning/message get pruned by syncAll); drive Timeline, NOT the fragile
-    Network canvas click.
+- **▶ EPIC-19 · The organism relates (the associative constellation) — ▶ ACTIVE.** 6th lens (ASSOCIATIVE): open any
+  entity → its *constellation* of cross-app relatives (shared-term · shared-tag · same-day · linked), ranked +
+  reason-labelled + one tap away. Reuses `search.ts` + graph + `openEntity` + `ui`; no new deps; six axes 0.
+  **Target: new `RELATED` QA guard 0 → 5/5.**
+  - **✅ S1 DONE (this run):** `src/lib/core/related.ts` — `RelatedReason`/`RelatedItem`, `significantTerms(node)` (title + `nodeBodyText` tokens, len≥4, minus STOP; imports `nodeBodyText` from `./search`), `relatedTo(nodes,id,limit=6)` (linked +8, shared-tag +4/tag cap 12, shared-term +3/term cap 9, same-day +2 via local `dayKey`; drop 0; sort score↓→`meta.updated`↓; reasons order linked·shared-tag·shared-term·same-day). 15 unit tests. **Trap:** a tag ≥4 chars scores BOTH shared-tag AND shared-term (significantTerms reads nodeBodyText, which folds in tags) — intentional; isolate a signal in tests via sub-4-char tags / distinct-day timestamps (default `created:0` = all same-day).
+  - **▶ S2 (next):** `src/components/ui/RelatedConstellation.tsx` — `export function RelatedConstellation({ nodeId
+    }: { nodeId: string })`, subscribes `useGraph(s=>s.nodes)`, memoizes `relatedTo(Object.values(nodes), nodeId)`;
+    `null` when empty (self-hiding like `<NodeLineage>`). Else a `[data-related=<nodeId>]` block of ≤6 ghost `ui`
+    `Button` rows (`data-related-item=<node.id>`), each firing `openEntity(node.meta.app, node.id)` — app accent
+    chip (`getAppIcon`/registry `color`, Bridge-attention-row idiom) + title + a reason chip for `reasons[0]`
+    (i18n `related.reason.linked|sharedTag|sharedTerm|sameDay`, EN/ID in `src/lib/i18n.ts`). `.related-*` CSS in
+    DS_INFRA `src/window-manager.css`; inline styles `var(--*)` only. **Mount beside `<NodeLineage>`/
+    `<NodeDescendants>` in the Network inspector per-entity list** (`src/apps/network/Network.tsx`).
+    `RelatedConstellation.test.tsx` (~4). **Acceptance:** build/vitest/eslint 🟢; six axes 0; component mounted.
+  - **S3:** mount the SAME component on Timeline (`src/apps/timeline/Timeline.tsx`) + Search
+    (`src/apps/search/Search.tsx`) rows (verbatim, beside their `NodeLineage`). **S4:** `RELATED` guard in
+    `qa-smoke.mjs` on the (headless-drivable) Timeline surface → `5/5` (linkedTop·sharedTerm·sharedTag·
+    unrelatedAbsent·oneTapLands) → EPIC-19 CODE-COMPLETE. **Trap:** seed `task`/`book`/`goal` types (note/learning/
+    message get pruned by syncAll); drive Timeline, NOT the fragile Network canvas click.
 
 ### Standing design-system recipes (carry forward — reusable across any future migration)
 
@@ -80,15 +79,13 @@
 
 ### ✅ Retired epics — DONE index (full bodies in git; metric each moved)
 
-- **EPIC-18 · The cockpit reaches beyond the home (shell-level attention)** — DONE 2026-07-14, `SHELL-ATTENTION
-  0 → 4/4` LOCKED (S1–S2). `attentionSummary` (`attention.ts`) → a live `.empire-homebar-badge.is-attention` on
-  the HomeBar Home `IconButton` (`Desktop.tsx`), shown only `!atHome`, urgent-tinted + spring-pulse on a new top
-  item (`shouldPulseAttention`). `SHELL-ATTENTION` guard in `qa-smoke.mjs`. `8a0c6c9` · `aa9acf7`.
-- **EPIC-17 · The Bridge becomes the organism's cockpit (legible→proactive)** — DONE 2026-07-14, `HOME-ATTENTION
-  0 → 6/6` LOCKED (S1–S4). Pure `computeAttention` spine (`attention.ts`) + Bridge "Needs you" ranked feed with
-  inline quick-resolve (`AttentionResolve`); `HOME-ATTENTION` guard in `qa-smoke.mjs`. `69fd479`.
-- **EPIC-16 · Doc-mass conformance** — DONE 2026-07-13, `docMass 3269 → 0` LOCKED (S1–S3; `scanDocMass` in
-  `scripts/docMassAudit.mjs` budgets CONTEXT ≤400 / EPICS ≤500; the sixth gated axis). `1cc462e` · `19e0454`.
+- **EPIC-18 · Shell-level attention** — DONE 2026-07-14, `SHELL-ATTENTION 0 → 4/4` LOCKED. `attentionSummary`
+  (`attention.ts`) → live `.empire-homebar-badge.is-attention` on the HomeBar Home `IconButton` (`Desktop.tsx`),
+  shown only `!atHome`, urgent-tinted + spring-pulse on a new top item (`shouldPulseAttention`).
+- **EPIC-17 · Bridge cockpit (legible→proactive)** — DONE 2026-07-14, `HOME-ATTENTION 0 → 6/6` LOCKED. Pure
+  `computeAttention` (`attention.ts`) + Bridge "Needs you" ranked feed with inline quick-resolve (`AttentionResolve`).
+- **EPIC-16 · Doc-mass conformance** — DONE 2026-07-13, `docMass 3269 → 0` LOCKED (`scanDocMass` in
+  `scripts/docMassAudit.mjs` budgets CONTEXT ≤400 / EPICS ≤500; the sixth gated axis).
 - **EPIC-15 · Keyboard operability (WCAG 2.1.1)** — DONE 2026-07-13, `keyboardA11y 24 → 0` LOCKED
   (S1 detector+baseline `79c9272`; S2+S3+S4 sweep+lock `61c4f7b`). QA-confirmed on green main.
 - **EPIC-14 · Shell conformance** — DONE 2026-07-13, `offShellControls 307/341 → 0` LOCKED (S1–S12; every bare
@@ -390,15 +387,11 @@ AI-call budget (default 100, user-tunable, hard stop button).
   `rgbCss(triplet, alpha?)` from `nodeColors.ts` (assembles the string from a constant,
   no literal `rgb(`), and never write `rgb(`/`rgba(` in prose. Reusing this helped S3
   *lower* the metric 503→501 (the old ticker swatches used raw `rgb(${s.rgb})`).
-- **Accessible-name metric (WCAG 4.1.2) → rejected as an epic (2026-07-13):** already-closed — all 125 `IconButton`s
-  carry `aria-label` (TS forces it), `<img>` alt is 4/4. A broader "icon-only `<Button>` w/o text child + no
-  aria-label" detector over-counts badly (most flagged Buttons have DYNAMIC text children a static scan can't see) —
-  too noisy to be honest. Chose the ratified `docMass` instead.
+- **Accessible-name metric (WCAG 4.1.2) → rejected (2026-07-13):** already-closed (all `IconButton`s carry `aria-label`, `<img>` alt 4/4); a broader icon-only-`<Button>` detector over-counts (DYNAMIC text children a static scan can't see). Chose `docMass` instead.
 
 ## ✅ QA state (latest — 2026-07-14, EPIC-18 CODE-COMPLETE independent cloud-confirm, green `aa9acf7`)
 
 - All six axes 0 & LOCKED (`--assert-zero` exit 0). Auto-metrics: apps 31, test cases 497 (+4 vs `b6681da`, EPIC-18 S2 pulse cases), files 67, bundle gz 734.1. build🟢 vitest🟢. **No runtime bug.** Independent QA re-ran full smoke on `aa9acf7` (EPIC-18 S2 landed since last QA): all 15 guards green — `SHELL-ATTENTION 4/4` (target HOLDS), `HOME-ATTENTION 6/6`, 32/32 routes clean, PRECACHE 89 no-gap, OFFLINE 5/5. **EPIC-18 CODE-COMPLETE (S1+S2) → Strategist: retire to DONE + promote next epic.** Env-only console noise (NOT bugs): weather/maps tiles + files/mail 401 — all render clean.
 
 ## FLEET v3 (2026-07-15) — new lanes, read once
-- New routines: **Bug Hunter** (3×/day; proves main green then reproduce→root-cause→fix→lock; ledger docs/BUGS.md), **UI/UX Director** (2×/day; ONE cross-app UX axis per run, fixed at token/primitive/shared-component level; ledger docs/UX-LEDGER.md), **Release Manager** (weekly; CHANGELOG + semver tag → release.yml publishes Release+APK). Optimizer re-enabled weekly (edits docs/routines/ spec bodies; a local sync applies them).
-- Lane rules: Artisan deep on ONE app · Director wide on ONE pattern · logic-bug leads → docs/BUGS.md · system-level UX leads → docs/UX-LEDGER.md inbox. Every routine prompt now carries the OPERATING PRINCIPLES block (docs/OPERATING-PRINCIPLES.md).
+- Routines: **Bug Hunter** (3×/day; reproduce→root-cause→fix→lock; ledger docs/BUGS.md) · **UI/UX Director** (2×/day; ONE cross-app UX axis fixed at token/primitive/shared-component level; ledger docs/UX-LEDGER.md) · **Release Manager** (weekly; CHANGELOG + semver tag → release.yml). Every routine prompt carries the OPERATING PRINCIPLES block (docs/OPERATING-PRINCIPLES.md). Logic-bug leads → docs/BUGS.md; system-level UX leads → docs/UX-LEDGER.md.

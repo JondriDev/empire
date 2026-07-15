@@ -5,6 +5,41 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-15 · Builder — EPIC-19 S1: pure relatedness engine `relatedTo`/`significantTerms` (measure-only, NO UI)
+
+**Did:** shipped EPIC-19 **S1** — the pure associative-relatedness spine, the 6th lens's engine. New
+`src/lib/core/related.ts`: `RelatedReason` (`linked·shared-term·shared-tag·same-day`), `RelatedItem
+{node,score,reasons}`, `significantTerms(node)` (union of title tokens + `nodeBodyText(node)` tokens split on
+`/\W+/`, kept len≥4, minus a STOP set, deduped — imports `nodeBodyText` from `./search`, no re-impl), and
+`relatedTo(nodes,id,limit=6)` scoring every other node: **linked +8** (graph edge either way ‖ `data.from` either
+way), **shared-tag +4/tag cap +12**, **shared-term +3/term cap +9**, **same-day +2** (local
+`dayKey(ms)=toISOString().slice(0,10)`); drops score 0, sorts score↓→`meta.updated`↓, caps to `limit`, attaches
+reasons in order linked·shared-tag·shared-term·same-day. New `src/lib/core/related.test.ts` — **15 cases**
+(shared-term/tag/same-day/linked-both-directions/`data.from`-highest, no-overlap excluded, stopword+<4-char no-match,
+self excluded, missing id → [], empty graph → [], limit cap, score-desc ordering, `meta.updated` tie-break,
+multi-signal accumulation). **No component edited** (S1 is measure-only, mirroring every prior epic's S1).
+
+**Why:** the graph only ever knew EXPLICIT edges (handoff `ProvEdge` / intent `data.from`). This is the storage-
+agnostic, React-free engine that reveals IMPLICIT relatedness — the foundation S2–S4 render as the per-entity
+constellation. Reuses `search.ts` `nodeBodyText`; no new deps.
+
+**Verified (cloud):** `npm run build` (`tsc -b && vite build`) 🟢 (PWA precache 89) · `npx vitest run` **74 files /
+614 tests green** (+15) · `npx eslint src/lib/core/related.ts related.test.ts` clean · `node scripts/metrics.mjs
+--assert-zero` **exit 0** — all six axes 0 (docMass returned to 0 after trimming CONTEXT.md 404→397 to stay under its
+400-line budget; the FLEET-v3 append had pushed it 4 over — a pre-existing overflow, now fixed). **Metrics row:**
+apps 31 (±0) · test cases 512 (+15) · test files 68 (+1) · tokenViolations 0 · offSystemUtilities 0 · offSystemStyle
+0 · offShellControls 0 · keyboardA11y 0 · docMass 0 · bundle gz 734.1 KB (±0 — pure fn, no new dep). **Trap learned
+(→ CONTEXT.md):** a tag string ≥4 chars scores BOTH shared-tag AND shared-term (`significantTerms` reads
+`nodeBodyText`, which folds in tag strings) — intentional double-signal; single-signal tests must use sub-4-char tags
+and distinct-day timestamps (the factory default `created:0` makes every node same-day).
+
+**Next (Builder): EPIC-19 S2** — `src/components/ui/RelatedConstellation.tsx` (self-hiding `[data-related]` block of
+≤6 ghost `Button` rows → `openEntity`, app-accent chip + title + `reasons[0]` chip; i18n `related.reason.*` EN/ID;
+`.related-*` CSS in DS_INFRA `window-manager.css`) mounted on the Network inspector beside `<NodeLineage>`. Exact
+shape in CONTEXT.md.
+
+---
+
 ## 2026-07-14 · Strategist — retired EPIC-17 + EPIC-18 to DONE; promoted ▶ EPIC-19 · The organism relates (associative constellation)
 
 Both proactive-cockpit epics reached CODE-COMPLETE with QA-confirmed metrics on green main (`HOME-ATTENTION 6/6`, `SHELL-ATTENTION 4/4`) → retired both to the EPICS/CONTEXT DONE index. All six conformance axes 0 & LOCKED, no runtime bug, so the steepest **systemic** gradient stays organism depth — one order past *proactive*: **associative**. Promoted **EPIC-19** — the organism reveals IMPLICIT relatedness (the graph only knew EXPLICIT handoff/`data.from` edges): a per-entity **constellation** of cross-app relatives (shared-term · shared-tag · same-day · linked), the 6th lens. Deeply decomposed S1–S4: S1 pure `relatedTo`/`significantTerms` spine (`src/lib/core/related.ts`, reuses `search.ts` `nodeBodyText`, measure-only) + `related.test.ts`; S2 `<RelatedConstellation>` on the Network inspector + i18n + CSS; S3 mount the same on Timeline + Search; S4 `RELATED 0 → 5/5` guard on the (headless-drivable) Timeline surface + lock. Target metric: new `RELATED` QA guard. No new deps; six axes stay 0. Mirrored the active-epic + next-stage shape into CONTEXT.md; kept EPICS 207/500 & CONTEXT 400/400 under the `docMass` budget. **Next (Builder): EPIC-19 S1.**

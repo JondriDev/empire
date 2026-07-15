@@ -78,7 +78,7 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
 > oneTapLands`), plus the pure `relatedTo` spine unit-pinned. Baseline (pre-epic): no relatedness surface
 > exists (`0/5`).
 
-- [ ] **S1 · Pure relatedness engine + unit tests (measure-only; NO UI change).** New
+- [x] **S1 · Pure relatedness engine + unit tests (measure-only; NO UI change).** New
   `src/lib/core/related.ts`. Types: `export type RelatedReason = 'linked' | 'shared-term' | 'shared-tag' |
   'same-day'`; `export interface RelatedItem { node: CoreNode; score: number; reasons: RelatedReason[] }`.
   Helpers: `export function significantTerms(node: CoreNode): string[]` — union of `node.title` (lowercased,
