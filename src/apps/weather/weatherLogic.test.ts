@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { wmo, mapForecast, type OpenMeteoForecast } from './weatherLogic'
 
 describe('wmo', () => {
@@ -69,5 +69,33 @@ describe('mapForecast', () => {
     const w = mapForecast({ current: fixture.current }, 'NoOutlook')
     expect(w.daily).toEqual([])
     expect(w.temp).toBe(19)
+  })
+
+  // Regression: a date-only forecast string names a LOCAL calendar day. Parsing it
+  // with `new Date(iso)` yields UTC midnight, so in a negative-offset zone the
+  // weekday label rendered locally shifts back a day (Fri → Thu). The label must
+  // name the day the forecast means, regardless of the viewer's timezone. TZ forced
+  // (mirrors related.test.ts) so a UTC CI reproduces the Americas-user failure.
+  describe('local-day weekday labels (America/Los_Angeles, UTC-7/8)', () => {
+    const realTZ = process.env.TZ
+    beforeAll(() => { process.env.TZ = 'America/Los_Angeles' })
+    afterAll(() => { process.env.TZ = realTZ })
+
+    it('labels each forecast day by its LOCAL weekday, not the UTC instant', () => {
+      // 2026-07-16 Thu, 2026-07-17 Fri, 2026-07-18 Sat.
+      const dated: OpenMeteoForecast = {
+        current: fixture.current,
+        daily: {
+          time: ['2026-07-16', '2026-07-17', '2026-07-18'],
+          weather_code: [0, 0, 0],
+          temperature_2m_max: [20, 20, 20],
+          temperature_2m_min: [10, 10, 10],
+        },
+      }
+      const w = mapForecast(dated, 'LA')
+      expect(w.daily[0].day).toBe('Today')
+      expect(w.daily[1].day).toBe('Fri') // 2026-07-17, NOT 'Thu' (the UTC-shifted label)
+      expect(w.daily[2].day).toBe('Sat') // 2026-07-18, NOT 'Fri'
+    })
   })
 })

@@ -58,9 +58,21 @@ export function wmo(code: number): { label: string; description: string; cat: Ca
   return { label: 'Storm', description: 'Thunderstorm', cat: 'storm' }
 }
 
-/** Short weekday label for an ISO date string ('Today' for index 0). */
+/**
+ * Short weekday label for an ISO date string ('Today' for index 0).
+ *
+ * Open-Meteo's `daily.time` entries are date-only strings (`YYYY-MM-DD`) naming a
+ * LOCAL forecast day. `new Date('2026-07-16')` parses as UTC midnight, which
+ * `toLocaleDateString` then renders in the local zone — shifting the weekday back
+ * a day for any negative-offset (Americas) user. Build a LOCAL Date from the parts
+ * so the label names the day the forecast actually means. Falls back to the raw
+ * string if the shape is unexpected.
+ */
 function dayLabel(iso: string, index: number): string {
-  return index === 0 ? 'Today' : new Date(iso).toLocaleDateString([], { weekday: 'short' })
+  if (index === 0) return 'Today'
+  const [y, m, d] = iso.split('-').map(Number)
+  if (!y || !m || !d) return iso
+  return new Date(y, m - 1, d).toLocaleDateString([], { weekday: 'short' })
 }
 
 /**
