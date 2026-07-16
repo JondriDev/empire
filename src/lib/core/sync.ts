@@ -100,7 +100,7 @@ const syncers: Array<() => void> = [
     items: s => s.messages,
     id: m => m.id,
     title: m => `${m.sender}: ${m.content.slice(0, 40)}`,
-    data: m => ({ sender: m.sender, content: m.content }),
+    data: m => ({ sender: m.sender, content: m.content, ...(m.from !== undefined ? { from: m.from } : {}) }),
   }),
 ]
 

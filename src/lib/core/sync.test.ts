@@ -247,6 +247,36 @@ describe('add-to-learning — real store round-trip (EPIC-12 S2)', () => {
   })
 })
 
+// Lineage parity: the note/learning central mirrors propagate `data.from` so a
+// handoff-received entity's ancestry is legible in Network/Timeline/Search node
+// views and in relatedTo's `areLinked`. The `message` mirror must do the same —
+// a message store row carries `from` (the source app of an inbound S3 handoff),
+// and dropping it in the mirror made messages the one type whose <LineageTrail>
+// showed in the Messages UI but vanished everywhere the graph is read.
+describe('message mirror — data.from lineage parity', () => {
+  beforeEach(() => {
+    startCoreSync()
+    useGraph.setState({ nodes: {} })
+    useStore.setState({ notes: [], learningItems: [], messages: [] })
+  })
+
+  it('propagates a message row `from` onto its mirrored graph node (matching note/learning)', () => {
+    useStore.getState().addMessage({ id: 'm-1', sender: 'Ada', content: 'inbound handoff body', from: 'editor' })
+    const msgNodes = nodesOfType('message')
+    expect(msgNodes).toHaveLength(1)
+    expect(msgNodes[0].data.from).toBe('editor')
+    // still carries the base fields
+    expect(msgNodes[0].data.sender).toBe('Ada')
+    expect(msgNodes[0].data.content).toBe('inbound handoff body')
+  })
+
+  it('omits `from` entirely when the message has none (no phantom key)', () => {
+    useStore.getState().addMessage({ id: 'm-2', sender: 'Me', content: 'local message' })
+    const node = nodesOfType('message')[0]
+    expect('from' in node.data).toBe(false)
+  })
+})
+
 // EPIC-12 S3: LOCK the intent-integrity invariant. For EACH core creation intent,
 // seed a valid source, run it, then run syncAll() (the boot/mutation reconcile) and
 // assert the entity it created STILL EXISTS. This encodes the rule: an intent that
