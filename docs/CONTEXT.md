@@ -334,6 +334,15 @@ AI-call budget (default 100, user-tunable, hard stop button).
 - **Calendar owns its own storage:** events live in `empire-calendar-events` (NOT the central
   store) and self-mirror via `mirrorCollection()` in a `[events]` effect. **Never add an
   `event` syncer to the central list** — it would delete Calendar's nodes.
+- **Empty-first-render mirror-prune trap (FIXED 2026-07-16 `2c1668d`, keep the guard):** an app that
+  `mirrorCollection()`s in a `[data]` effect but loads `data` AFTER first render (mount-effect
+  `setState`, or async IDB) mirrors an EMPTY collection on the first commit — and `reconcile` deletes
+  every node of that type (scrubbing edges + `data.from` lineage), then re-adds with fresh ids on the
+  next render. Silently churns ids + destroys cross-app links on EVERY open. **Rule: hydrate the
+  collection SYNCHRONOUSLY** — lazy `useState(() => readStorage())` (Goals/Calendar/Crypto/Mail/
+  PromptGenerator; the Reader/Kanban pattern) — **or gate the mirror effect behind a `hydratedRef`**
+  when the load is genuinely async (Photos). Never mirror before the data is loaded. (Calendar init
+  also migrates-in-place: default `tags: []`/`color` so a legacy event doesn't crash `e.tags.length`.)
 - **Alpha-append trap (EPIC-2 sweep):** the idiom `` background: `${color}18` `` (append a 2-hex alpha
   to a colour) **silently breaks** when you swap `color` from a hex to a CSS var — `var(--ion)18` is
   invalid CSS and renders nothing. When de-hexing a file that uses this pattern, convert those sites to

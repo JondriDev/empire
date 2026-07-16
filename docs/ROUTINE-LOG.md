@@ -5,6 +5,42 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-16 · Bug Hunter — 3 root-caused fixes (Lens C static sweeps): weather UTC weekday · graph-mirror empty-mount prune (×6 apps) · ChartBuilder empty-data crash
+
+**PRIORITY 0 — main proven GREEN on entry** (`2dc28fc`): build 🟢 (precache 89), vitest 638🟢, eslint clean,
+shell-styled/route-parity/audit 🟢, `metrics --assert-zero` exit 0 (all six axes 0 & LOCKED), no metric
+regression vs `docs/METRICS.md`. Releasable — proceeded to the hunt.
+
+**Lens C (static sweeps over `src/`)** via 3 parallel sweep agents (date/index · effect+listener leaks ·
+async+mirror races). The leak sweep came back CLEAN (every interval/listener/subscription is torn down; async
+loads gated). The other two produced three verified fixes:
+
+1. **`fix(weather)` `1d4c1aa`** — forecast weekday labels off by a day for Western-Hemisphere users. `dayLabel`
+   parsed Open-Meteo's date-only `daily.time` with `new Date(iso)` (UTC midnight) then rendered local (Fri→Thu
+   for any negative offset). Fix: build a LOCAL Date from parsed Y/M/D. Locked by a TZ-forced (LA) regression.
+2. **`fix(graph-mirror)` `2c1668d`** — opening a collection-owning app PRUNED its own persisted graph nodes.
+   Goals/Calendar/Crypto/Mail/PromptGenerator/Photos mirrored in a `[data]` effect but loaded `data` AFTER first
+   render, so the first mirror ran with `[]` and `reconcile` deleted every node of the type (scrubbing edges +
+   `data.from` lineage), re-adding fresh ids on every open — silent id-churn + broken cross-app lineage. Fix:
+   hydrate synchronously (lazy `useState` init; Photos gates its mirror behind the existing `hydratedRef`). Plus
+   Calendar migrate-in-place `tags: []`/`color` default (a legacy event crashed `e.tags.length`). Locked by 6
+   render regression tests (id-stability + edge survival). New trap written to CONTEXT.md.
+3. **`fix(chart-builder)` `535ef50`** — line chart crashed (`points[points.length-1]` on `[]`) + Min showed
+   Infinity after deleting all data points. `removeRow` had no floor. Fix: floor at 1 datum (+ disable the
+   control there). Locked by a regression test that drives the exact crash path.
+
+**Gate (final, all green):** build 🟢 (precache 89) · vitest **646 pass (84 files, +8)** · eslint clean ·
+shell-styled/route-parity/audit 🟢 · `metrics --assert-zero` **exit 0** (six axes 0 & LOCKED). Metrics Δ vs
+`2dc28fc`: apps 31 ±0 · **test cases 531→539 (+8)** · files 72→80 (+8) · bundle gz 735.4→**735.6** (+0.2, logic
+only) · all conformance axes 0. **OPEN leads logged in BUGS.md** for next run: Calendar "today" uses UTC (not
+local day); `message` graph mirror drops `from` (lineage parity gap). Next lens: **D (characterization)**.
+
+**Done / Verified / Next** — Done: main proven green + 3 root-caused fixes locked by regression tests, pushed.
+Verified: fail-before/pass-after on all 8 new tests; full gate green. Next: Lens D characterization of
+`sync.ts reconcile` edges, or land the two OPEN Calendar/message leads.
+
+---
+
 ## 2026-07-16 · Builder — feat(related): EPIC-19 S2 · surface the constellation on the Network inspector
 
 **Stage:** EPIC-19 S2 (the 6th/associative lens, rendered). **Done:** new
