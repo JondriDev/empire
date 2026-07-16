@@ -34,7 +34,10 @@ export default function ChartBuilder() {
     setData(data.map((d, idx) => idx === i ? { ...d, ...patch } : d))
   }
   const addRow = () => setData([...data, { label: 'Item ' + (data.length + 1), value: Math.floor(Math.random() * 80 + 10) }])
-  const removeRow = (i: number) => setData(data.filter((_, idx) => idx !== i))
+  // Keep at least one datum: a chart with zero points is meaningless AND the line
+  // renderer reads points[points.length - 1] (crashes on []) while the Min stat
+  // shows Math.min() === Infinity. Flooring here keeps the ≥1-datum invariant.
+  const removeRow = (i: number) => setData(data.length <= 1 ? data : data.filter((_, idx) => idx !== i))
   const randomize = () => setData(data.map(d => ({ ...d, value: Math.floor(Math.random() * 90 + 10) })))
 
   const exportSVG = () => {
@@ -100,7 +103,7 @@ export default function ChartBuilder() {
                   className="w-20"
                   aria-label={`Data point ${i + 1} value`}
                 />
-                <IconButton variant="ghost" size="sm" aria-label={`Remove data point ${i + 1}`} className="opacity-0 group-hover:opacity-100" onClick={() => removeRow(i)} icon={<Trash2 size={12} />} />
+                <IconButton variant="ghost" size="sm" disabled={data.length <= 1} aria-label={`Remove data point ${i + 1}`} className="opacity-0 group-hover:opacity-100" onClick={() => removeRow(i)} icon={<Trash2 size={12} />} />
               </div>
             ))}
           </div>

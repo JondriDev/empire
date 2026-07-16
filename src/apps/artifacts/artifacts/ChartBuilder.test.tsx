@@ -33,4 +33,22 @@ describe('ChartBuilder — S5 shell migration', () => {
     expect(screen.getByLabelText('Data point 1 label')).toBeTruthy()
     expect(screen.getByLabelText('Data point 1 value')).toBeTruthy()
   })
+
+  // Regression: `removeRow` had no floor, so the user could delete every data
+  // point. On an empty dataset the line renderer read `points[points.length - 1]`
+  // (crash on []) and the Min stat showed `Math.min()` === Infinity. The floor
+  // keeps ≥1 datum. This drives the exact path: switch to the line chart, then
+  // try to remove every row.
+  it('keeps at least one datum so the line chart cannot crash on an empty dataset', () => {
+    render(<ChartBuilder />)
+    fireEvent.click(screen.getByRole('radio', { name: 'line' }))
+    const initial = screen.getAllByLabelText(/Data point \d+ value/).length
+    // Attempt to remove every row while the line chart is live (each removal
+    // re-renders it — before the fix, emptying the data threw here).
+    for (let k = 0; k < initial; k++) {
+      fireEvent.click(screen.getAllByRole('button', { name: /Remove data point/ })[0])
+    }
+    expect(screen.getAllByLabelText(/Data point \d+ value/)).toHaveLength(1)
+    expect(screen.queryByText('Infinity')).toBeNull()
+  })
 })
