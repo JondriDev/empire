@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Card, Button, IconButton, Segmented, Select, Input } from '../../components/ui'
+import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 import { Clock as ClockIcon, Globe, Timer, AlarmClock, Hourglass, Play, Pause, RotateCcw, Trash2, Plus, X, Bell, BellOff } from 'lucide-react'
 import {
@@ -279,7 +280,12 @@ export default function Clock() {
               )}
             </div>
             {worldClocks.length === 0 ? (
-              <p className="text-faint text-sm py-4 text-center">No world clocks — add a city above.</p>
+              <EmptyState
+                size="sm"
+                icon={<Globe className="w-5 h-5" aria-hidden="true" />}
+                title="No world clocks"
+                description="Add a city above to track its local time here."
+              />
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {worldClocks.map(clock => (

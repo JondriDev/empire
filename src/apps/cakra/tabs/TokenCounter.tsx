@@ -3,6 +3,7 @@ import { Card, Button, TextArea } from '../../../components/ui'
 import { cssVar, tint } from '../../../design-system/tokens'
 import { ProvenanceChip } from '../../../components/ui/ProvenanceChip'
 import { SendResultMenu } from '../../../components/ui/SendResultMenu'
+import { EmptyState } from '../../../components/ui/Utility'
 import { useInboundHandoff } from '../../../lib/useInboundHandoff'
 import { emit } from '../../../lib/eventBus'
 import {
@@ -257,11 +258,11 @@ export default function TokenCounter() {
 
  {/* Empty state — prompt to paste text */}
  {!text.trim() && (
- <Card className="p-6 text-center">
- <Hash className="w-10 h-10 mx-auto text-faint mb-3" />
- <p className="text-muted text-sm">Paste or type text above to see token estimates across models.</p>
- <p className="text-faint text-xs mt-1">Supports GPT-4, Claude, Gemini, and custom model ratios.</p>
- </Card>
+ <EmptyState
+ icon={<Hash className="w-6 h-6" aria-hidden="true" />}
+ title="Count your tokens"
+ description="Paste or type text above to see token estimates across models — GPT-4, Claude, Gemini, and custom ratios."
+ />
  )}
 
  {/* Stats */}

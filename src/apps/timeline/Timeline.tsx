@@ -40,6 +40,7 @@ import { NodeActions } from '../../components/ui/NodeActions'
 import { NodeLineage } from '../../components/ui/NodeLineage'
 import { RelatedConstellation } from '../../components/ui/RelatedConstellation'
 import { NodeDescendants } from '../../components/ui/NodeDescendants'
+import { EmptyState } from '../../components/ui/Utility'
 import type { AppDefinition } from '../../lib/registry'
 import type { TimelineEntry } from '../../lib/core/timeline'
 
@@ -197,16 +198,17 @@ export default function Timeline() {
 
       {/* Idle / empty */}
       {days.length === 0 && (
-        <div className="gp rounded-2xl text-center" style={{ padding: 'var(--space-6, 28px)' }}>
-          <TimelineIcon className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text3)' }} />
-          <p className="text-sm font-medium" style={{ color: 'var(--text2)' }}>
-            {hasStream ? 'No moments match these filters' : 'No history yet'}
-          </p>
-          <p className="text-xs mt-1.5" style={{ color: 'var(--text3)' }}>
-            {hasStream
-              ? 'Clear a filter chip to widen the stream.'
-              : 'Create or hand off anything and it lands here — every entity birth and every app→app transfer, newest-first, grouped by day.'}
-          </p>
+        <div className="gp rounded-2xl">
+          <EmptyState
+            accent={ACCENT}
+            icon={<TimelineIcon className="w-6 h-6" aria-hidden="true" />}
+            title={hasStream ? 'No moments match these filters' : 'No history yet'}
+            description={
+              hasStream
+                ? 'Clear a filter chip to widen the stream.'
+                : 'Create or hand off anything and it lands here — every entity birth and every app→app transfer, newest-first, grouped by day.'
+            }
+          />
         </div>
       )}
 

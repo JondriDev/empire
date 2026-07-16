@@ -33,6 +33,7 @@ import { Button, IconButton, Input } from '../../components/ui'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { NodeLineage } from '../../components/ui/NodeLineage'
 import { RelatedConstellation } from '../../components/ui/RelatedConstellation'
+import { EmptyState } from '../../components/ui/Utility'
 
 // One accent per view — Search reads as ion-blue, the calm scanning light.
 const ACCENT = 'var(--ion)'
@@ -213,27 +214,34 @@ export default function Search() {
 
       {/* Idle — no query yet */}
       {!trimmed && (
-        <div className="gp rounded-2xl text-center" style={{ padding: 'var(--space-6, 28px)' }}>
-          <SearchIcon className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text3)' }} />
-          <p className="text-sm font-medium" style={{ color: 'var(--text2)' }}>Find anything, anywhere</p>
-          <p className="text-xs mt-1.5" style={{ color: 'var(--text3)' }}>
-            Type to search across every app’s real entities at once — the whole organism, one field.
-            <br />↑ ↓ to move · Enter to open · ⌘⇧F to summon from anywhere.
-          </p>
+        <div className="gp rounded-2xl">
+          <EmptyState
+            accent={ACCENT}
+            icon={<SearchIcon className="w-6 h-6" aria-hidden="true" />}
+            title="Find anything, anywhere"
+            description={
+              <>
+                Type to search across every app’s real entities at once — the whole organism, one field.
+                <br />↑ ↓ to move · Enter to open · ⌘⇧F to summon from anywhere.
+              </>
+            }
+          />
         </div>
       )}
 
       {/* Query, no matches (after filters) */}
       {trimmed && filtered.length === 0 && (
-        <div className="gp rounded-2xl text-center" style={{ padding: 'var(--space-6, 28px)' }}>
-          <p className="text-sm font-medium" style={{ color: 'var(--text2)' }}>
-            {hits.length === 0 ? `Nothing matches “${trimmed}”` : 'No hits match these filters'}
-          </p>
-          <p className="text-xs mt-1.5" style={{ color: 'var(--text3)' }}>
-            {hits.length === 0
-              ? 'Try fewer or shorter words. Only things mirrored into the graph are searchable.'
-              : 'Clear a filter chip to widen the results.'}
-          </p>
+        <div className="gp rounded-2xl">
+          <EmptyState
+            accent={ACCENT}
+            icon={<SearchIcon className="w-6 h-6" aria-hidden="true" />}
+            title={hits.length === 0 ? `Nothing matches “${trimmed}”` : 'No hits match these filters'}
+            description={
+              hits.length === 0
+                ? 'Try fewer or shorter words. Only things mirrored into the graph are searchable.'
+                : 'Clear a filter chip to widen the results.'
+            }
+          />
         </div>
       )}
 

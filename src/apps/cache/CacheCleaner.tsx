@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Database } from 'lucide-react'
 import { Card, Button } from '../../components/ui'
+import { EmptyState } from '../../components/ui/Utility'
 import { emit } from '../../lib/eventBus'
 
 interface CacheEntry {
@@ -179,7 +181,11 @@ export default function CacheCleaner() {
 
       <div className="space-y-1 max-h-[60vh] overflow-y-auto pr-1">
         {entries.length === 0 ? (
-          <div className="text-center py-12 text-faint">No cache entries found</div>
+          <EmptyState
+            icon={<Database className="w-6 h-6" aria-hidden="true" />}
+            title="Nothing cached"
+            description="Storage is clean — no local or session entries to clear right now."
+          />
         ) : (
           entries.map(entry => (
             <label

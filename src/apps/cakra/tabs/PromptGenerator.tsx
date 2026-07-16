@@ -6,6 +6,7 @@ import { apiUrl } from '../../../lib/apiBase'
 import { mirrorCollection } from '../../../lib/core/sync'
 import { NodeActions } from '../../../components/ui/NodeActions'
 import { ProvenanceChip } from '../../../components/ui/ProvenanceChip'
+import { EmptyState } from '../../../components/ui/Utility'
 import { useInboundHandoff } from '../../../lib/useInboundHandoff'
 import { onActivate } from '../../../lib/a11y'
 import {
@@ -364,7 +365,12 @@ export default function PromptGenerator() {
  <Card className="p-3">
  <h2 className="text-sm font-bold mb-2 flex items-center gap-2"><Tag className="w-4 h-4" /> Saved Prompts</h2>
  {filteredSaved.length === 0 ? (
- <p className="text-center text-faint text-sm py-6">No saved prompts yet — generate one and tap Save to store it here.</p>
+ <EmptyState
+ size="sm"
+ icon={<Tag className="w-5 h-5" aria-hidden="true" />}
+ title="No saved prompts yet"
+ description="Generate one and tap Save to store it here."
+ />
  ) : (
  <div className="space-y-1">
  {filteredSaved.map(p => (

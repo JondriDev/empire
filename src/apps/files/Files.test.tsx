@@ -90,6 +90,14 @@ describe('Files browser — a11y', () => {
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
   })
 
+  it('shows the shared EmptyState for an empty folder', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ files: [] }), text: async () => '' })))
+    render(<Files />)
+    // Migrated off the bare Card onto the shared EmptyState.
+    await waitFor(() => expect(screen.getByText('This folder is empty')).toBeTruthy())
+    expect(screen.getByText(/Nothing lives in this folder yet/)).toBeTruthy()
+  })
+
   it('surfaces a load failure as an alert with a Retry action', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 401, json: async () => ({}), text: async () => '' })))
     render(<Files />)

@@ -4,6 +4,7 @@ import { emit } from '../../lib/eventBus'
 import { apiUrl } from '../../lib/apiBase'
 import { mirrorCollection } from '../../lib/core/sync'
 import { NodeActions } from '../../components/ui/NodeActions'
+import { EmptyState } from '../../components/ui/Utility'
 import { accumulateFiles, fileNodeData, type AccumulatedFile } from './filesGraph'
 import { onActivate } from '../../lib/a11y'
 import {
@@ -238,10 +239,11 @@ export default function Files() {
           <Button onClick={() => loadDirectory(path)} className="mt-3 text-sm bg-glass hover:bg-glass">Retry</Button>
         </Card>
       ) : filtered.length === 0 ? (
-        <Card className="p-8 text-center text-faint">
-          <Folder className="w-12 h-12 mx-auto mb-2 opacity-20" aria-hidden="true" />
-          <p>{searchQuery ? 'No files match your search' : 'This folder is empty'}</p>
-        </Card>
+        <EmptyState
+          icon={<Folder className="w-6 h-6" aria-hidden="true" />}
+          title={searchQuery ? 'No files match your search' : 'This folder is empty'}
+          description={searchQuery ? 'Try a different name, or clear the search to see everything here.' : 'Nothing lives in this folder yet.'}
+        />
       ) : viewMode === 'list' ? (
         <Card className="p-2">
           {filtered.map(entry => (

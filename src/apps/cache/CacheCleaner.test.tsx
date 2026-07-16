@@ -44,6 +44,15 @@ describe('CacheCleaner — destructive-action confirmation gate', () => {
     vi.restoreAllMocks()
   })
 
+  it('shows the shared EmptyState when there is nothing to clear', () => {
+    localStorage.clear()
+    sessionStorage.clear()
+    render(<CacheCleaner />)
+    // Migrated off the bare "No cache entries found" div onto the shared EmptyState.
+    expect(screen.getByText('Nothing cached')).toBeTruthy()
+    expect(screen.getByText(/Storage is clean/)).toBeTruthy()
+  })
+
   it('names the icon-only Rescan control for screen readers', () => {
     render(<CacheCleaner />)
     expect(screen.getByLabelText('Rescan cache')).toBeTruthy()

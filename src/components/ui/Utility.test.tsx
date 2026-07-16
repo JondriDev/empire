@@ -20,6 +20,19 @@ describe('EmptyState', () => {
     expect(screen.getByRole('button', { name: 'Create your first table' })).toBeTruthy()
   })
 
+  it('renders a rich (ReactNode) description — line breaks / kbd hints, not just a string', () => {
+    render(
+      <EmptyState
+        title="Find anything, anywhere"
+        description={<>Search the whole organism.<br />↑ ↓ to move · Enter to open.</>}
+      />,
+    )
+    // Both text fragments and the <br/> survive — the Search/Timeline states rely on this.
+    expect(screen.getByText(/Search the whole organism/)).toBeTruthy()
+    expect(screen.getByText(/Enter to open/)).toBeTruthy()
+    expect(document.querySelector('p br')).toBeTruthy()
+  })
+
   it('omits the description block when none is given', () => {
     render(<EmptyState title="Only a title" />)
     // Title present, but no stray paragraph rendered.

@@ -13,7 +13,9 @@ import { cssVar, tint } from '../../design-system/tokens'
 interface EmptyStateProps {
   icon?: ReactNode
   title: string
-  description?: string
+  /** Rich node (not just a string) so a surface can carry line breaks or
+   *  keyboard hints (e.g. Search / Timeline) without forking its own layout. */
+  description?: ReactNode
   action?: ReactNode
   /** Optional accent for the icon chip (a CSS colour token, e.g. `var(--c-pembaca)`),
    *  so each app keeps its own identity while sharing the empty-state rhythm.

@@ -10,6 +10,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Globe2, Play, Plus, Square } from 'lucide-react'
 import { Button, IconButton, Input } from '../../../components/ui'
+import { EmptyState } from '../../../components/ui/Utility'
 import { getConfig } from '../../../lib/ai'
 import { useSolverStore, todayKey } from './store'
 import { registerSolverIntents } from './solverIntents'
@@ -179,9 +180,12 @@ export default function SolverPanel() {
 
           <div className="flex-1 overflow-y-auto">
             {shown.length === 0 && (
-              <p className="p-4 text-sm" style={{ color: 'var(--text3)' }}>
-                The backlog is empty. Import the world catalog, add your own problem, or send one here from Notes/Goals with ⚡.
-              </p>
+              <EmptyState
+                size="sm"
+                icon={<Globe2 className="w-5 h-5" aria-hidden="true" />}
+                title="The backlog is empty"
+                description="Import the world catalog, add your own problem, or send one here from Notes/Goals with ⚡."
+              />
             )}
             <ul>
               {shown.map(p => (
