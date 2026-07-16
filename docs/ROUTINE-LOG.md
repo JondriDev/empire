@@ -5,6 +5,32 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-16 · UI/UX Director — ux(touch-targets): coarse-pointer 44px floor at the primitive layer
+
+**Axis:** Touch targets & thumb reach (phone-first PWA). **Done:** added `--tap-min: 44px` token + a single
+`@media (pointer: coarse)` block in `src/design-system.css` that clamps the `ui` primitive classes
+(`.empire-btn` · `.empire-icon-btn` · `.empire-select-field` · `.empire-segmented button` · `.empire-slider`)
+UP to `--tap-min` (`min-height`; `min-width` too on IconButton). `min-*` wins over each primitive's smaller
+inline `width/height`, so desktop density is untouched and only the too-small touch controls grow — every app
+(164 IconButtons, 30 at sm=28px) inherits with zero per-app edits. The best part is no part: one CSS block
+replaces any future per-app 44px hack. Slider's 4px track keeps its thin look; only the hit box grows.
+Seamless `Input` deliberately excluded (dense DataCenter grid-cell edit — grid-distortion risk I can't verify
+headless; logged in UX-LEDGER as remaining). **Why:** the primitives were mouse-dense (28–42px) — under the
+Apple HIG / WCAG 2.5.5 AAA 44px thumb minimum on a touch device.
+
+**Verified (full gate green):** `npm run build` 🟢 · `npx vitest run` **634 pass (77 files)** · `npx eslint .`
+clean · `check-shell-styled` exit 0 (comments 69/69 balanced; dist top-level `.empire-desktop{…position:fixed}`,
+0 `.hide-sm .empire-desktop`) · `check-route-parity` exit 0 (31/31) · `check-audit` exit 0 · `metrics.mjs
+--assert-zero` **exit 0** (all six axes 0 & LOCKED). Behavior locked by `src/design-system/touch-targets.test.ts`
+(source-contract assertion — jsdom can't evaluate `@media (pointer: coarse)`).
+
+**Metrics Δ vs `ae505f3`:** apps 31 ±0 · test cases 524→**527 (+3)** · test files 70→**71 (+1)** · six axes **0
+±0** · **bundle gz 734.2 ±0** (CSS-only, no bloat). **On-device to confirm:** on a phone, IconButtons/Segmented/
+sliders are visibly bigger and easier to thumb; on desktop nothing changed. Watch dense IconButton rows at 320px
+for horizontal overflow (none expected — 5×44=220px).
+
+**Next axis:** Empty/loading/error state consistency (least-recently-visited standing axis).
+
 ## 2026-07-15 · Visual & Smoke QA — main GREEN on `ea2aef2`, EPIC-19 S1 measure-only confirmed, no runtime bug
 
 **main RUNS clean.** `npm run build` 🟢 (PWA precache 89, no gap) · `node scripts/qa-smoke.mjs` **32/32 routes

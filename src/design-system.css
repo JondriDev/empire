@@ -100,6 +100,13 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
+  /* ── Touch target ── the minimum thumb-reachable hit size on a coarse
+     (touch) pointer. Empire is a phone-first PWA; a control smaller than this
+     is hard to hit with a thumb. Consumed ONLY inside @media (pointer: coarse)
+     so desktop keeps its dense mouse-tuned sizing. 44px = Apple HIG / WCAG
+     2.5.5 AAA minimum. */
+  --tap-min: 44px;
+
   /* ── Radii → XENO radius scale ── */
   --radius-sm:   var(--r-sm);
   --radius-md:   var(--r-md);
@@ -757,6 +764,37 @@ textarea:focus {
   transform: translateY(0) scale(0.97);
   filter: brightness(0.95);
   transition-duration: var(--dur-fast);
+}
+
+/* ═══════════════════════════════════════════════
+   TOUCH TARGETS — thumb reach on coarse pointers (phone-first)
+   ───────────────────────────────────────────────
+   Empire is a phone-first PWA: thumbs, small viewports, touch. The `ui`
+   primitives are tuned dense for a mouse (IconButton 28-42px, Button/Segmented
+   ~28-34px tall, the Slider a 4px track) — perfect at a desktop, but under the
+   ~44px a thumb needs. Rather than fatten every app by hand, we raise the
+   MINIMUM hit size once, at the primitive-class layer, gated to touch pointers
+   only. `min-*` clamps UP over each primitive's inline width/height (min wins
+   over a smaller fixed value) so the visible chrome is untouched where it is
+   already ≥44px, and only the too-small controls grow. Desktop (fine pointer)
+   is completely unaffected — density preserved. Every app inherits for free
+   because they all render through these primitive classes.
+   ═══════════════════════════════════════════════ */
+@media (pointer: coarse) {
+  .empire-btn,
+  .empire-icon-btn,
+  .empire-select-field,
+  .empire-segmented button {
+    min-height: var(--tap-min);
+  }
+  .empire-icon-btn {
+    min-width: var(--tap-min);
+  }
+  /* The range track is a 4px sliver; expand only the HIT box so the thumb is
+     grabbable — the accent-color track stays centered and visually thin. */
+  .empire-slider {
+    min-height: var(--tap-min);
+  }
 }
 
 /* ═══════════════════════════════════════════════
