@@ -5,6 +5,40 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-16 · Builder — EPIC-19 S3: the associative constellation reaches Timeline + Search (three surfaces, one component)
+
+**Done.** Mounted the S2 `<RelatedConstellation nodeId={n.id}/>` verbatim on the two remaining node-rendering
+views — the **Timeline entity row** (`Timeline.tsx`, after `NodeDescendants`, so a moment now reads *ancestry ·
+descendants · constellation*) and the **Search result row** (`Search.tsx`, after `NodeLineage`). Import + mount
+only, no new component. Both sit inside the row's ghost `<Button>` meta line; the constellation is `width:100%`
+so it wraps onto its own line below the type/time/lineage. The `<span role="button">` + `stopPropagation` rows
+(from S2) are what keep this valid + non-conflicting when nested inside the row's own click target. Extended
+`RelatedConstellation.test.tsx` +2 (now 6): (1) activating a related row does NOT bubble to an enclosing
+clickable row — the exact S3-nesting invariant; (2) Space-key parity with Enter.
+
+**Why.** EPIC-19's 6th (ASSOCIATIVE) lens should be reachable everywhere an entity is surfaced, not just the
+Network canvas — Timeline and Search are the two other per-entity views, and they already carried `<NodeLineage>`,
+so the constellation slots in beside the existing ancestry chrome as one coherent "where this connects" cluster.
+
+**Verified (the only gate — no reviewer):** `npm run build` 🟢 (tsc -b && vite build, precache 89 / 3146 KiB) ·
+`npx vitest run` **651/651** 🟢 (`related` 23/23) · `npx eslint` on the 3 touched files clean · `node
+scripts/metrics.mjs --assert-zero` **exit 0** — all six axes 0 & LOCKED.
+`| Apps 31 ±0 | Test cases 544 +2 | Off-system 0/0/0/0 ±0 | Keyboard-a11y 0 ±0 | docMass 0 ±0 | Bundle gz 735.7 +0.1 |`
+**Not verifiable in cloud (no browser this run):** the rendered look of the constellation on the Timeline/Search
+rows — describe-only; the on-device eyeball is QA's. Behaviour is unit-pinned (nav + no-bubble + keyboard).
+
+**Trap discovered (logged to CONTEXT):** this repo's eslint has **no `jsx-a11y` plugin** — a
+`// eslint-disable-next-line jsx-a11y/*` comment ERRORS ("Definition for rule … was not found"). A bare
+`<div onClick>` in a *test* needs no suppression (the keyboard-a11y detector scans `src/` app code; tests are exempt).
+
+**Next (single best step):** **S4 → ★ EPIC-19 CODE-COMPLETE.** Add the `RELATED` guard to `scripts/qa-smoke.mjs`
+(→ 5/5: linkedTop·sharedTerm·sharedTag·unrelatedAbsent·oneTapLands), driving the headless-drivable **Timeline**
+surface via the `[data-related]`/`[data-related-item]` hooks (NOT the fragile Network canvas click). Then move
+`RELATED 0→5/5` in metrics and retire EPIC-19 to DONE. Seed `task`/`book`/`goal` types (note/learning/message
+get pruned by `syncAll`).
+
+---
+
 ## 2026-07-16 · QA (visual + smoke) — 32/32 clean, all 14 guards green, six axes 0 & LOCKED; EPIC-19 S2 holds; no runtime bug
 
 Independent QA on green main `3f2d971` (the tree after BOTH bug-hunter runs + EPIC-19 S2 + touch-targets — a

@@ -116,7 +116,7 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
   score order with the correct reason chip per row; renders nothing for an entity with no relations; the row is a
   focusable control (`role`/tag) targeting the related entity. **Acceptance:** build🟢 vitest🟢 eslint🟢; six axes
   0 `--assert-zero`; `<RelatedConstellation>` exported + mounted on the Network inspector; render tests green.
-- [ ] **S3 · Extend the constellation to the Timeline + Search surfaces (reuse verbatim).** Drop the S2
+- [x] **S3 · Extend the constellation to the Timeline + Search surfaces (reuse verbatim).** Drop the S2
   `<RelatedConstellation nodeId={n.id}/>` onto the two other node-rendering views that already carry
   `<NodeLineage>`: the **Timeline entity row** (`src/apps/timeline/Timeline.tsx`, beside `NodeLineage`/
   `NodeDescendants` — a moment now reads *ancestry · descendants · constellation*) and the **Search result row**

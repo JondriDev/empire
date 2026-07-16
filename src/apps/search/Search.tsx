@@ -32,6 +32,7 @@ import { openEntity } from '../../lib/windowStore'
 import { Button, IconButton, Input } from '../../components/ui'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { NodeLineage } from '../../components/ui/NodeLineage'
+import { RelatedConstellation } from '../../components/ui/RelatedConstellation'
 
 // One accent per view — Search reads as ion-blue, the calm scanning light.
 const ACCENT = 'var(--ion)'
@@ -301,6 +302,9 @@ function ResultRow({
             {hit.snippet && <span className="truncate">— {hit.snippet}</span>}
             {/* Node-level lineage — the exact entity this hit descended from. */}
             <NodeLineage nodeId={node.id} />
+            {/* Associative constellation (EPIC-19 S3) — cross-app relatives,
+                one tap away. Self-hides when nothing is related. */}
+            <RelatedConstellation nodeId={node.id} />
           </div>
         </span>
       </Button>

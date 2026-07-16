@@ -38,6 +38,7 @@ import { openEntity } from '../../lib/windowStore'
 import { Button } from '../../components/ui'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { NodeLineage } from '../../components/ui/NodeLineage'
+import { RelatedConstellation } from '../../components/ui/RelatedConstellation'
 import { NodeDescendants } from '../../components/ui/NodeDescendants'
 import type { AppDefinition } from '../../lib/registry'
 import type { TimelineEntry } from '../../lib/core/timeline'
@@ -290,6 +291,9 @@ function EntityRow({
             <NodeLineage nodeId={nodeId} />
             {/* …and forward: the entities this moment spawned (EPIC-10 S3). */}
             <NodeDescendants nodeId={nodeId} />
+            {/* …and sideways: the associative constellation (EPIC-19 S3) —
+                cross-app relatives, one tap away. Self-hides when empty. */}
+            <RelatedConstellation nodeId={nodeId} />
           </div>
         </span>
       </Button>
