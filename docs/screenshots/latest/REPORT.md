@@ -1,43 +1,8 @@
 # Empire QA — Visual + Smoke Report
 
-**Generated:** 2026-07-16T04:21:58.076Z
+**Generated:** 2026-07-16T09:34:24.591Z
 
 **Result:** 32/32 rendered without crash, 0 failed.
-
-## QA summary — 2026-07-16 (green main `ae505f3`)
-
-**No runtime bug found.** Build 🟢 (`tsc -b && vite build`, 89 precache entries), smoke **32/32** clean
-(desktop + 31 registry apps), **all guard suites green**, all **six conformance axes 0 & LOCKED**
-(`node scripts/metrics.mjs --assert-zero` → exit 0).
-
-**Guards:** INBOUND-LANDS 4/4 · MEDIA-PERSISTS 3/3 · GRAPH-LEGIBLE 3/3 · GLOBAL-SEARCH 1/1 ·
-NODE-LINEAGE 1/1 · INTENT-ROUNDTRIP 2/2 · TIMELINE 1/1 · HOME-ALIVE 1/1 · HOME-ATTENTION 6/6 ·
-SHELL-ATTENTION 4/4 · PROVENANCE-PERSISTS 3/3 · PROVENANCE-ENTITY 3/3 · PRECACHE 89 no-gap ·
-OFFLINE-BOOT 5/5.
-
-**Auto-metric deltas** (vs last QA `46de249` / `ea2aef2`): apps **31** (±0), test cases **524** (+10),
-test files **70** (+2), bundle gz **734.2** (+0.1), token/util/style/shell/a11y/docMass all **0** (±0).
-The +10 tests / +2 files come from the two polish commits landed since last QA — `7b594b9`
-(messages: scope sent messages to their recipient — `messagesLogic.test.ts`) and `ae505f3`
-(learning-tracker: touch-reachable per-topic actions — `LearningTracker.test.tsx`). Both verified
-clean in the render smoke.
-
-**Active epic — EPIC-19 (associative constellation):** S1 (pure `related.ts` engine, measure-only)
-remains done-confirmed (`vitest run related` 17/17). Target metric `RELATED 0 → 5/5` guard is **not yet
-present** → still 0/5. **EXPECTED, not a contradiction** — the `RELATED` guard lands in S4; S1–S3
-drive no headless guard yet (S2/S3 are UI surfaces). No epic acceptance moved this run (no EPIC-19
-code landed since last QA).
-
-**Visual inspection** (local screenshots, never committed): `desktop.png` (styled "Good night ·
-THURSDAY, JULY 16" greeting, 4 cockpit tiles all 0, "All clear — nothing needs you" feed, full dock),
-`app-network.png` (CORE hub + satellites + node-type legend + Memory/Live-Signal panels),
-`app-messages.png` (per-recipient threads with scoped empty states — the `7b594b9` fix visible),
-`app-learning-tracker.png` (New Topic form + All/Active/Mastered tabs + empty state). All styled, no
-blanks, no boundaries.
-
-**Console noise = env-expected only (NOT bugs):** `weather` (Open-Meteo geocoding tunnel-blocked +
-geolocation permissions-policy), `maps` (8× CartoDB tile PNGs egress-blocked — Leaflet container still
-renders), `files` + `mail` (401 on the authed/Android-only API — graceful "not configured", no boundary).
 
 > **PASS** = the app rendered with no uncaught JS exception / error boundary / blank screen.
 > Network & console noise (failed external CDN fetches, backend API calls needing auth) is
@@ -61,7 +26,7 @@ renders), `files` + `mail` (401 on the authed/Android-only API — graceful "not
 | notes | ✅ | — | — |
 | photos | ✅ | — | — |
 | datacenter | ✅ | — | — |
-| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
+| maps | ✅ | — | https://b.basemaps.cartocdn.com/dark_all/2/2/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/1/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/2/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/0/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://a.basemaps.cartocdn.com/dark_all/2/1/2.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/0/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://b.basemaps.cartocdn.com/dark_all/2/3/1.png (net::ERR_TUNNEL_CONNECTION_FAILED)<br>https://c.basemaps.cartocdn.com/dark_all/2/3/2.png (net::ERR_TUNNEL_CONNECTION_FAILED) |
 | messages | ✅ | — | — |
 | prompt-generator | ✅ | — | — |
 | token-counter | ✅ | — | — |
@@ -227,3 +192,42 @@ The built app was served, warm-loaded so the service worker precached, then ALL 
 ## Screenshots
 
 See PNGs in this folder. `desktop.png` is the shell; `app-<id>.png` is each app route.
+
+---
+
+## QA analysis — metric deltas, epic-acceptance, visual inspection (2026-07-16, green main `3f2d971`)
+
+**No runtime bug found.** All 32 routes render clean; console/network noise is env-expected only (blocked external tile/geocoding CDNs on maps/weather, an authed API 401 on files/mail). Build + smoke were re-run on `3f2d971` after a mid-run rebase pulled in the bug-hunter run-2 app-code fixes (`b6866af` message-mirror `from`, `ecdbc7f` calendar today-UTC) — this report describes the tree actually pushed.
+
+### Fitness metrics (`node scripts/metrics.mjs`; `--assert-zero` exit 0)
+
+| Metric | Value | Δ vs last QA `ae505f3` |
+|---|---|---|
+| Apps / routes | 31 (32/32 incl. desktop render clean) | ±0 |
+| Test cases | 542 | +18 |
+| Test files | 78 | +8 |
+| Token violations | 0 | ±0 |
+| Off-system utilities | 0 | ±0 |
+| Off-system style | 0 (r0/t0/m0) | ±0 |
+| Off-shell controls | 0 (b0/i0/s0/t0) | ±0 |
+| Keyboard a11y | 0 | ±0 |
+| Doc mass (over) | 0 (CONTEXT ≤400 · EPICS ≤500) | ±0 |
+| Bundle gz (KB) | 735.6 | +1.4 |
+
+**All six gated axes 0 & LOCKED; the ratchet holds (`--assert-zero` exit 0).** Code landed since last QA `ae505f3`: touch-targets `c02b17e`, EPIC-19 S2 `2dc28fc`, and five bug-hunter fixes (`1d4c1aa` weather UTC · `2c1668d` graph-mirror empty-mount prune · `535ef50` chart empty-data crash · `b6866af` message-mirror `from` · `ecdbc7f` calendar today-UTC).
+
+### Active-epic acceptance — EPIC-19 (the associative constellation)
+
+- **S1 (`related.ts`) HOLDS** — 17/17 (`src/lib/core/related.test.ts`).
+- **S2 (`RelatedConstellation.tsx`) HOLDS** — 4/4 (`src/components/ui/RelatedConstellation.test.tsx`), mounted on the Network inspector.
+- **Target metric `RELATED` guard = still 0/5 (not yet built).** EXPECTED, not a contradiction: S3 (mount on Timeline + Search) and S4 (the `RELATED` qa-smoke guard) are the remaining *builder* stages. S2 is the last done-confirmed stage; its acceptance (build/vitest/eslint 🟢, six axes 0, mounted) reproduces on green main. No stage regressed.
+
+### Visual inspection (local screenshots, never committed)
+
+Inspected desktop + network + timeline + maps + search + weather + crypto + mail. **Real rendering confirmed:**
+- **desktop** — "Good morning" hero, four stat cards (Today/Open Tasks/Goals/Organism all 0 on fresh checkout), "All clear — nothing needs you" attention feed, full 31-app dock, HomeBar.
+- **network** — CORE hub with radial node ring + node-type legend; "0 nodes" fresh-state copy correct.
+- **timeline** — honest "No history yet" empty state.
+- **maps** — Leaflet chrome (zoom controls, search panel, quick-city chips, attribution) renders; grey tiles = blocked OSM/CARTO CDN (env-expected, the net:8).
+
+All confirm the shell + apps genuinely paint headless; empty states are correct for a data-less fresh checkout.

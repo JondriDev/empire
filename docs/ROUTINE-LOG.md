@@ -5,6 +5,21 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-16 · QA (visual + smoke) — 32/32 clean, all 14 guards green, six axes 0 & LOCKED; EPIC-19 S2 holds; no runtime bug
+
+Independent QA on green main `3f2d971` (the tree after BOTH bug-hunter runs + EPIC-19 S2 + touch-targets — a
+mid-run `git pull --rebase` brought in the run-2 app-code fixes `b6866af`/`ecdbc7f`, so build + smoke were re-run
+on the tree actually pushed). Build 🟢 (`tsc -b && vite build`, precache 89 / 3146 KiB). Render-smoke `32/32`
+clean (desktop + 31 registry apps), all guards green: SHELL-IS-STYLED · REGISTRY-COVERAGE (31↔31) · INBOUND-LANDS
+4/4 · MEDIA-PERSISTS 3/3 · GRAPH-LEGIBLE 3/3 · GLOBAL-SEARCH 1/1 · NODE-LINEAGE 1/1 · INTENT-ROUNDTRIP 2/2 ·
+TIMELINE 1/1 · HOME-ALIVE 1/1 · HOME-ATTENTION 6/6 · SHELL-ATTENTION 4/4 · PROVENANCE-PERSISTS 3/3 ·
+PROVENANCE-ENTITY 3/3 · PRECACHE no-gap · OFFLINE-BOOT 5/5. `metrics --assert-zero` **exit 0** — all six axes
+0 & LOCKED. Live values: apps 31, test cases 542, test files 78, bundle gz 735.6. Visually inspected desktop/
+network/timeline/maps/search/weather/crypto/mail (local PNGs, uncommitted) — real rendering, empty states correct
+for a fresh checkout; grey map tiles = blocked OSM/CARTO CDN (env-expected). **EPIC-19 acceptance:** S1
+`related.ts` 17/17 + S2 `RelatedConstellation` 4/4 HOLD; the `RELATED` target guard is still 0/5 — EXPECTED,
+S3 (mount on Timeline+Search) + S4 (the guard) are the next *builder* stages. **No runtime bug.** Next: Builder lands EPIC-19 S3.
+
 ## 2026-07-16 (run 2) · Bug Hunter — cleared the OPEN backlog: 2 root-caused fixes (message-mirror `from` drop · Calendar today-UTC)
 
 **PRIORITY 0 — main proven GREEN on entry** (`79444fd`): `npm run build` 🟢 (precache 89), vitest **646**🟢,

@@ -62,7 +62,7 @@
   trilogy (colour EPIC-5 · tokens EPIC-11 · shell EPIC-14) + keyboard operability (EPIC-15) are enforced;
   a regression on any fails CI. **Do NOT reintroduce a bare `<button>`/`<input>`/`<select>`/`<textarea>` in
   app code, a raw hex/rgb/px, or a mouse-only `onClick` on a host — the gate bites.**
-- **Sixth axis `docMass` (EPIC-16): 0 AND LOCKED in `--assert-zero` (S3; QA-reconfirmed green main `19e0454`).**
+- **Sixth axis `docMass` (EPIC-16): 0 AND LOCKED in `--assert-zero` (S3; QA-reconfirmed green main `3f2d971` 2026-07-16 — 32/32 smoke clean, EPIC-19 S2 4/4 holds, RELATED guard S3/S4 still pending, no runtime bug).**
   Value = doc lines over budget; `docMass 3269 → 0`. The gate bites — any edit pushing CONTEXT >400 or EPICS >500 fails CI.
 
 ### ✅ Retired epics — DONE index (full bodies in git; metric each moved)
