@@ -62,6 +62,13 @@ const DICT: Record<string, Entry> = {
   'network.live':   { en: 'Live Signal', id: 'Sinyal Langsung' },
   'network.awaiting': { en: 'awaiting signal…', id: 'menunggu sinyal…' },
 
+  // ── Associative constellation (EPIC-19 · the 6th lens) ──
+  'related.title':          { en: 'Related', id: 'Terkait' },
+  'related.reason.linked':     { en: 'linked', id: 'tertaut' },
+  'related.reason.sharedTag':  { en: 'shared tag', id: 'tag sama' },
+  'related.reason.sharedTerm': { en: 'shared term', id: 'istilah sama' },
+  'related.reason.sameDay':    { en: 'same day', id: 'hari sama' },
+
   // ── Artifacts (Cakra-generated) ──
   'artifacts.building':     { en: 'Building artifact…', id: 'Membuat artefak…' },
   'artifacts.interrupted':  { en: 'Interrupted — partial content', id: 'Terputus — konten sebagian' },

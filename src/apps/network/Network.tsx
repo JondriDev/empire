@@ -16,6 +16,7 @@ import { useGraph } from '../../lib/core/graph'
 import { useFocus } from '../../lib/core/focus'
 import { Button, IconButton } from '../../components/ui'
 import { NodeLineage } from '../../components/ui/NodeLineage'
+import { RelatedConstellation } from '../../components/ui/RelatedConstellation'
 import type { CoreNode } from '../../lib/core/graph'
 import { flowForEvent } from '../../lib/core/flow'
 import { useProvenance, fedBy, feeds, recentEdges, type ProvNeighbor } from '../../lib/core/provenance'
@@ -708,6 +709,7 @@ export default function Network() {
                       </div>
                       <div style={{ paddingLeft: 15 }}>
                         <NodeLineage nodeId={n.id} />
+                        <RelatedConstellation nodeId={n.id} />
                       </div>
                     </div>
                   ))}

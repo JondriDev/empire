@@ -5,6 +5,35 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-16 · Builder — feat(related): EPIC-19 S2 · surface the constellation on the Network inspector
+
+**Stage:** EPIC-19 S2 (the 6th/associative lens, rendered). **Done:** new
+`src/components/ui/RelatedConstellation.tsx` — subscribes `useGraph(s=>s.nodes)`, `useMemo`s the pure
+`relatedTo(Object.values(nodes), nodeId)` scoring (S1's engine), and paints the ≤6 ranked relatives. Self-hiding
+(`null` when nothing is related), so it can hang off any per-entity surface without adding empty chrome. Each
+relative is a `role="button"` span (NOT a `<button>`) with `tabIndex`/`onKeyDown` + `stopPropagation` that
+`openEntity(app, id)`s the target — deliberately mirroring `NodeLineage`/`NodeDescendants` so it stays valid HTML
+when S3 nests it inside the Timeline/Search row `<button>`s (button-in-button is invalid). Each row shows the
+owning-app accent chip (`getAppIcon`/registry `color`, `color-mix` bg) + entity title + a reason chip for the top
+reason. New i18n keys `related.reason.{linked|sharedTag|sharedTerm|sameDay}` (EN/ID). New `.related-*` chrome in
+DS_INFRA `src/window-manager.css` (tokens only). Mounted in the Network inspector's per-entity list beside the
+existing `<NodeLineage>` (`Network.tsx:711`), so clicking a node now reveals both its ancestry AND its
+constellation. **Why:** S1 shipped the pure scoring but nothing rendered it; this is the first surface where the
+implicit cross-app relationships become visible + one tap away.
+
+**Verified (full gate green):** `npm run build` 🟢 (precache 89, no gap) · `npx vitest run` **638 pass (78
+files)** · `npx eslint` clean on touched files · `node scripts/metrics.mjs --assert-zero` **exit 0** (all six axes
+0 & LOCKED). New `RelatedConstellation.test.tsx` (4 cases): self-hides when nothing related; renders the related
+set with correct reason chip + `data-related` target id; click and keyboard-Enter each `openEntity` the target
+(opens its app + sets the gaze). **Not verifiable in cloud (no browser this run):** the rendered look of the
+constellation + on-canvas navigation — described here for on-device confirmation, not claimed.
+
+**Metrics Δ vs `ae505f3`/prior run:** apps 31 ±0 · test cases 527→**531 (+4)** · test files 71→**72 (+1)** · six
+axes **0 ±0** (LOCKED) · **bundle gz 734.2→735.4 (+1.2)** (new component + CSS + i18n). **On-device to confirm:**
+open Network → click a node with cross-app relatives → a "Related" group of accent-chipped rows appears under its
+lineage; each row's reason chip reads linked/shared tag/shared term/same day; clicking one opens that entity's
+app. **Next (S3):** mount the same `<RelatedConstellation>` verbatim on Timeline + Search node rows.
+
 ## 2026-07-16 · UI/UX Director — ux(touch-targets): coarse-pointer 44px floor at the primitive layer
 
 **Axis:** Touch targets & thumb reach (phone-first PWA). **Done:** added `--tap-min: 44px` token + a single

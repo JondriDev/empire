@@ -100,7 +100,7 @@ audit at 0 on `offSystemStyle`; keep them that way when reducing.
   `id` → `[]`; `limit` cap; score-desc ordering; `meta.updated` tie-break; empty graph → `[]`. **Acceptance:**
   `npx vitest run related` green; `relatedTo`/`significantTerms` exported + typed; **no component edited** (S1 is
   measure-only, mirroring every prior epic's S1); `node scripts/metrics.mjs --assert-zero` exit 0 (all six axes 0).
-- [ ] **S2 · Surface the constellation on the Network inspector (`<RelatedConstellation>`).** New
+- [x] **S2 · Surface the constellation on the Network inspector (`<RelatedConstellation>`).** New
   `src/components/ui/RelatedConstellation.tsx`: `export function RelatedConstellation({ nodeId }: { nodeId: string })`
   — subscribes `useGraph(s => s.nodes)`, memoizes `relatedTo(Object.values(nodes), nodeId)`; renders `null` when
   empty (self-hiding, like `<NodeLineage>`). Otherwise a labelled `[data-related=<nodeId>]` block of up to 6

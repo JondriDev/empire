@@ -858,6 +858,66 @@
 .empire-search-result:hover { background: color-mix(in srgb, var(--signal) 8%, transparent); }
 .empire-search-result:active { background: color-mix(in srgb, var(--signal) 14%, transparent); }
 
+/* ── Associative constellation (EPIC-19 · RelatedConstellation) ── */
+.related-constellation {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+}
+.related-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--text-xs);
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.related-item:hover {
+  background: color-mix(in srgb, var(--signal) 8%, transparent);
+  border-color: var(--gl-border-b);
+  color: var(--text);
+}
+.related-item:focus-visible {
+  outline: 2px solid var(--ion);
+  outline-offset: 1px;
+  color: var(--text);
+}
+.related-item-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-md);
+}
+.related-item-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.related-item-reason {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  color: var(--text3);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--text3) 12%, transparent);
+}
+
 /* ── TOUCH / RESPONSIVE ── */
 @media (max-width: 720px) {
   .empire-app-grid { padding: 16px; gap: 14px 6px; }
