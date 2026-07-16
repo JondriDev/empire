@@ -198,10 +198,10 @@ export default function LearningTracker() {
                   <span>→ Next: {item.nextReview}</span>
                 </div>
               </div>
-              <span className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <span className="opacity-60 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex-shrink-0">
                 <NodeActions type="learning" sourceId={item.id} />
               </span>
-              <span className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <span className="opacity-60 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex-shrink-0">
                 <IconButton
                   onClick={() => askCakraTopic(item)}
                   aria-label="Ask Cakra about this topic"

@@ -15,7 +15,7 @@
 
 ---
 
-## ▶ NEXT: `learning-tracker`
+## ▶ NEXT: `goals`
 
 (continue down the registry order, wrapping back to the top after The Bridge.)
 
@@ -44,8 +44,8 @@ Newest-visited float to the bottom of the "visited" understanding; unvisited = n
 | datacenter | 2026-07-14 | Touch-reachability fix (mirrors Music/Video/Files): both delete controls were `opacity-0 group-hover:opacity-100` — invisible/unreachable on a phone (no hover), so on touch you couldn't delete a row, delete a table, or reach ⚡ NodeActions. Now `opacity-60` base + hover/`focus-within`/`focus-visible` emphasis on the per-row delete **and** the sidebar table-action span (⚡ + delete-table). +`DataCenter.test.tsx` (4 → 6): locks both delete controls base-visible (not `opacity-0`). |
 | maps | 2026-07-14 | Honest-async-feedback pass on the two network actions. **"Use My Location":** geolocation gave ZERO feedback while resolving (seconds on a phone → looks broken) and could be double-tapped firing parallel requests; now a `locating` state → button disables + `aria-busy` + label "Locating…" + pulse, re-entry guarded, cleared on success/deny; guard hardened to `!navigator.geolocation` (was `'geolocation' in navigator`, true even when the value is undefined). **Search `IconButton`:** now `disabled`+`aria-busy` while a request is in flight and the Enter handler no-ops while `isSearching` (no duplicate in-flight geocode). +`Maps.test.tsx` (3 → 5): locks the Locating… busy contract (disabled+aria-busy, single-request re-entry guard, clears on success) + the unavailable-geolocation error path. |
 | messages | 2026-07-15 | Cross-thread leak fixed: sent messages carried NO recipient, so every `sender:'Me'` message showed in **every** contact's thread (and the contact-list preview used a *different, also-wrong* filter attributing your sends only to the currently-selected contact). Added optional `to?` to `Message` (store.ts); `send()` now stamps `to: recipient`; extracted pure `threadFor`/`lastInThread` (`messages/messagesLogic.ts`) used by BOTH thread view + preview so they can't diverge. **Migrate-in-place:** legacy sends (no `to`) still surface in all threads (can't infer recipient → no data hidden); new sends land only in the right conversation. +`messagesLogic.test.ts` (6 — locks no-leak, legacy-shows-everywhere, ordering, lastInThread). |
-| learning-tracker | — | ◀ NEXT |
-| goals | — | — |
+| learning-tracker | 2026-07-16 | Touch-reachability fix (mirrors Music/Video/Files/DataCenter): the per-topic **⚡ NodeActions** and **Ask Cakra about this topic** controls were `opacity-0 group-hover:opacity-100` — invisible/unreachable on a phone (no hover), so on touch you couldn't open NodeActions or hand a topic to Cakra. Now `opacity-60` base + `group-hover`/`focus-within` emphasis. +`LearningTracker.test.tsx` (4 — locks both action wrappers base-visible not `opacity-0`, `focus-within` reveal, empty-state). First test file for this surface. |
+| goals | — | ◀ NEXT |
 | network | — | — |
 | inbox | — | — |
 | reader | — | — |
