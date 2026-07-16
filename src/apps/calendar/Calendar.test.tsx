@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import Calendar from './Calendar'
 
@@ -66,5 +66,35 @@ describe('Calendar — S3 shell migration', () => {
     // Modal closes on save (its title is gone) and the event surfaces in the list.
     expect(screen.queryByText('New Event')).toBeNull()
     expect(screen.getByText('Standup')).toBeTruthy()
+  })
+})
+
+// Regression: the highlighted "today" cell must be the user's LOCAL calendar day,
+// not the UTC day. The grid cells + getEventsForDay are built from LOCAL Y/M/D, but
+// `today` was derived from `new Date().toISOString()` (UTC). For any negative-offset
+// user in the evening, UTC has already rolled to tomorrow, so the wrong cell lit up
+// (and the default event date / side-panel header disagreed with the events shown).
+// TZ forced so a UTC CI (where local == UTC and the bug hides) still exercises it.
+// Same class as the related.ts / weather UTC fixes — reuse the ONE local-day format.
+describe('Calendar — "today" highlight uses the LOCAL day, not UTC', () => {
+  const realTZ = process.env.TZ
+  beforeEach(() => {
+    process.env.TZ = 'America/Los_Angeles' // UTC-7 in July (PDT)
+    // Fake ONLY Date (leave setTimeout/microtasks real so React render is unaffected).
+    vi.useFakeTimers({ toFake: ['Date'] })
+    // 2026-07-16T05:00Z === 2026-07-15 22:00 PDT → LOCAL day is the 15th, UTC day is the 16th.
+    vi.setSystemTime(new Date('2026-07-16T05:00:00Z'))
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    process.env.TZ = realTZ
+  })
+
+  it('marks the local-day cell (Jul 15) as today, and NOT the UTC-day cell (Jul 16)', () => {
+    render(<Calendar />)
+    const localCell = screen.getByRole('button', { name: 'Select 2026-07-15' })
+    const utcCell = screen.getByRole('button', { name: 'Select 2026-07-16' })
+    expect(localCell.className).toContain('bg-signal/10')
+    expect(utcCell.className).not.toContain('bg-signal/10')
   })
 })

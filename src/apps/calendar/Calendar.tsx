@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Trash2, X, Check, Clock } from 'lucide-react'
 import { emit } from '../../lib/eventBus'
 import { mirrorCollection } from '../../lib/core/sync'
+import { dayStamp } from '../../lib/core/bridge'
 import { NodeActions } from '../../components/ui/NodeActions'
 import { Button, IconButton, Input, TextArea } from '../../components/ui'
 import { useInboundHandoff } from '../../lib/useInboundHandoff'
@@ -99,7 +100,8 @@ export default function Calendar() {
   useEffect(() => {
     if (!inbound.payload?.text) return
     const t = inbound.payload.text
-    const todayStr = new Date().toISOString().split('T')[0]
+    // LOCAL calendar day (matches the grid cells + getEventsForDay), not the UTC day.
+    const todayStr = dayStamp(Date.now())
     setNewDate(todayStr)
     setNewTitle(inbound.payload.title || t.split('\n')[0].slice(0, 80))
     setNewTime('12:00')
@@ -117,7 +119,9 @@ export default function Calendar() {
 
   const firstDay = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const today = new Date().toISOString().split('T')[0]
+  // LOCAL day (grid cells + getEventsForDay are built from local Y/M/D); a UTC
+  // toISOString() day lights the wrong cell for negative-offset users in the evening.
+  const today = dayStamp(Date.now())
 
   const pad = (n: number) => n.toString().padStart(2, '0')
 
