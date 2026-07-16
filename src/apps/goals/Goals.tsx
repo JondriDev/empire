@@ -34,20 +34,23 @@ export default function Goals() {
   const [deadline, setDeadline] = useState('')
   const [draftFrom, setDraftFrom] = useState<string | undefined>(undefined)
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
-  const [goals, setGoals] = useState<Goal[]>([])
-
-  // Load goals from localStorage on component mount
-  useEffect(() => {
-    const savedGoals = localStorage.getItem('empire-goals')
-    if (savedGoals) {
-      try {
-        setGoals(JSON.parse(savedGoals))
-      } catch (e) {
-        console.error('Failed to parse goals', e)
-      }
+  // Hydrate synchronously (lazy initializer) so the very first render already
+  // holds the saved goals. A mount-effect load left `goals` empty on the first
+  // commit, which made the `[goals]` mirror effect below prune every persisted
+  // `goal` node (reconcile deletes unseen nodes) before the real data arrived —
+  // scrubbing cross-app edges/lineage and churning node ids on every open.
+  const [goals, setGoals] = useState<Goal[]>(() => {
+    try {
+      const saved = localStorage.getItem('empire-goals')
+      return saved ? JSON.parse(saved) : []
+    } catch (e) {
+      console.error('Failed to parse goals', e)
+      return []
     }
-    
-    // Emit APP_OPENED for activity feed tracking
+  })
+
+  // Emit APP_OPENED for activity feed tracking
+  useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'goals' })
   }, [])
 

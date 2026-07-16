@@ -29,20 +29,20 @@ function getHeaders(): Record<string, string> {
 }
 
 export default function CryptoApp() {
-  const [addresses, setAddresses] = useState<Record<Coin, string>>({
-    btc: '', eth: '', sol: '', xrp: '', doge: '',
+  // Hydrate synchronously so the first render already holds the watched wallets.
+  // A mount-effect load left `addresses` all-blank on the first commit, so the
+  // `[addresses]` mirror effect below ran with `walletItems([])` === [] and pruned
+  // every persisted `wallet` node before the real data arrived.
+  const [addresses, setAddresses] = useState<Record<Coin, string>>(() => {
+    const base: Record<Coin, string> = { btc: '', eth: '', sol: '', xrp: '', doge: '' }
+    try {
+      const raw = localStorage.getItem('crypto-watch-list')
+      return raw ? { ...base, ...JSON.parse(raw) } : base
+    } catch { return base }
   })
   const [results, setResults] = useState<Record<string, unknown>>({})
   const [err, setErr] = useState<string>('')
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    // hydrate from localStorage
-    const raw = localStorage.getItem('crypto-watch-list')
-    if (raw) {
-      try { setAddresses(a => ({ ...a, ...JSON.parse(raw) })) } catch { /* ignore */ }
-    }
-  }, [])
 
   useEffect(() => { localStorage.setItem('crypto-watch-list', JSON.stringify(addresses)) }, [addresses])
 

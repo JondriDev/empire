@@ -43,7 +43,26 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [events, setEvents] = useState<CalendarEvent[]>([])
+  // Hydrate synchronously so the first render already holds saved events —
+  // otherwise the `[events]` save+mirror effect runs with `[]` on mount and
+  // prunes every persisted `event` node before the load lands (Calendar
+  // self-mirrors its own storage; the empty-first-render prune churned ids).
+  // Migrate-in-place: `tags`/`color` were added later, so a legacy event (the
+  // store's `CalendarEvent` shape predates them) has neither — default them so
+  // the render never reads `.tags.length` off undefined (a crash) or a `${color}`
+  // class off undefined.
+  const [events, setEvents] = useState<CalendarEvent[]>(() => {
+    try {
+      const saved = localStorage.getItem('empire-calendar-events')
+      const raw: unknown = saved ? JSON.parse(saved) : []
+      if (!Array.isArray(raw)) return []
+      return raw.map((e): CalendarEvent => ({
+        ...e,
+        tags: Array.isArray(e.tags) ? e.tags : [],
+        color: typeof e.color === 'string' && e.color ? e.color : 'bg-signal',
+      }))
+    } catch { return [] }
+  })
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null)
@@ -61,10 +80,6 @@ export default function Calendar() {
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'calendar' })
-    try {
-      const saved = localStorage.getItem('empire-calendar-events')
-      if (saved) setEvents(JSON.parse(saved))
-    } catch { /* ignore */ }
   }, [])
 
   useEffect(() => {

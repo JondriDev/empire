@@ -89,8 +89,12 @@ export default function Photos() {
 
   // Mirror photos into the Core graph as `photo` nodes so they join the
   // organism (object URLs are transient, so the node carries name/size/tags,
-  // not the url).
+  // not the url). Gate on hydration (same as the persist effect): the async IDB
+  // rehydrate leaves `photos` empty on the first render, and an ungated mirror
+  // would prune every persisted `photo` node — scrubbing edges + churning ids —
+  // before the real library is recovered.
   useEffect(() => {
+    if (!hydratedRef.current) return
     mirrorCollection('photo', 'photos', photos, {
       id: p => p.id,
       title: p => p.name,

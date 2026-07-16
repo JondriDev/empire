@@ -152,7 +152,15 @@ export default function PromptGenerator() {
   const [variables, setVariables] = useState<Record<string, string>>({})
   const [generated, setGenerated] = useState('')
   const [copied, setCopied] = useState(false)
-  const [saved, setSaved] = useState<SavedPrompt[]>([])
+  // Hydrate synchronously so the first render already holds saved prompts —
+  // otherwise the `[saved]` mirror effect below runs with `[]` on mount and
+  // prunes every persisted `prompt` node before the real data loads.
+  const [saved, setSaved] = useState<SavedPrompt[]>(() => {
+    try {
+      const raw = localStorage.getItem('empire-prompt-generator-saved')
+      return raw ? JSON.parse(raw) : []
+    } catch { return [] }
+  })
   const [showTemplates, setShowTemplates] = useState(true)
   const [categoryFilter, setCategoryFilter] = useState<Category | 'all'>('all')
   const [customPrompt, setCustomPrompt] = useState('')
@@ -163,10 +171,6 @@ export default function PromptGenerator() {
 
   useEffect(() => {
     emit({ type: 'APP_OPENED', appId: 'prompt-generator' })
-    try {
-      const savedData = localStorage.getItem('empire-prompt-generator-saved')
-      if (savedData) setSaved(JSON.parse(savedData))
-    } catch { /* ignore */ }
   }, [])
 
   // Preload the handed-off text into the template variables once it's read.

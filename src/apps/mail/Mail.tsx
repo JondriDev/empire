@@ -52,13 +52,15 @@ export default function MailApp() {
   const [sendStatus, setSendStatus] = useState<string>('')
   // Durable drafts (localStorage `empire-mail-drafts`). `draftId` tracks which draft
   // the composer is editing — null means a brand-new draft (saved gets a fresh id).
-  const [drafts, setDrafts] = useState<Draft[]>([])
+  // Hydrate synchronously so the first render already holds the saved drafts —
+  // otherwise the `[drafts]` mirror effect below runs with `[]` on mount and
+  // prunes every persisted `draft` node before `listDrafts()` lands.
+  const [drafts, setDrafts] = useState<Draft[]>(() => listDrafts())
   const [draftId, setDraftId] = useState<string | null>(null)
   const [draftStatus, setDraftStatus] = useState<string>('')
 
   useEffect(() => {
     jget('/api/integrations/status').then(setStatus).catch(e => setErr(String(e)))
-    setDrafts(listDrafts())
   }, [])
 
   // Mirror the durable drafts into the Core graph so Mail joins the organism — the
