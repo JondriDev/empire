@@ -350,6 +350,11 @@ AI-call budget (default 100, user-tunable, hard stop button).
   alone while `registry.ts` still supplies a real hex there (valid, and not a violation in *that* file).
 - **An app joins the organism in ~3 lines:** `mirrorCollection(type, app, items, {id,title,data})`
   in a `useEffect` + `<NodeActions type="<type>" sourceId={item.id}/>` in each row.
+- **Mirror `data.from` PARITY (`b6866af`) + local-day rule:** every `sync.ts` central mirror whose store row
+  can carry a handoff `from` MUST propagate `...(x.from !== undefined ? { from: x.from } : {})`
+  (note/learning/message do) — else lineage shows in the app's `<LineageTrail>` but vanishes in
+  Network/Timeline/Search + `relatedTo`. For a calendar day use `dayStamp(Date.now())` (`bridge.ts`, LOCAL
+  `YYYY-MM-DD`), **never** `toISOString().split('T')[0]` (UTC → day-off near midnight; fixed `ea2aef2`/`1d4c1aa`/`ecdbc7f`).
 - **Graph is a mirror, not the source of truth (yet):** apps keep their own store/localStorage;
   the graph reflects them. `make-note-from`/`add-to-learning` create graph-only nodes — they do
   **not** write back into the Notes/Learning stores yet.

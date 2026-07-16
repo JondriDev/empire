@@ -5,6 +5,36 @@ increment: what changed, why, what's verified, and the single best next step.
 
 ---
 
+## 2026-07-16 (run 2) · Bug Hunter — cleared the OPEN backlog: 2 root-caused fixes (message-mirror `from` drop · Calendar today-UTC)
+
+**PRIORITY 0 — main proven GREEN on entry** (`79444fd`): `npm run build` 🟢 (precache 89), vitest **646**🟢,
+eslint clean, shell-styled / route-parity (31) / audit 🟢, `metrics --assert-zero` **exit 0** (all six axes 0 &
+LOCKED), no metric regression. Releasable — proceeded to the hunt.
+
+**This run drained the two confirmed OPEN leads in `docs/BUGS.md`** (from run-1's Lens C/B static sweeps), each
+reproduced with a fail-before test and locked:
+
+1. **`fix(graph-mirror)` `b6866af`** — the `message` central mirror set only `{sender, content}`, dropping
+   `data.from`, while note/learning propagate it. An inbound-handoff message showed its `<LineageTrail>` in the
+   Messages UI (reads `msg.from`) but lost lineage in Network/Timeline/Search node views and in `relatedTo`'s
+   `areLinked` — a parity gap. Fix: propagate `...(m.from !== undefined ? { from: m.from } : {})`. Locked by 2
+   regression tests in `sync.test.ts` (`from` propagated; omitted cleanly when absent).
+2. **`fix(calendar)` `ecdbc7f`** — `today`/`todayStr` were `new Date().toISOString().split('T')[0]` (UTC day)
+   while the grid cells, `getEventsForDay` and `formatDate` use LOCAL Y/M/D. Negative-offset evening users
+   (US-Pacific 22:00 Jul 15 → UTC Jul 16) saw the wrong cell highlighted and the New-Event prefill / side-panel
+   header disagreeing with the events shown. Fix: reuse the canonical local-day `dayStamp(Date.now())` (deleting
+   the divergent UTC reimplementation, same class as `related.ts` `ea2aef2` / weather `1d4c1aa`). Locked by a
+   TZ-forced (America/Los_Angeles) regression crossing the UTC-midnight boundary.
+
+**VERIFY (full gate, post-fix):** `npm run build` 🟢 · vitest **646→649** (+3) 🟢 · eslint clean · shell-styled ✅ ·
+route-parity 31 ✅ · audit ✅ (5 known) · `metrics --assert-zero` **exit 0** — tokenViolations 0 / offSystemUtilities 0 /
+offSystemStyle 0 (r0/t0/m0) / offShellControls 0 (b0/i0/s0/t0) / keyboardA11y 0 / docMass 0, all Δ±0 · **test cases 539→542 (+3)** · bundle gz **735.6 ±0** · apps 31 ±0 · no new deps. Two conventional commits, one push.
+
+**OPEN queue now empty.** Next lens: **D (characterization over a core rail — `sync.ts reconcile` edges / `graph.ts` link-unlink).**
+Done / Verified / Next: run a Lens-D characterization pass on a core rail.
+
+---
+
 ## 2026-07-16 · Bug Hunter — 3 root-caused fixes (Lens C static sweeps): weather UTC weekday · graph-mirror empty-mount prune (×6 apps) · ChartBuilder empty-data crash
 
 **PRIORITY 0 — main proven GREEN on entry** (`2dc28fc`): build 🟢 (precache 89), vitest 638🟢, eslint clean,
